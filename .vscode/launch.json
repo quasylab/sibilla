@@ -1,0 +1,42 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Debug (Launch) - Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-TestMain<quasylab.sibilla.core.simulator>",
+            "request": "launch",
+            "mainClass": "quasylab.sibilla.core.simulator.tests.TestMain",
+            "projectName": "quasylab.sibilla.core.simulator"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-PMSier<quasylab.sibilla.core.simulator>",
+            "request": "launch",
+            "mainClass": "quasylab.sibilla.core.simulator.tests.pm.PMSier",
+            "projectName": "quasylab.sibilla.core.simulator"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Main<quasylab.sibilla.examples.pm.le>",
+            "request": "launch",
+            "mainClass": "quasylab.sibilla.examples.pm.le.Main",
+            "projectName": "quasylab.sibilla.examples.pm.le"
+        },
+        {
+            "type": "java",
+            "name": "Debug (Launch)-Main<quasylab.sibilla.examples.pm.seir>",
+            "request": "launch",
+            "mainClass": "quasylab.sibilla.examples.pm.seir.Main",
+            "projectName": "quasylab.sibilla.examples.pm.seir"
+        }
+    ]
+}

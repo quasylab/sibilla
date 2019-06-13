@@ -143,13 +143,13 @@ public class Main {
 		System.out.println( 
 			sim.reachability(0.1, 0.1 , 100.0, 
 				s -> true, 
-				s -> (
-						
+				s -> (						
 						(s.getOccupancy(L)==1)
 						&&
-						(s.getOccupancy(S0)+s.getOccupancy(S1)+s.getOccupancy(C)==0))
+						(s.getOccupancy(S0)+s.getOccupancy(S1)+s.getOccupancy(C)==0)
+					)
 					
-			) 
+			)
 		);
 //		sim.simulate(REPLICA,DEADLINE);
 //		cSamp.printTimeSeries(new PrintStream("data/seir_"+REPLICA+"_"+N+"_C_.data"),';');
