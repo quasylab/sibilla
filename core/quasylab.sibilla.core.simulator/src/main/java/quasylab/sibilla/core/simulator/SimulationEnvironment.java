@@ -127,36 +127,48 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 	}
 
 	private double doSimulate(S s, SimulationMonitor monitor , double deadline) {
-		this.state = model.initialState();
-		double time = 0.0;
-		if (sampling_function != null) {
-			sampling_function.start();
-			sampling_function.sample(time, state);
+		//TODO: Change SimulationMonitor to take into account the new usage protocol. 
+		SimulationTask<S> task = new SimulationTask<>(random, model, deadline);
+		task.run();
+		Trajectory<S> trajectory = task.getTrajectory();
+		if (sampling_function!=null) {
+			trajectory.sample(this.sampling_function);
 		}
-		while (((monitor == null)||(!monitor.isCancelled()))&&(time < deadline)) {
-			double dt = doAStep(time);
-			if (dt <= 0) {
-				if (sampling_function != null) {
-					sampling_function.end(time);
-				}
-				return time;
-			}
-			time += dt;
-//			this.model.timeStep(dt);
-			if (monitor != null && !monitor.isCancelled()) {
-				monitor.update(time);
-			}
-			if (sampling_function != null) {
-				sampling_function.sample(time, state);
-			}
-		}
-		
-		if (sampling_function != null) {
-			sampling_function.end(time);
-		}
-		return time;	
+		return (trajectory!=null?trajectory.getEnd():0.0);
 	}
 	
+//	private double doSimulate(S s, SimulationMonitor monitor , double deadline) {
+//		//TODO: Change SimulationMonitor to take into account the new usage protocol. 
+//		this.state = model.initialState();
+//		double time = 0.0;
+//		if (sampling_function != null) {
+//			sampling_function.start();
+//			sampling_function.sample(time, state);
+//		}
+//		while (((monitor == null)||(!monitor.isCancelled()))&&(time < deadline)) {
+//			double dt = doAStep(time);
+//			if (dt <= 0) {
+//				if (sampling_function != null) {
+//					sampling_function.end(time);
+//				}
+//				return time;
+//			}
+//			time += dt;
+////			this.model.timeStep(dt);
+//			if (monitor != null && !monitor.isCancelled()) {
+//				monitor.update(time);
+//			}
+//			if (sampling_function != null) {
+//				sampling_function.sample(time, state);
+//			}
+//		}
+//		
+//		if (sampling_function != null) {
+//			sampling_function.end(time);
+//		}
+//		return time;	
+//	}
+//
 	private double doSimulate(double deadline) {
 		return doSimulate(model.initialState(),null,deadline);
 	}

@@ -99,12 +99,14 @@ public class SimulationTask<S> implements Runnable {
 		double totalRate = agents.getTotalWeight();
 		if (totalRate == 0.0) {
 			cancel();
+			return ;
 		}
 		double dt = (1.0 / totalRate) * Math.log(1 / (random.nextDouble()));
 		double select = random.nextDouble() * totalRate;
 		WeightedElement<StepFunction<S>> wa = agents.select(select);
 		if (wa == null) {
 			cancel();
+			return ;
 		}
 		currentState = wa.getElement().step(random,time,dt);
 		time += dt;
