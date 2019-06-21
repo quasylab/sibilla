@@ -39,17 +39,22 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 	private S state;
 	private SamplingFunction<S> sampling_function;
 	private int iterations = 0;
+	private int threads;
 
 	public SimulationEnvironment(M model) {
-		this(model,new DefaultRandomGenerator());
+		this(model, new DefaultRandomGenerator());
 	}
 	
 
 	public SimulationEnvironment(M model, RandomGenerator randomGenerator) {
-		this.model = model;
-		this.random = randomGenerator;
+		this(model, randomGenerator, 1);
 	}
 
+	public SimulationEnvironment(M model, RandomGenerator randomGenerator, int threads){
+		this.model = model;
+		this.random = randomGenerator;
+		this.threads = threads;
+	}
 
 	public void setModel(M model) {
 		this.model = model;
@@ -75,7 +80,7 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 				System.out.print(i + 1);
 			}
 			System.out.flush();
-			doSimulate(state,monitor,deadline);
+			doSimulate(state,monitor,deadline); // esegue una iterazione
 			if (monitor != null) {
 				monitor.endSimulation( i );
 			}
@@ -125,6 +130,7 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 		simultionRun.run();
 		return simultionRun.reach();
 	}
+
 
 	private double doSimulate(S s, SimulationMonitor monitor , double deadline) {
 		this.state = model.initialState();
