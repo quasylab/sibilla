@@ -43,11 +43,11 @@ public class SimulationTask<S> implements Runnable {
 	private Trajectory<S> trajectory;
 	
 	public SimulationTask( RandomGenerator random , Model<S> model , double deadline ) {
-		this(random,model,deadline,s -> false);
+		this(random,model,deadline,s -> true);
 	}
 	
 	public SimulationTask( RandomGenerator random , Model<S> model , double deadline , Predicate<? super S> reachPredicate ) {
-		this(random,model,deadline,s->true,s -> true);
+		this(random,model,deadline,reachPredicate,s -> true);
 	}
 
 	public SimulationTask( RandomGenerator random , Model<S> model , double deadline , Predicate<? super S> transientPredicate, Predicate<? super S> reachPredicate ) {
