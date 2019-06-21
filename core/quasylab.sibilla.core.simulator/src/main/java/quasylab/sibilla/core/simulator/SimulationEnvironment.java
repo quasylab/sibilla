@@ -19,6 +19,7 @@
 package quasylab.sibilla.core.simulator;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Predicate;
 
 import org.apache.commons.math3.random.RandomGenerator;
@@ -39,21 +40,27 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 	private S state;
 	private SamplingFunction<S> sampling_function;
 	private int iterations = 0;
-	private int threads;
+	private int tasks;
+	private SimulationManager<S> simManager;
 
 	public SimulationEnvironment(M model) {
-		this(model, new DefaultRandomGenerator());
+		this(model, 1);
 	}
 	
 
-	public SimulationEnvironment(M model, RandomGenerator randomGenerator) {
-		this(model, randomGenerator, 1);
+	public SimulationEnvironment(M model,  int tasks) {
+		this(model, 1, new DefaultRandomGenerator());
 	}
 
-	public SimulationEnvironment(M model, RandomGenerator randomGenerator, int threads){
+	public SimulationEnvironment(M model,  int tasks, RandomGenerator randomGenerator){
+		this(model, randomGenerator, tasks, new SimulationThreadManager<S>());
+	}
+
+	public SimulationEnvironment(M model, RandomGenerator randomGenerator, int tasks, SimulationManager<S> simManager){
 		this.model = model;
 		this.random = randomGenerator;
-		this.threads = threads;
+		this.tasks = tasks;
+		this.simManager = simManager;
 	}
 
 	public void setModel(M model) {
@@ -80,7 +87,7 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 				System.out.print(i + 1);
 			}
 			System.out.flush();
-			doSimulate(state,monitor,deadline); // esegue una iterazione
+			doSimulate(state,monitor,deadline);
 			if (monitor != null) {
 				monitor.endSimulation( i );
 			}
@@ -118,29 +125,37 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 		double n = Math.ceil(Math.log(2/delta)/(2*error));
 		double count = 0;
 		for (int i=0; i<n; i++) {
-			if (sample(deadline,phi,psi)) {
+			/*if (sample(deadline,phi,psi)) {
 				count++;
-			}
+			}*/
+			count += sample(deadline,phi,psi).stream().filter(x -> x == true).count();
 		}		
 		return count/n;
 	}
 	
-	private boolean sample( double deadline, Predicate<? super S> phi, Predicate<? super S> psi) {
-		SimulationTask<S> simultionRun = new SimulationTask<>(random, model, deadline, phi, psi);
-		simultionRun.run();
-		return simultionRun.reach();
+	private List<Boolean> sample( double deadline, Predicate<? super S> phi, Predicate<? super S> psi) {
+		for(int i = 0; i < tasks; i++){
+			SimulationTask<S>  simulationRun = new SimulationTask<>(random, model, deadline, phi, psi);
+			simManager.addTask(simulationRun);
+		}
+		//SimulationTask<S> simulationRun = new SimulationTask<>(random, model, deadline, phi, psi);
+		return simManager.reach();
+		//simulationRun.run();
+		//return simulationRun.reach();
 	}
 
 
-	private double doSimulate(S s, SimulationMonitor monitor , double deadline) {
+	private double doSimulate(S s, SimulationMonitor monitor , double deadline) { // s and monitor is not used?
 		//TODO: Change SimulationMonitor to take into account the new usage protocol. 
-		SimulationTask<S> task = new SimulationTask<>(random, model, deadline);
-		task.run();
-		Trajectory<S> trajectory = task.getTrajectory();
-		if (sampling_function!=null) {
-			trajectory.sample(this.sampling_function);
+		for(int i = 0; i < tasks; i++){
+			SimulationTask<S> task = new SimulationTask<>(random, model, deadline);
+			simManager.addTask(task);
 		}
-		return (trajectory!=null?trajectory.getEnd():0.0);
+		// SimulationTask<S> task = new SimulationTask<>(random, model, deadline);
+		// task.run();
+		simManager.runTasks(this.sampling_function);
+		// return (trajectory!=null?trajectory.getEnd():0.0);
+		return 0.0;
 	}
 	
 //	private double doSimulate(S s, SimulationMonitor monitor , double deadline) {
@@ -203,11 +218,11 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 		return random.nextInt(zones);
 	}
 
-	public LinkedList<SimulationTimeSeries> getTimeSeries( ) {
+	public LinkedList<SimulationTimeSeries> getTimeSeries( int slot) {
 		if (sampling_function == null) {
 			return null;
 		}
-		return sampling_function.getSimulationTimeSeries( iterations );
+		return sampling_function.getSimulationTimeSeries( iterations, slot );
 	}
 		
 	

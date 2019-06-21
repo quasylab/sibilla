@@ -18,15 +18,75 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
-public class SimulationThreadManager implements SimulationManager {
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+
+public class SimulationThreadManager<S> implements SimulationManager<S> {
     ExecutorService executor = Executors.newCachedThreadPool();
+    Map<Integer, SimulationTask<S>> tasks = new HashMap<>();
+    int nTasks = 0;
+    SamplingFunction<S> sampling_function;
 
     @Override
-    public void run(int tasks) {
-        
+    public void addTask(SimulationTask<S> task) {
+        tasks.put(nTasks++, task);
+    }
+
+    @Override
+    public void runTasks(SamplingFunction<S> sampling_function) {
+        this.sampling_function = sampling_function;
+        List<Callable<Object>> callableTasks = tasks.entrySet().stream().map(Map.Entry::getValue).map(Executors::callable).collect(Collectors.toList());
+        try {
+            executor.invokeAll(callableTasks);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        sampleTasks(sampling_function);
+        clear();
+        /*
+        executor.shutdown();
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }*/
+    }
+
+    public List<Boolean> reach(){
+        List<Callable<Object>> callableTasks = tasks.entrySet().stream().map(Map.Entry::getValue).map(Executors::callable).collect(Collectors.toList());
+        try {
+            executor.invokeAll(callableTasks);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        List<Boolean> result = tasks.entrySet().stream().map(Map.Entry::getValue).map(SimulationTask::reach).collect(Collectors.toList());
+        clear();
+        return result;
+    }
+
+    private void sampleTasks(SamplingFunction<S> f) {
+        for(Integer key : tasks.keySet()){
+            Trajectory<S> trajectory = tasks.get(key).getTrajectory();
+            if (f!=null) {
+                trajectory.sample(f, key.intValue());
+            }
+        }
+
+    }
+
+    private void clear(){
+        tasks.clear();
+        nTasks = 0;
     }
     
 }

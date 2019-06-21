@@ -18,12 +18,25 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator;
 
+import java.util.List;
 
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
-public class SimulationNetworkManager implements SimulationManager {
+public class SimulationNetworkManager<S> implements SimulationManager<S> {
 
     @Override
-    public void run(int tasks) {
+    public void addTask(SimulationTask<S> task) {
 
     }
+
+    @Override
+    public void runTasks(SamplingFunction<S> sampling_function) {
+
+    }
+
+    @Override
+    public List<Boolean> reach() {
+        return null;
+    }
+
 }

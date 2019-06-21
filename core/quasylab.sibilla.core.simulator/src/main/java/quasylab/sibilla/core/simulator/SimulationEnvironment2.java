@@ -140,7 +140,7 @@ public class SimulationEnvironment2<M extends Model<S>,S> {
 		double time = 0.0;
 		if (sampling_function != null) {
 			sampling_function.start();
-			sampling_function.sample(time, state);
+			sampling_function.sample(time, state, 0);
 		}
 		while (((monitor == null)||(!monitor.isCancelled()))&&(time < deadline)) {
 			double dt = doAStep(time);
@@ -156,7 +156,7 @@ public class SimulationEnvironment2<M extends Model<S>,S> {
 				monitor.update(time);
 			}
 			if (sampling_function != null) {
-				sampling_function.sample(time, state);
+				sampling_function.sample(time, state, 0);
 			}
 		}
 		
@@ -194,11 +194,11 @@ public class SimulationEnvironment2<M extends Model<S>,S> {
 		return random.nextInt(zones);
 	}
 
-	public LinkedList<SimulationTimeSeries> getTimeSeries( ) {
+	public LinkedList<SimulationTimeSeries> getTimeSeries( int slot ) {
 		if (sampling_function == null) {
 			return null;
 		}
-		return sampling_function.getSimulationTimeSeries( iterations );
+		return sampling_function.getSimulationTimeSeries( iterations, slot );
 	}
 		
 	

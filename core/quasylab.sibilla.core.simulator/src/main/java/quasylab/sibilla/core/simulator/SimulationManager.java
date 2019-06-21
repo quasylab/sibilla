@@ -21,6 +21,12 @@
  */
 package quasylab.sibilla.core.simulator;
 
-public interface SimulationManager {
-    public void run(int tasks);
+import java.util.List;
+
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+
+public interface SimulationManager<S> {
+    public void addTask(SimulationTask<S> task);
+    public void runTasks(SamplingFunction<S> sampling_function);
+    public List<Boolean> reach();
 }

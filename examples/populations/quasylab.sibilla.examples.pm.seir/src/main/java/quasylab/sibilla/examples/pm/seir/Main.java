@@ -6,6 +6,7 @@ package quasylab.sibilla.examples.pm.seir;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
+
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
@@ -39,7 +40,7 @@ public class Main {
 	public final static int SAMPLINGS = 100;
 	public final static double DEADLINE = 600;
 	private static final int REPLICA = 1000;
-	
+	private final static int TASKS = 3;
 	
 	public static void main(String[] argv) throws FileNotFoundException {
 
@@ -73,17 +74,18 @@ public class Main {
 		StatisticSampling<PopulationState> fiSamp = 
 				StatisticSampling.measure("Fraction Infected", 
 						SAMPLINGS, DEADLINE, 
-						s -> s.getOccupancy(I)/N) ;
+						s -> s.getOccupancy(I)/N, TASKS) ;
 		StatisticSampling<PopulationState> frSamp = 
 				StatisticSampling.measure("Fraction Recovered", 
 						SAMPLINGS, DEADLINE, 
-						s -> s.getOccupancy(R)/N) ;
+						s -> s.getOccupancy(R)/N, TASKS) ;
 		
 //		StatisticSampling<PopulationModel> eSamp = StatisticSampling.measure("#E", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(E)) ;
 //		StatisticSampling<PopulationModel> iSamp = StatisticSampling.measure("#I", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(I)) ;
 //		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
 		
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
+		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
+		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, TASKS);
 
 		sim.setSampling(new SamplingCollection<>(fiSamp,frSamp));
 		

@@ -52,9 +52,9 @@ public class SamplingCollection<S> implements SamplingFunction<S> {
 	}
 
 	@Override
-	public void sample(double time, S context) {
+	public void sample(double time, S context, int slot) {
 		for (SamplingFunction<S> f : functions) {
-			f.sample(time, context);
+			f.sample(time, context, slot);
 		}
 	}
 
@@ -81,10 +81,10 @@ public class SamplingCollection<S> implements SamplingFunction<S> {
 	}
 
 	@Override
-	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries( int replications ) {
+	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries( int replications, int slot ) {
 		LinkedList<SimulationTimeSeries> toReturn = new LinkedList<>();
 		for (SamplingFunction<S> f : functions) {
-			toReturn.addAll(f.getSimulationTimeSeries( replications ));
+			toReturn.addAll(f.getSimulationTimeSeries( replications, slot ));
 		}
 		return toReturn;
 	}
