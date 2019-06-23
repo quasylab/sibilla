@@ -71,6 +71,7 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
             e.printStackTrace();
         }
         List<Boolean> result = tasks.entrySet().stream().map(Map.Entry::getValue).map(SimulationTask::reach).collect(Collectors.toList());
+        printTimingInformation();
         clear();
         return result;
     }
