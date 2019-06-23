@@ -108,8 +108,10 @@ public class StatisticSampling<S> implements SamplingFunction<S> {
 	}
 
 	public void printTimeSeries(PrintStream out) {
-		double time = 0.0;
+		double time;
 		for (int i = 0; i < task_slots; i++){
+			time = 0.0;
+			out.println("----------------Results of TASK "+ i + "----------------");
 			for (int j = 0; j < this.data[0].length; j++) { // TODO: improve this condition
 				out.println(time + "\t" + this.data[i][j].getMean() + "\t" + this.data[i][j].getStandardDeviation());
 				time += dt;
@@ -118,8 +120,10 @@ public class StatisticSampling<S> implements SamplingFunction<S> {
 	}
 
 	public void printTimeSeries(PrintStream out, char separator) {
-		double time = 0.0;
+		double time;
 		for (int i = 0; i < task_slots; i++){ // TODO: improve this condition
+			time = 0.0;
+			out.println("----------------Results of TASK "+ i + "----------------");
 			for (int j = 0; j < this.data[0].length; j++) {
 				out.println(""+time + separator 
 						+ this.data[i][j].getMean() 
