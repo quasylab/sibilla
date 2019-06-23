@@ -77,6 +77,7 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
     private void sampleTasks(SamplingFunction<S> f) {
         for(Integer key : tasks.keySet()){
             Trajectory<S> trajectory = tasks.get(key).getTrajectory();
+            // trajectory.print();
             if (f!=null) {
                 trajectory.sample(f, key.intValue());
             }

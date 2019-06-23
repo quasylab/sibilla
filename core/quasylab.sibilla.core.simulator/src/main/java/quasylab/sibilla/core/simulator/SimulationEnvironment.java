@@ -49,7 +49,7 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 	
 
 	public SimulationEnvironment(M model,  int tasks) {
-		this(model, 1, new DefaultRandomGenerator());
+		this(model, tasks, new DefaultRandomGenerator());
 	}
 
 	public SimulationEnvironment(M model,  int tasks, RandomGenerator randomGenerator){

@@ -36,6 +36,11 @@ public class Trajectory<S> {
 	public Trajectory() {
 		this.data = new LinkedList<Sample<S>>();
 	}
+
+	public void print(){
+		data.stream().forEach(x -> System.out.print(x.getValue()));
+		System.out.println();
+	}
 	
 	public void add( double time , S value ) {
 		if (!Double.isFinite(start)) {
