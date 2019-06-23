@@ -41,6 +41,7 @@ public class SimulationTask<S> implements Runnable {
 	private S currentState;
 	private SimulationStatus status;
 	private Trajectory<S> trajectory;
+	private long startTime = 0, elapsedTime = 0;
 	
 	public SimulationTask( RandomGenerator random , Model<S> model , double deadline ) {
 		this(random,model,deadline,s -> false);
@@ -77,9 +78,11 @@ public class SimulationTask<S> implements Runnable {
 				return;
 			}
 		}
+		completed(true);
 	}
 
 	private synchronized void running() {
+		startTime = System.nanoTime();
 		if (!isCancelled()) {
 			this.status = SimulationStatus.RUNNING;
 		}
@@ -90,7 +93,7 @@ public class SimulationTask<S> implements Runnable {
 		if (this.status != SimulationStatus.CANCELLED) {
 			this.status = SimulationStatus.COMPLETED;
 		}
-		
+		elapsedTime = System.nanoTime() - startTime;
 	}
 
 	private void step() {
@@ -140,5 +143,7 @@ public class SimulationTask<S> implements Runnable {
 		return trajectory;		
 	}
 
-
+	public long getElapsedTime(){
+		return elapsedTime;
+	}
 }

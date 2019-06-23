@@ -50,6 +50,7 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
             e.printStackTrace();
         }
         sampleTasks(sampling_function);
+        printTimingInformation();
         clear();
         /*
         executor.shutdown();
@@ -88,6 +89,11 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
     private void clear(){
         tasks.clear();
         nTasks = 0;
+    }
+
+    private void printTimingInformation(){
+        System.out.println();
+        tasks.forEach((k, v) -> System.out.println("Task " + k +  " Elapsed Time: " + v.getElapsedTime() + "ns"));
     }
     
 }
