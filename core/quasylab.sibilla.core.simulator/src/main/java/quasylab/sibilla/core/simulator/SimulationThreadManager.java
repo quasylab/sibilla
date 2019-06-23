@@ -16,8 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-package quasylab.sibilla.core.simulator;
 
+package quasylab.sibilla.core.simulator;
+/**
+ * @author belenchia
+ *
+ */
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,14 +56,6 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
         sampleTasks(sampling_function);
         printTimingInformation();
         clear();
-        /*
-        executor.shutdown();
-        try {
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }*/
     }
 
     public List<Boolean> reach(){
@@ -79,7 +75,6 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
     private void sampleTasks(SamplingFunction<S> f) {
         for(Integer key : tasks.keySet()){
             Trajectory<S> trajectory = tasks.get(key).getTrajectory();
-            // trajectory.print();
             if (f!=null) {
                 trajectory.sample(f, key.intValue());
             }
@@ -87,11 +82,17 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
 
     }
 
+    /**
+     * Clears the hash map
+     */
     private void clear(){
         tasks.clear();
         nTasks = 0;
     }
 
+    /**
+     * Prints timing information stored in the hash map's threads
+     */
     private void printTimingInformation(){
         System.out.println();
         tasks.forEach((k, v) -> System.out.println("Task " + k +  " Elapsed Time: " + v.getElapsedTime() + "ns"));

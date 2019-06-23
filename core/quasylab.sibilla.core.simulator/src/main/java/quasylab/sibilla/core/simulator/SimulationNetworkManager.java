@@ -16,8 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
+
 package quasylab.sibilla.core.simulator;
 
+/**
+ * @author belenchia
+ *
+ */
 import java.util.List;
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;

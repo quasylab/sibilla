@@ -16,17 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-/**
- * 
- */
+
 package quasylab.sibilla.core.simulator;
+
+/**
+ * @author belenchia
+ *
+ */
 
 import java.util.List;
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public interface SimulationManager<S> {
-    public void addTask(SimulationTask<S> task);
+
+    /**
+     * Adds a new task to execute
+     * @param task
+     */
+    public void addTask(SimulationTask<S> task); 
+    /**
+     * Runs all added tasks, saves result then clears the tasks
+     * @param sampling_function
+     */ 
     public void runTasks(SamplingFunction<S> sampling_function);
+    /**
+     * Same as runTasks(SamplingFunction<S> sampling_function) but computes reachability instead
+     * @return List<Boolean> of tasks that reached predicate
+     */
     public List<Boolean> reach();
 }

@@ -124,11 +124,8 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 			Predicate<? super S> phi, Predicate<? super S> psi ) {
 		double n = Math.ceil(Math.log(2/delta)/(2*error));
 		double count = 0;
-		for (int i=0; i<n; i++) {
-			/*if (sample(deadline,phi,psi)) {
-				count++;
-			}*/
-			count += sample(deadline,phi,psi).stream().filter(x -> x == true).count();
+		for (int i=0; i<n; i++) { 
+			count += sample(deadline,phi,psi).stream().filter(x -> x == true).count();  // we count all trues for each iteration
 		}		
 		return count/n;
 	}
@@ -138,10 +135,7 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 			SimulationTask<S>  simulationRun = new SimulationTask<>(random, model, deadline, phi, psi);
 			simManager.addTask(simulationRun);
 		}
-		//SimulationTask<S> simulationRun = new SimulationTask<>(random, model, deadline, phi, psi);
-		return simManager.reach();
-		//simulationRun.run();
-		//return simulationRun.reach();
+		return simManager.reach();  // returns a true for each task that reached predicates
 	}
 
 
@@ -151,11 +145,8 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 			SimulationTask<S> task = new SimulationTask<>(random, model, deadline);
 			simManager.addTask(task);
 		}
-		// SimulationTask<S> task = new SimulationTask<>(random, model, deadline);
-		// task.run();
 		simManager.runTasks(this.sampling_function);
-		// return (trajectory!=null?trajectory.getEnd():0.0);
-		return 0.0;
+		return 0.0;  // return value?
 	}
 	
 //	private double doSimulate(S s, SimulationMonitor monitor , double deadline) {
