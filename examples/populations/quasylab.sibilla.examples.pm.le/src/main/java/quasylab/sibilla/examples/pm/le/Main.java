@@ -6,6 +6,7 @@ package quasylab.sibilla.examples.pm.le;
 import java.io.FileNotFoundException;
 
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
+import quasylab.sibilla.core.simulator.SimulationThreadManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
@@ -132,13 +133,13 @@ public class Main {
 		); 
 		
 		StatisticSampling<PopulationState> cSamp = StatisticSampling.measure("#C", SAMPLINGS, DEADLINE, 
-				s -> s.getOccupancy(C,S0,S1), TASKS) ;
+				s -> s.getOccupancy(C,S0,S1)) ;
 		StatisticSampling<PopulationState> fSamp = StatisticSampling.measure("#F", SAMPLINGS, DEADLINE, 
-				s -> s.getOccupancy(F), TASKS) ;
+				s -> s.getOccupancy(F)) ;
 		StatisticSampling<PopulationState> lSamp = StatisticSampling.measure("#L", SAMPLINGS, DEADLINE, 
-				s -> s.getOccupancy(L), TASKS) ;
+				s -> s.getOccupancy(L)) ;
 		
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, TASKS );
+		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new SimulationThreadManager<>(TASKS) );
 
 		sim.setSampling(new SamplingCollection<>(cSamp,fSamp,lSamp));
 

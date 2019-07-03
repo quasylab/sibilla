@@ -34,7 +34,7 @@ public class SamplingLog<S> implements SamplingFunction<S> {
 	}
 
 	@Override
-	public void sample(double time, S context, int slot) {
+	public void sample(double time, S context) {
 		while (time >= last_time) {
 			System.out.println(last_time + ": " + context.toString());
 			this.last_time += dt;
@@ -52,7 +52,7 @@ public class SamplingLog<S> implements SamplingFunction<S> {
 	}
 
 	@Override
-	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries( int replications, int slot) {
+	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries( int replications) {
 		return new LinkedList<>();
 	}
 

@@ -20,6 +20,7 @@ package quasylab.sibilla.core.simulator;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.function.Predicate;
 
 import org.apache.commons.math3.random.RandomGenerator;
@@ -33,7 +34,7 @@ import quasylab.sibilla.core.simulator.util.WeightedStructure;
  * @author loreti
  *
  */
-public class SimulationEnvironment<M extends Model<S>,S> {
+public class SimulationEnvironment<M extends Model<S>, S> {
 
 	protected RandomGenerator random;
 	private M model;
@@ -44,29 +45,23 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 	private SimulationManager<S> simManager;
 
 	public SimulationEnvironment(M model) {
-		this(model, 1);
-	}
-	
-
-	public SimulationEnvironment(M model,  int tasks) {
-		this(model, tasks, new DefaultRandomGenerator());
+		this(model, new SimulationThreadManager<S>(1));
 	}
 
-	public SimulationEnvironment(M model,  int tasks, RandomGenerator randomGenerator){
-		this(model, randomGenerator, tasks, new SimulationThreadManager<S>());
+	public SimulationEnvironment(M model, SimulationManager<S> simManager) {
+		this(model, new DefaultRandomGenerator(), simManager);
 	}
 
-	public SimulationEnvironment(M model, RandomGenerator randomGenerator, int tasks, SimulationManager<S> simManager){
+	public SimulationEnvironment(M model, RandomGenerator randomGenerator, SimulationManager<S> simManager) {
 		this.model = model;
 		this.random = randomGenerator;
-		this.tasks = tasks;
 		this.simManager = simManager;
 	}
 
 	public void setModel(M model) {
 		this.model = model;
 	}
-	
+
 	public void seed(long seed) {
 		random.setSeed(seed);
 	}
@@ -75,21 +70,24 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 		this.sampling_function = sampling_function;
 	}
 
-	public synchronized void simulate(SimulationMonitor monitor , int iterations, double deadline) {
+	public synchronized void simulate(SimulationMonitor monitor, int iterations, double deadline) {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
+		simManager.setSampling(sampling_function);
 		rgi.register(random);
-		for (int i = 0; (((monitor == null)||(!monitor.isCancelled()))&&(i < iterations)) ; i++) {
+		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			if (monitor != null) {
-				monitor.startIteration( i );
+				monitor.startIteration(i);
 			}
 			System.out.print('<');
 			if ((i + 1) % 50 == 0) {
 				System.out.print(i + 1);
 			}
 			System.out.flush();
-			doSimulate(state,monitor,deadline);
+			SimulationTask<S> task = new SimulationTask<>(random, model, deadline);
+			simManager.run(task);
+			// doSimulate(state,monitor,deadline);
 			if (monitor != null) {
-				monitor.endSimulation( i );
+				monitor.endSimulation(i);
 			}
 			System.out.print('>');
 			if ((i + 1) % 50 == 0) {
@@ -98,18 +96,19 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 			System.out.flush();
 			this.iterations++;
 		}
-		rgi.unregister();		
-	}
-	
-	public synchronized void simulate(int iterations, double deadline) {
-		simulate( null , iterations , deadline );
+		rgi.unregister();
+		simManager.waitTermination();
 	}
 
-	public void simulate( S model , SamplingFunction<S> measure , double deadline) {
-		this.sampling_function = measure;
-		doSimulate(model,null,deadline);
+	public synchronized void simulate(int iterations, double deadline) {
+		simulate(null, iterations, deadline);
 	}
-	
+
+	public void simulate(S model, SamplingFunction<S> measure, double deadline) {
+		this.sampling_function = measure;
+		doSimulate(model, null, deadline);
+	}
+
 	public synchronized double simulate(double deadline) {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
 		rgi.register(random);
@@ -117,76 +116,82 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 		rgi.unregister();
 		return result;
 	}
-	
-	public double reachability( double error, 
-			double delta, 
-			double deadline, 
-			Predicate<? super S> phi, Predicate<? super S> psi ) {
-		double n = Math.ceil(Math.log(2/delta)/(2*error));
+
+	public double reachability(double error, double delta, double deadline, Predicate<? super S> phi,
+			Predicate<? super S> psi) {
+		double n = Math.ceil(Math.log(2 / delta) / (2 * error));
 		double count = 0;
-		for (int i=0; i<n; i++) { 
-			count += sample(deadline,phi,psi).stream().filter(x -> x == true).count();  // we count all trues for each iteration
-		}		
-		return count/n;
-	}
-	
-	private List<Boolean> sample( double deadline, Predicate<? super S> phi, Predicate<? super S> psi) {
-		for(int i = 0; i < tasks; i++){
-			SimulationTask<S>  simulationRun = new SimulationTask<>(random, model, deadline, phi, psi);
-			simManager.addTask(simulationRun);
+		for (int i = 0; i < n; i++) {
+			SimulationTask<S> simulationRun = new SimulationTask<>(random, model, deadline, phi, psi);
+			simManager.run(simulationRun);
+			/*if (sample(deadline,phi,psi)) {
+				count++;
+			}*/																							// iteration
 		}
-		return simManager.reach();  // returns a true for each task that reached predicates
+		simManager.waitTermination();
+		count = simManager.reach();
+		return count / n;
 	}
 
+	private Boolean sample(double deadline, Predicate<? super S> phi, Predicate<? super S> psi) {
+		SimulationTask<S> simulationRun = new SimulationTask<>(random, model, deadline, phi, psi);
+		try {
+			simulationRun.call();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return simulationRun.reach(); // returns a true for each task that reached predicates
+	}
 
-	private double doSimulate(S s, SimulationMonitor monitor , double deadline) { // s and monitor is not used?
-		//TODO: Change SimulationMonitor to take into account the new usage protocol. 
-		for(int i = 0; i < tasks; i++){
+	private double doSimulate(S s, SimulationMonitor monitor, double deadline) { // s and monitor is not used?
+		// TODO: Change SimulationMonitor to take into account the new usage protocol.
+		/*for (int i = 0; i < tasks; i++) {
 			SimulationTask<S> task = new SimulationTask<>(random, model, deadline);
 			simManager.addTask(task);
 		}
-		simManager.runTasks(this.sampling_function);
-		return 0.0;  // return value?
+		simManager.runTasks(this.sampling_function);*/
+		return 0.0; // return value?
 	}
-	
-//	private double doSimulate(S s, SimulationMonitor monitor , double deadline) {
-//		//TODO: Change SimulationMonitor to take into account the new usage protocol. 
-//		this.state = model.initialState();
-//		double time = 0.0;
-//		if (sampling_function != null) {
-//			sampling_function.start();
-//			sampling_function.sample(time, state);
-//		}
-//		while (((monitor == null)||(!monitor.isCancelled()))&&(time < deadline)) {
-//			double dt = doAStep(time);
-//			if (dt <= 0) {
-//				if (sampling_function != null) {
-//					sampling_function.end(time);
-//				}
-//				return time;
-//			}
-//			time += dt;
-////			this.model.timeStep(dt);
-//			if (monitor != null && !monitor.isCancelled()) {
-//				monitor.update(time);
-//			}
-//			if (sampling_function != null) {
-//				sampling_function.sample(time, state);
-//			}
-//		}
-//		
-//		if (sampling_function != null) {
-//			sampling_function.end(time);
-//		}
-//		return time;	
-//	}
-//
+
+	// private double doSimulate(S s, SimulationMonitor monitor , double deadline) {
+	// //TODO: Change SimulationMonitor to take into account the new usage protocol.
+	// this.state = model.initialState();
+	// double time = 0.0;
+	// if (sampling_function != null) {
+	// sampling_function.start();
+	// sampling_function.sample(time, state);
+	// }
+	// while (((monitor == null)||(!monitor.isCancelled()))&&(time < deadline)) {
+	// double dt = doAStep(time);
+	// if (dt <= 0) {
+	// if (sampling_function != null) {
+	// sampling_function.end(time);
+	// }
+	// return time;
+	// }
+	// time += dt;
+	//// this.model.timeStep(dt);
+	// if (monitor != null && !monitor.isCancelled()) {
+	// monitor.update(time);
+	// }
+	// if (sampling_function != null) {
+	// sampling_function.sample(time, state);
+	// }
+	// }
+	//
+	// if (sampling_function != null) {
+	// sampling_function.end(time);
+	// }
+	// return time;
+	// }
+	//
 	private double doSimulate(double deadline) {
-		return doSimulate(model.initialState(),null,deadline);
+		return doSimulate(model.initialState(), null, deadline);
 	}
 
 	private double doAStep(double now) {
-		WeightedStructure<StepFunction<S>> agents = this.model.getActivities( random , state );
+		WeightedStructure<StepFunction<S>> agents = this.model.getActivities(random, state);
 		double totalRate = agents.getTotalWeight();
 		if (totalRate == 0.0) {
 			return 0.0;
@@ -197,7 +202,7 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 		if (wa == null) {
 			return 0.0;
 		}
-		this.state = wa.getElement().step(random,now,dt);
+		this.state = wa.getElement().step(random, now, dt);
 		return dt;
 	}
 
@@ -209,30 +214,46 @@ public class SimulationEnvironment<M extends Model<S>,S> {
 		return random.nextInt(zones);
 	}
 
-	public LinkedList<SimulationTimeSeries> getTimeSeries( int slot) {
+	public LinkedList<SimulationTimeSeries> getTimeSeries() {
 		if (sampling_function == null) {
 			return null;
 		}
-		return sampling_function.getSimulationTimeSeries( iterations, slot );
-	}
-		
-	
-	public Trajectory<S> sampleTrajectory( double deadline ) {
-		SimulationTask<S> simultionRun = new SimulationTask<>(random, model, deadline);
-		simultionRun.run();
-		return simultionRun.getTrajectory();
-	}
-	
-	public Trajectory<S> sampleTrajectory( double deadline , Predicate<? super S> reachPredicate ) {
-		SimulationTask<S> simultionRun = new SimulationTask<>(random, model, deadline, reachPredicate);
-		simultionRun.run();
-		return simultionRun.getTrajectory();
+		return sampling_function.getSimulationTimeSeries(iterations);
 	}
 
-	public Trajectory<S> sampleTrajectory( double deadline , Predicate<? super S> transientPredicate, Predicate<? super S> reachPredicate ) {
-		SimulationTask<S> simultionRun = new SimulationTask<>(random, model, deadline, transientPredicate, reachPredicate);
-		simultionRun.run();
-		return simultionRun.getTrajectory();
+	public Trajectory<S> sampleTrajectory(double deadline) {
+		SimulationTask<S> simulationRun = new SimulationTask<>(random, model, deadline);
+		try {
+			return simulationRun.call();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public Trajectory<S> sampleTrajectory(double deadline, Predicate<? super S> reachPredicate) {
+		SimulationTask<S> simulationRun = new SimulationTask<>(random, model, deadline, reachPredicate);
+		try {
+			return simulationRun.call();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public Trajectory<S> sampleTrajectory(double deadline, Predicate<? super S> transientPredicate,
+			Predicate<? super S> reachPredicate) {
+		SimulationTask<S> simulationRun = new SimulationTask<>(random, model, deadline, transientPredicate,
+				reachPredicate);
+		try {
+			return simulationRun.call();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 }

@@ -47,12 +47,12 @@ public class Trajectory<S> {
 		this.data.add( new Sample<S>(time,value));
 	}
 	
-	public void sample(SamplingFunction<S> f, int slot) {
+	public void sample(SamplingFunction<S> f) {
 		if (!Double.isFinite(start)) {
 			throw new IllegalArgumentException();
 		}
 		f.start();
-		this.data.stream().forEach(s -> f.sample(s.getTime(), s.getValue(), slot));
+		this.data.stream().forEach(s -> f.sample(s.getTime(), s.getValue()));
 		f.end(end);
 	}
 

@@ -24,25 +24,17 @@ package quasylab.sibilla.core.simulator;
  *
  */
 
-import java.util.List;
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public interface SimulationManager<S> {
 
-    /**
-     * Adds a new task to execute
-     * @param task
-     */
-    public void addTask(SimulationTask<S> task); 
-    /**
-     * Runs all added tasks, saves result then clears the tasks
-     * @param sampling_function
-     */ 
-    public void runTasks(SamplingFunction<S> sampling_function);
+    public void setSampling(SamplingFunction<S> sampling_function);
     /**
      * Same as runTasks(SamplingFunction<S> sampling_function) but computes reachability instead
      * @return List<Boolean> of tasks that reached predicate
      */
-    public List<Boolean> reach();
+    public long reach();
+    public void run(SimulationTask<S> task);
+    public void waitTermination();
 }

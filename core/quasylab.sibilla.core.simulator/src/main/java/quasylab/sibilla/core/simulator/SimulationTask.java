@@ -18,6 +18,7 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator;
 
+import java.util.concurrent.Callable;
 import java.util.function.Predicate;
 
 import org.apache.commons.math3.random.RandomGenerator;
@@ -29,7 +30,7 @@ import quasylab.sibilla.core.simulator.util.WeightedStructure;
  * @author loreti
  *
  */
-public class SimulationTask<S> implements Runnable {
+public class SimulationTask<S> implements Callable<Trajectory<S>> {
 
 	private double deadline;
 	private double time;
@@ -61,7 +62,29 @@ public class SimulationTask<S> implements Runnable {
 		this.status = SimulationStatus.INIT;
 	}
 	
-	
+
+	@Override
+	public Trajectory<S> call() throws Exception {
+		running();
+		this.trajectory = new Trajectory<>();
+		this.trajectory.add(time, currentState);
+		while ((time<deadline)&&(!isCancelled())) {
+			if (reachPredicate.test(currentState)) {
+				completed(true);
+				return this.getTrajectory();
+			}
+			if (transientPredicate.test(currentState)) {
+				step();
+			} else {
+				completed(false);
+				return this.getTrajectory();
+			}
+		}
+		completed(true);
+		return this.getTrajectory();
+	}
+
+/*
 	public void run( ) {
 		running();
 		this.trajectory = new Trajectory<>();
@@ -80,7 +103,7 @@ public class SimulationTask<S> implements Runnable {
 		}
 		completed(true);
 	}
-
+*/
 	private synchronized void running() {
 		startTime = System.nanoTime();
 		if (!isCancelled()) {
@@ -146,4 +169,5 @@ public class SimulationTask<S> implements Runnable {
 	public long getElapsedTime(){
 		return elapsedTime;
 	}
+
 }
