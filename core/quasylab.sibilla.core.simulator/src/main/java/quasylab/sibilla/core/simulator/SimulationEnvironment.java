@@ -97,7 +97,8 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 			this.iterations++;
 		}
 		rgi.unregister();
-		simManager.waitTermination();
+		while(simManager.waitTermination() != true);
+
 	}
 
 	public synchronized void simulate(int iterations, double deadline) {

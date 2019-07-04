@@ -44,8 +44,8 @@ public class SimulationNetworkManager<S> implements SimulationManager<S> {
     }
 
     @Override
-    public void waitTermination() {
-
+    public boolean waitTermination() {
+        return false;
     }
 
 }

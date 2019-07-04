@@ -36,5 +36,5 @@ public interface SimulationManager<S> {
      */
     public long reach();
     public void run(SimulationTask<S> task);
-    public void waitTermination();
+    public boolean waitTermination();
 }

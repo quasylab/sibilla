@@ -43,32 +43,58 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
     int taskCounter = 0;
     SamplingFunction<S> sampling_function;
     LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
+    List<Future<Trajectory<S>>> futures = new LinkedList<>();
     Timer scheduler = new Timer();
     List<Boolean> reach = new LinkedList<>();
 
     public SimulationThreadManager(int nTasks) {
         this.nTasks = nTasks;
-        scheduler.scheduleAtFixedRate(new TimerTask() {
+        /*scheduler.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 checkExecution();
             }
-        }, 0L, 1L);
+        }, 0L, 1L);*/
     }
+
+    private void doSample(Trajectory<S> trajectory) {
+        if (sampling_function != null) {
+            trajectory.sample(sampling_function);
+        }
+    }
+
+    private boolean checkExec() {
+        if (waitingTasks.size() > 0) {
+            checkExecution();
+            return false;
+        }
+        else {
+            System.out.println("debug");
+            for (Future<Trajectory<S>> future : futures) {
+                try {
+                    doSample(future.get());
+                } catch (InterruptedException | ExecutionException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            futures.clear();
+            this.printTimingInformation();
+            return true;
+        }
+    }
+
+
 
     private synchronized void checkExecution() {
         Future<Trajectory<S>> result;
         while ((result = completionExecutor.poll()) != null) {
-            // System.out.println(taskCounter + " "+ waitingTasks.size());
+            System.out.println(taskCounter + " "+ waitingTasks.size());
             try {
-                if (sampling_function != null) {
-                    result.get().sample(sampling_function);
-                }
+                doSample(result.get());
                 taskCounter--;
                 SimulationTask<S> nextTask = waitingTasks.poll();
                 if (nextTask != null) {
                     run(nextTask);
-                }else{
-                    this.notify();
                 }
             } catch (InterruptedException | ExecutionException e) {
                 // TODO Auto-generated catch block
@@ -100,24 +126,15 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
         if (taskCounter < nTasks) {
             taskCounter++;
             tasks.add(task);
-            completionExecutor.submit(task);
+            futures.add(completionExecutor.submit(task));
         } else {
             waitingTasks.add(task);
         }
     }
 
     @Override
-    public synchronized void waitTermination() {
-
-        if (waitingTasks.size() > 0) {
-            try {
-                this.wait();
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        this.printTimingInformation();
+    public synchronized boolean waitTermination() {
+        return this.checkExec();
     }
 /*
     public List<Boolean> reach(){
