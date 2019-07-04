@@ -97,7 +97,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 			this.iterations++;
 		}
 		rgi.unregister();
-		while(simManager.waitTermination() != true);
+		simManager.waitTermination();
 
 	}
 

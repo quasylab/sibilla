@@ -25,25 +25,28 @@ package quasylab.sibilla.core.simulator;
  */
 import java.util.LinkedList;
 import java.util.List;
+import java.util.LongSummaryStatistics;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public class SimulationThreadManager<S> implements SimulationManager<S> {
     ExecutorService executor = Executors.newCachedThreadPool();
-    ExecutorCompletionService<Trajectory<S>> completionExecutor = new ExecutorCompletionService<>(executor);
+    BlockingQueue<Future<Trajectory<S>>> futures = new LinkedBlockingQueue<>();
+    ExecutorCompletionService<Trajectory<S>> completionExecutor = new ExecutorCompletionService<>(executor, futures);
     List<SimulationTask<S>> tasks = new LinkedList<>();
     int nTasks;
     int taskCounter = 0;
     SamplingFunction<S> sampling_function;
     LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
-    List<Future<Trajectory<S>>> futures = new LinkedList<>();
     Timer scheduler = new Timer();
     List<Boolean> reach = new LinkedList<>();
 
@@ -63,12 +66,9 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
     }
 
     private boolean checkExec() {
-        if (waitingTasks.size() > 0) {
+        while(waitingTasks.size() > 0){
             checkExecution();
-            return false;
         }
-        else {
-            System.out.println("debug");
             for (Future<Trajectory<S>> future : futures) {
                 try {
                     doSample(future.get());
@@ -80,7 +80,7 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
             futures.clear();
             this.printTimingInformation();
             return true;
-        }
+        
     }
 
 
@@ -88,7 +88,6 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
     private synchronized void checkExecution() {
         Future<Trajectory<S>> result;
         while ((result = completionExecutor.poll()) != null) {
-            System.out.println(taskCounter + " "+ waitingTasks.size());
             try {
                 doSample(result.get());
                 taskCounter--;
@@ -126,7 +125,7 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
         if (taskCounter < nTasks) {
             taskCounter++;
             tasks.add(task);
-            futures.add(completionExecutor.submit(task));
+            completionExecutor.submit(task);
         } else {
             waitingTasks.add(task);
         }
@@ -166,9 +165,13 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
      */
     private void printTimingInformation(){
         System.out.println();
-        for(int i = 0; i < tasks.size(); i++){
+        /*for(int i = 0; i < tasks.size(); i++){
             System.out.println("Task " + i +  " Elapsed Time: " + tasks.get(i).getElapsedTime() + "ns");
-        }
+        }*/
+        LongSummaryStatistics statistics = tasks.stream().map(x -> x.getElapsedTime()).mapToLong(Long::valueOf).summaryStatistics();
+        System.out.println("Average run time:" + statistics.getAverage());
+        System.out.println("Maximum run time:" + statistics.getMax());
+        System.out.println("Minimum run time:" + statistics.getMin());
     }
 
     @Override
