@@ -44,10 +44,10 @@ public class Main {
 	
 	public static void main(String[] argv) throws FileNotFoundException {
 		/*PrintStream out = new PrintStream(new FileOutputStream("thread_data.data", true));
-        out.println("Concurrent tasks; average runtime; maximum runtime; minimum runtime");
+        out.println("Concurrent tasks;average runtime;maximum runtime;minimum runtime");
 		out.close();
 		PrintStream out2 = new PrintStream(new FileOutputStream("run_data.data"));
-		out2.println("Concurrent tasks; total runtime");
+		out2.println("Concurrent tasks;total runtime");
 		for(int i = 1; i< 1000; i++){*/
 		PopulationRule rule_S_E = new ReactionRule(
 				"S->E", 
