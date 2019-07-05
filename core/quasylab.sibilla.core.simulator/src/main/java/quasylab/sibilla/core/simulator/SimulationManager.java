@@ -29,12 +29,12 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public interface SimulationManager<S> {
 
+    // initialize the simulation manager with sampling function and the number of tasks that will be submitted
     public void init(SamplingFunction<S> sampling_function, int expectedTasks);
-    /**
-     * Same as runTasks(SamplingFunction<S> sampling_function) but computes reachability instead
-     * @return List<Boolean> of tasks that reached predicate
-     */
+    // calculates reach
     public long reach();
+    // runs a task
     public void run(SimulationTask<S> task);
+    // wait for submitted tasks to finish
     public void waitTermination();
 }

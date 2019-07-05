@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.LongSummaryStatistics;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -41,21 +40,20 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
  *
  */
 public class SimulationThreadManager<S> implements SimulationManager<S> {
-    ExecutorService executor;
-    BlockingQueue<Future<Trajectory<S>>> futures;
-    ExecutorCompletionService<Trajectory<S>> completionExecutor;
-    List<SimulationTask<S>> tasks = new LinkedList<>();
-    int nTasks, expectedTasks, taskCounter = 0;
-    SamplingFunction<S> sampling_function;
-    LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
-    List<Boolean> reach = new LinkedList<>();
+    private ExecutorService executor;
+    private BlockingQueue<Future<Trajectory<S>>> futures;
+    private List<SimulationTask<S>> tasks = new LinkedList<>();
+    private final int concurrentTasks;
+    private int expectedTasks = 0, runningTasks = 0; 
+    private SamplingFunction<S> sampling_function;
+    private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
 
-    public SimulationThreadManager(int nTasks) {
-        this.nTasks = nTasks;
+    public SimulationThreadManager(int concurrentTasks) {
+        this.concurrentTasks = concurrentTasks;
         executor = Executors.newCachedThreadPool();
         futures = new LinkedBlockingQueue<>();
-        completionExecutor = new ExecutorCompletionService<>(executor, futures);
     }
+
 
     private void doSample(Trajectory<S> trajectory) {
         if (sampling_function != null) {
@@ -63,6 +61,8 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
         }
     }
 
+
+    // waits for all tasks to end, then prints timing information to file
     private void terminate() {
         try {
             executor.awaitTermination(60000, TimeUnit.SECONDS);
@@ -71,7 +71,7 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
             e.printStackTrace();
         }
         try {
-            this.printTimingInformation( new PrintStream(new FileOutputStream("thread_data.data", true)));
+            printTimingInformation( new PrintStream(new FileOutputStream("thread_data.data", true)));
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -80,10 +80,11 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
     }
 
 
-
+    // samples the trajectory, updates counters, then runs next task. 
+    // if no new tasks to run, shutdowns the executor
     private synchronized void manageTask(Trajectory<S> trajectory) {
         doSample(trajectory);
-        taskCounter--;
+        runningTasks--;
         expectedTasks--;
         SimulationTask<S> nextTask = waitingTasks.poll();
         if (nextTask != null) {
@@ -99,10 +100,11 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
         this.expectedTasks = expectedTasks;
     }
 
+    // runs a new task if below task limit, else adds to queue
     @Override
-    public void run(SimulationTask<S> task) {
-        if (taskCounter < nTasks) {
-            taskCounter++;
+    public synchronized void run(SimulationTask<S> task) {
+        if (runningTasks < concurrentTasks) {
+            runningTasks++;
             tasks.add(task);
             CompletableFuture.supplyAsync(task, executor).thenAccept(this::manageTask);
         } else {
@@ -110,6 +112,7 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
         }
     }
 
+    // busy waiting until executor is shutdown
     @Override
     public void waitTermination() {
         while(executor.isShutdown() == false);
@@ -118,7 +121,7 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
 
     private void printTimingInformation(PrintStream out){
         LongSummaryStatistics statistics = tasks.stream().map(x -> x.getElapsedTime()).mapToLong(Long::valueOf).summaryStatistics();
-        out.println(nTasks +";" + statistics.getAverage() + ";" + statistics.getMax() +";" + statistics.getMin());
+        out.println(concurrentTasks +";" + statistics.getAverage() + ";" + statistics.getMax() +";" + statistics.getMin());
     }
 
     @Override
