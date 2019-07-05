@@ -41,7 +41,6 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
  */
 public class SimulationThreadManager<S> implements SimulationManager<S> {
     private ExecutorService executor;
-    private BlockingQueue<Future<Trajectory<S>>> futures;
     private List<SimulationTask<S>> tasks = new LinkedList<>();
     private final int concurrentTasks;
     private int expectedTasks = 0, runningTasks = 0; 
@@ -51,7 +50,6 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
     public SimulationThreadManager(int concurrentTasks) {
         this.concurrentTasks = concurrentTasks;
         executor = Executors.newCachedThreadPool();
-        futures = new LinkedBlockingQueue<>();
     }
 
 
