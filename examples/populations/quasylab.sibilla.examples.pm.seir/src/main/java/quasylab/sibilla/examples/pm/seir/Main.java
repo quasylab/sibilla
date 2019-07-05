@@ -43,7 +43,12 @@ public class Main {
 	private final static int TASKS = 3;
 	
 	public static void main(String[] argv) throws FileNotFoundException {
-
+		/*PrintStream out = new PrintStream(new FileOutputStream("thread_data.data", true));
+        out.println("Concurrent tasks; average runtime; maximum runtime; minimum runtime");
+		out.close();
+		PrintStream out2 = new PrintStream(new FileOutputStream("run_data.data"));
+		out2.println("Concurrent tasks; total runtime");
+		for(int i = 1; i< 1000; i++){*/
 		PopulationRule rule_S_E = new ReactionRule(
 				"S->E", 
 				new Specie[] { new Specie(S), new Specie(I)} , 
@@ -88,13 +93,15 @@ public class Main {
 		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new SimulationThreadManager<>(TASKS) );
 
 		sim.setSampling(new SamplingCollection<>(fiSamp,frSamp));
-		
+		//long startTime = System.nanoTime();
 		sim.simulate(REPLICA,DEADLINE);
+		//long endTime = System.nanoTime() - startTime;
 		fiSamp.printTimeSeries(new PrintStream("data/seir_"+REPLICA+"_"+N+"_FI_.data"),';');
 		frSamp.printTimeSeries(new PrintStream("data/seir_"+REPLICA+"_"+N+"_FR_.data"),';');
-
-
+		//out2.println(i+";"+endTime);
 	}
+
+	//}
 	
 
 	public static PopulationState initialState() {

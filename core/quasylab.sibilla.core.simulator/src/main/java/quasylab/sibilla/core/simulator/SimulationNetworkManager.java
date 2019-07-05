@@ -39,13 +39,12 @@ public class SimulationNetworkManager<S> implements SimulationManager<S> {
     }
 
     @Override
-    public void setSampling(SamplingFunction<S> sampling_function) {
+    public void init(SamplingFunction<S> sampling_function, int expectedTasks) {
 
     }
 
     @Override
-    public boolean waitTermination() {
-        return false;
+    public void waitTermination() {
     }
 
 }

@@ -19,8 +19,6 @@
 package quasylab.sibilla.core.simulator;
 
 import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Future;
 import java.util.function.Predicate;
 
 import org.apache.commons.math3.random.RandomGenerator;
@@ -41,7 +39,6 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 	private S state;
 	private SamplingFunction<S> sampling_function;
 	private int iterations = 0;
-	private int tasks;
 	private SimulationManager<S> simManager;
 
 	public SimulationEnvironment(M model) {
@@ -72,7 +69,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 
 	public synchronized void simulate(SimulationMonitor monitor, int iterations, double deadline) {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
-		simManager.setSampling(sampling_function);
+		simManager.init(sampling_function, iterations);
 		rgi.register(random);
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			if (monitor != null) {
@@ -85,7 +82,6 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 			System.out.flush();
 			SimulationTask<S> task = new SimulationTask<>(random, model, deadline);
 			simManager.run(task);
-			// doSimulate(state,monitor,deadline);
 			if (monitor != null) {
 				monitor.endSimulation(i);
 			}
@@ -122,12 +118,10 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 			Predicate<? super S> psi) {
 		double n = Math.ceil(Math.log(2 / delta) / (2 * error));
 		double count = 0;
+		simManager.init(null,(int)n);
 		for (int i = 0; i < n; i++) {
 			SimulationTask<S> simulationRun = new SimulationTask<>(random, model, deadline, phi, psi);
-			simManager.run(simulationRun);
-			/*if (sample(deadline,phi,psi)) {
-				count++;
-			}*/																							// iteration
+			simManager.run(simulationRun);																					// iteration
 		}
 		simManager.waitTermination();
 		count = simManager.reach();
@@ -137,7 +131,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 	private Boolean sample(double deadline, Predicate<? super S> phi, Predicate<? super S> psi) {
 		SimulationTask<S> simulationRun = new SimulationTask<>(random, model, deadline, phi, psi);
 		try {
-			simulationRun.call();
+			simulationRun.get();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -225,7 +219,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 	public Trajectory<S> sampleTrajectory(double deadline) {
 		SimulationTask<S> simulationRun = new SimulationTask<>(random, model, deadline);
 		try {
-			return simulationRun.call();
+			return simulationRun.get();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -236,7 +230,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 	public Trajectory<S> sampleTrajectory(double deadline, Predicate<? super S> reachPredicate) {
 		SimulationTask<S> simulationRun = new SimulationTask<>(random, model, deadline, reachPredicate);
 		try {
-			return simulationRun.call();
+			return simulationRun.get();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -249,7 +243,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 		SimulationTask<S> simulationRun = new SimulationTask<>(random, model, deadline, transientPredicate,
 				reachPredicate);
 		try {
-			return simulationRun.call();
+			return simulationRun.get();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

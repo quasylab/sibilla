@@ -200,7 +200,7 @@ public class SimulationEnvironment2<M extends Model<S>, S> {
 	public Trajectory<S> sampleTrajectory(double deadline) {
 		SimulationTask<S> simultionRun = new SimulationTask<>(random, model, deadline);
 		try {
-			simultionRun.call();
+			simultionRun.get();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -211,7 +211,7 @@ public class SimulationEnvironment2<M extends Model<S>, S> {
 	public Trajectory<S> sampleTrajectory(double deadline, Predicate<S> reachPredicate) {
 		SimulationTask<S> simultionRun = new SimulationTask<>(random, model, deadline, reachPredicate);
 		try {
-			simultionRun.call();
+			simultionRun.get();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -224,7 +224,7 @@ public class SimulationEnvironment2<M extends Model<S>, S> {
 		SimulationTask<S> simultionRun = new SimulationTask<>(random, model, deadline, transientPredicate,
 				reachPredicate);
 		try {
-			simultionRun.call();
+			simultionRun.get();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

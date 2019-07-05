@@ -17,46 +17,44 @@
  * under the License.
  *******************************************************************************/
 
+
 package quasylab.sibilla.core.simulator;
 
-/**
- * @author belenchia
- *
- */
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.LongSummaryStatistics;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-
+/**
+ * @author belenchia
+ *
+ */
 public class SimulationThreadManager<S> implements SimulationManager<S> {
-    ExecutorService executor = Executors.newCachedThreadPool();
-    BlockingQueue<Future<Trajectory<S>>> futures = new LinkedBlockingQueue<>();
-    ExecutorCompletionService<Trajectory<S>> completionExecutor = new ExecutorCompletionService<>(executor, futures);
+    ExecutorService executor;
+    BlockingQueue<Future<Trajectory<S>>> futures;
+    ExecutorCompletionService<Trajectory<S>> completionExecutor;
     List<SimulationTask<S>> tasks = new LinkedList<>();
-    int nTasks;
-    int taskCounter = 0;
+    int nTasks, expectedTasks, taskCounter = 0;
     SamplingFunction<S> sampling_function;
     LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
-    Timer scheduler = new Timer();
     List<Boolean> reach = new LinkedList<>();
 
     public SimulationThreadManager(int nTasks) {
         this.nTasks = nTasks;
-        /*scheduler.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-                checkExecution();
-            }
-        }, 0L, 1L);*/
+        executor = Executors.newCachedThreadPool();
+        futures = new LinkedBlockingQueue<>();
+        completionExecutor = new ExecutorCompletionService<>(executor, futures);
     }
 
     private void doSample(Trajectory<S> trajectory) {
@@ -65,113 +63,62 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
         }
     }
 
-    private boolean checkExec() {
-        while(waitingTasks.size() > 0){
-            checkExecution();
+    private void terminate() {
+        try {
+            executor.awaitTermination(60000, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-            for (Future<Trajectory<S>> future : futures) {
-                try {
-                    doSample(future.get());
-                } catch (InterruptedException | ExecutionException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-            futures.clear();
-            this.printTimingInformation();
-            return true;
+        try {
+            this.printTimingInformation( new PrintStream(new FileOutputStream("thread_data.data", true)));
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         
     }
 
 
 
-    private synchronized void checkExecution() {
-        Future<Trajectory<S>> result;
-        while ((result = completionExecutor.poll()) != null) {
-            try {
-                doSample(result.get());
-                taskCounter--;
-                SimulationTask<S> nextTask = waitingTasks.poll();
-                if (nextTask != null) {
-                    run(nextTask);
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+    private synchronized void manageTask(Trajectory<S> trajectory) {
+        doSample(trajectory);
+        taskCounter--;
+        expectedTasks--;
+        SimulationTask<S> nextTask = waitingTasks.poll();
+        if (nextTask != null) {
+            run(nextTask);
+        } else if (expectedTasks == 0) {
+            executor.shutdown();
         }
     }
 
     @Override
-    public void setSampling(SamplingFunction<S> sampling_function) {
+    public void init(SamplingFunction<S> sampling_function, int expectedTasks) {
         this.sampling_function = sampling_function;
+        this.expectedTasks = expectedTasks;
     }
 
-    /*
-     * @Override public void addTask(SimulationTask<S> task) { tasks.put(nTasks++,
-     * task); }
-     * 
-     * @Override public void runTasks(SamplingFunction<S> sampling_function) {
-     * this.sampling_function = sampling_function; List<Callable<Object>>
-     * callableTasks =
-     * tasks.entrySet().stream().map(Map.Entry::getValue).map(Executors::callable).
-     * collect(Collectors.toList()); try { executor.invokeAll(callableTasks); }
-     * catch (InterruptedException e) { // TODO Auto-generated catch block
-     * e.printStackTrace(); } sampleTasks(sampling_function);
-     * printTimingInformation(); clear(); }
-     */
     @Override
     public void run(SimulationTask<S> task) {
         if (taskCounter < nTasks) {
             taskCounter++;
             tasks.add(task);
-            completionExecutor.submit(task);
+            CompletableFuture.supplyAsync(task, executor).thenAccept(this::manageTask);
         } else {
             waitingTasks.add(task);
         }
     }
 
     @Override
-    public synchronized boolean waitTermination() {
-        return this.checkExec();
-    }
-/*
-    public List<Boolean> reach(){
-        List<Callable<Object>> callableTasks = tasks.entrySet().stream().map(Map.Entry::getValue).map(Executors::callable).collect(Collectors.toList());
-        try {
-            executor.invokeAll(callableTasks);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        List<Boolean> result = tasks.entrySet().stream().map(Map.Entry::getValue).map(SimulationTask::reach).collect(Collectors.toList());
-        printTimingInformation();
-        clear();
-        return result;
-    }
-*/
-
-
-    /**
-     * Clears the hash map
-     */
-    private void clear(){
-        tasks.clear();
-        nTasks = 0;
+    public void waitTermination() {
+        while(executor.isShutdown() == false);
+        terminate();
     }
 
-    /**
-     * Prints timing information stored in the hash map's threads
-     */
-    private void printTimingInformation(){
-        System.out.println();
-        /*for(int i = 0; i < tasks.size(); i++){
-            System.out.println("Task " + i +  " Elapsed Time: " + tasks.get(i).getElapsedTime() + "ns");
-        }*/
+    private void printTimingInformation(PrintStream out){
         LongSummaryStatistics statistics = tasks.stream().map(x -> x.getElapsedTime()).mapToLong(Long::valueOf).summaryStatistics();
-        System.out.println("Average run time:" + statistics.getAverage());
-        System.out.println("Maximum run time:" + statistics.getMax());
-        System.out.println("Minimum run time:" + statistics.getMin());
+        out.println(nTasks +";" + statistics.getAverage() + ";" + statistics.getMax() +";" + statistics.getMin());
     }
 
     @Override

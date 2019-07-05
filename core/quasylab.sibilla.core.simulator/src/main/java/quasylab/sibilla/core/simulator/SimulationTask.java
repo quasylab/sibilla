@@ -18,8 +18,8 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator;
 
-import java.util.concurrent.Callable;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -30,7 +30,7 @@ import quasylab.sibilla.core.simulator.util.WeightedStructure;
  * @author loreti
  *
  */
-public class SimulationTask<S> implements Callable<Trajectory<S>> {
+public class SimulationTask<S> implements Supplier<Trajectory<S>> {
 
 	private double deadline;
 	private double time;
@@ -64,7 +64,7 @@ public class SimulationTask<S> implements Callable<Trajectory<S>> {
 	
 
 	@Override
-	public Trajectory<S> call() throws Exception {
+	public Trajectory<S> get() {
 		running();
 		this.trajectory = new Trajectory<>();
 		this.trajectory.add(time, currentState);
