@@ -7,7 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.SimulationThreadManager;
+import quasylab.sibilla.core.simulator.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
@@ -42,7 +42,7 @@ public class Main {
 	private static final int REPLICA = 1000;
 	private final static int TASKS = 15;
 	
-	public static void main(String[] argv) throws FileNotFoundException {
+	public static void main(String[] argv) throws FileNotFoundException, InterruptedException {
 		/*PrintStream out = new PrintStream(new FileOutputStream("thread_data.data", true));
         out.println("Concurrent tasks;average runtime;maximum runtime;minimum runtime");
 		out.close();
@@ -90,7 +90,7 @@ public class Main {
 //		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new SimulationThreadManager<>(TASKS) );
+		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS) );
 
 		sim.setSampling(new SamplingCollection<>(fiSamp,frSamp));
 		//long startTime = System.nanoTime();
