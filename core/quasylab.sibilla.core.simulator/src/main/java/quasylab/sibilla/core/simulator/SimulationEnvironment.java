@@ -181,7 +181,8 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 	// return time;
 	// }
 	//
-	private double doSimulate(double deadline) {
+
+  private double doSimulate(double deadline) {
 		return doSimulate(model.initialState(), null, deadline);
 	}
 
