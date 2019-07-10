@@ -17,7 +17,6 @@
  * under the License.
  *******************************************************************************/
 
-
 package quasylab.sibilla.core.simulator;
 
 import java.io.FileNotFoundException;
@@ -35,6 +34,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+
 /**
  * @author belenchia
  *
@@ -43,7 +43,7 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
     private ExecutorService executor;
     private List<SimulationTask<S>> tasks = new LinkedList<>();
     private final int concurrentTasks;
-    private int expectedTasks = 0, runningTasks = 0; 
+    private int expectedTasks = 0, runningTasks = 0;
     private SamplingFunction<S> sampling_function;
     private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
 
@@ -52,13 +52,11 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
         executor = Executors.newCachedThreadPool();
     }
 
-
     private void doSample(Trajectory<S> trajectory) {
         if (sampling_function != null) {
             trajectory.sample(sampling_function);
         }
     }
-
 
     // waits for all tasks to end, then prints timing information to file
     private void terminate() {
@@ -69,16 +67,16 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
             e.printStackTrace();
         }
         try {
-            printTimingInformation( new PrintStream(new FileOutputStream("thread_data.data", true)));
+            printTimingInformation(System.out);
+            printTimingInformation(new PrintStream(new FileOutputStream("thread_data.data", true)));
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+
     }
 
-
-    // samples the trajectory, updates counters, then runs next task. 
+    // samples the trajectory, updates counters, then runs next task.
     // if no new tasks to run, shutdowns the executor
     private synchronized void manageTask(Trajectory<S> trajectory) {
         doSample(trajectory);
@@ -89,6 +87,7 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
             run(nextTask);
         } else if (expectedTasks == 0) {
             executor.shutdown();
+            this.notify();
         }
     }
 
@@ -112,8 +111,14 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
 
     // busy waiting until executor is shutdown
     @Override
-    public void waitTermination() {
-        while(executor.isShutdown() == false);
+    public synchronized void waitTermination() {
+        // while(executor.isShutdown() == false);
+        try {
+            this.wait();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         terminate();
     }
 
