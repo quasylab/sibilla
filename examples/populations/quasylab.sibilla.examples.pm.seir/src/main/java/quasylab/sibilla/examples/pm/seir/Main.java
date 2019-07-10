@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
+import quasylab.sibilla.core.simulator.SimulationThreadManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
@@ -39,10 +40,15 @@ public class Main {
 	public final static int SAMPLINGS = 100;
 	public final static double DEADLINE = 600;
 	private static final int REPLICA = 1000;
-	
+	private final static int TASKS = 15;
 	
 	public static void main(String[] argv) throws FileNotFoundException {
-
+		/*PrintStream out = new PrintStream(new FileOutputStream("thread_data.data", true));
+        out.println("Concurrent tasks;average runtime;maximum runtime;minimum runtime");
+		out.close();
+		PrintStream out2 = new PrintStream(new FileOutputStream("run_data.data"));
+		out2.println("Concurrent tasks;total runtime");
+		for(int i = 1; i< 1000; i++){*/
 		PopulationRule rule_S_E = new ReactionRule(
 				"S->E", 
 				new Specie[] { new Specie(S), new Specie(I)} , 
@@ -83,16 +89,19 @@ public class Main {
 //		StatisticSampling<PopulationModel> iSamp = StatisticSampling.measure("#I", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(I)) ;
 //		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
 		
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
+		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
+		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new SimulationThreadManager<>(TASKS) );
 
 		sim.setSampling(new SamplingCollection<>(fiSamp,frSamp));
-		
+		//long startTime = System.nanoTime();
 		sim.simulate(REPLICA,DEADLINE);
+		//long endTime = System.nanoTime() - startTime;
 		fiSamp.printTimeSeries(new PrintStream("data/seir_"+REPLICA+"_"+N+"_FI_.data"),';');
 		frSamp.printTimeSeries(new PrintStream("data/seir_"+REPLICA+"_"+N+"_FR_.data"),';');
-
-
+		//out2.println(i+";"+endTime);
 	}
+
+	//}
 	
 
 	public static PopulationState initialState() {

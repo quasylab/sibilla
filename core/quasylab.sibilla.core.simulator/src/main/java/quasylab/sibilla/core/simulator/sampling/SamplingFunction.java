@@ -32,6 +32,6 @@ public interface SamplingFunction<S> {
 
 	public void start();
 
-	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries( int replications );
+	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries( int replications);
 	
 }

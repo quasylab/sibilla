@@ -14,8 +14,10 @@ gradle-app.setting
 # gradle/wrapper/gradle-wrapper.properties
 
 bin/
+.vscode/
 .DS_Store
 .classpath
 .project
 .settings
 *.data
+

@@ -16,19 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
+
 package quasylab.sibilla.core.simulator;
 
-import quasylab.sibilla.core.simulator.sampling.Measure;
-
-
 /**
- * @author loreti
+ * @author belenchia
  *
  */
-public interface SimulationFactory<S extends Model<S>> {
 
-	public S getModel();
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
-	public Measure<S> getMeasure( String name );
-	
+public class SimulationNetworkManager<S> implements SimulationManager<S> {
+
+    @Override
+    public long reach() {
+        return 0;
+    }
+
+    @Override
+    public void run(SimulationTask<S> task) {
+
+    }
+
+    @Override
+    public void init(SamplingFunction<S> sampling_function, int expectedTasks) {
+
+    }
+
+    @Override
+    public void waitTermination() {
+    }
+
 }

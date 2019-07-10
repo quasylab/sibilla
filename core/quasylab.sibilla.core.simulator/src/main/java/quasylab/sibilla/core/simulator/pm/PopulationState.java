@@ -68,6 +68,7 @@ public class PopulationState {
 		return IntStream.of(idx).boxed().map(i -> (double) populationVector[i]).reduce(0.0, (x,y) -> x+y);
 	}
 	
+	// applies one update function
 	public PopulationState apply( Update update ) {
 		int[] newState = Arrays.copyOf(populationVector, populationVector.length);
 		for (Entry<Integer, Integer> u : update.getUpdate()) {
