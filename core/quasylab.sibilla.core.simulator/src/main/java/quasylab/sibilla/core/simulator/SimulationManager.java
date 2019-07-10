@@ -36,5 +36,5 @@ public interface SimulationManager<S> {
     // runs a task
     public void run(SimulationTask<S> task);
     // wait for submitted tasks to finish
-    public void waitTermination();
+    public void waitTermination() throws InterruptedException;
 }

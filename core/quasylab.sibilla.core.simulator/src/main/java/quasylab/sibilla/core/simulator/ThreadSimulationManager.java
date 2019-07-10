@@ -39,7 +39,7 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
  * @author belenchia
  *
  */
-public class SimulationThreadManager<S> implements SimulationManager<S> {
+public class ThreadSimulationManager<S> implements SimulationManager<S> {
     private ExecutorService executor;
     private List<SimulationTask<S>> tasks = new LinkedList<>();
     private final int concurrentTasks;
@@ -47,7 +47,7 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
     private SamplingFunction<S> sampling_function;
     private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
 
-    public SimulationThreadManager(int concurrentTasks) {
+    public ThreadSimulationManager(int concurrentTasks) {
         this.concurrentTasks = concurrentTasks;
         executor = Executors.newCachedThreadPool();
     }
@@ -85,13 +85,16 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
         SimulationTask<S> nextTask = waitingTasks.poll();
         if (nextTask != null) {
             run(nextTask);
-        } else if (expectedTasks == 0) {
-            executor.shutdown();
+        } else if (isCompleted()) {
             this.notify();
         }
     }
 
-    @Override
+    private synchronized boolean isCompleted() {
+		return (runningTasks+expectedTasks==0);
+	}
+
+	@Override
     public void init(SamplingFunction<S> sampling_function, int expectedTasks) {
         this.sampling_function = sampling_function;
         this.expectedTasks = expectedTasks;
@@ -111,14 +114,11 @@ public class SimulationThreadManager<S> implements SimulationManager<S> {
 
     // busy waiting until executor is shutdown
     @Override
-    public synchronized void waitTermination() {
+    public synchronized void waitTermination() throws InterruptedException {
         // while(executor.isShutdown() == false);
-        try {
+        while (!isCompleted()) {
             this.wait();
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        } 
         terminate();
     }
 

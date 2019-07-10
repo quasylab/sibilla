@@ -42,7 +42,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 	private SimulationManager<S> simManager;
 
 	public SimulationEnvironment(M model) {
-		this(model, new SimulationThreadManager<S>(1));
+		this(model, new ThreadSimulationManager<S>(1));
 	}
 
 	public SimulationEnvironment(M model, SimulationManager<S> simManager) {
@@ -67,8 +67,9 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 		this.sampling_function = sampling_function;
 	}
 
-	public synchronized void simulate(SimulationMonitor monitor, int iterations, double deadline) {
+	public synchronized void simulate(SimulationMonitor monitor, int iterations, double deadline) throws InterruptedException {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
+		//SimulationSession session = simManager.newSession();
 		simManager.init(sampling_function, iterations);
 		rgi.register(random);
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
@@ -82,6 +83,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 			System.out.flush();
 			SimulationTask<S> task = new SimulationTask<>(random, model, deadline);
 			simManager.run(task);
+			//simManager.run(session,task);
 			if (monitor != null) {
 				monitor.endSimulation(i);
 			}
@@ -94,10 +96,10 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 		}
 		rgi.unregister();
 		simManager.waitTermination();
-
+		//simManager.wait(session);
 	}
 
-	public synchronized void simulate(int iterations, double deadline) {
+	public synchronized void simulate(int iterations, double deadline) throws InterruptedException {
 		simulate(null, iterations, deadline);
 	}
 
@@ -115,7 +117,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 	}
 
 	public double reachability(double error, double delta, double deadline, Predicate<? super S> phi,
-			Predicate<? super S> psi) {
+			Predicate<? super S> psi) throws InterruptedException {
 		double n = Math.ceil(Math.log(2 / delta) / (2 * error));
 		double count = 0;
 		simManager.init(null,(int)n);
