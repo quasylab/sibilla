@@ -61,12 +61,6 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     // waits for all tasks to end, then prints timing information to file
     private void terminate() {
         try {
-            executor.awaitTermination(60000, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        try {
             printTimingInformation(System.out);
             printTimingInformation(new PrintStream(new FileOutputStream("thread_data.data", true)));
         } catch (FileNotFoundException e) {
