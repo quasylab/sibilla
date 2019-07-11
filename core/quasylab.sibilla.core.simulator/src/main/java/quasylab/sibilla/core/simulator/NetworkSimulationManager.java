@@ -26,7 +26,7 @@ package quasylab.sibilla.core.simulator;
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
-public class SimulationNetworkManager<S> implements SimulationManager<S> {
+public class NetworkSimulationManager<S> implements SimulationManager<S> {
 
     @Override
     public long reach() {

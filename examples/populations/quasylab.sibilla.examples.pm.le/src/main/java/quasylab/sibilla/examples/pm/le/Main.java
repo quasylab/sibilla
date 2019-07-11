@@ -6,7 +6,7 @@ package quasylab.sibilla.examples.pm.le;
 import java.io.FileNotFoundException;
 
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.SimulationThreadManager;
+import quasylab.sibilla.core.simulator.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
@@ -46,7 +46,7 @@ public class Main {
 	private final static int TASKS = 5;
 	
 	
-	public static void main(String[] argv) throws FileNotFoundException {
+	public static void main(String[] argv) throws FileNotFoundException, InterruptedException {
 
 		PopulationRule rule_C_S0 = new ReactionRule(
 				"C->S0", 
@@ -139,7 +139,7 @@ public class Main {
 		StatisticSampling<PopulationState> lSamp = StatisticSampling.measure("#L", SAMPLINGS, DEADLINE, 
 				s -> s.getOccupancy(L)) ;
 		
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new SimulationThreadManager<>(TASKS) );
+		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS) );
 
 		sim.setSampling(new SamplingCollection<>(cSamp,fSamp,lSamp));
 
