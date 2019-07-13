@@ -25,13 +25,10 @@ import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.LongSummaryStatistics;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
@@ -114,11 +111,12 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
             this.wait();
         } 
         terminate();
+        //executor.shutdown(); // only when recording time
     }
 
     private void printTimingInformation(PrintStream out){
         LongSummaryStatistics statistics = tasks.stream().map(x -> x.getElapsedTime()).mapToLong(Long::valueOf).summaryStatistics();
-        out.println(concurrentTasks +";" + statistics.getAverage() + ";" + statistics.getMax() +";" + statistics.getMin());
+        out.println(concurrentTasks +";"+((ThreadPoolExecutor) executor).getPoolSize()+";" + statistics.getAverage() + ";" + statistics.getMax() +";" + statistics.getMin());
     }
 
     @Override

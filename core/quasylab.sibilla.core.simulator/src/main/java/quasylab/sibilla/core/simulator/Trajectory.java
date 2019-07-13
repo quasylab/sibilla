@@ -18,6 +18,7 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -27,8 +28,9 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
  * @author loreti
  *
  */
-public class Trajectory<S> {
+public class Trajectory<S> implements Serializable {
 	
+	private static final long serialVersionUID = -9039722623650234376L;
 	private List<Sample<S>> data;
 	private double start = Double.NaN;
 	private double end = Double.NaN;

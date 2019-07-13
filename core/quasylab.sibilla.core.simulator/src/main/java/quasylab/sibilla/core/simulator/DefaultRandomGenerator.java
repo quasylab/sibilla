@@ -18,6 +18,7 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator;
 
+import java.io.Serializable;
 import java.util.Random;
 
 import org.apache.commons.math3.random.AbstractRandomGenerator;
@@ -26,8 +27,9 @@ import org.apache.commons.math3.random.AbstractRandomGenerator;
  * @author loreti
  *
  */
-public class DefaultRandomGenerator extends AbstractRandomGenerator {
+public class DefaultRandomGenerator extends AbstractRandomGenerator implements Serializable{
 
+	private static final long serialVersionUID = -8354414629214279876L;
 	private Random random = new Random();
 
 	@Override

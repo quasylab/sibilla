@@ -18,6 +18,7 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator;
 
+import java.io.Serializable;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -30,8 +31,9 @@ import quasylab.sibilla.core.simulator.util.WeightedStructure;
  * @author loreti
  *
  */
-public class SimulationTask<S> implements Supplier<Trajectory<S>> {
+public class SimulationTask<S> implements Supplier<Trajectory<S>>, Serializable {
 
+	private static final long serialVersionUID = -504798938865475892L;
 	private double deadline;
 	private double time;
 	private Predicate<? super S> transientPredicate;
@@ -45,11 +47,11 @@ public class SimulationTask<S> implements Supplier<Trajectory<S>> {
 	private long startTime = 0, elapsedTime = 0;
 	
 	public SimulationTask( RandomGenerator random , Model<S> model , double deadline ) {
-		this(random,model,deadline,s -> false);
+		this(random,model,deadline,(Predicate<? super S> & Serializable) s -> false);
 	}
 	
 	public SimulationTask( RandomGenerator random , Model<S> model , double deadline , Predicate<? super S> reachPredicate ) {
-		this(random,model,deadline,reachPredicate,s -> true);
+		this(random,model,deadline,reachPredicate,(Predicate<? super S> & Serializable) s -> true);
 	}
 
 	public SimulationTask( RandomGenerator random , Model<S> model , double deadline , Predicate<? super S> reachPredicate, Predicate<? super S> transientPredicate) {
