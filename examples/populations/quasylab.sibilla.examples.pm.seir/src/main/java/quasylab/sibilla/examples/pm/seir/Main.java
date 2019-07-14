@@ -44,14 +44,6 @@ public class Main {
 	private final static int TASKS = 15;
 	
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException {
-		/*List<Long> stats = new ArrayList<>();
-		PrintStream out = new PrintStream(new FileOutputStream("thread_data.data", true));
-        out.println("Concurrent tasks;pool size;average runtime;maximum runtime;minimum runtime");
-		out.close();
-		PrintStream out2 = new PrintStream(new FileOutputStream("run_data.data"));
-		out2.println("Concurrent tasks;total runtime");
-		for(int i = 1; i<= 1000; i++){  // i -> number of concurrent tasks
-		for(int j = 0; j < 50; j++){   // j -> number of runs*/	
 		PopulationRule rule_S_E = new ReactionRule(
 				"S->E", 
 				new Specie[] { new Specie(S), new Specie(I)} , 
@@ -96,19 +88,12 @@ public class Main {
 		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS) );
 
 		sim.setSampling(new SamplingCollection<>(fiSamp,frSamp));
-		//long startTime = System.nanoTime();
+
 		sim.simulate(REPLICA,DEADLINE);
-		//long endTime = System.nanoTime() - startTime;
+
 		fiSamp.printTimeSeries(new PrintStream("data/seir_"+REPLICA+"_"+N+"_FI_.data"),';');
 		frSamp.printTimeSeries(new PrintStream("data/seir_"+REPLICA+"_"+N+"_FR_.data"),';');
-		//stats.add(endTime);
-	/*} // j loop
-	LongSummaryStatistics statistics = stats.stream().mapToLong(Long::valueOf).summaryStatistics();
-	out2.println(i+";"+statistics.getAverage());
-	stats.clear();
-	System.out.println(i);
-	} // i loop
-	*/
+
 	}
 	
 
