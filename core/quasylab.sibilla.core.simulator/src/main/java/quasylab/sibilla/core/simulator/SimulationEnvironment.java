@@ -70,7 +70,6 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 	public synchronized void simulate(SimulationMonitor monitor, int iterations, double deadline) throws InterruptedException {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
 		SimulationSession<S> session = simManager.newSession(iterations, sampling_function);
-		//simManager.init(sampling_function, iterations);
 		rgi.register(random);
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			if (monitor != null) {
@@ -83,7 +82,6 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 			System.out.flush();
 			SimulationTask<S> task = new SimulationTask<>(random, model, deadline);
 			simManager.run(session, task);
-			//simManager.run(session,task);
 			if (monitor != null) {
 				monitor.endSimulation(i);
 			}
@@ -96,7 +94,6 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 		}
 		rgi.unregister();
 		simManager.waitTermination(session);
-		//simManager.wait(session);
 	}
 
 	public synchronized void simulate(int iterations, double deadline) throws InterruptedException {

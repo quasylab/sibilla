@@ -88,12 +88,6 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
 		return (runningTasks+expectedTasks==0);
 	}
 
-	/*@Override
-    public void init(SamplingFunction<S> sampling_function, int expectedTasks) {
-        this.sampling_function = sampling_function;
-        this.expectedTasks = expectedTasks;
-    }*/
-
     // runs a new task if below task limit, else adds to queue
     @Override
     public synchronized void run(SimulationSession<S> session, SimulationTask<S> task) {
@@ -106,10 +100,9 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
         }
     }
 
-    // busy waiting until executor is shutdown
+    //waiting until executor is shutdown
     @Override
     public synchronized void waitTermination(SimulationSession<S> session) throws InterruptedException {
-        // while(executor.isShutdown() == false);
         while (!isCompleted(session.getExpectedTasks())) {
             this.wait();
         } 
