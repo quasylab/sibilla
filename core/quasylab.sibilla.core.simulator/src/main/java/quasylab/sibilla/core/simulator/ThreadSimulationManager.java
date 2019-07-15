@@ -79,13 +79,13 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
         SimulationTask<S> nextTask = waitingTasks.poll();
         if (nextTask != null) {
             run(session, nextTask);
-        } else if (isCompleted(session.getExpectedTasks())){
+        } else if (isCompleted(session)){
             this.notify();
         }
     }
 
-    private synchronized boolean isCompleted(int expectedTasks) {
-		return (runningTasks+expectedTasks==0);
+    private synchronized boolean isCompleted(SimulationSession<S> session) {
+		return (runningTasks+session.getExpectedTasks()==0);
 	}
 
     // runs a new task if below task limit, else adds to queue
@@ -103,7 +103,7 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     //waiting until executor is shutdown
     @Override
     public synchronized void waitTermination(SimulationSession<S> session) throws InterruptedException {
-        while (!isCompleted(session.getExpectedTasks())) {
+        while (!isCompleted(session)) {
             this.wait();
         } 
         terminate();
