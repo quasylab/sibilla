@@ -12,8 +12,6 @@ import quasylab.sibilla.core.simulator.pm.PopulationState;
 import quasylab.sibilla.core.simulator.pm.ReactionRule;
 import quasylab.sibilla.core.simulator.sampling.Measure;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
-import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 /**

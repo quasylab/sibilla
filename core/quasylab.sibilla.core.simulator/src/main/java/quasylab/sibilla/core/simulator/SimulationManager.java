@@ -16,11 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-/**
- * 
- */
+
 package quasylab.sibilla.core.simulator;
 
-public interface SimulationManager {
-    public void run(int tasks);
+/**
+ * @author belenchia
+ *
+ */
+
+
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+
+public interface SimulationManager<S> {
+
+    // initialize the simulation manager with sampling function and the number of tasks that will be submitted
+    public void init(SamplingFunction<S> sampling_function, int expectedTasks);
+    // calculates reach
+    public long reach();
+    // runs a task
+    public void run(SimulationTask<S> task);
+    // wait for submitted tasks to finish
+    public void waitTermination() throws InterruptedException;
 }

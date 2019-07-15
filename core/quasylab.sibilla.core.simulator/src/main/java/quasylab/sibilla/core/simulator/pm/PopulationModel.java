@@ -18,6 +18,7 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator.pm;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -41,7 +42,9 @@ import quasylab.sibilla.core.simulator.util.WeightedStructure;
  * @author loreti
  *
  */
-public class PopulationModel implements Model<PopulationState> {
+public class PopulationModel implements Model<PopulationState>, Serializable {
+
+	private static final long serialVersionUID = 6871037109869821108L;
 
 	private PopulationRule[] rules;
 

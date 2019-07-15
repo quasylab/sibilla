@@ -18,7 +18,9 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator;
 
+import java.io.Serializable;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -29,8 +31,9 @@ import quasylab.sibilla.core.simulator.util.WeightedStructure;
  * @author loreti
  *
  */
-public class SimulationTask<S> implements Runnable {
+public class SimulationTask<S> implements Supplier<Trajectory<S>>, Serializable {
 
+	private static final long serialVersionUID = -504798938865475892L;
 	private double deadline;
 	private double time;
 	private Predicate<? super S> transientPredicate;
@@ -41,16 +44,17 @@ public class SimulationTask<S> implements Runnable {
 	private S currentState;
 	private SimulationStatus status;
 	private Trajectory<S> trajectory;
+	private long startTime = 0, elapsedTime = 0;
 	
 	public SimulationTask( RandomGenerator random , Model<S> model , double deadline ) {
-		this(random,model,deadline,s -> true);
+		this(random,model,deadline,(Predicate<? super S> & Serializable) s -> false);
 	}
 	
 	public SimulationTask( RandomGenerator random , Model<S> model , double deadline , Predicate<? super S> reachPredicate ) {
-		this(random,model,deadline,reachPredicate,s -> true);
+		this(random,model,deadline,reachPredicate,(Predicate<? super S> & Serializable) s -> true);
 	}
 
-	public SimulationTask( RandomGenerator random , Model<S> model , double deadline , Predicate<? super S> transientPredicate, Predicate<? super S> reachPredicate ) {
+	public SimulationTask( RandomGenerator random , Model<S> model , double deadline , Predicate<? super S> reachPredicate, Predicate<? super S> transientPredicate) {
 		this.random = random;
 		this.model = model;
 		this.deadline = deadline;
@@ -60,7 +64,29 @@ public class SimulationTask<S> implements Runnable {
 		this.status = SimulationStatus.INIT;
 	}
 	
-	
+
+	@Override
+	public Trajectory<S> get() {
+		running();
+		this.trajectory = new Trajectory<>();
+		this.trajectory.add(time, currentState);
+		while ((time<deadline)&&(!isCancelled())) {
+			if (reachPredicate.test(currentState)) {
+				completed(true);
+				return this.getTrajectory();
+			}
+			if (transientPredicate.test(currentState)) {
+				step();
+			} else {
+				completed(false);
+				return this.getTrajectory();
+			}
+		}
+		completed(true);
+		return this.getTrajectory();
+	}
+
+/*
 	public void run( ) {
 		running();
 		this.trajectory = new Trajectory<>();
@@ -77,9 +103,11 @@ public class SimulationTask<S> implements Runnable {
 				return;
 			}
 		}
+		completed(true);
 	}
-
+*/
 	private synchronized void running() {
+		startTime = System.nanoTime();
 		if (!isCancelled()) {
 			this.status = SimulationStatus.RUNNING;
 		}
@@ -90,7 +118,7 @@ public class SimulationTask<S> implements Runnable {
 		if (this.status != SimulationStatus.CANCELLED) {
 			this.status = SimulationStatus.COMPLETED;
 		}
-		
+		elapsedTime = System.nanoTime() - startTime;
 	}
 
 	private void step() {
@@ -140,5 +168,8 @@ public class SimulationTask<S> implements Runnable {
 		return trajectory;		
 	}
 
+	public long getElapsedTime(){
+		return elapsedTime;
+	}
 
 }

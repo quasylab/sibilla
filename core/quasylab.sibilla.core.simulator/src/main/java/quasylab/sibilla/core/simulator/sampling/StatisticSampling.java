@@ -97,6 +97,7 @@ public class StatisticSampling<S> implements SamplingFunction<S> {
 
 	public void printTimeSeries(PrintStream out) {
 		double time = 0.0;
+
 		for (int i = 0; i < this.data.length; i++) {
 			out.println(time + "\t" + this.data[i].getMean() + "\t" + this.data[i].getStandardDeviation());
 			time += dt;

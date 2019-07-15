@@ -21,6 +21,7 @@
  */
 package quasylab.sibilla.core.simulator.pm;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -35,8 +36,9 @@ import java.util.stream.IntStream;
  * @author loreti
  *
  */
-public class PopulationState {
+public class PopulationState implements Serializable {
 
+	private static final long serialVersionUID = -4973919753621170006L;
 	/**
 	 * Internal representation of the state as continuing vector.
 	 */

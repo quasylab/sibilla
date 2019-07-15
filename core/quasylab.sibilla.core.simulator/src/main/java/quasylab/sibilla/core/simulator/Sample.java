@@ -21,12 +21,16 @@
  */
 package quasylab.sibilla.core.simulator;
 
+import java.io.Serializable;
+
 /**
  * @author loreti
  *
  */
-public class Sample<T> {
+public class Sample<T> implements Serializable{
 	
+	private static final long serialVersionUID = -2981890753216588999L;
+
 	private double time;
 	
 	private T value;

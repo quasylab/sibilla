@@ -16,17 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
+
 package quasylab.sibilla.core.simulator;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+/**
+ * @author belenchia
+ *
+ */
 
-public class SimulationThreadManager implements SimulationManager {
-    ExecutorService executor = Executors.newCachedThreadPool();
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+
+public class NetworkSimulationManager<S> implements SimulationManager<S> {
 
     @Override
-    public void run(int tasks) {
-        
+    public long reach() {
+        return 0;
     }
-    
+
+    @Override
+    public void run(SimulationTask<S> task) {
+
+    }
+
+    @Override
+    public void init(SamplingFunction<S> sampling_function, int expectedTasks) {
+
+    }
+
+    @Override
+    public void waitTermination() {
+    }
+
 }

@@ -25,7 +25,7 @@ import quasylab.sibilla.core.simulator.sampling.Measure;
  * @author loreti
  *
  */
-public interface SimulationFactory<S extends Model> {
+public interface SimulationFactory<S extends Model<S>> {
 
 	public S getModel();
 
