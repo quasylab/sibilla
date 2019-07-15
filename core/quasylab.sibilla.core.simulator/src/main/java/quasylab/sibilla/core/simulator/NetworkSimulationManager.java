@@ -34,17 +34,19 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     }
 
     @Override
-    public void run(SimulationTask<S> task) {
+    public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function) {
+        return null;
+    }
+
+    @Override
+    public void run(SimulationSession<S> session, SimulationTask<S> task) {
 
     }
 
     @Override
-    public void init(SamplingFunction<S> sampling_function, int expectedTasks) {
+    public void waitTermination(SimulationSession<S> session) throws InterruptedException {
 
     }
 
-    @Override
-    public void waitTermination() {
-    }
 
 }
