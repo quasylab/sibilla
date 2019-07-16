@@ -1,7 +1,7 @@
 /**
  * 
  */
-package quasylab.sibilla.examples.pm.seir;
+package quasylab.sibilla.core.simulator;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -89,7 +89,8 @@ public class Main {
 //		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS));
+		//SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS) );
+		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new NetworkSimulationManager<>(new InetAddress[]{InetAddress.getLocalHost()}, new int[]{8080} ));
 
 		sim.setSampling(new SamplingCollection<>(fiSamp,frSamp));
 

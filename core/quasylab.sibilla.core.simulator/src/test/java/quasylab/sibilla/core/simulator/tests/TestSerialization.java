@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.io.Serializable;
 
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import quasylab.sibilla.core.simulator.NetworkTask;
 import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
@@ -63,17 +64,18 @@ public class TestSerialization {
     ); 
 
     SimulationTask<PopulationState> task = new SimulationTask<>(new DefaultRandomGenerator(), f, 600);
+    NetworkTask<PopulationState> ntask = new NetworkTask<>(task,1);
     FileOutputStream fos = new FileOutputStream("test-serialization-task.data");
     ObjectOutputStream oos = new ObjectOutputStream(fos);
-    oos.writeObject(task);
+    oos.writeObject(ntask);
     oos.flush();
     oos.close();
     FileInputStream fis = new FileInputStream("test-serialization-task.data");
     ObjectInputStream ois = new ObjectInputStream(fis);
-    SimulationTask<PopulationState> task2 = (SimulationTask<PopulationState>) ois.readObject();
+    NetworkTask<PopulationState> task2 = (NetworkTask<PopulationState>) ois.readObject();
     ois.close();
     System.out.println(task2);
-    Trajectory<PopulationState> trajectory = task2.get();
+    Trajectory<PopulationState> trajectory = task2.getTask().get();
     FileOutputStream fos2 = new FileOutputStream("test-serialization-trajectory.data");
     ObjectOutputStream oos2 = new ObjectOutputStream(fos2);
     oos2.writeObject(trajectory);

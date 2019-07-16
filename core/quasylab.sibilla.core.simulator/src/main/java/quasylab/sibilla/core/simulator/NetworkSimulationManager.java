@@ -19,6 +19,17 @@
 
 package quasylab.sibilla.core.simulator;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * @author belenchia
  *
@@ -27,6 +38,20 @@ package quasylab.sibilla.core.simulator;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public class NetworkSimulationManager<S> implements SimulationManager<S> {
+    private final List<Socket> servers = new LinkedList<>();
+    private ExecutorService executor;
+    private int workingServers = 0;
+
+    public NetworkSimulationManager(InetAddress[] servers, int[] ports) {
+        executor = Executors.newCachedThreadPool();
+        for (int i = 0; i < servers.length; i++) {
+            try {
+                this.servers.add(new Socket(servers[i].getHostAddress(), ports[i]));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     @Override
     public long reach() {
@@ -35,18 +60,69 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
 
     @Override
     public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function) {
-        return null;
+        return new SimulationSession<S>(expectedTasks, sampling_function);
     }
 
     @Override
     public void run(SimulationSession<S> session, SimulationTask<S> task) {
-
+        NetworkTask<S> networkTask = new NetworkTask<S>(task, session.getExpectedTasks());
+        for( Socket server : servers){
+            workingServers++;
+            //manageTask(session, send(networkTask, server));
+            CompletableFuture.supplyAsync(() -> send(networkTask, server), executor).thenAccept((trajectory) -> this.manageTask(session, trajectory));
+            //executor.submit(()-> this.manageTask(networkTask, server, session));
+        }
+        //executor.shutdown();
     }
+
+    private synchronized void manageTask(SimulationSession<S> session, List<Trajectory<S>> trajectories){
+        for(Trajectory<S> trajectory : trajectories){
+            doSample(session.getSamplingFunction(), trajectory);
+            session.taskCompleted();
+        }
+        workingServers--;
+        if(isCompleted(session)){
+            this.notify();
+        }
+    }
+
+    private List<Trajectory<S>> send(NetworkTask<S> networkTask, Socket server){
+        ObjectOutputStream oos;
+        ObjectInputStream ois;
+        List<Trajectory<S>> trajectories = null;
+        
+        try {
+            oos = new ObjectOutputStream(server.getOutputStream());
+            ois = new ObjectInputStream(server.getInputStream());
+
+            oos.writeObject(networkTask);
+
+            trajectories = (List<Trajectory<S>>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return trajectories;
+    }
+
+    private void doSample(SamplingFunction<S> sampling_function, Trajectory<S> trajectory) {
+        if (sampling_function != null) {
+            trajectory.sample(sampling_function);
+        }
+    }
+
 
     @Override
-    public void waitTermination(SimulationSession<S> session) throws InterruptedException {
-
+    public synchronized void waitTermination(SimulationSession<S> session) throws InterruptedException {
+        while (!isCompleted(session)) {
+            this.wait();
+        } 
+        System.out.println("Completed");
     }
+
+    private synchronized boolean isCompleted(SimulationSession<S> session) {
+		return (workingServers+session.getExpectedTasks()==0);
+	}
 
 
 }

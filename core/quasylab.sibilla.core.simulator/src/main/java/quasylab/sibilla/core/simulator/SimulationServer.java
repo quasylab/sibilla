@@ -5,6 +5,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class SimulationServer<S> {
@@ -13,7 +15,7 @@ public class SimulationServer<S> {
     public void start(int port) throws IOException {
         serverSocket = new ServerSocket(port);
         while(true){
-            new TaskHandler(serverSocket.accept()).run();
+            new Thread(new TaskHandler(serverSocket.accept())).start();
         }
     }
 
@@ -26,20 +28,24 @@ public class SimulationServer<S> {
         @Override
         public void run() {
             ObjectInputStream ois;
+            ObjectOutputStream oos;
             SimulationTask<S> task;
-            Trajectory<S> trajectory = null;
+            int repetitions;
+            NetworkTask<S> ntask;
             try {
+                oos = new ObjectOutputStream(socket.getOutputStream());
                 ois = new ObjectInputStream(socket.getInputStream());
-                task = (SimulationTask<S>) ois.readObject();
-                trajectory = task.get();
+                ntask = ((NetworkTask<S>) ois.readObject());
+                task = ntask.getTask();
+                repetitions = ntask.getRepetitions();
+                List<Trajectory<S>> results = new LinkedList<>();
+                for(int i = 0; i < repetitions; i++){
+                    results.add(task.get());
+                    task.reset();
+                }
+                oos.writeObject(results);
+
             } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            try {
-                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-                oos.writeObject(trajectory);
-                oos.close();
-            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
