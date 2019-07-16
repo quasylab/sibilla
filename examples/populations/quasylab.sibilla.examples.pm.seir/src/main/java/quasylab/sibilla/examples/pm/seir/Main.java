@@ -41,7 +41,7 @@ public class Main {
 	public final static int SAMPLINGS = 100;
 	public final static double DEADLINE = 600;
 	private static final int REPLICA = 1000;
-	private final static int TASKS = 2;
+	private final static int TASKS = 15;
 	
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException {
 		PopulationRule rule_S_E = new ReactionRule(

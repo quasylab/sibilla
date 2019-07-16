@@ -84,7 +84,6 @@ public class TestSerialization {
     Trajectory<PopulationState> trajectory2 = (Trajectory<PopulationState>) ois2.readObject();
     ois2.close();
     System.out.println(trajectory2);
-
     }
 
 	public static PopulationState initialState() {

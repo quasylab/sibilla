@@ -63,6 +63,15 @@ public class SimulationTask<S> implements Supplier<Trajectory<S>>, Serializable 
 		this.currentState = model.initialState();
 		this.status = SimulationStatus.INIT;
 	}
+
+	public void reset(){
+		time = 0;
+		reach = false;
+		currentState = model.initialState();
+		status = SimulationStatus.INIT;
+		startTime = 0;
+		elapsedTime = 0;
+	}
 	
 
 	@Override
