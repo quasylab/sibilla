@@ -46,10 +46,12 @@ public class SimulationTask<S> implements Supplier<Trajectory<S>>, Serializable 
 	private Trajectory<S> trajectory;
 	private long startTime = 0, elapsedTime = 0;
 	
+	@SuppressWarnings("unchecked")
 	public SimulationTask( RandomGenerator random , Model<S> model , double deadline ) {
 		this(random,model,deadline,(Predicate<? super S> & Serializable) s -> false);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public SimulationTask( RandomGenerator random , Model<S> model , double deadline , Predicate<? super S> reachPredicate ) {
 		this(random,model,deadline,reachPredicate,(Predicate<? super S> & Serializable) s -> true);
 	}

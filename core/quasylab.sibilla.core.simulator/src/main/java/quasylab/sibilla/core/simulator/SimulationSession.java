@@ -1,8 +1,5 @@
 package quasylab.sibilla.core.simulator;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public class SimulationSession<S> {

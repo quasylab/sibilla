@@ -5,12 +5,8 @@ package quasylab.sibilla.examples.pm.seir;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.function.Function;
-import java.io.Serializable;
 
-import quasylab.sibilla.core.simulator.NetworkSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
@@ -52,20 +48,20 @@ public class Main {
 				"S->E", 
 				new Specie[] { new Specie(S), new Specie(I)} , 
 				new Specie[] { new Specie(E), new Specie(I)},  
-				(Function<PopulationState, Double> & Serializable) s -> s.getOccupancy(S)*LAMBDA_E*(s.getOccupancy(I)/N)); 
+				s -> s.getOccupancy(S)*LAMBDA_E*(s.getOccupancy(I)/N)); 
 		
 		PopulationRule rule_E_I = new ReactionRule(
 				"E->I",
 				new Specie[] { new Specie(E) },
 				new Specie[] { new Specie(I) },
-				(Function<PopulationState, Double> & Serializable) s -> s.getOccupancy(E)*LAMBDA_I
+				s -> s.getOccupancy(E)*LAMBDA_I
 		);
 		
 		PopulationRule rule_I_R = new ReactionRule(
 				"I->R",
 				new Specie[] { new Specie(I) },
 				new Specie[] { new Specie(R) },
-				(Function<PopulationState, Double> & Serializable) s -> s.getOccupancy(I)*LAMBDA_R
+				s -> s.getOccupancy(I)*LAMBDA_R
 		);
 		
 		PopulationModel f = new PopulationModel( 

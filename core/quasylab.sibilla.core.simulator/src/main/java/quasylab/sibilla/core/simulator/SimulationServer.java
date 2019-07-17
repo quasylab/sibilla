@@ -7,7 +7,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class SimulationServer<S> {
     ServerSocket serverSocket;
@@ -27,17 +26,15 @@ public class SimulationServer<S> {
 
         @Override
         public void run() {
-            ObjectInputStream ois;
-            ObjectOutputStream oos;
-            SimulationTask<S> task;
-            int repetitions;
-            NetworkTask<S> ntask;
             try {
-                oos = new ObjectOutputStream(socket.getOutputStream());
-                ois = new ObjectInputStream(socket.getInputStream());
-                ntask = ((NetworkTask<S>) ois.readObject());
-                task = ntask.getTask();
-                repetitions = ntask.getRepetitions();
+                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+
+                @SuppressWarnings("unchecked")
+                NetworkTask<S> ntask = ((NetworkTask<S>) ois.readObject());
+                
+                SimulationTask<S> task = ntask.getTask();
+                int repetitions = ntask.getRepetitions();
                 List<Trajectory<S>> results = new LinkedList<>();
                 for(int i = 0; i < repetitions; i++){
                     results.add(task.get());

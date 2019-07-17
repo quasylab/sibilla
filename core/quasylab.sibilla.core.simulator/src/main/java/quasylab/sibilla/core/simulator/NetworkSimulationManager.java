@@ -41,6 +41,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     private final List<Socket> servers = new LinkedList<>();
     private ExecutorService executor;
     private int workingServers = 0;
+    private boolean isRunning = false;
 
     public NetworkSimulationManager(InetAddress[] servers, int[] ports) {
         executor = Executors.newCachedThreadPool();
@@ -54,25 +55,24 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     }
 
     @Override
-    public long reach() {
-        return 0;
-    }
-
-    @Override
     public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function) {
         return new SimulationSession<S>(expectedTasks, sampling_function);
     }
 
+    private synchronized boolean isCompleted(SimulationSession<S> session) {
+		return (workingServers+session.getExpectedTasks()==0);
+    }
+
     @Override
     public void run(SimulationSession<S> session, SimulationTask<S> task) {
+        if(isRunning)
+            return;
         NetworkTask<S> networkTask = new NetworkTask<S>(task, session.getExpectedTasks());
         for( Socket server : servers){
             workingServers++;
-            //manageTask(session, send(networkTask, server));
             CompletableFuture.supplyAsync(() -> send(networkTask, server), executor).thenAccept((trajectory) -> this.manageTask(session, trajectory));
-            //executor.submit(()-> this.manageTask(networkTask, server, session));
         }
-        //executor.shutdown();
+        isRunning = true;
     }
 
     private synchronized void manageTask(SimulationSession<S> session, List<Trajectory<S>> trajectories){
@@ -81,6 +81,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             session.taskCompleted();
         }
         workingServers--;
+        System.out.println("Server finished running!");
         if(isCompleted(session)){
             this.notify();
         }
@@ -97,9 +98,13 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
 
             oos.writeObject(networkTask);
 
-            trajectories = (List<Trajectory<S>>) ois.readObject();
+            @SuppressWarnings("unchecked")
+            List<Trajectory<S>> result = (List<Trajectory<S>>) ois.readObject();
+
+            trajectories = result;
+
         } catch (IOException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
+
             e.printStackTrace();
         }
         return trajectories;
@@ -119,10 +124,11 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         } 
         System.out.println("Completed");
     }
-
-    private synchronized boolean isCompleted(SimulationSession<S> session) {
-		return (workingServers+session.getExpectedTasks()==0);
-	}
+ 
+    @Override
+    public long reach() {
+        return 0;
+    }
 
 
 }

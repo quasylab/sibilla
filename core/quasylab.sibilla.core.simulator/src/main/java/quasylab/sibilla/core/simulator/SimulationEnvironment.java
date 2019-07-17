@@ -91,7 +91,6 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 			}
 			System.out.flush();
 			this.iterations++;
-			break; // TODO: DEBUG
 		}
 		rgi.unregister();
 		simManager.waitTermination(session);

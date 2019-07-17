@@ -44,7 +44,6 @@ public class TestTime {
 	public final static int SAMPLINGS = 100;
 	public final static double DEADLINE = 6000;
 	private static final int REPLICA = 10000;
-	private final static int TASKS = 15;
 	
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException {
 		List<Long> stats = new ArrayList<>();
@@ -111,6 +110,7 @@ public class TestTime {
 	stats.clear();
 	System.out.println(i);
 	} // i loop
+	out2.close();
 	}
 	
 
