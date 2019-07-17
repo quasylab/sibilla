@@ -30,11 +30,11 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 public interface SimulationManager<S> {
 
     // initialize the simulation manager with sampling function and the number of tasks that will be submitted
-    public void init(SamplingFunction<S> sampling_function, int expectedTasks);
+    public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function);
     // calculates reach
     public long reach();
     // runs a task
-    public void run(SimulationTask<S> task);
+    public void run(SimulationSession<S> session, SimulationTask<S> task);
     // wait for submitted tasks to finish
-    public void waitTermination() throws InterruptedException;
+    public void waitTermination(SimulationSession<S> session) throws InterruptedException;
 }

@@ -21,6 +21,7 @@
  */
 package quasylab.sibilla.core.simulator.pm;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,9 +31,10 @@ import java.util.Set;
  * @author loreti
  *
  */
-public class Update {
+public class Update implements Serializable{
 
-	private Map<Integer,Integer> update;
+	private static final long serialVersionUID = 5759358996259668600L;
+	private Map<Integer, Integer> update;
 	private String name;
 	
 	public Update( String name ) {

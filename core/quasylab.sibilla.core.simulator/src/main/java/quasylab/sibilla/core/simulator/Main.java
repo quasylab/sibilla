@@ -1,14 +1,17 @@
 /**
  * 
  */
-package quasylab.sibilla.examples.pm.seir;
+package quasylab.sibilla.core.simulator;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.function.Function;
+import java.io.Serializable;
 
+import quasylab.sibilla.core.simulator.NetworkSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
@@ -41,27 +44,29 @@ public class Main {
 	public final static int SAMPLINGS = 100;
 	public final static double DEADLINE = 600;
 	private static final int REPLICA = 1000;
-	private final static int TASKS = 15;
 
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
+		@SuppressWarnings("unchecked")
 		PopulationRule rule_S_E = new ReactionRule(
 				"S->E", 
 				new Specie[] { new Specie(S), new Specie(I)} , 
 				new Specie[] { new Specie(E), new Specie(I)},  
-				s -> s.getOccupancy(S)*LAMBDA_E*(s.getOccupancy(I)/N)); 
+				(Function<PopulationState, Double> & Serializable) s -> s.getOccupancy(S)*LAMBDA_E*(s.getOccupancy(I)/N)); 
 		
+		@SuppressWarnings("unchecked")
 		PopulationRule rule_E_I = new ReactionRule(
 				"E->I",
 				new Specie[] { new Specie(E) },
 				new Specie[] { new Specie(I) },
-				s -> s.getOccupancy(E)*LAMBDA_I
+				(Function<PopulationState, Double> & Serializable) s -> s.getOccupancy(E)*LAMBDA_I
 		);
 		
+		@SuppressWarnings("unchecked")
 		PopulationRule rule_I_R = new ReactionRule(
 				"I->R",
 				new Specie[] { new Specie(I) },
 				new Specie[] { new Specie(R) },
-				s -> s.getOccupancy(I)*LAMBDA_R
+				(Function<PopulationState, Double> & Serializable) s -> s.getOccupancy(I)*LAMBDA_R
 		);
 		
 		PopulationModel f = new PopulationModel( 
@@ -85,7 +90,8 @@ public class Main {
 //		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS));
+		//SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS) );
+		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new NetworkSimulationManager<>(new InetAddress[]{InetAddress.getLocalHost(), InetAddress.getLocalHost(), InetAddress.getLocalHost()}, new int[]{8080, 8081, 8082} ));
 
 		sim.setSampling(new SamplingCollection<>(fiSamp,frSamp));
 

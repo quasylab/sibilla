@@ -69,8 +69,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 
 	public synchronized void simulate(SimulationMonitor monitor, int iterations, double deadline) throws InterruptedException {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
-		//SimulationSession session = simManager.newSession();
-		simManager.init(sampling_function, iterations);
+		SimulationSession<S> session = simManager.newSession(iterations, sampling_function);
 		rgi.register(random);
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			if (monitor != null) {
@@ -82,8 +81,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 			}
 			System.out.flush();
 			SimulationTask<S> task = new SimulationTask<>(random, model, deadline);
-			simManager.run(task);
-			//simManager.run(session,task);
+			simManager.run(session, task);
 			if (monitor != null) {
 				monitor.endSimulation(i);
 			}
@@ -95,8 +93,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 			this.iterations++;
 		}
 		rgi.unregister();
-		simManager.waitTermination();
-		//simManager.wait(session);
+		simManager.waitTermination(session);
 	}
 
 	public synchronized void simulate(int iterations, double deadline) throws InterruptedException {
@@ -120,12 +117,12 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 			Predicate<? super S> psi) throws InterruptedException {
 		double n = Math.ceil(Math.log(2 / delta) / (2 * error));
 		double count = 0;
-		simManager.init(null,(int)n);
+		SimulationSession<S> session = simManager.newSession((int) n, null);
 		for (int i = 0; i < n; i++) {
 			SimulationTask<S> simulationRun = new SimulationTask<>(random, model, deadline, phi, psi);
-			simManager.run(simulationRun);																					// iteration
+			simManager.run(session, simulationRun);																					// iteration
 		}
-		simManager.waitTermination();
+		simManager.waitTermination(session);
 		count = simManager.reach();
 		return count / n;
 	}

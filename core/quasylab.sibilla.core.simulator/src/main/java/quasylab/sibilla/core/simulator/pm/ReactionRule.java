@@ -21,6 +21,7 @@
  */
 package quasylab.sibilla.core.simulator.pm;
 
+import java.io.Serializable;
 import java.util.function.Function;
 
 import org.apache.commons.math3.random.RandomGenerator;
@@ -29,8 +30,10 @@ import org.apache.commons.math3.random.RandomGenerator;
  * @author loreti
  *
  */
-public class ReactionRule implements PopulationRule {
+public class ReactionRule implements PopulationRule, Serializable {
 	
+	private static final long serialVersionUID = 6508399289508390200L;
+
 	private final Specie[] reactants;
 	
 	private final Specie[] products;
@@ -89,8 +92,10 @@ public class ReactionRule implements PopulationRule {
 		return true;
 	}
 
-	public static class Specie {
+	public static class Specie implements Serializable{
 		
+		private static final long serialVersionUID = 5501961970972786801L;
+
 		private int index;
 
 		private int size;

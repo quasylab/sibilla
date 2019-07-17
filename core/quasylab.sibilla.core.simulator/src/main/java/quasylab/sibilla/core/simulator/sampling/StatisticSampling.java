@@ -24,7 +24,6 @@ import java.util.function.Function;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
-import quasylab.sibilla.core.simulator.pm.PopulationModel;
 
 /**
  * @author loreti
