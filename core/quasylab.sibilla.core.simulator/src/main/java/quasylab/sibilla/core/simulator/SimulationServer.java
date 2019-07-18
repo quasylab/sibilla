@@ -27,11 +27,17 @@ public class SimulationServer<S> {
         @Override
         public void run() {
             try {
+                CustomClassLoader cloader = new CustomClassLoader();
                 ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-                ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                Deserializer deserializer = new Deserializer(socket.getInputStream(), cloader);
+
+                //ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                String modelName = (String) deserializer.readObject();
+                byte[] myClass = (byte []) deserializer.readObject();
+                cloader.defClass(modelName, myClass);
 
                 @SuppressWarnings("unchecked")
-                NetworkTask<S> ntask = ((NetworkTask<S>) ois.readObject());
+                NetworkTask<S> ntask = ((NetworkTask<S>) deserializer.readObject());
                 
                 SimulationTask<S> task = ntask.getTask();
                 int repetitions = ntask.getRepetitions();

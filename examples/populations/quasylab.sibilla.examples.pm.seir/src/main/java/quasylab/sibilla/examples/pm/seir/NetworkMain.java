@@ -1,7 +1,7 @@
 /**
  * 
  */
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.examples.pm.seir;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
@@ -24,7 +24,7 @@ import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
  * @author loreti
  *
  */
-public class Main {
+public class NetworkMain {
 
 	public final static int S = 0;
 	public final static int E = 1;

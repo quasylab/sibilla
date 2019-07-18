@@ -91,11 +91,15 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         ObjectOutputStream oos;
         ObjectInputStream ois;
         List<Trajectory<S>> trajectories = null;
+        String modelName = "quasylab.sibilla.examples.pm.seir.NetworkMain";
         
         try {
             oos = new ObjectOutputStream(server.getOutputStream());
             ois = new ObjectInputStream(server.getInputStream());
 
+            byte[] toSend = ClassBytesLoader.loadClassBytes(modelName);
+            oos.writeObject(modelName);
+            oos.writeObject(toSend);
             oos.writeObject(networkTask);
 
             @SuppressWarnings("unchecked")
