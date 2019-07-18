@@ -64,6 +64,7 @@ public class SimulationTask<S> implements Supplier<Trajectory<S>>, Serializable 
 		this.reachPredicate = reachPredicate;
 		this.currentState = model.initialState();
 		this.status = SimulationStatus.INIT;
+		this.getClass();
 	}
 
 	public void reset(){

@@ -49,7 +49,7 @@ public class ReactionRule implements PopulationRule, Serializable {
 	 * @param products
 	 * @param rate
 	 */
-	public ReactionRule(String name, Specie[] reactants, Specie[] products, Function<PopulationState, Double> rateFunction) {
+	public ReactionRule(String name, Specie[] reactants, Specie[] products, RatePopulationFunction rateFunction) {
 		super();
 		this.reactants = reactants;
 		this.products = products;
@@ -112,6 +112,14 @@ public class ReactionRule implements PopulationRule, Serializable {
 
 		public Specie(int s) {
 			this(s,1);
+		}
+
+		public int getIndex() {
+			return index;
+		}
+
+		public int getSize() {
+			return size;
 		}
 
 	}

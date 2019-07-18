@@ -21,6 +21,7 @@ package quasylab.sibilla.core.simulator.pm;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
@@ -51,11 +52,14 @@ public class PopulationModel implements Model<PopulationState>, Serializable {
 	private double time;
 	
 	private PopulationState initialState;
-
 	
 	public PopulationModel( PopulationState currentState, PopulationRule ... rules ) {
 		this.rules = rules;
 		this.initialState = currentState;
+	}
+	
+	public PopulationModel( PopulationState currentState, List<PopulationRule> rules ) {
+		this(currentState,rules.toArray(i -> new PopulationRule[i]));
 	}
 	
 	public PopulationModel(PopulationState currentState, LinkedList<PopulationRule> buildRules) {

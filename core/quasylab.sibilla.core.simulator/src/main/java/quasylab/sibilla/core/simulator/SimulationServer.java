@@ -9,7 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class SimulationServer<S> {
-    ServerSocket serverSocket;
+    private ServerSocket serverSocket;
+    private SimulationTask<?> task2;
 
     public void start(int port) throws IOException {
         serverSocket = new ServerSocket(port);
@@ -30,12 +31,12 @@ public class SimulationServer<S> {
                 ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
                 ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
 
-                @SuppressWarnings("unchecked")
-                NetworkTask<S> ntask = ((NetworkTask<S>) ois.readObject());
                 
-                SimulationTask<S> task = ntask.getTask();
+                NetworkTask<?> ntask = ((NetworkTask<?>) ois.readObject());
+                
+                SimulationTask<?> task = ntask.getTask();
                 int repetitions = ntask.getRepetitions();
-                List<Trajectory<S>> results = new LinkedList<>();
+                List<Trajectory<?>> results = new LinkedList<>();
                 for(int i = 0; i < repetitions; i++){
                     results.add(task.get());
                     task.reset();
