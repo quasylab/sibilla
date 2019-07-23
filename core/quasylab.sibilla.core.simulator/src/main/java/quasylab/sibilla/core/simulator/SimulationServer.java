@@ -1,7 +1,7 @@
 package quasylab.sibilla.core.simulator;
 
+import java.io.EOFException;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -9,9 +9,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class SimulationServer<S> {
-    ServerSocket serverSocket;
+    private ServerSocket serverSocket;
 
-    public void start(int port) throws IOException {
+    public void start(int port) throws IOException, ClassNotFoundException {
         serverSocket = new ServerSocket(port);
         while(true){
             new Thread(new TaskHandler(serverSocket.accept())).start();
@@ -19,36 +19,43 @@ public class SimulationServer<S> {
     }
 
     private class TaskHandler implements Runnable{
-        Socket socket;
-        public TaskHandler(Socket socket){
-            this.socket = socket;
+        private ObjectOutputStream oos;
+        private long startTime, elapsedTime;
+        private Deserializer deserializer;
+        private CustomClassLoader cloader;
+        public TaskHandler(Socket socket) throws IOException, ClassNotFoundException {
+            cloader = new CustomClassLoader();
+            oos = new ObjectOutputStream(socket.getOutputStream());
+            deserializer = new Deserializer(socket.getInputStream(), cloader);
+            String modelName = (String) deserializer.readObject();
+            byte[] myClass = (byte []) deserializer.readObject();
+            cloader.defClass(modelName, myClass);
         }
 
         @Override
         public void run() {
             try {
-                CustomClassLoader cloader = new CustomClassLoader();
-                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-                Deserializer deserializer = new Deserializer(socket.getInputStream(), cloader);
+                while(true){
+                    @SuppressWarnings("unchecked")
+                    NetworkTask<S> ntask = ((NetworkTask<S>) deserializer.readObject());
+                    
+                    List<SimulationTask<S>> tasks = ntask.getTasks();
+                    List<ComputationResult<S>> results = new LinkedList<>();
+                    Trajectory<S> tempTrajectory;
 
-                //ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
-                String modelName = (String) deserializer.readObject();
-                byte[] myClass = (byte []) deserializer.readObject();
-                cloader.defClass(modelName, myClass);
-
-                @SuppressWarnings("unchecked")
-                NetworkTask<S> ntask = ((NetworkTask<S>) deserializer.readObject());
-                
-                SimulationTask<S> task = ntask.getTask();
-                int repetitions = ntask.getRepetitions();
-                List<Trajectory<S>> results = new LinkedList<>();
-                for(int i = 0; i < repetitions; i++){
-                    results.add(task.get());
-                    task.reset();
+                    for(int i = 0; i < tasks.size(); i++){
+                        startTime = System.nanoTime();
+                        tempTrajectory = tasks.get(i).get();
+                        elapsedTime = System.nanoTime() - startTime;
+                        results.add(new ComputationResult<>(tempTrajectory, elapsedTime));
+                    }
+                    oos.writeObject(results);
                 }
-                oos.writeObject(results);
 
-            } catch (IOException | ClassNotFoundException e) {
+            }catch(EOFException e){
+                System.out.println("session complete");
+                return;
+            }catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }

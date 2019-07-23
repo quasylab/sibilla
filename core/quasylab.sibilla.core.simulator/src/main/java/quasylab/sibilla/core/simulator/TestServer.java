@@ -13,21 +13,21 @@ public class TestServer {
             new Thread(()-> {
                 try {
                     server1.start(8080);
-                } catch (IOException e) {
+                } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }).start();
             new Thread(()-> {
                 try {
                     server2.start(8081);
-                } catch (IOException e) {
+                } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }).start();
             new Thread(()-> {
                 try {
                     server3.start(8082);
-                } catch (IOException e) {
+                } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }).start();
