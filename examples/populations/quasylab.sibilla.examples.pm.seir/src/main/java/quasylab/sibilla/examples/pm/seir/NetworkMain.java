@@ -92,7 +92,7 @@ public class NetworkMain {
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
 		//SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS) );
 		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new NetworkSimulationManager<>(new InetAddress[]{InetAddress.getLocalHost(), InetAddress.getLocalHost(), InetAddress.getLocalHost()},
-																																	new int[]{8080, 8081, 8082},
+																																			new int[]{8080, 8081, 8082},
 																																	"quasylab.sibilla.examples.pm.seir.NetworkMain" ));
 
 		sim.setSampling(new SamplingCollection<>(fiSamp,frSamp));

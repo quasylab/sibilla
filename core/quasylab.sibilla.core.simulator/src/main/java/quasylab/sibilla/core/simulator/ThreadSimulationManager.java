@@ -19,6 +19,8 @@
 
 package quasylab.sibilla.core.simulator;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
@@ -42,13 +44,15 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     private final int concurrentTasks;
     private int runningTasks = 0;
     private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     public ThreadSimulationManager(int concurrentTasks) {
         this.concurrentTasks = concurrentTasks;
         executor = Executors.newCachedThreadPool();
     }
 
-    public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function){
+    public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function) {
+        new SimulationView<>(expectedTasks, this);
         return new SimulationSession<S>(expectedTasks, sampling_function);
     }
 
@@ -74,19 +78,20 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     // if no new tasks to run, shutdowns the executor
     private synchronized void manageTask(SimulationSession<S> session, Trajectory<S> trajectory) {
         doSample(session.getSamplingFunction(), trajectory);
+        pcs.firePropertyChange("progress", session.getExpectedTasks(), session.taskCompleted());
         runningTasks--;
-        session.taskCompleted();
         SimulationTask<S> nextTask = waitingTasks.poll();
+        pcs.firePropertyChange("waitingTasks", null, waitingTasks.size());
         if (nextTask != null) {
             run(session, nextTask);
-        } else if (isCompleted(session)){
+        } else if (isCompleted(session)) {
             this.notify();
         }
     }
 
     private synchronized boolean isCompleted(SimulationSession<S> session) {
-		return (runningTasks+session.getExpectedTasks()==0);
-	}
+        return (runningTasks + session.getExpectedTasks() == 0);
+    }
 
     // runs a new task if below task limit, else adds to queue
     @Override
@@ -94,30 +99,41 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
         if (runningTasks < concurrentTasks) {
             runningTasks++;
             tasks.add(task);
-            CompletableFuture.supplyAsync(task, executor).thenAccept((trajectory) -> this.manageTask(session, trajectory));
+            CompletableFuture.supplyAsync(task, executor)
+                    .thenAccept((trajectory) -> this.manageTask(session, trajectory));
         } else {
             waitingTasks.add(task);
+            pcs.firePropertyChange("waitingTasks", null, waitingTasks.size());
         }
     }
 
-    //waiting until executor is shutdown
+    // waiting until executor is shutdown
     @Override
     public synchronized void waitTermination(SimulationSession<S> session) throws InterruptedException {
         while (!isCompleted(session)) {
             this.wait();
-        } 
+        }
         terminate();
-        //executor.shutdown(); // only when recording time
+        // executor.shutdown(); // only when recording time
     }
 
-    private void printTimingInformation(PrintStream out){
-        LongSummaryStatistics statistics = tasks.stream().map(x -> x.getElapsedTime()).mapToLong(Long::valueOf).summaryStatistics();
-        out.println(concurrentTasks +";"+((ThreadPoolExecutor) executor).getPoolSize()+";" + statistics.getAverage() + ";" + statistics.getMax() +";" + statistics.getMin());
+    private void printTimingInformation(PrintStream out) {
+        LongSummaryStatistics statistics = tasks.stream().map(x -> x.getElapsedTime()).mapToLong(Long::valueOf)
+                .summaryStatistics();
+        out.println(concurrentTasks + ";" + ((ThreadPoolExecutor) executor).getPoolSize() + ";"
+                + statistics.getAverage() + ";" + statistics.getMax() + ";" + statistics.getMin());
     }
+
+    
 
     @Override
     public long reach() {
         return tasks.stream().filter(task -> task.reach() == true).count();
+    }
+
+    @Override
+    public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
+        this.pcs.addPropertyChangeListener(property, listener);
     }
     
 }

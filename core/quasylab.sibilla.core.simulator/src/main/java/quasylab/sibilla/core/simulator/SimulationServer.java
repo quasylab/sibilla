@@ -42,11 +42,9 @@ public class SimulationServer<S> {
                     List<SimulationTask<S>> tasks = ntask.getTasks();
                     List<ComputationResult<S>> results = new LinkedList<>();
                     Trajectory<S> tempTrajectory;
-
+                    
                     for(int i = 0; i < tasks.size(); i++){
-                        startTime = System.nanoTime();
                         tempTrajectory = tasks.get(i).get();
-                        elapsedTime = System.nanoTime() - startTime;
                         results.add(new ComputationResult<>(tempTrajectory, elapsedTime));
                     }
                     oos.writeObject(results);

@@ -18,6 +18,8 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.LinkedList;
 import java.util.function.Predicate;
 
@@ -40,6 +42,11 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 	private SamplingFunction<S> sampling_function;
 	private int iterations = 0;
 	private SimulationManager<S> simManager;
+	/*private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+	public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
+		this.pcs.addPropertyChangeListener(property, listener);
+	}*/
 
 	public SimulationEnvironment(M model) {
 		this(model, new ThreadSimulationManager<S>(1));
@@ -70,6 +77,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 	public synchronized void simulate(SimulationMonitor monitor, int iterations, double deadline) throws InterruptedException {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
 		SimulationSession<S> session = simManager.newSession(iterations, sampling_function);
+		//this.addPropertyChangeListener("iterations", new SimulationView(iterations));
 		rgi.register(random);
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			if (monitor != null) {
@@ -90,6 +98,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 				System.out.print("\n");
 			}
 			System.out.flush();
+			//pcs.firePropertyChange("iterations", this.iterations, ++this.iterations);
 			this.iterations++;
 		}
 		rgi.unregister();

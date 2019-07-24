@@ -12,9 +12,9 @@ public class ServerState {
     private boolean running;
     private long startTime, elapsedTime;
     private long runningTime;
-    private double devRTT;
+    public double devRTT;
     private double sampleRTT;
-    private double estimatedRTT;
+    public double estimatedRTT;
     private final static double alpha = 0.5;
     private final static double beta = 0.5;
     private final static int threshold = 256;
@@ -44,18 +44,16 @@ public class ServerState {
         devRTT = tasks == 1 ? sampleRTT * 2 : beta * Math.abs(sampleRTT - estimatedRTT) + (1-beta)*devRTT;
         if(runningTime > getTimeLimit()){
             tasks = tasks == 1 ? 1 : tasks / 2;
-            System.out.println("halving");
         }else if(tasks < threshold){
             tasks = tasks * 2;
-            System.out.println("doubling");
         }else if(tasks >= threshold){
             tasks = tasks + 1;
-            System.out.println("increasing");
         }
     }
 
     public double getTimeout(){  // after this time, a timeout has occurred and the server is not to be contacted again
-        return tasks*estimatedRTT + tasks*4*devRTT;
+        //return tasks*estimatedRTT + tasks*4*devRTT;
+        return Double.MAX_VALUE;
     }
 
     public double getTimeLimit(){ // after this time, the tasks to be sent to this server is to be halved
@@ -79,11 +77,14 @@ public class ServerState {
     }
 
     public boolean isTimeout(){
-        return (elapsedTime =  System.nanoTime() - startTime) > getTimeout() ;
+        if(getElapsedTime() > getTimeout()){
+            System.out.println(getElapsedTime()+" "+getTimeout());
+        }
+        return getElapsedTime() > getTimeout() ;
     }
 
     public long getElapsedTime(){
-        return elapsedTime;
+        return (elapsedTime =  System.nanoTime() - startTime);
     }
 
     public void startRunning(){
@@ -106,5 +107,14 @@ public class ServerState {
 
     public void printState(){
         System.out.println("Tasks: "+tasks +" devRTT: "+devRTT+" server: "+server);
+    }
+
+    @Override
+    public String toString(){
+        return "Task window: "+tasks+" "+
+                "Window runtime: "+runningTime+" "+
+                "sampleRTT: "+sampleRTT+" "+
+                "estimatedRTT: "+estimatedRTT+" "+
+                "devRTT: "+devRTT+"\n";
     }
 }

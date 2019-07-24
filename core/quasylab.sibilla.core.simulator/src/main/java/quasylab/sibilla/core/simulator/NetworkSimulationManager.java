@@ -19,6 +19,8 @@
 
 package quasylab.sibilla.core.simulator;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -47,6 +49,11 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     private int workingServers = 0;
     private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
     private boolean isTerminated = false;
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+	public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
+		this.pcs.addPropertyChangeListener(property, listener);
+	}
 
     public NetworkSimulationManager(InetAddress[] servers, int[] ports, String modelName) {
         executor = Executors.newCachedThreadPool();
@@ -73,7 +80,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             for(Map.Entry<Socket,ServerState> entry : servers.entrySet()){
                 ServerState state = entry.getValue();
                 if(state.isRunning() && state.getTimeout() > 0 && state.isTimeout()){
-                    System.out.println("Elapsed time: " + state.getElapsedTime() +" Timeout value: " + state.getTimeout());
+                    System.out.println("Elapsed time: " + state.getElapsedTime() +" Timeout value: " + state.getTimeout()+ " estimatedRTT: "+state.estimatedRTT+" devRTT: "+state.devRTT);
                     toRemove.add(entry.getKey());
                     System.out.println("removed server");
                 }
@@ -85,6 +92,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
 
     @Override
     public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function) {
+        new SimulationView<>(expectedTasks, this);
         return new SimulationSession<S>(expectedTasks, sampling_function);
     }
 
@@ -110,8 +118,10 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
                     .thenAccept((trajectory) -> this.manageTask(session, trajectory))
                     .thenRun(() -> nextRun(session, server));
+            pcs.firePropertyChange("servers", null, this.servers);
         } else {
             waitingTasks.addAll(tasks);
+            pcs.firePropertyChange("waitingTasks", null, waitingTasks.size());
         }
     }
 
@@ -122,7 +132,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     private synchronized void manageTask(SimulationSession<S> session, List<Trajectory<S>> trajectories) {
         for (Trajectory<S> trajectory : trajectories) {
             doSample(session.getSamplingFunction(), trajectory);
-            session.taskCompleted();
+            pcs.firePropertyChange("progress", session.getExpectedTasks(), session.taskCompleted());
         }
         workingServers--;
     }
@@ -157,6 +167,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             else
                 break;
         }
+        pcs.firePropertyChange("waitingTasks", null, waitingTasks.size());
         return fetchedTasks;
     }
 
@@ -197,7 +208,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             state = servers.get(server);
             state.stopRunning();  
             state.update(timings);
-            state.printState();        
+            //System.out.println(waitingTasks.size());       
 
 
         } catch (IOException | ClassNotFoundException e) {

@@ -15,8 +15,8 @@ public class SimulationSession<S> {
         return expectedTasks;
     }
 
-    public synchronized void taskCompleted(){
-        expectedTasks--;
+    public synchronized int taskCompleted(){
+        return --expectedTasks;
     }
 
     public SamplingFunction<S> getSamplingFunction(){
