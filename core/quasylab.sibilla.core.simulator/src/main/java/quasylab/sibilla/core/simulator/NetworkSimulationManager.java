@@ -64,23 +64,6 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
                 e.printStackTrace();
             }
         }
-        executor.submit(() -> checkTimeout());
-    }
-
-    private void checkTimeout(){
-        List<Socket> toRemove = new LinkedList<>();
-        while(!isTerminated){
-            for(Map.Entry<Socket,ServerState> entry : servers.entrySet()){
-                ServerState state = entry.getValue();
-                if(state.isRunning() && state.getTimeout() > 0 && state.isTimeout()){
-                    System.out.println("Elapsed time: " + state.getElapsedTime() +" Timeout value: " + state.getTimeout());
-                    toRemove.add(entry.getKey());
-                    System.out.println("removed server");
-                }
-            }
-
-            toRemove.stream().forEach(servers::remove);
-        }
     }
 
     @Override
@@ -128,8 +111,8 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     }
 
     private synchronized void nextRun(SimulationSession<S> session, Socket server) {
-        if (!waitingTasks.isEmpty()) {
-            ServerState serverState = servers.get(server);
+        ServerState serverState;
+        if ( !waitingTasks.isEmpty() && (serverState = servers.get(server)) != null) {
             int acceptableTasks = serverState.getTasks();
             List<SimulationTask<S>> nextTasks = getWaitingTasks(acceptableTasks);
             if (serverState.canCompleteTask(nextTasks.size())) {
@@ -195,9 +178,13 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             }
 
             state = servers.get(server);
-            state.stopRunning();  
+            state.stopRunning();
             state.update(timings);
-            state.printState();        
+            state.printState();   
+            if(state.isTimeout()) {
+                servers.remove(server);
+                System.out.println("removed server" + server);
+            }      
 
 
         } catch (IOException | ClassNotFoundException e) {

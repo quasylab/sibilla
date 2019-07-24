@@ -80,7 +80,7 @@ public class ServerState {
     }
 
     public boolean isTimeout(){
-        return (elapsedTime =  System.nanoTime() - startTime) > getTimeout() ;
+        return elapsedTime > getTimeout() ;
     }
 
     public long getElapsedTime(){
