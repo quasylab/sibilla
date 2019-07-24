@@ -148,7 +148,8 @@ public class SimulationView<S> {
         JTextArea text = serverData.get(socket);
         if(text == null){
             JTextArea newData = new JTextArea();
-            //newData.setPreferredSize(new Dimension(410, 50));
+            DefaultCaret caret = (DefaultCaret)newData.getCaret();
+            caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
             newData.append(formatServerState(state));
             serverData.put(socket, newData);
             text = newData;

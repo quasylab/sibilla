@@ -104,6 +104,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
                              .whenComplete((value, error) -> {
                                                                 if(error!=null){
                                                                     //send still alive message
+                                                                    serverQueue.add(server);
                                                                     waitingTasks.addAll(tasks);
                                                                     nextRun(session);
                                                                 }else{
@@ -138,7 +139,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         Socket server = findServer();
         ServerState serverState;
         if ( !waitingTasks.isEmpty() && (serverState = servers.get(server)) != null) {
-            int acceptableTasks = serverState.getTasks();
+            int acceptableTasks = serverState.getExpectedTasks();
             List<SimulationTask<S>> nextTasks = getWaitingTasks(acceptableTasks);
             if (serverState.canCompleteTask(nextTasks.size())) {
                 run(session, nextTasks, server);

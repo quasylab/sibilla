@@ -8,7 +8,7 @@ import java.util.List;
 
 public class ServerState {
     private Socket server;
-    private int tasks;
+    private int expectedTasks, actualTasks;
     private boolean running;
     private long startTime, elapsedTime;
     private long runningTime;
@@ -25,7 +25,8 @@ public class ServerState {
 
     public ServerState(Socket server) throws IOException {
         this.server = server;
-        tasks = 1;
+        expectedTasks = 1;
+        actualTasks = 0;
         running = false;
         startTime = 0L;
         elapsedTime = 0L;
@@ -38,26 +39,27 @@ public class ServerState {
     }
 
     public void update(List<Long> executionTimes){
+        actualTasks = executionTimes.size();
         runningTime = executionTimes.stream().reduce(0L, Long::sum);
-        sampleRTT = runningTime / tasks;
+        sampleRTT = runningTime / actualTasks;
         estimatedRTT = alpha * sampleRTT + (1-alpha) * estimatedRTT;
-        devRTT = tasks == 1 ? sampleRTT * 2 : beta * Math.abs(sampleRTT - estimatedRTT) + (1-beta)*devRTT;
+        devRTT = expectedTasks == 1 ? sampleRTT * 2 : beta * Math.abs(sampleRTT - estimatedRTT) + (1-beta)*devRTT;
         if(runningTime > getTimeLimit()){
-            tasks = tasks == 1 ? 1 : tasks / 2;
-        }else if(tasks < threshold){
-            tasks = tasks * 2;
-        }else if(tasks >= threshold){
-            tasks = tasks + 1;
+            expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
+        }else if(expectedTasks < threshold){
+            expectedTasks = expectedTasks * 2;
+        }else if(expectedTasks >= threshold){
+            expectedTasks = expectedTasks + 1;
         }
     }
 
     public double getTimeout(){  // after this time, a timeout has occurred and the server is not to be contacted again
-        //return tasks*estimatedRTT + tasks*4*devRTT;
-        return Double.MAX_VALUE;
+        return expectedTasks*estimatedRTT + expectedTasks*4*devRTT;
+        //return Double.MAX_VALUE;
     }
 
     public double getTimeLimit(){ // after this time, the tasks to be sent to this server is to be halved
-        return getTimeLimit(tasks);
+        return getTimeLimit(expectedTasks);
     }
 
     private double getTimeLimit(int tasks){
@@ -68,8 +70,13 @@ public class ServerState {
         return getTimeLimit(tasks) < maxRunningTime;
     }
 
-    public int getTasks(){
-        return tasks;
+    public int getActualTasks(){
+        return actualTasks;
+    }
+
+
+    public int getExpectedTasks(){
+        return expectedTasks;
     }
 
     public boolean isRunning(){
@@ -103,12 +110,13 @@ public class ServerState {
     }
 
     public void printState(){
-        System.out.println("Tasks: "+tasks +" devRTT: "+devRTT+" server: "+server);
+        System.out.println("Tasks: "+expectedTasks +" devRTT: "+devRTT+" server: "+server);
     }
 
     @Override
     public String toString(){
-        return "Task window: "+tasks+" "+
+        return "Task window: "+expectedTasks+" "+
+                "Effective tasks: "+actualTasks+" "+
                 "Window runtime: "+runningTime+" "+
                 "sampleRTT: "+sampleRTT+" "+
                 "estimatedRTT: "+estimatedRTT+" "+
