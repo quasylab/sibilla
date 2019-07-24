@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class SimulationServer<S> {
     private ServerSocket serverSocket;
@@ -41,14 +42,12 @@ public class SimulationServer<S> {
                     
                     List<SimulationTask<S>> tasks = ntask.getTasks();
                     List<ComputationResult<S>> results = new LinkedList<>();
-                    Trajectory<S> tempTrajectory;
-
+                    CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
                     for(int i = 0; i < tasks.size(); i++){
-                        startTime = System.nanoTime();
-                        tempTrajectory = tasks.get(i).get();
-                        elapsedTime = System.nanoTime() - startTime;
-                        results.add(new ComputationResult<>(tempTrajectory, elapsedTime));
+                        futures[i] = CompletableFuture.supplyAsync(tasks.get(i));
                     }
+                    CompletableFuture.allOf(futures).join();
+                    tasks.stream().forEach(x -> results.add(new ComputationResult<>(x.getTrajectory(), x.getElapsedTime())));
                     oos.writeObject(results);
                 }
 
