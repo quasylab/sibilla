@@ -24,6 +24,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -48,21 +49,18 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
     private boolean isTerminated = false;
 
-    public NetworkSimulationManager(InetAddress[] servers, int[] ports, String modelName) {
+    public NetworkSimulationManager(InetAddress[] servers, int[] ports, String modelName)
+            throws UnknownHostException, IOException {
         executor = Executors.newCachedThreadPool();
         for (int i = 0; i < servers.length; i++) {
-            try {
-                Socket server = new Socket(servers[i].getHostAddress(), ports[i]);
-                this.servers.put(server, new ServerState(server));
+            Socket server = new Socket(servers[i].getHostAddress(), ports[i]);
+            this.servers.put(server, new ServerState(server));
 
-                ObjectOutputStream oos = this.servers.get(server).getObjectOutputStream();
+            ObjectOutputStream oos = this.servers.get(server).getObjectOutputStream();
 
-                byte[] toSend = ClassBytesLoader.loadClassBytes(modelName);
-                oos.writeObject(modelName);
-                oos.writeObject(toSend);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            byte[] toSend = ClassBytesLoader.loadClassBytes(modelName);
+            oos.writeObject(modelName);
+            oos.writeObject(toSend);
         }
     }
 
@@ -183,7 +181,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             state.printState();   
             if(state.isTimeout()) {
                 servers.remove(server);
-                System.out.println("removed server" + server);
+                //System.out.println("removed server" + server + " elapsedTime: "+state.getElapsedTime() + " Timeout: "+state.getTimeout());
             }      
 
 

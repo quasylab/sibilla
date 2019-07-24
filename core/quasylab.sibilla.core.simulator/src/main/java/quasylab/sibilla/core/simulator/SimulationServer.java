@@ -21,7 +21,6 @@ public class SimulationServer<S> {
 
     private class TaskHandler implements Runnable{
         private ObjectOutputStream oos;
-        private long startTime, elapsedTime;
         private Deserializer deserializer;
         private CustomClassLoader cloader;
         public TaskHandler(Socket socket) throws IOException, ClassNotFoundException {
