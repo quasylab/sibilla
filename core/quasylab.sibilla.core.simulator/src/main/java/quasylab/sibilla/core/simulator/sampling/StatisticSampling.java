@@ -93,6 +93,10 @@ public class StatisticSampling<S> implements SamplingFunction<S> {
 		this.current_index = 0;
 		this.next_time = 0;
 	}
+	
+	public String getName() {
+		return measure.getName();
+	}
 
 	public void printTimeSeries(PrintStream out) {
 		double time = 0.0;
