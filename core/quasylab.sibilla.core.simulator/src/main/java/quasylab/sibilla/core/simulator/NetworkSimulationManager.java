@@ -63,21 +63,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             Socket server = new Socket(servers[i].getHostAddress(), ports[i]);
             this.servers.put(server, new ServerState(server));
 
-<<<<<<< HEAD
-    private void checkTimeout(){
-        List<Socket> toRemove = new LinkedList<>();
-        while(!isTerminated){
-            for(Map.Entry<Socket,ServerState> entry : servers.entrySet()){
-                ServerState state = entry.getValue();
-                if(state.isRunning() && state.getTimeout() > 0 && state.isTimeout()){
-                    System.out.println("Elapsed time: " + state.getElapsedTime() +" Timeout value: " + state.getTimeout()+ " estimatedRTT: "+state.estimatedRTT+" devRTT: "+state.devRTT);
-                    toRemove.add(entry.getKey());
-                    System.out.println("removed server");
-                }
-            }
-=======
             ObjectOutputStream oos = this.servers.get(server).getObjectOutputStream();
->>>>>>> dee81bbea591c9bbf0f1c92ea95046a3b6f792ad
 
             byte[] toSend = ClassBytesLoader.loadClassBytes(modelName);
             oos.writeObject(modelName);
@@ -203,15 +189,11 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             state = servers.get(server);
             state.stopRunning();
             state.update(timings);
-<<<<<<< HEAD
-            //System.out.println(waitingTasks.size());       
-=======
             state.printState();   
             if(state.isTimeout()) {
                 servers.remove(server);
                 //System.out.println("removed server" + server + " elapsedTime: "+state.getElapsedTime() + " Timeout: "+state.getTimeout());
             }      
->>>>>>> dee81bbea591c9bbf0f1c92ea95046a3b6f792ad
 
 
         } catch (IOException | ClassNotFoundException e) {
