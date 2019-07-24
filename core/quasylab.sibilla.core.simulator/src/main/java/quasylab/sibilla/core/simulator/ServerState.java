@@ -15,8 +15,8 @@ public class ServerState {
     public double devRTT;
     private double sampleRTT;
     public double estimatedRTT;
-    private final static double alpha = 0.5;
-    private final static double beta = 0.5;
+    private final static double alpha = 0.125;
+    private final static double beta = 0.250;
     private final static int threshold = 256;
     private final static long maxRunningTime = 3600000000000L; // 1 hour in nanoseconds
 
@@ -52,8 +52,8 @@ public class ServerState {
     }
 
     public double getTimeout(){  // after this time, a timeout has occurred and the server is not to be contacted again
-        return tasks*estimatedRTT + tasks*4*devRTT;
-        //return Double.MAX_VALUE;
+        //return tasks*estimatedRTT + tasks*4*devRTT;
+        return Double.MAX_VALUE;
     }
 
     public double getTimeLimit(){ // after this time, the tasks to be sent to this server is to be halved
@@ -114,4 +114,9 @@ public class ServerState {
                 "estimatedRTT: "+estimatedRTT+" "+
                 "devRTT: "+devRTT+"\n";
     }
+
+    public Socket getServer(){
+        return server;
+    }
+
 }

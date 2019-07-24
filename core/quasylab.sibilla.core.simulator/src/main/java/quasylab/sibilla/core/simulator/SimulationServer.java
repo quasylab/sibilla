@@ -8,9 +8,12 @@ import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SimulationServer<S> {
     private ServerSocket serverSocket;
+    private ExecutorService executor = Executors.newCachedThreadPool();
 
     public void start(int port) throws IOException, ClassNotFoundException {
         serverSocket = new ServerSocket(port);
@@ -43,7 +46,7 @@ public class SimulationServer<S> {
                     List<ComputationResult<S>> results = new LinkedList<>();
                     CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
                     for(int i = 0; i < tasks.size(); i++){
-                        futures[i] = CompletableFuture.supplyAsync(tasks.get(i));
+                        futures[i] = CompletableFuture.supplyAsync(tasks.get(i), executor);
                     }
                     CompletableFuture.allOf(futures).join();
                     tasks.stream().forEach(x -> results.add(new ComputationResult<>(x.getTrajectory(), x.getElapsedTime())));

@@ -40,7 +40,7 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
  */
 public class ThreadSimulationManager<S> implements SimulationManager<S> {
     private ExecutorService executor;
-    private List<SimulationTask<S>> tasks = new LinkedList<>();
+    private LinkedList<SimulationTask<S>> tasks = new LinkedList<>();
     private final int concurrentTasks;
     private int runningTasks = 0;
     private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
@@ -65,6 +65,7 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     // waits for all tasks to end, then prints timing information to file
     private void terminate() {
         try {
+            pcs.firePropertyChange("end", null, "");
             printTimingInformation(System.out);
             printTimingInformation(new PrintStream(new FileOutputStream("thread_data.data", true)));
         } catch (FileNotFoundException e) {
@@ -79,6 +80,7 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     private synchronized void manageTask(SimulationSession<S> session, Trajectory<S> trajectory) {
         doSample(session.getSamplingFunction(), trajectory);
         pcs.firePropertyChange("progress", session.getExpectedTasks(), session.taskCompleted());
+        //pcs.firePropertyChange("runtime", null, tasks);
         runningTasks--;
         SimulationTask<S> nextTask = waitingTasks.poll();
         pcs.firePropertyChange("waitingTasks", null, waitingTasks.size());
@@ -97,14 +99,19 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     @Override
     public synchronized void run(SimulationSession<S> session, SimulationTask<S> task) {
         if (runningTasks < concurrentTasks) {
-            runningTasks++;
+            pcs.firePropertyChange("threads", runningTasks, ++runningTasks);
             tasks.add(task);
             CompletableFuture.supplyAsync(task, executor)
-                    .thenAccept((trajectory) -> this.manageTask(session, trajectory));
+                              .whenComplete((value, error) -> showThreadRuntime(task))
+                            .thenAccept((trajectory) -> this.manageTask(session, trajectory));
         } else {
             waitingTasks.add(task);
             pcs.firePropertyChange("waitingTasks", null, waitingTasks.size());
         }
+    }
+
+    private synchronized void showThreadRuntime(SimulationTask<S> task){
+        pcs.firePropertyChange("runtime", null, task.getElapsedTime());
     }
 
     // waiting until executor is shutdown

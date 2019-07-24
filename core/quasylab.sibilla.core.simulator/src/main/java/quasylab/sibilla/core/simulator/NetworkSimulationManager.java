@@ -32,10 +32,14 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author belenchia
@@ -46,6 +50,7 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public class NetworkSimulationManager<S> implements SimulationManager<S> {
     private Map<Socket, ServerState> servers = new ConcurrentHashMap<>();
+    private ConcurrentLinkedQueue<Socket> serverQueue;
     private ExecutorService executor;
     private int workingServers = 0;
     private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
@@ -69,6 +74,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             oos.writeObject(modelName);
             oos.writeObject(toSend);
         }
+        serverQueue = new ConcurrentLinkedQueue<>(this.servers.keySet());
     }
 
     @Override
@@ -83,31 +89,41 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
 
     @Override
     public synchronized void run(SimulationSession<S> session, SimulationTask<S> task) {
-        run(session, new LinkedList<>(Arrays.asList(task)));
-    }
-
-    private synchronized void run(SimulationSession<S> session, List<SimulationTask<S>> tasks) {
         Socket server = findServer();
-        run(session, tasks, server);
+        run(session, new LinkedList<>(Arrays.asList(task)), server);
     }
 
     private synchronized void run(SimulationSession<S> session, List<SimulationTask<S>> tasks, Socket server) {
         if (server != null) {
             NetworkTask<S> networkTask = new NetworkTask<S>(tasks);
             workingServers++;
-            servers.get(server).startRunning();
+            ServerState state = servers.get(server);
+            state.startRunning();
             CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
-                    .thenAccept((trajectory) -> this.manageTask(session, trajectory))
-                    .thenRun(() -> nextRun(session, server));
-            pcs.firePropertyChange("servers", null, this.servers);
+                             .orTimeout((long)state.getTimeout(),TimeUnit.NANOSECONDS)
+                             .whenComplete((value, error) -> {
+                                                                if(error!=null){
+                                                                    //send still alive message
+                                                                    waitingTasks.addAll(tasks);
+                                                                    nextRun(session);
+                                                                }else{
+                                                                    manageTask(session, value);
+                                                                    nextRun(session);
+                                                                }
+                                                            } 
+                                            );
+                                            
+                    //.thenRun(() -> nextRun(session));//.orTimeout(timeout, unit);
+            pcs.firePropertyChange("servers", null, servers.get(server));
         } else {
             waitingTasks.addAll(tasks);
-            pcs.firePropertyChange("waitingTasks", null, waitingTasks.size());
         }
+        pcs.firePropertyChange("waitingTasks", null, waitingTasks.size());
     }
 
     private synchronized Socket findServer() {
-        return servers.keySet().stream().filter(x -> !servers.get(x).isRunning()).findFirst().orElse(null);
+        //return servers.keySet().stream().filter(x -> !servers.get(x).isRunning()).findFirst().orElse(null);
+        return serverQueue.poll();
     }
 
     private synchronized void manageTask(SimulationSession<S> session, List<Trajectory<S>> trajectories) {
@@ -118,7 +134,8 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         workingServers--;
     }
 
-    private synchronized void nextRun(SimulationSession<S> session, Socket server) {
+    private synchronized void nextRun(SimulationSession<S> session) {
+        Socket server = findServer();
         ServerState serverState;
         if ( !waitingTasks.isEmpty() && (serverState = servers.get(server)) != null) {
             int acceptableTasks = serverState.getTasks();
@@ -126,16 +143,16 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             if (serverState.canCompleteTask(nextTasks.size())) {
                 run(session, nextTasks, server);
             } else {
-                try {
-                    throw new Exception("Submitted task requires too much time!");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                waitingTasks.addAll(nextTasks);
+                nextTasks = getWaitingTasks(acceptableTasks / 2);
+                run(session, nextTasks, server);
             }
 
         } else if(isCompleted(session)){
             closeStreams();
             this.notify();
+        } else {
+            serverQueue.add(server);
         }
     }
 
@@ -189,11 +206,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             state = servers.get(server);
             state.stopRunning();
             state.update(timings);
-            state.printState();   
-            if(state.isTimeout()) {
-                servers.remove(server);
-                //System.out.println("removed server" + server + " elapsedTime: "+state.getElapsedTime() + " Timeout: "+state.getTimeout());
-            }      
+            serverQueue.add(server);     
 
 
         } catch (IOException | ClassNotFoundException e) {

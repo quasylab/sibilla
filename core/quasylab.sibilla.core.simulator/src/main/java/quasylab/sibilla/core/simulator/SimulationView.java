@@ -7,8 +7,12 @@ import java.awt.GridBagLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.Socket;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -19,6 +23,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.border.Border;
+import javax.swing.text.DefaultCaret;
 
 public class SimulationView<S> {
     private JFrame frame = new JFrame("Sibilla");
@@ -29,6 +34,8 @@ public class SimulationView<S> {
     private JTabbedPane tabbedPane;
     private JLabel waitingTasks;
     private Map<Socket,JTextArea> serverData = new HashMap<>();
+    private JTextArea threadDetail = new JTextArea();
+    private JLabel threadCount = new JLabel("Running Tasks: 0");
     /*
      * private static SimulationView instance;
      * 
@@ -102,7 +109,39 @@ public class SimulationView<S> {
     }
 
     private JPanel threadView(){
-        return new JPanel();
+        simManager.addPropertyChangeListener("runtime", this::threadRuntime);
+        simManager.addPropertyChangeListener("threads", this::threadCount);
+        simManager.addPropertyChangeListener("end", evt -> {
+            threadCount.setText("Running Tasks: 0");
+            threadDetail.append("Simulation Completed.\n");
+        });
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setPreferredSize(new Dimension(1200,600));
+        GridBagConstraints c = new GridBagConstraints();
+        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        c.anchor = GridBagConstraints.NORTH;
+        c.gridx = 0;
+        c.gridy = 0;
+        panel.add(threadCount, c);
+        c.gridx = 0;
+        c.gridy = 1;
+        JScrollPane content = new JScrollPane(threadDetail);
+        DefaultCaret caret = (DefaultCaret)threadDetail.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        content.setPreferredSize(new Dimension(1000,400));
+        panel.add(content, c);
+        return panel;
+    }
+
+
+    private void threadRuntime(PropertyChangeEvent evt){
+        long elapsedTime = (long) evt.getNewValue();
+        threadDetail.append("Task terminated in: " + elapsedTime + "ns\n");
+    }
+
+    private void threadCount(PropertyChangeEvent evt){
+        int count = (int) evt.getNewValue();
+        threadCount.setText("Running tasks: "+count);
     }
 
     private JTextArea serverDetail(Socket socket, ServerState state){
@@ -120,7 +159,11 @@ public class SimulationView<S> {
     }
 
     private String formatServerState(ServerState state) {
-        return state.toString() + "\n";
+        String formattedString = "";
+        formattedString = formattedString.concat(state.toString() + "\n");
+        if(state.isTimeout())
+            formattedString = formattedString.concat("Server has timed out.\n");
+        return formattedString;
     }
 
     private void progressStatus(PropertyChangeEvent evt) {
@@ -133,19 +176,18 @@ public class SimulationView<S> {
         this.waitingTasks.setText("Tasks in queue: "+waitingTasks);
     }
 
+
     @SuppressWarnings("unchecked")
     private void serverView(PropertyChangeEvent evt){
-        Map<Socket, ServerState> servers = (Map<Socket, ServerState>) evt.getNewValue();
-        for(Map.Entry<Socket, ServerState> entry : servers.entrySet()){
+        ServerState server = (ServerState) evt.getNewValue();
             int index;
-            if((index = tabbedPane.indexOfTab(entry.getKey().toString())) == -1){
-                tabbedPane.addTab(entry.getKey().toString(), new JScrollPane(serverDetail(entry.getKey(), entry.getValue())));
+            if((index = tabbedPane.indexOfTab(server.getServer().toString())) == -1){
+                tabbedPane.addTab(server.getServer().toString(), new JScrollPane(serverDetail(server.getServer(), server)));
                 frame.pack();
             }
             else
-                tabbedPane.setComponentAt(index, new JScrollPane(serverDetail(entry.getKey(), entry.getValue())));
+                tabbedPane.setComponentAt(index, new JScrollPane(serverDetail(server.getServer(), server)));
         }
-    }
 
 
 }
