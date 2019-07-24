@@ -56,6 +56,7 @@ public class ServerState {
 
     public double getTimeout(){  // after this time, a timeout has occurred and the server is not to be contacted again
         return tasks*estimatedRTT + tasks*4*devRTT;
+        //return Double.MAX_VALUE;
     }
 
     public double getTimeLimit(){ // after this time, the tasks to be sent to this server is to be halved
@@ -79,7 +80,7 @@ public class ServerState {
     }
 
     public boolean isTimeout(){
-        return (elapsedTime =  System.nanoTime() - startTime) > getTimeout() ;
+        return elapsedTime > getTimeout() ;
     }
 
     public long getElapsedTime(){

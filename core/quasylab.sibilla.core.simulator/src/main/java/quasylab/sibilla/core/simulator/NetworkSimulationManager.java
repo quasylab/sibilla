@@ -24,6 +24,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -48,38 +49,18 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
     private boolean isTerminated = false;
 
-    public NetworkSimulationManager(InetAddress[] servers, int[] ports, String modelName) {
+    public NetworkSimulationManager(InetAddress[] servers, int[] ports, String modelName)
+            throws UnknownHostException, IOException {
         executor = Executors.newCachedThreadPool();
         for (int i = 0; i < servers.length; i++) {
-            try {
-                Socket server = new Socket(servers[i].getHostAddress(), ports[i]);
-                this.servers.put(server, new ServerState(server));
+            Socket server = new Socket(servers[i].getHostAddress(), ports[i]);
+            this.servers.put(server, new ServerState(server));
 
-                ObjectOutputStream oos = this.servers.get(server).getObjectOutputStream();
+            ObjectOutputStream oos = this.servers.get(server).getObjectOutputStream();
 
-                byte[] toSend = ClassBytesLoader.loadClassBytes(modelName);
-                oos.writeObject(modelName);
-                oos.writeObject(toSend);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        executor.submit(() -> checkTimeout());
-    }
-
-    private void checkTimeout(){
-        List<Socket> toRemove = new LinkedList<>();
-        while(!isTerminated){
-            for(Map.Entry<Socket,ServerState> entry : servers.entrySet()){
-                ServerState state = entry.getValue();
-                if(state.isRunning() && state.getTimeout() > 0 && state.isTimeout()){
-                    System.out.println("Elapsed time: " + state.getElapsedTime() +" Timeout value: " + state.getTimeout());
-                    toRemove.add(entry.getKey());
-                    System.out.println("removed server");
-                }
-            }
-
-            toRemove.stream().forEach(servers::remove);
+            byte[] toSend = ClassBytesLoader.loadClassBytes(modelName);
+            oos.writeObject(modelName);
+            oos.writeObject(toSend);
         }
     }
 
@@ -128,8 +109,8 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     }
 
     private synchronized void nextRun(SimulationSession<S> session, Socket server) {
-        if (!waitingTasks.isEmpty()) {
-            ServerState serverState = servers.get(server);
+        ServerState serverState;
+        if ( !waitingTasks.isEmpty() && (serverState = servers.get(server)) != null) {
             int acceptableTasks = serverState.getTasks();
             List<SimulationTask<S>> nextTasks = getWaitingTasks(acceptableTasks);
             if (serverState.canCompleteTask(nextTasks.size())) {
@@ -195,9 +176,13 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             }
 
             state = servers.get(server);
-            state.stopRunning();  
+            state.stopRunning();
             state.update(timings);
-            state.printState();        
+            state.printState();   
+            if(state.isTimeout()) {
+                servers.remove(server);
+                //System.out.println("removed server" + server + " elapsedTime: "+state.getElapsedTime() + " Timeout: "+state.getTimeout());
+            }      
 
 
         } catch (IOException | ClassNotFoundException e) {
