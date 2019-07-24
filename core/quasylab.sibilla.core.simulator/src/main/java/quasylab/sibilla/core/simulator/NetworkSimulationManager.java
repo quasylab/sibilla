@@ -26,6 +26,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -55,25 +56,14 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
 		this.pcs.addPropertyChangeListener(property, listener);
 	}
 
-    public NetworkSimulationManager(InetAddress[] servers, int[] ports, String modelName) {
+    public NetworkSimulationManager(InetAddress[] servers, int[] ports, String modelName)
+            throws UnknownHostException, IOException {
         executor = Executors.newCachedThreadPool();
         for (int i = 0; i < servers.length; i++) {
-            try {
-                Socket server = new Socket(servers[i].getHostAddress(), ports[i]);
-                this.servers.put(server, new ServerState(server));
+            Socket server = new Socket(servers[i].getHostAddress(), ports[i]);
+            this.servers.put(server, new ServerState(server));
 
-                ObjectOutputStream oos = this.servers.get(server).getObjectOutputStream();
-
-                byte[] toSend = ClassBytesLoader.loadClassBytes(modelName);
-                oos.writeObject(modelName);
-                oos.writeObject(toSend);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        executor.submit(() -> checkTimeout());
-    }
-
+<<<<<<< HEAD
     private void checkTimeout(){
         List<Socket> toRemove = new LinkedList<>();
         while(!isTerminated){
@@ -85,8 +75,13 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
                     System.out.println("removed server");
                 }
             }
+=======
+            ObjectOutputStream oos = this.servers.get(server).getObjectOutputStream();
+>>>>>>> dee81bbea591c9bbf0f1c92ea95046a3b6f792ad
 
-            toRemove.stream().forEach(servers::remove);
+            byte[] toSend = ClassBytesLoader.loadClassBytes(modelName);
+            oos.writeObject(modelName);
+            oos.writeObject(toSend);
         }
     }
 
@@ -138,8 +133,8 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     }
 
     private synchronized void nextRun(SimulationSession<S> session, Socket server) {
-        if (!waitingTasks.isEmpty()) {
-            ServerState serverState = servers.get(server);
+        ServerState serverState;
+        if ( !waitingTasks.isEmpty() && (serverState = servers.get(server)) != null) {
             int acceptableTasks = serverState.getTasks();
             List<SimulationTask<S>> nextTasks = getWaitingTasks(acceptableTasks);
             if (serverState.canCompleteTask(nextTasks.size())) {
@@ -206,9 +201,17 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             }
 
             state = servers.get(server);
-            state.stopRunning();  
+            state.stopRunning();
             state.update(timings);
+<<<<<<< HEAD
             //System.out.println(waitingTasks.size());       
+=======
+            state.printState();   
+            if(state.isTimeout()) {
+                servers.remove(server);
+                //System.out.println("removed server" + server + " elapsedTime: "+state.getElapsedTime() + " Timeout: "+state.getTimeout());
+            }      
+>>>>>>> dee81bbea591c9bbf0f1c92ea95046a3b6f792ad
 
 
         } catch (IOException | ClassNotFoundException e) {

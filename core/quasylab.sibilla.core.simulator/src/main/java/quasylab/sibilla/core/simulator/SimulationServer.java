@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class SimulationServer<S> {
     private ServerSocket serverSocket;
@@ -20,7 +21,6 @@ public class SimulationServer<S> {
 
     private class TaskHandler implements Runnable{
         private ObjectOutputStream oos;
-        private long startTime, elapsedTime;
         private Deserializer deserializer;
         private CustomClassLoader cloader;
         public TaskHandler(Socket socket) throws IOException, ClassNotFoundException {
@@ -41,12 +41,20 @@ public class SimulationServer<S> {
                     
                     List<SimulationTask<S>> tasks = ntask.getTasks();
                     List<ComputationResult<S>> results = new LinkedList<>();
+<<<<<<< HEAD
                     Trajectory<S> tempTrajectory;
                     
                     for(int i = 0; i < tasks.size(); i++){
                         tempTrajectory = tasks.get(i).get();
                         results.add(new ComputationResult<>(tempTrajectory, elapsedTime));
+=======
+                    CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
+                    for(int i = 0; i < tasks.size(); i++){
+                        futures[i] = CompletableFuture.supplyAsync(tasks.get(i));
+>>>>>>> dee81bbea591c9bbf0f1c92ea95046a3b6f792ad
                     }
+                    CompletableFuture.allOf(futures).join();
+                    tasks.stream().forEach(x -> results.add(new ComputationResult<>(x.getTrajectory(), x.getElapsedTime())));
                     oos.writeObject(results);
                 }
 

@@ -52,8 +52,13 @@ public class ServerState {
     }
 
     public double getTimeout(){  // after this time, a timeout has occurred and the server is not to be contacted again
+<<<<<<< HEAD
         //return tasks*estimatedRTT + tasks*4*devRTT;
         return Double.MAX_VALUE;
+=======
+        return tasks*estimatedRTT + tasks*4*devRTT;
+        //return Double.MAX_VALUE;
+>>>>>>> dee81bbea591c9bbf0f1c92ea95046a3b6f792ad
     }
 
     public double getTimeLimit(){ // after this time, the tasks to be sent to this server is to be halved
@@ -77,10 +82,14 @@ public class ServerState {
     }
 
     public boolean isTimeout(){
+<<<<<<< HEAD
         if(getElapsedTime() > getTimeout()){
             System.out.println(getElapsedTime()+" "+getTimeout());
         }
         return getElapsedTime() > getTimeout() ;
+=======
+        return elapsedTime > getTimeout() ;
+>>>>>>> dee81bbea591c9bbf0f1c92ea95046a3b6f792ad
     }
 
     public long getElapsedTime(){

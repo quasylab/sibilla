@@ -4,6 +4,7 @@
 package quasylab.sibilla.examples.pm.seir;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -45,7 +46,7 @@ public class NetworkMain {
 	public final static double DEADLINE = 600;
 	private static final int REPLICA = 1000;
 
-	public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
+	public static void main(String[] argv) throws InterruptedException, IOException {
 		@SuppressWarnings("unchecked")
 		PopulationRule rule_S_E = new ReactionRule(
 				"S->E", 
