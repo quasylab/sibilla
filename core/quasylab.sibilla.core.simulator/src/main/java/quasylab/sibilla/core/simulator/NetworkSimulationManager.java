@@ -24,9 +24,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -38,19 +43,24 @@ import java.util.concurrent.Executors;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public class NetworkSimulationManager<S> implements SimulationManager<S> {
-    private final List<Socket> servers = new LinkedList<>();
+    private Map<Socket, ServerState> servers = new ConcurrentHashMap<>();
     private ExecutorService executor;
     private int workingServers = 0;
-    private boolean isRunning = false;
+    private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
+    private boolean isTerminated = false;
 
-    public NetworkSimulationManager(InetAddress[] servers, int[] ports) {
+    public NetworkSimulationManager(InetAddress[] servers, int[] ports, String modelName)
+            throws UnknownHostException, IOException {
         executor = Executors.newCachedThreadPool();
         for (int i = 0; i < servers.length; i++) {
-            try {
-                this.servers.add(new Socket(servers[i].getHostAddress(), ports[i]));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Socket server = new Socket(servers[i].getHostAddress(), ports[i]);
+            this.servers.put(server, new ServerState(server));
+
+            ObjectOutputStream oos = this.servers.get(server).getObjectOutputStream();
+
+            byte[] toSend = ClassBytesLoader.loadClassBytes(modelName);
+            oos.writeObject(modelName);
+            oos.writeObject(toSend);
         }
     }
 
@@ -60,48 +70,120 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     }
 
     private synchronized boolean isCompleted(SimulationSession<S> session) {
-		return (workingServers+session.getExpectedTasks()==0);
+        return (workingServers + session.getExpectedTasks() == 0);
     }
 
     @Override
-    public void run(SimulationSession<S> session, SimulationTask<S> task) {
-        if(isRunning)
-            return;
-        NetworkTask<S> networkTask = new NetworkTask<S>(task, session.getExpectedTasks());
-        for( Socket server : servers){
-            workingServers++;
-            CompletableFuture.supplyAsync(() -> send(networkTask, server), executor).thenAccept((trajectory) -> this.manageTask(session, trajectory));
-        }
-        isRunning = true;
+    public synchronized void run(SimulationSession<S> session, SimulationTask<S> task) {
+        run(session, new LinkedList<>(Arrays.asList(task)));
     }
 
-    private synchronized void manageTask(SimulationSession<S> session, List<Trajectory<S>> trajectories){
-        for(Trajectory<S> trajectory : trajectories){
+    private synchronized void run(SimulationSession<S> session, List<SimulationTask<S>> tasks) {
+        Socket server = findServer();
+        run(session, tasks, server);
+    }
+
+    private synchronized void run(SimulationSession<S> session, List<SimulationTask<S>> tasks, Socket server) {
+        if (server != null) {
+            NetworkTask<S> networkTask = new NetworkTask<S>(tasks);
+            workingServers++;
+            servers.get(server).startRunning();
+            CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
+                    .thenAccept((trajectory) -> this.manageTask(session, trajectory))
+                    .thenRun(() -> nextRun(session, server));
+        } else {
+            waitingTasks.addAll(tasks);
+        }
+    }
+
+    private synchronized Socket findServer() {
+        return servers.keySet().stream().filter(x -> !servers.get(x).isRunning()).findFirst().orElse(null);
+    }
+
+    private synchronized void manageTask(SimulationSession<S> session, List<Trajectory<S>> trajectories) {
+        for (Trajectory<S> trajectory : trajectories) {
             doSample(session.getSamplingFunction(), trajectory);
             session.taskCompleted();
         }
         workingServers--;
-        System.out.println("Server finished running!");
-        if(isCompleted(session)){
+    }
+
+    private synchronized void nextRun(SimulationSession<S> session, Socket server) {
+        ServerState serverState;
+        if ( !waitingTasks.isEmpty() && (serverState = servers.get(server)) != null) {
+            int acceptableTasks = serverState.getTasks();
+            List<SimulationTask<S>> nextTasks = getWaitingTasks(acceptableTasks);
+            if (serverState.canCompleteTask(nextTasks.size())) {
+                run(session, nextTasks, server);
+            } else {
+                try {
+                    throw new Exception("Submitted task requires too much time!");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+        } else if(isCompleted(session)){
+            closeStreams();
             this.notify();
         }
     }
 
-    private List<Trajectory<S>> send(NetworkTask<S> networkTask, Socket server){
+    private synchronized List<SimulationTask<S>> getWaitingTasks(int n){
+        List<SimulationTask<S>> fetchedTasks = new LinkedList<>();
+        for(int i = 0; i < n; i++){
+            SimulationTask<S> next = waitingTasks.poll();
+            if(next != null)
+                fetchedTasks.add(next);
+            else
+                break;
+        }
+        return fetchedTasks;
+    }
+
+    private void closeStreams(){
+        for( ServerState state: servers.values()){
+            try {
+                state.getObjectInputStream().close();
+                state.getObjectOutputStream().close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        isTerminated = true;
+    }
+
+    private synchronized List<Trajectory<S>> send(NetworkTask<S> networkTask, Socket server){
         ObjectOutputStream oos;
         ObjectInputStream ois;
-        List<Trajectory<S>> trajectories = null;
+        List<Trajectory<S>> trajectories = new LinkedList<>();
+        List<Long> timings = new LinkedList<>();
+        ServerState state;
         
         try {
-            oos = new ObjectOutputStream(server.getOutputStream());
-            ois = new ObjectInputStream(server.getInputStream());
+
+            oos = servers.get(server).getObjectOutputStream();
+            ois = servers.get(server).getObjectInputStream();
 
             oos.writeObject(networkTask);
 
             @SuppressWarnings("unchecked")
-            List<Trajectory<S>> result = (List<Trajectory<S>>) ois.readObject();
+            List<ComputationResult<S>> result = (List<ComputationResult<S>>) ois.readObject();
 
-            trajectories = result;
+            for(ComputationResult<S> compResult : result){
+                trajectories.add(compResult.getTrajectory());
+                timings.add(compResult.getElapsedTime());
+            }
+
+            state = servers.get(server);
+            state.stopRunning();
+            state.update(timings);
+            state.printState();   
+            if(state.isTimeout()) {
+                servers.remove(server);
+                //System.out.println("removed server" + server + " elapsedTime: "+state.getElapsedTime() + " Timeout: "+state.getTimeout());
+            }      
+
 
         } catch (IOException | ClassNotFoundException e) {
 

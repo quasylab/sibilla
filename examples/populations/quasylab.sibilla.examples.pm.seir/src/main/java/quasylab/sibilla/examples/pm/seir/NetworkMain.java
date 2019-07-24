@@ -1,9 +1,10 @@
 /**
  * 
  */
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.examples.pm.seir;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -24,7 +25,7 @@ import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
  * @author loreti
  *
  */
-public class Main {
+public class NetworkMain {
 
 	public final static int S = 0;
 	public final static int E = 1;
@@ -45,7 +46,7 @@ public class Main {
 	public final static double DEADLINE = 600;
 	private static final int REPLICA = 1000;
 
-	public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
+	public static void main(String[] argv) throws InterruptedException, IOException {
 		@SuppressWarnings("unchecked")
 		PopulationRule rule_S_E = new ReactionRule(
 				"S->E", 
@@ -91,7 +92,9 @@ public class Main {
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
 		//SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS) );
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new NetworkSimulationManager<>(new InetAddress[]{InetAddress.getLocalHost(), InetAddress.getLocalHost(), InetAddress.getLocalHost()}, new int[]{8080, 8081, 8082} ));
+		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new NetworkSimulationManager<>(new InetAddress[]{InetAddress.getLocalHost(), InetAddress.getLocalHost(), InetAddress.getLocalHost()},
+																																	new int[]{8080, 8081, 8082},
+																																	"quasylab.sibilla.examples.pm.seir.NetworkMain" ));
 
 		sim.setSampling(new SamplingCollection<>(fiSamp,frSamp));
 
