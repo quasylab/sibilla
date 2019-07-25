@@ -5,14 +5,9 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.net.Socket;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -22,7 +17,6 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import javax.swing.border.Border;
 import javax.swing.text.DefaultCaret;
 
 public class SimulationView<S> {
@@ -162,8 +156,8 @@ public class SimulationView<S> {
     private String formatServerState(ServerState state) {
         String formattedString = "";
         formattedString = formattedString.concat(state.toString() + "\n");
-        if(state.isTimeout())
-            formattedString = formattedString.concat("Server has timed out.\n");
+        if(state.isRemoved())
+            formattedString = formattedString.concat("Server has been removed.\n");
         return formattedString;
     }
 
@@ -178,7 +172,6 @@ public class SimulationView<S> {
     }
 
 
-    @SuppressWarnings("unchecked")
     private void serverView(PropertyChangeEvent evt){
         ServerState server = (ServerState) evt.getNewValue();
             int index;

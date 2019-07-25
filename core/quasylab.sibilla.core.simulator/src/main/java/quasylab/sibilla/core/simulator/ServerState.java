@@ -10,6 +10,7 @@ public class ServerState {
     private Socket server;
     private int expectedTasks, actualTasks;
     private boolean running;
+    private boolean isRemoved;
     private long startTime, elapsedTime;
     private long runningTime;
     public double devRTT;
@@ -28,6 +29,7 @@ public class ServerState {
         expectedTasks = 1;
         actualTasks = 0;
         running = false;
+        isRemoved = false;
         startTime = 0L;
         elapsedTime = 0L;
         runningTime = 0L;
@@ -125,6 +127,14 @@ public class ServerState {
 
     public Socket getServer(){
         return server;
+    }
+
+    public boolean isRemoved(){
+        return isRemoved;
+    }
+
+    public void removed(){
+        isRemoved = true;
     }
 
 }

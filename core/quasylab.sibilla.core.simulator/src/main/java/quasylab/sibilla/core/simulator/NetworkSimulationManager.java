@@ -28,14 +28,11 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -50,11 +47,11 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public class NetworkSimulationManager<S> implements SimulationManager<S> {
     private Map<Socket, ServerState> servers = new ConcurrentHashMap<>();
+    private final String modelName;
     private ConcurrentLinkedQueue<Socket> serverQueue;
     private ExecutorService executor;
     private int workingServers = 0;
     private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
-    private boolean isTerminated = false;
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
 	public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
@@ -63,18 +60,24 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
 
     public NetworkSimulationManager(InetAddress[] servers, int[] ports, String modelName)
             throws UnknownHostException, IOException {
+        this.modelName = modelName;
         executor = Executors.newCachedThreadPool();
         for (int i = 0; i < servers.length; i++) {
             Socket server = new Socket(servers[i].getHostAddress(), ports[i]);
             this.servers.put(server, new ServerState(server));
+            initConnection(server);
+        }
+        serverQueue = new ConcurrentLinkedQueue<>(this.servers.keySet());
+    }
+
+    private void initConnection(Socket server) throws UnknownHostException, IOException {
+
 
             ObjectOutputStream oos = this.servers.get(server).getObjectOutputStream();
 
             byte[] toSend = ClassBytesLoader.loadClassBytes(modelName);
             oos.writeObject(modelName);
             oos.writeObject(toSend);
-        }
-        serverQueue = new ConcurrentLinkedQueue<>(this.servers.keySet());
     }
 
     @Override
@@ -100,21 +103,27 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             ServerState state = servers.get(server);
             state.startRunning();
             CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
-                             .orTimeout((long)state.getTimeout(),TimeUnit.NANOSECONDS)
+                             .orTimeout((long)state.getTimeout(), TimeUnit.NANOSECONDS)
                              .whenComplete((value, error) -> {
                                                                 if(error!=null){
-                                                                    //send still alive message
-                                                                    serverQueue.add(server);
-                                                                    waitingTasks.addAll(tasks);
-                                                                    nextRun(session);
+                                                                    //timeout occurred, contact server
+                                                                    if(manageTimeout(server)){
+                                                                        // server responded: abort computation, retry with half
+                                                                        serverQueue.add(server);
+                                                                        waitingTasks.addAll(tasks);
+                                                                        nextRun(session);
+                                                                    }else{
+                                                                        // server not responding, remove server
+                                                                        servers.remove(server).removed();
+                                                                    }
+                                                                    //both cases: 
                                                                 }else{
+                                                                    //timeout not occurred, continue as usual
                                                                     manageTask(session, value);
                                                                     nextRun(session);
                                                                 }
                                                             } 
                                             );
-                                            
-                    //.thenRun(() -> nextRun(session));//.orTimeout(timeout, unit);
             pcs.firePropertyChange("servers", null, servers.get(server));
         } else {
             waitingTasks.addAll(tasks);
@@ -123,8 +132,27 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     }
 
     private synchronized Socket findServer() {
-        //return servers.keySet().stream().filter(x -> !servers.get(x).isRunning()).findFirst().orElse(null);
         return serverQueue.poll();
+    }
+
+    private synchronized boolean manageTimeout(Socket server){
+        boolean valid = false;
+        try {
+            Socket pingServer = new Socket(server.getInetAddress().toString(), server.getPort());
+            pingServer.setSoTimeout(5000);
+            initConnection(pingServer);
+            ObjectOutputStream oos = new ObjectOutputStream(pingServer.getOutputStream());
+            ObjectInputStream ois = new ObjectInputStream(pingServer.getInputStream());
+
+            oos.writeObject("PING");
+            ois.readObject();
+            valid = true;
+            
+            //abort and halve
+        } catch (IOException | ClassNotFoundException e) {
+            valid = false;
+        }
+        return valid;
     }
 
     private synchronized void manageTask(SimulationSession<S> session, List<Trajectory<S>> trajectories) {
@@ -179,7 +207,6 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
                 e.printStackTrace();
             }
         }
-        isTerminated = true;
     }
 
     private synchronized List<Trajectory<S>> send(NetworkTask<S> networkTask, Socket server){
@@ -194,6 +221,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             oos = servers.get(server).getObjectOutputStream();
             ois = servers.get(server).getObjectInputStream();
 
+            oos.writeObject("TASK");
             oos.writeObject(networkTask);
 
             @SuppressWarnings("unchecked")
