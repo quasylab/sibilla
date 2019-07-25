@@ -46,7 +46,7 @@ public class ServerState {
         sampleRTT = runningTime / actualTasks;
         estimatedRTT = alpha * sampleRTT + (1-alpha) * estimatedRTT;
         devRTT = expectedTasks == 1 ? sampleRTT * 2 : beta * Math.abs(sampleRTT - estimatedRTT) + (1-beta)*devRTT;
-        if(runningTime > getTimeLimit()){
+        if(runningTime >= getTimeLimit()){
             expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
         }else if(expectedTasks < threshold){
             expectedTasks = expectedTasks * 2;
@@ -55,9 +55,21 @@ public class ServerState {
         }
     }
 
+    public void forceExpiredTimeLimit(){
+        expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
+    }
+
+    public void migrate(Socket server) throws IOException {
+        this.server = server;
+        oos = new ObjectOutputStream(server.getOutputStream());
+        ois = new ObjectInputStream(server.getInputStream());
+        running = false;
+        isRemoved = false;      
+    }
+
     public double getTimeout(){  // after this time, a timeout has occurred and the server is not to be contacted again
-        return expectedTasks*estimatedRTT + expectedTasks*4*devRTT;
-        //return Double.MAX_VALUE;
+        //return expectedTasks*estimatedRTT + expectedTasks*4*devRTT;
+        return Double.MAX_VALUE;
     }
 
     public double getTimeLimit(){ // after this time, the tasks to be sent to this server is to be halved

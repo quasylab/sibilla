@@ -41,7 +41,8 @@ public class SimulationServer<S> {
                 while(true){
 
                     String request = (String) deserializer.readObject();
-                    if(request == "PING"){
+                    System.out.println(request);
+                    if(request.equals("PING")){
                         oos.writeObject("PONG");
                         continue;
                     }
@@ -54,7 +55,7 @@ public class SimulationServer<S> {
                     for(int i = 0; i < tasks.size(); i++){
                         futures[i] = CompletableFuture.supplyAsync(tasks.get(i), executor);
                     }
-                    CompletableFuture.allOf(futures).join(); //isDone
+                    CompletableFuture.allOf(futures).join();
                     tasks.stream().forEach(x -> results.add(new ComputationResult<>(x.getTrajectory(), x.getElapsedTime())));
                     oos.writeObject(results);
                 }

@@ -24,4 +24,5 @@ public class Deserializer {
         obj = (Serializable) ois.readObject();
         return obj;
     }
+    
 }

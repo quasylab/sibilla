@@ -28,14 +28,18 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,9 +50,9 @@ import java.util.concurrent.TimeUnit;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public class NetworkSimulationManager<S> implements SimulationManager<S> {
-    private Map<Socket, ServerState> servers = new ConcurrentHashMap<>();
+    private Map<Socket, ServerState> servers = Collections.synchronizedMap(new HashMap<>());
     private final String modelName;
-    private ConcurrentLinkedQueue<Socket> serverQueue;
+    private BlockingQueue<Socket> serverQueue;
     private ExecutorService executor;
     private int workingServers = 0;
     private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
@@ -65,15 +69,13 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         for (int i = 0; i < servers.length; i++) {
             Socket server = new Socket(servers[i].getHostAddress(), ports[i]);
             this.servers.put(server, new ServerState(server));
-            initConnection(server);
+            ObjectOutputStream oos = this.servers.get(server).getObjectOutputStream();
+            initConnection(server, oos);
         }
-        serverQueue = new ConcurrentLinkedQueue<>(this.servers.keySet());
+        serverQueue = new LinkedBlockingQueue<>(this.servers.keySet());
     }
 
-    private void initConnection(Socket server) throws UnknownHostException, IOException {
-
-
-            ObjectOutputStream oos = this.servers.get(server).getObjectOutputStream();
+    private void initConnection(Socket server, ObjectOutputStream oos) throws UnknownHostException, IOException {
 
             byte[] toSend = ClassBytesLoader.loadClassBytes(modelName);
             oos.writeObject(modelName);
@@ -101,29 +103,13 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             NetworkTask<S> networkTask = new NetworkTask<S>(tasks);
             workingServers++;
             ServerState state = servers.get(server);
+            if(state == null){
+                System.out.println("debug");
+            }
             state.startRunning();
             CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
                              .orTimeout((long)state.getTimeout(), TimeUnit.NANOSECONDS)
-                             .whenComplete((value, error) -> {
-                                                                if(error!=null){
-                                                                    //timeout occurred, contact server
-                                                                    if(manageTimeout(server)){
-                                                                        // server responded: abort computation, retry with half
-                                                                        serverQueue.add(server);
-                                                                        waitingTasks.addAll(tasks);
-                                                                        nextRun(session);
-                                                                    }else{
-                                                                        // server not responding, remove server
-                                                                        servers.remove(server).removed();
-                                                                    }
-                                                                    //both cases: 
-                                                                }else{
-                                                                    //timeout not occurred, continue as usual
-                                                                    manageTask(session, value);
-                                                                    nextRun(session);
-                                                                }
-                                                            } 
-                                            );
+                             .whenComplete((value, error) -> timeoutHandler(value, error, session, tasks, server));
             pcs.firePropertyChange("servers", null, servers.get(server));
         } else {
             waitingTasks.addAll(tasks);
@@ -135,24 +121,49 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         return serverQueue.poll();
     }
 
-    private synchronized boolean manageTimeout(Socket server){
-        boolean valid = false;
-        try {
-            Socket pingServer = new Socket(server.getInetAddress().toString(), server.getPort());
-            pingServer.setSoTimeout(5000);
-            initConnection(pingServer);
-            ObjectOutputStream oos = new ObjectOutputStream(pingServer.getOutputStream());
-            ObjectInputStream ois = new ObjectInputStream(pingServer.getInputStream());
+    private synchronized void timeoutHandler(List<Trajectory<S>> value, Throwable error, SimulationSession<S> session, List<SimulationTask<S>> tasks, Socket server){
+        if(error!=null){
+            System.out.println("Timeout");
+            //timeout occurred, contact server
+            Socket newServer;
+            if((newServer = manageTimeout(server))!= null){
+                // server responded: abort computation, retry with half
+                serverQueue.add(newServer); // add new server to queue, old server won't return                                                   
+                System.out.println("Server refreshed");
+            }else{
+                // server not responding, remove server
+                System.out.println("server deleted");
+                servers.remove(server).removed();
+            }
+            //both cases: 
+            waitingTasks.addAll(tasks);
+            nextRun(session);
+        }else{
+            //timeout not occurred, continue as usual
+            //System.out.println("Nothing to report");
+            manageTask(session, value);
+            nextRun(session);
+        } 
+    }
 
+    private synchronized Socket manageTimeout(Socket server){
+        Socket pingServer = null;
+        try {
+            pingServer = new Socket(server.getInetAddress().getHostAddress(), server.getPort());
+            pingServer.setSoTimeout(5000);
+            ServerState removedState = servers.remove(server); // get old state, remove old server from map
+            removedState.forceExpiredTimeLimit();
+            removedState.migrate(pingServer);
+            ObjectOutputStream oos = removedState.getObjectOutputStream();
+            ObjectInputStream ois = removedState.getObjectInputStream();
+            initConnection(pingServer, oos);
             oos.writeObject("PING");
             ois.readObject();
-            valid = true;
-            
-            //abort and halve
+            servers.put(pingServer, removedState);
         } catch (IOException | ClassNotFoundException e) {
-            valid = false;
+            return null;
         }
-        return valid;
+        return pingServer;
     }
 
     private synchronized void manageTask(SimulationSession<S> session, List<Trajectory<S>> trajectories) {
