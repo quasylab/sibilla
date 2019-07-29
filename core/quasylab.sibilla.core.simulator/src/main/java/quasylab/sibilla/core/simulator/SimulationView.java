@@ -17,6 +17,8 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.text.DefaultCaret;
 
 public class SimulationView<S> {
@@ -27,7 +29,7 @@ public class SimulationView<S> {
     private JProgressBar progressBar;
     private JTabbedPane tabbedPane;
     private JLabel waitingTasks;
-    private Map<Socket,JTextArea> serverData = new HashMap<>();
+    private Map<String, JTextArea> serverData = new HashMap<>();
     private JTextArea threadDetail = new JTextArea();
     private JLabel threadCount = new JLabel("Running Tasks: 0");
     /*
@@ -40,10 +42,16 @@ public class SimulationView<S> {
     public SimulationView(int iterations, SimulationManager<S> simManager) {
         this.simManager = simManager;
         this.simulationLength = iterations;
+        try {
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+                | UnsupportedLookAndFeelException e) {                   
+            e.printStackTrace();
+        }
         type = simManager.getClass().getName();
         frame.setContentPane(createView(type));
         frame.getContentPane().setPreferredSize(new Dimension(1300, 700));
-        frame.pack();
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setVisible(true);
     }
 
@@ -62,6 +70,7 @@ public class SimulationView<S> {
         switch(type){
             case "quasylab.sibilla.core.simulator.ThreadSimulationManager": panel.add(threadView(), c); break;
             case "quasylab.sibilla.core.simulator.NetworkSimulationManager": panel.add(networkView(), c); break;
+            case "quasylab.sibilla.core.simulator.SequentialSimulationManager": break;
             default: break;
         }
         return panel;
@@ -138,14 +147,15 @@ public class SimulationView<S> {
         threadCount.setText("Running tasks: "+count);
     }
 
-    private JTextArea serverDetail(Socket socket, ServerState state){
-        JTextArea text = serverData.get(socket);
+    private JTextArea serverDetail(String serverName, ServerState state){
+        JTextArea text = serverData.get(serverName);
         if(text == null){
             JTextArea newData = new JTextArea();
+            newData.setEditable(false);
             DefaultCaret caret = (DefaultCaret)newData.getCaret();
             caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
             newData.append(formatServerState(state));
-            serverData.put(socket, newData);
+            serverData.put(serverName, newData);
             text = newData;
         }else{
             text.append(formatServerState(state));
@@ -156,8 +166,6 @@ public class SimulationView<S> {
     private String formatServerState(ServerState state) {
         String formattedString = "";
         formattedString = formattedString.concat(state.toString() + "\n");
-        if(state.isRemoved())
-            formattedString = formattedString.concat("Server has been removed.\n");
         return formattedString;
     }
 
@@ -174,13 +182,19 @@ public class SimulationView<S> {
 
     private void serverView(PropertyChangeEvent evt){
         ServerState server = (ServerState) evt.getNewValue();
+        String serverName = null;
+        try{
+        serverName = server.getServer().getInetAddress().getHostAddress()+":"+server.getServer().getPort();
+        }catch(NullPointerException e){
+            System.out.println("debug");
+        }
             int index;
-            if((index = tabbedPane.indexOfTab(server.getServer().toString())) == -1){
-                tabbedPane.addTab(server.getServer().toString(), new JScrollPane(serverDetail(server.getServer(), server)));
-                frame.pack();
+            if((index = tabbedPane.indexOfTab(serverName)) == -1){
+                tabbedPane.addTab(serverName, new JScrollPane(serverDetail(serverName, server)));
+                //frame.pack();
             }
             else
-                tabbedPane.setComponentAt(index, new JScrollPane(serverDetail(server.getServer(), server)));
+                tabbedPane.setComponentAt(index, new JScrollPane(serverDetail(serverName, server)));
         }
 
 

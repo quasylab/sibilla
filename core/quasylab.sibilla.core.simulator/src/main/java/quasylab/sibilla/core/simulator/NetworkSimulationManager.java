@@ -55,8 +55,9 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     private BlockingQueue<Socket> serverQueue;
     private ExecutorService executor;
     private int workingServers = 0;
-    private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
+    private BlockingQueue<SimulationTask<S>> waitingTasks = new LinkedBlockingQueue<>();
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    private int c = 0, r = 0;
 
 	public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
 		this.pcs.addPropertyChangeListener(property, listener);
@@ -94,23 +95,33 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
 
     @Override
     public synchronized void run(SimulationSession<S> session, SimulationTask<S> task) {
-        Socket server = findServer();
-        run(session, new LinkedList<>(Arrays.asList(task)), server);
+        run(session, new LinkedList<>(Arrays.asList(task)));
     }
 
-    private synchronized void run(SimulationSession<S> session, List<SimulationTask<S>> tasks, Socket server) {
+    private synchronized void run(SimulationSession<S> session, List<SimulationTask<S>> tasks) {
+        //System.out.println("map size: "+servers.size()+" queue size: "+serverQueue.size());
+        Socket server = findServer();
+        List<SimulationTask<S>> toRun;
         if (server != null) {
-            NetworkTask<S> networkTask = new NetworkTask<S>(tasks);
-            workingServers++;
-            ServerState state = servers.get(server);
-            if(state == null){
-                System.out.println("debug");
+            ServerState serverState = servers.get(server);
+            if(tasks.isEmpty()){ //get from waiting tasks
+                int acceptableTasks = serverState.getExpectedTasks();
+                toRun = getWaitingTasks(acceptableTasks);
+                if (!serverState.canCompleteTask(toRun.size())) {
+                    System.out.println("canCompleteFired");
+                    waitingTasks.addAll(toRun);
+                    toRun = getWaitingTasks(acceptableTasks / 2);
+                }
+            }else{ //get from params
+                toRun = tasks;
             }
-            state.startRunning();
+            final List<SimulationTask<S>> selectedTasks = toRun;
+            NetworkTask<S> networkTask = new NetworkTask<S>(selectedTasks);
+            workingServers++;
+            serverState.startRunning();
             CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
-                             .orTimeout((long)state.getTimeout(), TimeUnit.NANOSECONDS)
-                             .whenComplete((value, error) -> timeoutHandler(value, error, session, tasks, server));
-            pcs.firePropertyChange("servers", null, servers.get(server));
+                             .orTimeout((long)serverState.getTimeout(), TimeUnit.NANOSECONDS)
+                             .whenComplete((value, error) -> timeoutHandler(value, error, session, selectedTasks, server));
         } else {
             waitingTasks.addAll(tasks);
         }
@@ -133,34 +144,44 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             }else{
                 // server not responding, remove server
                 System.out.println("server deleted");
-                servers.remove(server).removed();
             }
             //both cases: 
+            workingServers--;
             waitingTasks.addAll(tasks);
-            nextRun(session);
+            r+=tasks.size();
         }else{
             //timeout not occurred, continue as usual
             //System.out.println("Nothing to report");
+            c+=value.size();
+            serverQueue.add(server); 
             manageTask(session, value);
-            nextRun(session);
-        } 
+            pcs.firePropertyChange("servers", null, servers.get(server));
+        }
+        nextRun(session); 
+
     }
 
     private synchronized Socket manageTimeout(Socket server){
         Socket pingServer = null;
+        ServerState removedState = null;
         try {
             pingServer = new Socket(server.getInetAddress().getHostAddress(), server.getPort());
             pingServer.setSoTimeout(5000);
-            ServerState removedState = servers.remove(server); // get old state, remove old server from map
+            removedState = servers.remove(server); // get old state, remove old server from map
+            removedState.timedout();
+            pcs.firePropertyChange("servers", null, removedState);
             removedState.forceExpiredTimeLimit();
             removedState.migrate(pingServer);
             ObjectOutputStream oos = removedState.getObjectOutputStream();
             ObjectInputStream ois = removedState.getObjectInputStream();
             initConnection(pingServer, oos);
             oos.writeObject("PING");
-            ois.readObject();
+            String response = (String) ois.readObject();
+            System.out.println(response);
             servers.put(pingServer, removedState);
         } catch (IOException | ClassNotFoundException e) {
+            removedState.removed();
+            pcs.firePropertyChange("servers", null, removedState);
             return null;
         }
         return pingServer;
@@ -175,24 +196,14 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     }
 
     private synchronized void nextRun(SimulationSession<S> session) {
-        Socket server = findServer();
-        ServerState serverState;
-        if ( !waitingTasks.isEmpty() && (serverState = servers.get(server)) != null) {
-            int acceptableTasks = serverState.getExpectedTasks();
-            List<SimulationTask<S>> nextTasks = getWaitingTasks(acceptableTasks);
-            if (serverState.canCompleteTask(nextTasks.size())) {
-                run(session, nextTasks, server);
-            } else {
-                waitingTasks.addAll(nextTasks);
-                nextTasks = getWaitingTasks(acceptableTasks / 2);
-                run(session, nextTasks, server);
-            }
-
-        } else if(isCompleted(session)){
+        if(servers.size()==0){
+            System.out.println("No servers available");
+            this.notify();
+        }else if(!waitingTasks.isEmpty()){
+            run(session,new LinkedList<>());
+        }else if(isCompleted(session)){
             closeStreams();
             this.notify();
-        } else {
-            serverQueue.add(server);
         }
     }
 
@@ -246,7 +257,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             state = servers.get(server);
             state.stopRunning();
             state.update(timings);
-            serverQueue.add(server);     
+            //serverQueue.add(server);     
 
 
         } catch (IOException | ClassNotFoundException e) {

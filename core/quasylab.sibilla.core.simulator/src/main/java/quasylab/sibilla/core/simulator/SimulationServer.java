@@ -45,6 +45,7 @@ public class SimulationServer<S> {
                     if(request.equals("PING")){
                         oos.writeObject("PONG");
                         continue;
+                        //while(true);
                     }
                     @SuppressWarnings("unchecked")
                     NetworkTask<S> ntask = ((NetworkTask<S>) deserializer.readObject());

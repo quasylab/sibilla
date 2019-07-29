@@ -10,7 +10,7 @@ public class ServerState {
     private Socket server;
     private int expectedTasks, actualTasks;
     private boolean running;
-    private boolean isRemoved;
+    private boolean isRemoved, isTimeout;
     private long startTime, elapsedTime;
     private long runningTime;
     public double devRTT;
@@ -64,12 +64,13 @@ public class ServerState {
         oos = new ObjectOutputStream(server.getOutputStream());
         ois = new ObjectInputStream(server.getInputStream());
         running = false;
-        isRemoved = false;      
+        isRemoved = false; 
+        isTimeout = false;     
     }
 
     public double getTimeout(){  // after this time, a timeout has occurred and the server is not to be contacted again
-        //return expectedTasks*estimatedRTT + expectedTasks*4*devRTT;
-        return Double.MAX_VALUE;
+        return expectedTasks*estimatedRTT + expectedTasks*4*devRTT;
+        //return Double.MAX_VALUE;
     }
 
     public double getTimeLimit(){ // after this time, the tasks to be sent to this server is to be halved
@@ -98,7 +99,7 @@ public class ServerState {
     }
 
     public boolean isTimeout(){
-        return elapsedTime > getTimeout() ;
+        return isTimeout;
     }
 
     public long getElapsedTime(){
@@ -129,6 +130,12 @@ public class ServerState {
 
     @Override
     public String toString(){
+        if(isRemoved()){
+            return "Server has been removed.";
+        }
+        if(isTimeout()){
+            return "Server has timed out, reconnecting...";
+        }
         return "Task window: "+expectedTasks+" "+
                 "Effective tasks: "+actualTasks+" "+
                 "Window runtime: "+runningTime+" "+
@@ -147,6 +154,10 @@ public class ServerState {
 
     public void removed(){
         isRemoved = true;
+    }
+
+    public void timedout(){
+        isTimeout = true;
     }
 
 }
