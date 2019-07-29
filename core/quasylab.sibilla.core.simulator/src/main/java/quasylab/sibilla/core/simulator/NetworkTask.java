@@ -1,23 +1,24 @@
 package quasylab.sibilla.core.simulator;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class NetworkTask<S> implements Serializable {
     private static final long serialVersionUID = 1L;
-    private SimulationTask<S> task;
-    private int repetitions;
+    private List<SimulationTask<S>> tasks;
 
-    public NetworkTask(SimulationTask<S> task, int repetitions){
-        this.task = task;
-        this.repetitions = repetitions;
+    public NetworkTask(List<SimulationTask<S>> tasks){
+        this.tasks = tasks;
     }
 
-    public SimulationTask<S> getTask() {
-        return task;
+    public NetworkTask(SimulationTask<S> task){
+        this(new LinkedList<>(Arrays.asList(task)));
     }
 
-    public int getRepetitions() {
-        return repetitions;
+    public List<SimulationTask<S>> getTasks() {
+        return tasks;
     }
 
 }
