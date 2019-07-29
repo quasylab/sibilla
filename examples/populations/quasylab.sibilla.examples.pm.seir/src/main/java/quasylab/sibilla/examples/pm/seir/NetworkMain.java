@@ -52,14 +52,14 @@ public class NetworkMain {
 				"S->E", 
 				new Specie[] { new Specie(S), new Specie(I)} , 
 				new Specie[] { new Specie(E), new Specie(I)},  
-				(Function<PopulationState, Double> & Serializable) s -> s.getOccupancy(S)*LAMBDA_E*(s.getOccupancy(I)/N)); 
+				s -> s.getOccupancy(S)*LAMBDA_E*(s.getOccupancy(I)/N)); 
 		
 		@SuppressWarnings("unchecked")
 		PopulationRule rule_E_I = new ReactionRule(
 				"E->I",
 				new Specie[] { new Specie(E) },
 				new Specie[] { new Specie(I) },
-				(Function<PopulationState, Double> & Serializable) s -> s.getOccupancy(E)*LAMBDA_I
+				s -> s.getOccupancy(E)*LAMBDA_I
 		);
 		
 		@SuppressWarnings("unchecked")
@@ -67,7 +67,7 @@ public class NetworkMain {
 				"I->R",
 				new Specie[] { new Specie(I) },
 				new Specie[] { new Specie(R) },
-				(Function<PopulationState, Double> & Serializable) s -> s.getOccupancy(I)*LAMBDA_R
+				s -> s.getOccupancy(I)*LAMBDA_R
 		);
 		
 		PopulationModel f = new PopulationModel( 
