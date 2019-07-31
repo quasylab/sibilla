@@ -2,8 +2,10 @@ package quasylab.sibilla.core.simulator;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
 import java.net.Socket;
 import java.util.HashMap;
@@ -24,7 +26,7 @@ import javax.swing.text.DefaultCaret;
 public class SimulationView<S> {
     private JFrame frame = new JFrame("Sibilla");
     private SimulationManager<S> simManager;
-    private String type;
+    private String type, session;
     private int simulationLength;
     private JProgressBar progressBar;
     private JTabbedPane tabbedPane;
@@ -39,9 +41,10 @@ public class SimulationView<S> {
      * instance = new SimulationView(); return instance; }
      */
 
-    public SimulationView(int iterations, SimulationManager<S> simManager) {
+    public SimulationView(SimulationSession<S> session, SimulationManager<S> simManager) {
         this.simManager = simManager;
-        this.simulationLength = iterations;
+        this.simulationLength = session.getExpectedTasks();
+        this.session = session.toString();
         try {
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
@@ -60,17 +63,17 @@ public class SimulationView<S> {
         panel.setBorder(BorderFactory.createLineBorder(Color.RED));
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTH;
-        c.gridx = 0;
-        c.gridy = 0;
-        panel.add(commonView(), c);
-        c.weightx = 0.5;
-        c.weighty = 0.5;
+        c.insets = new Insets(10,10,10,10);
         c.gridx = 0;
         c.gridy = 1;
+        panel.add(commonView(), c);
+        c.anchor = GridBagConstraints.SOUTH;
+        c.gridx = 0;
+        c.gridy = 0;
         switch(type){
             case "quasylab.sibilla.core.simulator.ThreadSimulationManager": panel.add(threadView(), c); break;
             case "quasylab.sibilla.core.simulator.NetworkSimulationManager": panel.add(networkView(), c); break;
-            case "quasylab.sibilla.core.simulator.SequentialSimulationManager": break;
+            case "quasylab.sibilla.core.simulator.SequentialSimulationManager": panel.add(sequentialView(), c); break;
             default: break;
         }
         return panel;
@@ -78,6 +81,7 @@ public class SimulationView<S> {
 
     private JPanel commonView(){
         JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.NORTH;
         c.gridx = 0;
@@ -85,54 +89,96 @@ public class SimulationView<S> {
         progressBar = new JProgressBar(0, simulationLength);
         progressBar.setValue(0);
         progressBar.setStringPainted(true);
-        panel.add(progressBar);
-        simManager.addPropertyChangeListener("progress", this::progressStatus);
+        progressBar.setPreferredSize(new Dimension(800,30));
+        JPanel progressPanel = new JPanel();
+        progressPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        progressPanel.add(new JLabel("Execution progress: "));
+        progressPanel.add(progressBar);
+        panel.add(progressPanel, c);
+        simManager.addPropertyChangeListener("progress"+session, this::progressStatus);
+        JPanel queuePanel = new JPanel();
         waitingTasks = new JLabel("Tasks in queue: 0");
-        c.gridx = 1;
-        c.gridy = 0;
-        panel.add(waitingTasks);
-        simManager.addPropertyChangeListener("waitingTasks", this::taskQueueStatus);
+        queuePanel.add(waitingTasks);
+        queuePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        c.anchor = GridBagConstraints.WEST;
+        c.gridx = 0;
+        c.gridy = 1;
+        panel.add(queuePanel, c);
+        simManager.addPropertyChangeListener("waitingTasks"+session, this::taskQueueStatus);
+        return panel;
+    }
+
+    private JPanel sequentialView(){
+        JPanel panel = new JPanel();
+        JLabel simulationManager = new JLabel("Sequential Simulation Manager");
+        simulationManager.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 28));
+        panel.add(simulationManager);
         return panel;
     }
 
     private JPanel networkView(){
+        simManager.addPropertyChangeListener("servers"+session, this::serverView);
         simManager.addPropertyChangeListener("servers", this::serverView);
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        JLabel simulationManager = new JLabel("Network Simulation Manager");
+        simulationManager.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 28));
         c.anchor = GridBagConstraints.NORTH;
         c.gridx = 0;
         c.gridy = 0;
+        panel.add(simulationManager,c);
+        c.anchor = GridBagConstraints.LINE_START;
+        c.insets = new Insets(0,0,0,0);
+        c.gridx = 0;
+        c.gridy = 1;
+        panel.add(new JLabel("Simulation Log:"), c);
+        c.gridx = 0;
+        c.gridy = 2;
         tabbedPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
         tabbedPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        tabbedPane.setPreferredSize(new Dimension(1200, 600));
+        tabbedPane.setPreferredSize(new Dimension(1200, 500));
         panel.add(tabbedPane, c);
         return panel;
 
     }
 
     private JPanel threadView(){
-        simManager.addPropertyChangeListener("runtime", this::threadRuntime);
-        simManager.addPropertyChangeListener("threads", this::threadCount);
-        simManager.addPropertyChangeListener("end", evt -> {
+        simManager.addPropertyChangeListener("runtime"+session, this::threadRuntime);
+        simManager.addPropertyChangeListener("threads"+session, this::threadCount);
+        simManager.addPropertyChangeListener("end"+session, evt -> {
             threadCount.setText("Running Tasks: 0");
             threadDetail.append("Simulation Completed.\n");
         });
         JPanel panel = new JPanel(new GridBagLayout());
-        panel.setPreferredSize(new Dimension(1200,600));
+        //panel.setPreferredSize(new Dimension(1200,600));
         GridBagConstraints c = new GridBagConstraints();
         panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        JLabel simulationManager = new JLabel("Multithreading Simulation Manager");
+        simulationManager.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 28));
         c.anchor = GridBagConstraints.NORTH;
         c.gridx = 0;
         c.gridy = 0;
-        panel.add(threadCount, c);
+        c.insets = new Insets(10,10,10,10);
+        panel.add(simulationManager, c);
+        c.anchor = GridBagConstraints.LINE_START;
+        c.insets = new Insets(0,0,0,0);
         c.gridx = 0;
         c.gridy = 1;
+        panel.add(new JLabel("Simulation Log:"), c);
+        c.anchor = GridBagConstraints.SOUTH;
+        c.gridx = 0;
+        c.gridy = 2;
         JScrollPane content = new JScrollPane(threadDetail);
         DefaultCaret caret = (DefaultCaret)threadDetail.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         content.setPreferredSize(new Dimension(1000,400));
         panel.add(content, c);
+        c.anchor = GridBagConstraints.LINE_START;
+        c.gridx = 0;
+        c.gridy = 3;
+        c.insets = new Insets(10,0,10,10);
+        panel.add(threadCount, c);
         return panel;
     }
 
@@ -190,11 +236,12 @@ public class SimulationView<S> {
         }
             int index;
             if((index = tabbedPane.indexOfTab(serverName)) == -1){
-                tabbedPane.addTab(serverName, new JScrollPane(serverDetail(serverName, server)));
-                //frame.pack();
+                JScrollPane scrollPane = new JScrollPane(serverDetail(serverName, server));
+                //scrollPane.setPreferredSize(new Dimension(1000,400));
+                tabbedPane.addTab(serverName, scrollPane);
             }
             else
-                tabbedPane.setComponentAt(index, new JScrollPane(serverDetail(serverName, server)));
+                serverDetail(serverName, server);
         }
 
 

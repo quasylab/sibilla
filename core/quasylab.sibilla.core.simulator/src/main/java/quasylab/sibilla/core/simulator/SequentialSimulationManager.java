@@ -16,8 +16,9 @@ public class SequentialSimulationManager<S> implements SimulationManager<S> {
 
     @Override
     public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function) {
-        new SimulationView<>(expectedTasks, this);
-        return new SimulationSession<S>(expectedTasks, sampling_function);
+        SimulationSession<S> newSession = new SimulationSession<S>(expectedTasks, sampling_function);
+        new SimulationView<>(newSession, this);
+        return newSession;
     }
 
     @Override
@@ -34,7 +35,7 @@ public class SequentialSimulationManager<S> implements SimulationManager<S> {
     @Override
     public void run(SimulationSession<S> session, SimulationTask<S> task) {
         doSample(session.getSamplingFunction(), task.get());
-        pcs.firePropertyChange("progress", session.getExpectedTasks(), session.taskCompleted());
+        pcs.firePropertyChange("progress"+session.toString(), session.getExpectedTasks(), session.taskCompleted());
     }
 
     @Override

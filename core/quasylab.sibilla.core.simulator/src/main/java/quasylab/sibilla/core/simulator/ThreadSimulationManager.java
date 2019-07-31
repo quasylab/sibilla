@@ -25,10 +25,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.LongSummaryStatistics;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
@@ -42,17 +45,21 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     private LinkedList<SimulationTask<S>> tasks = new LinkedList<>();
     private final int concurrentTasks;
     private int runningTasks = 0;
-    private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
+    //private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    private BlockingQueue<SimulationSession<S>> sessions = new LinkedBlockingQueue<>();
 
     public ThreadSimulationManager(int concurrentTasks) {
         this.concurrentTasks = concurrentTasks;
         executor = Executors.newCachedThreadPool();
     }
 
+    @Override
     public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function) {
-        new SimulationView<>(expectedTasks, this);
-        return new SimulationSession<S>(expectedTasks, sampling_function);
+        SimulationSession<S> newSession = new SimulationSession<S>(expectedTasks, sampling_function);
+        sessions.add(newSession);
+        new SimulationView<>(newSession, this);
+        return newSession;
     }
 
     private void doSample(SamplingFunction<S> sampling_function, Trajectory<S> trajectory) {
@@ -62,9 +69,9 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     }
 
     // waits for all tasks to end, then prints timing information to file
-    private void terminate() {
+    private void terminate(SimulationSession<S> session) {
         try {
-            pcs.firePropertyChange("end", null, "");
+            pcs.firePropertyChange("end"+session.toString(), null, "");
             printTimingInformation(System.out);
             printTimingInformation(new PrintStream(new FileOutputStream("thread_data.data", true)));
         } catch (FileNotFoundException e) {
@@ -78,16 +85,33 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     // if no new tasks to run, shutdowns the executor
     private synchronized void manageTask(SimulationSession<S> session, Trajectory<S> trajectory) {
         doSample(session.getSamplingFunction(), trajectory);
-        pcs.firePropertyChange("progress", session.getExpectedTasks(), session.taskCompleted());
+        pcs.firePropertyChange("progress"+session.toString(), session.getExpectedTasks(), session.taskCompleted());
         //pcs.firePropertyChange("runtime", null, tasks);
         runningTasks--;
-        SimulationTask<S> nextTask = waitingTasks.poll();
-        pcs.firePropertyChange("waitingTasks", null, waitingTasks.size());
-        if (nextTask != null) {
-            run(session, nextTask);
-        } else if (isCompleted(session)) {
-            this.notify();
+
+        ////// pick next task
+        SimulationTask<S> nextTask = null;
+        SimulationSession<S> nextSession = null;
+        for(int i = 0; i < sessions.size(); i++){
+            nextSession = sessions.poll();
+            nextTask = nextSession.getQueue().poll();
+            if(nextTask != null){  // session is incomplete and has tasks to execute
+                sessions.add(nextSession);
+                break;
+            }
+            else if(nextSession.getExpectedTasks() > 0){ // session is incomplete but no tasks to execute
+                sessions.add(nextSession);
+            }else if (isCompleted(nextSession)){  // session is complete with no tasks still running
+                this.notifyAll();
+            }
         }
+        //////////
+        pcs.firePropertyChange("waitingTasks"+session.toString(), null, nextSession.getQueue().size());
+        if (nextTask != null) {
+            run(nextSession, nextTask);
+        } /*else if (isCompleted(nextSession)) {
+            this.notify();
+        }*/
     }
 
     private synchronized boolean isCompleted(SimulationSession<S> session) {
@@ -98,19 +122,20 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     @Override
     public synchronized void run(SimulationSession<S> session, SimulationTask<S> task) {
         if (runningTasks < concurrentTasks) {
-            pcs.firePropertyChange("threads", runningTasks, ++runningTasks);
+            pcs.firePropertyChange("threads"+session.toString(), runningTasks, ++runningTasks);
             tasks.add(task);
             CompletableFuture.supplyAsync(task, executor)
-                              .whenComplete((value, error) -> showThreadRuntime(task))
+                              .whenComplete((value, error) -> showThreadRuntime(session, task))
                             .thenAccept((trajectory) -> this.manageTask(session, trajectory));
         } else {
-            waitingTasks.add(task);
-            pcs.firePropertyChange("waitingTasks", null, waitingTasks.size());
+            session.getQueue().add(task);
+            pcs.firePropertyChange("waitingTasks"+session.toString(), null, session.getQueue().size());
         }
     }
 
-    private synchronized void showThreadRuntime(SimulationTask<S> task){
-        pcs.firePropertyChange("runtime", null, task.getElapsedTime());
+    private synchronized void showThreadRuntime(SimulationSession<S> session, SimulationTask<S> task){
+        pcs.firePropertyChange("runtime"+session.toString(), null, task.getElapsedTime());
+        System.out.println(session);
     }
 
     // waiting until executor is shutdown
@@ -119,7 +144,7 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
         while (!isCompleted(session)) {
             this.wait();
         }
-        terminate();
+        terminate(session);
         // executor.shutdown(); // only when recording time
     }
 
