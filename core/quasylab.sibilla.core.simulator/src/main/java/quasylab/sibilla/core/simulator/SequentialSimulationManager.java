@@ -3,11 +3,13 @@ package quasylab.sibilla.core.simulator;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import javax.swing.event.SwingPropertyChangeSupport;
+
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public class SequentialSimulationManager<S> implements SimulationManager<S> {
 
-    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
 
     @Override
     public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
@@ -15,9 +17,10 @@ public class SequentialSimulationManager<S> implements SimulationManager<S> {
     }
 
     @Override
-    public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function) {
+    public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function, boolean enableGUI) {
         SimulationSession<S> newSession = new SimulationSession<S>(expectedTasks, sampling_function);
-        new SimulationView<>(newSession, this);
+        if(enableGUI)
+            new SimulationView<>(newSession, this);
         return newSession;
     }
 
@@ -35,12 +38,17 @@ public class SequentialSimulationManager<S> implements SimulationManager<S> {
     @Override
     public void run(SimulationSession<S> session, SimulationTask<S> task) {
         doSample(session.getSamplingFunction(), task.get());
-        pcs.firePropertyChange("progress"+session.toString(), session.getExpectedTasks(), session.taskCompleted());
+        session.taskCompleted();
+        propertyChange("progress"+session.toString(), session.getExpectedTasks());
     }
 
     @Override
     public void waitTermination(SimulationSession<S> session) throws InterruptedException {
         return;
+    }
+
+    private void propertyChange(String property, Object value){
+        pcs.firePropertyChange(property, null, value);
     }
     
 }

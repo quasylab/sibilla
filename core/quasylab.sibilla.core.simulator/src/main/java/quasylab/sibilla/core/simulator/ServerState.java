@@ -6,8 +6,10 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.List;
 
+import org.nustaq.net.TCPObjectSocket;
+
 public class ServerState {
-    private Socket server;
+    private TCPObjectSocket server;
     private int expectedTasks, actualTasks;
     private boolean running;
     private boolean isRemoved, isTimeout;
@@ -21,10 +23,10 @@ public class ServerState {
     private final static int threshold = 256;
     private final static long maxRunningTime = 3600000000000L; // 1 hour in nanoseconds
 
-    private ObjectOutputStream oos;
-    private ObjectInputStream ois;
+    //private ObjectOutputStream oos;
+    //private ObjectInputStream ois;
 
-    public ServerState(Socket server) throws IOException {
+    public ServerState(TCPObjectSocket server) throws IOException {
         this.server = server;
         expectedTasks = 1;
         actualTasks = 0;
@@ -36,8 +38,8 @@ public class ServerState {
         devRTT = 0;
         sampleRTT = 0;
         estimatedRTT = 0;
-        oos = new ObjectOutputStream(server.getOutputStream());
-        ois = new ObjectInputStream(server.getInputStream());
+        //oos = new ObjectOutputStream(server.getOutputStream());
+        //ois = new ObjectInputStream(server.getInputStream());
     }
 
     public void update(List<Long> executionTimes){
@@ -59,18 +61,18 @@ public class ServerState {
         expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
     }
 
-    public void migrate(Socket server) throws IOException {
+    public void migrate(TCPObjectSocket server) throws IOException {
         this.server = server;
-        oos = new ObjectOutputStream(server.getOutputStream());
-        ois = new ObjectInputStream(server.getInputStream());
+        //oos = new ObjectOutputStream(server.getOutputStream());
+        //ois = new ObjectInputStream(server.getInputStream());
         running = false;
         isRemoved = false; 
         isTimeout = false;     
     }
 
     public double getTimeout(){  // after this time, a timeout has occurred and the server is not to be contacted again
-        return expectedTasks*estimatedRTT + expectedTasks*4*devRTT;
-        //return Double.MAX_VALUE;
+        //return expectedTasks == 1 ? Double.MAX_VALUE : expectedTasks*estimatedRTT + expectedTasks*32*devRTT;
+        return Double.MAX_VALUE;
     }
 
     public double getTimeLimit(){ // after this time, the tasks to be sent to this server is to be halved
@@ -115,7 +117,7 @@ public class ServerState {
         elapsedTime = System.nanoTime() - startTime;
         running = false;
     }
-
+/*
     public ObjectInputStream getObjectInputStream(){
         return ois;
     }
@@ -123,7 +125,7 @@ public class ServerState {
     public ObjectOutputStream getObjectOutputStream(){
         return oos;
     }
-
+*/
     public void printState(){
         System.out.println("Tasks: "+expectedTasks +" devRTT: "+devRTT+" server: "+server);
     }
@@ -144,7 +146,7 @@ public class ServerState {
                 "devRTT: "+devRTT+"\n";
     }
 
-    public Socket getServer(){
+    public TCPObjectSocket getServer(){
         return server;
     }
 

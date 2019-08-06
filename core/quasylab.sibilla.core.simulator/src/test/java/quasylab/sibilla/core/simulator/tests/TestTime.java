@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.LongSummaryStatistics;
 
+import quasylab.sibilla.core.simulator.SequentialSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
@@ -42,8 +43,8 @@ public class TestTime {
 	public final static double LAMBDA_R = 1/7.0;
  	
 	public final static int SAMPLINGS = 100;
-	public final static double DEADLINE = 6000;
-	private static final int REPLICA = 10000;
+	public final static double DEADLINE = 600;
+	private static final int REPLICA = 1000;
 	
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException {
 		List<Long> stats = new ArrayList<>();
@@ -95,7 +96,7 @@ public class TestTime {
 //		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(i) );
+		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(5) );
 
 		sim.setSampling(new SamplingCollection<>(fiSamp,frSamp));
 		long startTime = System.nanoTime();

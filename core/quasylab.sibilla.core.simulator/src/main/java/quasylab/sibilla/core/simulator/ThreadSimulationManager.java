@@ -27,12 +27,16 @@ import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.LongSummaryStatistics;
+import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+
+import javax.swing.SwingUtilities;
+import javax.swing.event.SwingPropertyChangeSupport;
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
@@ -41,13 +45,12 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
  *
  */
 public class ThreadSimulationManager<S> implements SimulationManager<S> {
-    private ExecutorService executor;
-    private LinkedList<SimulationTask<S>> tasks = new LinkedList<>();
+    private static final String loggingFile = "thread_data.data";
+    private final ExecutorService executor;
     private final int concurrentTasks;
+    private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
     private int runningTasks = 0;
-    //private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
-    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-    private BlockingQueue<SimulationSession<S>> sessions = new LinkedBlockingQueue<>();
+    private Queue<SimulationSession<S>> sessions = new LinkedList<>();
 
     public ThreadSimulationManager(int concurrentTasks) {
         this.concurrentTasks = concurrentTasks;
@@ -55,10 +58,11 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     }
 
     @Override
-    public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function) {
+    public synchronized SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function, boolean enableGUI) {
         SimulationSession<S> newSession = new SimulationSession<S>(expectedTasks, sampling_function);
         sessions.add(newSession);
-        new SimulationView<>(newSession, this);
+        if(enableGUI)
+            new SimulationView<>(newSession, this);
         return newSession;
     }
 
@@ -71,24 +75,18 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     // waits for all tasks to end, then prints timing information to file
     private void terminate(SimulationSession<S> session) {
         try {
-            pcs.firePropertyChange("end"+session.toString(), null, "");
-            printTimingInformation(System.out);
-            printTimingInformation(new PrintStream(new FileOutputStream("thread_data.data", true)));
+            propertyChange("end"+session.toString(), getTimingInformation(session));
+            printTimingInformation(getTimingInformation(session), new PrintStream(new FileOutputStream(loggingFile, true)));
+            printTimingInformation(getTimingInformation(session), System.out);
         } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
-
     }
 
-    // samples the trajectory, updates counters, then runs next task.
-    // if no new tasks to run, shutdowns the executor
-    private synchronized void manageTask(SimulationSession<S> session, Trajectory<S> trajectory) {
-        doSample(session.getSamplingFunction(), trajectory);
-        pcs.firePropertyChange("progress"+session.toString(), session.getExpectedTasks(), session.taskCompleted());
-        //pcs.firePropertyChange("runtime", null, tasks);
-        runningTasks--;
+    private void printTimingInformation(String str, PrintStream out){
+        out.println(str);
+    }
 
+    private synchronized void runNextSession(){
         ////// pick next task
         SimulationTask<S> nextTask = null;
         SimulationSession<S> nextSession = null;
@@ -106,12 +104,19 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
             }
         }
         //////////
-        pcs.firePropertyChange("waitingTasks"+session.toString(), null, nextSession.getQueue().size());
+        propertyChange("waitingTasks"+nextSession.toString(), nextSession.getQueue().size());
         if (nextTask != null) {
             run(nextSession, nextTask);
-        } /*else if (isCompleted(nextSession)) {
-            this.notify();
-        }*/
+        }
+    }
+
+    // samples the trajectory, updates counters, then runs next task.
+    // if no new tasks to run, shutdowns the executor
+    private synchronized void manageTask(SimulationSession<S> session, Trajectory<S> trajectory) {
+        doSample(session.getSamplingFunction(), trajectory);
+        session.taskCompleted();
+        runningTasks--;
+        propertyChange("progress"+session.toString(), session.getExpectedTasks());
     }
 
     private synchronized boolean isCompleted(SimulationSession<S> session) {
@@ -122,20 +127,21 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     @Override
     public synchronized void run(SimulationSession<S> session, SimulationTask<S> task) {
         if (runningTasks < concurrentTasks) {
-            pcs.firePropertyChange("threads"+session.toString(), runningTasks, ++runningTasks);
-            tasks.add(task);
+            runningTasks++;
+            propertyChange("threads"+session.toString(), runningTasks);
+            session.getTasks().add(task);
             CompletableFuture.supplyAsync(task, executor)
-                              .whenComplete((value, error) -> showThreadRuntime(session, task))
-                            .thenAccept((trajectory) -> this.manageTask(session, trajectory));
+                             .whenComplete((value, error) -> showThreadRuntime(session, task))
+                             .thenAccept((trajectory) -> manageTask(session, trajectory))
+                             .thenRun(this::runNextSession);
         } else {
             session.getQueue().add(task);
-            pcs.firePropertyChange("waitingTasks"+session.toString(), null, session.getQueue().size());
+            propertyChange("waitingTasks"+session.toString(), session.getQueue().size());
         }
     }
 
     private synchronized void showThreadRuntime(SimulationSession<S> session, SimulationTask<S> task){
-        pcs.firePropertyChange("runtime"+session.toString(), null, task.getElapsedTime());
-        System.out.println(session);
+        propertyChange("runtime"+session.toString(), task.getElapsedTime());
     }
 
     // waiting until executor is shutdown
@@ -145,26 +151,30 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
             this.wait();
         }
         terminate(session);
-        // executor.shutdown(); // only when recording time
+        //executor.shutdown(); // only when recording time
     }
 
-    private void printTimingInformation(PrintStream out) {
-        LongSummaryStatistics statistics = tasks.stream().map(x -> x.getElapsedTime()).mapToLong(Long::valueOf)
+    private String getTimingInformation(SimulationSession<S> session) {
+        LongSummaryStatistics statistics = session.getTasks().stream().map(x -> x.getElapsedTime()).mapToLong(Long::valueOf)
                 .summaryStatistics();
-        out.println(concurrentTasks + ";" + ((ThreadPoolExecutor) executor).getPoolSize() + ";"
-                + statistics.getAverage() + ";" + statistics.getMax() + ";" + statistics.getMin());
+        return concurrentTasks + ";" + ((ThreadPoolExecutor) executor).getPoolSize() + ";"
+                + statistics.getAverage() + ";" + statistics.getMax() + ";" + statistics.getMin();
     }
-
     
 
     @Override
     public long reach() {
-        return tasks.stream().filter(task -> task.reach() == true).count();
+        //return tasks.stream().filter(task -> task.reach() == true).count();
+        return 0;
     }
 
     @Override
     public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
         this.pcs.addPropertyChangeListener(property, listener);
+    }
+
+    private synchronized void propertyChange(String property, Object value){
+        pcs.firePropertyChange(property, null, value);
     }
     
 }

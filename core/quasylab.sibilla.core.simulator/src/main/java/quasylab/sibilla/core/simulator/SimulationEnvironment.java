@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
+
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 import quasylab.sibilla.core.simulator.util.WeightedElement;
@@ -40,11 +41,6 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 	private SamplingFunction<S> sampling_function;
 	private int iterations = 0;
 	private SimulationManager<S> simManager;
-	/*private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-
-	public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
-		this.pcs.addPropertyChangeListener(property, listener);
-	}*/
 
 	public SimulationEnvironment(M model) {
 		this(model, new ThreadSimulationManager<S>(1));
@@ -74,9 +70,8 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 
 	public synchronized void simulate(SimulationMonitor monitor, int iterations, double deadline) throws InterruptedException {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
-		SimulationSession<S> session1 = simManager.newSession(iterations, sampling_function);
-		SimulationSession<S> session2 = simManager.newSession(iterations, sampling_function);
-		//this.addPropertyChangeListener("iterations", new SimulationView(iterations));
+		SimulationSession<S> session1 = simManager.newSession(iterations, sampling_function, true);
+		//SimulationSession<S> session2 = simManager.newSession(iterations, sampling_function);
 		rgi.register(random);
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			if (monitor != null) {
@@ -89,8 +84,8 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 			System.out.flush();
 			SimulationTask<S> task = new SimulationTask<>(random, model, deadline);
 			simManager.run(session1, task);
-			task = new SimulationTask<>(random, model, deadline);
-			simManager.run(session2, task);
+			//task = new SimulationTask<>(random, model, deadline);
+			//simManager.run(session2, task);
 			if (monitor != null) {
 				monitor.endSimulation(i);
 			}
@@ -99,12 +94,11 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 				System.out.print("\n");
 			}
 			System.out.flush();
-			//pcs.firePropertyChange("iterations", this.iterations, ++this.iterations);
 			this.iterations++;
 		}
 		rgi.unregister();
 		simManager.waitTermination(session1);
-		simManager.waitTermination(session2);
+		//simManager.waitTermination(session2);
 	}
 
 	public synchronized void simulate(int iterations, double deadline) throws InterruptedException {
@@ -128,7 +122,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 			Predicate<? super S> psi) throws InterruptedException {
 		double n = Math.ceil(Math.log(2 / delta) / (2 * error));
 		double count = 0;
-		SimulationSession<S> session = simManager.newSession((int) n, null);
+		SimulationSession<S> session = simManager.newSession((int) n, null, true);
 		for (int i = 0; i < n; i++) {
 			SimulationTask<S> simulationRun = new SimulationTask<>(random, model, deadline, phi, psi);
 			simManager.run(session, simulationRun);																					// iteration

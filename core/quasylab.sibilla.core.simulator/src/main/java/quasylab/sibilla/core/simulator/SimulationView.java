@@ -119,6 +119,9 @@ public class SimulationView<S> {
     private JPanel networkView(){
         simManager.addPropertyChangeListener("servers"+session, this::serverView);
         simManager.addPropertyChangeListener("servers", this::serverView);
+        simManager.addPropertyChangeListener("end"+session, evt -> {
+            serverData.values().forEach(x->x.append("Simulation Completed."));
+        });
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         panel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -146,10 +149,7 @@ public class SimulationView<S> {
     private JPanel threadView(){
         simManager.addPropertyChangeListener("runtime"+session, this::threadRuntime);
         simManager.addPropertyChangeListener("threads"+session, this::threadCount);
-        simManager.addPropertyChangeListener("end"+session, evt -> {
-            threadCount.setText("Running Tasks: 0");
-            threadDetail.append("Simulation Completed.\n");
-        });
+        simManager.addPropertyChangeListener("end"+session, this::endThreadSimulation);
         JPanel panel = new JPanel(new GridBagLayout());
         //panel.setPreferredSize(new Dimension(1200,600));
         GridBagConstraints c = new GridBagConstraints();
@@ -225,12 +225,19 @@ public class SimulationView<S> {
         this.waitingTasks.setText("Tasks in queue: "+waitingTasks);
     }
 
+    private void endThreadSimulation(PropertyChangeEvent evt){
+        String[] str = evt.getNewValue().toString().split(";");
+        threadCount.setText("Running Tasks: 0");
+        threadDetail.append("Simulation Completed.\n\n\nSimulation statistics:\n");
+        threadDetail.append("Concurrent tasks: "+str[0]+"\nPool size: "+str[1]+"\nAverage runtime: "+str[2]+"ns\nMaximum runtime: "+str[3]+"ns\nMinimum runtime: "+str[4]+"ns\n");
+    }
+
 
     private void serverView(PropertyChangeEvent evt){
         ServerState server = (ServerState) evt.getNewValue();
         String serverName = null;
         try{
-        serverName = server.getServer().getInetAddress().getHostAddress()+":"+server.getServer().getPort();
+        serverName = server.getServer().getSocket().getInetAddress().getHostAddress()+":"+server.getServer().getSocket().getPort();
         }catch(NullPointerException e){
             System.out.println("debug");
         }
