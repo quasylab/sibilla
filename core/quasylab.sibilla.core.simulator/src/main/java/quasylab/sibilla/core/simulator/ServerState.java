@@ -44,6 +44,9 @@ public class ServerState {
 
     public void update(long elapsedTime, int tasksSent){
 
+        actualTasks = tasksSent;
+        runningTime = elapsedTime;
+
         if(devRTT != 0.0){
             if(runningTime >= getTimeLimit()){
                 expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
@@ -56,11 +59,9 @@ public class ServerState {
             expectedTasks = 2;
         }
 
-        actualTasks = tasksSent;
-        runningTime = elapsedTime;
         sampleRTT = runningTime / actualTasks;
         estimatedRTT = alpha * sampleRTT + (1-alpha) * estimatedRTT;
-        devRTT = devRTT == 0 ? sampleRTT * 2 : beta * Math.abs(sampleRTT - estimatedRTT) + (1-beta)*devRTT;
+        devRTT = devRTT == 0.0 ? sampleRTT * 2 : beta * Math.abs(sampleRTT - estimatedRTT) + (1-beta)*devRTT;
     }
 
     public void forceExpiredTimeLimit(){
