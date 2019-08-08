@@ -35,26 +35,32 @@ public class ServerState {
         startTime = 0L;
         elapsedTime = 0L;
         runningTime = 0L;
-        devRTT = 0;
-        sampleRTT = 0;
-        estimatedRTT = 0;
+        devRTT = 0.0;
+        sampleRTT = 0.0;
+        estimatedRTT = 0.0;
         //oos = new ObjectOutputStream(server.getOutputStream());
         //ois = new ObjectInputStream(server.getInputStream());
     }
 
-    public void update(List<Long> executionTimes){
-        actualTasks = executionTimes.size();
-        runningTime = executionTimes.stream().reduce(0L, Long::sum);
+    public void update(long elapsedTime, int tasksSent){
+
+        if(devRTT != 0.0){
+            if(runningTime >= getTimeLimit()){
+                expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
+            }else if(expectedTasks < threshold){
+                expectedTasks = expectedTasks * 2;
+            }else if(expectedTasks >= threshold){
+                expectedTasks = expectedTasks + 1;
+            }
+        }else{
+            expectedTasks = 2;
+        }
+
+        actualTasks = tasksSent;
+        runningTime = elapsedTime;
         sampleRTT = runningTime / actualTasks;
         estimatedRTT = alpha * sampleRTT + (1-alpha) * estimatedRTT;
-        devRTT = expectedTasks == 1 ? sampleRTT * 2 : beta * Math.abs(sampleRTT - estimatedRTT) + (1-beta)*devRTT;
-        if(runningTime >= getTimeLimit()){
-            expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
-        }else if(expectedTasks < threshold){
-            expectedTasks = expectedTasks * 2;
-        }else if(expectedTasks >= threshold){
-            expectedTasks = expectedTasks + 1;
-        }
+        devRTT = devRTT == 0 ? sampleRTT * 2 : beta * Math.abs(sampleRTT - estimatedRTT) + (1-beta)*devRTT;
     }
 
     public void forceExpiredTimeLimit(){
@@ -62,17 +68,17 @@ public class ServerState {
     }
 
     public void migrate(TCPObjectSocket server) throws IOException {
+        this.server.close();
         this.server = server;
-        //oos = new ObjectOutputStream(server.getOutputStream());
-        //ois = new ObjectInputStream(server.getInputStream());
         running = false;
         isRemoved = false; 
         isTimeout = false;     
     }
 
     public double getTimeout(){  // after this time, a timeout has occurred and the server is not to be contacted again
-        //return expectedTasks == 1 ? Double.MAX_VALUE : expectedTasks*estimatedRTT + expectedTasks*32*devRTT;
-        return Double.MAX_VALUE;
+        double val = expectedTasks == 1 ? Double.MAX_VALUE : expectedTasks*estimatedRTT + expectedTasks*4*devRTT;
+        return expectedTasks == 1 ? Double.MAX_VALUE : expectedTasks*estimatedRTT + expectedTasks*4*devRTT;
+        //return Double.MAX_VALUE;
     }
 
     public double getTimeLimit(){ // after this time, the tasks to be sent to this server is to be halved
@@ -138,12 +144,14 @@ public class ServerState {
         if(isTimeout()){
             return "Server has timed out, reconnecting...";
         }
-        return "Task window: "+expectedTasks+" "+
-                "Effective tasks: "+actualTasks+" "+
-                "Window runtime: "+runningTime+" "+
-                "sampleRTT: "+sampleRTT+" "+
-                "estimatedRTT: "+estimatedRTT+" "+
-                "devRTT: "+devRTT+"\n";
+        return  "Tasks received: "+actualTasks+" "+       
+                "Window runtime: "+runningTime+"ns "+
+                "sampleRTT: "+sampleRTT+"ns "+
+                "estimatedRTT: "+estimatedRTT+"ns "+
+                "devRTT: "+devRTT+"ns "+
+                "Next task window: "+expectedTasks+" "+
+                "Next time limit: "+getTimeLimit()+"ns "+
+                "Next timeout: "+getTimeout()+"ns\n";
     }
 
     public TCPObjectSocket getServer(){

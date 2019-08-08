@@ -94,13 +94,13 @@ public class NetworkMain {
 		//SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS) );
 		
 		
-		/*SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new NetworkSimulationManager<>(new InetAddress[]{InetAddress.getLocalHost(), InetAddress.getLocalHost(), InetAddress.getLocalHost()},
+		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new NetworkSimulationManager<>(new InetAddress[]{InetAddress.getByName("192.168.1.64"), InetAddress.getByName("192.168.1.64"), InetAddress.getByName("192.168.1.64")},
 																																			new int[]{8080, 8081, 8082},
-																																	"quasylab.sibilla.examples.pm.seir.NetworkMain" ));*/
+																																	"quasylab.sibilla.examples.pm.seir.NetworkMain" ));
 
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new NetworkSimulationManager<>(new InetAddress[]{InetAddress.getByName("192.168.1.64")},
+		/*SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new NetworkSimulationManager<>(new InetAddress[]{InetAddress.getByName("192.168.1.64")},
 																																	new int[]{8080},
-																															"quasylab.sibilla.examples.pm.seir.NetworkMain"));																															
+																															"quasylab.sibilla.examples.pm.seir.NetworkMain"));*/																													
 
 		sim.setSampling(new SamplingCollection<>(fiSamp,frSamp));
 

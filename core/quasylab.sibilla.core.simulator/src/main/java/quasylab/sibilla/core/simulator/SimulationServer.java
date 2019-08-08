@@ -57,7 +57,7 @@ public class SimulationServer<S> {
                         futures[i] = CompletableFuture.supplyAsync(tasks.get(i), executor);
                     }
                     CompletableFuture.allOf(futures).join();
-                    tasks.stream().forEach(x -> results.add(new ComputationResult<>(x.getTrajectory(), x.getElapsedTime())));
+                    //tasks.stream().forEach(x -> results.add(new ComputationResult<>(x.getTrajectory(), x.getElapsedTime())));
                     oos.writeObject(results);
                 }
 

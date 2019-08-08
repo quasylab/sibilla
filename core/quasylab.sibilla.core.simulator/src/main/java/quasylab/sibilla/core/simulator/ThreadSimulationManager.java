@@ -151,7 +151,7 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
             this.wait();
         }
         terminate(session);
-        //executor.shutdown(); // only when recording time
+        executor.shutdown(); // only when recording time
     }
 
     private String getTimingInformation(SimulationSession<S> session) {
