@@ -164,7 +164,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         }
 
         /////////////////////////
-        nextRun(nextSession); 
+        runSelectedSession(nextSession); 
     }
 
     private  TCPObjectSocket manageTimeout(TCPObjectSocket server, SimulationSession<S> session){
@@ -205,7 +205,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         workingServers--;
     }
 
-    private synchronized void nextRun(SimulationSession<S> session) {
+    private synchronized void runSelectedSession(SimulationSession<S> session) {
         if(servers.size()==0){
             this.notifyAll();
         }else if(!session.getQueue().isEmpty()){
