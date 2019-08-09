@@ -1,19 +1,13 @@
 package quasylab.sibilla.core.simulator;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
-import java.util.List;
 
 import org.nustaq.net.TCPObjectSocket;
 
 public class ServerState {
     private TCPObjectSocket server;
     private int expectedTasks, actualTasks;
-    private boolean running;
     private boolean isRemoved, isTimeout;
-    private long startTime, elapsedTime;
     private long runningTime;
     public double devRTT;
     private double sampleRTT;
@@ -30,16 +24,12 @@ public class ServerState {
         this.server = server;
         expectedTasks = 1;
         actualTasks = 0;
-        running = false;
         isRemoved = false;
-        startTime = 0L;
-        elapsedTime = 0L;
+        isTimeout = false;
         runningTime = 0L;
         devRTT = 0.0;
         sampleRTT = 0.0;
         estimatedRTT = 0.0;
-        //oos = new ObjectOutputStream(server.getOutputStream());
-        //ois = new ObjectInputStream(server.getInputStream());
     }
 
     public void update(long elapsedTime, int tasksSent){
@@ -71,14 +61,12 @@ public class ServerState {
     public void migrate(TCPObjectSocket server) throws IOException {
         this.server.close();
         this.server = server;
-        running = false;
         isRemoved = false; 
         isTimeout = false;     
     }
 
     public double getTimeout(){  // after this time, a timeout has occurred and the server is not to be contacted again
-        double val = expectedTasks == 1 ? Double.MAX_VALUE : expectedTasks*estimatedRTT + expectedTasks*4*devRTT;
-        return expectedTasks == 1 ? Double.MAX_VALUE : expectedTasks*estimatedRTT + expectedTasks*4*devRTT;
+        return expectedTasks == 1 ? Double.MAX_VALUE : expectedTasks*estimatedRTT + expectedTasks*16*devRTT;
         //return Double.MAX_VALUE;
     }
 
@@ -103,38 +91,8 @@ public class ServerState {
         return expectedTasks;
     }
 
-    public boolean isRunning(){
-        return running;
-    }
-
     public boolean isTimeout(){
         return isTimeout;
-    }
-
-    public long getElapsedTime(){
-        return (elapsedTime =  System.nanoTime() - startTime);
-    }
-
-    public void startRunning(){
-        running = true;
-        startTime = System.nanoTime();
-    }
-
-    public void stopRunning(){
-        elapsedTime = System.nanoTime() - startTime;
-        running = false;
-    }
-/*
-    public ObjectInputStream getObjectInputStream(){
-        return ois;
-    }
-
-    public ObjectOutputStream getObjectOutputStream(){
-        return oos;
-    }
-*/
-    public void printState(){
-        System.out.println("Tasks: "+expectedTasks +" devRTT: "+devRTT+" server: "+server);
     }
 
     @Override

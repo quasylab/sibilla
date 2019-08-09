@@ -20,22 +20,17 @@
 package quasylab.sibilla.core.simulator;
 
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.LongSummaryStatistics;
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import javax.swing.SwingUtilities;
 import javax.swing.event.SwingPropertyChangeSupport;
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
@@ -58,7 +53,7 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     }
 
     @Override
-    public synchronized SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function, boolean enableGUI) {
+    public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function, boolean enableGUI) {
         SimulationSession<S> newSession = new SimulationSession<S>(expectedTasks, sampling_function);
         sessions.add(newSession);
         if(enableGUI)
@@ -66,7 +61,7 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
         return newSession;
     }
 
-    private void doSample(SamplingFunction<S> sampling_function, Trajectory<S> trajectory) {
+    private synchronized void doSample(SamplingFunction<S> sampling_function, Trajectory<S> trajectory) {
         if (sampling_function != null) {
             trajectory.sample(sampling_function);
         }
@@ -140,7 +135,7 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
         }
     }
 
-    private synchronized void showThreadRuntime(SimulationSession<S> session, SimulationTask<S> task){
+    private void showThreadRuntime(SimulationSession<S> session, SimulationTask<S> task){
         propertyChange("runtime"+session.toString(), task.getElapsedTime());
     }
 
@@ -151,7 +146,7 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
             this.wait();
         }
         terminate(session);
-        executor.shutdown(); // only when recording time
+        // executor.shutdown(); // only when recording time
     }
 
     private String getTimingInformation(SimulationSession<S> session) {
@@ -173,7 +168,7 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
         this.pcs.addPropertyChangeListener(property, listener);
     }
 
-    private synchronized void propertyChange(String property, Object value){
+    private void propertyChange(String property, Object value){
         pcs.firePropertyChange(property, null, value);
     }
     

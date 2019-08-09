@@ -1,13 +1,11 @@
 package quasylab.sibilla.core.simulator;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
-import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,12 +32,6 @@ public class SimulationView<S> {
     private Map<String, JTextArea> serverData = new HashMap<>();
     private JTextArea threadDetail = new JTextArea();
     private JLabel threadCount = new JLabel("Running Tasks: 0");
-    /*
-     * private static SimulationView instance;
-     * 
-     * public static SimulationView getSimulationView(){ if(instance == null)
-     * instance = new SimulationView(); return instance; }
-     */
 
     public SimulationView(SimulationSession<S> session, SimulationManager<S> simManager) {
         this.simManager = simManager;
@@ -53,7 +45,6 @@ public class SimulationView<S> {
         }
         type = simManager.getClass().getName();
         frame.setContentPane(createView(type));
-        //frame.getContentPane().setPreferredSize(new Dimension(1300, 700));
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setVisible(true);
     }
@@ -92,9 +83,7 @@ public class SimulationView<S> {
         progressBar = new JProgressBar(0, simulationLength);
         progressBar.setValue(0);
         progressBar.setStringPainted(true);
-        //progressBar.setPreferredSize(new Dimension(800,30));
         JPanel progressPanel = new JPanel(new GridBagLayout());
-        //progressPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         c.gridx = 0;
         c.gridy = 0;
         progressPanel.add(new JLabel("Execution progress: "), c);
@@ -114,7 +103,6 @@ public class SimulationView<S> {
         c.weighty = 0.0;
         c.anchor = GridBagConstraints.WEST;
         queuePanel.add(waitingTasks, c);
-        //queuePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         c.anchor = GridBagConstraints.WEST;
         c.gridx = 0;
         c.gridy = 1;
@@ -170,7 +158,6 @@ public class SimulationView<S> {
         simManager.addPropertyChangeListener("threads"+session, this::threadCount);
         simManager.addPropertyChangeListener("end"+session, this::endThreadSimulation);
         JPanel panel = new JPanel(new GridBagLayout());
-        //panel.setPreferredSize(new Dimension(1200,600));
         GridBagConstraints c = new GridBagConstraints();
         panel.setBorder(BorderFactory.createLineBorder(Color.BLACK,2,true));
         JLabel simulationManager = new JLabel("Multithreading Simulation Manager");
@@ -196,7 +183,6 @@ public class SimulationView<S> {
         content.setPreferredSize(panel.getSize());
         DefaultCaret caret = (DefaultCaret)threadDetail.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-        //content.setPreferredSize(new Dimension(1000,400));
         panel.add(content, c);
         c.anchor = GridBagConstraints.LINE_START;
         c.gridx = 0;
@@ -258,16 +244,14 @@ public class SimulationView<S> {
         String[] data = (String[]) evt.getNewValue();
         String serverState = data[1];
         String serverName = data[0];
-            int index;
-            if((index = tabbedPane.indexOfTab(serverName)) == -1){
-                JScrollPane scrollPane = new JScrollPane();
-                scrollPane.setViewportView(serverDetail(serverName, serverState));
-                scrollPane.setPreferredSize(tabbedPane.getSize());
-                //scrollPane.setPreferredSize(new Dimension(1000,400));
-                tabbedPane.addTab(serverName, scrollPane);
-            }
-            else
-                serverDetail(serverName, serverState);
+        if(tabbedPane.indexOfTab(serverName) == -1){
+            JScrollPane scrollPane = new JScrollPane();
+            scrollPane.setViewportView(serverDetail(serverName, serverState));
+            scrollPane.setPreferredSize(tabbedPane.getSize());
+            tabbedPane.addTab(serverName, scrollPane);
+        }
+        else
+            serverDetail(serverName, serverState);
         }
 
 

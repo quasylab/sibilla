@@ -3,11 +3,9 @@
  */
 package quasylab.sibilla.examples.pm.seir;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.function.Function;
 import java.io.Serializable;
 

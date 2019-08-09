@@ -20,16 +20,10 @@
 package quasylab.sibilla.core.simulator;
 
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.InetAddress;
-import java.net.Socket;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -37,13 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.swing.event.SwingPropertyChangeSupport;
 
@@ -62,9 +52,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     private BlockingQueue<TCPObjectSocket> serverQueue;
     private ExecutorService executor;
     private int workingServers = 0;
-    // private BlockingQueue<SimulationTask<S>> waitingTasks = new
-    // LinkedBlockingQueue<>();
-    private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);    private int c = 0, r = 0;
+    private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
     private BlockingQueue<SimulationSession<S>> sessions = new LinkedBlockingQueue<>();
 
     public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
@@ -78,24 +66,21 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         for (int i = 0; i < servers.length; i++) {
             TCPObjectSocket server = new TCPObjectSocket(servers[i].getHostAddress(), ports[i]);
             this.servers.put(server, new ServerState(server));
-            // ObjectOutputStream oos = this.servers.get(server).getObjectOutputStream();
-            initConnection(server);
+            try {
+                initConnection(server);
+            } catch (Exception e) {
+                this.servers.remove(server);
+            }
         }
         serverQueue = new LinkedBlockingQueue<>(this.servers.keySet());
     }
 
-    private void initConnection(TCPObjectSocket server) {
-
-        try {
-            byte[] toSend = ClassBytesLoader.loadClassBytes(modelName);
-            server.writeObject(modelName);
-            server.flush();
-            server.writeObject(toSend);
-            server.flush();
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    private void initConnection(TCPObjectSocket server) throws Exception{
+        byte[] classBytes = ClassBytesLoader.loadClassBytes(modelName);
+        server.writeObject(modelName);
+        server.flush();
+        server.writeObject(classBytes);
+        server.flush();
     }
 
     @Override
@@ -112,15 +97,12 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     }
 
     @Override
-    public synchronized void run(SimulationSession<S> session, SimulationTask<S> task) {
+    public void run(SimulationSession<S> session, SimulationTask<S> task) {
         session.getQueue().add(task);
-        /*if(session.getExpectedTasks() != session.getQueue().size())
-            return;*/
         run(session);
     }
 
-    private synchronized void run(SimulationSession<S> session) {
-        //System.out.println("map size: "+servers.size()+" queue size: "+serverQueue.size());
+    private void run(SimulationSession<S> session) {
         TCPObjectSocket server = findServer();
         List<SimulationTask<S>> toRun;
         if (server != null){
@@ -128,17 +110,14 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             int acceptableTasks = serverState.getExpectedTasks();
             toRun = getWaitingTasks(session, acceptableTasks);
             if (!serverState.canCompleteTask(toRun.size())) {
-                System.out.println("canCompleteFired");
                 session.getQueue().addAll(toRun);
                 toRun = getWaitingTasks(session, acceptableTasks==1 ? 1 : acceptableTasks / 2);
             }
             final List<SimulationTask<S>> selectedTasks = toRun;
             NetworkTask<S> networkTask = new NetworkTask<S>(selectedTasks);
             workingServers++;
-            //serverState.startRunning();
             CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
-                             //.orTimeout((long)serverState.getTimeout(), TimeUnit.NANOSECONDS)
-                             .whenComplete((value, error) -> timeoutHandler(value, error, session, selectedTasks, server));
+                             .whenComplete((value, error) -> manageResult(value, error, session, selectedTasks, server));
         }
         propertyChange("waitingTasks"+session.toString(), session.getQueue().size());
     }
@@ -147,29 +126,28 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         return serverQueue.poll();
     }
 
-    private  void timeoutHandler(List<Trajectory<S>> value, Throwable error, SimulationSession<S> session, List<SimulationTask<S>> tasks, TCPObjectSocket server){
+    private void manageResult(List<Trajectory<S>> value, Throwable error, SimulationSession<S> session, List<SimulationTask<S>> tasks, TCPObjectSocket server){
         if(error!=null){
-            System.out.println("Timeout");
             //timeout occurred, contact server
             TCPObjectSocket newServer;
             if((newServer = manageTimeout(server, session))!= null){
-                // server responded: abort computation, retry with half
+                // server responded
                 serverQueue.add(newServer); // add new server to queue, old server won't return                                                   
-                System.out.println("Server refreshed");
-            }else{
-                // server not responding, remove server
-                System.out.println("server deleted");
             }
-            //both cases: 
             workingServers--;
             session.getQueue().addAll(tasks);
         }else{
             //timeout not occurred, continue as usual
-            //System.out.println("Nothing to report");
             serverQueue.add(server); 
             manageTask(session, value);
             propertyChange("servers"+session.toString(), new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), servers.get(server).toString()});
         }
+
+        runNextSession();
+
+    }
+
+    private void runNextSession(){
         ///// select new session
         SimulationSession<S> nextSession = null;
         for(int i = 0; i < sessions.size(); i++){
@@ -181,13 +159,12 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             else if(nextSession.getExpectedTasks() > 0){ // session is incomplete but no tasks to execute
                 sessions.add(nextSession);
             }else if(isCompleted(nextSession)){ // session is complete with no tasks still running
-                terminateSession(session);
+                terminateSession(nextSession);
             }
         }
 
         /////////////////////////
         nextRun(nextSession); 
-
     }
 
     private  TCPObjectSocket manageTimeout(TCPObjectSocket server, SimulationSession<S> session){
@@ -195,22 +172,24 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         ServerState removedState = null;
         try {
             removedState = servers.remove(server); // get old state, remove old server from map
-            removedState.timedout();
+            removedState.timedout();  // mark server as timed out and update GUI
             propertyChange("servers"+session.toString(), new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), removedState.toString()});
-            pingServer = new TCPObjectSocket(server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort());
-            pingServer.getSocket().setSoTimeout(5000);
-            //ObjectOutputStream oos = removedState.getObjectOutputStream();
-            //ObjectInputStream ois = removedState.getObjectInputStream();
-            initConnection(pingServer);
-            pingServer.writeObject("PING");
+            pingServer = new TCPObjectSocket(server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort()); // start new connection
+            pingServer.getSocket().setSoTimeout(5000); // set 5 seconds timeout on read operations
+            initConnection(pingServer); // initialize connection sending model data
+            pingServer.writeObject("PING"); // send ping request
             pingServer.flush();
-            String response = (String) pingServer.readObject();
-            System.out.println(response);
-            removedState.forceExpiredTimeLimit();
-            removedState.migrate(pingServer);
-            servers.put(pingServer, removedState);
+            String response = (String) pingServer.readObject(); //wait for response
+            if(!response.equals("PONG")){
+                throw new IllegalStateException("Expected a different reply!");
+            }
+            // response received before time limit:
+            removedState.forceExpiredTimeLimit(); // halve the task window
+            removedState.migrate(pingServer); // change socket in serverstate
+            servers.put(pingServer, removedState); //update hash map
         } catch (Exception e) {
-            removedState.removed();
+            // time limit expired, or some other error happened
+            removedState.removed(); //mark server as removed and update GUI
             propertyChange("servers"+session.toString(), new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), removedState.toString()});
             return null;
         }
@@ -228,7 +207,6 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
 
     private synchronized void nextRun(SimulationSession<S> session) {
         if(servers.size()==0){
-            System.out.println("No servers available");
             this.notifyAll();
         }else if(!session.getQueue().isEmpty()){
             run(session);
@@ -260,24 +238,17 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     }
 
     private  List<Trajectory<S>> send(NetworkTask<S> networkTask, TCPObjectSocket server){
-        ObjectOutputStream oos;
-        ObjectInputStream ois;
         List<Trajectory<S>> trajectories = new LinkedList<>();
         long elapsedTime;
         ServerState state = servers.get(server);
         
         try {
-
-            //oos = servers.get(server).getObjectOutputStream();
-            //ois = servers.get(server).getObjectInputStream();
-
             server.writeObject("TASK");
             server.flush();
             server.writeObject(networkTask);
             server.flush();
 
             server.getSocket().setSoTimeout((int)(state.getTimeout() / 1000000));
-            System.out.println((state.getTimeout() / 1000000));
 
             @SuppressWarnings("unchecked")
             ComputationResult<S> result = (ComputationResult<S>) server.readObject();
@@ -285,11 +256,8 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             trajectories = result.getResults();
             elapsedTime = result.getElapsedTime();
 
-            //state.stopRunning();
             state.update(elapsedTime, trajectories.size());  
-            //System.out.println("updated"); 
         }catch(SocketTimeoutException e){
-
 
             throw new RuntimeException();
 
@@ -300,12 +268,13 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         return trajectories;
     }
 
-    private void doSample(SamplingFunction<S> sampling_function, Trajectory<S> trajectory) {
+
+    
+    private synchronized void doSample(SamplingFunction<S> sampling_function, Trajectory<S> trajectory) {
         if (sampling_function != null) {
             trajectory.sample(sampling_function);
         }
     }
-
 
     @Override
     public synchronized void waitTermination(SimulationSession<S> session) throws InterruptedException {
@@ -315,7 +284,6 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             this.wait();
         } 
         propertyChange("end"+session.toString(), "");
-        System.out.println("Completed");
     }
  
     @Override

@@ -42,9 +42,9 @@ public class TestTime {
 	public final static double LAMBDA_I = 1/3.0;
 	public final static double LAMBDA_R = 1/7.0;
  	
-	public final static int SAMPLINGS = 1000;
-	public final static double DEADLINE = 6000;
-	private static final int REPLICA = 10000;
+	public final static int SAMPLINGS = 100;
+	public final static double DEADLINE = 600;
+	private static final int REPLICA = 1000;
 	
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException {
 		List<Long> stats = new ArrayList<>();
