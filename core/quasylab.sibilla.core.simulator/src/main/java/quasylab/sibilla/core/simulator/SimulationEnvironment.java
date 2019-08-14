@@ -128,7 +128,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 			simManager.run(session, simulationRun);																					// iteration
 		}
 		simManager.waitTermination(session);
-		count = simManager.reach();
+		count = simManager.reach(session);
 		return count / n;
 	}
 

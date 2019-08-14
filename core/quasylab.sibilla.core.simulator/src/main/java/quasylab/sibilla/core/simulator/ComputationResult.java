@@ -7,19 +7,19 @@ import java.util.List;
 public class ComputationResult<S> implements Serializable {
     private static final long serialVersionUID = -545122842766553412L;
     private final LinkedList<Trajectory<S>> results;
-    private final long elapsedTime;
+    private final int reachCount;
 
-    public ComputationResult(LinkedList<Trajectory<S>> results, long elapsedTime){
+    public ComputationResult(LinkedList<Trajectory<S>> results, int reachCount){
         this.results = results;
-        this.elapsedTime = elapsedTime;
+        this.reachCount = reachCount;
     }
 
     public List<Trajectory<S>> getResults() {
         return results;
     }
 
-    public long getElapsedTime() {
-        return elapsedTime;
+    public int getReach(){
+        return reachCount;
     }
     
 }

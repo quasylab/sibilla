@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.nustaq.net.TCPObjectSocket;
 
 public class ServerState {
-    private TCPObjectSocket server;
+    private Serializer server;
     private int expectedTasks, actualTasks;
     private boolean isRemoved, isTimeout;
     private long runningTime;
@@ -20,7 +20,7 @@ public class ServerState {
     //private ObjectOutputStream oos;
     //private ObjectInputStream ois;
 
-    public ServerState(TCPObjectSocket server) throws IOException {
+    public ServerState(Serializer server) throws IOException {
         this.server = server;
         expectedTasks = 1;
         actualTasks = 0;
@@ -58,15 +58,19 @@ public class ServerState {
         expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
     }
 
-    public void migrate(TCPObjectSocket server) throws IOException {
-        this.server.close();
+    public void migrate(Serializer server) throws IOException {
+        close();
         this.server = server;
         isRemoved = false; 
         isTimeout = false;     
     }
 
+    public void close() throws IOException {
+        server.getSocket().close();
+    }
+
     public double getTimeout(){  // after this time, a timeout has occurred and the server is not to be contacted again
-        return expectedTasks == 1 ? Double.MAX_VALUE : expectedTasks*estimatedRTT + expectedTasks*16*devRTT;
+        return expectedTasks == 1 ? 1000000000 : expectedTasks*estimatedRTT + expectedTasks*4*devRTT;
         //return Double.MAX_VALUE;
     }
 
@@ -113,7 +117,7 @@ public class ServerState {
                 "Next timeout: "+getTimeout()+"ns\n";
     }
 
-    public TCPObjectSocket getServer(){
+    public Serializer getServer(){
         return server;
     }
 

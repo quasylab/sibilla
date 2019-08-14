@@ -53,7 +53,7 @@ public class TestTime {
 		out.close();
 		PrintStream out2 = new PrintStream(new FileOutputStream("run_data.data"));
 		out2.println("Concurrent tasks;total runtime");
-		for(int i = 1; i<= 10; i++){  // i -> number of concurrent tasks
+		for(int i = 1; i<= 1000; i++){  // i -> number of concurrent tasks
 		for(int j = 0; j < 50; j++){   // j -> number of runs	
 		PopulationRule rule_S_E = new ReactionRule(
 				"S->E", 

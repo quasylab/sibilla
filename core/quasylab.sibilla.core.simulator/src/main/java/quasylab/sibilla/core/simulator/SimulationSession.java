@@ -10,9 +10,10 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public class SimulationSession<S> {
     private int expectedTasks = 0;
+    private int reachCount = 0;
     private SamplingFunction<S> sampling_function;
     private BlockingQueue<SimulationTask<S>> waitingTasks = new LinkedBlockingQueue<>();
-    private List<SimulationTask<S>> tasks = new LinkedList<>();
+    private List<Long> elapsedTimes = new LinkedList<>();
 
     public SimulationSession(int expectedTasks, SamplingFunction<S> sampling_function){
         this.expectedTasks = expectedTasks;
@@ -27,6 +28,18 @@ public class SimulationSession<S> {
         expectedTasks--;
     }
 
+    public void incrementReach(int value){
+        reachCount += value;
+    }
+
+    public void incrementReach(){
+        incrementReach(1);
+    }
+
+    public int getReach(){
+        return reachCount;
+    }
+
     public SamplingFunction<S> getSamplingFunction(){
         return sampling_function;
     }
@@ -35,7 +48,7 @@ public class SimulationSession<S> {
         return waitingTasks;
     }
 
-    public List<SimulationTask<S>> getTasks(){
-        return tasks;
+    public List<Long> getTimeList(){
+        return elapsedTimes;
     }
 }

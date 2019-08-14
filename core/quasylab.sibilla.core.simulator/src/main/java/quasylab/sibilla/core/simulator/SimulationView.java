@@ -28,7 +28,7 @@ public class SimulationView<S> {
     private int simulationLength;
     private JProgressBar progressBar;
     private JTabbedPane tabbedPane;
-    private JLabel waitingTasks;
+    private JLabel waitingTasks, reachCount;
     private Map<String, JTextArea> serverData = new HashMap<>();
     private JTextArea threadDetail = new JTextArea();
     private JLabel threadCount = new JLabel("Running Tasks: 0");
@@ -74,6 +74,9 @@ public class SimulationView<S> {
     }
 
     private JPanel commonView(){
+        simManager.addPropertyChangeListener("progress"+session, this::progressStatus);
+        simManager.addPropertyChangeListener("waitingTasks"+session, this::taskQueueStatus);
+        simManager.addPropertyChangeListener("reach"+session, this::reachStatus);
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createLineBorder(Color.BLACK,2,true));
         GridBagConstraints c = new GridBagConstraints();
@@ -95,7 +98,6 @@ public class SimulationView<S> {
         c.gridy = 0;
         c.weighty = 1.0;
         panel.add(progressPanel, c);
-        simManager.addPropertyChangeListener("progress"+session, this::progressStatus);
         JPanel queuePanel = new JPanel(new GridBagLayout());
         waitingTasks = new JLabel("Tasks in queue: 0");
         c.gridx = 0;
@@ -103,11 +105,14 @@ public class SimulationView<S> {
         c.weighty = 0.0;
         c.anchor = GridBagConstraints.WEST;
         queuePanel.add(waitingTasks, c);
+        reachCount = new JLabel("");
+        c.gridx = 0;
+        c.gridy = 1;
+        queuePanel.add(reachCount,c);
         c.anchor = GridBagConstraints.WEST;
         c.gridx = 0;
         c.gridy = 1;
         panel.add(queuePanel, c);
-        simManager.addPropertyChangeListener("waitingTasks"+session, this::taskQueueStatus);
         return panel;
     }
 
@@ -179,11 +184,15 @@ public class SimulationView<S> {
         c.weightx = 1.0;
         c.weighty = 1.0;
         JScrollPane content = new JScrollPane();
+        threadDetail.setEditable(false);
+        //threadDetail.setBackground(content.getBackground());
+        //threadDetail.setForeground(content.getForeground());
         content.setViewportView(threadDetail);
         content.setPreferredSize(panel.getSize());
         DefaultCaret caret = (DefaultCaret)threadDetail.getCaret();
         caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
         panel.add(content, c);
+        //threadCount.setForeground(content.getForeground());
         c.anchor = GridBagConstraints.LINE_START;
         c.gridx = 0;
         c.gridy = 3;
@@ -204,6 +213,7 @@ public class SimulationView<S> {
         int count = (int) evt.getNewValue();
         threadCount.setText("Running tasks: "+count);
     }
+
 
     private JTextArea serverDetail(String serverName, String state){
         JTextArea text = serverData.get(serverName);
@@ -230,6 +240,11 @@ public class SimulationView<S> {
     private void taskQueueStatus(PropertyChangeEvent evt){
         int waitingTasks = (int) evt.getNewValue();
         this.waitingTasks.setText("Tasks in queue: "+waitingTasks);
+    }
+
+    private void reachStatus(PropertyChangeEvent evt){
+        int reachCount = (int) evt.getNewValue();
+        this.reachCount.setText("Task reach: "+reachCount);
     }
 
     private void endThreadSimulation(PropertyChangeEvent evt){

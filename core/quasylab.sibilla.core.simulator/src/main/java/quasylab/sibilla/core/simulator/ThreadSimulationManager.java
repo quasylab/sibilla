@@ -124,7 +124,6 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
         if (runningTasks < concurrentTasks) {
             runningTasks++;
             propertyChange("threads"+session.toString(), runningTasks);
-            session.getTasks().add(task);
             CompletableFuture.supplyAsync(task, executor)
                              .whenComplete((value, error) -> showThreadRuntime(session, task))
                              .thenAccept((trajectory) -> manageTask(session, trajectory))
@@ -135,8 +134,13 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
         }
     }
 
-    private void showThreadRuntime(SimulationSession<S> session, SimulationTask<S> task){
-        propertyChange("runtime"+session.toString(), task.getElapsedTime());
+    private synchronized void showThreadRuntime(SimulationSession<S> session, SimulationTask<S> task){
+        long elapsedTime = task.getElapsedTime();
+        if(task.reach()){
+            session.incrementReach();
+        }
+        session.getTimeList().add(elapsedTime);
+        propertyChange("runtime"+session.toString(), elapsedTime);
     }
 
     // waiting until executor is shutdown
@@ -150,7 +154,7 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     }
 
     private String getTimingInformation(SimulationSession<S> session) {
-        LongSummaryStatistics statistics = session.getTasks().stream().map(x -> x.getElapsedTime()).mapToLong(Long::valueOf)
+        LongSummaryStatistics statistics = session.getTimeList().stream().mapToLong(Long::valueOf)
                 .summaryStatistics();
         return concurrentTasks + ";" + ((ThreadPoolExecutor) executor).getPoolSize() + ";"
                 + statistics.getAverage() + ";" + statistics.getMax() + ";" + statistics.getMin();
@@ -158,9 +162,9 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     
 
     @Override
-    public long reach() {
-        //return tasks.stream().filter(task -> task.reach() == true).count();
-        return 0;
+    public long reach(SimulationSession<S> session) {
+        propertyChange("reach"+session.toString(), session.getReach());
+        return session.getReach();
     }
 
     @Override

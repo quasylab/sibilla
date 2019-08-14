@@ -22,6 +22,7 @@ package quasylab.sibilla.core.simulator;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Collections;
@@ -47,13 +48,14 @@ import org.nustaq.net.TCPObjectSocket;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public class NetworkSimulationManager<S> implements SimulationManager<S> {
-    private Map<TCPObjectSocket, ServerState> servers = Collections.synchronizedMap(new HashMap<>());
+    private Map<Serializer, ServerState> servers = Collections.synchronizedMap(new HashMap<>());
     private final String modelName;
-    private BlockingQueue<TCPObjectSocket> serverQueue;
+    private BlockingQueue<Serializer> serverQueue;
     private ExecutorService executor;
     private int workingServers = 0;
     private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
     private BlockingQueue<SimulationSession<S>> sessions = new LinkedBlockingQueue<>();
+    private static final String serialization = "FST"; //Default // FST
 
     public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
         this.pcs.addPropertyChangeListener(property, listener);
@@ -64,7 +66,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         this.modelName = modelName;
         executor = Executors.newCachedThreadPool();
         for (int i = 0; i < servers.length; i++) {
-            TCPObjectSocket server = new TCPObjectSocket(servers[i].getHostAddress(), ports[i]);
+            Serializer server = Serializer.createSerializer(new Socket(servers[i].getHostAddress(), ports[i]), serialization);
             this.servers.put(server, new ServerState(server));
             try {
                 initConnection(server);
@@ -75,12 +77,12 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         serverQueue = new LinkedBlockingQueue<>(this.servers.keySet());
     }
 
-    private void initConnection(TCPObjectSocket server) throws Exception{
+    private void initConnection(Serializer server) throws Exception{
         byte[] classBytes = ClassBytesLoader.loadClassBytes(modelName);
         server.writeObject(modelName);
-        server.flush();
+        //server.flush();
         server.writeObject(classBytes);
-        server.flush();
+        //server.flush();
     }
 
     @Override
@@ -103,7 +105,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     }
 
     private void run(SimulationSession<S> session) {
-        TCPObjectSocket server = findServer();
+        Serializer server = findServer();
         List<SimulationTask<S>> toRun;
         if (server != null){
             ServerState serverState = servers.get(server);
@@ -122,14 +124,14 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         propertyChange("waitingTasks"+session.toString(), session.getQueue().size());
     }
 
-    private synchronized TCPObjectSocket findServer() {
+    private synchronized Serializer findServer() {
         return serverQueue.poll();
     }
 
-    private void manageResult(List<Trajectory<S>> value, Throwable error, SimulationSession<S> session, List<SimulationTask<S>> tasks, TCPObjectSocket server){
+    private void manageResult(ComputationResult<S> value, Throwable error, SimulationSession<S> session, List<SimulationTask<S>> tasks, Serializer server){
         if(error!=null){
             //timeout occurred, contact server
-            TCPObjectSocket newServer;
+            Serializer newServer;
             if((newServer = manageTimeout(server, session))!= null){
                 // server responded
                 serverQueue.add(newServer); // add new server to queue, old server won't return                                                   
@@ -167,18 +169,18 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         runSelectedSession(nextSession); 
     }
 
-    private  TCPObjectSocket manageTimeout(TCPObjectSocket server, SimulationSession<S> session){
-        TCPObjectSocket pingServer = null;
+    private  Serializer manageTimeout(Serializer server, SimulationSession<S> session){
+        Serializer pingServer = null;
         ServerState removedState = null;
         try {
             removedState = servers.remove(server); // get old state, remove old server from map
             removedState.timedout();  // mark server as timed out and update GUI
             propertyChange("servers"+session.toString(), new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), removedState.toString()});
-            pingServer = new TCPObjectSocket(server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort()); // start new connection
+            pingServer = Serializer.createSerializer(new Socket(server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort()), serialization); // start new connection
             pingServer.getSocket().setSoTimeout(5000); // set 5 seconds timeout on read operations
             initConnection(pingServer); // initialize connection sending model data
             pingServer.writeObject("PING"); // send ping request
-            pingServer.flush();
+            //pingServer.flush();
             String response = (String) pingServer.readObject(); //wait for response
             if(!response.equals("PONG")){
                 throw new IllegalStateException("Expected a different reply!");
@@ -196,8 +198,9 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         return pingServer;
     }
 
-    private synchronized void manageTask(SimulationSession<S> session, List<Trajectory<S>> trajectories) {
-        for (Trajectory<S> trajectory : trajectories) {
+    private synchronized void manageTask(SimulationSession<S> session, ComputationResult<S> result) {
+        session.incrementReach(result.getReach());
+        for (Trajectory<S> trajectory : result.getResults()) {
             doSample(session.getSamplingFunction(), trajectory);
             session.taskCompleted();
             propertyChange("progress"+session.toString(), session.getExpectedTasks());
@@ -230,33 +233,36 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     private void closeStreams(){
         for( ServerState state: servers.values()){
             try {
-                state.getServer().close();
+                state.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private  List<Trajectory<S>> send(NetworkTask<S> networkTask, TCPObjectSocket server){
-        List<Trajectory<S>> trajectories = new LinkedList<>();
+    private  ComputationResult<S> send(NetworkTask<S> networkTask, Serializer server){
+        ComputationResult<S> result;
         long elapsedTime;
         ServerState state = servers.get(server);
         
         try {
             server.writeObject("TASK");
-            server.flush();
+            //server.flush();
             server.writeObject(networkTask);
-            server.flush();
+            //server.flush();
+
+            elapsedTime = System.nanoTime();
 
             server.getSocket().setSoTimeout((int)(state.getTimeout() / 1000000));
 
             @SuppressWarnings("unchecked")
-            ComputationResult<S> result = (ComputationResult<S>) server.readObject();
+            ComputationResult<S> receivedResult = (ComputationResult<S>) server.readObject();
             
-            trajectories = result.getResults();
-            elapsedTime = result.getElapsedTime();
+            elapsedTime = System.nanoTime() - elapsedTime;
 
-            state.update(elapsedTime, trajectories.size());  
+            state.update(elapsedTime, receivedResult.getResults().size());
+
+            result = receivedResult;  
         }catch(SocketTimeoutException e){
 
             throw new RuntimeException();
@@ -265,7 +271,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
 
             throw new RuntimeException();
         }
-        return trajectories;
+        return result;
     }
 
 
@@ -287,8 +293,9 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     }
  
     @Override
-    public long reach() {
-        return 0;
+    public long reach(SimulationSession<S> session) {
+        propertyChange("reach"+session.toString(), session.getReach());
+        return session.getReach();
     }
 
     private void propertyChange(String property, Object value){

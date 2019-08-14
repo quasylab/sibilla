@@ -24,8 +24,9 @@ public class SequentialSimulationManager<S> implements SimulationManager<S> {
     }
 
     @Override
-    public long reach() {
-        return 0;
+    public long reach(SimulationSession<S> session) {
+        propertyChange("reach"+session.toString(), session.getReach());
+        return session.getReach();
     }
 
     private void doSample(SamplingFunction<S> sampling_function, Trajectory<S> trajectory) {
@@ -37,6 +38,9 @@ public class SequentialSimulationManager<S> implements SimulationManager<S> {
     @Override
     public void run(SimulationSession<S> session, SimulationTask<S> task) {
         doSample(session.getSamplingFunction(), task.get());
+        if(task.reach()){
+            session.incrementReach();
+        }
         session.taskCompleted();
         propertyChange("progress"+session.toString(), session.getExpectedTasks());
     }
