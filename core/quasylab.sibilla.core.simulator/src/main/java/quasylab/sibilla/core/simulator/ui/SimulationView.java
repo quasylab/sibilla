@@ -1,4 +1,4 @@
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.core.simulator.ui;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -20,6 +20,9 @@ import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.text.DefaultCaret;
+
+import quasylab.sibilla.core.simulator.manager.SimulationManager;
+import quasylab.sibilla.core.simulator.manager.SimulationSession;
 
 public class SimulationView<S> {
     private JFrame frame = new JFrame("Sibilla");

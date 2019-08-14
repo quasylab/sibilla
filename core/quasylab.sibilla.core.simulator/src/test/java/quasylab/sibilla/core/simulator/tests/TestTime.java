@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.LongSummaryStatistics;
 
-import quasylab.sibilla.core.simulator.SequentialSimulationManager;
+import quasylab.sibilla.core.simulator.manager.SequentialSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.ThreadSimulationManager;
+import quasylab.sibilla.core.simulator.manager.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;

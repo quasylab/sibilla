@@ -1,8 +1,7 @@
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.core.simulator.server;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -12,10 +11,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.nustaq.net.TCPObjectServer;
-import org.nustaq.net.TCPObjectSocket;
-import org.nustaq.net.TCPObjectServer.NewClientListener;
-import org.nustaq.serialization.FSTConfiguration;
+
+import quasylab.sibilla.core.simulator.SimulationTask;
+import quasylab.sibilla.core.simulator.Trajectory;
+import quasylab.sibilla.core.simulator.manager.NetworkTask;
+import quasylab.sibilla.core.simulator.serialization.CustomClassLoader;
+import quasylab.sibilla.core.simulator.serialization.Serializer;
 
 public class BasicSimulationServer<S> implements SimulationServer<S> {
     private ServerSocket serverSocket;

@@ -23,7 +23,9 @@ import java.util.function.Predicate;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-
+import quasylab.sibilla.core.simulator.manager.SequentialSimulationManager;
+import quasylab.sibilla.core.simulator.manager.SimulationManager;
+import quasylab.sibilla.core.simulator.manager.SimulationSession;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 import quasylab.sibilla.core.simulator.util.WeightedElement;
@@ -43,7 +45,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 	private SimulationManager<S> simManager;
 
 	public SimulationEnvironment(M model) {
-		this(model, new ThreadSimulationManager<S>(1));
+		this(model, new SequentialSimulationManager<S>());
 	}
 
 	public SimulationEnvironment(M model, SimulationManager<S> simManager) {

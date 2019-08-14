@@ -1,4 +1,4 @@
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.core.simulator.serialization;
 
 import java.io.IOException;
 import java.net.Socket;

@@ -7,7 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.net.UnknownHostException;
 
-import quasylab.sibilla.core.simulator.SequentialSimulationManager;
+import quasylab.sibilla.core.simulator.manager.SequentialSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;

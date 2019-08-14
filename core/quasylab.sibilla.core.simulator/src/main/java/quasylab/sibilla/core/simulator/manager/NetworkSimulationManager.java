@@ -17,7 +17,7 @@
  * under the License.
  *******************************************************************************/
 
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.core.simulator.manager;
 
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -38,7 +38,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.event.SwingPropertyChangeSupport;
 
-import org.nustaq.net.TCPObjectSocket;
+import quasylab.sibilla.core.simulator.SimulationTask;
+import quasylab.sibilla.core.simulator.Trajectory;
 
 /**
  * @author belenchia
@@ -46,6 +47,10 @@ import org.nustaq.net.TCPObjectSocket;
  */
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import quasylab.sibilla.core.simulator.serialization.ClassBytesLoader;
+import quasylab.sibilla.core.simulator.serialization.Serializer;
+import quasylab.sibilla.core.simulator.server.ComputationResult;
+import quasylab.sibilla.core.simulator.ui.SimulationView;
 
 public class NetworkSimulationManager<S> implements SimulationManager<S> {
     private Map<Serializer, ServerState> servers = Collections.synchronizedMap(new HashMap<>());

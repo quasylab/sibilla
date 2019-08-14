@@ -1,8 +1,9 @@
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.core.simulator.manager;
 
 import java.io.IOException;
 
-import org.nustaq.net.TCPObjectSocket;
+
+import quasylab.sibilla.core.simulator.serialization.Serializer;
 
 public class ServerState {
     private Serializer server;

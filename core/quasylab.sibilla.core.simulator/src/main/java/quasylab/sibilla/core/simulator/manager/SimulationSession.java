@@ -1,11 +1,11 @@
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.core.simulator.manager;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-
+import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public class SimulationSession<S> {

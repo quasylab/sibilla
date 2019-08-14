@@ -1,4 +1,4 @@
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.core.simulator.serialization;
 
 public class CustomClassLoader extends ClassLoader{
     public Class<?> defClass(String name, byte[] byteCode) {

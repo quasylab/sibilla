@@ -3,18 +3,14 @@
  */
 package quasylab.sibilla.examples.pm.le;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.io.Serializable;
 
-import quasylab.sibilla.core.simulator.NetworkSimulationManager;
-import quasylab.sibilla.core.simulator.SequentialSimulationManager;
+import quasylab.sibilla.core.simulator.manager.SequentialSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;

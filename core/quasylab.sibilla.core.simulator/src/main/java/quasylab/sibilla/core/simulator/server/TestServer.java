@@ -1,8 +1,7 @@
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.core.simulator.server;
 
 import java.io.IOException;
 
-import quasylab.sibilla.core.simulator.SimulationServer;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
 
 public class TestServer {

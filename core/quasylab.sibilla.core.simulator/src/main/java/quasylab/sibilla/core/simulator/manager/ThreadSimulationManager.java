@@ -17,7 +17,7 @@
  * under the License.
  *******************************************************************************/
 
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.core.simulator.manager;
 
 import java.beans.PropertyChangeListener;
 import java.io.FileNotFoundException;
@@ -33,7 +33,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.swing.event.SwingPropertyChangeSupport;
 
+import quasylab.sibilla.core.simulator.SimulationTask;
+import quasylab.sibilla.core.simulator.Trajectory;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import quasylab.sibilla.core.simulator.ui.SimulationView;
 
 /**
  * @author belenchia

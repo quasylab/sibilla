@@ -9,7 +9,7 @@ import java.net.InetAddress;
 import java.util.function.Function;
 import java.io.Serializable;
 
-import quasylab.sibilla.core.simulator.NetworkSimulationManager;
+import quasylab.sibilla.core.simulator.manager.NetworkSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;

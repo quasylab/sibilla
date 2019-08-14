@@ -17,9 +17,11 @@
  * under the License.
  *******************************************************************************/
 
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.core.simulator.manager;
 
 import java.beans.PropertyChangeListener;
+
+import quasylab.sibilla.core.simulator.SimulationTask;
 
 /**
  * @author belenchia

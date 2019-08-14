@@ -1,10 +1,13 @@
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.core.simulator.manager;
 
 import java.beans.PropertyChangeListener;
 
 import javax.swing.event.SwingPropertyChangeSupport;
 
+import quasylab.sibilla.core.simulator.SimulationTask;
+import quasylab.sibilla.core.simulator.Trajectory;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import quasylab.sibilla.core.simulator.ui.SimulationView;
 
 public class SequentialSimulationManager<S> implements SimulationManager<S> {
 

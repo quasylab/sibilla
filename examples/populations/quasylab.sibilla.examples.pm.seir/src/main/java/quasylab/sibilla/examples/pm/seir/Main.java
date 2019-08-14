@@ -8,7 +8,7 @@ import java.io.PrintStream;
 import java.net.UnknownHostException;
 
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.ThreadSimulationManager;
+import quasylab.sibilla.core.simulator.manager.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
