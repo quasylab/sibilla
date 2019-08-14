@@ -46,7 +46,7 @@ public class SimulationView<S> {
                 | UnsupportedLookAndFeelException e) {                   
             e.printStackTrace();
         }
-        type = simManager.getClass().getName();
+        type = simManager.getClass().getSimpleName();
         frame.setContentPane(createView(type));
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setVisible(true);
@@ -68,9 +68,9 @@ public class SimulationView<S> {
         c.gridy = 0;
         c.weighty = 0.7;
         switch(type){
-            case "quasylab.sibilla.core.simulator.ThreadSimulationManager": panel.add(threadView(), c); break;
-            case "quasylab.sibilla.core.simulator.NetworkSimulationManager": panel.add(networkView(), c); break;
-            case "quasylab.sibilla.core.simulator.SequentialSimulationManager": panel.add(sequentialView(), c); break;
+            case "ThreadSimulationManager": panel.add(threadView(), c); break;
+            case "NetworkSimulationManager": panel.add(networkView(), c); break;
+            case "SequentialSimulationManager": panel.add(sequentialView(), c); break;
             default: break;
         }
         return panel;
