@@ -110,7 +110,7 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
 
     // samples the trajectory, updates counters, then runs next task.
     // if no new tasks to run, shutdowns the executor
-    private synchronized void manageTask(SimulationSession<S> session, Trajectory<S> trajectory) {
+    private synchronized void manageResult(SimulationSession<S> session, Trajectory<S> trajectory) {
         doSample(session.getSamplingFunction(), trajectory);
         session.taskCompleted();
         runningTasks--;
@@ -128,8 +128,8 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
             runningTasks++;
             propertyChange("threads"+session.toString(), runningTasks);
             CompletableFuture.supplyAsync(task, executor)
-                             .whenComplete((value, error) -> showThreadRuntime(session, task))
-                             .thenAccept((trajectory) -> manageTask(session, trajectory))
+                             .whenComplete((value, error) -> readTaskInformation(session, task))
+                             .thenAccept((trajectory) -> manageResult(session, trajectory))
                              .thenRun(this::runNextSession);
         } else {
             session.getQueue().add(task);
@@ -137,7 +137,7 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
         }
     }
 
-    private synchronized void showThreadRuntime(SimulationSession<S> session, SimulationTask<S> task){
+    private synchronized void readTaskInformation(SimulationSession<S> session, SimulationTask<S> task){
         long elapsedTime = task.getElapsedTime();
         if(task.reach()){
             session.incrementReach();
@@ -163,12 +163,6 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
                 + statistics.getAverage() + ";" + statistics.getMax() + ";" + statistics.getMin();
     }
     
-
-    @Override
-    public long reach(SimulationSession<S> session) {
-        propertyChange("reach"+session.toString(), session.getReach());
-        return session.getReach();
-    }
 
     @Override
     public void addPropertyChangeListener(String property, PropertyChangeListener listener) {

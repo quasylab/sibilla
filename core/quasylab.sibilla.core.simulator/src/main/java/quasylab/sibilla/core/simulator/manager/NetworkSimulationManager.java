@@ -48,6 +48,7 @@ import quasylab.sibilla.core.simulator.Trajectory;
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.serialization.ClassBytesLoader;
+import quasylab.sibilla.core.simulator.serialization.SerializationType;
 import quasylab.sibilla.core.simulator.serialization.Serializer;
 import quasylab.sibilla.core.simulator.server.ComputationResult;
 import quasylab.sibilla.core.simulator.ui.SimulationView;
@@ -60,22 +61,23 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     private int workingServers = 0;
     private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
     private BlockingQueue<SimulationSession<S>> sessions = new LinkedBlockingQueue<>();
-    private static final String serialization = "FST"; //Default // FST
+    //private final SerializationType serialization; //Default // FST
 
     public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
         this.pcs.addPropertyChangeListener(property, listener);
     }
 
-    public NetworkSimulationManager(InetAddress[] servers, int[] ports, String modelName)
+    public NetworkSimulationManager(InetAddress[] servers, int[] ports, String modelName, SerializationType[] serialization)
             throws UnknownHostException, IOException {
         this.modelName = modelName;
         executor = Executors.newCachedThreadPool();
         for (int i = 0; i < servers.length; i++) {
-            Serializer server = Serializer.createSerializer(new Socket(servers[i].getHostAddress(), ports[i]), serialization);
+            Serializer server = Serializer.createSerializer(new Socket(servers[i].getHostAddress(), ports[i]), serialization[i]);
             this.servers.put(server, new ServerState(server));
             try {
                 initConnection(server);
             } catch (Exception e) {
+                System.out.println("Error during server initialization, removing server...");
                 this.servers.remove(server);
             }
         }
@@ -181,7 +183,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             removedState = servers.remove(server); // get old state, remove old server from map
             removedState.timedout();  // mark server as timed out and update GUI
             propertyChange("servers"+session.toString(), new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), removedState.toString()});
-            pingServer = Serializer.createSerializer(new Socket(server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort()), serialization); // start new connection
+            pingServer = Serializer.createSerializer(new Socket(server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort()), SerializationType.getType(server)); // start new connection
             pingServer.getSocket().setSoTimeout(5000); // set 5 seconds timeout on read operations
             initConnection(pingServer); // initialize connection sending model data
             pingServer.writeObject("PING"); // send ping request
@@ -297,11 +299,6 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         propertyChange("end"+session.toString(), "");
     }
  
-    @Override
-    public long reach(SimulationSession<S> session) {
-        propertyChange("reach"+session.toString(), session.getReach());
-        return session.getReach();
-    }
 
     private void propertyChange(String property, Object value){
         pcs.firePropertyChange(property, null, value);

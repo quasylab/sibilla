@@ -11,18 +11,22 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
 import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
 import quasylab.sibilla.core.simulator.manager.NetworkTask;
 import quasylab.sibilla.core.simulator.serialization.CustomClassLoader;
+import quasylab.sibilla.core.simulator.serialization.SerializationType;
 import quasylab.sibilla.core.simulator.serialization.Serializer;
 
 public class BasicSimulationServer<S> implements SimulationServer<S> {
     private ServerSocket serverSocket;
     private ExecutorService taskExecutor = Executors.newCachedThreadPool();
     private ExecutorService connectionExecutor = Executors.newCachedThreadPool();
-    private static final String serialization = "FST";
+    private final SerializationType serialization;
+
+    public BasicSimulationServer( SerializationType serialization){
+        this.serialization = serialization;
+    }
 
     public void start(int port) throws IOException {
         serverSocket = new ServerSocket(port);

@@ -27,7 +27,8 @@ import quasylab.sibilla.core.simulator.manager.SimulationSession;
 public class SimulationView<S> {
     private JFrame frame = new JFrame("Sibilla");
     private SimulationManager<S> simManager;
-    private String type, session;
+    private SimulationSession<S> session;
+    private String type, sessionID;
     private int simulationLength;
     private JProgressBar progressBar;
     private JTabbedPane tabbedPane;
@@ -38,8 +39,9 @@ public class SimulationView<S> {
 
     public SimulationView(SimulationSession<S> session, SimulationManager<S> simManager) {
         this.simManager = simManager;
+        this.session = session;
         this.simulationLength = session.getExpectedTasks();
-        this.session = session.toString();
+        this.sessionID = session.toString();
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
@@ -77,9 +79,9 @@ public class SimulationView<S> {
     }
 
     private JPanel commonView(){
-        simManager.addPropertyChangeListener("progress"+session, this::progressStatus);
-        simManager.addPropertyChangeListener("waitingTasks"+session, this::taskQueueStatus);
-        simManager.addPropertyChangeListener("reach"+session, this::reachStatus);
+        simManager.addPropertyChangeListener("progress"+sessionID, this::progressStatus);
+        simManager.addPropertyChangeListener("waitingTasks"+sessionID, this::taskQueueStatus);
+        session.addPropertyChangeListener("reach"+sessionID, this::reachStatus);
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createLineBorder(Color.BLACK,2,true));
         GridBagConstraints c = new GridBagConstraints();
@@ -132,8 +134,8 @@ public class SimulationView<S> {
     }
 
     private JPanel networkView(){
-        simManager.addPropertyChangeListener("servers"+session, this::serverView);
-        simManager.addPropertyChangeListener("end"+session, evt -> {
+        simManager.addPropertyChangeListener("servers"+sessionID, this::serverView);
+        simManager.addPropertyChangeListener("end"+sessionID, evt -> {
             serverData.values().forEach(x->x.append("Simulation Completed."));
         });
         JPanel panel = new JPanel(new GridBagLayout());
@@ -162,9 +164,9 @@ public class SimulationView<S> {
     }
 
     private JPanel threadView(){
-        simManager.addPropertyChangeListener("runtime"+session, this::threadRuntime);
-        simManager.addPropertyChangeListener("threads"+session, this::threadCount);
-        simManager.addPropertyChangeListener("end"+session, this::endThreadSimulation);
+        simManager.addPropertyChangeListener("runtime"+sessionID, this::threadRuntime);
+        simManager.addPropertyChangeListener("threads"+sessionID, this::threadCount);
+        simManager.addPropertyChangeListener("end"+sessionID, this::endThreadSimulation);
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         panel.setBorder(BorderFactory.createLineBorder(Color.BLACK,2,true));

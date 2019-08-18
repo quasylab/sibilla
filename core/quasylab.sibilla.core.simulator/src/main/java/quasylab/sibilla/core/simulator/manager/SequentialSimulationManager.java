@@ -26,11 +26,6 @@ public class SequentialSimulationManager<S> implements SimulationManager<S> {
         return newSession;
     }
 
-    @Override
-    public long reach(SimulationSession<S> session) {
-        propertyChange("reach"+session.toString(), session.getReach());
-        return session.getReach();
-    }
 
     private void doSample(SamplingFunction<S> sampling_function, Trajectory<S> trajectory) {
         if (sampling_function != null) {

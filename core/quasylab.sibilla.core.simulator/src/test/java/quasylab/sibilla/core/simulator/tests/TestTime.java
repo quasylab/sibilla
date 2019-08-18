@@ -43,8 +43,8 @@ public class TestTime {
 	public final static double LAMBDA_R = 1/7.0;
  	
 	public final static int SAMPLINGS = 100;
-	public final static double DEADLINE = 600;
-	private static final int REPLICA = 1000;
+	public final static double DEADLINE = 6000;
+	private static final int REPLICA = 10000;
 	
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException {
 		List<Long> stats = new ArrayList<>();
@@ -54,7 +54,7 @@ public class TestTime {
 		PrintStream out2 = new PrintStream(new FileOutputStream("run_data.data"));
 		out2.println("Concurrent tasks;total runtime");
 		for(int i = 1; i<= 1000; i++){  // i -> number of concurrent tasks
-		for(int j = 0; j < 50; j++){   // j -> number of runs	
+		for(int j = 0; j < 20; j++){   // j -> number of runs	
 		PopulationRule rule_S_E = new ReactionRule(
 				"S->E", 
 				new Specie[] { new Specie(S), new Specie(I)} , 
@@ -96,7 +96,7 @@ public class TestTime {
 //		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(i) );
+		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(Integer.MAX_VALUE) );
 
 		sim.setSampling(new SamplingCollection<>(fiSamp,frSamp));
 		long startTime = System.nanoTime();

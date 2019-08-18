@@ -36,8 +36,6 @@ public interface SimulationManager<S> {
     public void addPropertyChangeListener(String property, PropertyChangeListener listener);
     // initialize the simulation manager with sampling function and the number of tasks that will be submitted
     public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function, boolean enableGUI);
-    // calculates reach
-    public long reach(SimulationSession<S> session);
     // runs a task
     public void run(SimulationSession<S> session, SimulationTask<S> task);
     // wait for submitted tasks to finish

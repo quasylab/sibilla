@@ -18,6 +18,7 @@ import quasylab.sibilla.core.simulator.pm.ReactionRule;
 import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
+import quasylab.sibilla.core.simulator.serialization.SerializationType;
 
 /**
  * @author loreti
@@ -93,8 +94,9 @@ public class NetworkMain {
 		
 		
 		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new NetworkSimulationManager<>(new InetAddress[]{InetAddress.getByName("127.0.0.1"), InetAddress.getByName("127.0.0.1"), InetAddress.getByName("127.0.0.1")},
-																																			new int[]{8080, 8081, 8082},
-																																	"quasylab.sibilla.examples.pm.seir.NetworkMain" ));
+																																	new int[]{8080, 8081, 8082},
+																																	"quasylab.sibilla.examples.pm.seir.NetworkMain",
+																																	new SerializationType[]{SerializationType.FST, SerializationType.FST, SerializationType.FST} ));
 
 		/*SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new NetworkSimulationManager<>(new InetAddress[]{InetAddress.getByName("192.168.1.64")},
 																																	new int[]{8080},
