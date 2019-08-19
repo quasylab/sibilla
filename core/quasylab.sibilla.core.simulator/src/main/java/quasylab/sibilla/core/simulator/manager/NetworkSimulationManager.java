@@ -58,10 +58,8 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     private final String modelName;
     private BlockingQueue<Serializer> serverQueue;
     private ExecutorService executor;
-    private int workingServers = 0;
     private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
     private BlockingQueue<SimulationSession<S>> sessions = new LinkedBlockingQueue<>();
-    //private final SerializationType serialization; //Default // FST
 
     public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
         this.pcs.addPropertyChangeListener(property, listener);
@@ -87,9 +85,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     private void initConnection(Serializer server) throws Exception{
         byte[] classBytes = ClassBytesLoader.loadClassBytes(modelName);
         server.writeObject(modelName);
-        //server.flush();
         server.writeObject(classBytes);
-        //server.flush();
     }
 
     @Override
@@ -102,7 +98,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
     }
 
     private synchronized boolean isCompleted(SimulationSession<S> session) {
-        return (workingServers + session.getExpectedTasks() == 0);
+        return session.getExpectedTasks() == 0;
     }
 
     @Override
@@ -124,7 +120,6 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             }
             final List<SimulationTask<S>> selectedTasks = toRun;
             NetworkTask<S> networkTask = new NetworkTask<S>(selectedTasks);
-            workingServers++;
             CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
                              .whenComplete((value, error) -> manageResult(value, error, session, selectedTasks, server));
         }
@@ -143,7 +138,6 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
                 // server responded
                 serverQueue.add(newServer); // add new server to queue, old server won't return                                                   
             }
-            workingServers--;
             session.getQueue().addAll(tasks);
         }else{
             //timeout not occurred, continue as usual
@@ -187,7 +181,6 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             pingServer.getSocket().setSoTimeout(5000); // set 5 seconds timeout on read operations
             initConnection(pingServer); // initialize connection sending model data
             pingServer.writeObject("PING"); // send ping request
-            //pingServer.flush();
             String response = (String) pingServer.readObject(); //wait for response
             if(!response.equals("PONG")){
                 throw new IllegalStateException("Expected a different reply!");
@@ -212,7 +205,6 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
             session.taskCompleted();
             propertyChange("progress"+session.toString(), session.getExpectedTasks());
         }
-        workingServers--;
     }
 
     private synchronized void runSelectedSession(SimulationSession<S> session) {
@@ -254,9 +246,7 @@ public class NetworkSimulationManager<S> implements SimulationManager<S> {
         
         try {
             server.writeObject("TASK");
-            //server.flush();
             server.writeObject(networkTask);
-            //server.flush();
 
             elapsedTime = System.nanoTime();
 

@@ -118,7 +118,7 @@ public class ThreadSimulationManager<S> implements SimulationManager<S> {
     }
 
     private synchronized boolean isCompleted(SimulationSession<S> session) {
-        return (runningTasks + session.getExpectedTasks() == 0);
+        return session.getExpectedTasks() == 0;
     }
 
     // runs a new task if below task limit, else adds to queue

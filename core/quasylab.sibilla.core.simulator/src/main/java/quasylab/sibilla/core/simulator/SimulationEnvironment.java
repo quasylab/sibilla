@@ -73,7 +73,7 @@ public class SimulationEnvironment<M extends Model<S>, S> {
 	public synchronized void simulate(SimulationMonitor monitor, int iterations, double deadline) throws InterruptedException {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
 		SimulationSession<S> session1 = simManager.newSession(iterations, sampling_function, true);
-		//SimulationSession<S> session2 = simManager.newSession(iterations, sampling_function);
+		//SimulationSession<S> session2 = simManager.newSession(iterations, sampling_function, true);
 		rgi.register(random);
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			if (monitor != null) {

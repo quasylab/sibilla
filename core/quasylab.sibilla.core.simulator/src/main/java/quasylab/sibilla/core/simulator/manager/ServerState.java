@@ -18,9 +18,6 @@ public class ServerState {
     private final static int threshold = 256;
     private final static long maxRunningTime = 3600000000000L; // 1 hour in nanoseconds
 
-    //private ObjectOutputStream oos;
-    //private ObjectInputStream ois;
-
     public ServerState(Serializer server) throws IOException {
         this.server = server;
         expectedTasks = 1;
@@ -72,7 +69,6 @@ public class ServerState {
 
     public double getTimeout(){  // after this time, a timeout has occurred and the server is not to be contacted again
         return expectedTasks == 1 ? 1000000000 : expectedTasks*estimatedRTT + expectedTasks*4*devRTT;
-        //return Double.MAX_VALUE;
     }
 
     public double getTimeLimit(){ // after this time, the tasks to be sent to this server is to be halved
@@ -86,11 +82,6 @@ public class ServerState {
     public boolean canCompleteTask(int tasks){ 
         return getTimeLimit(tasks) < maxRunningTime;
     }
-
-    public int getActualTasks(){
-        return actualTasks;
-    }
-
 
     public int getExpectedTasks(){
         return expectedTasks;
@@ -116,10 +107,6 @@ public class ServerState {
                 "Next task window: "+expectedTasks+" "+
                 "Next time limit: "+getTimeLimit()+"ns "+
                 "Next timeout: "+getTimeout()+"ns\n";
-    }
-
-    public Serializer getServer(){
-        return server;
     }
 
     public boolean isRemoved(){
