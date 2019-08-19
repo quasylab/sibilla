@@ -66,13 +66,11 @@ public class BasicSimulationServer<S> implements SimulationServer<S> {
                     String request = (String) client.readObject();
                     if (request.equals("PING")) {
                         client.writeObject("PONG");
-                        //client.flush();
                         continue;
                     }
                     @SuppressWarnings("unchecked")
                     NetworkTask<S> ntask = ((NetworkTask<S>) client.readObject());
 
-                    //long s = System.nanoTime();
                     List<SimulationTask<S>> tasks = ntask.getTasks();
                     LinkedList<Trajectory<S>> results = new LinkedList<>();
                     CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
@@ -87,13 +85,8 @@ public class BasicSimulationServer<S> implements SimulationServer<S> {
                             reachCount++;
                         }
                     }
-                    //long s2 = System.nanoTime();
                     client.writeObject(new ComputationResult<>(results, reachCount));
-                    //client.flush();
-                    //long s3 = System.nanoTime();
 
-                    /*System.out.println("Time spent executing: " + (s2 - s) / 1000000 + "ms Time spent sending: "
-                            + (s3 - s2) / 1000000 + "ms");*/
                 }
 
             } catch (EOFException e) {
