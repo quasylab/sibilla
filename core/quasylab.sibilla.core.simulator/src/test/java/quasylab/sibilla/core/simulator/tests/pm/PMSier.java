@@ -5,6 +5,7 @@ package quasylab.sibilla.core.simulator.tests.pm;
 
 import java.util.LinkedList;
 
+import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
@@ -12,6 +13,7 @@ import quasylab.sibilla.core.simulator.pm.PopulationState;
 import quasylab.sibilla.core.simulator.pm.ReactionRule;
 import quasylab.sibilla.core.simulator.sampling.Measure;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 /**
@@ -31,10 +33,9 @@ public class PMSier {
 	
 	private static final int SIZE = 100;
 
-	public static void main(String[] argv) {
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>(
-			new PopulationModel(new PopulationState( new int[] { SIZE-1,1,0 } ),  buildRules())
-		);
+	public static void main(String[] argv) throws InterruptedException {
+		SimulationEnvironment sim = new SimulationEnvironment();
+		PopulationModel model = buildPopulationModel();
 		StatisticSampling<PopulationState> sSamp = new StatisticSampling<>(1000, 0.1, 
 			new Measure<PopulationState>() {
 
@@ -82,10 +83,17 @@ public class PMSier {
 				});
 
 
-		sim.setSampling(new SamplingCollection<PopulationState>(sSamp, iSamp, rSamp));
-		System.out.println(sim.simulate(100));
+		SamplingFunction<PopulationState> sf = new SamplingCollection<PopulationState>(sSamp, iSamp, rSamp);
+		sim.simulate(new DefaultRandomGenerator(),model,new PopulationState( new int[] { SIZE-1,1,0 } ),sf,1,100);
 	}
 	
+	private static PopulationModel buildPopulationModel() {
+		PopulationModel m = new PopulationModel();
+		m.addRules( buildRules() );
+		m.addState("init", new PopulationState( new int[] { SIZE-1,1,0 } ) );	
+		return m;
+	}
+
 	private static LinkedList<PopulationRule> buildRules() {
 		LinkedList<PopulationRule> rules = new LinkedList<>();
 		

@@ -75,8 +75,12 @@ public class PopulationState implements Serializable {
 	}
 
 	public PopulationState(int[] state) {
+		this( IntStream.range(0, state.length).map(i -> state[i]).sum() , state );
+	}
+
+	private PopulationState(double population, int[] state) {
 		this.populationVector = state;
-		this.population = IntStream.range(0, state.length).map(i -> state[i]).sum();
+		this.population = population;
 	}
 
 	public double poluation( ) {
@@ -98,16 +102,18 @@ public class PopulationState implements Serializable {
 	// applies one update function
 	public PopulationState apply( Update update ) {
 		int[] newState = Arrays.copyOf(populationVector, populationVector.length);
+		double population = this.population;
 		for (Entry<Integer, Integer> u : update.getUpdate()) {
 			int idx = u.getKey();
 			int newValue = newState[idx]+u.getValue(); 
 			if (newValue>=0) {
 				newState[idx] = newValue;
+				population += u.getValue();
 			} else {
 				throw new IllegalArgumentException("Population Vector: "+this+" newState: "+Arrays.toString(newState)+" Update: "+update+" idx: "+idx+" newValue: "+newValue+" u: "+u);
 			}
 		}		
-		return new PopulationState(newState);
+		return new PopulationState(population,newState);
 	}
 	
 	public double min( Function<Integer, Double> f ) {
@@ -184,6 +190,10 @@ public class PopulationState implements Serializable {
 
 	public double fraction( int i ) {
 		return getOccupancy(i)/population;
+	}
+
+	public PopulationState copy() {
+		return new PopulationState(population,populationVector);
 	}
 	
 

@@ -9,6 +9,7 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 
+import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
@@ -93,10 +94,9 @@ public class Main {
 		
 		
 
-		PopulationModel f = new PopulationModel( 
-				initialState(1),//2 per M2
-				rules
-		); 
+		PopulationModel f = new PopulationModel();
+		//f.addState("init",initialState(1));//2 per M2
+		f.addRules(rules); 
 		
 		List<StatisticSampling<PopulationState>> samplings = new LinkedList<>();
 		for( int i=0 ; i<N ; i++ ) {
@@ -117,15 +117,15 @@ public class Main {
 			) 			
 		);
 		
-		SimulationEnvironment<PopulationModel,PopulationState> sim = 
-				new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS));
+		SimulationEnvironment sim = 
+				new SimulationEnvironment( new ThreadSimulationManager(TASKS));
 		
-		sim.setSampling(new SamplingCollection<PopulationState>(samplings));
+		SamplingFunction<PopulationState> sf = new SamplingCollection<PopulationState>(samplings);
 
-		sim.simulate(REPLICA,DEADLINE);
+		sim.simulate(new DefaultRandomGenerator(), f, initialState(1),sf, REPLICA,DEADLINE);
 
-		for (StatisticSampling<PopulationState> sf : samplings) {
-			sf.printTimeSeries(new PrintStream("data/crowds_"+REPLICA+"_"+N+"_"+sf.getName()+"_.data"),';');
+		for (StatisticSampling<PopulationState> s : samplings) {
+			s.printTimeSeries(new PrintStream("data/crowds_"+REPLICA+"_"+N+"_"+s.getName()+"_.data"),';');
 		}
 
 	}

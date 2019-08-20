@@ -11,6 +11,7 @@ import java.net.UnknownHostException;
 import java.util.function.Function;
 import java.io.Serializable;
 
+import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.NetworkSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
@@ -19,6 +20,7 @@ import quasylab.sibilla.core.simulator.pm.PopulationState;
 import quasylab.sibilla.core.simulator.pm.ReactionRule;
 import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 /**
@@ -70,12 +72,11 @@ public class NetworkMain {
 				s -> s.getOccupancy(I)*LAMBDA_R
 		);
 		
-		PopulationModel f = new PopulationModel( 
-				initialState(),
-				rule_S_E,
-				rule_E_I,
-				rule_I_R
-		); 
+		PopulationModel f = new PopulationModel(); 
+		f.addState("init",initialState()); 
+		f.addRule(rule_S_E); 
+		f.addRule(rule_E_I); 
+		f.addRule(rule_I_R); 
 		
 		StatisticSampling<PopulationState> fiSamp = 
 				StatisticSampling.measure("Fraction Infected", 
@@ -92,13 +93,13 @@ public class NetworkMain {
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
 		//SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS) );
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new NetworkSimulationManager<>(new InetAddress[]{InetAddress.getLocalHost(), InetAddress.getLocalHost(), InetAddress.getLocalHost()},
+		SimulationEnvironment sim = new SimulationEnvironment( new NetworkSimulationManager(new InetAddress[]{InetAddress.getLocalHost(), InetAddress.getLocalHost(), InetAddress.getLocalHost()},
 																																	new int[]{8080, 8081, 8082},
 																																	"quasylab.sibilla.examples.pm.seir.NetworkMain" ));
 
-		sim.setSampling(new SamplingCollection<>(fiSamp,frSamp));
+		SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp,frSamp);
 
-		sim.simulate(REPLICA,DEADLINE);
+		sim.simulate(new DefaultRandomGenerator(),f,initialState(),sf,REPLICA,DEADLINE);
 
 		fiSamp.printTimeSeries(new PrintStream("data/seir_"+REPLICA+"_"+N+"_FI_.data"),';');
 		frSamp.printTimeSeries(new PrintStream("data/seir_"+REPLICA+"_"+N+"_FR_.data"),';');

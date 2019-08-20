@@ -19,22 +19,113 @@
 
 package quasylab.sibilla.core.simulator;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+
+import org.apache.commons.math3.random.RandomGenerator;
+
 /**
- * @author belenchia
+ * A <code>SimulationManager</code> has the responsibility to coordinate 
+ * simulation activities. These are arranged in <it>sessions</it> ({@link SimulationSessionI}).
+ * 
+ * @author Matteo Belenchia, Michele Loreti
  *
  */
+public abstract class SimulationManager {
+	
+	private final Map<Integer,SimulationSessionI> sessions;
+	private int sessionCounter = 0;
+	
+	public SimulationManager() {
+		this.sessions = new HashMap<>();
+	}
+	
+	/**
+	 * 
+	 * Initializes a new simulation session. Each session is associated with a 
+	 * type <code>S</code> indicating states of simulated model. 
+	 * 
+	 * @param <S> type of simulated model states
+	 * @param consumer trace consumer associated with the session
+	 * @return a new session
+	 * 
+	 */
+    public synchronized <S> SimulationSession<S> newSession(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+    	SimulationSession<S> session = new SimulationSession<S>( sessionCounter++, random, consumer );
+    	this.sessions.put(session.sessionId, session);
+    	return session;
+    }
+    
+    /**
+     * Executes a <code>SimulationUnit</code> by using the specific random generator.
+     * The trajectory resulting from the simulation is passed to the argument <code>conumer</code>.
+     * 
+     * @param <S> type of simulated states
+     * @param random random generator used in the simulation
+     * @param consumer consumer used to handle the trajectory resulting from the simulation
+     * @param simulation simulation unit
+     */
+    protected abstract <S> void runSimulation(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationUnit<S> simulation);
+    
+    /**
+     * 
+     * @author loreti
+     *
+     * @param <S>
+     */
+    public class SimulationSession<S> implements SimulationSessionI {
+    	
+    	private int sessionId;
+        private int runningTasks = 0;
+        private Consumer<Trajectory<S>> trajectoryConsumer;
+        private RandomGenerator random;
+        private boolean running;
+        
+        private SimulationSession(int sessionId, RandomGenerator random, Consumer<Trajectory<S>> trajectoryConsumer){
+            this.sessionId = sessionId;
+            this.trajectoryConsumer = trajectoryConsumer;
+            this.random = random;
+            this.running = true;
+        }
 
+    	@Override
+    	public int getSessionId() {
+    		return sessionId;
+    	}
 
-import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+    	@Override
+    	public synchronized boolean isRunning() {
+    		return running;
+    	}
+    	
+    	public synchronized void setRunning(boolean flag) {
+    		this.running = false;
+    	}
 
-public interface SimulationManager<S> {
+    	@Override
+    	public void shutdown() {
+    		// TODO Auto-generated method stub
+    		
+    	}
+    	
+    	public synchronized void simulate( SimulationUnit<S> unit ) {
+    		runningTasks++;
+    		runSimulation( random, this::handleTrajectory, unit );
+    	}
+    	
+    	private synchronized void handleTrajectory( Trajectory<S> trj ) {
+    		trajectoryConsumer.accept(trj);
+    		runningTasks--;
+    		notifyAll();
+    	}
 
-    // initialize the simulation manager with sampling function and the number of tasks that will be submitted
-    public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function);
-    // calculates reach
-    public long reach();
-    // runs a task
-    public void run(SimulationSession<S> session, SimulationTask<S> task);
-    // wait for submitted tasks to finish
-    public void waitTermination(SimulationSession<S> session) throws InterruptedException;
+		@Override
+		public synchronized void join() throws InterruptedException {
+			while (this.runningTasks>0) {
+				wait();
+			}
+		}
+    }
+
 }

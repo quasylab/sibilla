@@ -29,6 +29,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.Consumer;
+
+import org.apache.commons.math3.random.RandomGenerator;
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
@@ -36,88 +39,99 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
  * @author belenchia
  *
  */
-public class ThreadSimulationManager<S> implements SimulationManager<S> {
-    private ExecutorService executor;
-    private List<SimulationTask<S>> tasks = new LinkedList<>();
-    private final int concurrentTasks;
-    private int runningTasks = 0;
-    private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
+public class ThreadSimulationManager extends SimulationManager {
+
+	private ExecutorService executor;
+	
+//    private final int concurrentTasks;
+//    private int runningTasks = 0;
+//    private int sessionCounter = 0;
+//    private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
 
     public ThreadSimulationManager(int concurrentTasks) {
-        this.concurrentTasks = concurrentTasks;
-        executor = Executors.newCachedThreadPool();
+    	this(Executors.newFixedThreadPool(concurrentTasks));
+    }
+    
+    public ThreadSimulationManager( ) {
+    	this(Executors.newCachedThreadPool());
     }
 
-    public SimulationSession<S> newSession(int expectedTasks, SamplingFunction<S> sampling_function){
-        return new SimulationSession<S>(expectedTasks, sampling_function);
-    }
-
-    private void doSample(SamplingFunction<S> sampling_function, Trajectory<S> trajectory) {
-        if (sampling_function != null) {
-            trajectory.sample(sampling_function);
-        }
-    }
+//    private void doSample(SamplingFunction<S> sampling_function, Trajectory<S> trajectory) {
+//        if (sampling_function != null) {
+//            trajectory.sample(sampling_function);
+//        }
+//    }
 
     // waits for all tasks to end, then prints timing information to file
-    private void terminate() {
-        try {
-            printTimingInformation(System.out);
-            printTimingInformation(new PrintStream(new FileOutputStream("thread_data.data", true)));
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+//    private void terminate() {
+//        try {
+//            printTimingInformation(System.out);
+//            printTimingInformation(new PrintStream(new FileOutputStream("thread_data.data", true)));
+//        } catch (FileNotFoundException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//
+//    }
 
-    }
-
-    // samples the trajectory, updates counters, then runs next task.
-    // if no new tasks to run, shutdowns the executor
-    private synchronized void manageTask(SimulationSession<S> session, Trajectory<S> trajectory) {
-        doSample(session.getSamplingFunction(), trajectory);
-        runningTasks--;
-        session.taskCompleted();
-        SimulationTask<S> nextTask = waitingTasks.poll();
-        if (nextTask != null) {
-            run(session, nextTask);
-        } else if (isCompleted(session)){
-            this.notify();
-        }
-    }
-
-    private synchronized boolean isCompleted(SimulationSession<S> session) {
-		return (runningTasks+session.getExpectedTasks()==0);
+    public ThreadSimulationManager(ExecutorService executor) {
+    	this.executor = executor;
 	}
 
+//	// samples the trajectory, updates counters, then runs next task.
+//    // if no new tasks to run, shutdowns the executor
+//    private synchronized <S> void manageTask(SimulationSession<S> session, Trajectory<S> trajectory) {
+//    	session.getSamplingFunction().accept(trajectory);
+////        doSample(session.getSamplingFunction(), trajectory);
+//        runningTasks--;
+//        session.taskCompleted();
+//        SimulationTask<S> nextTask = waitingTasks.poll();
+//        if (nextTask != null) {
+//            run(session, nextTask);
+//        } else if (isCompleted(session)){
+//            this.notify();
+//        }
+//    }
+
+//    private synchronized boolean isCompleted(SimulationSession<S> session) {
+//		return (runningTasks+session.getExpectedTasks()==0);
+//	}
+
     // runs a new task if below task limit, else adds to queue
-    @Override
-    public synchronized void run(SimulationSession<S> session, SimulationTask<S> task) {
-        if (runningTasks < concurrentTasks) {
-            runningTasks++;
-            tasks.add(task);
-            CompletableFuture.supplyAsync(task, executor).thenAccept((trajectory) -> this.manageTask(session, trajectory));
-        } else {
-            waitingTasks.add(task);
-        }
+    protected <S> void runSimulation(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationUnit<S> unit) {
+        CompletableFuture.supplyAsync(new SimulationTask<>(random, unit), executor).thenAccept(consumer);
     }
 
-    //waiting until executor is shutdown
-    @Override
-    public synchronized void waitTermination(SimulationSession<S> session) throws InterruptedException {
-        while (!isCompleted(session)) {
-            this.wait();
-        } 
-        terminate();
-        //executor.shutdown(); // only when recording time
-    }
-
-    private void printTimingInformation(PrintStream out){
-        LongSummaryStatistics statistics = tasks.stream().map(x -> x.getElapsedTime()).mapToLong(Long::valueOf).summaryStatistics();
-        out.println(concurrentTasks +";"+((ThreadPoolExecutor) executor).getPoolSize()+";" + statistics.getAverage() + ";" + statistics.getMax() +";" + statistics.getMin());
-    }
-
-    @Override
-    public long reach() {
-        return tasks.stream().filter(task -> task.reach() == true).count();
-    }
+//    //waiting until executor is shutdown
+//    @Override
+//    public synchronized void waitTermination(SimulationSession<S> session) throws InterruptedException {
+//        while (!isCompleted(session)) {
+//            this.wait();
+//        } 
+//        terminate();
+//        //executor.shutdown(); // only when recording time
+//    }
+//
+//    private void printTimingInformation(PrintStream out){
+//        LongSummaryStatistics statistics = tasks.stream().map(x -> x.getElapsedTime()).mapToLong(Long::valueOf).summaryStatistics();
+//        out.println(concurrentTasks +";"+((ThreadPoolExecutor) executor).getPoolSize()+";" + statistics.getAverage() + ";" + statistics.getMax() +";" + statistics.getMin());
+//    }
+//
+//    @Override
+//    public long reach() {
+//        return tasks.stream().filter(task -> task.reach() == true).count();
+//    }
+//
+//	@Override
+//	public <S> void waitTermination(SimulationSession<S> session) throws InterruptedException {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public <S> void waitTermination(SimulationSession<S> session) throws InterruptedException {
+//		// TODO Auto-generated method stub
+//		
+//	}
     
 }

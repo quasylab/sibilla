@@ -34,6 +34,7 @@ public class Trajectory<S> implements Serializable {
 	private List<Sample<S>> data;
 	private double start = Double.NaN;
 	private double end = Double.NaN;
+	private boolean succesfull; 
 
 	public Trajectory() {
 		this.data = new LinkedList<Sample<S>>();
@@ -68,6 +69,20 @@ public class Trajectory<S> implements Serializable {
 	
 	public int size() {
 		return data.size();
+	}
+
+	/**
+	 * @return the succesfull
+	 */
+	public boolean isSuccesfull() {
+		return succesfull;
+	}
+
+	/**
+	 * @param succesfull the succesfull to set
+	 */
+	public void setSuccesfull(boolean succesfull) {
+		this.succesfull = succesfull;
 	}
 	
 

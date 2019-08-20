@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.net.UnknownHostException;
 
+import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
@@ -15,6 +16,7 @@ import quasylab.sibilla.core.simulator.pm.PopulationState;
 import quasylab.sibilla.core.simulator.pm.ReactionRule;
 import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 /**
@@ -64,12 +66,11 @@ public class Main {
 				s -> s.getOccupancy(I)*LAMBDA_R
 		);
 		
-		PopulationModel f = new PopulationModel( 
-				initialState(),
-				rule_S_E,
-				rule_E_I,
-				rule_I_R
-		); 
+		PopulationModel f = new PopulationModel();
+		f.addState("initial", initialState());
+		f.addRule(rule_S_E);
+		f.addRule(rule_E_I);
+		f.addRule(rule_I_R); 
 		
 		StatisticSampling<PopulationState> fiSamp = 
 				StatisticSampling.measure("Fraction Infected", 
@@ -85,11 +86,11 @@ public class Main {
 //		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS));
+		SimulationEnvironment sim = new SimulationEnvironment( new ThreadSimulationManager(TASKS));
 
-		sim.setSampling(new SamplingCollection<>(fiSamp,frSamp));
+		SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp,frSamp);
 
-		sim.simulate(REPLICA,DEADLINE);
+		sim.simulate(new DefaultRandomGenerator(),f,initialState(),sf,REPLICA,DEADLINE);
 
 		fiSamp.printTimeSeries(new PrintStream("data/seir_"+REPLICA+"_"+N+"_FI_.data"),';');
 		frSamp.printTimeSeries(new PrintStream("data/seir_"+REPLICA+"_"+N+"_FR_.data"),';');

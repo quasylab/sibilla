@@ -16,34 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-/**
- * 
- */
+
 package quasylab.sibilla.core.simulator;
-
-import java.io.Serializable;
-import java.util.Set;
-import java.util.function.Function;
-
-import org.apache.commons.math3.random.RandomGenerator;
-
-import quasylab.sibilla.core.simulator.util.WeightedStructure;
 
 /**
  * @author loreti
  *
  */
-public interface Model<S> extends Serializable {
-
-	public WeightedStructure<StepFunction<S>> getActivities( RandomGenerator r , S s );
-
-//	public S getState( String label );
-//	
-//	public Set<String> getStateLabels(); 
-//
-//	public S copy( S state );
-//
-//	public Function<? super S,Double> getMeasure( String label );
-//	
-//	public Set<String> getMeasureLabels();
+public interface SimulationSessionI {
+	
+	public int getSessionId();
+	
+	public boolean isRunning();
+	
+	public void shutdown();
+	
+	public void join() throws InterruptedException;
+	
 }

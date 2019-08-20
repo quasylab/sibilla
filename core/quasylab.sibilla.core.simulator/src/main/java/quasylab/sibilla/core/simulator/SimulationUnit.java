@@ -16,34 +16,55 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
-/**
- * 
- */
+
 package quasylab.sibilla.core.simulator;
 
-import java.io.Serializable;
-import java.util.Set;
-import java.util.function.Function;
-
-import org.apache.commons.math3.random.RandomGenerator;
-
-import quasylab.sibilla.core.simulator.util.WeightedStructure;
+import java.util.function.Predicate;
 
 /**
  * @author loreti
  *
  */
-public interface Model<S> extends Serializable {
+public class SimulationUnit<S> {
 
-	public WeightedStructure<StepFunction<S>> getActivities( RandomGenerator r , S s );
+	private Model<S> model;
+	
+	private S state;
+	
+	private SamplePredicate<? super S> stoppingPredicate;
+	
+	private Predicate<? super S> reachPredicate;
+	
+	public SimulationUnit(Model<S> model, S state, SamplePredicate<? super S> stoppingPredicate, Predicate<? super S> reachPredicate) {
+		this.model = model;
+		this.state = state;
+		this.stoppingPredicate = stoppingPredicate;
+		this.reachPredicate = reachPredicate;
+	}
 
-//	public S getState( String label );
-//	
-//	public Set<String> getStateLabels(); 
-//
-//	public S copy( S state );
-//
-//	public Function<? super S,Double> getMeasure( String label );
-//	
-//	public Set<String> getMeasureLabels();
+	public Model<S> getModel() {
+		return model;
+	}
+
+	public S getState() {
+		return state;
+	}
+
+	/**
+	 * @return the stoppingPredicate
+	 */
+	public SamplePredicate<? super S> getStoppingPredicate() {
+		return stoppingPredicate;
+	}
+
+	/**
+	 * 
+	 * @return the reachPredicate
+	 */
+	public Predicate<? super S> getReachPredicate() {
+		return reachPredicate;
+	}
+	
+	
+	
 }
