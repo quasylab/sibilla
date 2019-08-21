@@ -44,7 +44,7 @@ public class SimulationEnvironment {
 	}
 
 	public synchronized <S> void simulate(RandomGenerator random, Model<S> model, S initialState, SamplingFunction<S> sampling_function, int iterations, double deadline) throws InterruptedException {
-		simulate(null, model, initialState, sampling_function, iterations, deadline);
+		simulate(null, random, model, initialState, sampling_function, iterations, deadline);
 	}
 
 	public synchronized <S> void simulate(SimulationMonitor monitor, RandomGenerator random, Model<S> model, S initialState, SamplingFunction<S> sampling_function, int iterations, double deadline) throws InterruptedException {
@@ -64,15 +64,15 @@ public class SimulationEnvironment {
 			if (monitor != null) {
 				monitor.endSimulation(i);
 			}
-			System.out.print('>');
-			if ((i + 1) % 50 == 0) {
-				System.out.print("\n");
-			}
-			System.out.flush();
+//			System.out.print('>');
+//			if ((i + 1) % 50 == 0) {
+//				System.out.print("\n");
+//			}
+//			System.out.flush();
 		}
 		session.join();
 		rgi.unregister();
-		
+		System.out.println("DONE!");
 	}
 
 	public <S> double reachability(SimulationMonitor monitor, RandomGenerator random, Model<S> model, S state, double error, double delta, double deadline, Predicate<? super S> phi,
