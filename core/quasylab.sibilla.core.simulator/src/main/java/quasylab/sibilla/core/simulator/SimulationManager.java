@@ -20,8 +20,12 @@
 package quasylab.sibilla.core.simulator;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -91,6 +95,7 @@ public abstract class SimulationManager {
         private Consumer<Trajectory<S>> trajectoryConsumer;
         private RandomGenerator random;
         private boolean running;
+        private LinkedList<Long> executionTime;
         
         private SimulationSession(int sessionId, RandomGenerator random, Consumer<Trajectory<S>> trajectoryConsumer){
             this.sessionId = sessionId;
@@ -128,6 +133,7 @@ public abstract class SimulationManager {
     	}
     	
     	private synchronized void handleTrajectory( Trajectory<S> trj ) {
+    		this.executionTime.add(trj.getGenerationTime());
     		trajectoryConsumer.accept(trj);
     		runningTasks--;
     		notifyAll();
@@ -139,6 +145,17 @@ public abstract class SimulationManager {
 				wait();
 			}
 		}
+
+		@Override
+		public int computedTrajectories() {
+			return executionTime.size();
+		}
+
+		@Override
+		public double averageExecutionTime() {
+			return executionTime.stream().collect(Collectors.averagingDouble(l -> l.doubleValue()));
+		}
+
     }
 
 }

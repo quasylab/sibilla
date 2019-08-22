@@ -35,4 +35,7 @@ public interface SimulationSessionI {
 	
 	public void join() throws InterruptedException;
 	
+	public int computedTrajectories();
+	
+	public double averageExecutionTime();
 }
