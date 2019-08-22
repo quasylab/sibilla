@@ -31,7 +31,7 @@ public interface SimulationSessionI {
 	
 	public boolean isRunning();
 	
-	public void shutdown();
+	public void shutdown() throws InterruptedException;
 	
 	public void join() throws InterruptedException;
 	

@@ -21,10 +21,8 @@ package quasylab.sibilla.core.simulator;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.random.RandomGenerator;
@@ -119,15 +117,15 @@ public abstract class SimulationManager {
     	}
 
     	@Override
-    	public void shutdown() {
-    		if (isRunning()) {
-    			
-    		}
-    		// TODO Auto-generated method stub
-    		
+    	public void shutdown() throws InterruptedException {
+    		setRunning(false);
+    		join();
     	}
     	
     	public synchronized void simulate( SimulationUnit<S> unit ) {
+    		if (!isRunning()) {
+    			throw new IllegalStateException();
+    		}
     		runningTasks++;
     		runSimulation( random, this::handleTrajectory, unit );
     	}
