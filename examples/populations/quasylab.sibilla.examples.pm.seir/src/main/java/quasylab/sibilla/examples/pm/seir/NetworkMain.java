@@ -5,7 +5,9 @@ package quasylab.sibilla.examples.pm.seir;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.net.InetAddress;
+import java.util.function.Function;
 
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.NetworkSimulationManager;
@@ -13,6 +15,7 @@ import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
+import quasylab.sibilla.core.simulator.pm.RatePopulationFunction;
 import quasylab.sibilla.core.simulator.pm.ReactionRule;
 import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
@@ -46,27 +49,25 @@ public class NetworkMain {
 	private static final int REPLICA = 1000;
 
 	public static void main(String[] argv) throws InterruptedException, IOException {
-		@SuppressWarnings("unchecked")
+
 		PopulationRule rule_S_E = new ReactionRule(
 				"S->E", 
 				new Specie[] { new Specie(S), new Specie(I)} , 
 				new Specie[] { new Specie(E), new Specie(I)},  
-				s -> s.getOccupancy(S)*LAMBDA_E*(s.getOccupancy(I)/N)); 
+				(RatePopulationFunction & Serializable) s -> s.getOccupancy(S)*LAMBDA_E*(s.getOccupancy(I)/N)); 
 		
-		@SuppressWarnings("unchecked")
 		PopulationRule rule_E_I = new ReactionRule(
 				"E->I",
 				new Specie[] { new Specie(E) },
 				new Specie[] { new Specie(I) },
-				s -> s.getOccupancy(E)*LAMBDA_I
+				(RatePopulationFunction & Serializable) s -> s.getOccupancy(E)*LAMBDA_I
 		);
 		
-		@SuppressWarnings("unchecked")
 		PopulationRule rule_I_R = new ReactionRule(
 				"I->R",
 				new Specie[] { new Specie(I) },
 				new Specie[] { new Specie(R) },
-				s -> s.getOccupancy(I)*LAMBDA_R
+				(RatePopulationFunction & Serializable) s -> s.getOccupancy(I)*LAMBDA_R
 		);
 		
 		PopulationModel f = new PopulationModel(); 

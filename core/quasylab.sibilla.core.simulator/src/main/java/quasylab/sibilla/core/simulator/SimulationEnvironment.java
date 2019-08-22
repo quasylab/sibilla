@@ -20,6 +20,7 @@ package quasylab.sibilla.core.simulator;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.io.Serializable;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -47,8 +48,8 @@ public class SimulationEnvironment {
 
 	public synchronized <S> void simulate(SimulationMonitor monitor, RandomGenerator random, Model<S> model, S initialState, SamplingFunction<S> sampling_function, int iterations, double deadline) throws InterruptedException {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
-		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random,trc -> trc.sample(sampling_function));
-		SimulationUnit<S> unit = new SimulationUnit<S>(model, initialState,SamplePredicate.timeDeadlinePredicate(deadline),s -> true);
+		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random,  trc -> trc.sample(sampling_function));
+		SimulationUnit<S> unit = new SimulationUnit<S>(model, initialState,SamplePredicate.timeDeadlinePredicate(deadline), (Predicate<? super S> & Serializable) s -> true);
 		rgi.register(random);//FIXME: Remove!
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			if (monitor != null) {

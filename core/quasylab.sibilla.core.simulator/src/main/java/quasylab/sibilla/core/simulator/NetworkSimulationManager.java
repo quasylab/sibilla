@@ -130,7 +130,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
 
     private void run() throws InterruptedException {
         Serializer server = findServer();
-        final List<SimulationTask<S>> toRun;        
+        List<SimulationTask<S>> toRun;        
         if (server != null){
             ServerState serverState = servers.get(server);
             int acceptableTasks = serverState.getExpectedTasks();
@@ -138,6 +138,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
             	acceptableTasks /= 2;
             }
             toRun = getTask(acceptableTasks,true);
+            //final List<SimulationTask<S>> selectedTasks = toRun;
             NetworkTask<S> networkTask = new NetworkTask<S>(toRun);
             CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
                              .whenComplete((value, error) -> manageResult(value, error, toRun, server));
@@ -146,7 +147,6 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     }
 
     private synchronized Serializer findServer() throws InterruptedException {
-        try{
     	while (isRunning()&&serverQueue.isEmpty()) {
     		wait();
     	}
@@ -154,10 +154,11 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     		return null;
     	}
         return serverQueue.poll();
-    }catch(NullPointerException e){
-        e.printStackTrace();
     }
-    return null;
+
+    private synchronized void enqueueServer(Serializer server){
+        serverQueue.add(server);
+        notifyAll();
     }
 
     private void manageResult(ComputationResult<S> value, Throwable error, List<SimulationTask<S>> tasks, Serializer server){
@@ -166,14 +167,12 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
             Serializer newServer;
             if((newServer = manageTimeout(server))!= null){
                 // server responded
-                serverQueue.add(newServer); // add new server to queue, old server won't return  
-                notifyAll();
+                enqueueServer(newServer);// add new server to queue, old server won't return  
             }
             rescheduleAll(tasks);
         }else{
             //timeout not occurred, continue as usual
-            serverQueue.add(server); 
-            notifyAll();
+            enqueueServer(server);
             value.getResults().stream().forEach(this::handleTrajectory);
             propertyChange("servers", new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), servers.get(server).toString()});
         }
