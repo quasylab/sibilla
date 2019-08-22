@@ -18,7 +18,6 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator;
 
-import java.util.LinkedList;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 

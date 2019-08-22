@@ -26,7 +26,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -37,13 +36,6 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import org.apache.commons.math3.random.RandomGenerator;
-
-/**
- * @author belenchia
- *
- */
-
-import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 public class NetworkSimulationManager extends SimulationManager {
 	

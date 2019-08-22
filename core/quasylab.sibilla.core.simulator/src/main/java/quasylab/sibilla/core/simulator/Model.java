@@ -22,8 +22,6 @@
 package quasylab.sibilla.core.simulator;
 
 import java.io.Serializable;
-import java.util.Set;
-import java.util.function.Function;
 
 import org.apache.commons.math3.random.RandomGenerator;
 

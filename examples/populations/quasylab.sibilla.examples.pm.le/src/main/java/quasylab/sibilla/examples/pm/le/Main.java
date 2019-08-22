@@ -44,8 +44,8 @@ public class Main {
 	
 	public final static int SAMPLINGS = 100;
 	public final static double DEADLINE = 600;
-	private static final int REPLICA = 1000;
-	private final static int TASKS = 5;
+	public static final int REPLICA = 1000;
+	public final static int TASKS = 5;
 	
 	
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException {

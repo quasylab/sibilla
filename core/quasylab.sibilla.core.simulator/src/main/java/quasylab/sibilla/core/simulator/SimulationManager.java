@@ -34,9 +34,19 @@ import org.apache.commons.math3.random.RandomGenerator;
  */
 public abstract class SimulationManager {
 	
+	/**
+	 * A map contining a reference to all active sessions.
+	 */
 	private final Map<Integer,SimulationSessionI> sessions;
+	
+	/**
+	 * Session counter.
+	 */
 	private int sessionCounter = 0;
 	
+	/**
+	 * Creates a new simulation manager.
+	 */
 	public SimulationManager() {
 		this.sessions = new HashMap<>();
 	}
@@ -105,6 +115,9 @@ public abstract class SimulationManager {
 
     	@Override
     	public void shutdown() {
+    		if (isRunning()) {
+    			
+    		}
     		// TODO Auto-generated method stub
     		
     	}

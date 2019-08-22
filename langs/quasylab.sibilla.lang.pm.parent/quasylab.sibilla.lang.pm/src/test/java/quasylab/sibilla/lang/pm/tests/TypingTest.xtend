@@ -7,15 +7,14 @@ import com.google.inject.Inject
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.extensions.InjectionExtension
 import org.eclipse.xtext.testing.util.ParseHelper
-import org.eclipse.xtext.testing.validation.ValidationTestHelper
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.^extension.ExtendWith
 import quasylab.sibilla.lang.pm.model.Constant
+import quasylab.sibilla.lang.pm.model.Expression
 import quasylab.sibilla.lang.pm.model.Model
 import quasylab.sibilla.lang.pm.validation.ExpressionType
-import quasylab.sibilla.lang.pm.model.Expression
 import quasylab.sibilla.lang.pm.validation.ExpressionTypeInference
-import org.junit.jupiter.api.Assertions
 
 @ExtendWith(InjectionExtension)
 @InjectWith(ModelInjectorProvider)

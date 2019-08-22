@@ -20,6 +20,8 @@
 package quasylab.sibilla.core.simulator;
 
 /**
+ * A 
+ * 
  * @author loreti
  *
  */
