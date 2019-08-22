@@ -61,7 +61,7 @@ public class NetworkSimulationManager extends SimulationManager {
 
 
     protected <S> void runSimulation(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationUnit<S> unit) {
-        CompletableFuture.supplyAsync(new SimulationTask<>(random, unit), executor).thenAccept(consumer);
+    	deploy( new SimulationTask<>(random, unit), consumer );
     }
 
     public synchronized <S> void deploy(SimulationTask<S> task, Consumer<Trajectory<S>> consumer) {

@@ -80,6 +80,11 @@ public abstract class SimulationManager {
      */
     protected abstract <S> void runSimulation(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationUnit<S> simulation);
     
+    
+    private void deleteSession( SimulationSessionI session ) {
+    	this.sessions.remove(session.getSessionId());
+    }
+    
     /**
      * 
      * @author loreti
@@ -120,6 +125,7 @@ public abstract class SimulationManager {
     	public void shutdown() throws InterruptedException {
     		setRunning(false);
     		join();
+    		deleteSession(this);
     	}
     	
     	public synchronized void simulate( SimulationUnit<S> unit ) {
