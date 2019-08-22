@@ -78,7 +78,8 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 
     public ThreadSimulationManager(ExecutorService executor,RandomGenerator random, Consumer<Trajectory<S>> consumer) {
     	super(random,consumer);
-    	this.executor = executor;
+		this.executor = executor;
+		this.start();
 	}
 
 //	// samples the trajectory, updates counters, then runs next task.

@@ -97,6 +97,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
             }
         }
         serverQueue = new LinkedBlockingQueue<>(this.servers.keySet());
+        this.start();
     }
 
 
@@ -145,6 +146,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     }
 
     private synchronized Serializer findServer() throws InterruptedException {
+        try{
     	while (isRunning()&&serverQueue.isEmpty()) {
     		wait();
     	}
@@ -152,6 +154,10 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     		return null;
     	}
         return serverQueue.poll();
+    }catch(NullPointerException e){
+        e.printStackTrace();
+    }
+    return null;
     }
 
     private void manageResult(ComputationResult<S> value, Throwable error, List<SimulationTask<S>> tasks, Serializer server){
@@ -233,6 +239,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
             elapsedTime = System.nanoTime() - elapsedTime;
 
             state.update(elapsedTime, receivedResult.getResults().size());
+            System.out.println(receivedResult.getResults().size());
 
             result = receivedResult;  
         }catch(SocketTimeoutException e){

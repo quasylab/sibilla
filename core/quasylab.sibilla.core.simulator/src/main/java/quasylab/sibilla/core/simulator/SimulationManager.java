@@ -59,7 +59,6 @@ public abstract class SimulationManager<S> {
 	public SimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
 		this.random = random;
 		this.trajectoryConsumer = consumer;
-		this.start();
 	}
 	
 	protected abstract void start();
