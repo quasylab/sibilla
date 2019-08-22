@@ -98,7 +98,7 @@ public class TestTime {
 //		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
-		SimulationEnvironment sim = new SimulationEnvironment( new ThreadSimulationManager(i) );
+		SimulationEnvironment sim = new SimulationEnvironment( ThreadSimulationManager.getFixedThreadsimulationManager(i) );
 
 		SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp,frSamp);
 		long startTime = System.nanoTime();

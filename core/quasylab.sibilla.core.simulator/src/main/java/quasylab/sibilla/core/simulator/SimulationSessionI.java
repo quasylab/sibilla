@@ -19,6 +19,8 @@
 
 package quasylab.sibilla.core.simulator;
 
+import java.util.List;
+
 /**
  * A 
  * 
@@ -38,4 +40,8 @@ public interface SimulationSessionI {
 	public int computedTrajectories();
 	
 	public double averageExecutionTime();
+	
+	public SimulationTask<?> nextTask();
+	
+	public List<SimulationTask<?>> getTask(int n);
 }

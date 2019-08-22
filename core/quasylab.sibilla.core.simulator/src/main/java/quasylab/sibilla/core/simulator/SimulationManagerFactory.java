@@ -19,58 +19,17 @@
 
 package quasylab.sibilla.core.simulator;
 
-import java.io.Serializable;
-import java.util.function.Predicate;
+import java.util.function.Consumer;
+
+import org.apache.commons.math3.random.RandomGenerator;
 
 /**
  * @author loreti
  *
  */
-public class SimulationUnit<S> implements Serializable {
+@FunctionalInterface
+public interface SimulationManagerFactory {
+	
+	public <S> SimulationManager<S> getSimulationManager( RandomGenerator random, Consumer<Trajectory<S>> consumer);
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 2809995821274223033L;
-
-	private Model<S> model;
-	
-	private S state;
-	
-	private SamplePredicate<? super S> stoppingPredicate;
-	
-	private Predicate<? super S> reachPredicate;
-	
-	public SimulationUnit(Model<S> model, S state, SamplePredicate<? super S> stoppingPredicate, Predicate<? super S> reachPredicate) {
-		this.model = model;
-		this.state = state;
-		this.stoppingPredicate = stoppingPredicate;
-		this.reachPredicate = reachPredicate;
-	}
-
-	public Model<S> getModel() {
-		return model;
-	}
-
-	public S getState() {
-		return state;
-	}
-
-	/**
-	 * @return the stoppingPredicate
-	 */
-	public SamplePredicate<? super S> getStoppingPredicate() {
-		return stoppingPredicate;
-	}
-
-	/**
-	 * 
-	 * @return the reachPredicate
-	 */
-	public Predicate<? super S> getReachPredicate() {
-		return reachPredicate;
-	}
-	
-	
-	
 }

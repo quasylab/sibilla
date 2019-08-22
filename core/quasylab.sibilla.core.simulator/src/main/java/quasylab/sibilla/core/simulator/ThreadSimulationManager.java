@@ -30,7 +30,7 @@ import org.apache.commons.math3.random.RandomGenerator;
  * @author belenchia
  *
  */
-public class ThreadSimulationManager extends SimulationManager {
+public class ThreadSimulationManager<S> extends SimulationManager<S> {
 
 	private ExecutorService executor;
 	
@@ -39,14 +39,25 @@ public class ThreadSimulationManager extends SimulationManager {
 //    private int sessionCounter = 0;
 //    private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
 
-    public ThreadSimulationManager(int concurrentTasks) {
-    	this(Executors.newFixedThreadPool(concurrentTasks));
+	public ThreadSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+		this(Executors.newCachedThreadPool(),random,consumer);
+	}
+	
+    public ThreadSimulationManager(int concurrentTasks,RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+    	this(Executors.newFixedThreadPool(concurrentTasks),random,consumer);
     }
     
-    public ThreadSimulationManager( ) {
-    	this(Executors.newCachedThreadPool());
-    }
-
+    public static final SimulationManagerFactory getFixedThreadsimulationManager( int n ) {
+    	return new SimulationManagerFactory() {
+   		
+			@Override
+			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+				return new ThreadSimulationManager<>(n, random, consumer);
+			}
+    	};
+		
+	}
+    
 //    private void doSample(SamplingFunction<S> sampling_function, Trajectory<S> trajectory) {
 //        if (sampling_function != null) {
 //            trajectory.sample(sampling_function);
@@ -65,7 +76,8 @@ public class ThreadSimulationManager extends SimulationManager {
 //
 //    }
 
-    public ThreadSimulationManager(ExecutorService executor) {
+    public ThreadSimulationManager(ExecutorService executor,RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+    	super(random,consumer);
     	this.executor = executor;
 	}
 
@@ -92,6 +104,29 @@ public class ThreadSimulationManager extends SimulationManager {
     protected <S> void runSimulation(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationUnit<S> unit) {
         CompletableFuture.supplyAsync(new SimulationTask<>(random, unit), executor).thenAccept(consumer);
     }
+
+	@Override
+	protected void start() {
+
+		Thread t = new Thread( this::handleTasks );
+		t.start();
+		
+	}
+	
+	private void handleTasks() {
+	
+		try {
+			while (isRunning()) {
+				SimulationTask<S> nextTask = nextTask(true);
+				if (nextTask != null) {
+				    CompletableFuture.supplyAsync(nextTask, executor).thenAccept(this::handleTrajectory);
+				}
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+	}
 
 //    //waiting until executor is shutdown
 //    @Override

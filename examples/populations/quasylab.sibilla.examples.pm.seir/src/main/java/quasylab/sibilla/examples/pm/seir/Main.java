@@ -42,7 +42,7 @@ public class Main {
 
 	public final static int SAMPLINGS = 100;
 	public final static double DEADLINE = 600;
-	private static final int REPLICA = 1000;
+	private static final int REPLICA = 100;
 	private final static int TASKS = 15;
 
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
@@ -86,7 +86,7 @@ public class Main {
 //		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
-		SimulationEnvironment sim = new SimulationEnvironment( new ThreadSimulationManager(TASKS));
+		SimulationEnvironment sim = new SimulationEnvironment( );
 
 		SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp,frSamp);
 

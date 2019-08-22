@@ -18,6 +18,7 @@ import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
+import quasylab.sibilla.core.simulator.serialization.SerializationType;
 
 /**
  * @author loreti
@@ -89,9 +90,10 @@ public class NetworkMain {
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
 		//SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS) );
-		SimulationEnvironment sim = new SimulationEnvironment( new NetworkSimulationManager(new InetAddress[]{InetAddress.getLocalHost(), InetAddress.getLocalHost(), InetAddress.getLocalHost()},
+		SimulationEnvironment sim = new SimulationEnvironment( NetworkSimulationManager.getNetworkSimulationManagerFactory(new InetAddress[]{InetAddress.getLocalHost(), InetAddress.getLocalHost(), InetAddress.getLocalHost()},
 																																	new int[]{8080, 8081, 8082},
-																																	"quasylab.sibilla.examples.pm.seir.NetworkMain" ));
+																																	"quasylab.sibilla.examples.pm.seir.NetworkMain",
+																																	new SerializationType[] { SerializationType.FST, SerializationType.FST, SerializationType.FST }));
 
 		SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp,frSamp);
 

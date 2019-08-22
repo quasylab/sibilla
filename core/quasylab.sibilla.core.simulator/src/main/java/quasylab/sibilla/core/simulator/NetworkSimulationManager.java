@@ -19,168 +19,239 @@
 
 package quasylab.sibilla.core.simulator;
 
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
+
+import javax.swing.event.SwingPropertyChangeSupport;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-public class NetworkSimulationManager extends SimulationManager {
-	
-    private Map<Socket, ServerState> servers = new ConcurrentHashMap<>();
-    private ExecutorService executor;
-    private int workingServers = 0;
-    private boolean isTerminated = false;
+import quasylab.sibilla.core.simulator.serialization.SerializationType;
+import quasylab.sibilla.core.simulator.serialization.Serializer;
+import quasylab.sibilla.core.simulator.server.ComputationResult;
 
-    public NetworkSimulationManager(InetAddress[] servers, int[] ports, String modelName)
+public class NetworkSimulationManager<S> extends SimulationManager<S> {
+	
+    
+    private Map<Serializer, ServerState> servers = Collections.synchronizedMap(new HashMap<>());
+    private final String modelName;
+    private BlockingQueue<Serializer> serverQueue ;
+    private ExecutorService executor;
+    private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
+//    private BlockingQueue<SimulationSession<S>> sessions = new LinkedBlockingQueue<>();
+
+    
+    public static final SimulationManagerFactory getNetworkSimulationManagerFactory( InetAddress[] servers, int[] ports, String modelName, SerializationType[] serialization) {
+    	return new SimulationManagerFactory() {
+   		
+			@Override
+			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+				try {
+					return new NetworkSimulationManager<S>(random, consumer, servers, ports, modelName, serialization);
+				} catch (IOException e) {
+					e.printStackTrace();
+					return null;
+				}
+			}
+    	};
+		
+	}
+
+
+    public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
+        this.pcs.addPropertyChangeListener(property, listener);
+    }
+
+    public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer,InetAddress[] servers, int[] ports, String modelName, SerializationType[] serialization)
             throws UnknownHostException, IOException {
+    	super(random,consumer);
+        this.modelName = modelName;
         executor = Executors.newCachedThreadPool();
         for (int i = 0; i < servers.length; i++) {
-            Socket server = new Socket(servers[i].getHostAddress(), ports[i]);
+            Serializer server = Serializer.createSerializer(new Socket(servers[i].getHostAddress(), ports[i]), serialization[i]);
             this.servers.put(server, new ServerState(server));
-
-            ObjectOutputStream oos = this.servers.get(server).getObjectOutputStream();
-
-            byte[] toSend = ClassBytesLoader.loadClassBytes(modelName);
-            oos.writeObject(modelName);
-            oos.writeObject(toSend);
+            try {
+                initConnection(server);
+            } catch (Exception e) {
+                System.out.println("Error during server initialization, removing server...");
+                this.servers.remove(server);
+            }
         }
+        serverQueue = new LinkedBlockingQueue<>(this.servers.keySet());
     }
 
 
-    protected <S> void runSimulation(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationUnit<S> unit) {
-    	deploy( new SimulationTask<>(random, unit), consumer );
+    private void initConnection(Serializer server) throws Exception{
+        byte[] classBytes = ClassBytesLoader.loadClassBytes(modelName);
+        server.writeObject(modelName);
+        server.writeObject(classBytes);
     }
 
-    public synchronized <S> void deploy(SimulationTask<S> task, Consumer<Trajectory<S>> consumer) {
-    	deploy(new LinkedList<>(Arrays.asList(task)),consumer);
-    }
 
-    private synchronized <S> void deploy(List<SimulationTask<S>> tasks, Consumer<Trajectory<S>> consumer) {
-        Socket server = findServer();
-        deploy(tasks, consumer, server);
-    }
+	@Override
+	protected void start() {
 
-    private synchronized <S> void deploy(List<SimulationTask<S>> tasks, Consumer<Trajectory<S>> consumer, Socket server) {
-        if (server != null) {
-            NetworkTask<S> networkTask = new NetworkTask<S>(tasks);
-            workingServers++;
-            servers.get(server).startRunning();
+		Thread t = new Thread( this::handleTasks );
+		t.start();
+		
+	}
+	
+	private void handleTasks() {
+	
+		try {
+			while (isRunning()) {
+				run();
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+    private void run() throws InterruptedException {
+        Serializer server = findServer();
+        final List<SimulationTask<S>> toRun;        
+        if (server != null){
+            ServerState serverState = servers.get(server);
+            int acceptableTasks = serverState.getExpectedTasks();
+            if (!serverState.canCompleteTask(acceptableTasks)) {
+            	acceptableTasks /= 2;
+            }
+            toRun = getTask(acceptableTasks,true);
+            NetworkTask<S> networkTask = new NetworkTask<S>(toRun);
             CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
-                    .thenAccept((trajectory) -> this.manageTask(consumer, trajectory));
-        } else {
-        	throw new NullPointerException(); //FIXME!!!
-            //waitingTasks.addAll(tasks);
+                             .whenComplete((value, error) -> manageResult(value, error, toRun, server));
+        }
+        //propertyChange("waitingTasks", size());
+    }
+
+    private synchronized Serializer findServer() throws InterruptedException {
+    	while (isRunning()&&serverQueue.isEmpty()) {
+    		wait();
+    	}
+    	if (!isRunning()) {
+    		return null;
+    	}
+        return serverQueue.poll();
+    }
+
+    private void manageResult(ComputationResult<S> value, Throwable error, List<SimulationTask<S>> tasks, Serializer server){
+        if(error!=null){
+            //timeout occurred, contact server
+            Serializer newServer;
+            if((newServer = manageTimeout(server))!= null){
+                // server responded
+                serverQueue.add(newServer); // add new server to queue, old server won't return  
+                notifyAll();
+            }
+            rescheduleAll(tasks);
+        }else{
+            //timeout not occurred, continue as usual
+            serverQueue.add(server); 
+            notifyAll();
+            value.getResults().stream().forEach(this::handleTrajectory);
+            propertyChange("servers", new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), servers.get(server).toString()});
         }
     }
 
-    private synchronized Socket findServer() {
-        return servers.keySet().stream().filter(x -> !servers.get(x).isRunning()).findFirst().orElse(null);
-    }
 
-    private synchronized <S> void manageTask(Consumer<Trajectory<S>> consumer, List<Trajectory<S>> trajectories) {
-        for (Trajectory<S> trajectory : trajectories) {
-        	consumer.accept(trajectory);
+    private  Serializer manageTimeout(Serializer server){
+        Serializer pingServer = null;
+        ServerState removedState = null;
+        try {
+            removedState = servers.remove(server); // get old state, remove old server from map
+            removedState.timedout();  // mark server as timed out and update GUI
+            propertyChange("servers", new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), removedState.toString()});
+            pingServer = Serializer.createSerializer(new Socket(server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort()), SerializationType.getType(server)); // start new connection
+            pingServer.getSocket().setSoTimeout(5000); // set 5 seconds timeout on read operations
+            initConnection(pingServer); // initialize connection sending model data
+            pingServer.writeObject("PING"); // send ping request
+            String response = (String) pingServer.readObject(); //wait for response
+            if(!response.equals("PONG")){
+                throw new IllegalStateException("Expected a different reply!");
+            }
+            // response received before time limit:
+            removedState.forceExpiredTimeLimit(); // halve the task window
+            removedState.migrate(pingServer); // change socket in serverstate
+            servers.put(pingServer, removedState); //update hash map
+        } catch (Exception e) {
+            // time limit expired, or some other error happened
+            removedState.removed(); //mark server as removed and update GUI
+            propertyChange("servers", new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), removedState.toString()});
+            return null;
         }
-        workingServers--;
+        return pingServer;
     }
 
-//    private synchronized void nextRun(SimulationSession<S> session, Socket server) {
-//        ServerState serverState;
-//        if ( !waitingTasks.isEmpty() && (serverState = servers.get(server)) != null) {
-//            int acceptableTasks = serverState.getTasks();
-//            List<SimulationTask<S>> nextTasks = getWaitingTasks(acceptableTasks);
-//            if (serverState.canCompleteTask(nextTasks.size())) {
-//                run(session, nextTasks, server);
-//            } else {
-//                try {
-//                    throw new Exception("Submitted task requires too much time!");
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//        } else if(isCompleted(session)){
-//            closeStreams();
-//            this.notify();
-//        }
-//    }
 
-//    private synchronized List<SimulationTask<S>> getWaitingTasks(int n){
-//        List<SimulationTask<S>> fetchedTasks = new LinkedList<>();
-//        for(int i = 0; i < n; i++){
-//            SimulationTask<S> next = waitingTasks.poll();
-//            if(next != null)
-//                fetchedTasks.add(next);
-//            else
-//                break;
-//        }
-//        return fetchedTasks;
-//    }
 
     private void closeStreams(){
         for( ServerState state: servers.values()){
             try {
-                state.getObjectInputStream().close();
-                state.getObjectOutputStream().close();
+                state.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        isTerminated = true;
     }
 
-    private synchronized <S> List<Trajectory<S>> send(NetworkTask<S> networkTask, Socket server){
-        ObjectOutputStream oos;
-        ObjectInputStream ois;
-        List<Trajectory<S>> trajectories = new LinkedList<>();
-        List<Long> timings = new LinkedList<>();
-        ServerState state;
+    private  ComputationResult<S> send(NetworkTask<S> networkTask, Serializer server){
+        ComputationResult<S> result;
+        long elapsedTime;
+        ServerState state = servers.get(server);
         
         try {
+            server.writeObject("TASK");
+            server.writeObject(networkTask);
 
-            oos = servers.get(server).getObjectOutputStream();
-            ois = servers.get(server).getObjectInputStream();
+            elapsedTime = System.nanoTime();
 
-            oos.writeObject(networkTask);
+            server.getSocket().setSoTimeout((int)(state.getTimeout() / 1000000));
 
             @SuppressWarnings("unchecked")
-            List<ComputationResult<S>> result = (List<ComputationResult<S>>) ois.readObject();
+            ComputationResult<S> receivedResult = (ComputationResult<S>) server.readObject();
+            
+            elapsedTime = System.nanoTime() - elapsedTime;
 
-            for(ComputationResult<S> compResult : result){
-                trajectories.add(compResult.getTrajectory());
-                timings.add(compResult.getElapsedTime());
-            }
+            state.update(elapsedTime, receivedResult.getResults().size());
 
-            state = servers.get(server);
-            state.stopRunning();
-            state.update(timings);
-            state.printState();   
-            if(state.isTimeout()) {
-                servers.remove(server);
-                //System.out.println("removed server" + server + " elapsedTime: "+state.getElapsedTime() + " Timeout: "+state.getTimeout());
-            }      
+            result = receivedResult;  
+        }catch(SocketTimeoutException e){
 
+            throw new RuntimeException();
 
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
 
-            e.printStackTrace();
+            throw new RuntimeException();
         }
-        return trajectories;
+        return result;
     }
 
+
+ 
+
+    private void propertyChange(String property, Object value){
+        pcs.firePropertyChange(property, null, value);
+    }
 
 
 }

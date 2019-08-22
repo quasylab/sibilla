@@ -118,7 +118,7 @@ public class Main {
 		);
 		
 		SimulationEnvironment sim = 
-				new SimulationEnvironment( new ThreadSimulationManager(TASKS));
+				new SimulationEnvironment( );
 		
 		SamplingFunction<PopulationState> sf = new SamplingCollection<PopulationState>(samplings);
 

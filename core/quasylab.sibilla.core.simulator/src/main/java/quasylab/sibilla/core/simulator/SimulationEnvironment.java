@@ -23,7 +23,6 @@ import java.util.function.Predicate;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-import quasylab.sibilla.core.simulator.SimulationManager.SimulationSession;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 /**
@@ -32,14 +31,14 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
  */
 public class SimulationEnvironment {
 
-	private SimulationManager simManager;
+	private SimulationManagerFactory simulationManagerFactory;
 
 	public SimulationEnvironment() {
-		this(new ThreadSimulationManager(1));
+		this(ThreadSimulationManager::new);
 	}
 
-	public SimulationEnvironment(SimulationManager simManager) {
-		this.simManager = simManager;
+	public SimulationEnvironment(SimulationManagerFactory simulationManagerFactory) {
+		this.simulationManagerFactory = simulationManagerFactory;
 	}
 
 	public synchronized <S> void simulate(RandomGenerator random, Model<S> model, S initialState, SamplingFunction<S> sampling_function, int iterations, double deadline) throws InterruptedException {
@@ -48,7 +47,7 @@ public class SimulationEnvironment {
 
 	public synchronized <S> void simulate(SimulationMonitor monitor, RandomGenerator random, Model<S> model, S initialState, SamplingFunction<S> sampling_function, int iterations, double deadline) throws InterruptedException {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
-		SimulationSession<S> session = simManager.newSession(random,trc -> trc.sample(sampling_function));
+		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random,trc -> trc.sample(sampling_function));
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, initialState,SamplePredicate.timeDeadlinePredicate(deadline),s -> true);
 		rgi.register(random);//FIXME: Remove!
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
@@ -59,7 +58,7 @@ public class SimulationEnvironment {
 //			if ((i + 1) % 50 == 0) {
 //				System.out.print(i + 1);
 //			}
-			session.simulate(unit);
+			simulationManager.simulate(unit);
 			if (monitor != null) {
 				monitor.endSimulation(i);
 			}
@@ -69,7 +68,7 @@ public class SimulationEnvironment {
 //			}
 //			System.out.flush();
 		}
-		session.join();
+		simulationManager.join();
 		rgi.unregister();
 		System.out.println("DONE!");
 	}
@@ -79,11 +78,11 @@ public class SimulationEnvironment {
 		double n = Math.ceil(Math.log(2 / delta) / (2 * error));
 		ReachabilityTraceConsumer<S> traceConsumer = new ReachabilityTraceConsumer<>();
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, state, (t,s) -> (t>=deadline)||psi.test(s)||!phi.test(s), psi);
-		SimulationSession<S> session = simManager.newSession(random, traceConsumer);
+		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, traceConsumer);
 		for (int i = 0; i < n; i++) {
-			session.simulate(unit);
+			simulationManager.simulate(unit);
 		}
-		session.join();
+		simulationManager.shutdown();
 		return traceConsumer.counter / n;
 	}
 

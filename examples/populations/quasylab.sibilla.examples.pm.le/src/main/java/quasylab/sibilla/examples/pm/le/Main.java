@@ -140,7 +140,7 @@ public class Main {
 		StatisticSampling<PopulationState> lSamp = StatisticSampling.measure("#L", SAMPLINGS, DEADLINE, 
 				s -> s.getOccupancy(L)) ;
 		
-		SimulationEnvironment sim = new SimulationEnvironment( new ThreadSimulationManager(TASKS) );
+		SimulationEnvironment sim = new SimulationEnvironment( );
 
 		SamplingFunction<PopulationState> sf = new SamplingCollection<>(cSamp,fSamp,lSamp);
 

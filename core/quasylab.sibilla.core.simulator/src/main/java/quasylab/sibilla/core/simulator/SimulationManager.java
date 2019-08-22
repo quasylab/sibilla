@@ -19,9 +19,13 @@
 
 package quasylab.sibilla.core.simulator;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -34,132 +38,139 @@ import org.apache.commons.math3.random.RandomGenerator;
  * @author Matteo Belenchia, Michele Loreti
  *
  */
-public abstract class SimulationManager {
-	
-	/**
-	 * A map contining a reference to all active sessions.
-	 */
-	private final Map<Integer,SimulationSessionI> sessions;
+public abstract class SimulationManager<S> {
 	
 	/**
 	 * Session counter.
 	 */
 	private int sessionCounter = 0;
-	
+
+    private final BlockingQueue<SimulationTask<S>> pendingTasks = new LinkedBlockingQueue<>();
+
+    private int runningTasks = 0;
+    private final Consumer<Trajectory<S>> trajectoryConsumer;
+    private RandomGenerator random;
+    private boolean running = true;
+    private final LinkedList<Long> executionTime = new LinkedList<>();
+
 	/**
 	 * Creates a new simulation manager.
 	 */
-	public SimulationManager() {
-		this.sessions = new HashMap<>();
+	public SimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+		this.random = random;
+		this.trajectoryConsumer = consumer;
+		this.start();
 	}
 	
-	/**
-	 * 
-	 * Initializes a new simulation session. Each session is associated with a 
-	 * type <code>S</code> indicating states of simulated model. 
-	 * 
-	 * @param <S> type of simulated model states
-	 * @param consumer trace consumer associated with the session
-	 * @return a new session
-	 * 
-	 */
-    public synchronized <S> SimulationSession<S> newSession(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
-    	SimulationSession<S> session = new SimulationSession<S>( sessionCounter++, random, consumer );
-    	this.sessions.put(session.sessionId, session);
-    	return session;
-    }
-    
-    /**
-     * Executes a <code>SimulationUnit</code> by using the specific random generator.
-     * The trajectory resulting from the simulation is passed to the argument <code>conumer</code>.
-     * 
-     * @param <S> type of simulated states
-     * @param random random generator used in the simulation
-     * @param consumer consumer used to handle the trajectory resulting from the simulation
-     * @param simulation simulation unit
-     */
-    protected abstract <S> void runSimulation(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationUnit<S> simulation);
-    
-    
-    private void deleteSession( SimulationSessionI session ) {
-    	this.sessions.remove(session.getSessionId());
-    }
-    
-    /**
-     * 
-     * @author loreti
-     *
-     * @param <S>
-     */
-    public class SimulationSession<S> implements SimulationSessionI {
-    	
-    	private int sessionId;
-        private int runningTasks = 0;
-        private Consumer<Trajectory<S>> trajectoryConsumer;
-        private RandomGenerator random;
-        private boolean running;
-        private LinkedList<Long> executionTime;
-        
-        private SimulationSession(int sessionId, RandomGenerator random, Consumer<Trajectory<S>> trajectoryConsumer){
-            this.sessionId = sessionId;
-            this.trajectoryConsumer = trajectoryConsumer;
-            this.random = random;
-            this.running = true;
-        }
+	protected abstract void start();
 
-    	@Override
-    	public int getSessionId() {
-    		return sessionId;
-    	}
-
-    	@Override
-    	public synchronized boolean isRunning() {
-    		return running;
-    	}
-    	
-    	public synchronized void setRunning(boolean flag) {
-    		this.running = false;
-    	}
-
-    	@Override
-    	public void shutdown() throws InterruptedException {
-    		setRunning(false);
-    		join();
-    		deleteSession(this);
-    	}
-    	
-    	public synchronized void simulate( SimulationUnit<S> unit ) {
-    		if (!isRunning()) {
-    			throw new IllegalStateException();
-    		}
-    		runningTasks++;
-    		runSimulation( random, this::handleTrajectory, unit );
-    	}
-    	
-    	private synchronized void handleTrajectory( Trajectory<S> trj ) {
-    		this.executionTime.add(trj.getGenerationTime());
-    		trajectoryConsumer.accept(trj);
-    		runningTasks--;
-    		notifyAll();
-    	}
-
-		@Override
-		public synchronized void join() throws InterruptedException {
-			while (this.runningTasks>0) {
-				wait();
-			}
+	public synchronized void simulate(SimulationUnit<S> unit) {
+		if (!isRunning()) {
+			throw new IllegalStateException();
 		}
+		add(new SimulationTask<>(random, unit));
+	}
+    
+   
+	protected void add(SimulationTask<S> simulationTask) {
+		pendingTasks.add(simulationTask);
+		notify();
+	}
 
-		@Override
-		public int computedTrajectories() {
-			return executionTime.size();
+	protected synchronized void reschedule(SimulationTask<S> simulationTask) {
+		runningTasks--;
+		add(simulationTask);
+	}
+	
+	protected synchronized void rescheduleAll( Collection<? extends SimulationTask<S>> tasks ) {
+		runningTasks -= tasks.size();
+		addAll( tasks );
+	}
+	
+	protected void addAll(Collection<? extends SimulationTask<S>> tasks) {
+		pendingTasks.addAll(tasks);
+		notify();
+	}
+
+
+	protected synchronized void handleTrajectory( Trajectory<S> trj ) {
+		this.executionTime.add(trj.getGenerationTime());
+		trajectoryConsumer.accept(trj);
+		runningTasks--;
+		notifyAll();
+	}
+
+	
+	public int computedTrajectories() {
+		return executionTime.size();
+	}
+
+	
+	public double averageExecutionTime() {
+		return executionTime.stream().collect(Collectors.averagingDouble(l -> l.doubleValue()));
+	}
+
+	
+	protected synchronized SimulationTask<S> nextTask() {
+		try {
+			return nextTask(false);
+		} catch (InterruptedException e) {
+			return null;
 		}
-
-		@Override
-		public double averageExecutionTime() {
-			return executionTime.stream().collect(Collectors.averagingDouble(l -> l.doubleValue()));
+	}
+	
+	protected synchronized SimulationTask<S> nextTask(boolean blocking) throws InterruptedException {
+		while (isRunning()&&blocking&&pendingTasks.isEmpty()) {
+			wait();
 		}
+		if (isRunning()) {
+			runningTasks++;
+			return pendingTasks.poll();			
+		}
+		return null;
+	}
 
-    }
+	protected synchronized List<SimulationTask<S>> getTask(int n) {
+		try {
+			return getTask(n,false);
+		} catch (InterruptedException e) {
+			return new LinkedList<>();
+		}
+	}
 
+	protected synchronized List<SimulationTask<S>> getTask(int n, boolean blocking) throws InterruptedException {
+		while (isRunning()&&blocking&&pendingTasks.isEmpty()) {
+			wait();
+		}
+		List<SimulationTask<S>> tasks = new LinkedList<>();
+		if (!isRunning()) {
+			return tasks;
+		}
+		runningTasks += pendingTasks.drainTo(tasks,n);
+		return tasks;
+	}
+
+	public synchronized boolean isRunning() {
+		return running;
+	}
+	
+	public synchronized void setRunning(boolean flag) {
+		this.running = flag;
+		this.notifyAll();
+	}
+
+	public void shutdown() throws InterruptedException {
+//		setRunning(false);
+		join();
+	}
+	
+	public synchronized void join() throws InterruptedException {
+		while (this.runningTasks>0) {
+			wait();
+		}
+	}
+
+	protected Consumer<Trajectory<S>> getConsumer() {
+		return trajectoryConsumer;
+	}
 }

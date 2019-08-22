@@ -1,66 +1,78 @@
 package quasylab.sibilla.core.simulator;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
-import java.util.List;
+
+
+import quasylab.sibilla.core.simulator.serialization.Serializer;
 
 public class ServerState {
-    private Socket server;
-    private int tasks;
-    private boolean running;
-    private long startTime, elapsedTime;
+    private Serializer server;
+    private int expectedTasks, actualTasks;
+    private boolean isRemoved, isTimeout;
     private long runningTime;
-    private double devRTT;
+    public double devRTT;
     private double sampleRTT;
-    private double estimatedRTT;
-    private final static double alpha = 0.5;
-    private final static double beta = 0.5;
+    public double estimatedRTT;
+    private final static double alpha = 0.125;
+    private final static double beta = 0.250;
     private final static int threshold = 256;
     private final static long maxRunningTime = 3600000000000L; // 1 hour in nanoseconds
 
-    private ObjectOutputStream oos;
-    private ObjectInputStream ois;
-
-    public ServerState(Socket server) throws IOException {
+    public ServerState(Serializer server) throws IOException {
         this.server = server;
-        tasks = 1;
-        running = false;
-        startTime = 0L;
-        elapsedTime = 0L;
+        expectedTasks = 1;
+        actualTasks = 0;
+        isRemoved = false;
+        isTimeout = false;
         runningTime = 0L;
-        devRTT = 0;
-        sampleRTT = 0;
-        estimatedRTT = 0;
-        oos = new ObjectOutputStream(server.getOutputStream());
-        ois = new ObjectInputStream(server.getInputStream());
+        devRTT = 0.0;
+        sampleRTT = 0.0;
+        estimatedRTT = 0.0;
     }
 
-    public void update(List<Long> executionTimes){
-        runningTime = executionTimes.stream().reduce(0L, Long::sum);
-        sampleRTT = runningTime / tasks;
-        estimatedRTT = alpha * sampleRTT + (1-alpha) * estimatedRTT;
-        devRTT = tasks == 1 ? sampleRTT * 2 : beta * Math.abs(sampleRTT - estimatedRTT) + (1-beta)*devRTT;
-        if(runningTime > getTimeLimit()){
-            tasks = tasks == 1 ? 1 : tasks / 2;
-            System.out.println("halving");
-        }else if(tasks < threshold){
-            tasks = tasks * 2;
-            System.out.println("doubling");
-        }else if(tasks >= threshold){
-            tasks = tasks + 1;
-            System.out.println("increasing");
+    public void update(long elapsedTime, int tasksSent){
+
+        actualTasks = tasksSent;
+        runningTime = elapsedTime;
+
+        if(devRTT != 0.0){
+            if(runningTime >= getTimeLimit()){
+                expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
+            }else if(expectedTasks < threshold){
+                expectedTasks = expectedTasks * 2;
+            }else if(expectedTasks >= threshold){
+                expectedTasks = expectedTasks + 1;
+            }
+        }else{
+            expectedTasks = 2;
         }
+
+        sampleRTT = runningTime / actualTasks;
+        estimatedRTT = alpha * sampleRTT + (1-alpha) * estimatedRTT;
+        devRTT = devRTT == 0.0 ? sampleRTT * 2 : beta * Math.abs(sampleRTT - estimatedRTT) + (1-beta)*devRTT;
+    }
+
+    public void forceExpiredTimeLimit(){
+        expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
+    }
+
+    public void migrate(Serializer server) throws IOException {
+        close();
+        this.server = server;
+        isRemoved = false; 
+        isTimeout = false;     
+    }
+
+    public void close() throws IOException {
+        server.getSocket().close();
     }
 
     public double getTimeout(){  // after this time, a timeout has occurred and the server is not to be contacted again
-        return tasks*estimatedRTT + tasks*4*devRTT;
-        //return Double.MAX_VALUE;
+        return expectedTasks == 1 ? 1000000000 : expectedTasks*estimatedRTT + expectedTasks*4*devRTT;
     }
 
     public double getTimeLimit(){ // after this time, the tasks to be sent to this server is to be halved
-        return getTimeLimit(tasks);
+        return getTimeLimit(expectedTasks);
     }
 
     private double getTimeLimit(int tasks){
@@ -71,41 +83,42 @@ public class ServerState {
         return getTimeLimit(tasks) < maxRunningTime;
     }
 
-    public int getTasks(){
-        return tasks;
-    }
-
-    public boolean isRunning(){
-        return running;
+    public int getExpectedTasks(){
+        return expectedTasks;
     }
 
     public boolean isTimeout(){
-        return elapsedTime > getTimeout() ;
+        return isTimeout;
     }
 
-    public long getElapsedTime(){
-        return elapsedTime;
+    @Override
+    public String toString(){
+        if(isRemoved()){
+            return "Server has been removed.";
+        }
+        if(isTimeout()){
+            return "Server has timed out, reconnecting...";
+        }
+        return  "Tasks received: "+actualTasks+" "+       
+                "Window runtime: "+runningTime+"ns "+
+                "sampleRTT: "+sampleRTT+"ns "+
+                "estimatedRTT: "+estimatedRTT+"ns "+
+                "devRTT: "+devRTT+"ns "+
+                "Next task window: "+expectedTasks+" "+
+                "Next time limit: "+getTimeLimit()+"ns "+
+                "Next timeout: "+getTimeout()+"ns\n";
     }
 
-    public void startRunning(){
-        running = true;
-        startTime = System.nanoTime();
+    public boolean isRemoved(){
+        return isRemoved;
     }
 
-    public void stopRunning(){
-        elapsedTime = System.nanoTime() - startTime;
-        running = false;
+    public void removed(){
+        isRemoved = true;
     }
 
-    public ObjectInputStream getObjectInputStream(){
-        return ois;
+    public void timedout(){
+        isTimeout = true;
     }
 
-    public ObjectOutputStream getObjectOutputStream(){
-        return oos;
-    }
-
-    public void printState(){
-        System.out.println("Tasks: "+tasks +" devRTT: "+devRTT+" server: "+server);
-    }
 }
