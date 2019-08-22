@@ -19,109 +19,145 @@
 
 package quasylab.sibilla.core.simulator;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.LongSummaryStatistics;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.Consumer;
 
-import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import org.apache.commons.math3.random.RandomGenerator;
 
 /**
  * @author belenchia
  *
  */
-public class ThreadSimulationManager<S> implements SimulationManager<S> {
-    private ExecutorService executor;
-    private List<SimulationTask<S>> tasks = new LinkedList<>();
-    private final int concurrentTasks;
-    private int expectedTasks = 0, runningTasks = 0;
-    private SamplingFunction<S> sampling_function;
-    private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
+public class ThreadSimulationManager<S> extends SimulationManager<S> {
 
-    public ThreadSimulationManager(int concurrentTasks) {
-        this.concurrentTasks = concurrentTasks;
-        executor = Executors.newCachedThreadPool();
-    }
+	private ExecutorService executor;
+	
+//    private final int concurrentTasks;
+//    private int runningTasks = 0;
+//    private int sessionCounter = 0;
+//    private LinkedList<SimulationTask<S>> waitingTasks = new LinkedList<>();
 
-    private void doSample(Trajectory<S> trajectory) {
-        if (sampling_function != null) {
-            trajectory.sample(sampling_function);
-        }
+	public ThreadSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+		this(Executors.newCachedThreadPool(),random,consumer);
+	}
+	
+    public ThreadSimulationManager(int concurrentTasks,RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+    	this(Executors.newFixedThreadPool(concurrentTasks),random,consumer);
     }
+    
+    public static final SimulationManagerFactory getFixedThreadsimulationManager( int n ) {
+    	return new SimulationManagerFactory() {
+   		
+			@Override
+			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+				return new ThreadSimulationManager<>(n, random, consumer);
+			}
+    	};
+		
+	}
+    
+//    private void doSample(SamplingFunction<S> sampling_function, Trajectory<S> trajectory) {
+//        if (sampling_function != null) {
+//            trajectory.sample(sampling_function);
+//        }
+//    }
 
     // waits for all tasks to end, then prints timing information to file
-    private void terminate() {
-        try {
-            printTimingInformation(System.out);
-            printTimingInformation(new PrintStream(new FileOutputStream("thread_data.data", true)));
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+//    private void terminate() {
+//        try {
+//            printTimingInformation(System.out);
+//            printTimingInformation(new PrintStream(new FileOutputStream("thread_data.data", true)));
+//        } catch (FileNotFoundException e) {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
+//
+//    }
 
-    }
-
-    // samples the trajectory, updates counters, then runs next task.
-    // if no new tasks to run, shutdowns the executor
-    private synchronized void manageTask(Trajectory<S> trajectory) {
-        doSample(trajectory);
-        runningTasks--;
-        expectedTasks--;
-        SimulationTask<S> nextTask = waitingTasks.poll();
-        if (nextTask != null) {
-            run(nextTask);
-        } else if (isCompleted()) {
-            this.notify();
-        }
-    }
-
-    private synchronized boolean isCompleted() {
-		return (runningTasks+expectedTasks==0);
+    public ThreadSimulationManager(ExecutorService executor,RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+    	super(random,consumer);
+    	this.executor = executor;
 	}
 
-	@Override
-    public void init(SamplingFunction<S> sampling_function, int expectedTasks) {
-        this.sampling_function = sampling_function;
-        this.expectedTasks = expectedTasks;
-    }
+//	// samples the trajectory, updates counters, then runs next task.
+//    // if no new tasks to run, shutdowns the executor
+//    private synchronized <S> void manageTask(SimulationSession<S> session, Trajectory<S> trajectory) {
+//    	session.getSamplingFunction().accept(trajectory);
+////        doSample(session.getSamplingFunction(), trajectory);
+//        runningTasks--;
+//        session.taskCompleted();
+//        SimulationTask<S> nextTask = waitingTasks.poll();
+//        if (nextTask != null) {
+//            run(session, nextTask);
+//        } else if (isCompleted(session)){
+//            this.notify();
+//        }
+//    }
+
+//    private synchronized boolean isCompleted(SimulationSession<S> session) {
+//		return (runningTasks+session.getExpectedTasks()==0);
+//	}
 
     // runs a new task if below task limit, else adds to queue
-    @Override
-    public synchronized void run(SimulationTask<S> task) {
-        if (runningTasks < concurrentTasks) {
-            runningTasks++;
-            tasks.add(task);
-            CompletableFuture.supplyAsync(task, executor).thenAccept(this::manageTask);
-        } else {
-            waitingTasks.add(task);
-        }
+    protected <S> void runSimulation(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationUnit<S> unit) {
+        CompletableFuture.supplyAsync(new SimulationTask<>(random, unit), executor).thenAccept(consumer);
     }
 
-    // busy waiting until executor is shutdown
-    @Override
-    public synchronized void waitTermination() throws InterruptedException {
-        // while(executor.isShutdown() == false);
-        while (!isCompleted()) {
-            this.wait();
-        } 
-        terminate();
-        //executor.shutdown(); // only when recording time
-    }
+	@Override
+	protected void start() {
 
-    private void printTimingInformation(PrintStream out){
-        LongSummaryStatistics statistics = tasks.stream().map(x -> x.getElapsedTime()).mapToLong(Long::valueOf).summaryStatistics();
-        out.println(concurrentTasks +";"+((ThreadPoolExecutor) executor).getPoolSize()+";" + statistics.getAverage() + ";" + statistics.getMax() +";" + statistics.getMin());
-    }
+		Thread t = new Thread( this::handleTasks );
+		t.start();
+		
+	}
+	
+	private void handleTasks() {
+	
+		try {
+			while (isRunning()) {
+				SimulationTask<S> nextTask = nextTask(true);
+				if (nextTask != null) {
+				    CompletableFuture.supplyAsync(nextTask, executor).thenAccept(this::handleTrajectory);
+				}
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+	}
 
-    @Override
-    public long reach() {
-        return tasks.stream().filter(task -> task.reach() == true).count();
-    }
+//    //waiting until executor is shutdown
+//    @Override
+//    public synchronized void waitTermination(SimulationSession<S> session) throws InterruptedException {
+//        while (!isCompleted(session)) {
+//            this.wait();
+//        } 
+//        terminate();
+//        //executor.shutdown(); // only when recording time
+//    }
+//
+//    private void printTimingInformation(PrintStream out){
+//        LongSummaryStatistics statistics = tasks.stream().map(x -> x.getElapsedTime()).mapToLong(Long::valueOf).summaryStatistics();
+//        out.println(concurrentTasks +";"+((ThreadPoolExecutor) executor).getPoolSize()+";" + statistics.getAverage() + ";" + statistics.getMax() +";" + statistics.getMin());
+//    }
+//
+//    @Override
+//    public long reach() {
+//        return tasks.stream().filter(task -> task.reach() == true).count();
+//    }
+//
+//	@Override
+//	public <S> void waitTermination(SimulationSession<S> session) throws InterruptedException {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public <S> void waitTermination(SimulationSession<S> session) throws InterruptedException {
+//		// TODO Auto-generated method stub
+//		
+//	}
     
 }

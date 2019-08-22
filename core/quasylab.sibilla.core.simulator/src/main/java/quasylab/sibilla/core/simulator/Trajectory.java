@@ -34,6 +34,8 @@ public class Trajectory<S> implements Serializable {
 	private List<Sample<S>> data;
 	private double start = Double.NaN;
 	private double end = Double.NaN;
+	private boolean succesfull; 
+	private long generationTime = -1;
 
 	public Trajectory() {
 		this.data = new LinkedList<Sample<S>>();
@@ -68,6 +70,34 @@ public class Trajectory<S> implements Serializable {
 	
 	public int size() {
 		return data.size();
+	}
+
+	/**
+	 * @return the succesfull
+	 */
+	public boolean isSuccesfull() {
+		return succesfull;
+	}
+
+	/**
+	 * @param succesfull the succesfull to set
+	 */
+	public void setSuccesfull(boolean succesfull) {
+		this.succesfull = succesfull;
+	}
+
+	/**
+	 * @return the generationTime
+	 */
+	public long getGenerationTime() {
+		return generationTime;
+	}
+
+	/**
+	 * @param generationTime the generationTime to set
+	 */
+	public void setGenerationTime(long generationTime) {
+		this.generationTime = generationTime;
 	}
 	
 

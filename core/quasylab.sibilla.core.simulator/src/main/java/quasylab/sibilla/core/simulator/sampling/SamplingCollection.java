@@ -41,7 +41,7 @@ public class SamplingCollection<S> implements SamplingFunction<S> {
 		}
 	}
 
-	public SamplingCollection(Collection<SamplingFunction<S>> functions) {
+	public SamplingCollection(Collection<? extends SamplingFunction<S>> functions) {
 		this();
 		this.functions = new LinkedList<>();
 		this.functions.addAll(functions);

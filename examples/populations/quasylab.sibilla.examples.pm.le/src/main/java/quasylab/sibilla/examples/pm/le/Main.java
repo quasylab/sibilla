@@ -5,6 +5,7 @@ package quasylab.sibilla.examples.pm.le;
 
 import java.io.FileNotFoundException;
 
+import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
@@ -13,6 +14,7 @@ import quasylab.sibilla.core.simulator.pm.PopulationState;
 import quasylab.sibilla.core.simulator.pm.ReactionRule;
 import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 
@@ -42,8 +44,8 @@ public class Main {
 	
 	public final static int SAMPLINGS = 100;
 	public final static double DEADLINE = 600;
-	private static final int REPLICA = 1000;
-	private final static int TASKS = 5;
+	public static final int REPLICA = 1000;
+	public final static int TASKS = 5;
 	
 	
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException {
@@ -120,17 +122,16 @@ public class Main {
 				s -> s.getOccupancy(S0,S1,C)/N*s.getOccupancy(L)*COM_RATE); 
 		
 		
-		PopulationModel f = new PopulationModel( 
-				initialState(),
-				rule_C_S0
-				,rule_C_S1
-				,rule_S0_S1
-				,rule_S0_S0
-				,rule_S1_S1
-				,rule_L_C
-				,rule_S0_L
-				,rule_S1_L
-		); 
+		PopulationModel f = new PopulationModel();
+		f.addState("init", initialState());
+		f.addRule(rule_C_S0);
+		f.addRule(rule_C_S1);
+		f.addRule(rule_S0_S1);
+		f.addRule(rule_S0_S0);
+		f.addRule(rule_S1_S1);
+		f.addRule(rule_L_C);
+		f.addRule(rule_S0_L);
+		f.addRule(rule_S1_L); 
 		
 		StatisticSampling<PopulationState> cSamp = StatisticSampling.measure("#C", SAMPLINGS, DEADLINE, 
 				s -> s.getOccupancy(C,S0,S1)) ;
@@ -139,12 +140,12 @@ public class Main {
 		StatisticSampling<PopulationState> lSamp = StatisticSampling.measure("#L", SAMPLINGS, DEADLINE, 
 				s -> s.getOccupancy(L)) ;
 		
-		SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS) );
+		SimulationEnvironment sim = new SimulationEnvironment( );
 
-		sim.setSampling(new SamplingCollection<>(cSamp,fSamp,lSamp));
+		SamplingFunction<PopulationState> sf = new SamplingCollection<>(cSamp,fSamp,lSamp);
 
 		System.out.println( 
-			sim.reachability(0.1, 0.1 , 100.0, 
+			sim.reachability(null,new DefaultRandomGenerator(),f,initialState(),0.1, 0.1 , 100.0, 
 				s -> true, 
 				s -> (						
 						(s.getOccupancy(L)==1)

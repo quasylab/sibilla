@@ -24,7 +24,6 @@ import java.util.function.Function;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
-import quasylab.sibilla.core.simulator.pm.PopulationModel;
 
 /**
  * @author loreti
@@ -93,6 +92,10 @@ public class StatisticSampling<S> implements SamplingFunction<S> {
 	public void start() {
 		this.current_index = 0;
 		this.next_time = 0;
+	}
+	
+	public String getName() {
+		return measure.getName();
 	}
 
 	public void printTimeSeries(PrintStream out) {

@@ -19,9 +19,11 @@
 package quasylab.sibilla.core.simulator.pm;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.random.RandomGenerator;
@@ -46,34 +48,20 @@ public class PopulationModel implements Model<PopulationState>, Serializable {
 
 	private static final long serialVersionUID = 6871037109869821108L;
 
-	private PopulationRule[] rules;
+	private LinkedList<PopulationRule> rules;
 
 	private double time;
 	
-	private PopulationState initialState;
-
+	private HashMap<String,PopulationState> states;
 	
-	public PopulationModel( PopulationState currentState, PopulationRule ... rules ) {
-		this.rules = rules;
-		this.initialState = currentState;
-	}
+	private HashMap<String,Function<? super PopulationState,Double>> measures;
 	
-	public PopulationModel(PopulationState currentState, LinkedList<PopulationRule> buildRules) {
-		this(currentState,buildRules.toArray(new PopulationRule[buildRules.size()]));
-	}
-
-	public PopulationState getCurrentState() {
-		return initialState;
+	public PopulationModel( ) {
+		this.rules = new LinkedList<PopulationRule>();
+		this.states = new HashMap<>();
+		this.measures = new HashMap<>();
 	}
 	
-	public double getOccupancy( int idx ) {
-		return initialState.getOccupancy(idx);
-	}
-
-	protected void setState(PopulationState newState) {
-		this.initialState = newState;
-	}
-
 	@Override
 	public WeightedStructure<StepFunction<PopulationState>> getActivities(RandomGenerator r , PopulationState state ) {
 		WeightedLinkedList<StepFunction<PopulationState>> activities = new WeightedLinkedList<>();
@@ -91,27 +79,10 @@ public class PopulationModel implements Model<PopulationState>, Serializable {
 		return activities;
 	}
 
-	protected void apply(Update drift) {
-		setState(getCurrentState().apply(drift));
-	}
-
 	public double getTime() {
 		return time;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	@Override
-	public String toString() {
-		return initialState.toString();
-	}
-
-	@Override
-	public PopulationState initialState() {
-		return this.initialState;
-	}
-	
 	public static Map<String,Integer> createPopulation( String ... species ) {
 		HashMap<String, Integer> map = new HashMap<>();
 		IntStream.range(0, species.length).forEach(i -> map.put(species[i],i));
@@ -121,4 +92,42 @@ public class PopulationModel implements Model<PopulationState>, Serializable {
 	public static PopulationState vectorOf( int ... species ) {
 		return new PopulationState(species);
 	}
+
+//	@Override
+//	public PopulationState getState(String label) {
+//		return states.get(label);
+//	}
+//
+//	@Override
+//	public Set<String> getStateLabels() {
+//		return states.keySet();
+//	}
+//
+//	@Override
+//	public PopulationState copy(PopulationState state) {
+//		return state.copy();
+//	}
+//	
+	public void addRule( PopulationRule rule ) {
+		this.rules.add(rule);
+	}
+
+//	@Override
+//	public Function<? super PopulationState, Double> getMeasure(String label) {
+//		return null;
+//	}
+//
+//	@Override
+//	public Set<String> getMeasureLabels() {
+//		return measures.keySet();
+//	}
+
+	public void addState(String label, PopulationState state) {
+		this.states.put(label, state);
+	}
+
+	public void addRules(Collection<PopulationRule> rules) {
+		this.rules.addAll(rules);
+	}
+	
 }

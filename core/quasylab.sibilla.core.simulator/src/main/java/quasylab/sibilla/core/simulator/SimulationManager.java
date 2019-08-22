@@ -19,22 +19,158 @@
 
 package quasylab.sibilla.core.simulator;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import org.apache.commons.math3.random.RandomGenerator;
+
 /**
- * @author belenchia
+ * A <code>SimulationManager</code> has the responsibility to coordinate 
+ * simulation activities. These are arranged in <it>sessions</it> ({@link SimulationSessionI}).
+ * 
+ * @author Matteo Belenchia, Michele Loreti
  *
  */
+public abstract class SimulationManager<S> {
+	
+	/**
+	 * Session counter.
+	 */
+	private int sessionCounter = 0;
+
+    private final BlockingQueue<SimulationTask<S>> pendingTasks = new LinkedBlockingQueue<>();
+
+    private int runningTasks = 0;
+    private final Consumer<Trajectory<S>> trajectoryConsumer;
+    private RandomGenerator random;
+    private boolean running = true;
+    private final LinkedList<Long> executionTime = new LinkedList<>();
+
+	/**
+	 * Creates a new simulation manager.
+	 */
+	public SimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+		this.random = random;
+		this.trajectoryConsumer = consumer;
+		this.start();
+	}
+	
+	protected abstract void start();
+
+	public synchronized void simulate(SimulationUnit<S> unit) {
+		if (!isRunning()) {
+			throw new IllegalStateException();
+		}
+		add(new SimulationTask<>(random, unit));
+	}
+    
+   
+	protected void add(SimulationTask<S> simulationTask) {
+		pendingTasks.add(simulationTask);
+		notify();
+	}
+
+	protected synchronized void reschedule(SimulationTask<S> simulationTask) {
+		runningTasks--;
+		add(simulationTask);
+	}
+	
+	protected synchronized void rescheduleAll( Collection<? extends SimulationTask<S>> tasks ) {
+		runningTasks -= tasks.size();
+		addAll( tasks );
+	}
+	
+	protected void addAll(Collection<? extends SimulationTask<S>> tasks) {
+		pendingTasks.addAll(tasks);
+		notify();
+	}
 
 
-import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+	protected synchronized void handleTrajectory( Trajectory<S> trj ) {
+		this.executionTime.add(trj.getGenerationTime());
+		trajectoryConsumer.accept(trj);
+		runningTasks--;
+		notifyAll();
+	}
 
-public interface SimulationManager<S> {
+	
+	public int computedTrajectories() {
+		return executionTime.size();
+	}
 
-    // initialize the simulation manager with sampling function and the number of tasks that will be submitted
-    public void init(SamplingFunction<S> sampling_function, int expectedTasks);
-    // calculates reach
-    public long reach();
-    // runs a task
-    public void run(SimulationTask<S> task);
-    // wait for submitted tasks to finish
-    public void waitTermination() throws InterruptedException;
+	
+	public double averageExecutionTime() {
+		return executionTime.stream().collect(Collectors.averagingDouble(l -> l.doubleValue()));
+	}
+
+	
+	protected synchronized SimulationTask<S> nextTask() {
+		try {
+			return nextTask(false);
+		} catch (InterruptedException e) {
+			return null;
+		}
+	}
+	
+	protected synchronized SimulationTask<S> nextTask(boolean blocking) throws InterruptedException {
+		while (isRunning()&&blocking&&pendingTasks.isEmpty()) {
+			wait();
+		}
+		if (isRunning()) {
+			runningTasks++;
+			return pendingTasks.poll();			
+		}
+		return null;
+	}
+
+	protected synchronized List<SimulationTask<S>> getTask(int n) {
+		try {
+			return getTask(n,false);
+		} catch (InterruptedException e) {
+			return new LinkedList<>();
+		}
+	}
+
+	protected synchronized List<SimulationTask<S>> getTask(int n, boolean blocking) throws InterruptedException {
+		while (isRunning()&&blocking&&pendingTasks.isEmpty()) {
+			wait();
+		}
+		List<SimulationTask<S>> tasks = new LinkedList<>();
+		if (!isRunning()) {
+			return tasks;
+		}
+		runningTasks += pendingTasks.drainTo(tasks,n);
+		return tasks;
+	}
+
+	public synchronized boolean isRunning() {
+		return running;
+	}
+	
+	public synchronized void setRunning(boolean flag) {
+		this.running = flag;
+		this.notifyAll();
+	}
+
+	public void shutdown() throws InterruptedException {
+//		setRunning(false);
+		join();
+	}
+	
+	public synchronized void join() throws InterruptedException {
+		while (this.runningTasks>0) {
+			wait();
+		}
+	}
+
+	protected Consumer<Trajectory<S>> getConsumer() {
+		return trajectoryConsumer;
+	}
 }

@@ -26,8 +26,11 @@ import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
+
+import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 
 /**
  * The instances of this class represent a generic population state having species of type <code>S</code>. 
@@ -49,9 +52,35 @@ public class PopulationState implements Serializable {
 		this(new int[size]);
 	}
 	
+	public PopulationState( int size , Specie ... species ) {
+		this(fillState(size,species));
+	}
+	
+	private static int[] fillState(int size, Specie[] species) {
+		int[] state = new int[size];
+		for( int i=0 ; i<species.length ; i++ ) {
+			state[species[i].getIndex()] += species[i].getSize();
+		}
+		return state;
+	}
+
+	public PopulationState( int size , IntFunction<Integer> f ) {
+		this(fillState(size,f));
+	}
+	
+	public static int[] fillState(int size, IntFunction<Integer> f) {
+		int[] state = new int[size];
+		IntStream.range(0, size).forEach(i -> state[i] = f.apply(i));		
+		return state;
+	}
+
 	public PopulationState(int[] state) {
+		this( IntStream.range(0, state.length).map(i -> state[i]).sum() , state );
+	}
+
+	private PopulationState(double population, int[] state) {
 		this.populationVector = state;
-		this.population = IntStream.range(0, state.length).map(i -> state[i]).sum();
+		this.population = population;
 	}
 
 	public double poluation( ) {
@@ -73,16 +102,18 @@ public class PopulationState implements Serializable {
 	// applies one update function
 	public PopulationState apply( Update update ) {
 		int[] newState = Arrays.copyOf(populationVector, populationVector.length);
+		double population = this.population;
 		for (Entry<Integer, Integer> u : update.getUpdate()) {
 			int idx = u.getKey();
 			int newValue = newState[idx]+u.getValue(); 
 			if (newValue>=0) {
 				newState[idx] = newValue;
+				population += u.getValue();
 			} else {
 				throw new IllegalArgumentException("Population Vector: "+this+" newState: "+Arrays.toString(newState)+" Update: "+update+" idx: "+idx+" newValue: "+newValue+" u: "+u);
 			}
 		}		
-		return new PopulationState(newState);
+		return new PopulationState(population,newState);
 	}
 	
 	public double min( Function<Integer, Double> f ) {
@@ -159,6 +190,10 @@ public class PopulationState implements Serializable {
 
 	public double fraction( int i ) {
 		return getOccupancy(i)/population;
+	}
+
+	public PopulationState copy() {
+		return new PopulationState(population,populationVector);
 	}
 	
 

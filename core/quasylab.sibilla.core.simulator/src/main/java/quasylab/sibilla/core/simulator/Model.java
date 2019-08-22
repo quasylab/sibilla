@@ -21,6 +21,8 @@
  */
 package quasylab.sibilla.core.simulator;
 
+import java.io.Serializable;
+
 import org.apache.commons.math3.random.RandomGenerator;
 
 import quasylab.sibilla.core.simulator.util.WeightedStructure;
@@ -29,10 +31,17 @@ import quasylab.sibilla.core.simulator.util.WeightedStructure;
  * @author loreti
  *
  */
-public interface Model<S> {
+public interface Model<S> extends Serializable {
 
 	public WeightedStructure<StepFunction<S>> getActivities( RandomGenerator r , S s );
 
-	public S initialState();
-
+//	public S getState( String label );
+//	
+//	public Set<String> getStateLabels(); 
+//
+//	public S copy( S state );
+//
+//	public Function<? super S,Double> getMeasure( String label );
+//	
+//	public Set<String> getMeasureLabels();
 }
