@@ -96,7 +96,7 @@ public abstract class SimulationManager<S> {
 		this.executionTime.add(trj.getGenerationTime());
 		trajectoryConsumer.accept(trj);
 		runningTasks--;
-		notifyAll();
+		//notifyAll();
 	}
 
 	
@@ -122,11 +122,8 @@ public abstract class SimulationManager<S> {
 		while (isRunning()&&blocking&&pendingTasks.isEmpty()) {
 			wait();
 		}
-		if (isRunning()) {
-			runningTasks++;
-			return pendingTasks.poll();			
-		}
-		return null;
+		runningTasks++;
+		return pendingTasks.poll();			
 	}
 
 	protected synchronized List<SimulationTask<S>> getTask(int n) {
@@ -142,9 +139,6 @@ public abstract class SimulationManager<S> {
 			wait();
 		}
 		List<SimulationTask<S>> tasks = new LinkedList<>();
-		if (!isRunning()) {
-			return tasks;
-		}
 		runningTasks += pendingTasks.drainTo(tasks,n);
 		return tasks;
 	}
@@ -168,11 +162,19 @@ public abstract class SimulationManager<S> {
 		}
 	}
 
+	protected synchronized void executionTerminated() {
+		notifyAll();
+	}
+
 	protected Consumer<Trajectory<S>> getConsumer() {
 		return trajectoryConsumer;
 	}
 
 	protected RandomGenerator getRandom(){
 		return random;
+	}
+
+	protected boolean hasTasks(){
+		return !pendingTasks.isEmpty();
 	}
 }
