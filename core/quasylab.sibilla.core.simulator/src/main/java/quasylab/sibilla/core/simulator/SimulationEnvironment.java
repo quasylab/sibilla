@@ -82,6 +82,7 @@ public class SimulationEnvironment {
 		ReachabilityTraceConsumer<S> traceConsumer = new ReachabilityTraceConsumer<>();
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, state, (t,s) -> (t>=deadline)||psi.test(s)||!phi.test(s), psi);
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, traceConsumer);
+		SimulationView<S> view = new SimulationView<S>(simulationManager, (int) n);
 		for (int i = 0; i < n; i++) {
 			simulationManager.simulate(unit);
 		}
