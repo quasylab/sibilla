@@ -73,7 +73,7 @@ public abstract class SimulationManager<S> {
    
 	protected void add(SimulationTask<S> simulationTask) {
 		pendingTasks.add(simulationTask);
-		notify();
+		notifyAll();
 	}
 
 	protected synchronized void reschedule(SimulationTask<S> simulationTask) {
@@ -88,7 +88,7 @@ public abstract class SimulationManager<S> {
 	
 	protected void addAll(Collection<? extends SimulationTask<S>> tasks) {
 		pendingTasks.addAll(tasks);
-		notify();
+		notifyAll();
 	}
 
 
@@ -96,7 +96,7 @@ public abstract class SimulationManager<S> {
 		this.executionTime.add(trj.getGenerationTime());
 		trajectoryConsumer.accept(trj);
 		runningTasks--;
-		//notifyAll();
+		notifyAll();
 	}
 
 	
@@ -160,10 +160,6 @@ public abstract class SimulationManager<S> {
 		while (this.runningTasks>0) {
 			wait();
 		}
-	}
-
-	protected synchronized void executionTerminated() {
-		notifyAll();
 	}
 
 	protected Consumer<Trajectory<S>> getConsumer() {

@@ -115,7 +115,6 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 	}
 	
 	private void handleTasks() {
-	int i = 0;
 		try {
 			while (isRunning() || hasTasks()) {
 				SimulationTask<S> nextTask = nextTask(true);
@@ -123,7 +122,6 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 				    CompletableFuture.supplyAsync(nextTask, executor).thenAccept(this::handleTrajectory);
 				}
 			}
-			executionTerminated();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
