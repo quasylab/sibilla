@@ -123,6 +123,7 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 				    CompletableFuture.supplyAsync(nextTask, executor).thenAccept(this::handleTrajectory);
 				}
 			}
+			this.notifyAll();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

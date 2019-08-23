@@ -155,11 +155,10 @@ public abstract class SimulationManager<S> {
 	
 	public synchronized void setRunning(boolean flag) {
 		this.running = flag;
-		this.notifyAll();
 	}
 
 	public void shutdown() throws InterruptedException {
-//		setRunning(false);
+        setRunning(false);
 		join();
 	}
 	
@@ -171,5 +170,9 @@ public abstract class SimulationManager<S> {
 
 	protected Consumer<Trajectory<S>> getConsumer() {
 		return trajectoryConsumer;
+	}
+
+	protected RandomGenerator getRandom(){
+		return random;
 	}
 }

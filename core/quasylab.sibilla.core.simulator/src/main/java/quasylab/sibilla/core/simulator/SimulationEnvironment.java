@@ -69,7 +69,7 @@ public class SimulationEnvironment {
 //			}
 //			System.out.flush();
 		}
-		simulationManager.join();
+		simulationManager.shutdown();
 		rgi.unregister();
 		System.out.println("DONE!");
 	}
