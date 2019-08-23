@@ -67,7 +67,13 @@ public class SequentialSimulationManager<S> extends SimulationManager<S> {
 	protected void start() {
         return;
 	}
-	
+    
+    @Override
+	protected void handleTrajectory( Trajectory<S> trj ) {
+		getExecutionTimes().add(trj.getGenerationTime());
+		getConsumer().accept(trj);
+		propertyChange("progress", getExecutionTimes().size());
+	}
 
     
 }

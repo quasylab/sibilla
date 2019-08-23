@@ -19,6 +19,7 @@
 
 package quasylab.sibilla.core.simulator;
 
+import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -28,6 +29,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import javax.swing.event.SwingPropertyChangeSupport;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -51,7 +54,8 @@ public abstract class SimulationManager<S> {
     private final Consumer<Trajectory<S>> trajectoryConsumer;
     private RandomGenerator random;
     private boolean running = true;
-    private final LinkedList<Long> executionTime = new LinkedList<>();
+	private final LinkedList<Long> executionTime = new LinkedList<>();
+	private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
 
 	/**
 	 * Creates a new simulation manager.
@@ -73,29 +77,43 @@ public abstract class SimulationManager<S> {
    
 	protected void add(SimulationTask<S> simulationTask) {
 		pendingTasks.add(simulationTask);
+		queueModified();
 		notifyAll();
 	}
 
 	protected synchronized void reschedule(SimulationTask<S> simulationTask) {
 		runningTasks--;
+		runningTasksModified();
 		add(simulationTask);
 	}
 	
 	protected synchronized void rescheduleAll( Collection<? extends SimulationTask<S>> tasks ) {
 		runningTasks -= tasks.size();
+		runningTasksModified();
 		addAll( tasks );
 	}
 	
 	protected void addAll(Collection<? extends SimulationTask<S>> tasks) {
 		pendingTasks.addAll(tasks);
+		queueModified();
 		notifyAll();
 	}
 
+	private void queueModified(){
+		propertyChange("waitingTasks", pendingTasks.size());
+	}
+
+	private void runningTasksModified(){
+		propertyChange("tasks", runningTasks);
+	}
 
 	protected synchronized void handleTrajectory( Trajectory<S> trj ) {
 		this.executionTime.add(trj.getGenerationTime());
 		trajectoryConsumer.accept(trj);
 		runningTasks--;
+		propertyChange("progress", executionTime.size());
+		propertyChange("runtime", trj.getGenerationTime());
+		runningTasksModified();
 		notifyAll();
 	}
 
@@ -122,8 +140,11 @@ public abstract class SimulationManager<S> {
 		while (isRunning()&&blocking&&pendingTasks.isEmpty()) {
 			wait();
 		}
+		SimulationTask<S> task = pendingTasks.poll();
 		runningTasks++;
-		return pendingTasks.poll();			
+		runningTasksModified();
+		queueModified();
+		return task;			
 	}
 
 	protected synchronized List<SimulationTask<S>> getTask(int n) {
@@ -140,6 +161,8 @@ public abstract class SimulationManager<S> {
 		}
 		List<SimulationTask<S>> tasks = new LinkedList<>();
 		runningTasks += pendingTasks.drainTo(tasks,n);
+		runningTasksModified();
+		queueModified();
 		return tasks;
 	}
 
@@ -170,7 +193,19 @@ public abstract class SimulationManager<S> {
 		return random;
 	}
 
+	protected List<Long> getExecutionTimes(){
+		return executionTime;
+	}
+
 	protected boolean hasTasks(){
 		return !pendingTasks.isEmpty();
 	}
+
+    public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
+        pcs.addPropertyChangeListener(property, listener);
+	}
+	
+	protected void propertyChange(String property, Object value){
+        pcs.firePropertyChange(property, null, value);
+    }
 }

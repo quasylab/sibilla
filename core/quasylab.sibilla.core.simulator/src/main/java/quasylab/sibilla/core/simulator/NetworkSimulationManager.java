@@ -78,10 +78,6 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
 	}
 
 
-    public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
-        this.pcs.addPropertyChangeListener(property, listener);
-    }
-
     public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer,InetAddress[] servers, int[] ports, String modelName, SerializationType[] serialization)
             throws UnknownHostException, IOException {
     	super(random,consumer);
@@ -207,7 +203,12 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
         return pingServer;
     }
 
-
+    @Override
+    public synchronized void join() throws InterruptedException {
+        super.join();
+        closeStreams();
+        propertyChange("end", null);
+	}
 
     private void closeStreams(){
         for( ServerState state: servers.values()){
@@ -251,13 +252,5 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
         }
         return result;
     }
-
-
- 
-
-    private void propertyChange(String property, Object value){
-        pcs.firePropertyChange(property, null, value);
-    }
-
 
 }

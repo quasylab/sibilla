@@ -18,6 +18,7 @@ import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
+import quasylab.sibilla.core.simulator.ui.SimulationView;
 
 /**
  * @author loreti
@@ -86,7 +87,7 @@ public class Main {
 //		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
-		SimulationEnvironment sim = new SimulationEnvironment( );
+		SimulationEnvironment sim = new SimulationEnvironment( ThreadSimulationManager.getFixedThreadsimulationManager(TASKS) );
 
 		SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp,frSamp);
 

@@ -19,9 +19,11 @@
 
 package quasylab.sibilla.core.simulator;
 
+import java.util.LongSummaryStatistics;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Consumer;
 
 import org.apache.commons.math3.random.RandomGenerator;
@@ -119,13 +121,22 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 			while (isRunning() || hasTasks()) {
 				SimulationTask<S> nextTask = nextTask(true);
 				if (nextTask != null) {
-				    CompletableFuture.supplyAsync(nextTask, executor).thenAccept(this::handleTrajectory);
+					CompletableFuture.supplyAsync(nextTask, executor).thenAccept(this::handleTrajectory);
 				}
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		
+	}
+
+	@Override
+	public synchronized void join() throws InterruptedException {
+		super.join();
+		LongSummaryStatistics statistics = getExecutionTimes().stream().mapToLong(Long::valueOf).summaryStatistics();
+		String data = ((ThreadPoolExecutor) executor).getMaximumPoolSize() + ";" + ((ThreadPoolExecutor) executor).getPoolSize() + ";"
+		+ statistics.getAverage() + ";" + statistics.getMax() + ";" + statistics.getMin();
+		propertyChange("end", data);
 	}
 
 //    //waiting until executor is shutdown
