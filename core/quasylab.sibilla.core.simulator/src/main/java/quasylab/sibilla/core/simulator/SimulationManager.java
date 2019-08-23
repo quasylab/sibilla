@@ -157,7 +157,7 @@ public abstract class SimulationManager<S> {
 	}
 	
 	public synchronized void join() throws InterruptedException {
-		while (this.runningTasks>0) {
+		while (this.runningTasks>0 || hasTasks()){
 			wait();
 		}
 	}

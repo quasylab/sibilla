@@ -58,6 +58,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     private ExecutorService executor;
     private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
 //    private BlockingQueue<SimulationSession<S>> sessions = new LinkedBlockingQueue<>();
+    private int runningServers = 0;
 
     
     public static final SimulationManagerFactory getNetworkSimulationManagerFactory( InetAddress[] servers, int[] ports, String modelName, SerializationType[] serialization) {
@@ -119,7 +120,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
 	private void handleTasks() {
 	
 		try {
-			while (isRunning()) {
+			while (isRunning() || hasTasks()){
 				run();
 			}
 		} catch (InterruptedException e) {
@@ -147,16 +148,15 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     }
 
     private synchronized Serializer findServer() throws InterruptedException {
-    	while (isRunning()&&serverQueue.isEmpty()) {
+    	while (serverQueue.isEmpty()) {
     		wait();
-    	}
-    	if (!isRunning()) {
-    		return null;
-    	}
+        }
+        runningServers++;
         return serverQueue.poll();
     }
 
     private synchronized void enqueueServer(Serializer server){
+        runningServers--;
         serverQueue.add(server);
         notifyAll();
     }
