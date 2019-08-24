@@ -138,7 +138,7 @@ public abstract class SimulationManager<S> {
 	
 	protected SimulationTask<S> nextTask(boolean blocking) throws InterruptedException {
 		SimulationTask<S> task;
-		if (isRunning()&&blocking) {
+		if (blocking) {
 			task = pendingTasks.take();
 		}else{
 			task = pendingTasks.poll();
