@@ -49,12 +49,32 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
     	this(Executors.newFixedThreadPool(concurrentTasks),random,consumer);
     }
     
-    public static final SimulationManagerFactory getFixedThreadsimulationManager( int n ) {
+    public static final SimulationManagerFactory getFixedThreadSimulationManager( int n ) {
     	return new SimulationManagerFactory() {
    		
 			@Override
 			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
 				return new ThreadSimulationManager<>(n, random, consumer);
+			}
+    	};
+		
+	}
+	public static final SimulationManagerFactory getCachedThreadSimulationManager() {
+    	return new SimulationManagerFactory() {
+   		
+			@Override
+			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+				return new ThreadSimulationManager<>(random, consumer);
+			}
+    	};
+		
+	}
+	public static final SimulationManagerFactory getThreadsimulationManager( ExecutorService executor ) {
+    	return new SimulationManagerFactory() {
+   		
+			@Override
+			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+				return new ThreadSimulationManager<>(executor, random, consumer);
 			}
     	};
 		
