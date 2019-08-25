@@ -58,7 +58,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     private ExecutorService executor;
     private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
 //    private BlockingQueue<SimulationSession<S>> sessions = new LinkedBlockingQueue<>();
-    private int serverRunning = 0;
+    private volatile int serverRunning = 0;
 
     
     public static final SimulationManagerFactory getNetworkSimulationManagerFactory( InetAddress[] servers, int[] ports, String modelName, SerializationType[] serialization) {
