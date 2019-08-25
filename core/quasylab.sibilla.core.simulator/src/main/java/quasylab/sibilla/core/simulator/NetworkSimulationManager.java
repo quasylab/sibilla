@@ -56,8 +56,6 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     private final String modelName;
     private BlockingQueue<Serializer> serverQueue ;
     private ExecutorService executor;
-    private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
-//    private BlockingQueue<SimulationSession<S>> sessions = new LinkedBlockingQueue<>();
     private volatile int serverRunning = 0;
 
     
@@ -129,23 +127,18 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     private void run() throws InterruptedException {
         Serializer server = findServer();
         List<SimulationTask<S>> toRun;        
-        //if (server != null){
-            ServerState serverState = servers.get(server);
-            int acceptableTasks = serverState.getExpectedTasks();
-            if (!serverState.canCompleteTask(acceptableTasks)) {
-            	acceptableTasks = acceptableTasks == 1 ? 1 : acceptableTasks / 2;
-            }
-            toRun = getTask(acceptableTasks,true);
-            if(toRun.size() > 0){
-                startServerRunning();
-                NetworkTask<S> networkTask = new NetworkTask<S>(toRun);
-                CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
-                                 .whenComplete((value, error) -> manageResult(value, error, toRun, server));
-            }
-            //final List<SimulationTask<S>> selectedTasks = toRun;
-
-       // }
-        //propertyChange("waitingTasks", size());
+        ServerState serverState = servers.get(server);
+        int acceptableTasks = serverState.getExpectedTasks();
+        if (!serverState.canCompleteTask(acceptableTasks)) {
+            acceptableTasks = acceptableTasks == 1 ? 1 : acceptableTasks / 2;
+        }
+        toRun = getTask(acceptableTasks,true);
+        if(toRun.size() > 0){
+            startServerRunning();
+            NetworkTask<S> networkTask = new NetworkTask<S>(toRun);
+            CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
+                             .whenComplete((value, error) -> manageResult(value, error, toRun, server));
+        }
     }
 
     private Serializer findServer() throws InterruptedException {
