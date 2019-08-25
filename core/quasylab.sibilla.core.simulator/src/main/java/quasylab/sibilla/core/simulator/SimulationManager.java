@@ -203,6 +203,10 @@ public abstract class SimulationManager<S> {
 		return !pendingTasks.isEmpty();
 	}
 
+	protected int getRunningTasks(){
+		return runningTasks;
+	}
+
     public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(property, listener);
 	}

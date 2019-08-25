@@ -58,7 +58,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     private ExecutorService executor;
     private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
 //    private BlockingQueue<SimulationSession<S>> sessions = new LinkedBlockingQueue<>();
-    //private int runningServers = 0;
+    private int serverRunning = 0;
 
     
     public static final SimulationManagerFactory getNetworkSimulationManagerFactory( InetAddress[] servers, int[] ports, String modelName, SerializationType[] serialization) {
@@ -116,9 +116,10 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
 	private void handleTasks() {
 	
 		try {
-			while (isRunning() || hasTasks()){
+			while ( (isRunning() || hasTasks() || serverRunning > 0) && !servers.isEmpty() ){
 				run();
-			}
+            }
+            System.out.println(serverRunning);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -128,18 +129,22 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     private void run() throws InterruptedException {
         Serializer server = findServer();
         List<SimulationTask<S>> toRun;        
-        if (server != null){
+        //if (server != null){
             ServerState serverState = servers.get(server);
             int acceptableTasks = serverState.getExpectedTasks();
             if (!serverState.canCompleteTask(acceptableTasks)) {
-            	acceptableTasks /= 2;
+            	acceptableTasks = acceptableTasks == 1 ? 1 : acceptableTasks / 2;
             }
             toRun = getTask(acceptableTasks,true);
+            if(toRun.size() > 0){
+                startServerRunning();
+                NetworkTask<S> networkTask = new NetworkTask<S>(toRun);
+                CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
+                                 .whenComplete((value, error) -> manageResult(value, error, toRun, server));
+            }
             //final List<SimulationTask<S>> selectedTasks = toRun;
-            NetworkTask<S> networkTask = new NetworkTask<S>(toRun);
-            CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
-                             .whenComplete((value, error) -> manageResult(value, error, toRun, server));
-        }
+
+       // }
         //propertyChange("waitingTasks", size());
     }
 
@@ -151,6 +156,14 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
         serverQueue.add(server);
     }
 
+    private synchronized void startServerRunning(){
+        serverRunning++;
+    }
+
+    private synchronized void endServerRunning(){
+        serverRunning--;
+    }
+
     private void manageResult(ComputationResult<S> value, Throwable error, List<SimulationTask<S>> tasks, Serializer server){
         if(error!=null){
             //timeout occurred, contact server
@@ -158,6 +171,10 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
             if((newServer = manageTimeout(server))!= null){
                 // server responded
                 enqueueServer(newServer);// add new server to queue, old server won't return  
+            }else if(servers.isEmpty()){
+                synchronized(this){
+                    notifyAll();
+                }
             }
             rescheduleAll(tasks);
         }else{
@@ -166,16 +183,16 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
             value.getResults().stream().forEach(this::handleTrajectory);
             propertyChange("servers", new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), servers.get(server).toString()});
         }
+        endServerRunning();
     }
 
 
     private  Serializer manageTimeout(Serializer server){
         Serializer pingServer = null;
-        ServerState removedState = null;
+        ServerState oldState = servers.get(server); // get old state
         try {
-            removedState = servers.remove(server); // get old state, remove old server from map
-            removedState.timedout();  // mark server as timed out and update GUI
-            propertyChange("servers", new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), removedState.toString()});
+            oldState.timedout();  // mark server as timed out and update GUI
+            propertyChange("servers", new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), oldState.toString()});
             pingServer = Serializer.createSerializer(new Socket(server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort()), SerializationType.getType(server)); // start new connection
             pingServer.getSocket().setSoTimeout(5000); // set 5 seconds timeout on read operations
             initConnection(pingServer); // initialize connection sending model data
@@ -185,13 +202,15 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
                 throw new IllegalStateException("Expected a different reply!");
             }
             // response received before time limit:
-            removedState.forceExpiredTimeLimit(); // halve the task window
-            removedState.migrate(pingServer); // change socket in serverstate
-            servers.put(pingServer, removedState); //update hash map
+            oldState.forceExpiredTimeLimit(); // halve the task window
+            oldState.migrate(pingServer); // change socket in serverstate
+            servers.put(pingServer, oldState); //update hash map
+            servers.remove(server);
         } catch (Exception e) {
             // time limit expired, or some other error happened
-            removedState.removed(); //mark server as removed and update GUI
-            propertyChange("servers", new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), removedState.toString()});
+            oldState.removed(); //mark server as removed and update GUI
+            servers.remove(server);
+            propertyChange("servers", new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), oldState.toString()});
             return null;
         }
         return pingServer;
@@ -199,7 +218,9 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
 
     @Override
     public synchronized void join() throws InterruptedException {
-        super.join();
+		while ( (getRunningTasks()>0 || hasTasks()) && !servers.isEmpty()){
+			wait();
+		}
         closeStreams();
         propertyChange("end", null);
 	}
@@ -233,7 +254,6 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
             elapsedTime = System.nanoTime() - elapsedTime;
 
             state.update(elapsedTime, receivedResult.getResults().size());
-            System.out.println(receivedResult.getResults().size());
 
             result = receivedResult;  
         }catch(SocketTimeoutException e){
