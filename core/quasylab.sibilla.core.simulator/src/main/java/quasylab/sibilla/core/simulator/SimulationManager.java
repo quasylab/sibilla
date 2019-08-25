@@ -136,17 +136,19 @@ public abstract class SimulationManager<S> {
 		}
 	}
 	
-	protected synchronized SimulationTask<S> nextTask(boolean blocking) throws InterruptedException {
+	protected SimulationTask<S> nextTask(boolean blocking) throws InterruptedException {
 		SimulationTask<S> task;
 		if (blocking) {
 			task = pendingTasks.take();
 		}else{
 			task = pendingTasks.poll();
 		}
+		synchronized(this){
 		runningTasks++;
 		runningTasksModified();
 		queueModified();
-		return task;			
+		}
+		return task;
 	}
 
 	protected synchronized List<SimulationTask<S>> getTask(int n) {
