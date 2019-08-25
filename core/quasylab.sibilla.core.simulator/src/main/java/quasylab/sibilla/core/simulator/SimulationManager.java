@@ -21,10 +21,8 @@ package quasylab.sibilla.core.simulator;
 
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
@@ -43,10 +41,6 @@ import org.apache.commons.math3.random.RandomGenerator;
  */
 public abstract class SimulationManager<S> {
 	
-	/**
-	 * Session counter.
-	 */
-	private int sessionCounter = 0;
 
     private final BlockingQueue<SimulationTask<S>> pendingTasks = new LinkedBlockingQueue<>();
 

@@ -124,7 +124,7 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 //	}
 
     // runs a new task if below task limit, else adds to queue
-    protected <S> void runSimulation(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationUnit<S> unit) {
+    protected void runSimulation(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationUnit<S> unit) {
         CompletableFuture.supplyAsync(new SimulationTask<>(random, unit), executor).thenAccept(consumer);
     }
 

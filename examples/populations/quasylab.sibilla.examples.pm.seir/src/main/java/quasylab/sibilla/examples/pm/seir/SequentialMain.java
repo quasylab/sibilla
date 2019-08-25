@@ -10,7 +10,6 @@ import java.net.UnknownHostException;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.SequentialSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
@@ -44,7 +43,6 @@ public class SequentialMain {
 	public final static int SAMPLINGS = 100;
 	public final static double DEADLINE = 600;
 	private static final int REPLICA = 100;
-	private final static int TASKS = 15;
 
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
 		PopulationRule rule_S_E = new ReactionRule(

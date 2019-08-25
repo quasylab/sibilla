@@ -51,6 +51,7 @@ public class SimulationEnvironment {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random,  trc -> trc.sample(sampling_function));
 		SimulationView<S> view = new SimulationView<S>(simulationManager, iterations);
+		@SuppressWarnings("unchecked")
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, initialState,SamplePredicate.timeDeadlinePredicate(deadline), (Predicate<? super S> & Serializable) s -> true);
 		rgi.register(random);//FIXME: Remove!
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
