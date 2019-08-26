@@ -69,7 +69,7 @@ public abstract class SimulationManager<S> {
 	}
     
    
-	protected synchronized void add(SimulationTask<S> simulationTask) {
+	private synchronized void add(SimulationTask<S> simulationTask) {
 		pendingTasks.add(simulationTask);
 		queueModified();
 		notifyAll();
@@ -87,7 +87,7 @@ public abstract class SimulationManager<S> {
 		addAll( tasks );
 	}
 	
-	protected synchronized void addAll(Collection<? extends SimulationTask<S>> tasks) {
+	private synchronized void addAll(Collection<? extends SimulationTask<S>> tasks) {
 		pendingTasks.addAll(tasks);
 		queueModified();
 		notifyAll();
@@ -164,7 +164,7 @@ public abstract class SimulationManager<S> {
 		return running;
 	}
 	
-	public synchronized void setRunning(boolean flag) {
+	protected synchronized void setRunning(boolean flag) {
 		this.running = flag;
 	}
 
@@ -173,7 +173,7 @@ public abstract class SimulationManager<S> {
 		join();
 	}
 	
-	public synchronized void join() throws InterruptedException {
+	protected synchronized void join() throws InterruptedException {
 		while (this.runningTasks>0 || hasTasks()){
 			wait();
 		}
