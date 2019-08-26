@@ -5,7 +5,6 @@ package quasylab.sibilla.examples.pm.seir;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.Serializable;
 import java.net.InetAddress;
 
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
@@ -14,7 +13,6 @@ import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
-import quasylab.sibilla.core.simulator.pm.RatePopulationFunction;
 import quasylab.sibilla.core.simulator.pm.ReactionRule;
 import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
@@ -53,20 +51,20 @@ public class NetworkMain {
 				"S->E", 
 				new Specie[] { new Specie(S), new Specie(I)} , 
 				new Specie[] { new Specie(E), new Specie(I)},  
-				(RatePopulationFunction & Serializable) s -> s.getOccupancy(S)*LAMBDA_E*(s.getOccupancy(I)/N)); 
+				s -> s.getOccupancy(S)*LAMBDA_E*(s.getOccupancy(I)/N)); 
 		
 		PopulationRule rule_E_I = new ReactionRule(
 				"E->I",
 				new Specie[] { new Specie(E) },
 				new Specie[] { new Specie(I) },
-				(RatePopulationFunction & Serializable) s -> s.getOccupancy(E)*LAMBDA_I
+				s -> s.getOccupancy(E)*LAMBDA_I
 		);
 		
 		PopulationRule rule_I_R = new ReactionRule(
 				"I->R",
 				new Specie[] { new Specie(I) },
 				new Specie[] { new Specie(R) },
-				(RatePopulationFunction & Serializable) s -> s.getOccupancy(I)*LAMBDA_R
+				s -> s.getOccupancy(I)*LAMBDA_R
 		);
 		
 		PopulationModel f = new PopulationModel(); 
