@@ -110,7 +110,6 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
 			while ( (isRunning() || hasTasks() || serverRunning > 0) && !servers.isEmpty() ){
 				run();
             }
-            System.out.println(serverRunning);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -163,13 +162,14 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
                 }
             }
             rescheduleAll(tasks);
+            endServerRunning();
         }else{
             //timeout not occurred, continue as usual
             enqueueServer(server);
+            endServerRunning();
             value.getResults().stream().forEach(this::handleTrajectory);
             propertyChange("servers", new String[]{server.getSocket().getInetAddress().getHostAddress()+":"+server.getSocket().getPort(), servers.get(server).toString()});
         }
-        endServerRunning();
     }
 
 
@@ -204,11 +204,13 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
 
     @Override
     public synchronized void join() throws InterruptedException {
-		while ( (getRunningTasks()>0 || hasTasks()) && !servers.isEmpty()){
+		while ( (getRunningTasks()>0 || hasTasks() || serverRunning > 0) && !servers.isEmpty()){
 			wait();
 		}
         closeStreams();
         propertyChange("end", null);
+        /// time testing stuff
+        //executor.shutdown();
 	}
 
     private void closeStreams(){

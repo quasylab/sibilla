@@ -86,7 +86,7 @@ public class Main {
 //		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
-		SimulationEnvironment sim = new SimulationEnvironment( ThreadSimulationManager.getFixedThreadSimulationManager(TASKS) );
+		SimulationEnvironment sim = new SimulationEnvironment( ThreadSimulationManager.getFixedThreadSimulationManagerFactory(TASKS) );
 
 		SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp,frSamp);
 

@@ -19,6 +19,9 @@
 
 package quasylab.sibilla.core.simulator;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.LongSummaryStatistics;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -49,7 +52,7 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
     	this(Executors.newFixedThreadPool(concurrentTasks),random,consumer);
     }
     
-    public static final SimulationManagerFactory getFixedThreadSimulationManager( int n ) {
+    public static final SimulationManagerFactory getFixedThreadSimulationManagerFactory( int n ) {
     	return new SimulationManagerFactory() {
    		
 			@Override
@@ -59,7 +62,7 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
     	};
 		
 	}
-	public static final SimulationManagerFactory getCachedThreadSimulationManager() {
+	public static final SimulationManagerFactory getCachedThreadSimulationManagerFactory() {
     	return new SimulationManagerFactory() {
    		
 			@Override
@@ -69,7 +72,7 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
     	};
 		
 	}
-	public static final SimulationManagerFactory getThreadsimulationManager( ExecutorService executor ) {
+	public static final SimulationManagerFactory getThreadsimulationManagerFactory( ExecutorService executor ) {
     	return new SimulationManagerFactory() {
    		
 			@Override
@@ -123,10 +126,6 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 //		return (runningTasks+session.getExpectedTasks()==0);
 //	}
 
-    // runs a new task if below task limit, else adds to queue
-    protected void runSimulation(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationUnit<S> unit) {
-        CompletableFuture.supplyAsync(new SimulationTask<>(random, unit), executor).thenAccept(consumer);
-    }
 
 	@Override
 	protected void start() {
@@ -157,6 +156,18 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 		String data = ((ThreadPoolExecutor) executor).getMaximumPoolSize() + ";" + ((ThreadPoolExecutor) executor).getPoolSize() + ";"
 		+ statistics.getAverage() + ";" + statistics.getMax() + ";" + statistics.getMin();
 		propertyChange("end", data);
+
+		/* time testing stuff
+		executor.shutdown();
+		try {
+			PrintStream out = new PrintStream(new FileOutputStream("thread_data.data", true));
+			out.println(data);
+			out.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*//////////////////////////
 	}
 
 //    //waiting until executor is shutdown

@@ -32,7 +32,7 @@ public class SequentialSimulationManager<S> extends SimulationManager<S> {
 
 
     
-    public static final SimulationManagerFactory getSequentialSimulationManager() {
+    public static final SimulationManagerFactory getSequentialSimulationManagerFactory() {
     	return new SimulationManagerFactory() {
    		
 			@Override
