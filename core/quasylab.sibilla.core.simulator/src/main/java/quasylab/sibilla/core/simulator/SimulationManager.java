@@ -72,7 +72,7 @@ public abstract class SimulationManager<S> {
 	private synchronized void add(SimulationTask<S> simulationTask) {
 		pendingTasks.add(simulationTask);
 		queueModified();
-		notifyAll();
+		notify();
 	}
 
 	protected synchronized void reschedule(SimulationTask<S> simulationTask) {
@@ -90,7 +90,7 @@ public abstract class SimulationManager<S> {
 	private synchronized void addAll(Collection<? extends SimulationTask<S>> tasks) {
 		pendingTasks.addAll(tasks);
 		queueModified();
-		notifyAll();
+		notify();
 	}
 
 	private void queueModified(){
@@ -108,7 +108,7 @@ public abstract class SimulationManager<S> {
 		propertyChange("progress", executionTime.size());
 		propertyChange("runtime", trj.getGenerationTime());
 		runningTasksModified();
-		notifyAll();
+		notify();
 	}
 
 	
@@ -166,7 +166,7 @@ public abstract class SimulationManager<S> {
 	
 	protected synchronized void setRunning(boolean flag) {
 		this.running = flag;
-		notifyAll();
+		notify();
 	}
 
 	public void shutdown() throws InterruptedException {
@@ -174,11 +174,7 @@ public abstract class SimulationManager<S> {
 		join();
 	}
 	
-	protected synchronized void join() throws InterruptedException {
-		while (this.runningTasks>0 || hasTasks()){
-			wait();
-		}
-	}
+	protected abstract void join() throws InterruptedException;
 
 	protected Consumer<Trajectory<S>> getConsumer() {
 		return trajectoryConsumer;
