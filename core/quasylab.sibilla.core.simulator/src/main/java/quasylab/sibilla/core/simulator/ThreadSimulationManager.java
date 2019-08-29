@@ -151,7 +151,9 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 
 	@Override
 	public synchronized void join() throws InterruptedException {
-		super.join();
+		while (getRunningTasks()>0 || hasTasks()){
+				wait();
+		}
 		LongSummaryStatistics statistics = getExecutionTimes().stream().mapToLong(Long::valueOf).summaryStatistics();
 		String data = ((ThreadPoolExecutor) executor).getMaximumPoolSize() + ";" + ((ThreadPoolExecutor) executor).getPoolSize() + ";"
 		+ statistics.getAverage() + ";" + statistics.getMax() + ";" + statistics.getMin();

@@ -56,7 +56,7 @@ public class SequentialSimulationManager<S> extends SimulationManager<S> {
 
  
     @Override
-    public void shutdown(){
+    public void join(){
         return;
     }
 
