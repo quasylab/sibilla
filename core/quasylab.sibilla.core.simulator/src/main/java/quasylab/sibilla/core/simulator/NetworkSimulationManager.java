@@ -158,7 +158,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
                 enqueueServer(newServer);// add new server to queue, old server won't return  
             }else if(servers.isEmpty()){
                 synchronized(this){
-                    notify();
+                    notifyAll();
                 }
             }
             rescheduleAll(tasks);

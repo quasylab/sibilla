@@ -72,7 +72,7 @@ public abstract class SimulationManager<S> {
 	private synchronized void add(SimulationTask<S> simulationTask) {
 		pendingTasks.add(simulationTask);
 		queueModified();
-		notify();
+		notifyAll();
 	}
 
 	protected synchronized void reschedule(SimulationTask<S> simulationTask) {
@@ -90,7 +90,7 @@ public abstract class SimulationManager<S> {
 	private synchronized void addAll(Collection<? extends SimulationTask<S>> tasks) {
 		pendingTasks.addAll(tasks);
 		queueModified();
-		notify();
+		notifyAll();
 	}
 
 	private void queueModified(){
@@ -108,7 +108,7 @@ public abstract class SimulationManager<S> {
 		propertyChange("progress", executionTime.size());
 		propertyChange("runtime", trj.getGenerationTime());
 		runningTasksModified();
-		notify();
+		notifyAll();
 	}
 
 	
@@ -166,7 +166,7 @@ public abstract class SimulationManager<S> {
 	
 	protected synchronized void setRunning(boolean flag) {
 		this.running = flag;
-		notify();
+		notifyAll();
 	}
 
 	public void shutdown() throws InterruptedException {
