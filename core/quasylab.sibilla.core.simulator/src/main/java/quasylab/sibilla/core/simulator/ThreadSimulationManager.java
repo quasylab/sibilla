@@ -19,9 +19,14 @@
 
 package quasylab.sibilla.core.simulator;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.util.LongSummaryStatistics;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Consumer;
 
 import org.apache.commons.math3.random.RandomGenerator;
@@ -47,12 +52,32 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
     	this(Executors.newFixedThreadPool(concurrentTasks),random,consumer);
     }
     
-    public static final SimulationManagerFactory getFixedThreadsimulationManager( int n ) {
+    public static final SimulationManagerFactory getFixedThreadSimulationManagerFactory( int n ) {
     	return new SimulationManagerFactory() {
    		
 			@Override
 			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
 				return new ThreadSimulationManager<>(n, random, consumer);
+			}
+    	};
+		
+	}
+	public static final SimulationManagerFactory getCachedThreadSimulationManagerFactory() {
+    	return new SimulationManagerFactory() {
+   		
+			@Override
+			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+				return new ThreadSimulationManager<>(random, consumer);
+			}
+    	};
+		
+	}
+	public static final SimulationManagerFactory getThreadsimulationManagerFactory( ExecutorService executor ) {
+    	return new SimulationManagerFactory() {
+   		
+			@Override
+			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+				return new ThreadSimulationManager<>(executor, random, consumer);
 			}
     	};
 		
@@ -78,7 +103,8 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 
     public ThreadSimulationManager(ExecutorService executor,RandomGenerator random, Consumer<Trajectory<S>> consumer) {
     	super(random,consumer);
-    	this.executor = executor;
+		this.executor = executor;
+		this.start();
 	}
 
 //	// samples the trajectory, updates counters, then runs next task.
@@ -100,10 +126,6 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 //		return (runningTasks+session.getExpectedTasks()==0);
 //	}
 
-    // runs a new task if below task limit, else adds to queue
-    protected <S> void runSimulation(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationUnit<S> unit) {
-        CompletableFuture.supplyAsync(new SimulationTask<>(random, unit), executor).thenAccept(consumer);
-    }
 
 	@Override
 	protected void start() {
@@ -114,18 +136,40 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 	}
 	
 	private void handleTasks() {
-	
 		try {
-			while (isRunning()) {
+			while (isRunning() || hasTasks()) {
 				SimulationTask<S> nextTask = nextTask(true);
 				if (nextTask != null) {
-				    CompletableFuture.supplyAsync(nextTask, executor).thenAccept(this::handleTrajectory);
+					CompletableFuture.supplyAsync(nextTask, executor).thenAccept(this::handleTrajectory);
 				}
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		
+	}
+
+	@Override
+	public synchronized void join() throws InterruptedException {
+		while (getRunningTasks()>0 || hasTasks()){
+				wait();
+		}
+		LongSummaryStatistics statistics = getExecutionTimes().stream().mapToLong(Long::valueOf).summaryStatistics();
+		String data = ((ThreadPoolExecutor) executor).getMaximumPoolSize() + ";" + ((ThreadPoolExecutor) executor).getPoolSize() + ";"
+		+ statistics.getAverage() + ";" + statistics.getMax() + ";" + statistics.getMin();
+		propertyChange("end", data);
+
+		/* time testing stuff
+		executor.shutdown();
+		try {
+			PrintStream out = new PrintStream(new FileOutputStream("thread_data.data", true));
+			out.println(data);
+			out.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*//////////////////////////
 	}
 
 //    //waiting until executor is shutdown

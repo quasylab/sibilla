@@ -19,15 +19,16 @@
 
 package quasylab.sibilla.core.simulator;
 
+import java.beans.PropertyChangeListener;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import javax.swing.event.SwingPropertyChangeSupport;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -40,10 +41,6 @@ import org.apache.commons.math3.random.RandomGenerator;
  */
 public abstract class SimulationManager<S> {
 	
-	/**
-	 * Session counter.
-	 */
-	private int sessionCounter = 0;
 
     private final BlockingQueue<SimulationTask<S>> pendingTasks = new LinkedBlockingQueue<>();
 
@@ -51,7 +48,8 @@ public abstract class SimulationManager<S> {
     private final Consumer<Trajectory<S>> trajectoryConsumer;
     private RandomGenerator random;
     private boolean running = true;
-    private final LinkedList<Long> executionTime = new LinkedList<>();
+	private final LinkedList<Long> executionTime = new LinkedList<>();
+	private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
 
 	/**
 	 * Creates a new simulation manager.
@@ -59,7 +57,6 @@ public abstract class SimulationManager<S> {
 	public SimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
 		this.random = random;
 		this.trajectoryConsumer = consumer;
-		this.start();
 	}
 	
 	protected abstract void start();
@@ -72,31 +69,45 @@ public abstract class SimulationManager<S> {
 	}
     
    
-	protected void add(SimulationTask<S> simulationTask) {
+	private synchronized void add(SimulationTask<S> simulationTask) {
 		pendingTasks.add(simulationTask);
-		notify();
+		queueModified();
+		notifyAll();
 	}
 
 	protected synchronized void reschedule(SimulationTask<S> simulationTask) {
 		runningTasks--;
+		runningTasksModified();
 		add(simulationTask);
 	}
 	
 	protected synchronized void rescheduleAll( Collection<? extends SimulationTask<S>> tasks ) {
 		runningTasks -= tasks.size();
+		runningTasksModified();
 		addAll( tasks );
 	}
 	
-	protected void addAll(Collection<? extends SimulationTask<S>> tasks) {
+	private synchronized void addAll(Collection<? extends SimulationTask<S>> tasks) {
 		pendingTasks.addAll(tasks);
-		notify();
+		queueModified();
+		notifyAll();
 	}
 
+	private void queueModified(){
+		propertyChange("waitingTasks", pendingTasks.size());
+	}
+
+	private void runningTasksModified(){
+		propertyChange("tasks", runningTasks);
+	}
 
 	protected synchronized void handleTrajectory( Trajectory<S> trj ) {
 		this.executionTime.add(trj.getGenerationTime());
 		trajectoryConsumer.accept(trj);
 		runningTasks--;
+		propertyChange("progress", executionTime.size());
+		propertyChange("runtime", trj.getGenerationTime());
+		runningTasksModified();
 		notifyAll();
 	}
 
@@ -123,11 +134,11 @@ public abstract class SimulationManager<S> {
 		while (isRunning()&&blocking&&pendingTasks.isEmpty()) {
 			wait();
 		}
-		if (isRunning()) {
-			runningTasks++;
-			return pendingTasks.poll();			
-		}
-		return null;
+		SimulationTask<S> task = pendingTasks.poll();
+		runningTasks++;
+		runningTasksModified();
+		queueModified();
+		return task;
 	}
 
 	protected synchronized List<SimulationTask<S>> getTask(int n) {
@@ -143,10 +154,9 @@ public abstract class SimulationManager<S> {
 			wait();
 		}
 		List<SimulationTask<S>> tasks = new LinkedList<>();
-		if (!isRunning()) {
-			return tasks;
-		}
 		runningTasks += pendingTasks.drainTo(tasks,n);
+		runningTasksModified();
+		queueModified();
 		return tasks;
 	}
 
@@ -154,23 +164,43 @@ public abstract class SimulationManager<S> {
 		return running;
 	}
 	
-	public synchronized void setRunning(boolean flag) {
+	protected synchronized void setRunning(boolean flag) {
 		this.running = flag;
-		this.notifyAll();
+		notifyAll();
 	}
 
 	public void shutdown() throws InterruptedException {
-//		setRunning(false);
+        setRunning(false);
 		join();
 	}
 	
-	public synchronized void join() throws InterruptedException {
-		while (this.runningTasks>0) {
-			wait();
-		}
-	}
+	protected abstract void join() throws InterruptedException;
 
 	protected Consumer<Trajectory<S>> getConsumer() {
 		return trajectoryConsumer;
 	}
+	
+	protected RandomGenerator getRandom(){
+		return random;
+	}
+
+	protected List<Long> getExecutionTimes(){
+		return executionTime;
+	}
+
+	protected boolean hasTasks(){
+		return !pendingTasks.isEmpty();
+	}
+
+	protected int getRunningTasks(){
+		return runningTasks;
+	}
+
+    public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
+        pcs.addPropertyChangeListener(property, listener);
+	}
+	
+	protected void propertyChange(String property, Object value){
+        pcs.firePropertyChange(property, null, value);
+    }
 }

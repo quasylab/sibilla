@@ -59,7 +59,7 @@ public class SimulationTask<S> implements Supplier<Trajectory<S>>, Serializable 
 
 	@Override
 	public Trajectory<S> get() {
-		long startTime = System.currentTimeMillis();
+		long startTime = System.nanoTime();
 		running();
 		this.currentState = this.unit.getState();
 		this.trajectory = new Trajectory<>();
@@ -69,7 +69,7 @@ public class SimulationTask<S> implements Supplier<Trajectory<S>>, Serializable 
 		}
 		this.trajectory.setSuccesfull(this.unit.getReachPredicate().test(currentState));
 		completed(true);
-		this.trajectory.setGenerationTime(System.currentTimeMillis()-startTime);
+		this.trajectory.setGenerationTime(System.nanoTime()-startTime);
 		return this.getTrajectory();
 	}
 	

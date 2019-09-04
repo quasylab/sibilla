@@ -12,13 +12,11 @@ public class TestServer {
         SimulationServer<PopulationState> server1 = new BasicSimulationServer<>(SerializationType.FST);
         SimulationServer<PopulationState> server2 = new BasicSimulationServer<>(SerializationType.FST);
         SimulationServer<PopulationState> server3 = new BasicSimulationServer<>(SerializationType.FST);
-            new Thread(()-> {
-                try {
+                new Thread(() -> {try {
                     server1.start(8080);
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
-            }).start();
+                }}).start();
             new Thread(()-> {
                 try {
                     server2.start(8081);

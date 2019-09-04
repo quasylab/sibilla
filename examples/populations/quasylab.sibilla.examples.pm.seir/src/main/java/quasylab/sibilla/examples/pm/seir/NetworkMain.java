@@ -46,14 +46,13 @@ public class NetworkMain {
 	private static final int REPLICA = 1000;
 
 	public static void main(String[] argv) throws InterruptedException, IOException {
-		@SuppressWarnings("unchecked")
+
 		PopulationRule rule_S_E = new ReactionRule(
 				"S->E", 
 				new Specie[] { new Specie(S), new Specie(I)} , 
 				new Specie[] { new Specie(E), new Specie(I)},  
 				s -> s.getOccupancy(S)*LAMBDA_E*(s.getOccupancy(I)/N)); 
 		
-		@SuppressWarnings("unchecked")
 		PopulationRule rule_E_I = new ReactionRule(
 				"E->I",
 				new Specie[] { new Specie(E) },
@@ -61,7 +60,6 @@ public class NetworkMain {
 				s -> s.getOccupancy(E)*LAMBDA_I
 		);
 		
-		@SuppressWarnings("unchecked")
 		PopulationRule rule_I_R = new ReactionRule(
 				"I->R",
 				new Specie[] { new Specie(I) },

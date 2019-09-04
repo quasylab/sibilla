@@ -6,11 +6,14 @@ package quasylab.sibilla.core.simulator.tests;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.LongSummaryStatistics;
 
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import quasylab.sibilla.core.simulator.NetworkSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
@@ -20,7 +23,8 @@ import quasylab.sibilla.core.simulator.pm.ReactionRule;
 import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import quasylab.sibilla.core.simulator.sampling.StatisticSampling;;
+import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
+import quasylab.sibilla.core.simulator.serialization.SerializationType;;
 
 /**
  * @author loreti
@@ -44,17 +48,17 @@ public class TestTime {
 	public final static double LAMBDA_R = 1/7.0;
  	
 	public final static int SAMPLINGS = 100;
-	public final static double DEADLINE = 6000;
-	private static final int REPLICA = 10000;
-	
-	public static void main(String[] argv) throws FileNotFoundException, InterruptedException {
+	public final static double DEADLINE = 600;
+	private static final int REPLICA = 1000;
+
+	public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
 		List<Long> stats = new ArrayList<>();
 		PrintStream out = new PrintStream(new FileOutputStream("thread_data.data", true));
         out.println("Concurrent tasks;pool size;average runtime;maximum runtime;minimum runtime");
 		out.close();
 		PrintStream out2 = new PrintStream(new FileOutputStream("run_data.data"));
 		out2.println("Concurrent tasks;total runtime");
-		for(int i = 1; i<= 100; i++){  // i -> number of concurrent tasks
+		for(int i = 1; i<= 1000; i++){  // i -> number of concurrent tasks
 		for(int j = 0; j < 1; j++){   // j -> number of runs	
 		PopulationRule rule_S_E = new ReactionRule(
 				"S->E", 
@@ -98,7 +102,10 @@ public class TestTime {
 //		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
-		SimulationEnvironment sim = new SimulationEnvironment( ThreadSimulationManager.getFixedThreadsimulationManager(i) );
+		SimulationEnvironment sim = new SimulationEnvironment( NetworkSimulationManager.getNetworkSimulationManagerFactory(new InetAddress[]{InetAddress.getByName("192.168.1.75"), InetAddress.getByName("192.168.1.71"), InetAddress.getByName("192.168.1.92")},
+																														   new int[]{8080,8080,8080},
+																														   "quasylab.sibilla.core.simulator.tests.TestTime",
+																														   new SerializationType[]{SerializationType.FST, SerializationType.FST, SerializationType.FST}) );
 
 		SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp,frSamp);
 		long startTime = System.nanoTime();

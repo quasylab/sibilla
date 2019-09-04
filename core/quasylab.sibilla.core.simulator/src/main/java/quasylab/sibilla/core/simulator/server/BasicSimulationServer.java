@@ -78,14 +78,10 @@ public class BasicSimulationServer<S> implements SimulationServer<S> {
                         futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
                     }
                     CompletableFuture.allOf(futures).join();
-                    int reachCount = 0;
                     for( SimulationTask<S> task : tasks){
                         results.add(task.getTrajectory());
-//                        if(task.reach()){
-//                            reachCount++;
-//                        }
                     }
-                    client.writeObject(new ComputationResult<>(results, reachCount));
+                    client.writeObject(new ComputationResult<>(results));
 
                 }
 

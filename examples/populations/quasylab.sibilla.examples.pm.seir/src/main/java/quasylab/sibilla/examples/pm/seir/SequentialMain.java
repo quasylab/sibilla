@@ -8,8 +8,8 @@ import java.io.PrintStream;
 import java.net.UnknownHostException;
 
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import quasylab.sibilla.core.simulator.SequentialSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
@@ -23,7 +23,7 @@ import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
  * @author loreti
  *
  */
-public class Main {
+public class SequentialMain {
 
 	public final static int S = 0;
 	public final static int E = 1;
@@ -42,8 +42,7 @@ public class Main {
 
 	public final static int SAMPLINGS = 100;
 	public final static double DEADLINE = 600;
-	private static final int REPLICA = 1000;
-	private final static int TASKS = 15;
+	private static final int REPLICA = 100;
 
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
 		PopulationRule rule_S_E = new ReactionRule(
@@ -86,7 +85,7 @@ public class Main {
 //		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
 		
 		// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
-		SimulationEnvironment sim = new SimulationEnvironment( ThreadSimulationManager.getFixedThreadSimulationManagerFactory(TASKS) );
+		SimulationEnvironment sim = new SimulationEnvironment( SequentialSimulationManager.getSequentialSimulationManagerFactory() );
 
 		SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp,frSamp);
 
