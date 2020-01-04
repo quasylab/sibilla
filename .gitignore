@@ -19,5 +19,9 @@ bin/
 .classpath
 .project
 .settings
+out/
+bin/
+xtend-gen
+xtext-gen
 *.data
 

@@ -22,6 +22,7 @@ import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.function.Function;
 
+import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 
@@ -108,16 +109,27 @@ public class StatisticSampling<S> implements SamplingFunction<S> {
 	}
 
 	public void printTimeSeries(PrintStream out, char separator) {
+		printTimeSeries(out,separator,0.05);
+	}
+
+	public void printTimeSeries(PrintStream out, char separator, double significance) {
 		double time = 0.0;
 		for (int i = 0; i < this.data.length; i++) {
+			double ci = getConfidenceInterval(i,significance);
 			out.println(""+time + separator 
 					+ this.data[i].getMean() 
-					+ separator + this.data[i].getStandardDeviation());
+					+ separator + ci);
 			time += dt;
 		}
 	}
 	
 	
+	private double getConfidenceInterval(int i, double significance) {
+		TDistribution tDist = new TDistribution(this.data[i].getN());
+		double a = tDist.inverseCumulativeProbability(1.0 -significance/2);
+		return a*this.data[i].getStandardDeviation() / Math.sqrt(this.data[i].getN());
+	}
+
 	public void printName(PrintStream out){
 		out.print(this.measure.getName());
 	}

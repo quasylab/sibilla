@@ -64,7 +64,8 @@ public class PopulationModel implements Model<PopulationState>, Serializable {
 	
 	@Override
 	public WeightedStructure<StepFunction<PopulationState>> getActivities(RandomGenerator r , PopulationState state ) {
-		WeightedLinkedList<StepFunction<PopulationState>> activities = new WeightedLinkedList<>();
+		WeightedLinkedList<StepFunction<PopulationState>> activities = 
+				new WeightedLinkedList<>();
 		for (PopulationRule rule : rules) {
 			PopulationTransition tra = rule.apply(r, state);
 			if (tra != null) {

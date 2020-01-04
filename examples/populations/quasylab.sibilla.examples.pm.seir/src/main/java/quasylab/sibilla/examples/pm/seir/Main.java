@@ -39,10 +39,11 @@ public class Main {
 	public final static double LAMBDA_E = 1;
 	public final static double LAMBDA_I = 1 / 3.0;
 	public final static double LAMBDA_R = 1 / 7.0;
+	public final static double LAMBDA_DECAY = 1/30.0;
 
 	public final static int SAMPLINGS = 100;
 	public final static double DEADLINE = 600;
-	private static final int REPLICA = 1000;
+	private static final int REPLICA = 10000;
 	private final static int TASKS = 15;
 
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
@@ -66,11 +67,20 @@ public class Main {
 				s -> s.getOccupancy(I)*LAMBDA_R
 		);
 		
+		
+		PopulationRule rule_R_S = new ReactionRule( 
+				"R->S",
+				new Specie[] { new Specie(R) },
+				new Specie[] { new Specie(S) },
+				s -> s.getOccupancy(R)*LAMBDA_DECAY
+		);
+		
 		PopulationModel f = new PopulationModel();
 		f.addState("initial", initialState());
 		f.addRule(rule_S_E);
 		f.addRule(rule_E_I);
 		f.addRule(rule_I_R); 
+		f.addRule(rule_R_S);
 		
 		StatisticSampling<PopulationState> fiSamp = 
 				StatisticSampling.measure("Fraction Infected", 

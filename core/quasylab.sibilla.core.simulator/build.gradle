@@ -4,9 +4,17 @@ repositories {
 	mavenCentral()
 }
 
+test {
+    useJUnitPlatform()
+}
+
 dependencies {
-	implementation 'org.apache.commons:commons-math3:3.6.1'
+	//implementation 'org.apache.commons:commons-math3:3.6.1'
+        compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 	compile group: 'de.ruedigermoeller',name:'fst',version:'2.57'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
 
     sourceCompatibility = '12'
