@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
@@ -23,13 +24,16 @@ public class BasicSimulationServer<S> implements SimulationServer<S> {
     private ExecutorService taskExecutor = Executors.newCachedThreadPool();
     private ExecutorService connectionExecutor = Executors.newCachedThreadPool();
     private final SerializationType serialization;
+    private static final Logger LOGGER = Logger.getLogger(BasicSimulationServer.class.getName());
 
-    public BasicSimulationServer( SerializationType serialization){
+    public BasicSimulationServer(SerializationType serialization) {
         this.serialization = serialization;
+        LOGGER.info(String.format("Set serialization type: %s", this.serialization.name()));
     }
 
     public void start(int port) throws IOException {
         serverSocket = new ServerSocket(port);
+        LOGGER.info(String.format("Listening on port %d", port));
         while (true) {
             TaskHandler handler = null;
             try {
@@ -48,24 +52,41 @@ public class BasicSimulationServer<S> implements SimulationServer<S> {
         private Serializer client;
 
         public TaskHandler(Socket socket) throws IOException {
+            LOGGER.info(String.format("Connection accepted by IP %s and port %d",
+                    socket.getInetAddress().getHostAddress(), socket.getPort()));
             cloader = new CustomClassLoader();
             client = Serializer.createSerializer(socket, cloader, serialization);
+            LOGGER.info(String.format("Serializer created"));
+        }
+
+        public void run() {
+            try {
+                init();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+            manageClient();
         }
 
         private void init() throws Exception {
             String modelName;
             modelName = (String) client.readObject();
+            LOGGER.info(String.format("Model name read: %s", modelName));
             byte[] myClass = (byte[]) client.readObject();
+            LOGGER.info(String.format("Class received"));
             cloader.defClass(modelName, myClass);
+            LOGGER.info(String.format("Class loaded"));
         }
 
         private void manageClient() {
             try {
                 while (true) {
-
                     String request = (String) client.readObject();
+                    LOGGER.info(String.format("Request received: %s", request));
                     if (request.equals("PING")) {
                         client.writeObject("PONG");
+                        LOGGER.info(String.format("Ping request answered"));
                         continue;
                     }
                     @SuppressWarnings("unchecked")
@@ -78,18 +99,18 @@ public class BasicSimulationServer<S> implements SimulationServer<S> {
                         futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
                     }
                     CompletableFuture.allOf(futures).join();
-                    for( SimulationTask<S> task : tasks){
+                    for (SimulationTask<S> task : tasks) {
                         results.add(task.getTrajectory());
                     }
                     client.writeObject(new ComputationResult<>(results));
-
+                    LOGGER.info(String.format("Computation's results have been sent to the client successfully"));
                 }
 
             } catch (EOFException e) {
-                System.out.println("Client closed input stream because we timed out or the session has been completed");
+                LOGGER.info("Client closed input stream because we timed out or the session has been completed");
                 return;
             } catch (SocketException e) {
-                System.out.println("Client closed output stream because we timed out");
+                LOGGER.info("Client closed output stream because we timed out");
                 return;
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
@@ -98,16 +119,6 @@ public class BasicSimulationServer<S> implements SimulationServer<S> {
                 e.printStackTrace();
                 return;
             }
-        }
-
-        public void run() {
-            try {
-                init();
-            } catch (Exception e) {
-                e.printStackTrace();
-                return;
-            }
-            manageClient();
         }
     }
 }
