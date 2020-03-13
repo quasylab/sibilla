@@ -10,7 +10,7 @@ import quasylab.sibilla.core.simulator.server.SimulationServer;
 
 public class TestServer {
 
-    final static SerializationType serType = SerializationType.FST;
+    final static SerializationType serType = SerializationType.DEFAULT;
     final static int port = 8080;
     private static final Logger LOGGER = Logger.getLogger(TestServer.class.getName());
 
@@ -22,7 +22,7 @@ public class TestServer {
             try {
                 server1.start(port);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.severe(e.getMessage());
             }
         }).start();
     }

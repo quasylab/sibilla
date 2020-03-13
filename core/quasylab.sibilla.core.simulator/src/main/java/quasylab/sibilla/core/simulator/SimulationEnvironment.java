@@ -25,6 +25,7 @@ import java.io.Serializable;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
+import quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.ui.SimulationView;
 
@@ -37,6 +38,7 @@ public class SimulationEnvironment implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = Logger.getLogger(SimulationEnvironment.class.getName());
 	private SimulationManagerFactory simulationManagerFactory;
+	private boolean activeGUI;
 
 	public SimulationEnvironment() {
 		this(ThreadSimulationManager::new);
@@ -47,7 +49,9 @@ public class SimulationEnvironment implements Serializable {
 	}
 
 	public synchronized <S> void simulate(RandomGenerator random, Model<S> model, S initialState,
-			SamplingFunction<S> sampling_function, int iterations, double deadline) throws InterruptedException {
+			SamplingFunction<S> sampling_function, int iterations, double deadline, boolean activeGUI)
+			throws InterruptedException {
+		this.activeGUI = activeGUI;
 		simulate(null, random, model, initialState, sampling_function, iterations, deadline);
 	}
 
@@ -58,7 +62,9 @@ public class SimulationEnvironment implements Serializable {
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random,
 				trc -> trc.sample(sampling_function));
 		LOGGER.info(String.format("Simulation manager created: %s", simulationManager.getClass().getName()));
-		//SimulationView<S> view = new SimulationView<S>(simulationManager, iterations);
+		if (activeGUI) {
+			SimulationView<S> view = new SimulationView<S>(simulationManager, iterations);
+		}
 		@SuppressWarnings("unchecked")
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, initialState,
 				SamplePredicate.timeDeadlinePredicate(deadline), (Predicate<? super S> & Serializable) s -> true);
@@ -94,7 +100,10 @@ public class SimulationEnvironment implements Serializable {
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, state,
 				(t, s) -> (t >= deadline) || psi.test(s) || !phi.test(s), psi);
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, traceConsumer);
-		//SimulationView<S> view = new SimulationView<S>(simulationManager, (int) n);
+		if (activeGUI) {
+			SimulationView<S> view = new SimulationView<S>(simulationManager, (int) n);
+		}
+
 		for (int i = 0; i < n; i++) {
 			simulationManager.simulate(unit);
 		}
@@ -109,8 +118,7 @@ public class SimulationEnvironment implements Serializable {
 		try {
 			return simulationRun.get();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe(e.getMessage());
 			return null;
 		}
 	}
@@ -123,8 +131,7 @@ public class SimulationEnvironment implements Serializable {
 		try {
 			return simulationRun.get();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe(e.getMessage());
 			return null;
 		}
 	}
@@ -137,8 +144,7 @@ public class SimulationEnvironment implements Serializable {
 		try {
 			return simulationRun.get();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.severe(e.getMessage());
 			return null;
 		}
 	}

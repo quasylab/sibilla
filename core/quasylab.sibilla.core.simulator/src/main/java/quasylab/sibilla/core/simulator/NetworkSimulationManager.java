@@ -39,9 +39,12 @@ import java.util.logging.Logger;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
+import quasylab.sibilla.core.simulator.serialization.ClassBytesLoader;
 import quasylab.sibilla.core.simulator.serialization.SerializationType;
 import quasylab.sibilla.core.simulator.serialization.Serializer;
 import quasylab.sibilla.core.simulator.server.ComputationResult;
+import quasylab.sibilla.core.simulator.server.ServerInfo;
+import quasylab.sibilla.core.simulator.server.ServerState;
 
 public class NetworkSimulationManager<S> extends SimulationManager<S> {
 
@@ -53,17 +56,17 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     private ExecutorService executor;
     private volatile int serverRunning = 0;
 
-    public static final SimulationManagerFactory getNetworkSimulationManagerFactory(InetAddress[] servers, int[] ports,
-            String modelName, SerializationType[] serialization) {
+    public static final SimulationManagerFactory getNetworkSimulationManagerFactory(List<ServerInfo> info,
+            String modelName) {
         return new SimulationManagerFactory() {
 
             @Override
             public <S> SimulationManager<S> getSimulationManager(RandomGenerator random,
                     Consumer<Trajectory<S>> consumer) {
                 try {
-                    return new NetworkSimulationManager<S>(random, consumer, servers, ports, modelName, serialization);
+                    return new NetworkSimulationManager<S>(random, consumer, info, modelName);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOGGER.severe(e.getMessage());
                     return null;
                 }
             }
@@ -71,17 +74,14 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
 
     }
 
-    public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer, InetAddress[] servers,
-            int[] ports, String modelName, SerializationType[] serialization) throws UnknownHostException, IOException {
+    public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer, List<ServerInfo> info,
+            String modelName) throws UnknownHostException, IOException {
         super(random, consumer);
-        LOGGER.info(String.format(
-                "Creating a new NetworkSimulationManager with servers: %s, ports: %s, model name to simulate: %s, serialization types: %s",
-                Arrays.toString(servers), Arrays.toString(ports), modelName, Arrays.toString(serialization)));
+        LOGGER.info(String.format("Creating a new NetworkSimulationManager with servers: %s \n", info.toString()));
         this.modelName = modelName;
         executor = Executors.newCachedThreadPool();
-        for (int i = 0; i < servers.length; i++) {
-            Serializer server = Serializer.createSerializer(new Socket(servers[i].getHostAddress(), ports[i]),
-                    serialization[i]);
+        for (int i = 0; i < info.size(); i++) {
+            Serializer server = Serializer.createSerializer(info.get(i));
             LOGGER.info(String.format("Serializer created - IP: %s - Port: %d - Class: %s",
                     server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort(),
                     server.getClass().getName()));
@@ -91,7 +91,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
                 LOGGER.info(String.format(
                         "All the model informations have been sent to the server through the Serializer object"));
             } catch (Exception e) {
-                LOGGER.info("Error during server initialization, removing server...");
+                LOGGER.severe("Error during server initialization, removing server...");
                 this.servers.remove(server);
             }
         }
@@ -123,7 +123,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
                 run();
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.severe(e.getMessage());
         }
 
     }
@@ -139,7 +139,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
         int acceptableTasks = serverState.getExpectedTasks();
         if (!serverState.canCompleteTask(acceptableTasks)) {
             acceptableTasks = acceptableTasks == 1 ? 1 : acceptableTasks / 2;
-            LOGGER.info(String.format("Server's tasks window has been reduced in half"));
+            LOGGER.severe(String.format("Server's tasks window has been reduced in half"));
         }
         toRun = getTask(acceptableTasks, true);
         if (toRun.size() > 0) {
@@ -173,7 +173,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
             Serializer server) {
         LOGGER.info("Managing results");
         if (error != null) {
-            LOGGER.info(String.format("Timeout occurred, contacting server - IP: %s - Port: %d - Class: %s",
+            LOGGER.severe(String.format("Timeout occurred, contacting server - IP: %s - Port: %d - Class: %s",
                     server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort(),
                     server.getClass().getName()));
             Serializer newServer;
@@ -200,7 +200,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     }
 
     private Serializer manageTimeout(Serializer server) {
-        LOGGER.info("Managing timeout");
+        LOGGER.warning("Managing timeout");
         Serializer pingServer = null;
         ServerState oldState = servers.get(server); // get old state
         try {
@@ -209,9 +209,8 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
                     new String[] {
                             server.getSocket().getInetAddress().getHostAddress() + ":" + server.getSocket().getPort(),
                             oldState.toString() });
-            pingServer = Serializer.createSerializer(
-                    new Socket(server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort()),
-                    SerializationType.getType(server));
+            pingServer = Serializer.createSerializer(new ServerInfo(server.getSocket().getInetAddress(),
+                    server.getSocket().getPort(), SerializationType.getType(server)));
             LOGGER.info(String.format("Creating a new Serializer to ping the server  - IP: %s - Port: %d - Class: %s",
                     server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort(),
                     server.getClass().getName()));
@@ -221,7 +220,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
             LOGGER.info("Ping request sent"); // send ping request
             String response = (String) pingServer.readObject(); // wait for response
             if (!response.equals("PONG")) {
-                LOGGER.info("The response received wasn't the one expected");
+                LOGGER.severe("The response received wasn't the one expected");
                 throw new IllegalStateException("Expected a different reply!");
             }
             LOGGER.info(
@@ -231,7 +230,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
             servers.put(pingServer, oldState); // update hash map
             servers.remove(server);
         } catch (Exception e) {
-            LOGGER.info("The response has been received after the time limit. The server will be removed");
+            LOGGER.severe("The response has been received after the time limit. The server will be removed");
             oldState.removed(); // mark server as removed and update GUI
             servers.remove(server);
             propertyChange("servers",
@@ -262,7 +261,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
                         state.getServer().getSocket().getInetAddress().getHostName(),
                         state.getServer().getSocket().getPort()));
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.severe(e.getMessage());
             }
         }
     }
@@ -288,11 +287,12 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
             LOGGER.info(String.format("The results from the computation have been received"));
             result = receivedResult;
         } catch (SocketTimeoutException e) {
-
+            LOGGER.severe(e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException();
-
         } catch (Exception e) {
-
+            LOGGER.severe(e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException();
         }
         return result;

@@ -12,9 +12,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
+import quasylab.sibilla.core.simulator.NetworkTask;
 import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
-import quasylab.sibilla.core.simulator.NetworkTask;
 import quasylab.sibilla.core.simulator.serialization.CustomClassLoader;
 import quasylab.sibilla.core.simulator.serialization.SerializationType;
 import quasylab.sibilla.core.simulator.serialization.Serializer;
@@ -39,7 +39,7 @@ public class BasicSimulationServer<S> implements SimulationServer<S> {
             try {
                 handler = new TaskHandler(serverSocket.accept());
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.severe(e.getMessage());
                 continue;
             }
             connectionExecutor.execute(handler);
@@ -48,14 +48,15 @@ public class BasicSimulationServer<S> implements SimulationServer<S> {
 
     private class TaskHandler implements Runnable {
 
-        private CustomClassLoader cloader;
+        private quasylab.sibilla.core.simulator.serialization.CustomClassLoader cloader;
         private Serializer client;
 
         public TaskHandler(Socket socket) throws IOException {
             LOGGER.info(String.format("Connection accepted by IP %s and port %d",
                     socket.getInetAddress().getHostAddress(), socket.getPort()));
             cloader = new CustomClassLoader();
-            client = Serializer.createSerializer(socket, cloader, serialization);
+            client = Serializer.createSerializer(
+                    new ServerInfo(socket.getInetAddress(), socket.getPort(), serialization), cloader);
             LOGGER.info(String.format("Serializer created"));
         }
 
@@ -63,7 +64,7 @@ public class BasicSimulationServer<S> implements SimulationServer<S> {
             try {
                 init();
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.severe(e.getMessage());
                 return;
             }
             manageClient();
@@ -110,12 +111,15 @@ public class BasicSimulationServer<S> implements SimulationServer<S> {
                 LOGGER.info("Client closed input stream because we timed out or the session has been completed");
                 return;
             } catch (SocketException e) {
-                LOGGER.info("Client closed output stream because we timed out");
+                LOGGER.severe("Client closed output stream because we timed out");
+                e.printStackTrace();
                 return;
             } catch (ClassNotFoundException e) {
+                LOGGER.severe(e.getMessage());
                 e.printStackTrace();
                 return;
             } catch (Exception e) {
+                LOGGER.severe(e.getMessage());
                 e.printStackTrace();
                 return;
             }
