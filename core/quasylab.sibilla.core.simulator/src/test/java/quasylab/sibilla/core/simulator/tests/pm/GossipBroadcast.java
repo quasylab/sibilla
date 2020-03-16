@@ -216,7 +216,7 @@ public class GossipBroadcast {
 
 		long start = System.currentTimeMillis();
 		SamplingFunction<PopulationState> sf = new SamplingCollection<>(aiSamp, piSamp, auSamp, puSamp,asSamp,psSamp);
-		sim.simulate(new DefaultRandomGenerator(),buildPopulationModel(scale),getInitState(scale),sf,iterations,deadline);
+	//	sim.simulate(new DefaultRandomGenerator(),buildPopulationModel(scale),getInitState(scale),sf,iterations,deadline);
 		
 		System.out.println("Time: "+(System.currentTimeMillis()-start));
 		aiSamp.printTimeSeries(new PrintStream(label+"_ai_.data"));

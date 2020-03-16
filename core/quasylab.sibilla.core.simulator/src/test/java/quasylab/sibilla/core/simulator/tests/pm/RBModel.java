@@ -252,7 +252,7 @@ public class RBModel {
 
 			long start = System.currentTimeMillis();
 			SamplingFunction<PopulationState> sf = new SamplingCollection<>(rSamp, bSamp, btSamp, rtSamp,red,blue);
-			sim.simulate(new DefaultRandomGenerator(),buildPopulationModel(scale),getInitState(scale),sf,iterations,deadline);
+		//	sim.simulate(new DefaultRandomGenerator(),buildPopulationModel(scale),getInitState(scale),sf,iterations,deadline);
 
 			System.out.println("Time: "+(System.currentTimeMillis()-start));
 			rSamp.printTimeSeries(new PrintStream(label+"_r_.data"));

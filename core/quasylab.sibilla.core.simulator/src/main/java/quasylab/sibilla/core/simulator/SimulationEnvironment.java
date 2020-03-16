@@ -75,19 +75,10 @@ public class SimulationEnvironment implements Serializable {
 			if (monitor != null) {
 				monitor.startIteration(i);
 			}
-			// System.out.print('<');
-			// if ((i + 1) % 50 == 0) {
-			// System.out.print(i + 1);
-			// }
 			simulationManager.simulate(unit);
 			if (monitor != null) {
 				monitor.endSimulation(i);
 			}
-			// System.out.print('>');
-			// if ((i + 1) % 50 == 0) {
-			// System.out.print("\n");
-			// }
-			// System.out.flush();
 		}
 		simulationManager.shutdown();
 		rgi.unregister();
