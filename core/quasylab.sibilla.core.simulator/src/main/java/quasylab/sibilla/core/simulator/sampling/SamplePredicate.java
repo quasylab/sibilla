@@ -17,7 +17,7 @@
  * under the License.
  *******************************************************************************/
 
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.core.simulator.sampling;
 
 import java.io.Serializable;
 import java.util.function.Predicate;

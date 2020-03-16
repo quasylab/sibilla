@@ -19,7 +19,7 @@
 /**
  * 
  */
-package quasylab.sibilla.core.simulator;
+package quasylab.sibilla.core.simulator.sampling;
 
 import java.io.Serializable;
 

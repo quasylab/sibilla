@@ -100,7 +100,7 @@ public class Main {
 
 		SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp,frSamp);
 
-		sim.simulate(new DefaultRandomGenerator(),f,initialState(),sf,REPLICA,DEADLINE);
+		sim.simulate(new DefaultRandomGenerator(),f,initialState(),sf,REPLICA,DEADLINE, true);
 
 		fiSamp.printTimeSeries(new PrintStream("data/seir_"+REPLICA+"_"+N+"_FI_.data"),';');
 		frSamp.printTimeSeries(new PrintStream("data/seir_"+REPLICA+"_"+N+"_FR_.data"),';');
