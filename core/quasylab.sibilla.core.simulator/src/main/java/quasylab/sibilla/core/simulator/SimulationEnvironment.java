@@ -27,7 +27,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import quasylab.sibilla.core.simulator.ui.SimulationView;
+//import quasylab.sibilla.core.simulator.ui.SimulationView;
 
 /**
  * @author loreti
@@ -59,6 +59,7 @@ public class SimulationEnvironment implements Serializable {
 			S initialState, SamplingFunction<S> sampling_function, int iterations, double deadline)
 			throws InterruptedException {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
+
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random,
 				trc -> trc.sample(sampling_function));
 		LOGGER.info(String.format("Simulation manager created: %s", simulationManager.getClass().getName()));
@@ -100,6 +101,7 @@ public class SimulationEnvironment implements Serializable {
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, state,
 				(t, s) -> (t >= deadline) || psi.test(s) || !phi.test(s), psi);
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, traceConsumer);
+
 		if (activeGUI) {
 			SimulationView<S> view = new SimulationView<S>(simulationManager, (int) n);
 		}
