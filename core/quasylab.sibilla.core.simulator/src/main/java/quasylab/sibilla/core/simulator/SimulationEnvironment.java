@@ -28,6 +28,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 //import quasylab.sibilla.core.simulator.ui.SimulationView;
+import quasylab.sibilla.core.simulator.ui.SimulationView;
 
 /**
  * @author loreti

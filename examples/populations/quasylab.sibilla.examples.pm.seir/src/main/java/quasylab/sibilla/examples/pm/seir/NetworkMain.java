@@ -93,7 +93,7 @@ public class NetworkMain implements Serializable {
 
 		SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp, frSamp);
 
-		sim.simulate(new DefaultRandomGenerator(), f, initialState(), sf, REPLICA, DEADLINE, true);
+		sim.simulate(new DefaultRandomGenerator(), f, initialState(), sf, REPLICA, DEADLINE, false);
 
 		/*
 		 * fiSamp.printTimeSeries(new
