@@ -122,7 +122,7 @@ public class Main {
 		
 		SamplingFunction<PopulationState> sf = new SamplingCollection<PopulationState>(samplings);
 
-		sim.simulate(new DefaultRandomGenerator(), f, initialState(1),sf, REPLICA,DEADLINE);
+		sim.simulate(new DefaultRandomGenerator(), f, initialState(1),sf, REPLICA,DEADLINE, true);
 
 		for (StatisticSampling<PopulationState> s : samplings) {
 			s.printTimeSeries(new PrintStream("data/crowds_"+REPLICA+"_"+N+"_"+s.getName()+"_.data"),';');

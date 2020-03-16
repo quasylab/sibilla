@@ -22,6 +22,8 @@ package quasylab.sibilla.core.simulator;
 import java.io.Serializable;
 import java.util.function.Predicate;
 
+import quasylab.sibilla.core.simulator.sampling.SamplePredicate;
+
 /**
  * @author loreti
  *
