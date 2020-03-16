@@ -36,4 +36,24 @@ public interface Serializer {
                 return new DefaultSerializer(socket);
         }
     }
+    
+    public static Serializer createSerializer(SerializationType serType, Socket socket, ClassLoader classLoader) throws IOException {
+        switch (serType) {
+            case FST:
+                return new FSTSerializer(socket, classLoader);
+            case DEFAULT:
+            default:
+                return new DefaultSerializer(socket, classLoader);
+        }
+    }
+
+    public static Serializer createSerializer(SerializationType serType, Socket socket) throws IOException {
+        switch (serType) {
+            case FST:
+                return new FSTSerializer(socket);
+            case DEFAULT:
+            default:
+                return new DefaultSerializer(socket);
+        }
+    }
 }
