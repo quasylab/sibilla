@@ -25,7 +25,7 @@ import java.io.Serializable;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import quasylab.sibilla.core.simulator.ui.SimulationView;
+//import quasylab.sibilla.core.simulator.ui.SimulationView;
 
 /**
  * @author loreti
@@ -50,7 +50,7 @@ public class SimulationEnvironment {
 	public synchronized <S> void simulate(SimulationMonitor monitor, RandomGenerator random, Model<S> model, S initialState, SamplingFunction<S> sampling_function, int iterations, double deadline) throws InterruptedException {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random,  trc -> trc.sample(sampling_function));
-		SimulationView<S> view = new SimulationView<S>(simulationManager, iterations);
+		//SimulationView<S> view = new SimulationView<S>(simulationManager, iterations);
 		@SuppressWarnings("unchecked")
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, initialState,SamplePredicate.timeDeadlinePredicate(deadline), (Predicate<? super S> & Serializable) s -> true);
 		rgi.register(random);//FIXME: Remove!
@@ -83,7 +83,7 @@ public class SimulationEnvironment {
 		ReachabilityTraceConsumer<S> traceConsumer = new ReachabilityTraceConsumer<>();
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, state, (t,s) -> (t>=deadline)||psi.test(s)||!phi.test(s), psi);
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, traceConsumer);
-		SimulationView<S> view = new SimulationView<S>(simulationManager, (int) n);
+		//SimulationView<S> view = new SimulationView<S>(simulationManager, (int) n);
 		for (int i = 0; i < n; i++) {
 			simulationManager.simulate(unit);
 		}
