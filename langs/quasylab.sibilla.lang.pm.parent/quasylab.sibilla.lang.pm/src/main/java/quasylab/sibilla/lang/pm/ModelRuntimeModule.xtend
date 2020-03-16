@@ -8,4 +8,5 @@ package quasylab.sibilla.lang.pm
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class ModelRuntimeModule extends AbstractModelRuntimeModule {
+	
 }

@@ -6,9 +6,9 @@ import quasylab.sibilla.core.simulator.pm.PopulationModel
 
 class ModelUtils {
 	
-	def PopulationModel createModel( Model m ) {
-		null//new PopulationModel( new PopultionState() );
-	}
+//	def PopulationModel createModel( Model m ) {
+//		return true;//new PopulationModel( new PopultionState() );
+//	}
 	
 	
 }
