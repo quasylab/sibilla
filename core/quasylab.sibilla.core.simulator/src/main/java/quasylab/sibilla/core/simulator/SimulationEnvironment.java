@@ -50,6 +50,12 @@ public class SimulationEnvironment implements Serializable {
 	}
 
 	public synchronized <S> void simulate(RandomGenerator random, Model<S> model, S initialState,
+			SamplingFunction<S> sampling_function, int iterations, double deadline)
+			throws InterruptedException {
+		simulate(random,model,initialState,sampling_function,iterations,deadline,false);
+	}	
+	
+	public synchronized <S> void simulate(RandomGenerator random, Model<S> model, S initialState,
 			SamplingFunction<S> sampling_function, int iterations, double deadline, boolean activeGUI)
 			throws InterruptedException {
 		this.activeGUI = activeGUI;
