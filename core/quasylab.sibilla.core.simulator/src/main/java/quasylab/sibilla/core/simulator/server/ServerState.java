@@ -2,10 +2,10 @@ package quasylab.sibilla.core.simulator.server;
 
 import java.io.IOException;
 
-import quasylab.sibilla.core.simulator.serialization.Serializer;
+import quasylab.sibilla.core.simulator.network.TCPNetworkManager;
 
 public class ServerState {
-    private Serializer server;
+    private TCPNetworkManager server;
     private int expectedTasks, actualTasks;
     private boolean isRemoved, isTimeout;
     private long runningTime;
@@ -17,7 +17,7 @@ public class ServerState {
     private final static int threshold = 256;
     private final static long maxRunningTime = 3600000000000L; // 1 hour in nanoseconds
 
-    public ServerState(Serializer server) throws IOException {
+    public ServerState(TCPNetworkManager server) throws IOException {
         this.server = server;
         expectedTasks = 1;
         actualTasks = 0;
@@ -55,7 +55,7 @@ public class ServerState {
         expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
     }
 
-    public void migrate(Serializer server) throws IOException {
+    public void migrate(TCPNetworkManager server) throws IOException {
         close();
         this.server = server;
         isRemoved = false;
@@ -91,7 +91,7 @@ public class ServerState {
         return isTimeout;
     }
 
-    public Serializer getServer() {
+    public TCPNetworkManager getServer() {
         return this.server;
     }
 

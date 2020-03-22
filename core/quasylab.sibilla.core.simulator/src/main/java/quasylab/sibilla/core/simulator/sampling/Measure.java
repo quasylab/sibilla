@@ -18,11 +18,13 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator.sampling;
 
+import java.io.Serializable;
+
 /**
  * @author loreti
  *
  */
-public interface Measure<S> {
+public interface Measure<S> extends Serializable{
 
 	public double measure(S t);
 

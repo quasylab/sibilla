@@ -16,6 +16,7 @@ import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.NetworkSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.ThreadSimulationManager;
+import quasylab.sibilla.core.simulator.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
@@ -24,7 +25,6 @@ import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
-import quasylab.sibilla.core.simulator.serialization.SerializationType;
 import quasylab.sibilla.core.simulator.server.ServerInfo;;
 
 /**
@@ -97,7 +97,7 @@ public class TestTime {
 						NetworkSimulationManager
 								.getNetworkSimulationManagerFactory(
 										List.of(new ServerInfo(InetAddress.getByName("192.168.1.201"), 8080,
-												SerializationType.DEFAULT)),
+												TCPNetworkManagerType.DEFAULT)),
 										"quasylab.sibilla.core.simulator.tests.TestTime"));
 
 				SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp, frSamp);

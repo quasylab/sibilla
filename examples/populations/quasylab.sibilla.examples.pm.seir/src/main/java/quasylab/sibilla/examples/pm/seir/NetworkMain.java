@@ -12,6 +12,7 @@ import java.util.List;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.NetworkSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
+import quasylab.sibilla.core.simulator.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
@@ -20,8 +21,8 @@ import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
-import quasylab.sibilla.core.simulator.serialization.SerializationType;
 import quasylab.sibilla.core.simulator.server.ServerInfo;
+import quasylab.sibilla.core.util.NetworkUtils;
 
 /**
  * @author loreti
@@ -49,7 +50,7 @@ public class NetworkMain implements Serializable {
 	public final static double LAMBDA_R = 1 / 7.0;
 
 	public final static int SAMPLINGS = 100;
-	public final static double DEADLINE = 600;
+	public final static double DEADLINE = 100;
 	private static final int REPLICA = 10;
 
 	public static void main(String[] argv) throws InterruptedException, IOException {
@@ -88,12 +89,13 @@ public class NetworkMain implements Serializable {
 		// SimulationEnvironment<>( f, new ThreadSimulationManager<>(TASKS) );
 		SimulationEnvironment sim = new SimulationEnvironment(
 				NetworkSimulationManager.getNetworkSimulationManagerFactory(List
-						.of(new ServerInfo(InetAddress.getByName("192.168.1.201"), 8080, SerializationType.DEFAULT)),
+						.of(new ServerInfo(NetworkUtils.getLocalIp(), 8080, TCPNetworkManagerType.DEFAULT)),
 						"quasylab.sibilla.examples.pm.seir.NetworkMain"));
 
 		SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp, frSamp);
 
 		sim.simulate(new DefaultRandomGenerator(), f, initialState(), sf, REPLICA, DEADLINE, false);
+
 
 		/*
 		 * fiSamp.printTimeSeries(new

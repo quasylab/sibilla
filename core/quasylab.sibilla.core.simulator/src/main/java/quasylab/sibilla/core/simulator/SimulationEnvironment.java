@@ -88,7 +88,7 @@ public class SimulationEnvironment implements Serializable {
 		}
 		simulationManager.shutdown();
 		rgi.unregister();
-		System.out.println("DONE!");
+		LOGGER.info("The simulation has concluded with success");
 	}
 
 	public <S> double reachability(SimulationMonitor monitor, RandomGenerator random, Model<S> model, S state,

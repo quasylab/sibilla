@@ -18,14 +18,15 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator.sampling;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
 /**
  * @author loreti
  *
  */
-public interface SamplingFunction<S> {
-	
+public interface SamplingFunction<S> extends Serializable {
+
 	public void sample(double time, S context);
 
 	public void end(double time);
@@ -33,5 +34,5 @@ public interface SamplingFunction<S> {
 	public void start();
 
 	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries(int replications);
-	
+
 }

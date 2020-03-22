@@ -19,50 +19,84 @@
 
 package quasylab.sibilla.core.simulator;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Consumer;
-import java.util.logging.Logger;
-
 import org.apache.commons.math3.random.RandomGenerator;
-
+import quasylab.sibilla.core.simulator.network.TCPNetworkManager;
+import quasylab.sibilla.core.simulator.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.simulator.serialization.ClassBytesLoader;
-import quasylab.sibilla.core.simulator.serialization.SerializationType;
-import quasylab.sibilla.core.simulator.serialization.Serializer;
+import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 import quasylab.sibilla.core.simulator.server.ComputationResult;
 import quasylab.sibilla.core.simulator.server.ServerInfo;
 import quasylab.sibilla.core.simulator.server.ServerState;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.SocketTimeoutException;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.Consumer;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 public class NetworkSimulationManager<S> extends SimulationManager<S> {
 
     private static final Logger LOGGER = Logger.getLogger(NetworkSimulationManager.class.getName());
-
-    private Map<Serializer, ServerState> servers = Collections.synchronizedMap(new HashMap<>());
     private final String modelName;
-    private BlockingQueue<Serializer> serverQueue;
+    private Map<TCPNetworkManager, ServerState> servers = Collections.synchronizedMap(new HashMap<>());
+    private BlockingQueue<TCPNetworkManager> serverQueue;
     private ExecutorService executor;
     private volatile int serverRunning = 0;
 
+    public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer, List<ServerInfo> info,
+                                    String modelName) throws IOException {
+        super(random, consumer);
+        LOGGER.info(String.format("Creating a new NetworkSimulationManager with servers: %s \n", info.toString()));
+        this.modelName = modelName;
+        executor = Executors.newCachedThreadPool();
+        Map<InetAddress, List<ServerInfo>> map = info.stream().collect(Collectors.toMap(s -> s.getAddress(), s -> new ArrayList<>(Arrays.asList(s)), (l1, l2) -> {
+            l1.addAll(l2);
+            return l1;
+        }));
+        map.forEach((address, servers) -> {
+            boolean classInitiated = false;
+            while (!classInitiated && !servers.isEmpty()) {
+                try {
+                    TCPNetworkManager server = TCPNetworkManager.createNetworkManager(servers.get(0));
+                    initConnection(server);
+                    LOGGER.info(String.format(
+                            "All the model informations have been sent to the server, throught the server: %s", servers.get(0).toString()));
+                    classInitiated = true;
+                } catch (Exception e) {
+                    LOGGER.severe("Error during server initialization, removing server...");
+                    map.get(address).remove(0);
+                    continue;
+                }
+            }
+        });
+        map.values().stream().reduce((l1, l2) -> {
+            l1.addAll(l2);
+            return l1;
+        }).get().forEach(serverInfo -> {
+            try {
+                TCPNetworkManager server = TCPNetworkManager.createNetworkManager(serverInfo);
+                LOGGER.info(String.format("NetworkManager created - IP: %s - Port: %d - Class: %s",
+                        server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort(),
+                        server.getClass().getName()));
+                this.servers.put(server, new ServerState(server));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        serverQueue = new LinkedBlockingQueue<>(this.servers.keySet());
+        this.start();
+    }
+
     public static final SimulationManagerFactory getNetworkSimulationManagerFactory(List<ServerInfo> info,
-            String modelName) {
+                                                                                    String modelName) {
         return new SimulationManagerFactory() {
 
             @Override
             public <S> SimulationManager<S> getSimulationManager(RandomGenerator random,
-                    Consumer<Trajectory<S>> consumer) {
+                                                                 Consumer<Trajectory<S>> consumer) {
                 try {
                     return new NetworkSimulationManager<S>(random, consumer, info, modelName);
                 } catch (IOException e) {
@@ -74,37 +108,12 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
 
     }
 
-    public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer, List<ServerInfo> info,
-            String modelName) throws UnknownHostException, IOException {
-        super(random, consumer);
-        LOGGER.info(String.format("Creating a new NetworkSimulationManager with servers: %s \n", info.toString()));
-        this.modelName = modelName;
-        executor = Executors.newCachedThreadPool();
-        for (int i = 0; i < info.size(); i++) {
-            Serializer server = Serializer.createSerializer(info.get(i));
-            LOGGER.info(String.format("Serializer created - IP: %s - Port: %d - Class: %s",
-                    server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort(),
-                    server.getClass().getName()));
-            this.servers.put(server, new ServerState(server));
-            try {
-                initConnection(server);
-                LOGGER.info(String.format(
-                        "All the model informations have been sent to the server through the Serializer object"));
-            } catch (Exception e) {
-                LOGGER.severe("Error during server initialization, removing server...");
-                this.servers.remove(server);
-            }
-        }
-        serverQueue = new LinkedBlockingQueue<>(this.servers.keySet());
-        this.start();
-    }
-
-    private void initConnection(Serializer server) throws Exception {
-        byte[] classBytes = ClassBytesLoader.loadClassBytes(modelName);
-        LOGGER.info(String.format("Model class has been converted in bytes"));
-        server.writeObject(modelName);
+    private void initConnection(TCPNetworkManager server) throws Exception {
+        server.writeObject(ObjectSerializer.serializeObject("INIT"));
+        LOGGER.info(String.format("INIT command sent"));
+        server.writeObject(ObjectSerializer.serializeObject(modelName));
         LOGGER.info(String.format("Model name %s has been sent to the server", modelName));
-        server.writeObject(classBytes);
+        server.writeObject(ClassBytesLoader.loadClassBytes(modelName));
         LOGGER.info(String.format("Class bytes have been sent to the server"));
     }
 
@@ -129,7 +138,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     }
 
     private void run() throws InterruptedException {
-        Serializer server = findServer();
+        TCPNetworkManager server = findServer();
         LOGGER.info(String.format("Server currently connected - IP: %s - Port: %d - Class: %s",
                 server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort(),
                 server.getClass().getName()));
@@ -151,11 +160,11 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
         }
     }
 
-    private Serializer findServer() throws InterruptedException {
+    private TCPNetworkManager findServer() throws InterruptedException {
         return serverQueue.take();
     }
 
-    private void enqueueServer(Serializer server) {
+    private void enqueueServer(TCPNetworkManager server) {
         serverQueue.add(server);
     }
 
@@ -170,13 +179,13 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     }
 
     private void manageResult(ComputationResult<S> value, Throwable error, List<SimulationTask<S>> tasks,
-            Serializer server) {
+                              TCPNetworkManager server) {
         LOGGER.info("Managing results");
         if (error != null) {
             LOGGER.severe(String.format("Timeout occurred, contacting server - IP: %s - Port: %d - Class: %s",
                     server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort(),
                     server.getClass().getName()));
-            Serializer newServer;
+            TCPNetworkManager newServer;
             if ((newServer = manageTimeout(server)) != null) {
                 LOGGER.info("The server has responded");
                 enqueueServer(newServer);// add new server to queue, old server won't return
@@ -193,32 +202,33 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
             endServerRunning();
             value.getResults().stream().forEach(this::handleTrajectory);
             propertyChange("servers",
-                    new String[] {
+                    new String[]{
                             server.getSocket().getInetAddress().getHostAddress() + ":" + server.getSocket().getPort(),
-                            servers.get(server).toString() });
+                            servers.get(server).toString()});
         }
     }
 
-    private Serializer manageTimeout(Serializer server) {
+    private TCPNetworkManager manageTimeout(TCPNetworkManager server) {
         LOGGER.warning("Managing timeout");
-        Serializer pingServer = null;
+        TCPNetworkManager pingServer = null;
         ServerState oldState = servers.get(server); // get old state
         try {
             oldState.timedout(); // mark server as timed out and update GUI
             propertyChange("servers",
-                    new String[] {
+                    new String[]{
                             server.getSocket().getInetAddress().getHostAddress() + ":" + server.getSocket().getPort(),
-                            oldState.toString() });
-            pingServer = Serializer.createSerializer(new ServerInfo(server.getSocket().getInetAddress(),
-                    server.getSocket().getPort(), SerializationType.getType(server)));
-            LOGGER.info(String.format("Creating a new Serializer to ping the server  - IP: %s - Port: %d - Class: %s",
-                    server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort(),
-                    server.getClass().getName()));
+                            oldState.toString()});
+            pingServer = TCPNetworkManager.createNetworkManager(new ServerInfo(server.getSocket().getInetAddress(),
+                    server.getSocket().getPort(), TCPNetworkManagerType.getType(server)));
+            LOGGER.info(
+                    String.format("Creating a new NetworkManager to ping the server  - IP: %s - Port: %d - Class: %s",
+                            server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort(),
+                            server.getClass().getName()));
             pingServer.getSocket().setSoTimeout(5000); // set 5 seconds timeout on read operations
             initConnection(pingServer); // initialize connection sending model data
-            pingServer.writeObject("PING");
+            pingServer.writeObject(ObjectSerializer.serializeObject("PING"));
             LOGGER.info("Ping request sent"); // send ping request
-            String response = (String) pingServer.readObject(); // wait for response
+            String response = (String) ObjectSerializer.deserializeObject(pingServer.readObject()); // wait for response
             if (!response.equals("PONG")) {
                 LOGGER.severe("The response received wasn't the one expected");
                 throw new IllegalStateException("Expected a different reply!");
@@ -234,9 +244,9 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
             oldState.removed(); // mark server as removed and update GUI
             servers.remove(server);
             propertyChange("servers",
-                    new String[] {
+                    new String[]{
                             server.getSocket().getInetAddress().getHostAddress() + ":" + server.getSocket().getPort(),
-                            oldState.toString() });
+                            oldState.toString()});
             return null;
         }
         return pingServer;
@@ -266,20 +276,21 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
         }
     }
 
-    private ComputationResult<S> send(NetworkTask<S> networkTask, Serializer server) {
+    private ComputationResult<S> send(NetworkTask<S> networkTask, TCPNetworkManager server) {
         ComputationResult<S> result;
         long elapsedTime;
         ServerState state = servers.get(server);
 
         try {
-            server.writeObject("TASK");
-            server.writeObject(networkTask);
+            server.writeObject(ObjectSerializer.serializeObject("TASK"));
+            server.writeObject(ObjectSerializer.serializeObject(networkTask));
             elapsedTime = System.nanoTime();
 
             server.getSocket().setSoTimeout((int) (state.getTimeout() / 1000000));
             LOGGER.info(String.format("A group of tasks has been sent"));
             @SuppressWarnings("unchecked")
-            ComputationResult<S> receivedResult = (ComputationResult<S>) server.readObject();
+            ComputationResult<S> receivedResult = (ComputationResult<S>) ObjectSerializer
+                    .deserializeObject(server.readObject());
 
             elapsedTime = System.nanoTime() - elapsedTime;
 
