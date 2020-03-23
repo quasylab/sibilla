@@ -16,6 +16,7 @@ public interface TCPNetworkManager {
 
     public Socket getSocket();
 
+    public TCPNetworkManagerType getType();
     public static TCPNetworkManager createNetworkManager(ServerInfo info) throws IOException {
         Socket socket = new Socket(info.getAddress(), info.getPort());
         switch (info.getType().name()) {

@@ -44,4 +44,9 @@ public class TCPFSTNetworkManager implements TCPNetworkManager {
 		return socket;
 	}
 
+	@Override
+	public TCPNetworkManagerType getType() {
+		return TCPNetworkManagerType.FST;
+	}
+
 }

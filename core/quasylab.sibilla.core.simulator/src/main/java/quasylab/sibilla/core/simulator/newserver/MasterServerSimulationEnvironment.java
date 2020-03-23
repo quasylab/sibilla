@@ -14,10 +14,7 @@ import quasylab.sibilla.core.util.NetworkUtils;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -85,7 +82,6 @@ public class MasterServerSimulationEnvironment {
             networkInterface.getInterfaceAddresses().stream().map(interfaceAddress -> interfaceAddress.getBroadcast()).filter(Objects::nonNull).forEach(this::broadcastToSingleInterface);
         });
     }
-
 
 
     /**
@@ -163,26 +159,46 @@ public class MasterServerSimulationEnvironment {
      */
     private void manageSimulationMessage(Socket socket) throws Exception {
         this.simulationNetworkManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), socket);
-        String modelName = (String) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
-        LOGGER.info(String.format("Model name read: %s", modelName));
-        byte[] myClass = (byte[]) simulationNetworkManager.readObject();
-        LOGGER.info(String.format("Class received"));
-        new CustomClassLoader().defClass(modelName, myClass);
-        LOGGER.info(String.format("Class loaded"));
+        Map<Command, Runnable> map = Map.of(Command.CLIENT_PING, () -> respondPingRequest(), Command.CLIENT_INIT, () -> loadModelClass(), Command.CLIENT_DATA, () -> handleSimulationDataSet());
         String command = (String) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
         LOGGER.info(String.format("%s command received by the client", command));
-        if (command.equals("PING")) {
-            simulationNetworkManager.writeObject(ObjectSerializer.serializeObject("PONG"));
-            LOGGER.info(String.format("Ping request answered"));
-            return;
-        } else if (command.equals("DATA")) {
+        map.getOrDefault(command, () -> {
+        }).run();
+    }
+
+    private void handleSimulationDataSet() {
+        try {
             // TODO state interface?
             SimulationDataSet<PopulationState> dataSet = (SimulationDataSet<PopulationState>) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
             SimulationEnvironment sim = new SimulationEnvironment(
                     NetworkSimulationManager.getNetworkSimulationManagerFactory(new ArrayList<>(simulationServers),
                             dataSet.getModelReferenceName()));
-
             sim.simulate(dataSet.getRandomGenerator(), dataSet.getModelReference(), dataSet.getModelReferenceInitialState(), dataSet.getModelReferenceSamplingFunction(), dataSet.getReplica(), dataSet.getDeadline(), false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadModelClass() {
+        try {
+            String modelName = (String) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
+            LOGGER.info(String.format("Model name read: %s", modelName));
+            byte[] myClass = new byte[0];
+            myClass = (byte[]) simulationNetworkManager.readObject();
+            LOGGER.info(String.format("Class received"));
+            new CustomClassLoader().defClass(modelName, myClass);
+            LOGGER.info(String.format("Class loaded"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void respondPingRequest() {
+        try {
+            simulationNetworkManager.writeObject(ObjectSerializer.serializeObject("PONG"));
+            LOGGER.info(String.format("Ping request answered"));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

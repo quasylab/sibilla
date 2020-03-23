@@ -61,6 +61,7 @@ public class ClientSimulationEnvironment<S> {
         byte[] classBytes = ClassBytesLoader.loadClassBytes(data.getModelReferenceName());
 
         LOGGER.info(String.format("Model class has been converted in bytes"));
+        server.writeObject(ObjectSerializer.serializeObject(Command.CLIENT_INIT));
         server.writeObject(ObjectSerializer.serializeObject(data.getModelReferenceName()));
         LOGGER.info(String.format("Model name %s has been sent to the server", data.getModelReferenceName()));
         server.writeObject(classBytes);
@@ -74,7 +75,7 @@ public class ClientSimulationEnvironment<S> {
      * @throws Exception TODO exception handling
      */
     private void sendSimulationInfo(TCPNetworkManager targetServer) throws Exception {
-        targetServer.writeObject(ObjectSerializer.serializeObject("DATA"));
+        targetServer.writeObject(ObjectSerializer.serializeObject(Command.CLIENT_DATA));
         targetServer.writeObject(ObjectSerializer.serializeObject(data));
         LOGGER.info(String.format("Data have been sent to the server"));
     }

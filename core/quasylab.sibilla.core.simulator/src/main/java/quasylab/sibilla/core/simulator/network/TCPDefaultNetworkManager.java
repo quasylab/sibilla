@@ -66,4 +66,9 @@ public class TCPDefaultNetworkManager implements TCPNetworkManager {
 		return socket;
 	}
 
+	@Override
+	public TCPNetworkManagerType getType() {
+		return TCPNetworkManagerType.DEFAULT;
+	}
+
 }

@@ -22,7 +22,7 @@ public class SlaveServerSimulationEnvironment {
 
     private int localDiscoveryPort;
     private HashSet<ServerInfo> simulationServersInfo;
-
+    private HashSet<SimulationServer> simulationServers;
     /**
      * Create a slave server listening on a given port and creates the simulation servers with the given info
      *
@@ -32,15 +32,18 @@ public class SlaveServerSimulationEnvironment {
     public SlaveServerSimulationEnvironment(int localDiscoveryPort, Set<ServerInfo> simulationServersInfo) {
         this.localDiscoveryPort = localDiscoveryPort;
         this.simulationServersInfo = new HashSet<>(simulationServersInfo);
+        this.simulationServers = new HashSet<>();
         this.startupSimulationServers();
-        this.startDiscoveryServer();
+        new Thread(this::startDiscoveryServer).start();
     }
 
     /**
      * Starts up the simulation servers defined in simulationServersInfo
      */
     private void startupSimulationServers() {
-        simulationServersInfo.forEach(this::startupSingleSimulationServer);
+        simulationServersInfo.forEach(info -> {
+            new Thread(() -> startupSingleSimulationServer(info)).start();
+        });
         LOGGER.info("Simulation servers have been initiated");
     }
 
@@ -51,35 +54,32 @@ public class SlaveServerSimulationEnvironment {
      */
     private void startupSingleSimulationServer(ServerInfo info) {
         SimulationServer server = new BasicSimulationServer((TCPNetworkManagerType) info.getType());
+        this.simulationServers.add(server);
         LOGGER.info(String.format("A new server has been created with the port %d and the serialization type %s", info.getPort(),
                 info.getType().name()));
-        new Thread(() -> {
-            try {
-                server.start(info.getPort());
-            } catch (IOException e) {
-                LOGGER.severe(e.getMessage());
-            }
-        }).start();
+        try {
+            server.start(info.getPort());
+        } catch (IOException e) {
+            LOGGER.severe(e.getMessage());
+        }
     }
 
     /**
      * Starts the server that listens for the masters and sends them info about the owned simulation servers
      */
     private void startDiscoveryServer() {
-        new Thread(() -> {
-            try {
-                DatagramSocket discoverySocket = new DatagramSocket(localDiscoveryPort);
-                LOGGER.info(String.format("Listening for masters on port: %d", localDiscoveryPort));
-                UDPDefaultNetworkManager manager = new UDPDefaultNetworkManager(discoverySocket);
-                while (true) {
-                    ServerInfo masterInfo = (ServerInfo) ObjectSerializer.deserializeObject(manager.readObject());
-                    LOGGER.info(String.format("Master informations received: %s", masterInfo.toString()));
-                    manageDiscoveryMessage(manager, masterInfo);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+        try {
+            DatagramSocket discoverySocket = new DatagramSocket(localDiscoveryPort);
+            LOGGER.info(String.format("Listening for masters on port: %d", localDiscoveryPort));
+            UDPDefaultNetworkManager manager = new UDPDefaultNetworkManager(discoverySocket);
+            while (true) {
+                ServerInfo masterInfo = (ServerInfo) ObjectSerializer.deserializeObject(manager.readObject());
+                LOGGER.info(String.format("Master informations received: %s", masterInfo.toString()));
+                manageDiscoveryMessage(manager, masterInfo);
             }
-        }).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

@@ -5,6 +5,7 @@ import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
 import quasylab.sibilla.core.simulator.network.TCPNetworkManager;
 import quasylab.sibilla.core.simulator.network.TCPNetworkManagerType;
+import quasylab.sibilla.core.simulator.newserver.Command;
 import quasylab.sibilla.core.simulator.serialization.CustomClassLoader;
 import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 
@@ -68,7 +69,7 @@ public class BasicSimulationServer implements SimulationServer {
 
         private void manageClient() {
             try {
-                Map<String, Runnable> map = Map.of("PING", () -> respondPingRequest(), "INIT", () -> loadModelClass(), "TASK", () -> handleTaskExecution());
+                Map<Command, Runnable> map = Map.of(Command.MASTER_PING, () -> respondPingRequest(), Command.MASTER_INIT, () -> loadModelClass(), Command.MASTER_TASK, () -> handleTaskExecution());
                 while (true) {
                     String request = (String) ObjectSerializer.deserializeObject(client.readObject());
                     LOGGER.info(String.format("Request received: %s", request));
@@ -128,7 +129,7 @@ public class BasicSimulationServer implements SimulationServer {
 
         private void respondPingRequest() {
             try {
-                client.writeObject(ObjectSerializer.serializeObject("PONG"));
+                client.writeObject(ObjectSerializer.serializeObject(Command.SLAVE_PONG));
                 LOGGER.info(String.format("Ping request answered"));
             } catch (Exception e) {
                 LOGGER.severe(e.getMessage());

@@ -36,4 +36,9 @@ public class UDPDefaultNetworkManager implements UDPNetworkManager {
 	socket.setSoTimeout((int) (timeout / 1000000));
 	}
 
+	@Override
+	public UDPNetworkManagerType getType() {
+		return UDPNetworkManagerType.DEFAULT;
+	}
+
 }

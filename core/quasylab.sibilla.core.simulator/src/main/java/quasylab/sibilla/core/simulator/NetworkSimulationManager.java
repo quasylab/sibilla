@@ -22,6 +22,7 @@ package quasylab.sibilla.core.simulator;
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.simulator.network.TCPNetworkManager;
 import quasylab.sibilla.core.simulator.network.TCPNetworkManagerType;
+import quasylab.sibilla.core.simulator.newserver.Command;
 import quasylab.sibilla.core.simulator.serialization.ClassBytesLoader;
 import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 import quasylab.sibilla.core.simulator.server.ComputationResult;
@@ -109,7 +110,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
     }
 
     private void initConnection(TCPNetworkManager server) throws Exception {
-        server.writeObject(ObjectSerializer.serializeObject("INIT"));
+        server.writeObject(ObjectSerializer.serializeObject(Command.MASTER_INIT));
         LOGGER.info(String.format("INIT command sent"));
         server.writeObject(ObjectSerializer.serializeObject(modelName));
         LOGGER.info(String.format("Model name %s has been sent to the server", modelName));
@@ -219,17 +220,17 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
                             server.getSocket().getInetAddress().getHostAddress() + ":" + server.getSocket().getPort(),
                             oldState.toString()});
             pingServer = TCPNetworkManager.createNetworkManager(new ServerInfo(server.getSocket().getInetAddress(),
-                    server.getSocket().getPort(), TCPNetworkManagerType.getType(server)));
+                    server.getSocket().getPort(), server.getType()));
             LOGGER.info(
                     String.format("Creating a new NetworkManager to ping the server  - IP: %s - Port: %d - Class: %s",
                             server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort(),
                             server.getClass().getName()));
             pingServer.getSocket().setSoTimeout(5000); // set 5 seconds timeout on read operations
             initConnection(pingServer); // initialize connection sending model data
-            pingServer.writeObject(ObjectSerializer.serializeObject("PING"));
+            pingServer.writeObject(ObjectSerializer.serializeObject(Command.MASTER_PING));
             LOGGER.info("Ping request sent"); // send ping request
             String response = (String) ObjectSerializer.deserializeObject(pingServer.readObject()); // wait for response
-            if (!response.equals("PONG")) {
+            if (!response.equals(Command.SLAVE_PONG)) {
                 LOGGER.severe("The response received wasn't the one expected");
                 throw new IllegalStateException("Expected a different reply!");
             }
@@ -282,7 +283,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
         ServerState state = servers.get(server);
 
         try {
-            server.writeObject(ObjectSerializer.serializeObject("TASK"));
+            server.writeObject(ObjectSerializer.serializeObject(Command.MASTER_TASK));
             server.writeObject(ObjectSerializer.serializeObject(networkTask));
             elapsedTime = System.nanoTime();
 
