@@ -1,5 +1,13 @@
 package quasylab.sibilla.core.simulator.server;
 
+import quasylab.sibilla.core.simulator.NetworkTask;
+import quasylab.sibilla.core.simulator.SimulationTask;
+import quasylab.sibilla.core.simulator.Trajectory;
+import quasylab.sibilla.core.simulator.network.TCPNetworkManager;
+import quasylab.sibilla.core.simulator.network.TCPNetworkManagerType;
+import quasylab.sibilla.core.simulator.serialization.CustomClassLoader;
+import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -7,121 +15,125 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-import quasylab.sibilla.core.simulator.NetworkTask;
-import quasylab.sibilla.core.simulator.SimulationTask;
-import quasylab.sibilla.core.simulator.Trajectory;
-import quasylab.sibilla.core.simulator.serialization.CustomClassLoader;
-import quasylab.sibilla.core.simulator.serialization.SerializationType;
-import quasylab.sibilla.core.simulator.serialization.Serializer;
+public class BasicSimulationServer implements SimulationServer {
 
-public class BasicSimulationServer<S> implements SimulationServer<S> {
-	private ServerSocket serverSocket;
-	private ExecutorService taskExecutor = Executors.newCachedThreadPool();
-	private ExecutorService connectionExecutor = Executors.newCachedThreadPool();
-	private final SerializationType serialization;
-	private static final Logger LOGGER = Logger.getLogger(BasicSimulationServer.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(BasicSimulationServer.class.getName());
 
-	public BasicSimulationServer(SerializationType serialization) {
-		this.serialization = serialization;
-		LOGGER.info(String.format("Set serialization type: %s", this.serialization.name()));
-	}
+    private final TCPNetworkManagerType serialization;
+    private ServerSocket serverSocket;
+    private ExecutorService taskExecutor = Executors.newCachedThreadPool();
+    private ExecutorService connectionExecutor = Executors.newCachedThreadPool();
 
-	public void start(int port) throws IOException {
-		serverSocket = new ServerSocket(port);
-		LOGGER.info(String.format("Listening on port %d", port));
-		while (true) {
-			TaskHandler handler = null;
-			try {
-				handler = new TaskHandler(serverSocket.accept());
-			} catch (IOException e) {
-				LOGGER.severe(e.getMessage());
-				continue;
-			}
-			connectionExecutor.execute(handler);
-		}
-	}
 
-	private class TaskHandler implements Runnable {
+    public BasicSimulationServer(TCPNetworkManagerType serialization) {
+        this.serialization = serialization;
+        LOGGER.info(String.format("Set serialization type: %s", this.serialization.name()));
+    }
 
-		private quasylab.sibilla.core.simulator.serialization.CustomClassLoader cloader;
-		private Serializer client;
+    public void start(int port) throws IOException {
+        serverSocket = new ServerSocket(port);
+        LOGGER.info(String.format("BasicSimulationServer listening on port %d", port));
+        while (true) {
+            TaskHandler handler = null;
+            try {
+                handler = new TaskHandler(serverSocket.accept());
+            } catch (IOException e) {
+                LOGGER.severe(e.getMessage());
+                continue;
+            }
+            connectionExecutor.execute(handler);
+        }
+    }
 
-		public TaskHandler(Socket socket) throws IOException {
-			LOGGER.info(String.format("Connection accepted by IP %s and port %d",
-					socket.getInetAddress().getHostAddress(), socket.getPort()));
-			cloader = new CustomClassLoader();
-			client = Serializer.createSerializer(serialization, socket, cloader);
-			LOGGER.info(String.format("Serializer created"));
-		}
+    private class TaskHandler implements Runnable {
 
-		public void run() {
-			try {
-				init();
-			} catch (Exception e) {
-				LOGGER.severe(e.getMessage());
-				return;
-			}
-			manageClient();
-		}
+        private TCPNetworkManager client;
 
-		private void init() throws Exception {
-			String modelName;
-			modelName = (String) client.readObject();
-			LOGGER.info(String.format("Model name read: %s", modelName));
-			byte[] myClass = (byte[]) client.readObject();
-			LOGGER.info(String.format("Class received"));
-			cloader.defClass(modelName, myClass);
-			LOGGER.info(String.format("Class loaded"));
-		}
+        public TaskHandler(Socket socket) throws IOException {
+            LOGGER.info(String.format("Connection accepted by IP %s and port %d",
+                    socket.getInetAddress().getHostAddress(), socket.getPort()));
+            client = TCPNetworkManager.createNetworkManager(serialization, socket);
+            LOGGER.info(String.format("NetworkManager created"));
+        }
 
-		private void manageClient() {
-			try {
-				while (true) {
-					String request = (String) client.readObject();
-					LOGGER.info(String.format("Request received: %s", request));
-					if (request.equals("PING")) {
-						client.writeObject("PONG");
-						LOGGER.info(String.format("Ping request answered"));
-						continue;
-					}
-					@SuppressWarnings("unchecked")
-					NetworkTask<S> ntask = ((NetworkTask<S>) client.readObject());
+        public void run() {
+            manageClient();
+        }
 
-					List<SimulationTask<S>> tasks = ntask.getTasks();
-					LinkedList<Trajectory<S>> results = new LinkedList<>();
-					CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
-					for (int i = 0; i < tasks.size(); i++) {
-						futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
-					}
-					CompletableFuture.allOf(futures).join();
-					for (SimulationTask<S> task : tasks) {
-						results.add(task.getTrajectory());
-					}
-					client.writeObject(new ComputationResult<>(results));
-					LOGGER.info(String.format("Computation's results have been sent to the client successfully"));
-				}
+        private void manageClient() {
+            try {
+                Map<String, Runnable> map = Map.of("PING", () -> respondPingRequest(), "INIT", () -> loadModelClass(), "TASK", () -> handleTaskExecution());
+                while (true) {
+                    String request = (String) ObjectSerializer.deserializeObject(client.readObject());
+                    LOGGER.info(String.format("Request received: %s", request));
+                    map.getOrDefault(request, () -> {
+                    }).run();
+                }
+            } catch (EOFException e) {
+                LOGGER.info("Client closed input stream because we timed out or the session has been completed");
+            } catch (SocketException e) {
+                LOGGER.severe("Client closed output stream because we timed out");
+                e.printStackTrace();
+            } catch (Exception e) {
+                LOGGER.severe(e.getMessage());
+                e.printStackTrace();
+            }
+        }
 
-			} catch (EOFException e) {
-				LOGGER.info("Client closed input stream because we timed out or the session has been completed");
-				return;
-			} catch (SocketException e) {
-				LOGGER.severe("Client closed output stream because we timed out");
-				e.printStackTrace();
-				return;
-			} catch (ClassNotFoundException e) {
-				LOGGER.severe(e.getMessage());
-				e.printStackTrace();
-				return;
-			} catch (Exception e) {
-				LOGGER.severe(e.getMessage());
-				e.printStackTrace();
-				return;
-			}
-		}
-	}
+        private void loadModelClass() {
+            try {
+                String modelName = (String) ObjectSerializer.deserializeObject(client.readObject());
+                LOGGER.info(String.format("Model name read: %s", modelName));
+                byte[] myClass = client.readObject();
+                LOGGER.info(String.format("Class received"));
+                new CustomClassLoader().defClass(modelName, myClass);
+                String classLoadedName = Class.forName(modelName).getName();
+                LOGGER.info(String.format("Class loaded: %s", classLoadedName));
+            } catch (ClassNotFoundException e) {
+                LOGGER.severe(e.getMessage());
+                e.printStackTrace();
+            } catch (Exception e) {
+                LOGGER.severe(e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+        private void handleTaskExecution() {
+            try {
+                NetworkTask<?> networkTask = (NetworkTask<?>) ObjectSerializer.deserializeObject(client.readObject());
+                List<? extends SimulationTask<?>> tasks = networkTask.getTasks();
+                LinkedList<Trajectory<?>> results = new LinkedList<>();
+                CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
+                for (int i = 0; i < tasks.size(); i++) {
+                    futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
+                }
+                CompletableFuture.allOf(futures).join();
+                for (SimulationTask<?> task : tasks) {
+                    results.add(task.getTrajectory());
+                }
+                client.writeObject(ObjectSerializer.serializeObject(new ComputationResult(results)));
+                LOGGER.info(String.format("Computation's results have been sent to the client successfully"));
+            } catch (Exception e) {
+                LOGGER.severe(e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+
+        private void respondPingRequest() {
+            try {
+                client.writeObject(ObjectSerializer.serializeObject("PONG"));
+                LOGGER.info(String.format("Ping request answered"));
+            } catch (Exception e) {
+                LOGGER.severe(e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
 }

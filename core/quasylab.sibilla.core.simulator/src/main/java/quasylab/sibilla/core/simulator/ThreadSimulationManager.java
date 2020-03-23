@@ -19,9 +19,6 @@
 
 package quasylab.sibilla.core.simulator;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.util.LongSummaryStatistics;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;

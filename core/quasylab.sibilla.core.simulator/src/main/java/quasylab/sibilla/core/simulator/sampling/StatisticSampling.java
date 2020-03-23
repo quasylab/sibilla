@@ -25,6 +25,8 @@ import java.util.function.Function;
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
+import quasylab.sibilla.core.simulator.pm.MeasureFunction;
+
 
 /**
  * @author loreti
@@ -150,7 +152,7 @@ public class StatisticSampling<S> implements SamplingFunction<S> {
 		return data.length;
 	}
 	
-	public static <S> StatisticSampling<S> measure( String name, int samplings, double deadline, Function<S,Double> m) {
+	public static <S> StatisticSampling<S> measure( String name, int samplings, double deadline, MeasureFunction<S> m) {
 		return new StatisticSampling<S>(samplings, deadline/samplings, 
 				new Measure<S>() {
 

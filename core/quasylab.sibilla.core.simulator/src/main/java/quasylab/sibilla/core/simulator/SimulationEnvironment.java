@@ -81,23 +81,14 @@ public class SimulationEnvironment implements Serializable {
 			if (monitor != null) {
 				monitor.startIteration(i);
 			}
-			// System.out.print('<');
-			// if ((i + 1) % 50 == 0) {
-			// System.out.print(i + 1);
-			// }
 			simulationManager.simulate(unit);
 			if (monitor != null) {
 				monitor.endSimulation(i);
 			}
-			// System.out.print('>');
-			// if ((i + 1) % 50 == 0) {
-			// System.out.print("\n");
-			// }
-			// System.out.flush();
 		}
 		simulationManager.shutdown();
 		rgi.unregister();
-		System.out.println("DONE!");
+		LOGGER.info("The simulation has concluded with success");
 	}
 
 	public <S> double reachability(SimulationMonitor monitor, RandomGenerator random, Model<S> model, S state,
