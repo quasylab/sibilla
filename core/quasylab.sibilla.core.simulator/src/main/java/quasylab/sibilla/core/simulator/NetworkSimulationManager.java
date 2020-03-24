@@ -112,7 +112,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
 
     private void initConnection(TCPNetworkManager server) throws Exception {
         server.writeObject(ObjectSerializer.serializeObject(Command.MASTER_INIT));
-        LOGGER.info(String.format("INIT command sent"));
+        LOGGER.info(String.format("Init command sent to the slave"));
         server.writeObject(ObjectSerializer.serializeObject(modelName));
         LOGGER.info(String.format("Model name %s has been sent to the server", modelName));
         server.writeObject(ClassBytesLoader.loadClassBytes(modelName));

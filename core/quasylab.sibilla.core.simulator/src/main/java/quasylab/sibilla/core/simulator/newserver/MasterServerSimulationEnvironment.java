@@ -145,10 +145,13 @@ public class MasterServerSimulationEnvironment {
             try {
                 Socket socket = simulationSocket.accept();
                 manageSimulationMessage(socket);
+            } catch (SocketException e) {
+                LOGGER.severe("The client closed the connection");
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+
     }
 
     /**
@@ -160,10 +163,12 @@ public class MasterServerSimulationEnvironment {
     private void manageSimulationMessage(Socket socket) throws Exception {
         this.simulationNetworkManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), socket);
         Map<Command, Runnable> map = Map.of(Command.CLIENT_PING, () -> respondPingRequest(), Command.CLIENT_INIT, () -> loadModelClass(), Command.CLIENT_DATA, () -> handleSimulationDataSet());
-        Command command = (Command) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
-        LOGGER.info(String.format("%s command received by the client", command));
-        map.getOrDefault(command, () -> {
-        }).run();
+        while (true) {
+            Command command = (Command) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
+            LOGGER.info(String.format("%s command received by the client", command.toString()));
+            map.getOrDefault(command, () -> {
+            }).run();
+        }
     }
 
     private void handleSimulationDataSet() {
@@ -193,7 +198,7 @@ public class MasterServerSimulationEnvironment {
 
     private void respondPingRequest() {
         try {
-            simulationNetworkManager.writeObject(ObjectSerializer.serializeObject("PONG"));
+            simulationNetworkManager.writeObject(ObjectSerializer.serializeObject(Command.MASTER_PONG));
             LOGGER.info(String.format("Ping request answered"));
         } catch (Exception e) {
             e.printStackTrace();

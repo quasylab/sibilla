@@ -64,10 +64,10 @@ public class BasicSimulationServer implements SimulationServer {
         }
 
         public void run() {
-            manageClient();
+            manageMaster();
         }
 
-        private void manageClient() {
+        private void manageMaster() {
             try {
                 Map<Command, Runnable> map = Map.of(Command.MASTER_PING, () -> respondPingRequest(), Command.MASTER_INIT, () -> loadModelClass(), Command.MASTER_TASK, () -> handleTaskExecution());
                 while (true) {
@@ -77,10 +77,9 @@ public class BasicSimulationServer implements SimulationServer {
                     }).run();
                 }
             } catch (EOFException e) {
-                LOGGER.info("Client closed input stream because we timed out or the session has been completed");
+                LOGGER.info("Master closed input stream because we timed out or the session has been completed");
             } catch (SocketException e) {
-                LOGGER.severe("Client closed output stream because we timed out");
-                e.printStackTrace();
+                LOGGER.severe("Master closed output stream because we timed out");
             } catch (Exception e) {
                 LOGGER.severe(e.getMessage());
                 e.printStackTrace();

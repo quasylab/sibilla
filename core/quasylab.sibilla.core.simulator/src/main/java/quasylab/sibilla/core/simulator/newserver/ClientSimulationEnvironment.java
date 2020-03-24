@@ -48,8 +48,9 @@ public class ClientSimulationEnvironment<S extends State> {
         LOGGER.info(String.format("Client data hashcode: %d", data.hashCode()));
         LOGGER.info(String.format("Client data toString: %s", data.toString()));
 
+
         this.initConnection(masterServerNetworkManager);
-        this.sendSimulationInfo(masterServerNetworkManager);
+       this.sendSimulationInfo(masterServerNetworkManager);
     }
 
     /**
@@ -79,6 +80,13 @@ public class ClientSimulationEnvironment<S extends State> {
         targetServer.writeObject(ObjectSerializer.serializeObject(Command.CLIENT_DATA));
         targetServer.writeObject(ObjectSerializer.serializeObject(data));
         LOGGER.info(String.format("Data have been sent to the server"));
+    }
+
+    private void sendPing(TCPNetworkManager targetServer) throws Exception {
+        targetServer.writeObject(ObjectSerializer.serializeObject(Command.CLIENT_PING));
+        LOGGER.info(String.format("Ping has been sent to the server"));
+        Command answer = (Command) ObjectSerializer.deserializeObject(targetServer.readObject());
+        LOGGER.info(String.format("Answer received: %s", answer.toString()));
     }
 
 }
