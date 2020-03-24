@@ -18,13 +18,15 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator.sampling;
 
+import quasylab.sibilla.core.simulator.pm.State;
+
 import java.util.LinkedList;
 
 /**
  * @author loreti
  *
  */
-public class SamplingLog<S> implements SamplingFunction<S> {
+public class SamplingLog<S extends State> implements SamplingFunction<S> {
 
 	private double dt;
 	private double last_time = 0.0;

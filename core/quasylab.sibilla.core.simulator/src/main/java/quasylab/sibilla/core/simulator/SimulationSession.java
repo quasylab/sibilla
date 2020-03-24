@@ -16,19 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  *******************************************************************************/
+
 package quasylab.sibilla.core.simulator;
 
-import quasylab.sibilla.core.simulator.sampling.Measure;
-
+import java.util.List;
 
 /**
+ * A 
+ * 
  * @author loreti
  *
  */
-public interface SimulationFactory<S extends Model<S>> {
-
-	public S getModel();
-
-	public Measure<S> getMeasure( String name );
+public interface SimulationSession {
 	
+	public int getSessionId();
+	
+	public boolean isRunning();
+	
+	public void shutdown() throws InterruptedException;
+	
+	public void join() throws InterruptedException;
+	
+	public int computedTrajectories();
+	
+	public double averageExecutionTime();
+	
+	public SimulationTask<?> nextTask();
+	
+	public List<SimulationTask<?>> getTask(int n);
 }

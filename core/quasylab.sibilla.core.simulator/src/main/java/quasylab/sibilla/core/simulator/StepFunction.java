@@ -19,13 +19,14 @@
 package quasylab.sibilla.core.simulator;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.simulator.pm.State;
 
 /**
  * @author loreti
  *
  */
 @FunctionalInterface
-public interface StepFunction<S> {
+public interface StepFunction<S extends State> {
 	
 	public S step( RandomGenerator r , double now , double dt );
 

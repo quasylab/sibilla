@@ -31,15 +31,16 @@ import java.util.stream.Collectors;
 import javax.swing.event.SwingPropertyChangeSupport;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.simulator.pm.State;
 
 /**
  * A <code>SimulationManager</code> has the responsibility to coordinate 
- * simulation activities. These are arranged in <it>sessions</it> ({@link SimulationSessionI}).
+ * simulation activities. These are arranged in <it>sessions</it> ({@link SimulationSession}).
  * 
  * @author Matteo Belenchia, Michele Loreti
  *
  */
-public abstract class SimulationManager<S> {
+public abstract class SimulationManager<S extends State> {
 	
 
     private final BlockingQueue<SimulationTask<S>> pendingTasks = new LinkedBlockingQueue<>();

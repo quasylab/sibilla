@@ -4,6 +4,6 @@ import java.io.Serializable;
 import java.util.function.Function;
 
 @FunctionalInterface
-public interface MeasureFunction<S> extends Serializable {
+public interface MeasureFunction<S extends State> extends Serializable {
     public double apply(S state);
 }

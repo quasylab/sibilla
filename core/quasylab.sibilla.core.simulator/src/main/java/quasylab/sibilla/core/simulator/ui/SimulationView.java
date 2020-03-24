@@ -22,9 +22,10 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.text.DefaultCaret;
 
 import quasylab.sibilla.core.simulator.SimulationManager;
+import quasylab.sibilla.core.simulator.pm.State;
 
 
-public class SimulationView<S> {
+public class SimulationView<S extends State> {
     private JFrame frame = new JFrame("Sibilla");
     private SimulationManager<S> simManager;
     private String type;

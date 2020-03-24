@@ -6,7 +6,7 @@ import quasylab.sibilla.core.simulator.network.TCPNetworkManager;
 import quasylab.sibilla.core.simulator.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.simulator.network.UDPNetworkManager;
 import quasylab.sibilla.core.simulator.network.UDPNetworkManagerType;
-import quasylab.sibilla.core.simulator.pm.PopulationState;
+import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.serialization.CustomClassLoader;
 import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 import quasylab.sibilla.core.simulator.server.ServerInfo;
@@ -160,7 +160,7 @@ public class MasterServerSimulationEnvironment {
     private void manageSimulationMessage(Socket socket) throws Exception {
         this.simulationNetworkManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), socket);
         Map<Command, Runnable> map = Map.of(Command.CLIENT_PING, () -> respondPingRequest(), Command.CLIENT_INIT, () -> loadModelClass(), Command.CLIENT_DATA, () -> handleSimulationDataSet());
-        String command = (String) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
+        Command command = (Command) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
         LOGGER.info(String.format("%s command received by the client", command));
         map.getOrDefault(command, () -> {
         }).run();
@@ -168,8 +168,7 @@ public class MasterServerSimulationEnvironment {
 
     private void handleSimulationDataSet() {
         try {
-            // TODO state interface?
-            SimulationDataSet<PopulationState> dataSet = (SimulationDataSet<PopulationState>) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
+            SimulationDataSet<State> dataSet = (SimulationDataSet<State>) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
             SimulationEnvironment sim = new SimulationEnvironment(
                     NetworkSimulationManager.getNetworkSimulationManagerFactory(new ArrayList<>(simulationServers),
                             dataSet.getModelReferenceName()));
@@ -183,8 +182,7 @@ public class MasterServerSimulationEnvironment {
         try {
             String modelName = (String) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
             LOGGER.info(String.format("Model name read: %s", modelName));
-            byte[] myClass = new byte[0];
-            myClass = (byte[]) simulationNetworkManager.readObject();
+            byte[] myClass = simulationNetworkManager.readObject();
             LOGGER.info(String.format("Class received"));
             new CustomClassLoader().defClass(modelName, myClass);
             LOGGER.info(String.format("Class loaded"));

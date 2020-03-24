@@ -23,6 +23,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.simulator.network.TCPNetworkManager;
 import quasylab.sibilla.core.simulator.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.simulator.newserver.Command;
+import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.serialization.ClassBytesLoader;
 import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 import quasylab.sibilla.core.simulator.server.ComputationResult;
@@ -38,7 +39,7 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class NetworkSimulationManager<S> extends SimulationManager<S> {
+public class NetworkSimulationManager<S extends State> extends SimulationManager<S> {
 
     private static final Logger LOGGER = Logger.getLogger(NetworkSimulationManager.class.getName());
     private final String modelName;
@@ -96,7 +97,7 @@ public class NetworkSimulationManager<S> extends SimulationManager<S> {
         return new SimulationManagerFactory() {
 
             @Override
-            public <S> SimulationManager<S> getSimulationManager(RandomGenerator random,
+            public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
                                                                  Consumer<Trajectory<S>> consumer) {
                 try {
                     return new NetworkSimulationManager<S>(random, consumer, info, modelName);

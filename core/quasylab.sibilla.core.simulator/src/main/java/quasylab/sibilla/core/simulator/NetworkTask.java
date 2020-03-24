@@ -1,11 +1,13 @@
 package quasylab.sibilla.core.simulator;
 
+import quasylab.sibilla.core.simulator.pm.State;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class NetworkTask<S> implements Serializable {
+public class NetworkTask<S extends State> implements Serializable {
     private static final long serialVersionUID = 1L;
     private List<SimulationTask<S>> tasks;
 

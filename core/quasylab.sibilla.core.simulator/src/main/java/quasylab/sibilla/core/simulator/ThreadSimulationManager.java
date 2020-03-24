@@ -28,12 +28,13 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.simulator.pm.State;
 
 /**
  * @author belenchia
  *
  */
-public class ThreadSimulationManager<S> extends SimulationManager<S> {
+public class ThreadSimulationManager<S extends State> extends SimulationManager<S> {
 
 	private static final Logger LOGGER = Logger.getLogger(ThreadSimulationManager.class.getName());
 	private ExecutorService executor;
@@ -55,7 +56,7 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 		return new SimulationManagerFactory() {
 
 			@Override
-			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random,
+			public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
 					Consumer<Trajectory<S>> consumer) {
 				return new ThreadSimulationManager<>(n, random, consumer);
 			}
@@ -67,7 +68,7 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 		return new SimulationManagerFactory() {
 
 			@Override
-			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random,
+			public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
 					Consumer<Trajectory<S>> consumer) {
 				return new ThreadSimulationManager<>(random, consumer);
 			}
@@ -79,7 +80,7 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 		return new SimulationManagerFactory() {
 
 			@Override
-			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random,
+			public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
 					Consumer<Trajectory<S>> consumer) {
 				return new ThreadSimulationManager<>(executor, random, consumer);
 			}

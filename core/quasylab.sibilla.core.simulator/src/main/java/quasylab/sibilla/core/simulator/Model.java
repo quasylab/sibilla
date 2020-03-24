@@ -25,13 +25,14 @@ import java.io.Serializable;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
+import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.util.WeightedStructure;
 
 /**
  * @author loreti
  *
  */
-public interface Model<S> extends Serializable {
+public interface Model<S extends State> extends Serializable {
 
 	public WeightedStructure<StepFunction<S>> getActivities( RandomGenerator r , S s );
 

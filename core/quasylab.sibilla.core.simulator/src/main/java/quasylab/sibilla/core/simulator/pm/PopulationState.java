@@ -39,7 +39,7 @@ import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
  * @author loreti
  *
  */
-public class PopulationState implements Serializable {
+public class PopulationState implements State {
 
 	private static final long serialVersionUID = -4973919753621170006L;
 	/**

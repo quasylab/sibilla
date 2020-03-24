@@ -25,6 +25,7 @@ import java.io.Serializable;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
+import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 //import quasylab.sibilla.core.simulator.ui.SimulationView;
@@ -49,21 +50,21 @@ public class SimulationEnvironment implements Serializable {
 		this.simulationManagerFactory = simulationManagerFactory;
 	}
 
-	public synchronized <S> void simulate(RandomGenerator random, Model<S> model, S initialState,
+	public synchronized <S extends State> void simulate(RandomGenerator random, Model<S> model, S initialState,
 			SamplingFunction<S> sampling_function, int iterations, double deadline)
 			throws InterruptedException {
 		simulate(random,model,initialState,sampling_function,iterations,deadline,false);
 	}	
 	
-	public synchronized <S> void simulate(RandomGenerator random, Model<S> model, S initialState,
+	public synchronized <S extends State> void simulate(RandomGenerator random, Model<S> model, S initialState,
 			SamplingFunction<S> sampling_function, int iterations, double deadline, boolean activeGUI)
 			throws InterruptedException {
 		this.activeGUI = activeGUI;
 		simulate(null, random, model, initialState, sampling_function, iterations, deadline);
 	}
 
-	public synchronized <S> void simulate(SimulationMonitor monitor, RandomGenerator random, Model<S> model,
-			S initialState, SamplingFunction<S> sampling_function, int iterations, double deadline)
+	public synchronized <S extends State> void simulate(SimulationMonitor monitor, RandomGenerator random, Model<S> model,
+														S initialState, SamplingFunction<S> sampling_function, int iterations, double deadline)
 			throws InterruptedException {
 		RandomGeneratorRegistry rgi = RandomGeneratorRegistry.getInstance();
 
@@ -91,7 +92,7 @@ public class SimulationEnvironment implements Serializable {
 		LOGGER.info("The simulation has concluded with success");
 	}
 
-	public <S> double reachability(SimulationMonitor monitor, RandomGenerator random, Model<S> model, S state,
+	public <S extends State> double reachability(SimulationMonitor monitor, RandomGenerator random, Model<S> model, S state,
 			double error, double delta, double deadline, Predicate<? super S> phi, Predicate<? super S> psi)
 			throws InterruptedException {
 		double n = Math.ceil(Math.log(2 / delta) / (2 * error));
@@ -111,7 +112,7 @@ public class SimulationEnvironment implements Serializable {
 		return traceConsumer.counter / n;
 	}
 
-	public <S> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state, double deadline) {
+	public <S extends State> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state, double deadline) {
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, state, SamplePredicate.timeDeadlinePredicate(deadline),
 				s -> true);
 		SimulationTask<S> simulationRun = new SimulationTask<>(random, unit);
@@ -123,7 +124,7 @@ public class SimulationEnvironment implements Serializable {
 		}
 	}
 
-	public <S> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state, double deadline,
+	public <S extends State> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state, double deadline,
 			Predicate<? super S> reachPredicate) {
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, state,
 				(t, s) -> (t >= deadline) || reachPredicate.test(s), reachPredicate);
@@ -136,7 +137,7 @@ public class SimulationEnvironment implements Serializable {
 		}
 	}
 
-	public <S> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state, double deadline,
+	public <S extends State> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state, double deadline,
 			Predicate<? super S> transientPredicate, Predicate<? super S> reachPredicate) {
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, state,
 				(t, s) -> (t >= deadline) || reachPredicate.test(s) || !transientPredicate.test(s), reachPredicate);
@@ -149,7 +150,7 @@ public class SimulationEnvironment implements Serializable {
 		}
 	}
 
-	private static class ReachabilityTraceConsumer<S> implements Consumer<Trajectory<S>> {
+    private static class ReachabilityTraceConsumer<S extends State> implements Consumer<Trajectory<S>> {
 
 		private int counter = 0;
 

@@ -5,10 +5,11 @@ import java.io.Serializable;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import quasylab.sibilla.core.simulator.Model;
+import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.server.ServerInfo;
 
-public class SimulationDataSet<S> implements Serializable {
+public class SimulationDataSet<S extends State> implements Serializable {
 
     private final RandomGenerator randomGenerator;
     private final String modelReferenceName;

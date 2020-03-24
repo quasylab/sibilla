@@ -6,6 +6,7 @@ import org.apache.commons.math3.random.AbstractRandomGenerator;
 
 import quasylab.sibilla.core.simulator.Model;
 import quasylab.sibilla.core.simulator.network.TCPNetworkManager;
+import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.serialization.ClassBytesLoader;
 import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
@@ -16,7 +17,7 @@ import quasylab.sibilla.core.simulator.server.ServerInfo;
  *
  * @param <S> The class of the state of the model
  */
-public class ClientSimulationEnvironment<S> {
+public class ClientSimulationEnvironment<S extends State> {
 
     private static final Logger LOGGER = Logger.getLogger(ClientSimulationEnvironment.class.getName());
 

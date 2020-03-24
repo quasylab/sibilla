@@ -71,7 +71,7 @@ public class BasicSimulationServer implements SimulationServer {
             try {
                 Map<Command, Runnable> map = Map.of(Command.MASTER_PING, () -> respondPingRequest(), Command.MASTER_INIT, () -> loadModelClass(), Command.MASTER_TASK, () -> handleTaskExecution());
                 while (true) {
-                    String request = (String) ObjectSerializer.deserializeObject(client.readObject());
+                    Command request = (Command) ObjectSerializer.deserializeObject(client.readObject());
                     LOGGER.info(String.format("Request received: %s", request));
                     map.getOrDefault(request, () -> {
                     }).run();

@@ -18,6 +18,8 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator.sampling;
 
+import quasylab.sibilla.core.simulator.pm.State;
+
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -25,7 +27,7 @@ import java.util.LinkedList;
  * @author loreti
  *
  */
-public class SamplingCollection<S> implements SamplingFunction<S> {
+public class SamplingCollection<S extends State> implements SamplingFunction<S> {
 
 	private LinkedList<SamplingFunction<S>> functions;
 
