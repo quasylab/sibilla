@@ -98,7 +98,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
 
             @Override
             public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
-                                                                 Consumer<Trajectory<S>> consumer) {
+                                                                               Consumer<Trajectory<S>> consumer) {
                 try {
                     return new NetworkSimulationManager<S>(random, consumer, info, modelName);
                 } catch (IOException e) {
@@ -230,7 +230,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             initConnection(pingServer); // initialize connection sending model data
             pingServer.writeObject(ObjectSerializer.serializeObject(Command.MASTER_PING));
             LOGGER.info("Ping request sent"); // send ping request
-            String response = (String) ObjectSerializer.deserializeObject(pingServer.readObject()); // wait for response
+            Command response = (Command) ObjectSerializer.deserializeObject(pingServer.readObject()); // wait for response
             if (!response.equals(Command.SLAVE_PONG)) {
                 LOGGER.severe("The response received wasn't the one expected");
                 throw new IllegalStateException("Expected a different reply!");
