@@ -109,7 +109,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
      * Initializes a connection to the target server sending the model class
      *
      * @param server NetworkManager throught the model is passed
-     * @throws Exception
+     * @throws Exception TODO ???
      */
     private void initConnection(TCPNetworkManager server) throws Exception {
         server.writeObject(ObjectSerializer.serializeObject(Command.MASTER_INIT));
@@ -138,7 +138,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
     /**
      * Sends to the next server in the queue the task to execute and waits for the results
      *
-     * @throws InterruptedException
+     * @throws InterruptedException TODO ???
      */
     private void singleTaskExecution() throws InterruptedException {
         TCPNetworkManager server = findServer();
@@ -154,7 +154,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
         }
         List<SimulationTask<S>> toRun = getTask(acceptableTasks, true);
         if (toRun.size() > 0) {
-            startServerRunning();
+            masterState.increaseRunningServers();
             NetworkTask<S> networkTask = new NetworkTask<>(toRun);
             CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
                     .whenComplete((value, error) -> manageResult(value, error, toRun, server));
@@ -165,7 +165,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
      * Takes the first server from the queue
      *
      * @return First server available in the queue
-     * @throws InterruptedException
+     * @throws InterruptedException TODO ???
      */
     private TCPNetworkManager findServer() throws InterruptedException {
         return serverQueue.take();
@@ -178,22 +178,6 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
      */
     private void enqueueServer(TCPNetworkManager server) {
         serverQueue.add(server);
-    }
-
-    /**
-     * Increments number of running servers
-     */
-    private synchronized void startServerRunning() {
-        this.masterState.increaseRunningServers();
-        LOGGER.info("Number of running server has been increased");
-    }
-
-    /**
-     * Decrements number of running servers
-     */
-    private synchronized void endServerRunning() {
-        this.masterState.decreaseRunningServers();
-        LOGGER.info("Number of running server has been decreased");
     }
 
     /**
@@ -221,11 +205,11 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
                 }
             }
             rescheduleAll(tasks);
-            endServerRunning();
+            masterState.decreaseRunningServers();
         } else {
             LOGGER.info("Timeout did not occurred");
             enqueueServer(server);
-            endServerRunning();
+            masterState.decreaseRunningServers();
             value.getResults().forEach(this::handleTrajectory);
             propertyChange("servers",
                     new String[]{

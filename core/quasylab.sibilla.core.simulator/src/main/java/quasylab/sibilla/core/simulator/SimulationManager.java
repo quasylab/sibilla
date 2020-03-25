@@ -62,6 +62,11 @@ public abstract class SimulationManager<S extends State> {
      */
     protected abstract void startTasksHandling();
 
+    /**
+     * Executes a simulation unit
+     *
+     * @param unit unit to be executed
+     */
     public synchronized void simulate(SimulationUnit<S> unit) {
         if (!isRunning()) {
             throw new IllegalStateException();
@@ -69,39 +74,69 @@ public abstract class SimulationManager<S extends State> {
         add(new SimulationTask<>(random, unit));
     }
 
-
+    /**
+     * Add a simulationTask to the tasks to be executed
+     *
+     * @param simulationTask tasks to be added
+     */
     private synchronized void add(SimulationTask<S> simulationTask) {
         pendingTasks.add(simulationTask);
         queueModified();
         notifyAll();
     }
 
+    /**
+     * Reschedules the task given in input
+     *
+     * @param simulationTask task to reschedule
+     */
     protected synchronized void reschedule(SimulationTask<S> simulationTask) {
         runningTasks--;
         runningTasksModified();
         add(simulationTask);
     }
 
+    /**
+     * Reschedules all the tasks given in input
+     *
+     * @param tasks tasks to reschedule
+     */
     protected synchronized void rescheduleAll(Collection<? extends SimulationTask<S>> tasks) {
         runningTasks -= tasks.size();
         runningTasksModified();
         addAll(tasks);
     }
 
+    /**
+     * Adds all the given tasks to the tasks to be executed
+     *
+     * @param tasks tasks to be added
+     */
     private synchronized void addAll(Collection<? extends SimulationTask<S>> tasks) {
         pendingTasks.addAll(tasks);
         queueModified();
         notifyAll();
     }
 
+    /**
+     * Signal that the queue has been modified to listeners
+     */
     private void queueModified() {
         propertyChange("waitingTasks", pendingTasks.size());
     }
 
+    /**
+     * Signal that the running tasks have been modified to listeners
+     */
     private void runningTasksModified() {
         propertyChange("tasks", runningTasks);
     }
 
+    /**
+     * Handles the trajectory given in input
+     *
+     * @param trj trajectory to be handled
+     */
     protected synchronized void handleTrajectory(Trajectory<S> trj) {
         this.executionTime.add(trj.getGenerationTime());
         trajectoryConsumer.accept(trj);
@@ -112,16 +147,13 @@ public abstract class SimulationManager<S extends State> {
         notifyAll();
     }
 
-
     public int computedTrajectories() {
         return executionTime.size();
     }
 
-
     public double averageExecutionTime() {
         return executionTime.stream().collect(Collectors.averagingDouble(l -> l.doubleValue()));
     }
-
 
     protected synchronized SimulationTask<S> nextTask() {
         try {
@@ -131,6 +163,13 @@ public abstract class SimulationManager<S extends State> {
         }
     }
 
+    /**
+     * Gets the next task to be executed
+     *
+     * @param blocking whether the operation is blocking or not
+     * @return next task to be executed
+     * @throws InterruptedException
+     */
     protected synchronized SimulationTask<S> nextTask(boolean blocking) throws InterruptedException {
         while (isRunning() && blocking && pendingTasks.isEmpty()) {
             wait();
@@ -142,6 +181,12 @@ public abstract class SimulationManager<S extends State> {
         return task;
     }
 
+    /**
+     * Gets the next n tasks to execute
+     *
+     * @param n number of tasks to be returned
+     * @return list of the requested tasks
+     */
     protected synchronized List<SimulationTask<S>> getTask(int n) {
         try {
             return getTask(n, false);
@@ -150,6 +195,14 @@ public abstract class SimulationManager<S extends State> {
         }
     }
 
+    /**
+     * * Gets the next n tasks to execute
+     *
+     * @param n        number of tasks to be returned
+     * @param blocking whether the operation is blocking or not
+     * @return list of the requested tasks
+     * @throws InterruptedException
+     */
     protected synchronized List<SimulationTask<S>> getTask(int n, boolean blocking) throws InterruptedException {
         while (isRunning() && blocking && pendingTasks.isEmpty()) {
             wait();
