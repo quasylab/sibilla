@@ -1,5 +1,7 @@
 package quasylab.sibilla.core.simulator.network;
 
+import quasylab.sibilla.core.simulator.server.ServerInfo;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;

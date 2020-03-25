@@ -12,6 +12,8 @@ import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 import quasylab.sibilla.core.simulator.server.ServerInfo;
 import quasylab.sibilla.core.util.NetworkUtils;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
@@ -37,6 +39,9 @@ public class MasterServerSimulationEnvironment {
     private TCPNetworkManager simulationNetworkManager;
 
 
+    private MonitoringServer monitoringServer;
+    private MasterState state;
+
     private int remotePort;
 
     /**
@@ -48,10 +53,13 @@ public class MasterServerSimulationEnvironment {
      * @throws InterruptedException TODO Exception handling
      * @throws IOException          TODO Exception handling
      */
-    public MasterServerSimulationEnvironment(int localDiscoveryPort, int remoteDiscoveryPort, UDPNetworkManagerType discoveryNetworkManager, int localSimulationPort, TCPNetworkManagerType simulationNetworkManager) throws InterruptedException, IOException {
+    public MasterServerSimulationEnvironment(int localDiscoveryPort, int remoteDiscoveryPort, UDPNetworkManagerType discoveryNetworkManager, int localSimulationPort, TCPNetworkManagerType simulationNetworkManager, int localMonitoringPort, TCPNetworkManagerType monitoringNetworkManager) throws InterruptedException, IOException {
         LOCAL_DISCOVERY_INFO = new ServerInfo(NetworkUtils.getLocalIp(), localDiscoveryPort, discoveryNetworkManager);
         LOCAL_SIMULATION_INFO = new ServerInfo(NetworkUtils.getLocalIp(), localSimulationPort, simulationNetworkManager);
         this.remotePort = remoteDiscoveryPort;
+        this.state = new MasterState(NetworkUtils.getLocalIp());
+        this.monitoringServer = new MonitoringServer(localMonitoringPort, monitoringNetworkManager);
+        this.state.addPropertyChangeListener(this.monitoringServer);
         this.discoveryNetworkManager = UDPNetworkManager.createNetworkManager(LOCAL_DISCOVERY_INFO, true);
         LOGGER.info(String.format("Listening on port: %d", localDiscoveryPort));
         this.discoveryConnectionExecutor = Executors.newFixedThreadPool(2);
@@ -174,11 +182,19 @@ public class MasterServerSimulationEnvironment {
     private void handleSimulationDataSet() {
         try {
             SimulationDataSet<State> dataSet = (SimulationDataSet<State>) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
-            SimulationEnvironment sim = new SimulationEnvironment(
-                    NetworkSimulationManager.getNetworkSimulationManagerFactory(new ArrayList<>(simulationServers),
-                            dataSet.getModelReferenceName()));
-            sim.simulate(dataSet.getRandomGenerator(), dataSet.getModelReference(), dataSet.getModelReferenceInitialState(), dataSet.getModelReferenceSamplingFunction(), dataSet.getReplica(), dataSet.getDeadline(), false);
+            this.submitSimulations(dataSet);
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void submitSimulations(SimulationDataSet dataSet) {
+        SimulationEnvironment sim = new SimulationEnvironment(
+                NetworkSimulationManager.getNetworkSimulationManagerFactory(new ArrayList<>(simulationServers),
+                        dataSet.getModelReferenceName(), this.state));
+        try {
+            sim.simulate(dataSet.getRandomGenerator(), dataSet.getModelReference(), dataSet.getModelReferenceInitialState(), dataSet.getModelReferenceSamplingFunction(), dataSet.getReplica(), dataSet.getDeadline(), false);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

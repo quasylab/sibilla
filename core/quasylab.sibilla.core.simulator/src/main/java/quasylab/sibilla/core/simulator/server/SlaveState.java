@@ -1,11 +1,16 @@
 package quasylab.sibilla.core.simulator.server;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.IOException;
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.util.Arrays;
 
 import quasylab.sibilla.core.simulator.network.TCPNetworkManager;
+import quasylab.sibilla.core.simulator.newserver.MasterState;
 
-public class ServerState {
-    private TCPNetworkManager server;
+public class SlaveState implements Serializable {
     private int expectedTasks, actualTasks;
     private boolean isRemoved, isTimeout;
     private long runningTime;
@@ -17,8 +22,9 @@ public class ServerState {
     private final static int threshold = 256;
     private final static long maxRunningTime = 3600000000000L; // 1 hour in nanoseconds
 
-    public ServerState(TCPNetworkManager server) throws IOException {
-        this.server = server;
+    private PropertyChangeSupport updateSupport;
+
+    public SlaveState(MasterState masterState) throws IOException {
         expectedTasks = 1;
         actualTasks = 0;
         isRemoved = false;
@@ -27,6 +33,25 @@ public class ServerState {
         devRTT = 0.0;
         sampleRTT = 0.0;
         estimatedRTT = 0.0;
+        updateSupport = new PropertyChangeSupport(this);
+        this.addPropertyChangeListener(masterState);
+    }
+
+    public synchronized void addPropertyChangeListener(PropertyChangeListener pcl) {
+        updateSupport.addPropertyChangeListener(pcl);
+    }
+
+    public synchronized void addPropertyChangeListener(PropertyChangeListener[] pclArray) {
+        Arrays.stream(pclArray).forEach(pcl -> updateSupport.addPropertyChangeListener(pcl));
+
+    }
+
+    public synchronized void removePropertyChangeListener(PropertyChangeListener pcl) {
+        updateSupport.removePropertyChangeListener(pcl);
+    }
+
+    private void updateListeners() {
+        updateSupport.firePropertyChange("SlaveState", null, this);
     }
 
     public void update(long elapsedTime, int tasksSent) {
@@ -49,25 +74,22 @@ public class ServerState {
         sampleRTT = runningTime / actualTasks;
         estimatedRTT = alpha * sampleRTT + (1 - alpha) * estimatedRTT;
         devRTT = devRTT == 0.0 ? sampleRTT * 2 : beta * Math.abs(sampleRTT - estimatedRTT) + (1 - beta) * devRTT;
+        this.updateListeners();
     }
 
     public void forceExpiredTimeLimit() {
         expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
+        this.updateListeners();
     }
 
-    public void migrate(TCPNetworkManager server) throws IOException {
-        close();
-        this.server = server;
+    public void migrate() throws IOException {
         isRemoved = false;
         isTimeout = false;
-    }
-
-    public void close() throws IOException {
-        server.getSocket().close();
+        this.updateListeners();
     }
 
     public double getTimeout() { // after this time, a timeout has occurred and the server is not to be contacted
-                                 // again
+        // again
         return expectedTasks == 1 ? 1000000000 : expectedTasks * estimatedRTT + expectedTasks * 4 * devRTT;
     }
 
@@ -91,9 +113,6 @@ public class ServerState {
         return isTimeout;
     }
 
-    public TCPNetworkManager getServer() {
-        return this.server;
-    }
 
     @Override
     public String toString() {
@@ -115,10 +134,12 @@ public class ServerState {
 
     public void removed() {
         isRemoved = true;
+        this.updateListeners();
     }
 
     public void timedout() {
         isTimeout = true;
+        this.updateListeners();
     }
 
 }
