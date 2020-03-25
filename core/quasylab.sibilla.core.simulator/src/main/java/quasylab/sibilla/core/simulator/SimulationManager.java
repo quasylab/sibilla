@@ -19,6 +19,10 @@
 
 package quasylab.sibilla.core.simulator;
 
+import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.simulator.pm.State;
+
+import javax.swing.event.SwingPropertyChangeSupport;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -28,180 +32,176 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.swing.event.SwingPropertyChangeSupport;
-
-import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.simulator.pm.State;
-
 /**
- * A <code>SimulationManager</code> has the responsibility to coordinate 
+ * A <code>SimulationManager</code> has the responsibility to coordinate
  * simulation activities. These are arranged in <it>sessions</it> ({@link SimulationSession}).
- * 
- * @author Matteo Belenchia, Michele Loreti
  *
+ * @author Matteo Belenchia, Michele Loreti
  */
 public abstract class SimulationManager<S extends State> {
-	
+
 
     private final BlockingQueue<SimulationTask<S>> pendingTasks = new LinkedBlockingQueue<>();
-
-    private int runningTasks = 0;
     private final Consumer<Trajectory<S>> trajectoryConsumer;
+    private final LinkedList<Long> executionTime = new LinkedList<>();
+    private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
+    private int runningTasks = 0;
     private RandomGenerator random;
     private boolean running = true;
-	private final LinkedList<Long> executionTime = new LinkedList<>();
-	private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);
 
-	/**
-	 * Creates a new simulation manager.
-	 */
-	public SimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
-		this.random = random;
-		this.trajectoryConsumer = consumer;
-	}
-	
-	protected abstract void start();
+    /**
+     * Creates a new simulation manager.
+     */
+    public SimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+        this.random = random;
+        this.trajectoryConsumer = consumer;
+    }
 
-	public synchronized void simulate(SimulationUnit<S> unit) {
-		if (!isRunning()) {
-			throw new IllegalStateException();
-		}
-		add(new SimulationTask<>(random, unit));
-	}
-    
-   
-	private synchronized void add(SimulationTask<S> simulationTask) {
-		pendingTasks.add(simulationTask);
-		queueModified();
-		notifyAll();
-	}
+    /**
+     * Starts the handling of the tasks to be executed to complete the simulation
+     */
+    protected abstract void startTasksHandling();
 
-	protected synchronized void reschedule(SimulationTask<S> simulationTask) {
-		runningTasks--;
-		runningTasksModified();
-		add(simulationTask);
-	}
-	
-	protected synchronized void rescheduleAll( Collection<? extends SimulationTask<S>> tasks ) {
-		runningTasks -= tasks.size();
-		runningTasksModified();
-		addAll( tasks );
-	}
-	
-	private synchronized void addAll(Collection<? extends SimulationTask<S>> tasks) {
-		pendingTasks.addAll(tasks);
-		queueModified();
-		notifyAll();
-	}
+    public synchronized void simulate(SimulationUnit<S> unit) {
+        if (!isRunning()) {
+            throw new IllegalStateException();
+        }
+        add(new SimulationTask<>(random, unit));
+    }
 
-	private void queueModified(){
-		propertyChange("waitingTasks", pendingTasks.size());
-	}
 
-	private void runningTasksModified(){
-		propertyChange("tasks", runningTasks);
-	}
+    private synchronized void add(SimulationTask<S> simulationTask) {
+        pendingTasks.add(simulationTask);
+        queueModified();
+        notifyAll();
+    }
 
-	protected synchronized void handleTrajectory( Trajectory<S> trj ) {
-		this.executionTime.add(trj.getGenerationTime());
-		trajectoryConsumer.accept(trj);
-		runningTasks--;
-		propertyChange("progress", executionTime.size());
-		propertyChange("runtime", trj.getGenerationTime());
-		runningTasksModified();
-		notifyAll();
-	}
+    protected synchronized void reschedule(SimulationTask<S> simulationTask) {
+        runningTasks--;
+        runningTasksModified();
+        add(simulationTask);
+    }
 
-	
-	public int computedTrajectories() {
-		return executionTime.size();
-	}
+    protected synchronized void rescheduleAll(Collection<? extends SimulationTask<S>> tasks) {
+        runningTasks -= tasks.size();
+        runningTasksModified();
+        addAll(tasks);
+    }
 
-	
-	public double averageExecutionTime() {
-		return executionTime.stream().collect(Collectors.averagingDouble(l -> l.doubleValue()));
-	}
+    private synchronized void addAll(Collection<? extends SimulationTask<S>> tasks) {
+        pendingTasks.addAll(tasks);
+        queueModified();
+        notifyAll();
+    }
 
-	
-	protected synchronized SimulationTask<S> nextTask() {
-		try {
-			return nextTask(false);
-		} catch (InterruptedException e) {
-			return null;
-		}
-	}
-	
-	protected synchronized SimulationTask<S> nextTask(boolean blocking) throws InterruptedException {
-		while (isRunning()&&blocking&&pendingTasks.isEmpty()) {
-			wait();
-		}
-		SimulationTask<S> task = pendingTasks.poll();
-		runningTasks++;
-		runningTasksModified();
-		queueModified();
-		return task;
-	}
+    private void queueModified() {
+        propertyChange("waitingTasks", pendingTasks.size());
+    }
 
-	protected synchronized List<SimulationTask<S>> getTask(int n) {
-		try {
-			return getTask(n,false);
-		} catch (InterruptedException e) {
-			return new LinkedList<>();
-		}
-	}
+    private void runningTasksModified() {
+        propertyChange("tasks", runningTasks);
+    }
 
-	protected synchronized List<SimulationTask<S>> getTask(int n, boolean blocking) throws InterruptedException {
-		while (isRunning()&&blocking&&pendingTasks.isEmpty()) {
-			wait();
-		}
-		List<SimulationTask<S>> tasks = new LinkedList<>();
-		runningTasks += pendingTasks.drainTo(tasks,n);
-		runningTasksModified();
-		queueModified();
-		return tasks;
-	}
+    protected synchronized void handleTrajectory(Trajectory<S> trj) {
+        this.executionTime.add(trj.getGenerationTime());
+        trajectoryConsumer.accept(trj);
+        runningTasks--;
+        propertyChange("progress", executionTime.size());
+        propertyChange("runtime", trj.getGenerationTime());
+        runningTasksModified();
+        notifyAll();
+    }
 
-	public synchronized boolean isRunning() {
-		return running;
-	}
-	
-	protected synchronized void setRunning(boolean flag) {
-		this.running = flag;
-		notifyAll();
-	}
 
-	public void shutdown() throws InterruptedException {
+    public int computedTrajectories() {
+        return executionTime.size();
+    }
+
+
+    public double averageExecutionTime() {
+        return executionTime.stream().collect(Collectors.averagingDouble(l -> l.doubleValue()));
+    }
+
+
+    protected synchronized SimulationTask<S> nextTask() {
+        try {
+            return nextTask(false);
+        } catch (InterruptedException e) {
+            return null;
+        }
+    }
+
+    protected synchronized SimulationTask<S> nextTask(boolean blocking) throws InterruptedException {
+        while (isRunning() && blocking && pendingTasks.isEmpty()) {
+            wait();
+        }
+        SimulationTask<S> task = pendingTasks.poll();
+        runningTasks++;
+        runningTasksModified();
+        queueModified();
+        return task;
+    }
+
+    protected synchronized List<SimulationTask<S>> getTask(int n) {
+        try {
+            return getTask(n, false);
+        } catch (InterruptedException e) {
+            return new LinkedList<>();
+        }
+    }
+
+    protected synchronized List<SimulationTask<S>> getTask(int n, boolean blocking) throws InterruptedException {
+        while (isRunning() && blocking && pendingTasks.isEmpty()) {
+            wait();
+        }
+        List<SimulationTask<S>> tasks = new LinkedList<>();
+        runningTasks += pendingTasks.drainTo(tasks, n);
+        runningTasksModified();
+        queueModified();
+        return tasks;
+    }
+
+    public synchronized boolean isRunning() {
+        return running;
+    }
+
+    protected synchronized void setRunning(boolean flag) {
+        this.running = flag;
+        notifyAll();
+    }
+
+    public void shutdown() throws InterruptedException {
         setRunning(false);
-		join();
-	}
-	
-	protected abstract void join() throws InterruptedException;
+        join();
+    }
 
-	protected Consumer<Trajectory<S>> getConsumer() {
-		return trajectoryConsumer;
-	}
-	
-	protected RandomGenerator getRandom(){
-		return random;
-	}
+    protected abstract void join() throws InterruptedException;
 
-	protected List<Long> getExecutionTimes(){
-		return executionTime;
-	}
+    protected Consumer<Trajectory<S>> getConsumer() {
+        return trajectoryConsumer;
+    }
 
-	protected boolean hasTasks(){
-		return !pendingTasks.isEmpty();
-	}
+    protected RandomGenerator getRandom() {
+        return random;
+    }
 
-	protected int getRunningTasks(){
-		return runningTasks;
-	}
+    protected List<Long> getExecutionTimes() {
+        return executionTime;
+    }
+
+    protected boolean hasTasks() {
+        return !pendingTasks.isEmpty();
+    }
+
+    protected int getRunningTasks() {
+        return runningTasks;
+    }
 
     public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
         pcs.addPropertyChangeListener(property, listener);
-	}
-	
-	protected void propertyChange(String property, Object value){
+    }
+
+    protected void propertyChange(String property, Object value) {
         pcs.firePropertyChange(property, null, value);
     }
 }

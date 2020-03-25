@@ -88,16 +88,14 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
                 e.printStackTrace();
             }
             return null;
-
         }).collect(Collectors.toSet());
         serverQueue = new LinkedBlockingQueue<>(networkManagers);
-        this.start();
+        this.startTasksHandling();
     }
 
     public static SimulationManagerFactory getNetworkSimulationManagerFactory(List<ServerInfo> info,
                                                                               String modelName, MasterState masterState) {
         return new SimulationManagerFactory() {
-
             @Override
             public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
                                                                                Consumer<Trajectory<S>> consumer) {
@@ -107,6 +105,12 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
 
     }
 
+    /**
+     * Initializes a connection to the target server sending the model class
+     *
+     * @param server NetworkManager throught the model is passed
+     * @throws Exception
+     */
     private void initConnection(TCPNetworkManager server) throws Exception {
         server.writeObject(ObjectSerializer.serializeObject(Command.MASTER_INIT));
         LOGGER.info("Init command sent to the slave");
@@ -117,31 +121,30 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
     }
 
     @Override
-    protected void start() {
-
-        Thread t = new Thread(this::handleTasks);
-        t.start();
-
+    protected void startTasksHandling() {
+        new Thread(this::handleTasks).start();
     }
 
     private void handleTasks() {
-
         try {
             while ((isRunning() || hasTasks() || this.masterState.getRunningServers() > 0) && !this.masterState.getServersMap().isEmpty()) {
-                run();
+                singleTaskExecution();
             }
         } catch (InterruptedException e) {
             LOGGER.severe(e.getMessage());
         }
-
     }
 
-    private void run() throws InterruptedException {
+    /**
+     * Sends to the next server in the queue the task to execute and waits for the results
+     *
+     * @throws InterruptedException
+     */
+    private void singleTaskExecution() throws InterruptedException {
         TCPNetworkManager server = findServer();
         LOGGER.info(String.format("Server currently connected - IP: %s - Port: %d - Class: %s",
                 server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort(),
                 server.getClass().getName()));
-        List<SimulationTask<S>> toRun;
         SlaveState serverState = this.masterState.getServersMap().get(server.getServerInfo());
         LOGGER.info(String.format("State of the server: %s", serverState.toString()));
         int acceptableTasks = serverState.getExpectedTasks();
@@ -149,34 +152,58 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             acceptableTasks = acceptableTasks == 1 ? 1 : acceptableTasks / 2;
             LOGGER.severe("Server's tasks window has been reduced in half");
         }
-        toRun = getTask(acceptableTasks, true);
+        List<SimulationTask<S>> toRun = getTask(acceptableTasks, true);
         if (toRun.size() > 0) {
             startServerRunning();
             NetworkTask<S> networkTask = new NetworkTask<>(toRun);
             CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
                     .whenComplete((value, error) -> manageResult(value, error, toRun, server));
-
         }
     }
 
+    /**
+     * Takes the first server from the queue
+     *
+     * @return First server available in the queue
+     * @throws InterruptedException
+     */
     private TCPNetworkManager findServer() throws InterruptedException {
         return serverQueue.take();
     }
 
+    /**
+     * Adds a server to the queue
+     *
+     * @param server Server to be added to the queue
+     */
     private void enqueueServer(TCPNetworkManager server) {
         serverQueue.add(server);
     }
 
+    /**
+     * Increments number of running servers
+     */
     private synchronized void startServerRunning() {
         this.masterState.increaseRunningServers();
         LOGGER.info("Number of running server has been increased");
     }
 
+    /**
+     * Decrements number of running servers
+     */
     private synchronized void endServerRunning() {
         this.masterState.decreaseRunningServers();
         LOGGER.info("Number of running server has been decreased");
     }
 
+    /**
+     * Manages the results of a NetworkTask sent by a simulation server
+     *
+     * @param value  results of the computation
+     * @param error  eventually thrown error
+     * @param tasks  list of tasks executed
+     * @param server server which has been used for the simulation
+     */
     private void manageResult(ComputationResult<S> value, Throwable error, List<SimulationTask<S>> tasks,
                               TCPNetworkManager server) {
         LOGGER.info("Managing results");
@@ -207,25 +234,33 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
         }
     }
 
+    /**
+     * Manages a timeout
+     *
+     * @param server server whuch was in timeout
+     * @return new server to use to execute tasks
+     */
     private TCPNetworkManager manageTimeout(TCPNetworkManager server) {
-        LOGGER.warning("Managing timeout");
+        SlaveState oldState = this.masterState.getServersMap().get(server.getServerInfo());
         TCPNetworkManager pingServer;
-        SlaveState oldState = this.masterState.getServersMap().get(server.getServerInfo()); // get old state
-        ServerInfo pingServerInfo;
+        ServerInfo pingServerInfo = null;
         try {
-            oldState.timedOut(); // mark server as timed out and update GUI
-            propertyChange("servers",
-                    new String[]{
-                            server.getSocket().getInetAddress().getHostAddress() + ":" + server.getSocket().getPort(),
-                            oldState.toString()});
+            LOGGER.warning("Managing timeout");
             pingServerInfo = new ServerInfo(server.getSocket().getInetAddress(),
                     server.getSocket().getPort(), server.getType());
             pingServer = TCPNetworkManager.createNetworkManager(pingServerInfo);
+            pingServer.getSocket().setSoTimeout(5000); // set 5 seconds timeout on read operations
             LOGGER.info(
                     String.format("Creating a new NetworkManager to ping the server  - IP: %s - Port: %d - Class: %s",
                             server.getSocket().getInetAddress().getHostAddress(), server.getSocket().getPort(),
                             server.getClass().getName()));
-            pingServer.getSocket().setSoTimeout(5000); // set 5 seconds timeout on read operations
+            oldState.timedOut(); // mark server as timed out and update GUI
+
+            propertyChange("servers",
+                    new String[]{
+                            server.getSocket().getInetAddress().getHostAddress() + ":" + server.getSocket().getPort(),
+                            oldState.toString()});
+
             initConnection(pingServer); // initialize connection sending model data
             pingServer.writeObject(ObjectSerializer.serializeObject(Command.MASTER_PING));
             LOGGER.info("Ping request sent"); // send ping request
@@ -242,12 +277,12 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             this.networkManagers.add(pingServer);
             server.getSocket().close();
             this.networkManagers.remove(server);
-            //this.masterState.removeServer(server);
+            this.masterState.removeServer(pingServerInfo);
         } catch (Exception e) {
             LOGGER.severe("The response has been received after the time limit. The server will be removed");
             oldState.removed(); // mark server as removed and update GUI
             this.networkManagers.remove(server);
-            // this.masterState.removeServer(pingServerInfo);
+            this.masterState.removeServer(pingServerInfo);
             propertyChange("servers",
                     new String[]{
                             server.getSocket().getInetAddress().getHostAddress() + ":" + server.getSocket().getPort(),
@@ -264,10 +299,11 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
         }
         closeStreams();
         propertyChange("end", null);
-        /// time testing stuff
-        // executor.shutdown();
     }
 
+    /**
+     * Closes all the connection streams
+     */
     private void closeStreams() {
         for (TCPNetworkManager server : this.networkManagers) {
             try {
@@ -281,11 +317,17 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
         }
     }
 
+    /**
+     * Sends tasks to execute to a server
+     *
+     * @param networkTask tasks to execute
+     * @param server      server to send the tasks to
+     * @return result of the computation
+     */
     private ComputationResult<S> send(NetworkTask<S> networkTask, TCPNetworkManager server) {
+        SlaveState state = this.masterState.getServersMap().get(server.getServerInfo());
         ComputationResult<S> result;
         long elapsedTime;
-        SlaveState state = this.masterState.getServersMap().get(server.getServerInfo());
-
         try {
             server.writeObject(ObjectSerializer.serializeObject(Command.MASTER_TASK));
             server.writeObject(ObjectSerializer.serializeObject(networkTask));
@@ -293,15 +335,14 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
 
             server.getSocket().setSoTimeout((int) (state.getTimeout() / 1000000));
             LOGGER.info("A group of tasks has been sent");
-            @SuppressWarnings("unchecked")
-            ComputationResult<S> receivedResult = (ComputationResult<S>) ObjectSerializer
+
+            result = (ComputationResult<S>) ObjectSerializer
                     .deserializeObject(server.readObject());
 
             elapsedTime = System.nanoTime() - elapsedTime;
 
-            state.update(elapsedTime, receivedResult.getResults().size());
+            state.update(elapsedTime, result.getResults().size());
             LOGGER.info("The results from the computation have been received");
-            result = receivedResult;
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             e.printStackTrace();

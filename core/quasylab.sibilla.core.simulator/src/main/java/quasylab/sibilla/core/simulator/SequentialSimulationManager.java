@@ -62,7 +62,7 @@ public class SequentialSimulationManager<S extends State> extends SimulationMana
     }
 
 	@Override
-	protected void start() {
+	protected void startTasksHandling() {
         return;
 	}
     

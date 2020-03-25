@@ -111,7 +111,7 @@ public class ThreadSimulationManager<S extends State> extends SimulationManager<
 	public ThreadSimulationManager(ExecutorService executor, RandomGenerator random, Consumer<Trajectory<S>> consumer) {
 		super(random, consumer);
 		this.executor = executor;
-		this.start();
+		this.startTasksHandling();
 	}
 
 	// // samples the trajectory, updates counters, then runs next task.
@@ -135,7 +135,7 @@ public class ThreadSimulationManager<S extends State> extends SimulationManager<
 	// }
 
 	@Override
-	protected void start() {
+	protected void startTasksHandling() {
 
 		Thread t = new Thread(this::handleTasks);
 		t.start();
