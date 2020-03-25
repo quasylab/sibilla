@@ -12,8 +12,6 @@ import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 import quasylab.sibilla.core.simulator.server.ServerInfo;
 import quasylab.sibilla.core.util.NetworkUtils;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
@@ -37,7 +35,6 @@ public class MasterServerSimulationEnvironment {
 
     private ServerSocket simulationSocket;
     private TCPNetworkManager simulationNetworkManager;
-
 
     private MonitoringServer monitoringServer;
     private MasterState state;
@@ -63,13 +60,13 @@ public class MasterServerSimulationEnvironment {
         this.discoveryNetworkManager = UDPNetworkManager.createNetworkManager(LOCAL_DISCOVERY_INFO, true);
         LOGGER.info(String.format("Listening on port: %d", localDiscoveryPort));
         this.discoveryConnectionExecutor = Executors.newFixedThreadPool(2);
-        this.simulationServers = new HashSet<ServerInfo>();
+        this.simulationServers = new HashSet<>();
 
         this.simulationSocket = new ServerSocket(localSimulationPort);
 
-        new Thread(() -> startDiscoveryServer()).start();
+        new Thread(this::startDiscoveryServer).start();
 
-        new Thread(() -> startSimulationServer()).start();
+        new Thread(this::startSimulationServer).start();
 
         while (true) {
             broadcastToInterfaces();
@@ -86,9 +83,7 @@ public class MasterServerSimulationEnvironment {
                 e.printStackTrace();
             }
             return false;
-        }).forEach(networkInterface -> {
-            networkInterface.getInterfaceAddresses().stream().map(interfaceAddress -> interfaceAddress.getBroadcast()).filter(Objects::nonNull).forEach(this::broadcastToSingleInterface);
-        });
+        }).forEach(networkInterface -> networkInterface.getInterfaceAddresses().stream().map(InterfaceAddress::getBroadcast).filter(Objects::nonNull).forEach(this::broadcastToSingleInterface));
     }
 
 
@@ -97,9 +92,8 @@ public class MasterServerSimulationEnvironment {
      */
     private void broadcastToSingleInterface(InetAddress address) {
         try {
-            LOGGER.info(String.format("Address: %s", address.toString()));
             discoveryNetworkManager.writeObject(ObjectSerializer.serializeObject(LOCAL_DISCOVERY_INFO), address, remotePort);
-            LOGGER.info("Sent broadcast packet");
+            LOGGER.info(String.format("Sent broadcast packet to address: %s", address.toString()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -120,8 +114,6 @@ public class MasterServerSimulationEnvironment {
                     }
                 });
                 LOGGER.info(String.format("Current set of servers: %s", simulationServers.toString()));
-            } catch (IOException e) {
-                e.printStackTrace();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -132,16 +124,14 @@ public class MasterServerSimulationEnvironment {
      * Manages the informations received by slave servers
      *
      * @param info Set of informations received by a slave server
-     * @throws Exception TODO Exception handling
      */
-    public void manageServers(Set<ServerInfo> info) throws Exception {
+    public void manageServers(Set<ServerInfo> info) {
         LOGGER.info(String.format("Read from the NetworkManager: %s", info.toString()));
         info.forEach(singleInfo -> {
             if (simulationServers.add(singleInfo)) {
                 LOGGER.info("Added server " + singleInfo.toString());
-            } else {
-                //LOGGER.warning("This server was already present: " + singleInfo.toString());
             }
+            //LOGGER.warning("This server was already present: " + singleInfo.toString());
         });
     }
 
@@ -170,7 +160,7 @@ public class MasterServerSimulationEnvironment {
      */
     private void manageSimulationMessage(Socket socket) throws Exception {
         this.simulationNetworkManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), socket);
-        Map<Command, Runnable> map = Map.of(Command.CLIENT_PING, () -> respondPingRequest(), Command.CLIENT_INIT, () -> loadModelClass(), Command.CLIENT_DATA, () -> handleSimulationDataSet());
+        Map<Command, Runnable> map = Map.of(Command.CLIENT_PING, this::respondPingRequest, Command.CLIENT_INIT, this::loadModelClass, Command.CLIENT_DATA, this::handleSimulationDataSet);
         while (true) {
             Command command = (Command) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
             LOGGER.info(String.format("%s command received by the client", command.toString()));
@@ -204,9 +194,9 @@ public class MasterServerSimulationEnvironment {
             String modelName = (String) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
             LOGGER.info(String.format("Model name read: %s", modelName));
             byte[] myClass = simulationNetworkManager.readObject();
-            LOGGER.info(String.format("Class received"));
+            LOGGER.info("Class received");
             new CustomClassLoader().defClass(modelName, myClass);
-            LOGGER.info(String.format("Class loaded"));
+            LOGGER.info("Class loaded");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -215,7 +205,7 @@ public class MasterServerSimulationEnvironment {
     private void respondPingRequest() {
         try {
             simulationNetworkManager.writeObject(ObjectSerializer.serializeObject(Command.MASTER_PONG));
-            LOGGER.info(String.format("Ping request answered"));
+            LOGGER.info("Ping request answered");
         } catch (Exception e) {
             e.printStackTrace();
         }

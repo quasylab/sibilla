@@ -1,13 +1,10 @@
 package quasylab.sibilla.core.simulator.newserver;
 
-import quasylab.sibilla.core.simulator.network.TCPNetworkManager;
 import quasylab.sibilla.core.simulator.server.ServerInfo;
-import quasylab.sibilla.core.simulator.server.SlaveState;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Collections;
@@ -31,10 +28,6 @@ public class MasterState implements Serializable, PropertyChangeListener {
         updateSupport.addPropertyChangeListener(pcl);
     }
 
-    public synchronized void removePropertyChangeListener(PropertyChangeListener pcl) {
-        updateSupport.removePropertyChangeListener(pcl);
-    }
-
     private void updateListeners() {
         updateSupport.firePropertyChange(String.format("MasterState - %s", this.address.getHostAddress()), null, this);
     }
@@ -54,11 +47,7 @@ public class MasterState implements Serializable, PropertyChangeListener {
     }
 
     public synchronized void addServer(ServerInfo server) {
-        try {
-            this.addServer(server, new SlaveState(this));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.addServer(server, new SlaveState(this));
     }
 
     public synchronized void removeServer(ServerInfo server) {
@@ -75,9 +64,16 @@ public class MasterState implements Serializable, PropertyChangeListener {
         return new HashMap<>(this.servers);
     }
 
-
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         this.updateListeners();
+    }
+
+    @Override
+    public String toString() {
+        return "MasterState{" + "runningServers=" + runningServers +
+                ", servers=" + servers +
+                ", address=" + address +
+                '}';
     }
 }

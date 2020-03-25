@@ -4,7 +4,6 @@ import quasylab.sibilla.core.simulator.network.TCPNetworkManager;
 import quasylab.sibilla.core.simulator.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 import quasylab.sibilla.core.simulator.server.ServerInfo;
-import quasylab.sibilla.core.simulator.server.SlaveState;
 import quasylab.sibilla.core.util.NetworkUtils;
 
 import java.io.IOException;

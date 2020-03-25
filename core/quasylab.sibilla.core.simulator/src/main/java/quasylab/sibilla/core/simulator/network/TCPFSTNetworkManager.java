@@ -6,6 +6,7 @@ import java.net.SocketException;
 
 import org.nustaq.net.TCPObjectSocket;
 import org.nustaq.serialization.FSTConfiguration;
+import quasylab.sibilla.core.simulator.server.ServerInfo;
 
 public class TCPFSTNetworkManager implements TCPNetworkManager {
 	private Socket socket;

@@ -1,22 +1,18 @@
 package quasylab.sibilla.core.simulator.newserver;
 
-import quasylab.sibilla.core.simulator.network.TCPDefaultNetworkManager;
 import quasylab.sibilla.core.simulator.network.TCPNetworkManager;
 import quasylab.sibilla.core.simulator.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 import quasylab.sibilla.core.simulator.server.ServerInfo;
-import quasylab.sibilla.core.simulator.server.SlaveState;
 import quasylab.sibilla.core.util.NetworkUtils;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 

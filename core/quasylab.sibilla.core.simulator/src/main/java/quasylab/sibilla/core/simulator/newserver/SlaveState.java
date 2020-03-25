@@ -1,14 +1,9 @@
-package quasylab.sibilla.core.simulator.server;
+package quasylab.sibilla.core.simulator.newserver;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.InetAddress;
-import java.util.Arrays;
-
-import quasylab.sibilla.core.simulator.network.TCPNetworkManager;
-import quasylab.sibilla.core.simulator.newserver.MasterState;
 
 public class SlaveState implements Serializable {
     private int expectedTasks, actualTasks;
@@ -24,7 +19,7 @@ public class SlaveState implements Serializable {
 
     private PropertyChangeSupport updateSupport;
 
-    public SlaveState(MasterState masterState) throws IOException {
+    public SlaveState(MasterState masterState) {
         expectedTasks = 1;
         actualTasks = 0;
         isRemoved = false;
@@ -41,15 +36,6 @@ public class SlaveState implements Serializable {
         updateSupport.addPropertyChangeListener(pcl);
     }
 
-    public synchronized void addPropertyChangeListener(PropertyChangeListener[] pclArray) {
-        Arrays.stream(pclArray).forEach(pcl -> updateSupport.addPropertyChangeListener(pcl));
-
-    }
-
-    public synchronized void removePropertyChangeListener(PropertyChangeListener pcl) {
-        updateSupport.removePropertyChangeListener(pcl);
-    }
-
     private void updateListeners() {
         updateSupport.firePropertyChange("SlaveState", null, this);
     }
@@ -64,7 +50,7 @@ public class SlaveState implements Serializable {
                 expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
             } else if (expectedTasks < threshold) {
                 expectedTasks = expectedTasks * 2;
-            } else if (expectedTasks >= threshold) {
+            } else {
                 expectedTasks = expectedTasks + 1;
             }
         } else {
@@ -82,7 +68,7 @@ public class SlaveState implements Serializable {
         this.updateListeners();
     }
 
-    public void migrate() throws IOException {
+    public void migrate() {
         isRemoved = false;
         isTimeout = false;
         this.updateListeners();
@@ -137,7 +123,7 @@ public class SlaveState implements Serializable {
         this.updateListeners();
     }
 
-    public void timedout() {
+    public void timedOut() {
         isTimeout = true;
         this.updateListeners();
     }
