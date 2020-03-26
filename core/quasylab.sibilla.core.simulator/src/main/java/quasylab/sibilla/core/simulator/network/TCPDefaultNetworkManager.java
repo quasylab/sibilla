@@ -69,6 +69,17 @@ public class TCPDefaultNetworkManager implements TCPNetworkManager {
 	}
 
 	@Override
+	public void closeConnection() {
+		try {
+			this.socket.close();
+			this.ois.close();
+			this.oos.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
 	public TCPNetworkManagerType getType() {
 		return TCPNetworkManagerType.DEFAULT;
 	}

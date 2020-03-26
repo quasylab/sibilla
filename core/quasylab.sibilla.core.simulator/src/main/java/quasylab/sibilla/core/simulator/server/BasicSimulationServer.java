@@ -26,20 +26,20 @@ public class BasicSimulationServer implements SimulationServer {
 
     private static final Logger LOGGER = Logger.getLogger(BasicSimulationServer.class.getName());
 
-    private final TCPNetworkManagerType serialization;
+    private final TCPNetworkManagerType networkManagerType;
     private ServerSocket serverSocket;
     private ExecutorService taskExecutor = Executors.newCachedThreadPool();
     private ExecutorService connectionExecutor = Executors.newCachedThreadPool();
 
 
-    public BasicSimulationServer(TCPNetworkManagerType serialization) {
-        this.serialization = serialization;
-        LOGGER.info(String.format("Set serialization type: %s", this.serialization.name()));
+    public BasicSimulationServer(TCPNetworkManagerType networkManagerType) {
+        this.networkManagerType = networkManagerType;
+        LOGGER.info(String.format("Creating a new BasicSimulation server that uses: [%s - %s]", this.networkManagerType.getClass(), this.networkManagerType.name()));
     }
 
     public void start(int port) throws IOException {
         serverSocket = new ServerSocket(port);
-        LOGGER.info(String.format("BasicSimulationServer listening on port %d", port));
+        LOGGER.info(String.format("The BasicSimulationServer is now listening for servers on port: [%d]", port));
         while (true) {
             TaskHandler handler = null;
             try {
@@ -57,10 +57,7 @@ public class BasicSimulationServer implements SimulationServer {
         private TCPNetworkManager client;
 
         public TaskHandler(Socket socket) throws IOException {
-            LOGGER.info(String.format("Connection accepted by IP %s and port %d",
-                    socket.getInetAddress().getHostAddress(), socket.getPort()));
-            client = TCPNetworkManager.createNetworkManager(serialization, socket);
-            LOGGER.info(String.format("NetworkManager created"));
+            client = TCPNetworkManager.createNetworkManager(networkManagerType, socket);
         }
 
         public void run() {
@@ -72,7 +69,7 @@ public class BasicSimulationServer implements SimulationServer {
                 Map<Command, Runnable> map = Map.of(Command.MASTER_PING, () -> respondPingRequest(), Command.MASTER_INIT, () -> loadModelClass(), Command.MASTER_TASK, () -> handleTaskExecution());
                 while (true) {
                     Command request = (Command) ObjectSerializer.deserializeObject(client.readObject());
-                    LOGGER.info(String.format("Request received: %s", request));
+                    LOGGER.info(String.format("[%s] command received by server - %s", request, client.getServerInfo().toString()));
                     map.getOrDefault(request, () -> {
                     }).run();
                 }
@@ -89,12 +86,11 @@ public class BasicSimulationServer implements SimulationServer {
         private void loadModelClass() {
             try {
                 String modelName = (String) ObjectSerializer.deserializeObject(client.readObject());
-                LOGGER.info(String.format("Model name read: %s", modelName));
+                LOGGER.info(String.format("[%s] Model name read by server - %s", modelName, client.getServerInfo().toString()));
                 byte[] myClass = client.readObject();
-                LOGGER.info(String.format("Class received"));
                 new CustomClassLoader().defClass(modelName, myClass);
                 String classLoadedName = Class.forName(modelName).getName();
-                LOGGER.info(String.format("Class loaded: %s", classLoadedName));
+                LOGGER.info(String.format("[%s] Class loaded with success", classLoadedName));
             } catch (ClassNotFoundException e) {
                 LOGGER.severe(e.getMessage());
                 e.printStackTrace();
@@ -118,7 +114,7 @@ public class BasicSimulationServer implements SimulationServer {
                     results.add(task.getTrajectory());
                 }
                 client.writeObject(ObjectSerializer.serializeObject(new ComputationResult(results)));
-                LOGGER.info(String.format("Computation's results have been sent to the client successfully"));
+                LOGGER.info(String.format("Computation's results have been sent to the server - %s", client.getServerInfo().toString()));
             } catch (Exception e) {
                 LOGGER.severe(e.getMessage());
                 e.printStackTrace();
@@ -129,7 +125,7 @@ public class BasicSimulationServer implements SimulationServer {
         private void respondPingRequest() {
             try {
                 client.writeObject(ObjectSerializer.serializeObject(Command.SLAVE_PONG));
-                LOGGER.info(String.format("Ping request answered"));
+                LOGGER.info(String.format("Ping request answered, it was sent by the server - %s", client.getServerInfo().toString()));
             } catch (Exception e) {
                 LOGGER.severe(e.getMessage());
                 e.printStackTrace();

@@ -44,13 +44,12 @@ public class ClientSimulationEnvironment<S extends State> {
                 deadline, masterServerInfo);
         this.masterServerNetworkManager = TCPNetworkManager.createNetworkManager(masterServerInfo);
 
-        LOGGER.info("Client environment initialized");
-        LOGGER.info(String.format("Client data hashcode: %d", data.hashCode()));
-        LOGGER.info(String.format("Client data toString: %s", data.toString()));
+        LOGGER.info(String.format("Starting a new client that will submit the simulation to the server - %s", masterServerInfo.toString()));
 
 
         this.initConnection(masterServerNetworkManager);
-       this.sendSimulationInfo(masterServerNetworkManager);
+        this.sendSimulationInfo(masterServerNetworkManager);
+        this.masterServerNetworkManager.closeConnection();
     }
 
     /**
@@ -62,12 +61,12 @@ public class ClientSimulationEnvironment<S extends State> {
     private void initConnection(TCPNetworkManager server) throws Exception {
         byte[] classBytes = ClassBytesLoader.loadClassBytes(data.getModelReferenceName());
 
-        LOGGER.info(String.format("Model class has been converted in bytes"));
         server.writeObject(ObjectSerializer.serializeObject(Command.CLIENT_INIT));
+        LOGGER.info(String.format("[%s] command sent to the server - %s", Command.CLIENT_INIT, server.getServerInfo().toString()));
         server.writeObject(ObjectSerializer.serializeObject(data.getModelReferenceName()));
-        LOGGER.info(String.format("Model name %s has been sent to the server", data.getModelReferenceName()));
+        LOGGER.info(String.format("[%s] Model name has been sent to the server - %s", data.getModelReferenceName(), server.getServerInfo().toString()));
         server.writeObject(classBytes);
-        LOGGER.info(String.format("Class bytes have been sent to the server"));
+        LOGGER.info(String.format("Class bytes have been sent to the server - %s", server.getServerInfo().toString()));
     }
 
     /**
@@ -79,7 +78,7 @@ public class ClientSimulationEnvironment<S extends State> {
     private void sendSimulationInfo(TCPNetworkManager targetServer) throws Exception {
         targetServer.writeObject(ObjectSerializer.serializeObject(Command.CLIENT_DATA));
         targetServer.writeObject(ObjectSerializer.serializeObject(data));
-        LOGGER.info(String.format("Data have been sent to the server"));
+        LOGGER.info(String.format("Simulation datas have been sent to the server - %s", targetServer.getServerInfo().toString()));
     }
 
     private void sendPing(TCPNetworkManager targetServer) throws Exception {

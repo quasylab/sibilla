@@ -46,6 +46,17 @@ public class TCPFSTNetworkManager implements TCPNetworkManager {
 	}
 
 	@Override
+	public void closeConnection() {
+		try {
+			this.socket.close();
+			this.FSTSocket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	@Override
 	public TCPNetworkManagerType getType() {
 		return TCPNetworkManagerType.FST;
 	}

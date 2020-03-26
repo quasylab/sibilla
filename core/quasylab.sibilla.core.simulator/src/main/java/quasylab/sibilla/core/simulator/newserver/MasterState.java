@@ -14,14 +14,15 @@ import java.util.Map;
 public class MasterState implements Serializable, PropertyChangeListener {
     private volatile int runningServers;
     private Map<ServerInfo, SlaveState> servers;
-    private InetAddress address;
+    private ServerInfo masterInfo;
     private PropertyChangeSupport updateSupport;
 
-    public MasterState(InetAddress address) {
-        this.address = address;
+    public MasterState(ServerInfo masterInfo) {
+        this.masterInfo = masterInfo;
         runningServers = 0;
         servers = Collections.synchronizedMap(new HashMap<>());
         updateSupport = new PropertyChangeSupport(this);
+        this.updateListeners();
     }
 
     public synchronized void addPropertyChangeListener(PropertyChangeListener pcl) {
@@ -29,7 +30,7 @@ public class MasterState implements Serializable, PropertyChangeListener {
     }
 
     private void updateListeners() {
-        updateSupport.firePropertyChange(String.format("MasterState - %s", this.address.getHostAddress()), null, this);
+        updateSupport.firePropertyChange(String.format("MasterState - %s", this.masterInfo.getAddress().getHostName()), null, this);
     }
 
     public synchronized void increaseRunningServers() {
@@ -71,9 +72,6 @@ public class MasterState implements Serializable, PropertyChangeListener {
 
     @Override
     public String toString() {
-        return "MasterState{" + "runningServers=" + runningServers +
-                ", servers=" + servers +
-                ", address=" + address +
-                '}';
+        return String.format("%s", servers);
     }
 }

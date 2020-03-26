@@ -144,10 +144,13 @@ public class SlaveState implements Serializable {
         if (isTimeout()) {
             return "Server has timed out, reconnecting...";
         }
-        return "Tasks received: " + actualTasks + " " + "Window runtime: " + runningTime + "ns " + "sampleRTT: "
-                + sampleRTT + "ns " + "estimatedRTT: " + estimatedRTT + "ns " + "devRTT: " + devRTT + "ns "
-                + "Next task window: " + expectedTasks + " " + "Next time limit: " + getTimeLimit() + "ns "
-                + "Next timeout: " + getTimeout() + "ns\n";
+        return " - Tasks received: " + actualTasks +
+                "\n - Window runtime: " + runningTime + "ns " +
+                "\n - sampleRTT: " + sampleRTT + "ns " +
+                "\n - estimatedRTT: " + estimatedRTT + "ns " +
+                "\n - devRTT: " + devRTT + "ns "
+                + "\n - Next task window: " + expectedTasks + " " + "\n - Next time limit: " + getTimeLimit() + "ns "
+                + "\n - Next timeout: " + getTimeout() + "ns";
     }
 
     public boolean isRemoved() {

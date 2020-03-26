@@ -20,14 +20,15 @@ public interface TCPNetworkManager {
         return new ServerInfo(getSocket().getInetAddress(), getSocket().getPort(), getType());
     }
 
+    public void closeConnection();
     public TCPNetworkManagerType getType();
 
     public static TCPNetworkManager createNetworkManager(ServerInfo info) throws IOException {
         Socket socket = new Socket(info.getAddress(), info.getPort());
-        switch (info.getType().name()) {
-            case "FST":
+        switch ((TCPNetworkManagerType) info.getType()) {
+            case FST:
                 return new TCPFSTNetworkManager(socket);
-            case "DEFAULT":
+            case DEFAULT:
             default:
                 return new TCPDefaultNetworkManager(socket);
         }

@@ -48,6 +48,7 @@ public class SimulationEnvironment implements Serializable {
 
 	public SimulationEnvironment(SimulationManagerFactory simulationManagerFactory) {
 		this.simulationManagerFactory = simulationManagerFactory;
+		LOGGER.info("Simulation environment created");
 	}
 
 	public synchronized <S extends State> void simulate(RandomGenerator random, Model<S> model, S initialState,
@@ -70,7 +71,6 @@ public class SimulationEnvironment implements Serializable {
 
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random,
 				trc -> trc.sample(sampling_function));
-		LOGGER.info(String.format("Simulation manager created: %s", simulationManager.getClass().getName()));
 		if (activeGUI) {
 			SimulationView<S> view = new SimulationView<S>(simulationManager, iterations);
 		}

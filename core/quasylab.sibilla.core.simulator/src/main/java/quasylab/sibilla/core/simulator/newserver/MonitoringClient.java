@@ -22,6 +22,7 @@ public class MonitoringClient {
     public MonitoringClient(int localPort, ServerInfo remoteMonitoringServer) {
         this.LOCAL_MONITOR_INFO = new ServerInfo(NetworkUtils.getLocalIp(), localPort, remoteMonitoringServer.getType());
         this.REMOTE_MONITOR_INFO = remoteMonitoringServer;
+        LOGGER.info(String.format("Creating a monitoring client that will listen for updates on port [%d] from server - %s", LOCAL_MONITOR_INFO.getPort(), REMOTE_MONITOR_INFO.toString()));
         this.subscribe();
         new Thread(() -> this.listenForUpdates()).start();
     }
@@ -32,7 +33,7 @@ public class MonitoringClient {
             ServerSocket serverSocket = new ServerSocket(LOCAL_MONITOR_INFO.getPort());
             while (true) {
                 Socket socket = serverSocket.accept();
-                listenClient(socket);
+                listenServer(socket);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -41,14 +42,14 @@ public class MonitoringClient {
 
     }
 
-    private void listenClient(Socket socket) {
+    private void listenServer(Socket socket) {
         try {
             TCPNetworkManager networkManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) LOCAL_MONITOR_INFO.getType(), socket);
             Command received = (Command) ObjectSerializer.deserializeObject(networkManager.readObject());
-            LOGGER.info(String.format("%s command received", received));
+            LOGGER.info(String.format("[%s] command received from the server - %s", received, networkManager.getServerInfo().toString()));
             if (received.equals(Command.MONITORING_UPDATE)) {
                 this.mastersInfo = (HashMap<String, MasterState>) ObjectSerializer.deserializeObject(networkManager.readObject());
-                LOGGER.info(String.format("Masters info: %s", mastersInfo.toString()));
+                LOGGER.info(String.format("CURRENT UPDATES: [%s]", mastersInfo.toString()));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,6 +61,7 @@ public class MonitoringClient {
             TCPNetworkManager networkManager = TCPNetworkManager.createNetworkManager(REMOTE_MONITOR_INFO);
             networkManager.writeObject(ObjectSerializer.serializeObject(Command.MONITORING_SUBSCRIBE));
             networkManager.writeObject(ObjectSerializer.serializeObject(LOCAL_MONITOR_INFO));
+            LOGGER.info(String.format("I have subscribed to the server - %s", networkManager.getServerInfo().toString()));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -72,6 +74,7 @@ public class MonitoringClient {
             TCPNetworkManager networkManager = TCPNetworkManager.createNetworkManager(REMOTE_MONITOR_INFO);
             networkManager.writeObject(ObjectSerializer.serializeObject(Command.MONITORING_UNSUBSCRIBE));
             networkManager.writeObject(ObjectSerializer.serializeObject(LOCAL_MONITOR_INFO));
+            LOGGER.info(String.format("I have unsubscribed from the server - %s", networkManager.getServerInfo().toString()));
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {

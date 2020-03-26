@@ -35,8 +35,8 @@ public class ServerInfo implements Serializable {
 	}
 
 	public String toString() {
-		return String.format("Server infos: IP %s - port %d - serialization type %s", address.getHostName(), port,
-				type.name());
+		return String.format("{ IP: [%s] - Port: [%d] - Communication type: [%s - %s] }", address.getHostName(), port,
+				type.getClass(), type);
 	}
 
 	@Override

@@ -17,8 +17,8 @@ public interface UDPNetworkManager {
 	public static UDPNetworkManager createNetworkManager(ServerInfo info, boolean toBroadcast) throws IOException {
 		DatagramSocket socket = new DatagramSocket(info.getPort(), info.getAddress());
 		socket.setBroadcast(toBroadcast);
-		switch (info.getType().name()) {
-			case "DEFAULT":
+		switch ((UDPNetworkManagerType) info.getType()) {
+			case DEFAULT:
 				return new UDPDefaultNetworkManager(socket);
 		}
 		return null;

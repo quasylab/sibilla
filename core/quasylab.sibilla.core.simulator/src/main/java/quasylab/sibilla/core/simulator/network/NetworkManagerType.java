@@ -4,5 +4,4 @@ import quasylab.sibilla.core.simulator.server.ServerInfo;
 
 public interface NetworkManagerType {
 
-	public String name();
 }

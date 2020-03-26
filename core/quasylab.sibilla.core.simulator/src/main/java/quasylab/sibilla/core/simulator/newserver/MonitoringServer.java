@@ -28,6 +28,7 @@ public class MonitoringServer implements PropertyChangeListener {
         LOCAL_MONITOR_INFO = new ServerInfo(NetworkUtils.getLocalIp(), monitoringPort, monitoringNetworkManager);
         mastersInfo = new HashMap<>();
         monitoringClients = new HashSet<>();
+        LOGGER.info(String.format("Creating a monitoring server that will listen for subscribers on port: [%d]", LOCAL_MONITOR_INFO.getPort()));
         new Thread(() -> this.listenForSubscribers()).start();
         new Thread(() -> this.updateSubscribers()).start();
     }
@@ -37,7 +38,7 @@ public class MonitoringServer implements PropertyChangeListener {
             while (true) {
                 monitoringClients.stream().forEach(this::updateClient);
                 LOGGER.info(String.format("Subscribers have been updated"));
-                Thread.sleep(20000);
+                Thread.sleep(5000);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -49,6 +50,7 @@ public class MonitoringServer implements PropertyChangeListener {
             TCPNetworkManager networkManager = TCPNetworkManager.createNetworkManager(serverInfo);
             networkManager.writeObject(ObjectSerializer.serializeObject(Command.MONITORING_UPDATE));
             networkManager.writeObject(ObjectSerializer.serializeObject(this.mastersInfo));
+           // networkManager.closeConnection();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -59,6 +61,7 @@ public class MonitoringServer implements PropertyChangeListener {
     private void listenForSubscribers() {
         try {
             ServerSocket serverSocket = new ServerSocket(LOCAL_MONITOR_INFO.getPort());
+            LOGGER.info(String.format("Now listening for new subscribers on port: [%d]", LOCAL_MONITOR_INFO.getPort()));
             while (true) {
                 Socket socket = serverSocket.accept();
                 this.manageSubscriber(socket);
@@ -72,12 +75,12 @@ public class MonitoringServer implements PropertyChangeListener {
         try {
             this.monitoringNetworkManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) LOCAL_MONITOR_INFO.getType(), socket);
             Map<Command, Runnable> map = Map.of(Command.MONITORING_SUBSCRIBE, () -> subscribeClient(), Command.MONITORING_UNSUBSCRIBE, () -> unsubscribeClient());
-            while (true) {
-                Command command = (Command) ObjectSerializer.deserializeObject(monitoringNetworkManager.readObject());
-                LOGGER.info(String.format("%s command received by the subscriber", command.toString()));
-                map.getOrDefault(command, () -> {
-                }).run();
-            }
+
+            Command command = (Command) ObjectSerializer.deserializeObject(monitoringNetworkManager.readObject());
+            LOGGER.info(String.format("[%s] command received by the client - %s", command.toString(), monitoringNetworkManager.getServerInfo().toString()));
+            map.getOrDefault(command, () -> {
+            }).run();
+           // monitoringNetworkManager.closeConnection();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -89,7 +92,7 @@ public class MonitoringServer implements PropertyChangeListener {
         try {
             ServerInfo clientInfo = (ServerInfo) ObjectSerializer.deserializeObject(monitoringNetworkManager.readObject());
             if (this.monitoringClients.remove(clientInfo)) {
-                LOGGER.info(String.format("Subscriber removed: %s", clientInfo.toString()));
+                LOGGER.info(String.format("Subscriber removed - %s", clientInfo.toString()));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -100,7 +103,7 @@ public class MonitoringServer implements PropertyChangeListener {
         try {
             ServerInfo clientInfo = (ServerInfo) ObjectSerializer.deserializeObject(monitoringNetworkManager.readObject());
             if (this.monitoringClients.add(clientInfo)) {
-                LOGGER.info(String.format("New subscriber added: %s", clientInfo.toString()));
+                LOGGER.info(String.format("New subscriber added - %s", clientInfo.toString()));
             }
         } catch (Exception e) {
             e.printStackTrace();
