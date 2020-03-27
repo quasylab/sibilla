@@ -77,15 +77,17 @@ public class ClientSimulationEnvironment<S extends State> {
      */
     private void sendSimulationInfo(TCPNetworkManager targetServer) throws Exception {
         targetServer.writeObject(ObjectSerializer.serializeObject(Command.CLIENT_DATA));
+        LOGGER.info(String.format("[%s] command sent to the server - %s", Command.CLIENT_DATA, targetServer.getServerInfo().toString()));
         targetServer.writeObject(ObjectSerializer.serializeObject(data));
         LOGGER.info(String.format("Simulation datas have been sent to the server - %s", targetServer.getServerInfo().toString()));
     }
 
     private void sendPing(TCPNetworkManager targetServer) throws Exception {
         targetServer.writeObject(ObjectSerializer.serializeObject(Command.CLIENT_PING));
+        LOGGER.info(String.format("[%s] command sent to the server - %s", Command.CLIENT_PING, targetServer.getServerInfo().toString()));
         LOGGER.info(String.format("Ping has been sent to the server"));
         Command answer = (Command) ObjectSerializer.deserializeObject(targetServer.readObject());
-        LOGGER.info(String.format("Answer received: %s", answer.toString()));
+        LOGGER.info(String.format("Answer received: [%s]", answer));
     }
 
 }

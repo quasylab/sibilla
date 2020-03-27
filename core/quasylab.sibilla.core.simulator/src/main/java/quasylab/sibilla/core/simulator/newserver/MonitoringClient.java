@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
 public class MonitoringClient {
@@ -54,6 +56,14 @@ public class MonitoringClient {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String mastersInfoToString(Map<String, MasterState> infos) {
+        AtomicReference<String> info = new AtomicReference<>("");
+        infos.keySet().stream().forEach((master) -> {
+            info.set(info + master + "\n" + infos.get(master).toString());
+        });
+        return info.get();
     }
 
     private void subscribe() {

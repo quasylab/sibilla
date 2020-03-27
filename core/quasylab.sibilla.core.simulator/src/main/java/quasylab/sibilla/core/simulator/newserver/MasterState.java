@@ -6,10 +6,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
-import java.net.InetAddress;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class MasterState implements Serializable, PropertyChangeListener {
     private volatile int runningServers;
@@ -30,7 +30,7 @@ public class MasterState implements Serializable, PropertyChangeListener {
     }
 
     private void updateListeners() {
-        updateSupport.firePropertyChange(String.format("MasterState - %s", this.masterInfo.getAddress().getHostName()), null, this);
+        updateSupport.firePropertyChange(String.format("- Master - %s", this.masterInfo.toString()), null, this);
     }
 
     public synchronized void increaseRunningServers() {
@@ -72,6 +72,10 @@ public class MasterState implements Serializable, PropertyChangeListener {
 
     @Override
     public String toString() {
-        return String.format("%s", servers);
+        AtomicReference<String> state = new AtomicReference<>("");
+        this.servers.keySet().stream().forEach((server) -> {
+            state.set(state + "- Slave - " + server.toString() + "\n" + this.servers.get(server).toString() + "\n");
+        });
+        return state.get();
     }
 }
