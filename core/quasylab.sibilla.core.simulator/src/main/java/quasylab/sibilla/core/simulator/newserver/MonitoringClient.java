@@ -51,7 +51,7 @@ public class MonitoringClient {
             LOGGER.info(String.format("[%s] command received from the server - %s", received, networkManager.getServerInfo().toString()));
             if (received.equals(Command.MONITORING_UPDATE)) {
                 this.mastersInfo = (HashMap<String, MasterState>) ObjectSerializer.deserializeObject(networkManager.readObject());
-                LOGGER.info(String.format("CURRENT UPDATES: [%s]", mastersInfo.toString()));
+                LOGGER.info(String.format("CURRENT UPDATES: [%s]", this.mastersInfoToString(mastersInfo)));
             }
         } catch (Exception e) {
             e.printStackTrace();
