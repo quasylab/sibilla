@@ -287,13 +287,9 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
      */
     private void closeStreams() {
         for (TCPNetworkManager server : this.networkManagers) {
-            try {
-                server.getSocket().close();
-                LOGGER.info(String.format("The connection with the server has been closed - %s",
-                        server.getServerInfo().toString()));
-            } catch (IOException e) {
-                LOGGER.severe(e.getMessage());
-            }
+            server.closeConnection();
+            LOGGER.info(String.format("The connection with the server has been closed - %s",
+                    server.getServerInfo().toString()));
         }
     }
 

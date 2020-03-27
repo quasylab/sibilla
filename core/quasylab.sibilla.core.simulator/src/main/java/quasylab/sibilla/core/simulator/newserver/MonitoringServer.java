@@ -20,7 +20,6 @@ public class MonitoringServer implements PropertyChangeListener {
     private static final Logger LOGGER = Logger.getLogger(MonitoringServer.class.getName());
 
     private HashSet<ServerInfo> monitoringClients;
-    private TCPNetworkManager monitoringNetworkManager;
     private final ServerInfo LOCAL_MONITOR_INFO;
     private HashMap<String, MasterState> mastersInfo;
 
@@ -30,7 +29,7 @@ public class MonitoringServer implements PropertyChangeListener {
         monitoringClients = new HashSet<>();
         LOGGER.info(String.format("Creating a monitoring server that will listen for subscribers on port: [%d]", LOCAL_MONITOR_INFO.getPort()));
         new Thread(() -> this.listenForSubscribers()).start();
-       // new Thread(() -> this.updateSubscribers()).start();
+        // new Thread(() -> this.updateSubscribers()).start();
     }
 
     private void updateSubscribers() {
@@ -46,7 +45,7 @@ public class MonitoringServer implements PropertyChangeListener {
             TCPNetworkManager networkManager = TCPNetworkManager.createNetworkManager(serverInfo);
             networkManager.writeObject(ObjectSerializer.serializeObject(Command.MONITORING_UPDATE));
             networkManager.writeObject(ObjectSerializer.serializeObject(this.mastersInfo));
-           // networkManager.closeConnection();
+            // networkManager.closeConnection();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -69,14 +68,14 @@ public class MonitoringServer implements PropertyChangeListener {
 
     private void manageSubscriber(Socket socket) {
         try {
-            this.monitoringNetworkManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) LOCAL_MONITOR_INFO.getType(), socket);
-            Map<Command, Runnable> map = Map.of(Command.MONITORING_SUBSCRIBE, () -> subscribeClient(), Command.MONITORING_UNSUBSCRIBE, () -> unsubscribeClient());
+            TCPNetworkManager monitoringNetworkManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) LOCAL_MONITOR_INFO.getType(), socket);
+            Map<Command, Runnable> map = Map.of(Command.MONITORING_SUBSCRIBE, () -> subscribeClient(monitoringNetworkManager), Command.MONITORING_UNSUBSCRIBE, () -> unsubscribeClient(monitoringNetworkManager));
 
             Command command = (Command) ObjectSerializer.deserializeObject(monitoringNetworkManager.readObject());
             LOGGER.info(String.format("[%s] command received by the client - %s", command.toString(), monitoringNetworkManager.getServerInfo().toString()));
             map.getOrDefault(command, () -> {
             }).run();
-           // monitoringNetworkManager.closeConnection();
+            // monitoringNetworkManager.closeConnection();
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -84,9 +83,9 @@ public class MonitoringServer implements PropertyChangeListener {
         }
     }
 
-    private void unsubscribeClient() {
+    private void unsubscribeClient(TCPNetworkManager manager) {
         try {
-            ServerInfo clientInfo = (ServerInfo) ObjectSerializer.deserializeObject(monitoringNetworkManager.readObject());
+            ServerInfo clientInfo = (ServerInfo) ObjectSerializer.deserializeObject(manager.readObject());
             if (this.monitoringClients.remove(clientInfo)) {
                 LOGGER.info(String.format("Subscriber removed - %s", clientInfo.toString()));
             }
@@ -95,9 +94,9 @@ public class MonitoringServer implements PropertyChangeListener {
         }
     }
 
-    private void subscribeClient() {
+    private void subscribeClient(TCPNetworkManager manager) {
         try {
-            ServerInfo clientInfo = (ServerInfo) ObjectSerializer.deserializeObject(monitoringNetworkManager.readObject());
+            ServerInfo clientInfo = (ServerInfo) ObjectSerializer.deserializeObject(manager.readObject());
             if (this.monitoringClients.add(clientInfo)) {
                 LOGGER.info(String.format("New subscriber added - %s", clientInfo.toString()));
             }

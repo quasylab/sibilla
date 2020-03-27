@@ -30,7 +30,6 @@ public class MonitoringClient {
     }
 
     private void listenForUpdates() {
-
         try {
             ServerSocket serverSocket = new ServerSocket(LOCAL_MONITOR_INFO.getPort());
             while (true) {
@@ -40,8 +39,6 @@ public class MonitoringClient {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
     }
 
     private void listenServer(Socket socket) {
