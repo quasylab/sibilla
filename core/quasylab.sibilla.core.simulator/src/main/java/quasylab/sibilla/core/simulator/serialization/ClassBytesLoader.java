@@ -14,7 +14,7 @@ public class ClassBytesLoader {
 
         className = className.replace('.', fileSeparator.charAt(0));
         className = className + ".class";
-
+        
         // Search for the class in the CLASSPATH
         is = ClassLoader.getSystemResourceAsStream(className);
 

@@ -28,11 +28,11 @@ public class MonitoringServer implements PropertyChangeListener {
         mastersInfo = new HashMap<>();
         monitoringClients = new HashSet<>();
         LOGGER.info(String.format("Creating a monitoring server that will listen for subscribers on port: [%d]", LOCAL_MONITOR_INFO.getPort()));
-        new Thread(() -> this.listenForSubscribers()).start();
+        // new Thread(() -> this.listenForSubscribers()).start();
         // new Thread(() -> this.updateSubscribers()).start();
     }
 
-    private void updateSubscribers() {
+   /* private void updateSubscribers() {
         //  while (true) {
         monitoringClients.stream().forEach(this::updateClient);
         LOGGER.info(String.format("Subscribers have been updated"));
@@ -103,14 +103,17 @@ public class MonitoringServer implements PropertyChangeListener {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getNewValue() instanceof MasterState) {
             mastersInfo.put(evt.getPropertyName(), (MasterState) evt.getNewValue());
         }
-        this.updateSubscribers();
+        //this.updateSubscribers();
     }
 
+    public Map<String, MasterState> getStateMap(){
+        return this.mastersInfo;
+    }
 }

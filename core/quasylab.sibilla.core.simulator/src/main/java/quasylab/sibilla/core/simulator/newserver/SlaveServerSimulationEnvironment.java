@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * Instantiates the single simulation servers, sends informations about them to the master
+ * Instantiates the single simulation servers, sends informations about them to the quasylab.sibilla.core.server.master
  */
 public class SlaveServerSimulationEnvironment {
 
@@ -88,10 +88,10 @@ public class SlaveServerSimulationEnvironment {
     }
 
     /**
-     * Manages a message from the master
+     * Manages a message from the quasylab.sibilla.core.server.master
      *
      * @param manager    UDPNetworkManager that handles the sending of messages
-     * @param masterInfo ServerInfo of the master server
+     * @param masterInfo ServerInfo of the quasylab.sibilla.core.server.master server
      * @throws Exception TODO Exception handling
      */
     private void manageDiscoveryMessage(UDPDefaultNetworkManager manager, ServerInfo masterInfo) throws Exception {

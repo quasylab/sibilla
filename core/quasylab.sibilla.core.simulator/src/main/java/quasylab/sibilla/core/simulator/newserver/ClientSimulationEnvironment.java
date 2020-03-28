@@ -13,7 +13,7 @@ import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 import quasylab.sibilla.core.simulator.server.ServerInfo;
 
 /**
- * Sends request to a master server for the execution of simulations
+ * Sends request to a quasylab.sibilla.core.server.master server for the execution of simulations
  *
  * @param <S> The class of the state of the model
  */
@@ -25,7 +25,7 @@ public class ClientSimulationEnvironment<S extends State> {
     private TCPNetworkManager masterServerNetworkManager;
 
     /**
-     * Creates a new client that sends simulation commands with the parameters of the simulation to execute and the ServerInfo of the master server that will manage such simulation
+     * Creates a new client that sends simulation commands with the parameters of the simulation to execute and the ServerInfo of the quasylab.sibilla.core.server.master server that will manage such simulation
      *
      * @param random            RandomGenerator of the simulation
      * @param modelName         String with the name of the class that defines the model
@@ -34,7 +34,7 @@ public class ClientSimulationEnvironment<S extends State> {
      * @param sampling_function The sampling function that will be used to collect data
      * @param replica           Repetitions of the simulation
      * @param deadline          Time interval between two samplings
-     * @param masterServerInfo  ServerInfo of the master server
+     * @param masterServerInfo  ServerInfo of the quasylab.sibilla.core.server.master server
      * @throws Exception TODO Exception handling
      */
     public ClientSimulationEnvironment(AbstractRandomGenerator random, String modelName, Model<S> model, S initialState,
@@ -53,9 +53,9 @@ public class ClientSimulationEnvironment<S extends State> {
     }
 
     /**
-     * Sends the original class to the master server
+     * Sends the original class to the quasylab.sibilla.core.server.master server
      *
-     * @param server NetworkManager to the master server
+     * @param server NetworkManager to the quasylab.sibilla.core.server.master server
      * @throws Exception TODO Exception handling
      */
     private void initConnection(TCPNetworkManager server) throws Exception {
@@ -70,9 +70,9 @@ public class ClientSimulationEnvironment<S extends State> {
     }
 
     /**
-     * Sends the info of the simulation to execute to the master server
+     * Sends the info of the simulation to execute to the quasylab.sibilla.core.server.master server
      *
-     * @param targetServer NetworkManager to the master server
+     * @param targetServer NetworkManager to the quasylab.sibilla.core.server.master server
      * @throws Exception TODO exception handling
      */
     private void sendSimulationInfo(TCPNetworkManager targetServer) throws Exception {

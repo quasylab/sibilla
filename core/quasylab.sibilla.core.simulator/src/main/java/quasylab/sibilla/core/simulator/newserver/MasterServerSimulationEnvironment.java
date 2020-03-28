@@ -41,7 +41,7 @@ public class MasterServerSimulationEnvironment {
     private int remotePort;
 
     /**
-     * Creates a master server with the given information that broadcasts his discovery messages to the given remoteDiscovetyPort
+     * Creates a quasylab.sibilla.core.server.master server with the given information that broadcasts his discovery messages to the given remoteDiscovetyPort
      *
      * @param localDiscoveryPort      port the server listens to
      * @param remoteDiscoveryPort     port the server sends discovery messages to
@@ -212,8 +212,8 @@ public class MasterServerSimulationEnvironment {
         try {
             String modelName = (String) ObjectSerializer.deserializeObject(client.readObject());
             LOGGER.info(String.format("[%s] Model name read by server - IP: [%s] Port: [%d]", modelName, client.getSocket().getInetAddress().getHostAddress(), client.getSocket().getPort()));
-            byte[] myClass = client.readObject();
-            new CustomClassLoader().defClass(modelName, myClass);
+            byte[] modelBytes = client.readObject();
+            new CustomClassLoader().defClass(modelName, modelBytes);
             String classLoadedName = Class.forName(modelName).getName();
             LOGGER.info(String.format("[%s] Class loaded with success", classLoadedName));
         } catch (Exception e) {
@@ -228,6 +228,10 @@ public class MasterServerSimulationEnvironment {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public MonitoringServer getMonitoringServer(){
+        return this.monitoringServer;
     }
 
 }

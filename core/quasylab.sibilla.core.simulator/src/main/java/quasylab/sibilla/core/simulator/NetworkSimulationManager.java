@@ -69,6 +69,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
                     classInitiated = true;
                 } catch (Exception e) {
                     LOGGER.severe("Error during server initialization, removing server...");
+                    e.printStackTrace();
                     map.get(address).remove(0);
                 }
             }
