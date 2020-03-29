@@ -19,11 +19,11 @@
 
 package quasylab.sibilla.core.simulator;
 
-import java.io.Serializable;
-import java.util.function.Predicate;
-
 import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.sampling.SamplePredicate;
+
+import java.io.Serializable;
+import java.util.function.Predicate;
 
 /**
  * @author loreti

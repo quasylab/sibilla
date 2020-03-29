@@ -21,12 +21,11 @@
  */
 package quasylab.sibilla.core.simulator;
 
-import java.io.Serializable;
-
 import org.apache.commons.math3.random.RandomGenerator;
-
 import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.util.WeightedStructure;
+
+import java.io.Serializable;
 
 /**
  * @author loreti

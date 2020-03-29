@@ -18,18 +18,18 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator;
 
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.logging.Logger;
-import java.io.Serializable;
-
 import org.apache.commons.math3.random.RandomGenerator;
-
 import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-//import quasylab.sibilla.core.simulator.ui.SimulationView;
 import quasylab.sibilla.core.simulator.ui.SimulationView;
+
+import java.io.Serializable;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.logging.Logger;
+
+//import quasylab.sibilla.core.simulator.ui.SimulationView;
 
 /**
  * @author loreti

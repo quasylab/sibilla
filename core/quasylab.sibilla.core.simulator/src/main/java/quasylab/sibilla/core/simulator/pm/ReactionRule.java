@@ -21,10 +21,10 @@
  */
 package quasylab.sibilla.core.simulator.pm;
 
+import org.apache.commons.math3.random.RandomGenerator;
+
 import java.io.Serializable;
 import java.util.function.Function;
-
-import org.apache.commons.math3.random.RandomGenerator;
 
 /**
  * @author loreti

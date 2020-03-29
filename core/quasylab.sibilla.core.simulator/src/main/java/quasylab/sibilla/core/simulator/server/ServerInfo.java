@@ -1,9 +1,9 @@
 package quasylab.sibilla.core.simulator.server;
 
+import quasylab.sibilla.core.simulator.network.NetworkManagerType;
+
 import java.io.Serializable;
 import java.net.InetAddress;
-
-import quasylab.sibilla.core.simulator.network.NetworkManagerType;
 
 public class ServerInfo implements Serializable {
 

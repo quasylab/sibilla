@@ -19,10 +19,10 @@
 
 package quasylab.sibilla.core.simulator;
 
-import java.util.function.Consumer;
-
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.simulator.pm.State;
+
+import java.util.function.Consumer;
 
 /**
  * @author loreti

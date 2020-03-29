@@ -1,28 +1,14 @@
 package quasylab.sibilla.core.simulator.ui;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import quasylab.sibilla.core.simulator.SimulationManager;
+import quasylab.sibilla.core.simulator.pm.State;
+
+import javax.swing.*;
+import javax.swing.text.DefaultCaret;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.text.DefaultCaret;
-
-import quasylab.sibilla.core.simulator.SimulationManager;
-import quasylab.sibilla.core.simulator.pm.State;
 
 
 public class SimulationView<S extends State> {

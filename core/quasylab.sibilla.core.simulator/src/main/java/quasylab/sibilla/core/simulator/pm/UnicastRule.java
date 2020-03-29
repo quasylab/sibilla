@@ -21,12 +21,11 @@
  */
 package quasylab.sibilla.core.simulator.pm;
 
-import java.util.function.Function;
-
 import org.apache.commons.math3.random.RandomGenerator;
-
 import quasylab.sibilla.core.simulator.util.ComposedWeightedStructure;
 import quasylab.sibilla.core.simulator.util.WeightedStructure;
+
+import java.util.function.Function;
 
 /**
  * @author loreti

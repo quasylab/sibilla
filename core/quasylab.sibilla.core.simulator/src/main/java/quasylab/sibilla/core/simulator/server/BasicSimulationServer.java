@@ -5,7 +5,6 @@ import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
 import quasylab.sibilla.core.simulator.network.TCPNetworkManager;
 import quasylab.sibilla.core.simulator.network.TCPNetworkManagerType;
-import quasylab.sibilla.core.simulator.newserver.Command;
 import quasylab.sibilla.core.simulator.serialization.CustomClassLoader;
 import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 

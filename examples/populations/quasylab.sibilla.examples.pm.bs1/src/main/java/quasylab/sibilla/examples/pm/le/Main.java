@@ -3,9 +3,6 @@
  */
 package quasylab.sibilla.examples.pm.le;
 
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.PopulationFactory;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
@@ -13,7 +10,12 @@ import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.ReactionRule;
 import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
-import quasylab.sibilla.core.simulator.sampling.StatisticSampling;;
+import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
+
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+
+;
 
 /**
  * @author loreti

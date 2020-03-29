@@ -18,13 +18,13 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator;
 
-import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.List;
-
 import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.sampling.Sample;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+
+import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author loreti

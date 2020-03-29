@@ -1,8 +1,8 @@
 package quasylab.sibilla.core.simulator.serialization;
 
-import java.io.Serializable;
-
 import org.apache.commons.lang3.SerializationUtils;
+
+import java.io.Serializable;
 
 public class ObjectSerializer {
 

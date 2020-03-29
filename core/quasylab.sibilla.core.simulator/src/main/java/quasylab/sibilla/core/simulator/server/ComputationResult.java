@@ -1,11 +1,11 @@
 package quasylab.sibilla.core.simulator.server;
 
+import quasylab.sibilla.core.simulator.Trajectory;
+import quasylab.sibilla.core.simulator.pm.State;
+
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
-
-import quasylab.sibilla.core.simulator.Trajectory;
-import quasylab.sibilla.core.simulator.pm.State;
 
 public class ComputationResult<S extends State> implements Serializable {
     private static final long serialVersionUID = -545122842766553412L;

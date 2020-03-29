@@ -18,15 +18,13 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator.sampling;
 
-import java.io.PrintStream;
-import java.util.LinkedList;
-import java.util.function.Function;
-
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-
 import quasylab.sibilla.core.simulator.pm.MeasureFunction;
 import quasylab.sibilla.core.simulator.pm.State;
+
+import java.io.PrintStream;
+import java.util.LinkedList;
 
 
 /**

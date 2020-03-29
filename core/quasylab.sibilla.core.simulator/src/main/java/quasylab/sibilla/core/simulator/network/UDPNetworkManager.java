@@ -1,10 +1,11 @@
 package quasylab.sibilla.core.simulator.network;
 
-import java.io.IOException;
-import java.net.*;
-
-import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 import quasylab.sibilla.core.simulator.server.ServerInfo;
+
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
 
 public interface UDPNetworkManager {
 

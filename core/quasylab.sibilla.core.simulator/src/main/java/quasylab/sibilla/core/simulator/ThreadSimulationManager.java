@@ -19,6 +19,9 @@
 
 package quasylab.sibilla.core.simulator;
 
+import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.simulator.pm.State;
+
 import java.util.LongSummaryStatistics;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -26,9 +29,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
-
-import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.simulator.pm.State;
 
 /**
  * @author belenchia

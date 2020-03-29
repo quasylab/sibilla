@@ -18,10 +18,10 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator;
 
+import org.apache.commons.math3.random.AbstractRandomGenerator;
+
 import java.io.Serializable;
 import java.util.Random;
-
-import org.apache.commons.math3.random.AbstractRandomGenerator;
 
 /**
  * @author loreti

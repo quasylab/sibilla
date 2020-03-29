@@ -18,6 +18,13 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator.pm;
 
+import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.simulator.Model;
+import quasylab.sibilla.core.simulator.StepFunction;
+import quasylab.sibilla.core.simulator.util.WeightedElement;
+import quasylab.sibilla.core.simulator.util.WeightedLinkedList;
+import quasylab.sibilla.core.simulator.util.WeightedStructure;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,14 +32,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.IntStream;
-
-import org.apache.commons.math3.random.RandomGenerator;
-
-import quasylab.sibilla.core.simulator.Model;
-import quasylab.sibilla.core.simulator.StepFunction;
-import quasylab.sibilla.core.simulator.util.WeightedElement;
-import quasylab.sibilla.core.simulator.util.WeightedLinkedList;
-import quasylab.sibilla.core.simulator.util.WeightedStructure;
 
 /**
  * 

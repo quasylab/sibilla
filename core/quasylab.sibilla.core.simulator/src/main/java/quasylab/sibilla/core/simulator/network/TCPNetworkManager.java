@@ -1,10 +1,10 @@
 package quasylab.sibilla.core.simulator.network;
 
+import quasylab.sibilla.core.simulator.server.ServerInfo;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
-
-import quasylab.sibilla.core.simulator.server.ServerInfo;
 
 public interface TCPNetworkManager {
 
