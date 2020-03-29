@@ -6,7 +6,7 @@ package quasylab.sibilla.core.simulator.tests;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.NetworkSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.network.TCPNetworkManagerType;
+import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;

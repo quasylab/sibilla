@@ -1,8 +1,5 @@
 package quasylab.sibilla.examples.pm.seir;
 
-import quasylab.sibilla.core.simulator.network.TCPNetworkManagerType;
-import quasylab.sibilla.core.simulator.server.BasicSimulationServer;
-import quasylab.sibilla.core.simulator.server.SimulationServer;
 
 import java.io.IOException;
 import java.util.logging.Logger;

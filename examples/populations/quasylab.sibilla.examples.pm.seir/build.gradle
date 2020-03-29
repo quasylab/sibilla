@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
   compile project(':core:quasylab.sibilla.core.simulator')
-  compile project(':core:quasylab.sibilla.core.newserver')
+  compile project(':core:quasylab.sibilla.core.server')
 }
 
 mainClassName = 'quasylab.sibilla.examples.pm.seir.NetworkMain'

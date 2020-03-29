@@ -10,7 +10,7 @@
 rootProject.name = 'quasylab.sibilla'
 
 include 'core:quasylab.sibilla.core.simulator',
-		'core:quasylab.sibilla.core.newserver',
+		'core:quasylab.sibilla.core.server',
         'langs:quasylab.sibilla.lang.pm.parent',
         'langs:quasylab.sibilla.lang.pm.parent:quasylab.sibilla.lang.pm',
         'langs:quasylab.sibilla.lang.pm.parent:quasylab.sibilla.lang.ide',
