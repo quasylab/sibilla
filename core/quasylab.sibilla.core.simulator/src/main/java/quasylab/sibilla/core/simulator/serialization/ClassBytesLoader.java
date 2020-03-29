@@ -1,5 +1,6 @@
 package quasylab.sibilla.core.simulator.serialization;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,22 +13,22 @@ public class ClassBytesLoader {
         InputStream is;
         String fileSeparator = System.getProperty("file.separator");
 
-        className = className.replace('.', fileSeparator.charAt(0));
-        className = className + ".class";
-        
+        String fileName = className.replace('.', fileSeparator.charAt(0));
+        fileName = fileName + ".class";
+
         // Search for the class in the CLASSPATH
-        is = ClassLoader.getSystemResourceAsStream(className);
+        is = ClassLoader.getSystemResourceAsStream(fileName);
+        if (is != null) {
+            size = is.available();
 
-        if (is == null)
-            throw new FileNotFoundException(className);
+            classBytes = new byte[size];
 
-        size = is.available();
+            is.read(classBytes);
+            is.close();
 
-        classBytes = new byte[size];
-
-        is.read(classBytes);
-        is.close();
-
-        return classBytes;
+            return classBytes;
+        }
+        
+        return CustomClassLoader.classes.get(className);
     }
 }
