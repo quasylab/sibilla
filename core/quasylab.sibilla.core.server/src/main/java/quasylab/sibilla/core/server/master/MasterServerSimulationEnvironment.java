@@ -4,11 +4,11 @@ import quasylab.sibilla.core.server.Command;
 import quasylab.sibilla.core.server.NetworkSimulationManager;
 import quasylab.sibilla.core.server.ServerInfo;
 import quasylab.sibilla.core.server.SimulationDataSet;
-import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.network.UDPNetworkManager;
 import quasylab.sibilla.core.server.network.UDPNetworkManagerType;
+import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 import quasylab.sibilla.core.simulator.serialization.CustomClassLoader;
@@ -227,6 +227,7 @@ public class MasterServerSimulationEnvironment {
         try {
             sim.simulate(dataSet.getRandomGenerator(), dataSet.getModelReference(), dataSet.getModelReferenceInitialState(), dataSet.getModelReferenceSamplingFunction(), dataSet.getReplica(), dataSet.getDeadline(), false);
             this.updateListeners(dataSet.getModelReferenceSamplingFunction().getSimulationTimeSeries(dataSet.getReplica()));
+            this.state.increaseExecutedSimulations();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

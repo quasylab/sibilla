@@ -11,7 +11,7 @@ public class ComputationResult<S extends State> implements Serializable {
     private static final long serialVersionUID = -545122842766553412L;
     private final LinkedList<Trajectory<S>> results;
 
-    public ComputationResult(LinkedList<Trajectory<S>> results){
+    public ComputationResult(LinkedList<Trajectory<S>> results) {
         this.results = results;
     }
 

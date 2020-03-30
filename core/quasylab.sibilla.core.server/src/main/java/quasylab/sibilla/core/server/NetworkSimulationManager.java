@@ -21,9 +21,12 @@ package quasylab.sibilla.core.server;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.server.master.MasterState;
-import quasylab.sibilla.core.server.slave.SlaveState;
-import quasylab.sibilla.core.simulator.*;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
+import quasylab.sibilla.core.server.slave.SlaveState;
+import quasylab.sibilla.core.simulator.SimulationManager;
+import quasylab.sibilla.core.simulator.SimulationManagerFactory;
+import quasylab.sibilla.core.simulator.SimulationTask;
+import quasylab.sibilla.core.simulator.Trajectory;
 import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.serialization.ClassBytesLoader;
 import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
@@ -223,7 +226,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
     private TCPNetworkManager manageTimeout(TCPNetworkManager server) {
         SlaveState oldState = this.masterState.getServersMap().get(server.getServerInfo());
         TCPNetworkManager pingServer = null;
-        ServerInfo pingServerInfo = null;
+        ServerInfo pingServerInfo;
         try {
             LOGGER.warning(String.format("Managing timeout of server - %s", server.getServerInfo().toString()));
             pingServerInfo = new ServerInfo(server.getSocket().getInetAddress(),

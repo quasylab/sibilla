@@ -137,7 +137,6 @@ public class SlaveState implements Serializable {
         return isTimeout;
     }
 
-
     @Override
     public String toString() {
         if (isRemoved()) {

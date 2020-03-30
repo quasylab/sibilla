@@ -25,6 +25,7 @@ public class SlaveServerSimulationEnvironment {
     private HashSet<ServerInfo> simulationServersInfo;
     private HashSet<SimulationServer> simulationServers;
     private boolean alreadyDiscovered;
+
     /**
      * Create a slave server listening on a given port and creates the simulation servers with the given info
      *

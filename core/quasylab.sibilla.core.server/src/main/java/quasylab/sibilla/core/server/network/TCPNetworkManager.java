@@ -9,21 +9,6 @@ import java.net.SocketException;
 
 public interface TCPNetworkManager {
 
-    public byte[] readObject() throws Exception;
-
-    public void writeObject(byte[] toWrite) throws Exception;
-
-    public void setTimeout(long timeout) throws SocketException;
-
-    public Socket getSocket();
-
-    public default ServerInfo getServerInfo(){
-        return new ServerInfo(getSocket().getInetAddress(), getSocket().getPort(), getType());
-    }
-
-    public void closeConnection();
-    public TCPNetworkManagerType getType();
-
     public static TCPNetworkManager createNetworkManager(ServerInfo info) throws IOException {
         Socket socket = new Socket(info.getAddress(), info.getPort());
         switch ((TCPNetworkManagerType) info.getType()) {
@@ -44,4 +29,20 @@ public interface TCPNetworkManager {
                 return new TCPDefaultNetworkManager(socket);
         }
     }
+
+    public byte[] readObject() throws Exception;
+
+    public void writeObject(byte[] toWrite) throws Exception;
+
+    public void setTimeout(long timeout) throws SocketException;
+
+    public Socket getSocket();
+
+    public default ServerInfo getServerInfo() {
+        return new ServerInfo(getSocket().getInetAddress(), getSocket().getPort(), getType());
+    }
+
+    public void closeConnection();
+
+    public TCPNetworkManagerType getType();
 }

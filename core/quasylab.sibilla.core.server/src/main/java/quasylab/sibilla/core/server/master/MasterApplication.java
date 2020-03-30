@@ -10,9 +10,6 @@ import quasylab.sibilla.core.server.network.UDPNetworkManagerType;
 @SpringBootApplication
 public class MasterApplication implements CommandLineRunner {
 
-    @Autowired
-    MonitoringServerComponent monitoringServerComponent;
-
     private static final int LOCAL_DISCOVERY_PORT = 10000;
     private static final int REMOTE_DISCOVERY_PORT = 59119;
     private static final UDPNetworkManagerType DISCOVERY_NETWORK_MANAGER_TYPE = UDPNetworkManagerType.DEFAULT;
@@ -20,6 +17,8 @@ public class MasterApplication implements CommandLineRunner {
     private static final TCPNetworkManagerType SIMULATION_NETWORK_MANAGER_TYPE = TCPNetworkManagerType.DEFAULT;
     private static final int LOCAL_MONITORING_PORT = 10002;
     private static final TCPNetworkManagerType MONITORING_NETWORK_MANAGER_TYPE = TCPNetworkManagerType.DEFAULT;
+    @Autowired
+    MonitoringServerComponent monitoringServerComponent;
 
     public static void main(String[] args) {
         SpringApplication.run(MasterApplication.class, args);

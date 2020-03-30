@@ -1,7 +1,6 @@
 package quasylab.sibilla.core.server.network;
 
 
-
 import quasylab.sibilla.core.server.ServerInfo;
 
 import java.io.IOException;
@@ -11,20 +10,22 @@ import java.net.SocketException;
 
 public interface UDPNetworkManager {
 
-	public byte[] readObject() throws Exception;
+    public static UDPNetworkManager createNetworkManager(ServerInfo info, boolean toBroadcast) throws IOException {
+        DatagramSocket socket = new DatagramSocket(info.getPort(), info.getAddress());
+        socket.setBroadcast(toBroadcast);
+        switch ((UDPNetworkManagerType) info.getType()) {
+            case DEFAULT:
+                return new UDPDefaultNetworkManager(socket);
+        }
+        return null;
+    }
 
-	public void writeObject(byte[] toWrite, InetAddress address, int port) throws Exception;
+    public byte[] readObject() throws Exception;
 
-	public void setTimeout(long timeout) throws SocketException;
-	public UDPNetworkManagerType getType();
-	public static UDPNetworkManager createNetworkManager(ServerInfo info, boolean toBroadcast) throws IOException {
-		DatagramSocket socket = new DatagramSocket(info.getPort(), info.getAddress());
-		socket.setBroadcast(toBroadcast);
-		switch ((UDPNetworkManagerType) info.getType()) {
-			case DEFAULT:
-				return new UDPDefaultNetworkManager(socket);
-		}
-		return null;
-	}
+    public void writeObject(byte[] toWrite, InetAddress address, int port) throws Exception;
+
+    public void setTimeout(long timeout) throws SocketException;
+
+    public UDPNetworkManagerType getType();
 
 }

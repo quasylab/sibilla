@@ -9,6 +9,7 @@ import java.io.Serializable;
 
 public class SimulationDataSet<S extends State> implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private final RandomGenerator randomGenerator;
     private final String modelReferenceName;
     private final Model<S> modelReference;
@@ -85,8 +86,6 @@ public class SimulationDataSet<S extends State> implements Serializable {
             return false;
         return true;
     }
-
-    private static final long serialVersionUID = 1L;
 
     public RandomGenerator getRandomGenerator() {
         return randomGenerator;

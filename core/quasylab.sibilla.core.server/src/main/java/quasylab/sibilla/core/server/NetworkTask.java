@@ -12,11 +12,11 @@ public class NetworkTask<S extends State> implements Serializable {
     private static final long serialVersionUID = 1L;
     private List<SimulationTask<S>> tasks;
 
-    public NetworkTask(List<SimulationTask<S>> tasks){
+    public NetworkTask(List<SimulationTask<S>> tasks) {
         this.tasks = tasks;
     }
 
-    public NetworkTask(SimulationTask<S> task){
+    public NetworkTask(SimulationTask<S> task) {
         this(new LinkedList<>(Arrays.asList(task)));
     }
 
