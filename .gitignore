@@ -205,3 +205,5 @@ gradle-app.setting
 **/build/
 
 # End of https://www.gitignore.io/api/java,gradle,eclipse,intellij
+*.iml
+core/quasylab.sibilla.core.simulator/src/main/main.iml

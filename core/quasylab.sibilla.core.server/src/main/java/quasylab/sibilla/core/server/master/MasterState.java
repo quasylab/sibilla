@@ -7,17 +7,14 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class MasterState implements Serializable, PropertyChangeListener {
     private Date startDate;
     private volatile int runningServers;
     private volatile int connectedServers;
     private volatile int executedSimulations;
-    private Map<ServerInfo, SlaveState> servers;
+    private Set<SlaveState> servers;
     private ServerInfo masterInfo;
     private PropertyChangeSupport updateSupport;
 
@@ -27,7 +24,7 @@ public class MasterState implements Serializable, PropertyChangeListener {
         this.runningServers = 0;
         this.connectedServers = 0;
         this.executedSimulations = 0;
-        this.servers = Collections.synchronizedMap(new HashMap<>());
+        this.servers = new HashSet<>();
         this.updateSupport = new PropertyChangeSupport(this);
         this.updateListeners();
     }
@@ -52,17 +49,21 @@ public class MasterState implements Serializable, PropertyChangeListener {
     }
 
     public synchronized void addServer(ServerInfo server) {
-        this.addServer(server, new SlaveState(this));
+        this.addServer(new SlaveState(this, server));
     }
 
     public synchronized void removeServer(ServerInfo server) {
-        this.servers.remove(server);
+        this.removeServer(this.getSlaveStateByServerInfo(server));
+    }
+
+    public synchronized void removeServer(SlaveState state) {
+        this.servers.remove(state);
         this.connectedServers--;
         this.updateListeners();
     }
 
-    public synchronized void addServer(ServerInfo server, SlaveState state) {
-        this.servers.put(server, state);
+    public synchronized void addServer(SlaveState state) {
+        this.servers.add(state);
         this.connectedServers++;
         this.updateListeners();
     }
@@ -76,8 +77,8 @@ public class MasterState implements Serializable, PropertyChangeListener {
         updateSupport.firePropertyChange("Master", null, this);
     }
 
-    public synchronized Map<ServerInfo, SlaveState> getServersMap() {
-        return new HashMap<>(this.servers);
+    public synchronized Set<SlaveState> getServers() {
+        return new HashSet<>(this.servers);
     }
 
     public ServerInfo getMasterInfo() {
@@ -98,5 +99,11 @@ public class MasterState implements Serializable, PropertyChangeListener {
 
     public Date getStartDate() {
         return startDate;
+    }
+
+    public SlaveState getSlaveStateByServerInfo(ServerInfo serverInfo) {
+        return this.servers.stream().filter(slaveState -> {
+            return slaveState.getSlaveInfo().equals(serverInfo);
+        }).findFirst().get();
     }
 }

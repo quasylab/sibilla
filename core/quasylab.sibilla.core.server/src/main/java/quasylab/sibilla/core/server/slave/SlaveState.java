@@ -1,5 +1,6 @@
 package quasylab.sibilla.core.server.slave;
 
+import quasylab.sibilla.core.server.ServerInfo;
 import quasylab.sibilla.core.server.master.MasterState;
 
 import java.beans.PropertyChangeListener;
@@ -18,13 +19,15 @@ public class SlaveState implements Serializable {
     private long runningTime;
     private double sampleRTT;
     private PropertyChangeSupport updateSupport;
+    private ServerInfo slaveInfo;
 
     /**
      * Creates a SlaveState object and sets the given MasterState as its listener
      *
      * @param masterState MasterState that listens to the changes of this object
      */
-    public SlaveState(MasterState masterState) {
+    public SlaveState(MasterState masterState, ServerInfo slaveInfo) {
+        this.slaveInfo = slaveInfo;
         expectedTasks = 1;
         actualTasks = 0;
         isRemoved = false;
@@ -45,6 +48,9 @@ public class SlaveState implements Serializable {
         updateSupport.firePropertyChange("SlaveState", null, this);
     }
 
+    public ServerInfo getSlaveInfo(){
+        return this.slaveInfo;
+    }
     /**
      * Updates the state of the slave server given the data about new executions
      *
@@ -85,7 +91,8 @@ public class SlaveState implements Serializable {
     /**
      * TODO ???
      */
-    public void migrate() {
+    public void migrate(ServerInfo newSlaveInfo) {
+        this.slaveInfo = newSlaveInfo;
         isRemoved = false;
         isTimeout = false;
         this.updateListeners();

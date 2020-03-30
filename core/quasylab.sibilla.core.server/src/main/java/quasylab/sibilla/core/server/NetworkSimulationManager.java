@@ -79,7 +79,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             l1.addAll(l2);
             return l1;
         }).get().forEach(serverInfo -> this.masterState.addServer(serverInfo));
-        networkManagers = this.masterState.getServersMap().keySet().stream().map(serverInfo -> {
+        networkManagers = this.masterState.getServers().stream().map(slaveState -> slaveState.getSlaveInfo()).map(serverInfo -> {
             try {
                 TCPNetworkManager server = TCPNetworkManager.createNetworkManager(serverInfo);
                 LOGGER.info(String.format("Created a NetworkManager to contact the server - %s",
@@ -128,7 +128,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
 
     private void handleTasks() {
         try {
-            while ((isRunning() || hasTasks() || this.masterState.getRunningServers() > 0) && !this.masterState.getServersMap().isEmpty()) {
+            while ((isRunning() || hasTasks() || this.masterState.getRunningServers() > 0) && !this.masterState.getServers().isEmpty()) {
                 singleTaskExecution();
             }
         } catch (InterruptedException e) {
@@ -145,7 +145,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
         TCPNetworkManager server = findServer();
         LOGGER.info(String.format("Server currently connected to: %s",
                 server.getServerInfo().toString()));
-        SlaveState serverState = this.masterState.getServersMap().get(server.getServerInfo());
+        SlaveState serverState = this.masterState.getSlaveStateByServerInfo(server.getServerInfo());
         LOGGER.info(String.format("State of the server: [%s]", serverState.toString()));
         int acceptableTasks = serverState.getExpectedTasks();
         if (!serverState.canCompleteTask(acceptableTasks)) {
@@ -198,7 +198,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             if ((newServer = manageTimeout(server)) != null) {
                 LOGGER.info(String.format("The server has responded. New server - %s", newServer.getServerInfo().toString()));
                 enqueueServer(newServer);// add new server to queue, old server won't return
-            } else if (this.masterState.getServersMap().isEmpty()) {
+            } else if (this.masterState.getServers().isEmpty()) {
                 synchronized (this) {
                     notifyAll();
                 }
@@ -213,7 +213,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             propertyChange("servers",
                     new String[]{
                             server.getSocket().getInetAddress().getHostAddress() + ":" + server.getSocket().getPort(),
-                            this.masterState.getServersMap().get(server.getServerInfo()).toString()});
+                            this.masterState.getSlaveStateByServerInfo(server.getServerInfo()).toString()});
         }
     }
 
@@ -224,7 +224,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
      * @return new server to use to execute tasks
      */
     private TCPNetworkManager manageTimeout(TCPNetworkManager server) {
-        SlaveState oldState = this.masterState.getServersMap().get(server.getServerInfo());
+        SlaveState oldState = this.masterState.getSlaveStateByServerInfo(server.getServerInfo());
         TCPNetworkManager pingServer = null;
         ServerInfo pingServerInfo;
         try {
@@ -254,11 +254,9 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             LOGGER.info(
                     String.format("The response has been received within the time limit. The task window will be reduced by half for the server - %s", pingServer.getServerInfo().toString()));
             oldState.forceExpiredTimeLimit(); // halve the task window
-            oldState.migrate();
-            this.masterState.addServer(pingServerInfo, oldState); // update hash map
+            oldState.migrate(pingServerInfo);
             this.networkManagers.add(pingServer);
 
-            this.masterState.removeServer(server.getServerInfo());
             server.getSocket().close();
             this.networkManagers.remove(server);
         } catch (Exception e) {
@@ -277,7 +275,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
 
     @Override
     public synchronized void join() throws InterruptedException {
-        while ((getRunningTasks() > 0 || hasTasks() || this.masterState.getRunningServers() > 0) && !this.masterState.getServersMap().isEmpty()) {
+        while ((getRunningTasks() > 0 || hasTasks() || this.masterState.getRunningServers() > 0) && !this.masterState.getServers().isEmpty()) {
             wait();
         }
         closeStreams();
@@ -303,7 +301,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
      * @return result of the computation
      */
     private ComputationResult<S> send(NetworkTask<S> networkTask, TCPNetworkManager server) {
-        SlaveState state = this.masterState.getServersMap().get(server.getServerInfo());
+        SlaveState state = this.masterState.getSlaveStateByServerInfo(server.getServerInfo());
         ComputationResult<S> result;
         long elapsedTime;
         try {
