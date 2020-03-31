@@ -8,7 +8,6 @@ import quasylab.sibilla.core.server.network.TCPNetworkManager;
 import quasylab.sibilla.core.simulator.Model;
 import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import quasylab.sibilla.core.simulator.serialization.ClassBytesLoader;
 import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 
 import java.util.logging.Logger;
@@ -60,13 +59,11 @@ public class ClientSimulationEnvironment<S extends State> {
      * @throws Exception TODO Exception handling
      */
     private void initConnection(TCPNetworkManager server) throws Exception {
-        byte[] classBytes = ClassBytesLoader.loadClassBytes(data.getModelReferenceName());
-
         server.writeObject(ObjectSerializer.serializeObject(Command.CLIENT_INIT));
         LOGGER.info(String.format("[%s] command sent to the server - %s", Command.CLIENT_INIT, server.getServerInfo().toString()));
         server.writeObject(ObjectSerializer.serializeObject(data.getModelReferenceName()));
         LOGGER.info(String.format("[%s] Model name has been sent to the server - %s", data.getModelReferenceName(), server.getServerInfo().toString()));
-        server.writeObject(classBytes);
+        server.writeObject(ObjectSerializer.serializeObject(Class.forName(data.getModelReferenceName())));
         LOGGER.info(String.format("Class bytes have been sent to the server - %s", server.getServerInfo().toString()));
     }
 

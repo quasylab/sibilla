@@ -85,8 +85,8 @@ public class BasicSimulationServer implements SimulationServer {
             try {
                 String modelName = (String) ObjectSerializer.deserializeObject(client.readObject());
                 LOGGER.info(String.format("[%s] Model name read by server - %s", modelName, client.getServerInfo().toString()));
-                byte[] myClass = client.readObject();
-                new CustomClassLoader().defClass(modelName, myClass);
+                Class<?> myClass = (Class<?>) ObjectSerializer.deserializeObject(client.readObject());
+                CustomClassLoader.resClass(myClass);
                 String classLoadedName = Class.forName(modelName).getName();
                 LOGGER.info(String.format("[%s] Class loaded with success", classLoadedName));
             } catch (ClassNotFoundException e) {

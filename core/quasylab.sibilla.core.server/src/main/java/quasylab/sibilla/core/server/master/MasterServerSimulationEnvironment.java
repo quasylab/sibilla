@@ -237,8 +237,8 @@ public class MasterServerSimulationEnvironment {
         try {
             String modelName = (String) ObjectSerializer.deserializeObject(client.readObject());
             LOGGER.info(String.format("[%s] Model name read by server - IP: [%s] Port: [%d]", modelName, client.getSocket().getInetAddress().getHostAddress(), client.getSocket().getPort()));
-            byte[] modelBytes = client.readObject();
-            new CustomClassLoader().defClass(modelName, modelBytes);
+            Class<?> clazz = (Class<?>) ObjectSerializer.deserializeObject(client.readObject());
+            CustomClassLoader.resClass(clazz);
             String classLoadedName = Class.forName(modelName).getName();
             LOGGER.info(String.format("[%s] Class loaded with success", classLoadedName));
         } catch (Exception e) {
