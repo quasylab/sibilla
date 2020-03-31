@@ -1,9 +1,9 @@
 package quasylab.sibilla.core.server.client;
 
-import org.apache.commons.math3.random.AbstractRandomGenerator;
-import quasylab.sibilla.core.server.Command;
+import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.server.ServerInfo;
 import quasylab.sibilla.core.server.SimulationDataSet;
+import quasylab.sibilla.core.server.master.MasterCommand;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
 import quasylab.sibilla.core.simulator.Model;
 import quasylab.sibilla.core.simulator.pm.State;
@@ -37,7 +37,7 @@ public class ClientSimulationEnvironment<S extends State> {
      * @param masterServerInfo  ServerInfo of the quasylab.sibilla.core.server.master server
      * @throws Exception TODO Exception handling
      */
-    public ClientSimulationEnvironment(AbstractRandomGenerator random, String modelName, Model<S> model, S initialState,
+    public ClientSimulationEnvironment(RandomGenerator random, String modelName, Model<S> model, S initialState,
                                        SamplingFunction<S> sampling_function, int replica, double deadline, ServerInfo masterServerInfo)
             throws Exception {
         this.data = new SimulationDataSet<S>(random, modelName, model, initialState, sampling_function, replica,
@@ -59,12 +59,22 @@ public class ClientSimulationEnvironment<S extends State> {
      * @throws Exception TODO Exception handling
      */
     private void initConnection(TCPNetworkManager server) throws Exception {
-        server.writeObject(ObjectSerializer.serializeObject(Command.CLIENT_INIT));
-        LOGGER.info(String.format("[%s] command sent to the server - %s", Command.CLIENT_INIT, server.getServerInfo().toString()));
+        server.writeObject(ObjectSerializer.serializeObject(ClientCommand.INIT));
+        LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.INIT, server.getServerInfo().toString()));
         server.writeObject(ObjectSerializer.serializeObject(data.getModelReferenceName()));
         LOGGER.info(String.format("[%s] Model name has been sent to the server - %s", data.getModelReferenceName(), server.getServerInfo().toString()));
         server.writeObject(ObjectSerializer.serializeObject(Class.forName(data.getModelReferenceName())));
         LOGGER.info(String.format("Class bytes have been sent to the server - %s", server.getServerInfo().toString()));
+        try {
+            MasterCommand answer = (MasterCommand) ObjectSerializer.deserializeObject(server.readObject());
+            if (answer.equals(MasterCommand.INIT_RESPONSE)) {
+                LOGGER.info(String.format("Answer received: [%s]", answer));
+            } else {
+                LOGGER.severe(String.format("The answer received wasn't expected. There was an error MasterServer's side"));
+            }
+        } catch (ClassCastException e) {
+            LOGGER.severe(String.format("The answer received wasn't expected. There was an error MasterServer's side"));
+        }
     }
 
     /**
@@ -74,18 +84,37 @@ public class ClientSimulationEnvironment<S extends State> {
      * @throws Exception TODO exception handling
      */
     private void sendSimulationInfo(TCPNetworkManager targetServer) throws Exception {
-        targetServer.writeObject(ObjectSerializer.serializeObject(Command.CLIENT_DATA));
-        LOGGER.info(String.format("[%s] command sent to the server - %s", Command.CLIENT_DATA, targetServer.getServerInfo().toString()));
+        targetServer.writeObject(ObjectSerializer.serializeObject(ClientCommand.DATA));
+        LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.DATA, targetServer.getServerInfo().toString()));
         targetServer.writeObject(ObjectSerializer.serializeObject(data));
         LOGGER.info(String.format("Simulation datas have been sent to the server - %s", targetServer.getServerInfo().toString()));
+        try {
+            MasterCommand answer = (MasterCommand) ObjectSerializer.deserializeObject(targetServer.readObject());
+            if (answer.equals(MasterCommand.DATA_RESPONSE)) {
+                LOGGER.info(String.format("Answer received: [%s]", answer));
+            } else {
+                LOGGER.severe(String.format("The answer received wasn't expected. There was an error MasterServer's side"));
+            }
+        } catch (ClassCastException e) {
+            LOGGER.severe(String.format("The answer received wasn't expected. There was an error MasterServer's side"));
+        }
     }
 
     private void sendPing(TCPNetworkManager targetServer) throws Exception {
-        targetServer.writeObject(ObjectSerializer.serializeObject(Command.CLIENT_PING));
-        LOGGER.info(String.format("[%s] command sent to the server - %s", Command.CLIENT_PING, targetServer.getServerInfo().toString()));
+        targetServer.writeObject(ObjectSerializer.serializeObject(ClientCommand.PING));
+        LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.PING, targetServer.getServerInfo().toString()));
         LOGGER.info(String.format("Ping has been sent to the server"));
-        Command answer = (Command) ObjectSerializer.deserializeObject(targetServer.readObject());
-        LOGGER.info(String.format("Answer received: [%s]", answer));
+        try {
+            MasterCommand answer = (MasterCommand) ObjectSerializer.deserializeObject(targetServer.readObject());
+            if (answer.equals(MasterCommand.PONG)) {
+                LOGGER.info(String.format("Answer received: [%s]", answer));
+            } else {
+                LOGGER.severe(String.format("The answer received wasn't expected. There was an error MasterServer's side"));
+            }
+        } catch (ClassCastException e) {
+            LOGGER.severe(String.format("The answer received wasn't expected. There was an error MasterServer's side"));
+        }
+
     }
 
 }

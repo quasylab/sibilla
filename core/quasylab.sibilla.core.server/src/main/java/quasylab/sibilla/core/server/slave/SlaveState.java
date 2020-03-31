@@ -6,6 +6,7 @@ import quasylab.sibilla.core.server.master.MasterState;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
+import java.util.Objects;
 
 public class SlaveState implements Serializable {
     private final static double alpha = 0.125;
@@ -20,6 +21,19 @@ public class SlaveState implements Serializable {
     private double sampleRTT;
     private PropertyChangeSupport updateSupport;
     private ServerInfo slaveInfo;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SlaveState that = (SlaveState) o;
+        return Objects.equals(slaveInfo, that.slaveInfo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(slaveInfo);
+    }
 
     /**
      * Creates a SlaveState object and sets the given MasterState as its listener

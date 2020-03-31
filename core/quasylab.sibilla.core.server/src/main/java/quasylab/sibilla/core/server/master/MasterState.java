@@ -48,24 +48,33 @@ public class MasterState implements Serializable, PropertyChangeListener {
         this.updateListeners();
     }
 
-    public synchronized void addServer(ServerInfo server) {
-        this.addServer(new SlaveState(this, server));
+    public synchronized boolean addServer(ServerInfo server) {
+        return this.addServer(new SlaveState(this, server));
     }
 
-    public synchronized void removeServer(ServerInfo server) {
-        this.removeServer(this.getSlaveStateByServerInfo(server));
+    public synchronized boolean removeServer(ServerInfo server) {
+        return this.removeServer(this.getSlaveStateByServerInfo(server));
     }
 
-    public synchronized void removeServer(SlaveState state) {
-        this.servers.remove(state);
-        this.connectedServers--;
-        this.updateListeners();
+    public synchronized boolean removeServer(SlaveState state) {
+        if (this.servers.remove(state)) {
+            this.connectedServers--;
+            this.updateListeners();
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    public synchronized void addServer(SlaveState state) {
-        this.servers.add(state);
-        this.connectedServers++;
-        this.updateListeners();
+    public synchronized boolean addServer(SlaveState state) {
+        if (this.servers.add(state)) {
+            this.connectedServers++;
+            this.updateListeners();
+            return true;
+        } else {
+            return false;
+        }
+
     }
 
     @Override

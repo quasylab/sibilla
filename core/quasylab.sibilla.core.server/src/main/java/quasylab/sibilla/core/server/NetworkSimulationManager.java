@@ -20,8 +20,10 @@
 package quasylab.sibilla.core.server;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.server.master.MasterCommand;
 import quasylab.sibilla.core.server.master.MasterState;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
+import quasylab.sibilla.core.server.slave.SlaveCommand;
 import quasylab.sibilla.core.server.slave.SlaveState;
 import quasylab.sibilla.core.simulator.SimulationManager;
 import quasylab.sibilla.core.simulator.SimulationManagerFactory;
@@ -47,9 +49,10 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
     private MasterState masterState;
     private Set<TCPNetworkManager> networkManagers;
 
-    public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer, List<ServerInfo> info,
+    public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer,
                                     String modelName, MasterState masterState) {
         super(random, consumer);
+        List<ServerInfo> info = masterState.getServers().stream().map(slaveState -> slaveState.getSlaveInfo()).collect(Collectors.toList());
         LOGGER.info(String.format("Creating a new NetworkSimulationManager to contact the servers: [%s]", info.toString()));
         this.modelName = modelName;
         this.masterState = masterState;
@@ -74,10 +77,10 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
                 }
             }
         });
-        map.values().stream().reduce((l1, l2) -> {
+       /* map.values().stream().reduce((l1, l2) -> {
             l1.addAll(l2);
             return l1;
-        }).get().forEach(serverInfo -> this.masterState.addServer(serverInfo));
+        }).get().forEach(serverInfo -> this.masterState.addServer(serverInfo));*/
         networkManagers = this.masterState.getServers().stream().map(slaveState -> slaveState.getSlaveInfo()).map(serverInfo -> {
             try {
                 TCPNetworkManager server = TCPNetworkManager.createNetworkManager(serverInfo);
@@ -93,13 +96,13 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
         this.startTasksHandling();
     }
 
-    public static SimulationManagerFactory getNetworkSimulationManagerFactory(List<ServerInfo> info,
-                                                                              String modelName, MasterState masterState) {
+    public static SimulationManagerFactory getNetworkSimulationManagerFactory(
+            String modelName, MasterState masterState) {
         return new SimulationManagerFactory() {
             @Override
             public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
                                                                                Consumer<Trajectory<S>> consumer) {
-                return new NetworkSimulationManager<>(random, consumer, info, modelName, masterState);
+                return new NetworkSimulationManager<>(random, consumer, modelName, masterState);
             }
         };
 
@@ -112,8 +115,8 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
      * @throws Exception TODO ???
      */
     private void initConnection(TCPNetworkManager server) throws Exception {
-        server.writeObject(ObjectSerializer.serializeObject(Command.MASTER_INIT));
-        LOGGER.info(String.format("[%s] command sent to the server - %s", Command.MASTER_INIT, server.getServerInfo().toString()));
+        server.writeObject(ObjectSerializer.serializeObject(MasterCommand.INIT));
+        LOGGER.info(String.format("[%s] command sent to the server - %s", MasterCommand.INIT, server.getServerInfo().toString()));
         server.writeObject(ObjectSerializer.serializeObject(modelName));
         LOGGER.info(String.format("[%s] Model name has been sent to the server - ", modelName, server.getServerInfo().toString()));
         server.writeObject(ObjectSerializer.serializeObject(Class.forName(modelName)));
@@ -243,10 +246,10 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
                             oldState.toString()});
 
             initConnection(pingServer); // initialize connection sending model data
-            pingServer.writeObject(ObjectSerializer.serializeObject(Command.MASTER_PING));
+            pingServer.writeObject(ObjectSerializer.serializeObject(MasterCommand.PING));
             LOGGER.info(String.format("Ping request sent to server - %s", pingServer.getServerInfo().toString())); // send ping request
-            Command response = (Command) ObjectSerializer.deserializeObject(pingServer.readObject()); // wait for response
-            if (!response.equals(Command.SLAVE_PONG)) {
+            SlaveCommand response = (SlaveCommand) ObjectSerializer.deserializeObject(pingServer.readObject()); // wait for response
+            if (!response.equals(SlaveCommand.PONG)) {
                 LOGGER.severe(String.format("The response received wasn't the one expected by the server - %s", pingServer.getServerInfo().toString()));
                 throw new IllegalStateException("Expected a different reply!");
             }
@@ -304,7 +307,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
         ComputationResult<S> result;
         long elapsedTime;
         try {
-            server.writeObject(ObjectSerializer.serializeObject(Command.MASTER_TASK));
+            server.writeObject(ObjectSerializer.serializeObject(MasterCommand.TASK));
             server.writeObject(ObjectSerializer.serializeObject(networkTask));
             elapsedTime = System.nanoTime();
 

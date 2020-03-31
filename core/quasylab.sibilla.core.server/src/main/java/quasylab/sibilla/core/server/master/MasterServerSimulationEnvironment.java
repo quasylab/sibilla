@@ -1,9 +1,9 @@
 package quasylab.sibilla.core.server.master;
 
-import quasylab.sibilla.core.server.Command;
 import quasylab.sibilla.core.server.NetworkSimulationManager;
 import quasylab.sibilla.core.server.ServerInfo;
 import quasylab.sibilla.core.server.SimulationDataSet;
+import quasylab.sibilla.core.server.client.ClientCommand;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.network.UDPNetworkManager;
@@ -17,7 +17,9 @@ import quasylab.sibilla.core.util.NetworkUtils;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.EOFException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -35,13 +37,17 @@ public class MasterServerSimulationEnvironment {
     private final ServerInfo LOCAL_SIMULATION_INFO;
 
     private UDPNetworkManager discoveryNetworkManager;
-    private ExecutorService discoveryConnectionExecutor;
-    private HashSet<ServerInfo> simulationServers;
+    private ExecutorService discoveryConnectionExecutor = Executors.newCachedThreadPool();
+    ;
+    // private HashSet<ServerInfo> simulationServers;
 
+    private int localSimulationPort;
     private ServerSocket simulationSocket;
     private MasterState state;
 
     private int remotePort;
+    private ExecutorService activitiesExecutors = Executors.newCachedThreadPool();
+    private ExecutorService connectionExecutor = Executors.newCachedThreadPool();
 
     private PropertyChangeSupport updateSupport;
 
@@ -60,15 +66,15 @@ public class MasterServerSimulationEnvironment {
         this.remotePort = remoteDiscoveryPort;
         this.state = new MasterState(LOCAL_SIMULATION_INFO);
         updateSupport = new PropertyChangeSupport(this);
-
+        this.localSimulationPort = localSimulationPort;
         Arrays.stream(listeners).forEach(listener -> {
             this.state.addPropertyChangeListener(listener);
             this.addPropertyChangeListener(listener);
         });
 
         this.discoveryNetworkManager = UDPNetworkManager.createNetworkManager(LOCAL_DISCOVERY_INFO, true);
-        this.discoveryConnectionExecutor = Executors.newFixedThreadPool(2);
-        this.simulationServers = new HashSet<>();
+
+        //this.simulationServers = new HashSet<>();
 
 
         LOGGER.info(String.format("Starting a new Master server" +
@@ -78,24 +84,39 @@ public class MasterServerSimulationEnvironment {
                 LOCAL_DISCOVERY_INFO.getPort(), LOCAL_DISCOVERY_INFO.getType().getClass(), LOCAL_DISCOVERY_INFO.getType(),
                 LOCAL_SIMULATION_INFO.getPort(), LOCAL_SIMULATION_INFO.getType().getClass(), LOCAL_SIMULATION_INFO.getType(),
                 localMonitoringPort, monitoringNetworkManager.getClass(), monitoringNetworkManager));
-        this.simulationSocket = new ServerSocket(localSimulationPort);
 
-        new Thread(this::startDiscoveryServer).start();
+        activitiesExecutors.execute(this::startDiscoveryServer);
+        activitiesExecutors.execute(this::startSimulationServer);
+        activitiesExecutors.execute(this::broadcastToInterfaces);
+      /*  new Thread(this::startDiscoveryServer).start();
 
         new Thread(this::startSimulationServer).start();
 
-        new Thread(this::broadcastToInterfaces).start();
+        new Thread(this::broadcastToInterfaces).start();*/
 
     }
 
+    /**
+     * Adds a PropertyChangeListener object that will receive updates from this object
+     *
+     * @param pcl the object to notify of updated
+     */
     public synchronized void addPropertyChangeListener(PropertyChangeListener pcl) {
         updateSupport.addPropertyChangeListener(pcl);
     }
 
+    /**
+     * Updates all the PropertyChangeListener objects that have been registered
+     *
+     * @param results List<SimulationTimeSeries> containing the simulations' results
+     */
     private void updateListeners(List<SimulationTimeSeries> results) {
         updateSupport.firePropertyChange("Results", null, results);
     }
 
+    /**
+     * Broadcast the discovery message to all the host's network interfaces
+     */
     private void broadcastToInterfaces() {
         try {
             while (true) {
@@ -116,7 +137,7 @@ public class MasterServerSimulationEnvironment {
 
 
     /**
-     * Sends a broadcast message to a specified interface, associated with the ip passed as an argument
+     * Sends a broadcast message to a specified network interface, associated with the ip passed as an argument
      */
     private void broadcastToSingleInterface(InetAddress address) {
         try {
@@ -141,7 +162,7 @@ public class MasterServerSimulationEnvironment {
                         e.printStackTrace();
                     }
                 });
-                LOGGER.info(String.format("Current set of servers: %s", simulationServers.toString()));
+                LOGGER.info(String.format("Current set of servers: %s", state.getServers().toString()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -155,7 +176,7 @@ public class MasterServerSimulationEnvironment {
      */
     public void manageServers(Set<ServerInfo> info) {
         info.forEach(singleInfo -> {
-            if (simulationServers.add(singleInfo)) {
+            if (state.addServer(singleInfo)) {
                 LOGGER.info(String.format("Added simulation server - %s", singleInfo.toString()));
             }
             //LOGGER.warning("This server was already present: " + singleInfo.toString());
@@ -166,20 +187,21 @@ public class MasterServerSimulationEnvironment {
      * Starts the server that listens for simulations to execute
      */
     public void startSimulationServer() {
-        LOGGER.info(String.format("The server is now listening for clients on port: [%d]", LOCAL_SIMULATION_INFO.getPort()));
-        while (true) {
-            try {
+        try {
+            this.simulationSocket = new ServerSocket(localSimulationPort);
+            LOGGER.info(String.format("The server is now listening for clients on port: [%d]", LOCAL_SIMULATION_INFO.getPort()));
+            while (true) {
                 Socket socket = simulationSocket.accept();
-                new Thread(() -> {
+                connectionExecutor.execute(() -> {
                     try {
-                        manageSimulationMessage(socket);
-                    } catch (Exception e) {
+                        manageClientMessage(socket);
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }).start();
-            } catch (IOException e) {
-                e.printStackTrace();
+                });
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -189,41 +211,52 @@ public class MasterServerSimulationEnvironment {
      * @param socket Socket on which the message arrived
      * @throws Exception TODO exception handling
      */
-    private void manageSimulationMessage(Socket socket) {
-        TCPNetworkManager simulationNetworkManager = null;
+    private void manageClientMessage(Socket socket) throws IOException {
+        TCPNetworkManager simulationNetworkManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), socket);
         try {
-            simulationNetworkManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), socket);
-            TCPNetworkManager finalSimulationNetworkManager = simulationNetworkManager;
-            Map<Command, Runnable> map = Map.of(Command.CLIENT_PING, () -> this.respondPingRequest(finalSimulationNetworkManager), Command.CLIENT_INIT, () -> this.loadModelClass(finalSimulationNetworkManager), Command.CLIENT_DATA, () -> this.handleSimulationDataSet(finalSimulationNetworkManager));
+            Map<ClientCommand, Runnable> map = Map.of(ClientCommand.PING, () -> this.respondPingRequest(simulationNetworkManager), ClientCommand.INIT, () -> this.loadModelClass(simulationNetworkManager), ClientCommand.DATA, () -> this.handleSimulationDataSet(simulationNetworkManager));
             while (true) {
-                Command command = (Command) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
+                ClientCommand command = (ClientCommand) ObjectSerializer.deserializeObject(simulationNetworkManager.readObject());
                 LOGGER.info(String.format("[%s] command received by client - %s", command, simulationNetworkManager.getServerInfo().toString()));
                 map.getOrDefault(command, () -> {
                 }).run();
-
             }
+        } catch (EOFException e) {
+            LOGGER.info("Client closed input stream because we timed out or the session has been completed");
+        } catch (SocketException e) {
+            LOGGER.severe("Client closed output stream because we timed out");
         } catch (Exception e) {
-            simulationNetworkManager.closeConnection();
-            //  e.printStackTrace();
+            LOGGER.severe(e.getMessage());
+            e.printStackTrace();
         }
 
     }
 
+    /**
+     * The server receives the simulation datas' from the client and submits a new set of simulations
+     *
+     * @param client the TCPNetworkManager that represents the connection with the client
+     */
     private void handleSimulationDataSet(TCPNetworkManager client) {
         try {
             SimulationDataSet<State> dataSet = (SimulationDataSet<State>) ObjectSerializer.deserializeObject(client.readObject());
             LOGGER.info(String.format("Simulation datas received by the client - %s", client.getServerInfo().toString()));
-
+            client.writeObject(ObjectSerializer.serializeObject(MasterCommand.DATA_RESPONSE));
+            LOGGER.info(String.format("[%s] command sent to the client - %s", MasterCommand.DATA_RESPONSE, client.getServerInfo().toString()));
             this.submitSimulations(dataSet);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * The server submits a new set of simulations
+     *
+     * @param dataSet containing all the simulation oriented datas
+     */
     private void submitSimulations(SimulationDataSet dataSet) {
         SimulationEnvironment sim = new SimulationEnvironment(
-                NetworkSimulationManager.getNetworkSimulationManagerFactory(new ArrayList<>(simulationServers),
-                        dataSet.getModelReferenceName(), this.state));
+                NetworkSimulationManager.getNetworkSimulationManagerFactory(dataSet.getModelReferenceName(), this.state));
         try {
             sim.simulate(dataSet.getRandomGenerator(), dataSet.getModelReference(), dataSet.getModelReferenceInitialState(), dataSet.getModelReferenceSamplingFunction(), dataSet.getReplica(), dataSet.getDeadline(), false);
             this.updateListeners(dataSet.getModelReferenceSamplingFunction().getSimulationTimeSeries(dataSet.getReplica()));
@@ -233,23 +266,35 @@ public class MasterServerSimulationEnvironment {
         }
     }
 
+    /**
+     * The server receives the class containing the model upon which the simulations are built
+     *
+     * @param client the TCPNetworkManager that represents the connection with the client
+     */
     private void loadModelClass(TCPNetworkManager client) {
         try {
             String modelName = (String) ObjectSerializer.deserializeObject(client.readObject());
             LOGGER.info(String.format("[%s] Model name read by server - IP: [%s] Port: [%d]", modelName, client.getSocket().getInetAddress().getHostAddress(), client.getSocket().getPort()));
-            Class<?> clazz = (Class<?>) ObjectSerializer.deserializeObject(client.readObject());
+            Class<?> clazz = (Class<? extends Serializable>) ObjectSerializer.deserializeObject(client.readObject());
             CustomClassLoader.resClass(clazz);
             String classLoadedName = Class.forName(modelName).getName();
             LOGGER.info(String.format("[%s] Class loaded with success", classLoadedName));
+            client.writeObject(ObjectSerializer.serializeObject(MasterCommand.INIT_RESPONSE));
+            LOGGER.info(String.format("[%s] command sent to the client - %s", MasterCommand.INIT_RESPONSE, client.getServerInfo().toString()));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * The server responds to a ping request received by the client
+     *
+     * @param client the TCPNetworkManager that represents the connection with the client
+     */
     private void respondPingRequest(TCPNetworkManager client) {
         try {
-            client.writeObject(ObjectSerializer.serializeObject(Command.MASTER_PONG));
-            LOGGER.info(String.format("Ping request answered, it was sent by the server - IP: [%s] Port: [%d]", client.getSocket().getInetAddress().getHostAddress(), client.getSocket().getPort()));
+            client.writeObject(ObjectSerializer.serializeObject(MasterCommand.PONG));
+            LOGGER.info(String.format("[%s] command sent to the client - %s", MasterCommand.PONG, client.getServerInfo().toString()));
         } catch (Exception e) {
             e.printStackTrace();
         }
