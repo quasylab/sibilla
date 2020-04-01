@@ -7,32 +7,32 @@ import java.net.SocketException;
 public class TCPDefaultNetworkManager implements TCPNetworkManager {
 
     private Socket socket;
-    private ObjectInputStream ois;
-    private ObjectOutputStream oos;
+    private DataInputStream dataInputStream;
+    private DataOutputStream dataOutputStream;
 
     public TCPDefaultNetworkManager(Socket socket) throws IOException {
         this.socket = socket;
-        oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-        oos.flush();
-        ois = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-    }
-
-    public TCPDefaultNetworkManager(Socket socket, ClassLoader classLoader) throws IOException {
-        this.socket = socket;
-        oos = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-        oos.flush();
-        ois = new CustomObjectInputStream(new BufferedInputStream(socket.getInputStream()), classLoader);
+        dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+        dataOutputStream.flush();
+        dataInputStream = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
     }
 
     @Override
     public byte[] readObject() throws Exception {
-        return (byte[]) ois.readObject();
+        int length = dataInputStream.readInt();
+        byte[] message = null;
+        if (length > 0) {
+            message = new byte[length];
+            dataInputStream.readFully(message, 0, length);
+        }
+        return message;
     }
 
     @Override
     public void writeObject(byte[] toWrite) throws Exception {
-        oos.writeObject(toWrite);
-        oos.flush();
+        dataOutputStream.writeInt(toWrite.length);
+        dataOutputStream.write(toWrite);
+        dataOutputStream.flush();
     }
 
     @Override
@@ -49,8 +49,8 @@ public class TCPDefaultNetworkManager implements TCPNetworkManager {
     public void closeConnection() {
         try {
             this.socket.close();
-            this.ois.close();
-            this.oos.close();
+            this.dataInputStream.close();
+            this.dataOutputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -59,21 +59,6 @@ public class TCPDefaultNetworkManager implements TCPNetworkManager {
     @Override
     public TCPNetworkManagerType getType() {
         return TCPNetworkManagerType.DEFAULT;
-    }
-
-    private class CustomObjectInputStream extends ObjectInputStream {
-        private ClassLoader classLoader;
-
-        public CustomObjectInputStream(InputStream is, ClassLoader classLoader) throws IOException {
-            super(is);
-            this.classLoader = classLoader;
-        }
-
-        @Override
-        protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-            return Class.forName(desc.getName(), false, classLoader);
-        }
-
     }
 
 }
