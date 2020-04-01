@@ -56,7 +56,16 @@ public class ClientSimulationEnvironment<S extends State> {
 
         this.initConnection(masterServerNetworkManager);
         this.sendSimulationInfo(masterServerNetworkManager);
+        this.closeConnection(masterServerNetworkManager);
+    }
+
+    private void closeConnection(TCPNetworkManager server) throws Exception{
+        server.writeObject(ObjectSerializer.serializeObject(ClientCommand.CLOSE_CONNECTION));
+        LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.CLOSE_CONNECTION,
+                server.getServerInfo().toString()));
+        server.writeObject(ObjectSerializer.serializeObject(this.data.getModelName()));
         this.masterServerNetworkManager.closeConnection();
+        LOGGER.info(String.format("Closed the connection with the master - %s", server.getServerInfo()));
     }
 
     /**

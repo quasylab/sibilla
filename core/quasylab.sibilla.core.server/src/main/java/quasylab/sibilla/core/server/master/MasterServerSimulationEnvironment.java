@@ -23,6 +23,7 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 /**
@@ -232,12 +233,14 @@ public class MasterServerSimulationEnvironment {
     private void manageClientMessage(Socket socket) throws IOException {
         TCPNetworkManager simulationNetworkManager = TCPNetworkManager
                 .createNetworkManager((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), socket);
+        AtomicBoolean clientIsActive = new AtomicBoolean(true);
         try {
-            Map<ClientCommand, Runnable> map = Map.of(ClientCommand.PING,
-                    () -> this.respondPingRequest(simulationNetworkManager), ClientCommand.INIT,
-                    () -> this.loadModelClass(simulationNetworkManager), ClientCommand.DATA,
-                    () -> this.handleSimulationDataSet(simulationNetworkManager));
-            while (true) {
+            Map<ClientCommand, Runnable> map = Map.of(
+                    ClientCommand.PING, () -> this.respondPingRequest(simulationNetworkManager),
+                    ClientCommand.INIT, () -> this.loadModelClass(simulationNetworkManager),
+                    ClientCommand.DATA, () -> this.handleSimulationDataSet(simulationNetworkManager),
+                    ClientCommand.CLOSE_CONNECTION, () -> this.closeConnectionWithClient(simulationNetworkManager, clientIsActive));
+            while (clientIsActive.get()) {
                 ClientCommand command = (ClientCommand) ObjectSerializer
                         .deserializeObject(simulationNetworkManager.readObject());
                 LOGGER.info(String.format("[%s] command received by client - %s", command,
@@ -245,15 +248,25 @@ public class MasterServerSimulationEnvironment {
                 map.getOrDefault(command, () -> {
                 }).run();
             }
-        } catch (EOFException e) {
-            LOGGER.info("Client closed input stream because we timed out or the session has been completed");
-        } catch (SocketException e) {
-            LOGGER.severe("Client closed output stream because we timed out");
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             e.printStackTrace();
         }
 
+    }
+
+    private void closeConnectionWithClient(TCPNetworkManager client, AtomicBoolean clientActive) {
+        try {
+            String modelName = (String) ObjectSerializer.deserializeObject(client.readObject());
+            LOGGER.info(String.format("[%s] Model name read to be deleted by client - %s", modelName, client.getServerInfo().toString()));
+            clientActive.set(false);
+            CustomClassLoader.classes.remove(modelName);
+            LOGGER.info(String.format("[%s] Model deleted off the class loader", modelName));
+            LOGGER.info(String.format("Client closed the connection"));
+        } catch (Exception e) {
+            LOGGER.severe(e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -273,7 +286,6 @@ public class MasterServerSimulationEnvironment {
             LOGGER.info(String.format("[%s] command sent to the client - %s", MasterCommand.DATA_RESPONSE,
                     client.getServerInfo().toString()));
             this.submitSimulations(dataSet);
-            this.endSimulations(dataSet);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -291,6 +303,9 @@ public class MasterServerSimulationEnvironment {
             sim.simulate(dataSet.getRandomGenerator(), dataSet.getModel(),
                     dataSet.getModelInitialState(), dataSet.getModelSamplingFunction(),
                     dataSet.getReplica(), dataSet.getDeadline(), false);
+            this.updateListeners(
+                    dataSet.getModelSamplingFunction().getSimulationTimeSeries(dataSet.getReplica()));
+            this.state.increaseExecutedSimulations();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -300,12 +315,11 @@ public class MasterServerSimulationEnvironment {
      * Manages the ending of all the submitted simulations
      * @param dataSet containing all the simulation oriented datas
      */
-    private void endSimulations(SimulationDataSet dataSet){
-        this.updateListeners(
-                dataSet.getModelSamplingFunction().getSimulationTimeSeries(dataSet.getReplica()));
-        this.state.increaseExecutedSimulations();
+    /*private void endSimulations(SimulationDataSet dataSet){
+
         CustomClassLoader.classes.remove(dataSet.getModelName());
-    }
+    }*/
+
     /**
      * The server receives the class containing the model upon which the simulations
      * are built

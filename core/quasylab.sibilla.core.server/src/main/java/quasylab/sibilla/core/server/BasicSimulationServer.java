@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 public class BasicSimulationServer implements SimulationServer {
@@ -61,18 +62,30 @@ public class BasicSimulationServer implements SimulationServer {
 
     private void manageMasterMessage(Socket socket) throws IOException {
         TCPNetworkManager master = TCPNetworkManager.createNetworkManager(networkManagerType, socket);
+        AtomicBoolean masterIsActive = new AtomicBoolean(true);
+        String masterModelName;
         try {
-            Map<MasterCommand, Runnable> map = Map.of(MasterCommand.PING, () -> respondPingRequest(master), MasterCommand.INIT, () -> loadModelClass(master), MasterCommand.TASK, () -> handleTaskExecution(master));
-            while (true) {
+            Map<MasterCommand, Runnable> map = Map.of(MasterCommand.PING, () -> respondPingRequest(master), MasterCommand.INIT, () -> loadModelClass(master), MasterCommand.TASK, () -> handleTaskExecution(master), MasterCommand.CLOSE_CONNECTION, () -> closeConnectionWithMaster(masterIsActive, master));
+            while (masterIsActive.get()) {
                 MasterCommand request = (MasterCommand) ObjectSerializer.deserializeObject(master.readObject());
                 LOGGER.info(String.format("[%s] command received by server - %s", request, master.getServerInfo().toString()));
                 map.getOrDefault(request, () -> {
                 }).run();
             }
-        } catch (EOFException e) {
-            LOGGER.info("Master closed input stream because we timed out or the session has been completed");
-        } catch (SocketException e) {
-            LOGGER.severe("Master closed output stream because we timed out");
+        } catch (Exception e) {
+            LOGGER.severe(e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void closeConnectionWithMaster(AtomicBoolean masterActive, TCPNetworkManager master) {
+        try {
+            String modelName = (String) ObjectSerializer.deserializeObject(master.readObject());
+            LOGGER.info(String.format("[%s] Model name read to be deleted by server - %s", modelName, master.getServerInfo().toString()));
+            masterActive.set(false);
+            CustomClassLoader.classes.remove(modelName);
+            LOGGER.info(String.format("[%s] Model deleted off the class loader", modelName));
+            LOGGER.info(String.format("Master closed the connection"));
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             e.printStackTrace();

@@ -58,37 +58,17 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
         this.modelName = modelName;
         this.masterState = masterState;
         executor = Executors.newCachedThreadPool();
-        Map<InetAddress, List<ServerInfo>> map = info.stream().collect(Collectors.toMap(ServerInfo::getAddress, s -> new ArrayList<>(Arrays.asList(s)), (l1, l2) -> {
-            l1.addAll(l2);
-            return l1;
-        }));
-        map.forEach((address, servers) -> {
-            boolean classInitiated = false;
-            while (!classInitiated && !servers.isEmpty()) {
-                try {
-                    TCPNetworkManager server = TCPNetworkManager.createNetworkManager(servers.get(0));
-                    initConnection(server);
-                    LOGGER.info(String.format(
-                            "All the model informations have been sent to the server: %s", servers.get(0).toString()));
-                    classInitiated = true;
-                } catch (Exception e) {
-                    LOGGER.severe("Error during server initialization, removing server...");
-                    e.printStackTrace();
-                    map.get(address).remove(0);
-                }
-            }
-        });
-       /* map.values().stream().reduce((l1, l2) -> {
-            l1.addAll(l2);
-            return l1;
-        }).get().forEach(serverInfo -> this.masterState.addServer(serverInfo));*/
         networkManagers = this.masterState.getServers().stream().map(slaveState -> slaveState.getSlaveInfo()).map(serverInfo -> {
             try {
                 TCPNetworkManager server = TCPNetworkManager.createNetworkManager(serverInfo);
                 LOGGER.info(String.format("Created a NetworkManager to contact the server - %s",
                         server.getServerInfo().toString()));
+                initConnection(server);
+                LOGGER.info(String.format(
+                        "All the model informations have been sent to the server: %s", server.getServerInfo().toString()));
                 return server;
-            } catch (IOException e) {
+            } catch (Exception e) {
+                LOGGER.severe("Error during server initialization, removing server...");
                 e.printStackTrace();
             }
             return null;
@@ -281,15 +261,21 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
         while ((getRunningTasks() > 0 || hasTasks() || this.masterState.getRunningServers() > 0) && !this.masterState.getServers().isEmpty()) {
             wait();
         }
-        closeStreams();
+        try {
+            closeStreams();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         propertyChange("end", null);
     }
 
     /**
      * Closes all the connection streams
      */
-    private void closeStreams() {
+    private void closeStreams() throws Exception {
         for (TCPNetworkManager server : this.networkManagers) {
+            server.writeObject(ObjectSerializer.serializeObject(MasterCommand.CLOSE_CONNECTION));
+            server.writeObject(ObjectSerializer.serializeObject(this.modelName));
             server.closeConnection();
             LOGGER.info(String.format("The connection with the server has been closed - %s",
                     server.getServerInfo().toString()));
