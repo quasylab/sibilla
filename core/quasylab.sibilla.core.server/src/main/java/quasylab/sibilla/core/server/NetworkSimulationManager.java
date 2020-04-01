@@ -30,6 +30,7 @@ import quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
 import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.simulator.serialization.ClassBytesLoader;
 import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 
 import java.io.IOException;
@@ -119,7 +120,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
         LOGGER.info(String.format("[%s] command sent to the server - %s", MasterCommand.INIT, server.getServerInfo().toString()));
         server.writeObject(ObjectSerializer.serializeObject(modelName));
         LOGGER.info(String.format("[%s] Model name has been sent to the server - ", modelName, server.getServerInfo().toString()));
-        server.writeObject(ObjectSerializer.serializeObject(Class.forName(modelName)));
+        server.writeObject(ClassBytesLoader.loadClassBytes(modelName));
         LOGGER.info(String.format("Class bytes have been sent to the server - ", server.getServerInfo().toString()));
     }
 

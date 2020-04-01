@@ -11,20 +11,20 @@ public class SimulationDataSet<S extends State> implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private final RandomGenerator randomGenerator;
-    private final String modelReferenceName;
-    private final Model<S> modelReference;
-    private final S modelReferenceInitialState;
-    private final SamplingFunction<S> modelReferenceSamplingFunction;
+    private final String modelName;
+    private final Model<S> model;
+    private final S modelInitialState;
+    private final SamplingFunction<S> modelSamplingFunction;
     private final int replica;
     private final double deadline;
 
     public SimulationDataSet(RandomGenerator random, String modelName, Model<S> model, S initialState,
                              SamplingFunction<S> sampling_function, int replica, double deadline, ServerInfo masterServerInfo) {
-        this.modelReferenceName = modelName;
+        this.modelName = modelName;
         this.randomGenerator = random;
-        this.modelReference = model;
-        this.modelReferenceInitialState = initialState;
-        this.modelReferenceSamplingFunction = sampling_function;
+        this.model = model;
+        this.modelInitialState = initialState;
+        this.modelSamplingFunction = sampling_function;
         this.replica = replica;
         this.deadline = deadline;
     }
@@ -36,11 +36,11 @@ public class SimulationDataSet<S extends State> implements Serializable {
         long temp;
         temp = Double.doubleToLongBits(deadline);
         result = prime * result + (int) (temp ^ (temp >>> 32));
-        result = prime * result + ((modelReference == null) ? 0 : modelReference.hashCode());
-        result = prime * result + ((modelReferenceInitialState == null) ? 0 : modelReferenceInitialState.hashCode());
-        result = prime * result + ((modelReferenceName == null) ? 0 : modelReferenceName.hashCode());
+        result = prime * result + ((model == null) ? 0 : model.hashCode());
+        result = prime * result + ((modelInitialState == null) ? 0 : modelInitialState.hashCode());
+        result = prime * result + ((modelName == null) ? 0 : modelName.hashCode());
         result = prime * result
-                + ((modelReferenceSamplingFunction == null) ? 0 : modelReferenceSamplingFunction.hashCode());
+                + ((modelSamplingFunction == null) ? 0 : modelSamplingFunction.hashCode());
         result = prime * result + ((randomGenerator == null) ? 0 : randomGenerator.hashCode());
         result = prime * result + replica;
         return result;
@@ -57,25 +57,25 @@ public class SimulationDataSet<S extends State> implements Serializable {
         SimulationDataSet other = (SimulationDataSet) obj;
         if (Double.doubleToLongBits(deadline) != Double.doubleToLongBits(other.deadline))
             return false;
-        if (modelReference == null) {
-            if (other.modelReference != null)
+        if (model == null) {
+            if (other.model != null)
                 return false;
-        } else if (!modelReference.equals(other.modelReference))
+        } else if (!model.equals(other.model))
             return false;
-        if (modelReferenceInitialState == null) {
-            if (other.modelReferenceInitialState != null)
+        if (modelInitialState == null) {
+            if (other.modelInitialState != null)
                 return false;
-        } else if (!modelReferenceInitialState.equals(other.modelReferenceInitialState))
+        } else if (!modelInitialState.equals(other.modelInitialState))
             return false;
-        if (modelReferenceName == null) {
-            if (other.modelReferenceName != null)
+        if (modelName == null) {
+            if (other.modelName != null)
                 return false;
-        } else if (!modelReferenceName.equals(other.modelReferenceName))
+        } else if (!modelName.equals(other.modelName))
             return false;
-        if (modelReferenceSamplingFunction == null) {
-            if (other.modelReferenceSamplingFunction != null)
+        if (modelSamplingFunction == null) {
+            if (other.modelSamplingFunction != null)
                 return false;
-        } else if (!modelReferenceSamplingFunction.equals(other.modelReferenceSamplingFunction))
+        } else if (!modelSamplingFunction.equals(other.modelSamplingFunction))
             return false;
         if (randomGenerator == null) {
             if (other.randomGenerator != null)
@@ -92,23 +92,23 @@ public class SimulationDataSet<S extends State> implements Serializable {
     }
 
 
-    public String getModelReferenceName() {
-        return modelReferenceName;
+    public String getModelName() {
+        return modelName;
     }
 
 
-    public Model<S> getModelReference() {
-        return modelReference;
+    public Model<S> getModel() {
+        return model;
     }
 
 
-    public S getModelReferenceInitialState() {
-        return modelReferenceInitialState;
+    public S getModelInitialState() {
+        return modelInitialState;
     }
 
 
-    public SamplingFunction<S> getModelReferenceSamplingFunction() {
-        return modelReferenceSamplingFunction;
+    public SamplingFunction<S> getModelSamplingFunction() {
+        return modelSamplingFunction;
     }
 
 
@@ -129,9 +129,9 @@ public class SimulationDataSet<S extends State> implements Serializable {
                         + " modelReferenceInitialState hashcode: %d \n" + " modelReferenceInitialState class: %s \n"
                         + " modelReferenceSamplingFunction hashcode: %d \n"
                         + " modelReferenceSamplingFunction class: %s \n" + " replica: %d \n deadline: %e \n",
-                randomGenerator.hashCode(), randomGenerator.getClass().getName(), modelReferenceName,
-                modelReference.hashCode(), modelReference.getClass().getName(), modelReferenceInitialState.hashCode(),
-                modelReferenceInitialState.getClass().getName(), modelReferenceSamplingFunction.hashCode(),
-                modelReferenceSamplingFunction.getClass().getName(), replica, deadline);
+                randomGenerator.hashCode(), randomGenerator.getClass().getName(), modelName,
+                model.hashCode(), model.getClass().getName(), modelInitialState.hashCode(),
+                modelInitialState.getClass().getName(), modelSamplingFunction.hashCode(),
+                modelSamplingFunction.getClass().getName(), replica, deadline);
     }
 }

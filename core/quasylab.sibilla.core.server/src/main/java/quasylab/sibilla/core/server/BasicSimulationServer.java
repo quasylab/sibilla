@@ -34,7 +34,8 @@ public class BasicSimulationServer implements SimulationServer {
 
     public BasicSimulationServer(TCPNetworkManagerType networkManagerType) {
         this.networkManagerType = networkManagerType;
-        LOGGER.info(String.format("Creating a new BasicSimulation server that uses: [%s - %s]", this.networkManagerType.getClass(), this.networkManagerType.name()));
+        LOGGER.info(String.format("Creating a new BasicSimulation server that uses: [%s - %s]",
+                this.networkManagerType.getClass(), this.networkManagerType.name()));
     }
 
     @Override
@@ -77,12 +78,13 @@ public class BasicSimulationServer implements SimulationServer {
             e.printStackTrace();
         }
     }
+
     private void loadModelClass(TCPNetworkManager master) {
         try {
             String modelName = (String) ObjectSerializer.deserializeObject(master.readObject());
             LOGGER.info(String.format("[%s] Model name read by server - %s", modelName, master.getServerInfo().toString()));
-            Class<?> myClass = (Class<?>) ObjectSerializer.deserializeObject(master.readObject());
-            CustomClassLoader.resClass(myClass);
+            byte[] myClass = master.readObject();
+            CustomClassLoader.defClass(modelName, myClass);
             String classLoadedName = Class.forName(modelName).getName();
             LOGGER.info(String.format("[%s] Class loaded with success", classLoadedName));
         } catch (ClassNotFoundException e) {
@@ -108,23 +110,23 @@ public class BasicSimulationServer implements SimulationServer {
                 results.add(task.getTrajectory());
             }
             master.writeObject(ObjectSerializer.serializeObject(new ComputationResult(results)));
-            LOGGER.info(String.format("Computation's results have been sent to the server - %s", master.getServerInfo().toString()));
+            LOGGER.info(String.format("Computation's results have been sent to the server - %s",
+                    master.getServerInfo().toString()));
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             e.printStackTrace();
         }
     }
-
 
     private void respondPingRequest(TCPNetworkManager master) {
         try {
             master.writeObject(ObjectSerializer.serializeObject(SlaveCommand.PONG));
-            LOGGER.info(String.format("Ping request answered, it was sent by the server - %s", master.getServerInfo().toString()));
+            LOGGER.info(String.format("Ping request answered, it was sent by the server - %s",
+                    master.getServerInfo().toString()));
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             e.printStackTrace();
         }
     }
-
 
 }
