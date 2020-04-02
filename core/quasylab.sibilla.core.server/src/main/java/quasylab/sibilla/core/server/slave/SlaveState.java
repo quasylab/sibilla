@@ -8,6 +8,9 @@ import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.Objects;
 
+/**
+ * Represents the state of a slave server
+ */
 public class SlaveState implements Serializable {
     private final static double alpha = 0.125;
     private final static double beta = 0.250;
@@ -54,17 +57,6 @@ public class SlaveState implements Serializable {
         this.addPropertyChangeListener(masterState);
     }
 
-    public synchronized void addPropertyChangeListener(PropertyChangeListener pcl) {
-        updateSupport.addPropertyChangeListener(pcl);
-    }
-
-    private void updateListeners() {
-        updateSupport.firePropertyChange("SlaveState", null, this);
-    }
-
-    public ServerInfo getSlaveInfo(){
-        return this.slaveInfo;
-    }
     /**
      * Updates the state of the slave server given the data about new executions
      *
@@ -148,6 +140,18 @@ public class SlaveState implements Serializable {
      */
     public boolean canCompleteTask(int tasks) {
         return getTimeLimit(tasks) < maxRunningTime;
+    }
+
+    public synchronized void addPropertyChangeListener(PropertyChangeListener pcl) {
+        updateSupport.addPropertyChangeListener(pcl);
+    }
+
+    private void updateListeners() {
+        updateSupport.firePropertyChange("SlaveState", null, this);
+    }
+
+    public ServerInfo getSlaveInfo(){
+        return this.slaveInfo;
     }
 
     public int getExpectedTasks() {

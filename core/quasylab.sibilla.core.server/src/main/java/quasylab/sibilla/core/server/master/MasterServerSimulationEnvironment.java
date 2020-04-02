@@ -12,8 +12,8 @@ import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
-import quasylab.sibilla.core.simulator.serialization.CustomClassLoader;
-import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
+import quasylab.sibilla.core.server.serialization.CustomClassLoader;
+import quasylab.sibilla.core.server.serialization.ObjectSerializer;
 import quasylab.sibilla.core.util.NetworkUtils;
 
 import java.beans.PropertyChangeListener;
@@ -51,9 +51,9 @@ public class MasterServerSimulationEnvironment {
     private PropertyChangeSupport updateSupport;
 
     /**
-     * Creates a quasylab.sibilla.core.server.master server with the given
+     * Creates a master server with the given
      * information that broadcasts his discovery messages to the given
-     * remoteDiscovetyPort
+     * remoteDiscoveryPort
      *
      * @param localDiscoveryPort      port the server listens to
      * @param remoteDiscoveryPort     port the server sends discovery messages to
@@ -246,6 +246,12 @@ public class MasterServerSimulationEnvironment {
 
     }
 
+    /**
+     * Closes the connection with the given client
+     *
+     * @param client       client which the connection has to be closed
+     * @param clientActive whether the client is active or not
+     */
     private void closeConnectionWithClient(TCPNetworkManager client, AtomicBoolean clientActive) {
         try {
             String modelName = (String) ObjectSerializer.deserializeObject(client.readObject());
@@ -304,15 +310,6 @@ public class MasterServerSimulationEnvironment {
             return null;
         }
     }
-
-    /**
-     * Manages the ending of all the submitted simulations
-     * @param dataSet containing all the simulation oriented datas
-     */
-    /*private void endSimulations(SimulationDataSet dataSet){
-
-        CustomClassLoader.classes.remove(dataSet.getModelName());
-    }*/
 
     /**
      * The server receives the class containing the model upon which the simulations

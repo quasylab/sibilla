@@ -5,7 +5,7 @@ import quasylab.sibilla.core.server.ServerInfo;
 import quasylab.sibilla.core.server.SimulationServer;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.network.UDPDefaultNetworkManager;
-import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
+import quasylab.sibilla.core.server.serialization.ObjectSerializer;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -39,18 +39,11 @@ public class SlaveServerSimulationEnvironment {
         this.simulationServers = new HashSet<>();
         LOGGER.info(String.format("Starting a new Slave server - It will respond for discovery messages on port [%d] and will create simulation servers on ports %s", localDiscoveryPort, simulationServersInfo.stream().map(serverInfo -> serverInfo.getPort()).collect(Collectors.toList())));
 
-        this.startupSimulationServers();
-
-        new Thread(this::startDiscoveryServer).start();
-    }
-
-    /**
-     * Starts up the simulation servers defined in simulationServersInfo
-     */
-    private void startupSimulationServers() {
         simulationServersInfo.forEach(info -> {
             new Thread(() -> startupSingleSimulationServer(info)).start();
         });
+
+        new Thread(this::startDiscoveryServer).start();
     }
 
     /**
@@ -89,10 +82,10 @@ public class SlaveServerSimulationEnvironment {
     }
 
     /**
-     * Manages a message from the quasylab.sibilla.core.server.master
+     * Manages a message from the master
      *
      * @param manager    UDPNetworkManager that handles the sending of messages
-     * @param masterInfo ServerInfo of the quasylab.sibilla.core.server.master server
+     * @param masterInfo ServerInfo of the master server
      * @throws Exception TODO Exception handling
      */
     private void manageDiscoveryMessage(UDPDefaultNetworkManager manager, ServerInfo masterInfo) throws Exception {

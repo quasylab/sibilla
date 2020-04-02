@@ -7,9 +7,15 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
+/**
+ * Class that contains the state of the master server
+ */
 public class MasterState implements Serializable, PropertyChangeListener {
+
     private Date startDate;
     private volatile int runningServers;
     private volatile int connectedServers;
@@ -77,6 +83,12 @@ public class MasterState implements Serializable, PropertyChangeListener {
 
     }
 
+    public SlaveState getSlaveStateByServerInfo(ServerInfo serverInfo) {
+        return this.servers.stream().filter(slaveState -> {
+            return slaveState.getSlaveInfo().equals(serverInfo);
+        }).findFirst().get();
+    }
+
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         this.updateListeners();
@@ -108,11 +120,5 @@ public class MasterState implements Serializable, PropertyChangeListener {
 
     public Date getStartDate() {
         return startDate;
-    }
-
-    public SlaveState getSlaveStateByServerInfo(ServerInfo serverInfo) {
-        return this.servers.stream().filter(slaveState -> {
-            return slaveState.getSlaveInfo().equals(serverInfo);
-        }).findFirst().get();
     }
 }

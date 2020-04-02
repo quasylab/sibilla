@@ -11,13 +11,7 @@ public interface TCPNetworkManager {
 
     public static TCPNetworkManager createNetworkManager(ServerInfo info) throws IOException {
         Socket socket = new Socket(info.getAddress(), info.getPort());
-        switch ((TCPNetworkManagerType) info.getType()) {
-            case FST:
-                return new TCPFSTNetworkManager(socket);
-            case DEFAULT:
-            default:
-                return new TCPDefaultNetworkManager(socket);
-        }
+        return createNetworkManager((TCPNetworkManagerType) info.getType(), socket);
     }
 
     public static TCPNetworkManager createNetworkManager(TCPNetworkManagerType serType, Socket socket) throws IOException {

@@ -7,9 +7,6 @@ import java.net.InetAddress;
 
 public class ServerInfo implements Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -2428861423753648117L;
     private InetAddress address;
     private int port;

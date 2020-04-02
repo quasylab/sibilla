@@ -8,9 +8,8 @@ import quasylab.sibilla.core.server.network.TCPNetworkManager;
 import quasylab.sibilla.core.simulator.Model;
 import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
-import quasylab.sibilla.core.simulator.serialization.ClassBytesLoader;
-import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
+import quasylab.sibilla.core.server.serialization.ClassBytesLoader;
+import quasylab.sibilla.core.server.serialization.ObjectSerializer;
 
 import java.util.logging.Logger;
 
@@ -27,10 +26,11 @@ public class ClientSimulationEnvironment<S extends State> {
     private SimulationDataSet<S> data;
     private TCPNetworkManager masterServerNetworkManager;
     private SamplingFunction samplingFunction;
+
     /**
      * Creates a new client that sends simulation commands with the parameters of
      * the simulation to execute and the ServerInfo of the
-     * quasylab.sibilla.core.server.master server that will manage such simulation
+     * master server that will manage such simulation
      *
      * @param random            RandomGenerator of the simulation
      * @param modelName         String with the name of the class that defines the
@@ -60,6 +60,12 @@ public class ClientSimulationEnvironment<S extends State> {
         this.closeConnection(masterServerNetworkManager);
     }
 
+    /**
+     * Closes the connection with the given master server
+     *
+     * @param server server the connection has to be closed with
+     * @throws Exception TODO ???
+     */
     private void closeConnection(TCPNetworkManager server) throws Exception {
         server.writeObject(ObjectSerializer.serializeObject(ClientCommand.CLOSE_CONNECTION));
         LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.CLOSE_CONNECTION,
@@ -102,9 +108,9 @@ public class ClientSimulationEnvironment<S extends State> {
 
     /**
      * Sends the info of the simulation to execute to the
-     * quasylab.sibilla.core.server.master server
+     * master server
      *
-     * @param targetServer NetworkManager to the quasylab.sibilla.core.server.master
+     * @param targetServer NetworkManager to the master
      *                     server
      * @throws Exception TODO exception handling
      */
@@ -142,6 +148,12 @@ public class ClientSimulationEnvironment<S extends State> {
         }
     }
 
+    /**
+     * Sends a ping command to the given master server
+     *
+     * @param targetServer server to send the ping command to
+     * @throws Exception TODO ???
+     */
     private void sendPing(TCPNetworkManager targetServer) throws Exception {
         targetServer.writeObject(ObjectSerializer.serializeObject(ClientCommand.PING));
         LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.PING,

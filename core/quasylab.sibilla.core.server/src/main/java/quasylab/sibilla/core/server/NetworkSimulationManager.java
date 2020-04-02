@@ -30,12 +30,11 @@ import quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
 import quasylab.sibilla.core.simulator.pm.State;
-import quasylab.sibilla.core.simulator.serialization.ClassBytesLoader;
-import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
+import quasylab.sibilla.core.server.serialization.ClassBytesLoader;
+import quasylab.sibilla.core.server.serialization.ObjectSerializer;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.logging.Logger;

@@ -1,4 +1,4 @@
-package quasylab.sibilla.core.simulator.serialization;
+package quasylab.sibilla.core.server.serialization;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
