@@ -8,6 +8,7 @@ import quasylab.sibilla.core.server.network.TCPNetworkManager;
 import quasylab.sibilla.core.simulator.Model;
 import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 import quasylab.sibilla.core.simulator.serialization.ClassBytesLoader;
 import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
 
@@ -45,7 +46,7 @@ public class ClientSimulationEnvironment<S extends State> {
      * @throws Exception TODO Exception handling
      */
     public ClientSimulationEnvironment(RandomGenerator random, String modelName, Model<S> model, S initialState,
-            SamplingFunction<S> sampling_function, int replica, double deadline, ServerInfo masterServerInfo)
+                                       SamplingFunction<S> sampling_function, int replica, double deadline, ServerInfo masterServerInfo)
             throws Exception {
         this.data = new SimulationDataSet<S>(random, modelName, model, initialState, sampling_function, replica,
                 deadline, masterServerInfo);
@@ -59,7 +60,7 @@ public class ClientSimulationEnvironment<S extends State> {
         this.closeConnection(masterServerNetworkManager);
     }
 
-    private void closeConnection(TCPNetworkManager server) throws Exception{
+    private void closeConnection(TCPNetworkManager server) throws Exception {
         server.writeObject(ObjectSerializer.serializeObject(ClientCommand.CLOSE_CONNECTION));
         LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.CLOSE_CONNECTION,
                 server.getServerInfo().toString()));
@@ -124,6 +125,12 @@ public class ClientSimulationEnvironment<S extends State> {
             }
         } catch (ClassCastException e) {
             LOGGER.severe(String.format("The answer received wasn't expected. There was an error MasterServer's side"));
+        }
+        SamplingFunction func = (SamplingFunction) ObjectSerializer.deserializeObject(targetServer.readObject());
+        if (func != null){
+            LOGGER.info("The simulation results have been received correctly");
+        } else {
+            LOGGER.warning("The simulation results haven't been received");
         }
     }
 

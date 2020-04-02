@@ -19,9 +19,4 @@ public class MasterController {
     public MasterState getMasterState() {
         return monitoringServerComponent.getMasterState();
     }
-
-    @GetMapping("/lastresults")
-    public List<SimulationTimeSeries> getLastResults() {
-        return monitoringServerComponent.getLastResults();
-    }
 }

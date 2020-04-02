@@ -10,6 +10,7 @@ import quasylab.sibilla.core.server.network.UDPNetworkManager;
 import quasylab.sibilla.core.server.network.UDPNetworkManagerType;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 import quasylab.sibilla.core.simulator.serialization.CustomClassLoader;
 import quasylab.sibilla.core.simulator.serialization.ObjectSerializer;
@@ -17,7 +18,6 @@ import quasylab.sibilla.core.util.NetworkUtils;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.EOFException;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
@@ -39,8 +39,6 @@ public class MasterServerSimulationEnvironment {
 
     private UDPNetworkManager discoveryNetworkManager;
     private ExecutorService discoveryConnectionExecutor = Executors.newCachedThreadPool();
-    ;
-    // private HashSet<ServerInfo> simulationServers;
 
     private int localSimulationPort;
     private ServerSocket simulationSocket;
@@ -67,7 +65,7 @@ public class MasterServerSimulationEnvironment {
                                              UDPNetworkManagerType discoveryNetworkManager, int localSimulationPort,
                                              TCPNetworkManagerType simulationNetworkManager, int localMonitoringPort,
                                              TCPNetworkManagerType monitoringNetworkManager, PropertyChangeListener... listeners)
-            throws InterruptedException, IOException {
+            throws IOException {
         LOCAL_DISCOVERY_INFO = new ServerInfo(NetworkUtils.getLocalIp(), localDiscoveryPort, discoveryNetworkManager);
         LOCAL_SIMULATION_INFO = new ServerInfo(NetworkUtils.getLocalIp(), localSimulationPort,
                 simulationNetworkManager);
@@ -97,13 +95,6 @@ public class MasterServerSimulationEnvironment {
         activitiesExecutors.execute(this::startDiscoveryServer);
         activitiesExecutors.execute(this::startSimulationServer);
         activitiesExecutors.execute(this::broadcastToInterfaces);
-        /*
-         * new Thread(this::startDiscoveryServer).start();
-         *
-         * new Thread(this::startSimulationServer).start();
-         *
-         * new Thread(this::broadcastToInterfaces).start();
-         */
 
     }
 
@@ -285,7 +276,7 @@ public class MasterServerSimulationEnvironment {
             client.writeObject(ObjectSerializer.serializeObject(MasterCommand.DATA_RESPONSE));
             LOGGER.info(String.format("[%s] command sent to the client - %s", MasterCommand.DATA_RESPONSE,
                     client.getServerInfo().toString()));
-            this.submitSimulations(dataSet);
+            client.writeObject(ObjectSerializer.serializeObject(this.submitSimulations(dataSet)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -296,7 +287,7 @@ public class MasterServerSimulationEnvironment {
      *
      * @param dataSet containing all the simulation oriented datas
      */
-    private void submitSimulations(SimulationDataSet dataSet) {
+    private SamplingFunction submitSimulations(SimulationDataSet dataSet) {
         SimulationEnvironment sim = new SimulationEnvironment(NetworkSimulationManager
                 .getNetworkSimulationManagerFactory(dataSet.getModelName(), this.state));
         try {
@@ -306,8 +297,10 @@ public class MasterServerSimulationEnvironment {
             this.updateListeners(
                     dataSet.getModelSamplingFunction().getSimulationTimeSeries(dataSet.getReplica()));
             this.state.increaseExecutedSimulations();
+            return dataSet.getModelSamplingFunction();
         } catch (InterruptedException e) {
             e.printStackTrace();
+            return null;
         }
     }
 
@@ -359,5 +352,4 @@ public class MasterServerSimulationEnvironment {
             e.printStackTrace();
         }
     }
-
 }
