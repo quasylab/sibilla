@@ -276,6 +276,7 @@ public class MasterServerSimulationEnvironment {
             client.writeObject(ObjectSerializer.serializeObject(MasterCommand.DATA_RESPONSE));
             LOGGER.info(String.format("[%s] command sent to the client - %s", MasterCommand.DATA_RESPONSE,
                     client.getServerInfo().toString()));
+            client.writeObject(ObjectSerializer.serializeObject(MasterCommand.RESULTS));
             client.writeObject(ObjectSerializer.serializeObject(this.submitSimulations(dataSet)));
         } catch (Exception e) {
             e.printStackTrace();

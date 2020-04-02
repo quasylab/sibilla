@@ -26,7 +26,7 @@ public class ClientSimulationEnvironment<S extends State> {
 
     private SimulationDataSet<S> data;
     private TCPNetworkManager masterServerNetworkManager;
-
+    private SamplingFunction samplingFunction;
     /**
      * Creates a new client that sends simulation commands with the parameters of
      * the simulation to execute and the ServerInfo of the
@@ -126,11 +126,19 @@ public class ClientSimulationEnvironment<S extends State> {
         } catch (ClassCastException e) {
             LOGGER.severe(String.format("The answer received wasn't expected. There was an error MasterServer's side"));
         }
-        SamplingFunction func = (SamplingFunction) ObjectSerializer.deserializeObject(targetServer.readObject());
-        if (func != null){
-            LOGGER.info("The simulation results have been received correctly");
-        } else {
-            LOGGER.warning("The simulation results haven't been received");
+        try {
+            MasterCommand command = (MasterCommand) ObjectSerializer.deserializeObject(targetServer.readObject());
+            LOGGER.info(String.format("[%s] command read by the master - %s", command,
+                    targetServer.getServerInfo().toString()));
+            if (command.equals(MasterCommand.RESULTS)) {
+                this.samplingFunction = (SamplingFunction) ObjectSerializer.deserializeObject(targetServer.readObject());
+                LOGGER.severe(
+                        String.format("The simulation results have been received correctly"));
+            } else {
+                LOGGER.severe(String.format("The simulation results haven't been received"));
+            }
+        } catch (ClassCastException e) {
+            LOGGER.severe(String.format("The simulation results haven't been received"));
         }
     }
 
