@@ -19,7 +19,6 @@
 package quasylab.sibilla.core.simulator.ds;
 
 import org.apache.commons.math3.random.RandomGenerator;
-
 import quasylab.sibilla.core.simulator.Activity;
 import quasylab.sibilla.core.simulator.ds.TupleSpace.Node;
 

@@ -21,13 +21,13 @@
  */
 package quasylab.sibilla.core.simulator;
 
+import org.apache.commons.math3.random.RandomGenerator;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.function.Function;
-
-import org.apache.commons.math3.random.RandomGenerator;
 
 /**
  * @author loreti

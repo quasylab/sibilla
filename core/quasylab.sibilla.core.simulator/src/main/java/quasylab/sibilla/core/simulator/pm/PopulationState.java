@@ -21,7 +21,8 @@
  */
 package quasylab.sibilla.core.simulator.pm;
 
-import java.io.Serializable;
+import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
+
 import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -30,8 +31,6 @@ import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
-import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
-
 /**
  * The instances of this class represent a generic population state having species of type <code>S</code>. 
  * 
@@ -39,7 +38,7 @@ import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
  * @author loreti
  *
  */
-public class PopulationState implements Serializable {
+public class PopulationState implements State {
 
 	private static final long serialVersionUID = -4973919753621170006L;
 	/**

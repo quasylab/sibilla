@@ -19,13 +19,13 @@
 
 package quasylab.sibilla.core.simulator.pm.util;
 
+import quasylab.sibilla.core.simulator.pm.PopulationState;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
-import quasylab.sibilla.core.simulator.pm.PopulationState;
 
 /**
  * @author loreti

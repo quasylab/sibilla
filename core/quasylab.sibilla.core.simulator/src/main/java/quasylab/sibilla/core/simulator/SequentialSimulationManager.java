@@ -19,15 +19,16 @@
 
 package quasylab.sibilla.core.simulator;
 
-import java.util.function.Consumer;
-
 import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.simulator.pm.State;
+
+import java.util.function.Consumer;
 
 /**
  * @author belenchia
  *
  */
-public class SequentialSimulationManager<S> extends SimulationManager<S> {
+public class SequentialSimulationManager<S extends State> extends SimulationManager<S> {
 
 
 
@@ -36,7 +37,7 @@ public class SequentialSimulationManager<S> extends SimulationManager<S> {
     	return new SimulationManagerFactory() {
    		
 			@Override
-			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
+			public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
 				return new SequentialSimulationManager<>(random, consumer);
 			}
     	};
@@ -61,7 +62,7 @@ public class SequentialSimulationManager<S> extends SimulationManager<S> {
     }
 
 	@Override
-	protected void start() {
+	protected void startTasksHandling() {
         return;
 	}
     

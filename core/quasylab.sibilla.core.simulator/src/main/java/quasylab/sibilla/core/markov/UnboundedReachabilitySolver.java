@@ -19,21 +19,15 @@
 
 package quasylab.sibilla.core.markov;
 
+import org.apache.commons.math3.linear.*;
+import quasylab.sibilla.core.util.Pair;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.DecompositionSolver;
-import org.apache.commons.math3.linear.LUDecomposition;
-import org.apache.commons.math3.linear.MatrixUtils;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
-
-import quasylab.sibilla.core.util.Pair;
 
 /**
  * @author loreti

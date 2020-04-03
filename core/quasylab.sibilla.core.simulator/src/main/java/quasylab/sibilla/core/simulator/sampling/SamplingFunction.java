@@ -18,6 +18,8 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator.sampling;
 
+import quasylab.sibilla.core.simulator.pm.State;
+
 import java.io.Serializable;
 import java.util.LinkedList;
 
@@ -25,7 +27,7 @@ import java.util.LinkedList;
  * @author loreti
  *
  */
-public interface SamplingFunction<S> extends Serializable {
+public interface SamplingFunction<S extends State> extends Serializable {
 
 	public void sample(double time, S context);
 

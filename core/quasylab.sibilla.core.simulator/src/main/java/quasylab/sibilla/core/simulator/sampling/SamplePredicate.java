@@ -19,25 +19,26 @@
 
 package quasylab.sibilla.core.simulator.sampling;
 
+import quasylab.sibilla.core.simulator.pm.State;
+
 import java.io.Serializable;
 import java.util.function.Predicate;
 
 /**
  * This functional interface is used to declare the stopping predicate of a simulation.
- * 
- * @author loreti
  *
+ * @author loreti
  */
 @FunctionalInterface
-public interface SamplePredicate<S> extends Serializable {
+public interface SamplePredicate<S extends State> extends Serializable {
 
-	public boolean test( double time, S state );
-	
-	public static <S> SamplePredicate<S> statePredicate( Predicate<S> condition ) {
-		return (t,s) -> condition.test(s);
-	}
-	
-	public static <S> SamplePredicate<S> timeDeadlinePredicate( double d ) {
-		return (t,s) -> t>=d;
-	}
+    public static <S extends State> SamplePredicate<S> statePredicate(Predicate<S> condition) {
+        return (t, s) -> condition.test(s);
+    }
+
+    public static <S extends State> SamplePredicate<S> timeDeadlinePredicate(double d) {
+        return (t, s) -> t >= d;
+    }
+
+    public boolean test(double time, S state);
 }

@@ -18,18 +18,19 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator;
 
+import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.simulator.sampling.Sample;
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
-
-import quasylab.sibilla.core.simulator.sampling.Sample;
-import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 /**
  * @author loreti
  *
  */
-public class Trajectory<S> implements Serializable {
+public class Trajectory<S extends State> implements Serializable {
 	
 	private static final long serialVersionUID = -9039722623650234376L;
 	private List<Sample<S>> data;

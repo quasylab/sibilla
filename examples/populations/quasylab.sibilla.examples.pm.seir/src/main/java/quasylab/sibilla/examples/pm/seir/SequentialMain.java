@@ -3,10 +3,6 @@
  */
 package quasylab.sibilla.examples.pm.seir;
 
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.net.UnknownHostException;
-
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.SequentialSimulationManager;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
@@ -18,6 +14,10 @@ import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
+
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+import java.net.UnknownHostException;
 
 /**
  * @author loreti

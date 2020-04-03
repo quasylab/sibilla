@@ -18,12 +18,12 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator.ds;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-
 import quasylab.sibilla.core.simulator.util.ComposedWeightedStructure;
 import quasylab.sibilla.core.simulator.util.WeightedStructure;
 import quasylab.sibilla.core.simulator.util.Weighter;
+
+import java.util.HashMap;
+import java.util.LinkedList;
 
 /**
  * @author loreti

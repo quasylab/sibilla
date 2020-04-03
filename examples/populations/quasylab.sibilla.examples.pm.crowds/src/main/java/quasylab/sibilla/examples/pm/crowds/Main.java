@@ -3,15 +3,8 @@
  */
 package quasylab.sibilla.examples.pm.crowds;
 
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.net.UnknownHostException;
-import java.util.LinkedList;
-import java.util.List;
-
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.ThreadSimulationManager;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
@@ -21,6 +14,12 @@ import quasylab.sibilla.core.simulator.pm.util.PopulationRegistry;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
+
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+import java.net.UnknownHostException;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author loreti

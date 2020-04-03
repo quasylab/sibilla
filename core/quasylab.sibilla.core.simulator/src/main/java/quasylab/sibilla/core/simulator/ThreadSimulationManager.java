@@ -19,6 +19,9 @@
 
 package quasylab.sibilla.core.simulator;
 
+import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.simulator.pm.State;
+
 import java.util.LongSummaryStatistics;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -27,13 +30,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-import org.apache.commons.math3.random.RandomGenerator;
-
 /**
  * @author belenchia
  *
  */
-public class ThreadSimulationManager<S> extends SimulationManager<S> {
+public class ThreadSimulationManager<S extends State> extends SimulationManager<S> {
 
 	private static final Logger LOGGER = Logger.getLogger(ThreadSimulationManager.class.getName());
 	private ExecutorService executor;
@@ -55,7 +56,7 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 		return new SimulationManagerFactory() {
 
 			@Override
-			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random,
+			public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
 					Consumer<Trajectory<S>> consumer) {
 				return new ThreadSimulationManager<>(n, random, consumer);
 			}
@@ -67,7 +68,7 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 		return new SimulationManagerFactory() {
 
 			@Override
-			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random,
+			public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
 					Consumer<Trajectory<S>> consumer) {
 				return new ThreadSimulationManager<>(random, consumer);
 			}
@@ -79,7 +80,7 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 		return new SimulationManagerFactory() {
 
 			@Override
-			public <S> SimulationManager<S> getSimulationManager(RandomGenerator random,
+			public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
 					Consumer<Trajectory<S>> consumer) {
 				return new ThreadSimulationManager<>(executor, random, consumer);
 			}
@@ -110,7 +111,7 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 	public ThreadSimulationManager(ExecutorService executor, RandomGenerator random, Consumer<Trajectory<S>> consumer) {
 		super(random, consumer);
 		this.executor = executor;
-		this.start();
+		this.startTasksHandling();
 	}
 
 	// // samples the trajectory, updates counters, then runs next task.
@@ -134,7 +135,7 @@ public class ThreadSimulationManager<S> extends SimulationManager<S> {
 	// }
 
 	@Override
-	protected void start() {
+	protected void startTasksHandling() {
 
 		Thread t = new Thread(this::handleTasks);
 		t.start();

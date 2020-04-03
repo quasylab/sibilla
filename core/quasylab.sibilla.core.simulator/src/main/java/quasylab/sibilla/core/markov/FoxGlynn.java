@@ -19,8 +19,6 @@
 
 package quasylab.sibilla.core.markov;
 
-import java.util.Arrays;
-
 /**
  * Based on https://github.com/oris-tool/sirio/blob/master/sirio/src/main/java/org/oristool/models/gspn/chains/FoxGlynn.java
  *

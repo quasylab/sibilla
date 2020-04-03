@@ -19,13 +19,11 @@
 
 package quasylab.sibilla.core.markov;
 
-import java.util.HashMap;
+import quasylab.sibilla.core.util.Pair;
+
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import quasylab.sibilla.core.util.Pair;
 
 /**
  * @author loreti

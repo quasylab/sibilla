@@ -21,9 +21,9 @@
  */
 package quasylab.sibilla.core.simulator.pm;
 
-import java.util.function.Function;
-
 import org.apache.commons.math3.random.RandomGenerator;
+
+import java.util.function.Function;
 
 /**
  * @author loreti
