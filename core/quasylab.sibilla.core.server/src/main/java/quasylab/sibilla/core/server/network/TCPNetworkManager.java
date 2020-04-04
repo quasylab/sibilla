@@ -19,10 +19,10 @@ public interface TCPNetworkManager {
         Socket socket;
         switch ((TCPNetworkManagerType) info.getType()) {
             case SECURE:
-                SocketFactory factory = SSLSocketFactory.getDefault();
+                SSLSocketFactory factory = (SSLSocketFactory) SSLSocketFactory.getDefault();
                 SSLSocket sslSocket = (SSLSocket) factory.createSocket(info.getAddress(), info.getPort());
-                sslSocket.setEnabledCipherSuites(new String[]{"TLS_DHE_DSS_WITH_AES_256_CBC_SHA256"});
-                sslSocket.setEnabledProtocols(new String[]{"TLSv1.2"});
+                /*sslSocket.setEnabledCipherSuites(new String[]{"TLS_DHE_DSS_WITH_AES_256_CBC_SHA256"});
+                sslSocket.setEnabledProtocols(new String[]{"TLSv1.2"});*/
                 return createNetworkManager((TCPNetworkManagerType) info.getType(), sslSocket);
             default:
                 socket = new Socket(info.getAddress(), info.getPort());

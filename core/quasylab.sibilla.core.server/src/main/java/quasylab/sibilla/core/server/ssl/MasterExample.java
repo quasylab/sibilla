@@ -1,6 +1,8 @@
-package main.java.quasylab.sibilla.core.server.ssl;
+package quasylab.sibilla.core.server.ssl;
 
 
+import quasylab.sibilla.core.server.client.ClientCommand;
+import quasylab.sibilla.core.server.master.MasterCommand;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.serialization.ObjectSerializer;
@@ -9,13 +11,12 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Base64;
 
@@ -40,19 +41,25 @@ public class MasterExample {
         }
     }*/
 
-    private void createServer() throws Exception {
-        ServerSocket socket = SSLServerSocketFactory.getDefault().createServerSocket(10000);
-        SSLServerSocket sslServerSocket = (SSLServerSocket) socket;
-        sslServerSocket.setNeedClientAuth(true);
-        sslServerSocket.setEnabledCipherSuites(new String[]{"TLS_DHE_DSS_WITH_AES_256_CBC_SHA256"});
-        sslServerSocket.setEnabledProtocols(new String[]{"TLSv1.2"});
-        Socket sasso = socket.accept();
-        TCPNetworkManager client = TCPNetworkManager.createNetworkManager(TCPNetworkManagerType.SECURE, sasso);
-        String result = (String) ObjectSerializer.deserializeObject(client.readObject());
-        System.out.printf("Sassi: %s", result);
-    }
-
     public static void main(String[] args) throws Exception {
+        System.setProperty("javax.net.ssl.keyStore", "E:\\Programmi\\GitHub\\sibilla\\core\\quasylab.sibilla.core.server\\src\\main\\java\\quasylab\\sibilla\\core\\server\\ssl\\serverKeyStore.jks");
+        System.setProperty("javax.net.ssl.keyStorePassword", "sibilla");
+        SSLServerSocket socket = (SSLServerSocket) SSLServerSocketFactory.getDefault().createServerSocket(10000);
+
+        /*socket.setNeedClientAuth(true);
+        socket.setEnabledCipherSuites(new String[]{"TLS_DHE_DSS_WITH_AES_256_CBC_SHA256"});
+        socket.setEnabledProtocols(new String[]{"TLSv1.2"});*/
+        SSLSocket sasso = (SSLSocket) socket.accept();
+        TCPNetworkManager client = TCPNetworkManager.createNetworkManager(TCPNetworkManagerType.SECURE, sasso);
+        while(true){
+            ClientCommand result = (ClientCommand) ObjectSerializer.deserializeObject(client.readObject());
+            System.out.printf("Ho letto: %s\n", result);
+            if (result.equals(ClientCommand.DATA)) {
+                client.writeObject(ObjectSerializer.serializeObject(MasterCommand.CLOSE_CONNECTION));
+                break;
+            }
+        }
+        System.out.printf("Client ha chiuso");
 
     }
 }
