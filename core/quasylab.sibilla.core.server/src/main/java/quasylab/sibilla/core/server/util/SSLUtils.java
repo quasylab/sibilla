@@ -3,6 +3,7 @@ package quasylab.sibilla.core.server.util;
 import javax.net.ssl.*;
 import java.io.FileInputStream;
 import java.security.KeyStore;
+import java.security.SecureRandom;
 
 
 public class SSLUtils {
@@ -56,7 +57,7 @@ public class SSLUtils {
 
             // Initialize SSLContext
             SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
-            sslContext.init(km, tm, null);
+            sslContext.init(km, tm, new SecureRandom());
 
             return sslContext;
         } catch (Exception ex) {
