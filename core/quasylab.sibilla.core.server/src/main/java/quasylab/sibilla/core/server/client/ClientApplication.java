@@ -3,8 +3,9 @@ package quasylab.sibilla.core.server.client;
 
 import org.apache.commons.math3.random.AbstractRandomGenerator;
 import quasylab.sibilla.core.server.ServerInfo;
-import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
+import quasylab.sibilla.core.server.util.NetworkUtils;
+import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
 import quasylab.sibilla.core.simulator.pm.PopulationState;
@@ -13,7 +14,6 @@ import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
-import quasylab.sibilla.core.util.NetworkUtils;
 
 import java.io.Serializable;
 

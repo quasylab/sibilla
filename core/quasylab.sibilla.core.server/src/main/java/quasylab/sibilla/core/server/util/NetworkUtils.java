@@ -1,4 +1,4 @@
-package quasylab.sibilla.core.util;
+package quasylab.sibilla.core.server.util;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;

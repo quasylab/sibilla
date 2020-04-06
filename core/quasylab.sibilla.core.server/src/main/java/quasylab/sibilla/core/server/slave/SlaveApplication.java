@@ -2,7 +2,7 @@ package quasylab.sibilla.core.server.slave;
 
 import quasylab.sibilla.core.server.ServerInfo;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
-import quasylab.sibilla.core.util.NetworkUtils;
+import quasylab.sibilla.core.server.util.NetworkUtils;
 
 import java.net.UnknownHostException;
 import java.util.Set;
