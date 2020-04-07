@@ -10,6 +10,7 @@ import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Arrays;
 
 public class TCPSecureNetworkManager implements TCPNetworkManager {
 
@@ -47,6 +48,7 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
         System.out.println("SSLSession :");
         System.out.println("\tProtocol : " + sslSession.getProtocol());
         System.out.println("\tCipher suite : " + sslSession.getCipherSuite());
+        System.out.println("\tPeer host : " + sslSession.getPeerPrincipal().getName());
         this.netManager = (TCPDefaultNetworkManager) TCPNetworkManager.createNetworkManager(TCPNetworkManagerType.DEFAULT, sslSocket);
     }
 

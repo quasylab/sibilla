@@ -18,11 +18,15 @@ public class ServerExample {
 
     public static void main(String[] args) throws Exception {
         SSLUtils.getInstance().setKeyStoreType("JKS");
-        SSLUtils.getInstance().setKeyStorePath("E:\\Programmi\\GitHub\\sibilla\\core\\quasylab.sibilla.core.server\\src\\main\\java\\quasylab\\sibilla\\core\\server\\ssl\\serverKeyStore.jks");
+        SSLUtils.getInstance().setKeyStorePath("C:\\Users\\Marco\\eclipse-workspace\\quasylab.sibilla\\core\\quasylab.sibilla.core.server\\src\\main\\java\\quasylab\\sibilla\\core\\server\\ssl\\serverKeyStore.jks");
         SSLUtils.getInstance().setKeyStorePass("sibilla");
+        SSLUtils.getInstance().setTrustStoreType("JKS");
+        SSLUtils.getInstance().setTrustStorePath("C:\\Users\\Marco\\eclipse-workspace\\quasylab.sibilla\\core\\quasylab.sibilla.core.server\\src\\main\\java\\quasylab\\sibilla\\core\\server\\ssl\\serverTrustStore.jks");
+        SSLUtils.getInstance().setTrustStorePass("clientpass");
         SSLContext sslContext = SSLUtils.getInstance().createSSLContext();
         SSLServerSocketFactory sslServerSocketFactory = sslContext.getServerSocketFactory();
         SSLServerSocket sslServerSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(PORT);
+        sslServerSocket.setNeedClientAuth(true);
         SSLSocket sslSocket = (SSLSocket) sslServerSocket.accept();
         TCPNetworkManager clientConnection = TCPNetworkManager.createNetworkManager(TCPNetworkManagerType.SECURE, sslSocket);
         while (true) {
