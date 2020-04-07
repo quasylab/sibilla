@@ -57,6 +57,7 @@ public class SSLUtils {
             if (this.keyStorePath == null || this.keyStorePass == null || this.keyStoreType == null) {
                 throw new Exception("Missing KeyStore infos");
             }
+            //Loads the keystore
             KeyStore keyStore = KeyStore.getInstance(this.keyStoreType);
             keyStore.load(new FileInputStream(this.keyStorePath),
                     keyStorePass.toCharArray());
@@ -66,8 +67,9 @@ public class SSLUtils {
             keyManagerFactory.init(keyStore, keyStorePass.toCharArray());
             KeyManager[] km = keyManagerFactory.getKeyManagers();
 
+            //Loads the truststore
             KeyStore trustStore = KeyStore.getInstance(this.trustStoreType);
-            keyStore.load(new FileInputStream(this.trustStorePath),
+            trustStore.load(new FileInputStream(this.trustStorePath),
                     trustStorePass.toCharArray());
 
             // Create trust manager

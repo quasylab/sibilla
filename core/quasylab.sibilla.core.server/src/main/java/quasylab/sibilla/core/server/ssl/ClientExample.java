@@ -14,12 +14,13 @@ public class ClientExample {
     private final static ServerInfo SERVER_INFO = new ServerInfo(NetworkUtils.getLocalIp(), 10000, TCPNetworkManagerType.SECURE);
 
     public static void main(String[] args) throws Exception {
+       // System.setProperty("javax.net.debug", "all");
         SSLUtils.getInstance().setKeyStoreType("JKS");
-        SSLUtils.getInstance().setKeyStorePath("C:\\Users\\Marco\\eclipse-workspace\\quasylab.sibilla\\core\\quasylab.sibilla.core.server\\src\\main\\java\\quasylab\\sibilla\\core\\server\\ssl\\clientKeyStore.jks");
+        SSLUtils.getInstance().setKeyStorePath("E:\\Programmi\\GitHub\\sibilla\\core\\quasylab.sibilla.core.server\\src\\main\\java\\quasylab\\sibilla\\core\\server\\ssl\\clientKeyStore.jks");
         SSLUtils.getInstance().setKeyStorePass("clientpass");
         SSLUtils.getInstance().setTrustStoreType("JKS");
-        SSLUtils.getInstance().setTrustStorePath("C:\\Users\\Marco\\eclipse-workspace\\quasylab.sibilla\\core\\quasylab.sibilla.core.server\\src\\main\\java\\quasylab\\sibilla\\core\\server\\ssl\\clientTrustStore.jks");
-        SSLUtils.getInstance().setTrustStorePass("sibilla");
+        SSLUtils.getInstance().setTrustStorePath("E:\\Programmi\\GitHub\\sibilla\\core\\quasylab.sibilla.core.server\\src\\main\\java\\quasylab\\sibilla\\core\\server\\ssl\\clientTrustStore.jks");
+        SSLUtils.getInstance().setTrustStorePass("clientpass");
         TCPNetworkManager connection = TCPNetworkManager.createNetworkManager(SERVER_INFO);
         connection.writeObject(ObjectSerializer.serializeObject(ClientCommand.DATA));
         System.out.println("I've sent: " + ClientCommand.DATA);
