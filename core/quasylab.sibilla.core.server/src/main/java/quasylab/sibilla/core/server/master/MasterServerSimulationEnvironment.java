@@ -62,8 +62,7 @@ public class MasterServerSimulationEnvironment {
      */
     public MasterServerSimulationEnvironment(int localDiscoveryPort, int remoteDiscoveryPort,
                                              UDPNetworkManagerType discoveryNetworkManager, int localSimulationPort,
-                                             TCPNetworkManagerType simulationNetworkManager, int localMonitoringPort,
-                                             TCPNetworkManagerType monitoringNetworkManager, PropertyChangeListener... listeners)
+                                             TCPNetworkManagerType simulationNetworkManager, PropertyChangeListener... listeners)
             throws IOException {
         LOCAL_DISCOVERY_INFO = new ServerInfo(NetworkUtils.getLocalIp(), localDiscoveryPort, discoveryNetworkManager);
         LOCAL_SIMULATION_INFO = new ServerInfo(NetworkUtils.getLocalIp(), localSimulationPort,
@@ -84,12 +83,10 @@ public class MasterServerSimulationEnvironment {
         LOGGER.info(String.format(
                 "Starting a new Master server"
                         + "\n- Local discovery port: [%d] - Discovery communication type: [%s - %s]"
-                        + "\n- Local simulation handling port: [%d] - Simulation handling communication type[%s - %s]"
-                        + "\n- Local monitoring port: [%d] - Monitoring communication type: [%s - %s]",
+                        + "\n- Local simulation handling port: [%d] - Simulation handling communication type[%s - %s]",
                 LOCAL_DISCOVERY_INFO.getPort(), LOCAL_DISCOVERY_INFO.getType().getClass(),
                 LOCAL_DISCOVERY_INFO.getType(), LOCAL_SIMULATION_INFO.getPort(),
-                LOCAL_SIMULATION_INFO.getType().getClass(), LOCAL_SIMULATION_INFO.getType(), localMonitoringPort,
-                monitoringNetworkManager.getClass(), monitoringNetworkManager));
+                LOCAL_SIMULATION_INFO.getType().getClass(), LOCAL_SIMULATION_INFO.getType()));
 
         activitiesExecutors.execute(this::startDiscoveryServer);
         activitiesExecutors.execute(this::startSimulationServer);

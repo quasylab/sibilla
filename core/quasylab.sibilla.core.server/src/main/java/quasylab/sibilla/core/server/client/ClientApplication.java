@@ -5,6 +5,7 @@ import org.apache.commons.math3.random.AbstractRandomGenerator;
 import quasylab.sibilla.core.server.ServerInfo;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.util.NetworkUtils;
+import quasylab.sibilla.core.server.util.SSLUtils;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.pm.PopulationModel;
 import quasylab.sibilla.core.simulator.pm.PopulationRule;
@@ -41,9 +42,16 @@ public class ClientApplication implements Serializable {
 
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
     private static final String MODEL_NAME = ClientApplication.class.getName();
-    private static final ServerInfo MASTER_SERVER_INFO = new ServerInfo(NetworkUtils.getLocalIp(), 10001, TCPNetworkManagerType.DEFAULT);
+    private static final ServerInfo MASTER_SERVER_INFO = new ServerInfo(NetworkUtils.getLocalIp(), 10001, TCPNetworkManagerType.SECURE);
 
     public static void main(String[] argv) throws Exception {
+
+        SSLUtils.getInstance().setKeyStoreType("JKS");
+        SSLUtils.getInstance().setKeyStorePath("./clientKeyStore.jks");
+        SSLUtils.getInstance().setKeyStorePass("clientPass");
+        SSLUtils.getInstance().setTrustStoreType("JKS");
+        SSLUtils.getInstance().setTrustStorePath("./clientTrustStore.jks");
+        SSLUtils.getInstance().setTrustStorePass("clientPass");
 
         PopulationRule rule_S_E = new ReactionRule("S->E", new Specie[]{new Specie(S), new Specie(I)},
                 new Specie[]{new Specie(E), new Specie(I)},

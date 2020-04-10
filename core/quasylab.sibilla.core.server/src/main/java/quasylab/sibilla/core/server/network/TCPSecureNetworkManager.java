@@ -1,6 +1,7 @@
 package quasylab.sibilla.core.server.network;
 
 import quasylab.sibilla.core.server.ServerInfo;
+import quasylab.sibilla.core.server.master.MasterServerSimulationEnvironment;
 import quasylab.sibilla.core.server.util.SSLUtils;
 
 import javax.net.ssl.SSLContext;
@@ -11,8 +12,11 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 public class TCPSecureNetworkManager implements TCPNetworkManager {
+
+    private static final Logger LOGGER = Logger.getLogger(TCPSecureNetworkManager.class.getName());
 
     private TCPDefaultNetworkManager netManager;
 
@@ -44,11 +48,7 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
         sslSocket.startHandshake();
 
         SSLSession sslSession = sslSocket.getSession();
-
-        System.out.println("SSLSession :");
-        System.out.println("\tProtocol : " + sslSession.getProtocol());
-        System.out.println("\tCipher suite : " + sslSession.getCipherSuite());
-        System.out.println("\tPeer host : " + sslSession.getPeerPrincipal().getName());
+        LOGGER.info(String.format("SSLSession Started:\n\tProtocol : %s\n\tCipher suite : %s\n\tPeer host : %s", sslSession.getProtocol(), sslSession.getCipherSuite(), sslSession.getPeerPrincipal().getName()));
         this.netManager = (TCPDefaultNetworkManager) TCPNetworkManager.createNetworkManager(TCPNetworkManagerType.DEFAULT, sslSocket);
     }
 
