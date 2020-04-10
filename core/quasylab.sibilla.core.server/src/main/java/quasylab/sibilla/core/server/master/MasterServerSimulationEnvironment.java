@@ -41,7 +41,6 @@ public class MasterServerSimulationEnvironment {
     private ExecutorService discoveryConnectionExecutor = Executors.newCachedThreadPool();
 
     private int localSimulationPort;
-    private ServerSocket simulationSocket;
     private MasterState state;
 
     private int remotePort;
@@ -196,11 +195,10 @@ public class MasterServerSimulationEnvironment {
      */
     public void startSimulationServer() {
         try {
-            this.simulationSocket = new ServerSocket(localSimulationPort);
-            LOGGER.info(String.format("The server is now listening for clients on port: [%d]",
-                    LOCAL_SIMULATION_INFO.getPort()));
             while (true) {
-                Socket socket = simulationSocket.accept();
+                Socket socket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), localSimulationPort);
+                LOGGER.info(String.format("The server is now listening for clients on port: [%d]",
+                        LOCAL_SIMULATION_INFO.getPort()));
                 connectionExecutor.execute(() -> {
                     try {
                         manageClientMessage(socket);

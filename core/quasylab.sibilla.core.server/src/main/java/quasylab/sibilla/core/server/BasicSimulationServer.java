@@ -29,7 +29,6 @@ public class BasicSimulationServer implements SimulationServer {
     private static final Logger LOGGER = Logger.getLogger(BasicSimulationServer.class.getName());
 
     private final TCPNetworkManagerType networkManagerType;
-    private ServerSocket serverSocket;
     private ExecutorService taskExecutor = Executors.newCachedThreadPool();
     private ExecutorService connectionExecutor = Executors.newCachedThreadPool();
     private int port;
@@ -57,10 +56,9 @@ public class BasicSimulationServer implements SimulationServer {
      * @throws IOException
      */
     private void startSimulationServer() throws IOException {
-        serverSocket = new ServerSocket(port);
-        LOGGER.info(String.format("The BasicSimulationServer is now listening for servers on port: [%d]", port));
         while (true) {
-            Socket socket = serverSocket.accept();
+            Socket socket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) networkManagerType, port);
+            LOGGER.info(String.format("The BasicSimulationServer is now listening for servers on port: [%d]", port));
             connectionExecutor.execute(() -> {
                 try {
                     manageMasterMessage(socket);

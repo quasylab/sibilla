@@ -11,6 +11,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocket;
+import java.net.Socket;
 
 public class ServerExample {
 
@@ -24,12 +25,8 @@ public class ServerExample {
         SSLUtils.getInstance().setTrustStoreType("JKS");
         SSLUtils.getInstance().setTrustStorePath("./serverTrustStore.jks");
         SSLUtils.getInstance().setTrustStorePass("serverpass");
-        SSLContext sslContext = SSLUtils.getInstance().createSSLContext();
-        SSLServerSocketFactory sslServerSocketFactory = sslContext.getServerSocketFactory();
-        SSLServerSocket sslServerSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(PORT);
-        sslServerSocket.setNeedClientAuth(true);
-        SSLSocket sslSocket = (SSLSocket) sslServerSocket.accept();
-        TCPNetworkManager clientConnection = TCPNetworkManager.createNetworkManager(TCPNetworkManagerType.SECURE, sslSocket);
+        Socket socket = TCPNetworkManager.createServerSocket(TCPNetworkManagerType.SECURE, PORT);
+        TCPNetworkManager clientConnection = TCPNetworkManager.createNetworkManager(TCPNetworkManagerType.SECURE, socket);
         while (true) {
             ClientCommand result = (ClientCommand) ObjectSerializer.deserializeObject(clientConnection.readObject());
             System.out.printf("I've read: %s\n", result);
