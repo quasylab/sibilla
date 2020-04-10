@@ -59,17 +59,16 @@ public class SSLUtils {
             }
             //Loads the keystore
             KeyStore keyStore = KeyStore.getInstance(this.keyStoreType);
-            keyStore.load(new FileInputStream(this.keyStorePath),
+            keyStore.load(ClassLoader.getSystemClassLoader().getSystemResourceAsStream(this.keyStorePath),
                     keyStorePass.toCharArray());
 
             // Create key manager
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
             keyManagerFactory.init(keyStore, keyStorePass.toCharArray());
             KeyManager[] km = keyManagerFactory.getKeyManagers();
-
             //Loads the truststore
             KeyStore trustStore = KeyStore.getInstance(this.trustStoreType);
-            trustStore.load(new FileInputStream(this.trustStorePath),
+            trustStore.load(ClassLoader.getSystemClassLoader().getSystemResourceAsStream(this.trustStorePath),
                     trustStorePass.toCharArray());
 
             // Create trust manager

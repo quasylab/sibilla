@@ -19,10 +19,10 @@ public class ServerExample {
     public static void main(String[] args) throws Exception {
         //  System.setProperty("javax.net.debug", "all");
         SSLUtils.getInstance().setKeyStoreType("JKS");
-        SSLUtils.getInstance().setKeyStorePath("E:\\Programmi\\GitHub\\sibilla\\core\\quasylab.sibilla.core.server\\src\\main\\java\\quasylab\\sibilla\\core\\server\\ssl\\serverKeyStore.jks");
+        SSLUtils.getInstance().setKeyStorePath("./serverKeyStore.jks");
         SSLUtils.getInstance().setKeyStorePass("serverpass");
         SSLUtils.getInstance().setTrustStoreType("JKS");
-        SSLUtils.getInstance().setTrustStorePath("E:\\Programmi\\GitHub\\sibilla\\core\\quasylab.sibilla.core.server\\src\\main\\java\\quasylab\\sibilla\\core\\server\\ssl\\serverTrustStore.jks");
+        SSLUtils.getInstance().setTrustStorePath("./serverTrustStore.jks");
         SSLUtils.getInstance().setTrustStorePass("serverpass");
         SSLContext sslContext = SSLUtils.getInstance().createSSLContext();
         SSLServerSocketFactory sslServerSocketFactory = sslContext.getServerSocketFactory();

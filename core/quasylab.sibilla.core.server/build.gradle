@@ -26,4 +26,4 @@ test {
     useJUnitPlatform()
 }
 
-mainClassName = 'quasylab.sibilla.core.server.master.MasterApplication'
+mainClassName = 'quasylab.sibilla.core.server.ssl.ClientExample'
