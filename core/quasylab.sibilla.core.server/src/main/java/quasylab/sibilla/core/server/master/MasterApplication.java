@@ -32,6 +32,6 @@ public class MasterApplication implements CommandLineRunner {
         SSLUtils.getInstance().setTrustStorePath("./masterTrustStore.jks");
         SSLUtils.getInstance().setTrustStorePass("masterPass");
 
-        MasterServerSimulationEnvironment masterEnvironment = new MasterServerSimulationEnvironment(LOCAL_DISCOVERY_PORT, REMOTE_DISCOVERY_PORT, DISCOVERY_NETWORK_MANAGER_TYPE, LOCAL_SIMULATION_PORT, SIMULATION_NETWORK_MANAGER_TYPE);
+        MasterServerSimulationEnvironment masterEnvironment = new MasterServerSimulationEnvironment(LOCAL_DISCOVERY_PORT, REMOTE_DISCOVERY_PORT, DISCOVERY_NETWORK_MANAGER_TYPE, LOCAL_SIMULATION_PORT, SIMULATION_NETWORK_MANAGER_TYPE, monitoringServerComponent);
     }
 }
