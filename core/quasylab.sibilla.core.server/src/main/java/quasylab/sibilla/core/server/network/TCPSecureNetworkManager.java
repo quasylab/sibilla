@@ -48,7 +48,7 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
         sslSocket.startHandshake();
 
         SSLSession sslSession = sslSocket.getSession();
-        LOGGER.info(String.format("SSLSession Started:\n\tProtocol : %s\n\tCipher suite : %s\n\tPeer host : %s", sslSession.getProtocol(), sslSession.getCipherSuite(), sslSession.getPeerPrincipal().getName()));
+        LOGGER.info(String.format("SSLSession Started:\n\tProtocol : %s\n\tCipher suite : %s\n\tPeer host : %s", sslSession.getProtocol(), sslSession.getCipherSuite(), sslSession.getPeerHost()));
         this.netManager = (TCPDefaultNetworkManager) TCPNetworkManager.createNetworkManager(TCPNetworkManagerType.DEFAULT, sslSocket);
     }
 
