@@ -46,9 +46,6 @@ public class MasterServerSimulationEnvironment {
     private int remotePort;
     private ExecutorService activitiesExecutors = Executors.newCachedThreadPool();
     private ExecutorService connectionExecutor = Executors.newCachedThreadPool();
-
-    private PropertyChangeSupport updateSupport;
-
     /**
      * Creates a master server with the given
      * information that broadcasts his discovery messages to the given
@@ -69,11 +66,9 @@ public class MasterServerSimulationEnvironment {
                 simulationNetworkManager);
         this.remotePort = remoteDiscoveryPort;
         this.state = new MasterState(LOCAL_SIMULATION_INFO);
-        updateSupport = new PropertyChangeSupport(this);
         this.localSimulationPort = localSimulationPort;
         Arrays.stream(listeners).forEach(listener -> {
             this.state.addPropertyChangeListener(listener);
-            this.addPropertyChangeListener(listener);
         });
 
         this.discoveryNetworkManager = UDPNetworkManager.createNetworkManager(LOCAL_DISCOVERY_INFO, true);
@@ -94,24 +89,6 @@ public class MasterServerSimulationEnvironment {
 
     }
 
-    /**
-     * Adds a PropertyChangeListener object that will receive updates from this
-     * object
-     *
-     * @param pcl the object to notify of updated
-     */
-    public synchronized void addPropertyChangeListener(PropertyChangeListener pcl) {
-        updateSupport.addPropertyChangeListener(pcl);
-    }
-
-    /**
-     * Updates all the PropertyChangeListener objects that have been registered
-     *
-     * @param results List<SimulationTimeSeries> containing the simulations' results
-     */
-    private void updateListeners(List<SimulationTimeSeries> results) {
-        updateSupport.firePropertyChange("Results", null, results);
-    }
 
     /**
      * Broadcast the discovery message to all the host's network interfaces
@@ -296,8 +273,6 @@ public class MasterServerSimulationEnvironment {
             sim.simulate(dataSet.getRandomGenerator(), dataSet.getModel(),
                     dataSet.getModelInitialState(), dataSet.getModelSamplingFunction(),
                     dataSet.getReplica(), dataSet.getDeadline(), false);
-            this.updateListeners(
-                    dataSet.getModelSamplingFunction().getSimulationTimeSeries(dataSet.getReplica()));
             this.state.increaseExecutedSimulations();
             return dataSet.getModelSamplingFunction();
         } catch (InterruptedException e) {
