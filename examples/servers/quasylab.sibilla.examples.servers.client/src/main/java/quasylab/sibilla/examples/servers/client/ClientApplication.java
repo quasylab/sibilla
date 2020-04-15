@@ -48,10 +48,10 @@ public class ClientApplication implements Serializable {
     public static void main(String[] argv) throws Exception {
 
         SSLUtils.getInstance().setKeyStoreType("JKS");
-        SSLUtils.getInstance().setKeyStorePath("./clientKeyStore.jks");
+        SSLUtils.getInstance().setKeyStorePath("clientKeyStore.jks");
         SSLUtils.getInstance().setKeyStorePass("clientPass");
         SSLUtils.getInstance().setTrustStoreType("JKS");
-        SSLUtils.getInstance().setTrustStorePath("./clientTrustStore.jks");
+        SSLUtils.getInstance().setTrustStorePath("clientTrustStore.jks");
         SSLUtils.getInstance().setTrustStorePass("clientPass");
 
         PopulationRule rule_S_E = new ReactionRule("S->E", new Specie[]{new Specie(S), new Specie(I)},

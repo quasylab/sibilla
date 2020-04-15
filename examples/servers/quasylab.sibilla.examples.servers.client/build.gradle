@@ -12,7 +12,6 @@ repositories {
 }
 
 dependencies {
-    compile project(':core:quasylab.sibilla.core.simulator')
     compile project(':core:quasylab.sibilla.core.server')
 }
 

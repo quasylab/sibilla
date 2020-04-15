@@ -16,10 +16,10 @@ public class ClientExample {
     public static void main(String[] args) throws Exception {
         //System.setProperty("javax.net.debug", "all");
         SSLUtils.getInstance().setKeyStoreType("JKS");
-        SSLUtils.getInstance().setKeyStorePath("./clientKeyStore.jks");
+        SSLUtils.getInstance().setKeyStorePath("clientKeyStore.jks");
         SSLUtils.getInstance().setKeyStorePass("clientpass");
         SSLUtils.getInstance().setTrustStoreType("JKS");
-        SSLUtils.getInstance().setTrustStorePath("./clientTrustStore.jks");
+        SSLUtils.getInstance().setTrustStorePath("clientTrustStore.jks");
         SSLUtils.getInstance().setTrustStorePass("clientpass");
         TCPNetworkManager connection = TCPNetworkManager.createNetworkManager(SERVER_INFO);
         connection.writeObject(ObjectSerializer.serializeObject(ClientCommand.DATA));

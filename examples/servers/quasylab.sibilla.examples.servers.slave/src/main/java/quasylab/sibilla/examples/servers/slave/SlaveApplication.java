@@ -17,10 +17,10 @@ public class SlaveApplication {
 
     public static void main(String[] args) throws UnknownHostException {
         SSLUtils.getInstance().setKeyStoreType("JKS");
-        SSLUtils.getInstance().setKeyStorePath("./slaveKeyStore.jks");
+        SSLUtils.getInstance().setKeyStorePath("slaveKeyStore.jks");
         SSLUtils.getInstance().setKeyStorePass("slavePass");
         SSLUtils.getInstance().setTrustStoreType("JKS");
-        SSLUtils.getInstance().setTrustStorePath("./slaveTrustStore.jks");
+        SSLUtils.getInstance().setTrustStorePath("slaveTrustStore.jks");
         SSLUtils.getInstance().setTrustStorePass("slavePass");
 
         new SlaveServerSimulationEnvironment(LOCAL_DISCOVERY_PORT, LOCAL_SIMULATION_SERVERS);
