@@ -1,7 +1,4 @@
-plugins {
-    id 'java'
-    id 'application'
-}
+apply plugin: 'java-library'
 
 group = 'quasylab.sibilla.core.server'
 version = '1.0.0'
@@ -18,5 +15,3 @@ dependencies {
 test {
     useJUnitPlatform()
 }
-
-mainClassName = 'quasylab.sibilla.core.server.slave.SlaveApplication'
