@@ -1,9 +1,11 @@
-package quasylab.sibilla.core.server.master;
+package quasylab.sibilla.examples.servers.master;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import quasylab.sibilla.core.server.master.MasterServerSimulationEnvironment;
+import quasylab.sibilla.core.server.master.MonitoringServerComponent;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.network.UDPNetworkManagerType;
 import quasylab.sibilla.core.server.util.SSLUtils;

@@ -1,7 +1,8 @@
-package quasylab.sibilla.core.server.slave;
+package quasylab.sibilla.examples.servers.slave;
 
 import quasylab.sibilla.core.server.ServerInfo;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
+import quasylab.sibilla.core.server.slave.SlaveServerSimulationEnvironment;
 import quasylab.sibilla.core.server.util.NetworkUtils;
 import quasylab.sibilla.core.server.util.SSLUtils;
 

@@ -1,8 +1,9 @@
-package quasylab.sibilla.core.server.client;
+package quasylab.sibilla.examples.servers.client;
 
 
 import org.apache.commons.math3.random.AbstractRandomGenerator;
 import quasylab.sibilla.core.server.ServerInfo;
+import quasylab.sibilla.core.server.client.ClientSimulationEnvironment;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.util.NetworkUtils;
 import quasylab.sibilla.core.server.util.SSLUtils;
