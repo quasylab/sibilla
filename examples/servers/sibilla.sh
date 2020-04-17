@@ -1,8 +1,6 @@
 #!/bin/bash
-
-SERVER=$1
-
-git clone https://github.com/FrancisFire/sibilla.git -b ssl sibilla_$SERVER
-cd sibilla_slave/examples/servers/quasylab.sibilla.examples.servers.$SERVER
+TYPE=$1
+git clone https://github.com/quasylab/sibilla.git -b working sibilla_$TYPE
+cd sibilla_$TYPE/examples/servers/quasylab.sibilla.examples.servers.$TYPE
 gradle build
 gradle run
