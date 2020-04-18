@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'quasylab.sibilla.examples.servers.client'
+version = '1.0.0'
+sourceCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':core:quasylab.sibilla.core.server')
+}
+
+mainClassName = 'quasylab.sibilla.examples.servers.client.ClientApplication'

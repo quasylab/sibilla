@@ -1,9 +1,4 @@
-plugins {
-    id 'org.springframework.boot' version '2.2.6.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
-    id 'java'
-    id 'application'
-}
+apply plugin: 'java-library'
 
 group = 'quasylab.sibilla.core.server'
 version = '1.0.0'
@@ -15,15 +10,8 @@ repositories {
 
 dependencies {
     compile project(':core:quasylab.sibilla.core.simulator')
-    implementation 'org.springframework.boot:spring-boot-starter'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    testImplementation('org.springframework.boot:spring-boot-starter-test') {
-        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-    }
 }
 
 test {
     useJUnitPlatform()
 }
-
-mainClassName = 'quasylab.sibilla.core.server.master.MasterApplication'

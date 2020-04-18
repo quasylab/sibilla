@@ -8,13 +8,13 @@ import quasylab.sibilla.core.server.network.TCPNetworkManager;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.network.UDPNetworkManager;
 import quasylab.sibilla.core.server.network.UDPNetworkManagerType;
+import quasylab.sibilla.core.server.serialization.CustomClassLoader;
+import quasylab.sibilla.core.server.serialization.ObjectSerializer;
+import quasylab.sibilla.core.server.util.NetworkUtils;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
-import quasylab.sibilla.core.server.serialization.CustomClassLoader;
-import quasylab.sibilla.core.server.serialization.ObjectSerializer;
-import quasylab.sibilla.core.util.NetworkUtils;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -41,15 +41,11 @@ public class MasterServerSimulationEnvironment {
     private ExecutorService discoveryConnectionExecutor = Executors.newCachedThreadPool();
 
     private int localSimulationPort;
-    private ServerSocket simulationSocket;
     private MasterState state;
 
     private int remotePort;
     private ExecutorService activitiesExecutors = Executors.newCachedThreadPool();
     private ExecutorService connectionExecutor = Executors.newCachedThreadPool();
-
-    private PropertyChangeSupport updateSupport;
-
     /**
      * Creates a master server with the given
      * information that broadcasts his discovery messages to the given
@@ -63,19 +59,16 @@ public class MasterServerSimulationEnvironment {
      */
     public MasterServerSimulationEnvironment(int localDiscoveryPort, int remoteDiscoveryPort,
                                              UDPNetworkManagerType discoveryNetworkManager, int localSimulationPort,
-                                             TCPNetworkManagerType simulationNetworkManager, int localMonitoringPort,
-                                             TCPNetworkManagerType monitoringNetworkManager, PropertyChangeListener... listeners)
+                                             TCPNetworkManagerType simulationNetworkManager, PropertyChangeListener... listeners)
             throws IOException {
         LOCAL_DISCOVERY_INFO = new ServerInfo(NetworkUtils.getLocalIp(), localDiscoveryPort, discoveryNetworkManager);
         LOCAL_SIMULATION_INFO = new ServerInfo(NetworkUtils.getLocalIp(), localSimulationPort,
                 simulationNetworkManager);
         this.remotePort = remoteDiscoveryPort;
         this.state = new MasterState(LOCAL_SIMULATION_INFO);
-        updateSupport = new PropertyChangeSupport(this);
         this.localSimulationPort = localSimulationPort;
         Arrays.stream(listeners).forEach(listener -> {
             this.state.addPropertyChangeListener(listener);
-            this.addPropertyChangeListener(listener);
         });
 
         this.discoveryNetworkManager = UDPNetworkManager.createNetworkManager(LOCAL_DISCOVERY_INFO, true);
@@ -85,12 +78,10 @@ public class MasterServerSimulationEnvironment {
         LOGGER.info(String.format(
                 "Starting a new Master server"
                         + "\n- Local discovery port: [%d] - Discovery communication type: [%s - %s]"
-                        + "\n- Local simulation handling port: [%d] - Simulation handling communication type[%s - %s]"
-                        + "\n- Local monitoring port: [%d] - Monitoring communication type: [%s - %s]",
+                        + "\n- Local simulation handling port: [%d] - Simulation handling communication type[%s - %s]",
                 LOCAL_DISCOVERY_INFO.getPort(), LOCAL_DISCOVERY_INFO.getType().getClass(),
                 LOCAL_DISCOVERY_INFO.getType(), LOCAL_SIMULATION_INFO.getPort(),
-                LOCAL_SIMULATION_INFO.getType().getClass(), LOCAL_SIMULATION_INFO.getType(), localMonitoringPort,
-                monitoringNetworkManager.getClass(), monitoringNetworkManager));
+                LOCAL_SIMULATION_INFO.getType().getClass(), LOCAL_SIMULATION_INFO.getType()));
 
         activitiesExecutors.execute(this::startDiscoveryServer);
         activitiesExecutors.execute(this::startSimulationServer);
@@ -98,24 +89,6 @@ public class MasterServerSimulationEnvironment {
 
     }
 
-    /**
-     * Adds a PropertyChangeListener object that will receive updates from this
-     * object
-     *
-     * @param pcl the object to notify of updated
-     */
-    public synchronized void addPropertyChangeListener(PropertyChangeListener pcl) {
-        updateSupport.addPropertyChangeListener(pcl);
-    }
-
-    /**
-     * Updates all the PropertyChangeListener objects that have been registered
-     *
-     * @param results List<SimulationTimeSeries> containing the simulations' results
-     */
-    private void updateListeners(List<SimulationTimeSeries> results) {
-        updateSupport.firePropertyChange("Results", null, results);
-    }
 
     /**
      * Broadcast the discovery message to all the host's network interfaces
@@ -196,11 +169,10 @@ public class MasterServerSimulationEnvironment {
      */
     public void startSimulationServer() {
         try {
-            this.simulationSocket = new ServerSocket(localSimulationPort);
-            LOGGER.info(String.format("The server is now listening for clients on port: [%d]",
-                    LOCAL_SIMULATION_INFO.getPort()));
             while (true) {
-                Socket socket = simulationSocket.accept();
+                Socket socket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), localSimulationPort);
+                LOGGER.info(String.format("The server is now listening for clients on port: [%d]",
+                        LOCAL_SIMULATION_INFO.getPort()));
                 connectionExecutor.execute(() -> {
                     try {
                         manageClientMessage(socket);
@@ -301,8 +273,6 @@ public class MasterServerSimulationEnvironment {
             sim.simulate(dataSet.getRandomGenerator(), dataSet.getModel(),
                     dataSet.getModelInitialState(), dataSet.getModelSamplingFunction(),
                     dataSet.getReplica(), dataSet.getDeadline(), false);
-            this.updateListeners(
-                    dataSet.getModelSamplingFunction().getSimulationTimeSeries(dataSet.getReplica()));
             this.state.increaseExecutedSimulations();
             return dataSet.getModelSamplingFunction();
         } catch (InterruptedException e) {
