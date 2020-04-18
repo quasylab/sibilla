@@ -1,6 +1,9 @@
 # Created by https://www.gitignore.io/api/java,gradle,eclipse,intellij
 # Edit at https://www.gitignore.io/?templates=java,gradle,eclipse,intellij
 
+xtend-gen/*
+xtext-gen/*
+
 ### Eclipse ###
 .metadata
 bin/
@@ -207,3 +210,4 @@ gradle-app.setting
 # End of https://www.gitignore.io/api/java,gradle,eclipse,intellij
 *.iml
 core/quasylab.sibilla.core.simulator/src/main/main.iml
+/langs/quasylab.sibilla.lang.pm.parent/quasylab.sibilla.lang.pm/src/main/xtend-gen/quasylab/sibilla/lang/pm/
