@@ -16,4 +16,5 @@ include 'core:quasylab.sibilla.core.simulator',
         'langs:quasylab.sibilla.lang.pm.parent:quasylab.sibilla.lang.ide',
         'examples:populations:quasylab.sibilla.examples.pm.crowds',
 		'examples:populations:quasylab.sibilla.examples.pm.seir',
-        'examples:populations:quasylab.sibilla.examples.pm.le'
+        'examples:populations:quasylab.sibilla.examples.pm.le',
+		'examples:populations:quasylab.sibilla.examples.pm.covid'
