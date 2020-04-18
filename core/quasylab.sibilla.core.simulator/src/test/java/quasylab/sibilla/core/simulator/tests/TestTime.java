@@ -51,6 +51,7 @@ public class TestTime {
     private static final int REPLICA = 1000;
 
     public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
+       /*
         List<Long> stats = new ArrayList<>();
         PrintStream out = new PrintStream(new FileOutputStream("thread_data.data", true));
         out.println("Concurrent tasks;pool size;average runtime;maximum runtime;minimum runtime");
@@ -112,6 +113,7 @@ public class TestTime {
             System.out.println(i);
         } // i loop
         out2.close();
+        */
     }
 
     public static PopulationState initialState() {
