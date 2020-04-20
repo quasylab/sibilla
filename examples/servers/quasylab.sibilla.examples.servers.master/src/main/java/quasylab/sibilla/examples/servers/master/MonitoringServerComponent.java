@@ -18,14 +18,15 @@ public class MonitoringServerComponent implements PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("Master")) {
             MasterState state = (MasterState) evt.getNewValue();
-            if(states.size() >= 10){
-               states.poll();
+            if (states.size() >= 30 && !states.contains(state)) {
+                states.poll();
             }
-            states.add(state);
+            if (!states.contains(state))
+                states.add(state);
         }
     }
 
     public Queue<MasterState> getMasterState() {
-       return this.states;
+        return this.states;
     }
 }

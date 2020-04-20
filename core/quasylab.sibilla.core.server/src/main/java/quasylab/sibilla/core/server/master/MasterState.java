@@ -34,7 +34,9 @@ import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Class that contains the state of the master server
@@ -47,8 +49,8 @@ public class MasterState implements Serializable, PropertyChangeListener, Compar
     private volatile int executedSimulations;
     private Set<SlaveState> servers;
     private ServerInfo masterInfo;
-    private PropertyChangeSupport updateSupport;
     private Date lastUpdate;
+    private transient PropertyChangeSupport updateSupport;
 
     public MasterState(ServerInfo masterInfo) {
         this.masterInfo = masterInfo;
@@ -119,11 +121,11 @@ public class MasterState implements Serializable, PropertyChangeListener, Compar
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        this.lastUpdate = new Date();
         this.updateListeners();
     }
 
     private void updateListeners() {
+        this.lastUpdate = new Date();
         updateSupport.firePropertyChange("Master", null, this.clone());
     }
 
@@ -162,6 +164,36 @@ public class MasterState implements Serializable, PropertyChangeListener, Compar
 
     @Override
     public MasterState clone(){
-        
+        MasterState clone = null;
+        try {
+            clone = (MasterState) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        clone.startDate = (Date) this.startDate.clone();
+        clone.servers = this.servers.stream().map(server -> server.clone()).collect(Collectors.toSet());
+        clone.masterInfo = this.masterInfo.clone();
+        clone.lastUpdate = (Date) this.lastUpdate.clone();
+        return clone;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MasterState that = (MasterState) o;
+        return runningServers == that.runningServers &&
+                connectedServers == that.connectedServers &&
+                executedSimulations == that.executedSimulations &&
+                Objects.equals(startDate, that.startDate) &&
+                Objects.equals(servers, that.servers) &&
+                Objects.equals(masterInfo, that.masterInfo) &&
+                Objects.equals(lastUpdate, that.lastUpdate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(startDate, runningServers, connectedServers, executedSimulations, servers, masterInfo, lastUpdate);
+    }
+
 }

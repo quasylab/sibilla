@@ -36,7 +36,7 @@ import java.util.Objects;
 /**
  * Represents the state of a slave server
  */
-public class SlaveState implements Serializable {
+public class SlaveState implements Serializable, Cloneable {
     private final static double alpha = 0.125;
     private final static double beta = 0.250;
     private final static int threshold = 256;
@@ -47,8 +47,8 @@ public class SlaveState implements Serializable {
     private boolean isRemoved, isTimeout;
     private long runningTime;
     private double sampleRTT;
-    private PropertyChangeSupport updateSupport;
     private ServerInfo slaveInfo;
+    private transient PropertyChangeSupport updateSupport;
 
     @Override
     public boolean equals(Object o) {
@@ -222,6 +222,17 @@ public class SlaveState implements Serializable {
     public void timedOut(String property) {
         isTimeout = true;
         this.updateListeners(property);
+    }
+    
+    public SlaveState clone() {
+        SlaveState clone = null;
+        try {
+            clone = (SlaveState) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        clone.slaveInfo = this.slaveInfo.clone();
+        return clone;
     }
 
 }

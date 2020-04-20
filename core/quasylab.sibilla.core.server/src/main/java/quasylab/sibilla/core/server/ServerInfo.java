@@ -29,8 +29,9 @@ import quasylab.sibilla.core.server.network.NetworkManagerType;
 
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-public class ServerInfo implements Serializable {
+public class ServerInfo implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -2428861423753648117L;
     private InetAddress address;
@@ -93,5 +94,20 @@ public class ServerInfo implements Serializable {
             return false;
         }
         return true;
+    }
+
+    public ServerInfo clone() {
+        ServerInfo clone = null;
+        try {
+            clone = (ServerInfo) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        try {
+            clone.address = InetAddress.getByName(this.address.getHostName());
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return clone;
     }
 }
