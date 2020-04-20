@@ -3,6 +3,7 @@
  */
 package quasylab.sibilla.core.simulator.tests.pm;
 
+import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.*;
 import quasylab.sibilla.core.simulator.sampling.Measure;
@@ -89,7 +90,7 @@ public class GossipUnicast {
 		rules.add(
 				new UnicastRule(//AI: shuffle_00^ii interaction with PI
 					"s_ii" ,	
-					(PopulationState s) -> 
+					(PopulationState s) ->
 						this.lambda_s
 						*(s.getOccupancy(PI_INDEX)/((s.getOccupancy(PI_INDEX)+s.getOccupancy(PS_INDEX)+s.getOccupancy(PU_INDEX)))),
 					AI_INDEX ,

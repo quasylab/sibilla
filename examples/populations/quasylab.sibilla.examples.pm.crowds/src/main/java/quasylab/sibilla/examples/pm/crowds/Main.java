@@ -5,12 +5,12 @@ package quasylab.sibilla.examples.pm.crowds;
 
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.pm.PopulationModel;
-import quasylab.sibilla.core.simulator.pm.PopulationRule;
-import quasylab.sibilla.core.simulator.pm.PopulationState;
-import quasylab.sibilla.core.simulator.pm.ReactionRule;
-import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
-import quasylab.sibilla.core.simulator.pm.util.PopulationRegistry;
+import quasylab.sibilla.core.models.pm.PopulationModel;
+import quasylab.sibilla.core.models.pm.PopulationRule;
+import quasylab.sibilla.core.models.pm.PopulationState;
+import quasylab.sibilla.core.models.pm.ReactionRule;
+import quasylab.sibilla.core.models.pm.Population;
+import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
@@ -54,8 +54,8 @@ public class Main {
 		for( int i=0 ; i<N ; i++ ) {
 			rules.add( new ReactionRule(
 				"M1->A"+i,
-				new Specie[] { new Specie(r.indexOf("A",i)) , new Specie(r.indexOf("M1"))} ,
-				new Specie[] { new Specie(r.indexOf("AM",i)) } ,
+				new Population[] { new Population(r.indexOf("A",i)) , new Population(r.indexOf("M1"))} ,
+				new Population[] { new Population(r.indexOf("AM",i)) } ,
 				s -> LAMBDA_S/N
 			));
 		}
@@ -63,8 +63,8 @@ public class Main {
 		for( int i=0 ; i<N ; i++ ) {
 			rules.add( new ReactionRule(
 				"M2->A"+i,
-				new Specie[] { new Specie(r.indexOf("A",i)) , new Specie(r.indexOf("M2"))} ,
-				new Specie[] { new Specie(r.indexOf("AM",i)) } ,
+				new Population[] { new Population(r.indexOf("A",i)) , new Population(r.indexOf("M2"))} ,
+				new Population[] { new Population(r.indexOf("AM",i)) } ,
 				s -> LAMBDA_S/N
 			));
 		}
@@ -74,8 +74,8 @@ public class Main {
 					rules.add( 
 						new ReactionRule(
 							"A"+i+"->A"+j,
-							new Specie[] { new Specie(r.indexOf("AM",i)) , new Specie(r.indexOf("A",j))} ,
-							new Specie[] { new Specie(r.indexOf("A",i)) , new Specie(r.indexOf("AM",j))} ,
+							new Population[] { new Population(r.indexOf("AM",i)) , new Population(r.indexOf("A",j))} ,
+							new Population[] { new Population(r.indexOf("A",i)) , new Population(r.indexOf("AM",j))} ,
 							s -> P_F*LAMBDA_S/N
 						)
 					);
@@ -85,8 +85,8 @@ public class Main {
 		for( int i=0 ; i<N ; i++ ) {
 			rules.add( new ReactionRule(
 				"A"+i+"->D",
-				new Specie[] { new Specie(r.indexOf("AM",i)) } ,
-				new Specie[] { new Specie(r.indexOf("A",i)) } ,
+				new Population[] { new Population(r.indexOf("AM",i)) } ,
+				new Population[] { new Population(r.indexOf("A",i)) } ,
 				s -> (1-P_F)*LAMBDA_S
 			));
 		}
@@ -138,11 +138,11 @@ public class Main {
 	}
 
 	public static PopulationState initialState(int m ) {
-		Specie[] population = new Specie[N+1];
+		Population[] population = new Population[N+1];
 		for( int i=0 ; i<N ; i++ ) {
-			population[i] = new Specie( r.indexOf("A",i ),1);
+			population[i] = new Population( r.indexOf("A",i ),1);
 		}
-		population[N] = new Specie( r.indexOf("M"+m),1);
+		population[N] = new Population( r.indexOf("M"+m),1);
 		return new PopulationState(r.size(),population);
 	}
 }

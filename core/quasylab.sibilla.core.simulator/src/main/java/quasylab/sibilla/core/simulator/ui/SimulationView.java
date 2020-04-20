@@ -1,7 +1,7 @@
 package quasylab.sibilla.core.simulator.ui;
 
 import quasylab.sibilla.core.simulator.SimulationManager;
-import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.past.State;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;

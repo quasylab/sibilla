@@ -19,7 +19,8 @@
 
 package quasylab.sibilla.core.simulator;
 
-import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.models.MarkovProcess;
+import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 
 import java.io.Serializable;
@@ -36,7 +37,7 @@ public class SimulationUnit<S extends State> implements Serializable {
 	 */
 	private static final long serialVersionUID = 2809995821274223033L;
 
-	private Model<S> model;
+	private MarkovProcess<S> model;
 	
 	private S state;
 	
@@ -44,14 +45,14 @@ public class SimulationUnit<S extends State> implements Serializable {
 	
 	private Predicate<? super S> reachPredicate;
 	
-	public SimulationUnit(Model<S> model, S state, SamplePredicate<? super S> stoppingPredicate, Predicate<? super S> reachPredicate) {
+	public SimulationUnit(MarkovProcess<S> model, S state, SamplePredicate<? super S> stoppingPredicate, Predicate<? super S> reachPredicate) {
 		this.model = model;
 		this.state = state;
 		this.stoppingPredicate = stoppingPredicate;
 		this.reachPredicate = reachPredicate;
 	}
 
-	public Model<S> getModel() {
+	public MarkovProcess<S> getModel() {
 		return model;
 	}
 

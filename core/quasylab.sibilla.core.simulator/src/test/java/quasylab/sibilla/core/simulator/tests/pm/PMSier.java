@@ -3,12 +3,9 @@
  */
 package quasylab.sibilla.core.simulator.tests.pm;
 
+import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.pm.PopulationModel;
-import quasylab.sibilla.core.simulator.pm.PopulationRule;
-import quasylab.sibilla.core.simulator.pm.PopulationState;
-import quasylab.sibilla.core.simulator.pm.ReactionRule;
 import quasylab.sibilla.core.simulator.sampling.Measure;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
@@ -94,17 +91,17 @@ public class PMSier {
 		LinkedList<PopulationRule> rules = new LinkedList<>();
 
 		rules.add(new ReactionRule("S,I->I,I",
-				new ReactionRule.Specie[] { new ReactionRule.Specie(S_INDEX, 1), new ReactionRule.Specie(I_INDEX, 1) },
-				new ReactionRule.Specie[] { new ReactionRule.Specie(I_INDEX, 2) },
+				new Population[] { new Population(S_INDEX, 1), new Population(I_INDEX, 1) },
+				new Population[] { new Population(I_INDEX, 2) },
 				(s -> s.getOccupancy(S_INDEX) * s.getOccupancy(I_INDEX) * BETA)));
-		rules.add(new ReactionRule("S->I", new ReactionRule.Specie[] { new ReactionRule.Specie(S_INDEX, 1) },
-				new ReactionRule.Specie[] { new ReactionRule.Specie(I_INDEX, 1) },
+		rules.add(new ReactionRule("S->I", new Population[] { new Population(S_INDEX, 1) },
+				new Population[] { new Population(I_INDEX, 1) },
 				(s -> (s.getOccupancy(I_INDEX) == 0 ? s.getOccupancy(S_INDEX) * BETA : 0.0))));
-		rules.add(new ReactionRule("I->R", new ReactionRule.Specie[] { new ReactionRule.Specie(I_INDEX, 1) },
-				new ReactionRule.Specie[] { new ReactionRule.Specie(R_INDEX, 1) },
+		rules.add(new ReactionRule("I->R", new Population[] { new Population(I_INDEX, 1) },
+				new Population[] { new Population(R_INDEX, 1) },
 				(s -> s.getOccupancy(I_INDEX) * ALPHA)));
-		rules.add(new ReactionRule("R->S", new ReactionRule.Specie[] { new ReactionRule.Specie(R_INDEX, 1) },
-				new ReactionRule.Specie[] { new ReactionRule.Specie(S_INDEX, 1) },
+		rules.add(new ReactionRule("R->S", new Population[] { new Population(R_INDEX, 1) },
+				new Population[] { new Population(S_INDEX, 1) },
 				(s -> s.getOccupancy(R_INDEX) * GAMMA)));
 
 		return rules;

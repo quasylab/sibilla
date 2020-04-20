@@ -26,11 +26,11 @@ package quasylab.sibilla.examples.pm.seir;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.ThreadSimulationManager;
-import quasylab.sibilla.core.simulator.pm.PopulationModel;
-import quasylab.sibilla.core.simulator.pm.PopulationRule;
-import quasylab.sibilla.core.simulator.pm.PopulationState;
-import quasylab.sibilla.core.simulator.pm.ReactionRule;
-import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
+import quasylab.sibilla.core.models.pm.PopulationModel;
+import quasylab.sibilla.core.models.pm.PopulationRule;
+import quasylab.sibilla.core.models.pm.PopulationState;
+import quasylab.sibilla.core.models.pm.ReactionRule;
+import quasylab.sibilla.core.models.pm.Population;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
@@ -76,53 +76,53 @@ public class CovidModel {
     public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
         PopulationRule rule_S_A_A = new ReactionRule(
                 "S->A",
-                new Specie[] { new Specie(S), new Specie(A)} ,
-                new Specie[] { new Specie(A), new Specie(A)},
+                new Population[] { new Population(S), new Population(A)} ,
+                new Population[] { new Population(A), new Population(A)},
                 s -> PROB_ASINT*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(A)/N));
 
         PopulationRule rule_S_G_A = new ReactionRule(
                 "S->A",
-                new Specie[] { new Specie(S), new Specie(A)} ,
-                new Specie[] { new Specie(G), new Specie(A)},
+                new Population[] { new Population(S), new Population(A)} ,
+                new Population[] { new Population(G), new Population(A)},
                 s -> (1-PROB_ASINT)*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(A)/N));
 
         PopulationRule rule_S_A_G = new ReactionRule(
                 "S->A",
-                new Specie[] { new Specie(S), new Specie(G)} ,
-                new Specie[] { new Specie(A), new Specie(G)},
+                new Population[] { new Population(S), new Population(G)} ,
+                new Population[] { new Population(A), new Population(G)},
                 s -> PROB_ASINT*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(G)/N));
 
         PopulationRule rule_S_G_G = new ReactionRule(
                 "S->A",
-                new Specie[] { new Specie(S), new Specie(G)} ,
-                new Specie[] { new Specie(G), new Specie(G)},
+                new Population[] { new Population(S), new Population(G)} ,
+                new Population[] { new Population(G), new Population(G)},
                 s -> (1-PROB_ASINT)*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(G)/N));
 
         PopulationRule rule_A_R = new ReactionRule(
                 "I->R",
-                new Specie[] { new Specie(A) },
-                new Specie[] { new Specie(R) },
+                new Population[] { new Population(A) },
+                new Population[] { new Population(R) },
                 s -> s.getOccupancy(A)*LAMBDA_R_A*(1-PROB_A_G)
         );
 
         PopulationRule rule_A_G = new ReactionRule(
                 "I->R",
-                new Specie[] { new Specie(A) },
-                new Specie[] { new Specie(G) },
+                new Population[] { new Population(A) },
+                new Population[] { new Population(G) },
                 s -> s.getOccupancy(A)*LAMBDA_R_A*PROB_A_G
         );
 
         PopulationRule rule_G_R = new ReactionRule(
                 "I->R",
-                new Specie[] { new Specie(G) },
-                new Specie[] { new Specie(R) },
+                new Population[] { new Population(G) },
+                new Population[] { new Population(R) },
                 s -> s.getOccupancy(G)*LAMBDA_R_G*(1-PROB_DEATH)
         );
 
         PopulationRule rule_G_D = new ReactionRule(
                 "I->R",
-                new Specie[] { new Specie(G) },
-                new Specie[] { new Specie(D) },
+                new Population[] { new Population(G) },
+                new Population[] { new Population(D) },
                 s -> s.getOccupancy(G)*LAMBDA_R_G*PROB_DEATH
         );
 

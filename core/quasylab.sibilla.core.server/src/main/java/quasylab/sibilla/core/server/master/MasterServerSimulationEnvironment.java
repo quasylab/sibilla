@@ -12,12 +12,10 @@ import quasylab.sibilla.core.server.serialization.CustomClassLoader;
 import quasylab.sibilla.core.server.serialization.ObjectSerializer;
 import quasylab.sibilla.core.server.util.NetworkUtils;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
@@ -272,7 +270,7 @@ public class MasterServerSimulationEnvironment {
         try {
             sim.simulate(dataSet.getRandomGenerator(), dataSet.getModel(),
                     dataSet.getModelInitialState(), dataSet.getModelSamplingFunction(),
-                    dataSet.getReplica(), dataSet.getDeadline(), false);
+                    dataSet.getReplica(), dataSet.getDeadline());
             this.state.increaseExecutedSimulations();
             return dataSet.getModelSamplingFunction();
         } catch (InterruptedException e) {

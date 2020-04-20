@@ -18,7 +18,7 @@
  *******************************************************************************/
 package quasylab.sibilla.core.simulator.sampling;
 
-import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.past.State;
 
 import java.util.Collection;
 import java.util.LinkedList;

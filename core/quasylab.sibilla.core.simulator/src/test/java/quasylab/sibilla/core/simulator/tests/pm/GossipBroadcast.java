@@ -4,10 +4,10 @@
 package quasylab.sibilla.core.simulator.tests.pm;
 
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.pm.BroadcastRule;
-import quasylab.sibilla.core.simulator.pm.PopulationModel;
-import quasylab.sibilla.core.simulator.pm.PopulationRule;
-import quasylab.sibilla.core.simulator.pm.PopulationState;
+import quasylab.sibilla.core.models.pm.BroadcastRule;
+import quasylab.sibilla.core.models.pm.PopulationModel;
+import quasylab.sibilla.core.models.pm.PopulationRule;
+import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.simulator.sampling.Measure;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;

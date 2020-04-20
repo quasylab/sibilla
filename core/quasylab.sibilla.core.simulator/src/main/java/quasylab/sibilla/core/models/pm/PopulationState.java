@@ -1,28 +1,32 @@
-/*******************************************************************************
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+/*
+ * Sibilla:  a Java framework designed to support analysis of Collective
+ * Adaptive Systems.
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * Copyright (C) 2020.
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- *******************************************************************************/
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *           http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 /**
  * 
  */
-package quasylab.sibilla.core.simulator.pm;
+package quasylab.sibilla.core.models.pm;
 
-import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
-
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -38,7 +42,7 @@ import java.util.stream.IntStream;
  * @author loreti
  *
  */
-public class PopulationState implements State {
+public class PopulationState implements Serializable {
 
 	private static final long serialVersionUID = -4973919753621170006L;
 	/**
@@ -51,11 +55,11 @@ public class PopulationState implements State {
 		this(new int[size]);
 	}
 	
-	public PopulationState( int size , Specie ... species ) {
+	public PopulationState( int size , Population... species ) {
 		this(fillState(size,species));
 	}
 	
-	private static int[] fillState(int size, Specie[] species) {
+	private static int[] fillState(int size, Population[] species) {
 		int[] state = new int[size];
 		for( int i=0 ; i<species.length ; i++ ) {
 			state[species[i].getIndex()] += species[i].getSize();

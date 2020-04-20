@@ -3,9 +3,10 @@
  */
 package quasylab.sibilla.core.simulator.tests.pm;
 
+import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.*;
-import quasylab.sibilla.core.simulator.pm.UnicastRule.UnicastReceiver;
+import quasylab.sibilla.core.models.pm.UnicastRule.UnicastReceiver;
 import quasylab.sibilla.core.simulator.sampling.Measure;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;

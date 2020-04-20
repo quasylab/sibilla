@@ -19,7 +19,8 @@
 package quasylab.sibilla.core.simulator;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.models.StepFunction;
+import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.util.WeightedElement;
 import quasylab.sibilla.core.simulator.util.WeightedStructure;
 
@@ -88,8 +89,8 @@ public class SimulationTask<S extends State> implements Supplier<Trajectory<S>>,
 	}
 
 	private void step() {
-		WeightedStructure<StepFunction<S>> agents = 
-				this.unit.getModel().getActivities( random , currentState );
+		WeightedStructure<StepFunction<S>> agents =
+				this.unit.getModel().getTransitions( random , currentState );
 		double totalRate = agents.getTotalWeight();
 		if (totalRate == 0.0) {
 			cancel();

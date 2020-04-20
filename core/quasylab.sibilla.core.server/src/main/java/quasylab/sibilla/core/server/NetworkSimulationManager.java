@@ -31,7 +31,7 @@ import quasylab.sibilla.core.simulator.SimulationManager;
 import quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
-import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.past.State;
 
 import java.util.List;
 import java.util.Set;

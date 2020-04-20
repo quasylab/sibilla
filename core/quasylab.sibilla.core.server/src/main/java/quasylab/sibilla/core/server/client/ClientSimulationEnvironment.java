@@ -7,8 +7,8 @@ import quasylab.sibilla.core.server.master.MasterCommand;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
 import quasylab.sibilla.core.server.serialization.ClassBytesLoader;
 import quasylab.sibilla.core.server.serialization.ObjectSerializer;
-import quasylab.sibilla.core.simulator.Model;
-import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.models.MarkovProcess;
+import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 import java.util.logging.Logger;
@@ -45,7 +45,7 @@ public class ClientSimulationEnvironment<S extends State> {
      *                          quasylab.sibilla.core.server.master server
      * @throws Exception TODO Exception handling
      */
-    public ClientSimulationEnvironment(RandomGenerator random, String modelName, Model<S> model, S initialState,
+    public ClientSimulationEnvironment(RandomGenerator random, String modelName, MarkovProcess<S> model, S initialState,
                                        SamplingFunction<S> sampling_function, int replica, double deadline, ServerInfo masterServerInfo)
             throws Exception {
         this.data = new SimulationDataSet<S>(random, modelName, model, initialState, sampling_function, replica,

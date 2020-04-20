@@ -5,11 +5,11 @@ package quasylab.sibilla.examples.pm.le;
 
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.pm.PopulationModel;
-import quasylab.sibilla.core.simulator.pm.PopulationRule;
-import quasylab.sibilla.core.simulator.pm.PopulationState;
-import quasylab.sibilla.core.simulator.pm.ReactionRule;
-import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
+import quasylab.sibilla.core.models.pm.PopulationModel;
+import quasylab.sibilla.core.models.pm.PopulationRule;
+import quasylab.sibilla.core.models.pm.PopulationState;
+import quasylab.sibilla.core.models.pm.ReactionRule;
+import quasylab.sibilla.core.models.pm.Population;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
@@ -51,23 +51,23 @@ public class Main {
 
 		PopulationRule rule_C_S0 = new ReactionRule(
 				"C->S0", 
-				new Specie[] { new Specie(C) } , 
-				new Specie[] { new Specie(S0) },  
+				new Population[] { new Population(C) } ,
+				new Population[] { new Population(S0) },
 				s -> s.getOccupancy(C)*0.5*SELECT_RATE
 		); 
 
 		PopulationRule rule_C_S1 = new ReactionRule( 
 				"C->S1", 
-				new Specie[] { new Specie(C) } , 
-				new Specie[] { new Specie(S1) },  
+				new Population[] { new Population(C) } ,
+				new Population[] { new Population(S1) },
 				s -> s.getOccupancy(C)*0.5*SELECT_RATE); 
 
 		
 		
 		PopulationRule rule_S0_S1 = new ReactionRule( 
 				"S0*S1->F*C", 
-				new Specie[] { new Specie(S0) , new Specie(S1) } , 
-				new Specie[] { new Specie(F) , new Specie(C) } , 
+				new Population[] { new Population(S0) , new Population(S1) } ,
+				new Population[] { new Population(F) , new Population(C) } ,
 					s -> (
 							s.getOccupancy(S0)*s.getOccupancy(S1)/(s.getOccupancy(S0,S1)*(s.getOccupancy(S0,S1)-1) )
 							*s.getOccupancy(S0,S1)
@@ -78,8 +78,8 @@ public class Main {
 
 		PopulationRule rule_S0_S0 = new ReactionRule( 
 				"S0*S1->F*C", 
-				new Specie[] { new Specie(S0,2)} , 
-				new Specie[] { new Specie(C,2)} , 
+				new Population[] { new Population(S0,2)} ,
+				new Population[] { new Population(C,2)} ,
 					s -> (
 							s.getOccupancy(S0)*(s.getOccupancy(S0)-1)/(s.getOccupancy(S0,S1)*(s.getOccupancy(S0,S1)-1) )
 							*s.getOccupancy(S0,S1)/2
@@ -90,8 +90,8 @@ public class Main {
 
 		PopulationRule rule_S1_S1 = new ReactionRule( 
 				"S0*S1->F*C", 
-				new Specie[] { new Specie(S1,2) } , 
-				new Specie[] { new Specie(C,2) } , 
+				new Population[] { new Population(S1,2) } ,
+				new Population[] { new Population(C,2) } ,
 				s -> (
 						s.getOccupancy(S1)*(s.getOccupancy(S1)-1)/(s.getOccupancy(S0,S1)*(s.getOccupancy(S0,S1)-1) )
 						*s.getOccupancy(S0,S1)/2
@@ -102,22 +102,22 @@ public class Main {
 		
 		PopulationRule rule_S0_L = new ReactionRule( 
 				"S0 ->F", 
-				new Specie[] { new Specie(S0) } , 
-				new Specie[] { new Specie(L) } , 
+				new Population[] { new Population(S0) } ,
+				new Population[] { new Population(L) } ,
 				s -> s.getOccupancy(S0)*WAITING_RATE); 
 
 		PopulationRule rule_S1_L = new ReactionRule( 
 				"S1 ->F", 
-				new Specie[] { new Specie(S1) } , 
-				new Specie[] { new Specie(L) } , 
+				new Population[] { new Population(S1) } ,
+				new Population[] { new Population(L) } ,
 				s -> s.getOccupancy(S1)*WAITING_RATE);
 		
 		
 			
 		PopulationRule rule_L_C = new ReactionRule( 
 				"L -> C", 
-				new Specie[] { new Specie(L) } , 
-				new Specie[] { new Specie(C) } , 
+				new Population[] { new Population(L) } ,
+				new Population[] { new Population(C) } ,
 				s -> s.getOccupancy(S0,S1,C)/N*s.getOccupancy(L)*COM_RATE); 
 		
 		

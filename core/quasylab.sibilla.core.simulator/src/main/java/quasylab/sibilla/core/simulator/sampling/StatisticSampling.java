@@ -20,8 +20,8 @@ package quasylab.sibilla.core.simulator.sampling;
 
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import quasylab.sibilla.core.simulator.pm.MeasureFunction;
-import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.models.pm.MeasureFunction;
+import quasylab.sibilla.core.past.State;
 
 import java.io.PrintStream;
 import java.util.LinkedList;

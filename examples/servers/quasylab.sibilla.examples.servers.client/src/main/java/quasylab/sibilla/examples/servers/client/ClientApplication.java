@@ -8,11 +8,11 @@ import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.util.NetworkUtils;
 import quasylab.sibilla.core.server.util.SSLUtils;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
-import quasylab.sibilla.core.simulator.pm.PopulationModel;
-import quasylab.sibilla.core.simulator.pm.PopulationRule;
-import quasylab.sibilla.core.simulator.pm.PopulationState;
-import quasylab.sibilla.core.simulator.pm.ReactionRule;
-import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
+import quasylab.sibilla.core.models.pm.PopulationModel;
+import quasylab.sibilla.core.models.pm.PopulationRule;
+import quasylab.sibilla.core.models.pm.PopulationState;
+import quasylab.sibilla.core.models.pm.ReactionRule;
+import quasylab.sibilla.core.models.pm.Population;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
@@ -54,15 +54,15 @@ public class ClientApplication implements Serializable {
         SSLUtils.getInstance().setTrustStorePath("clientTrustStore.jks");
         SSLUtils.getInstance().setTrustStorePass("clientPass");
 
-        PopulationRule rule_S_E = new ReactionRule("S->E", new Specie[]{new Specie(S), new Specie(I)},
-                new Specie[]{new Specie(E), new Specie(I)},
+        PopulationRule rule_S_E = new ReactionRule("S->E", new Population[]{new Population(S), new Population(I)},
+                new Population[]{new Population(E), new Population(I)},
                 s -> s.getOccupancy(S) * LAMBDA_E * (s.getOccupancy(I) / N));
 
-        PopulationRule rule_E_I = new ReactionRule("E->I", new Specie[]{new Specie(E)},
-                new Specie[]{new Specie(I)}, s -> s.getOccupancy(E) * LAMBDA_I);
+        PopulationRule rule_E_I = new ReactionRule("E->I", new Population[]{new Population(E)},
+                new Population[]{new Population(I)}, s -> s.getOccupancy(E) * LAMBDA_I);
 
-        PopulationRule rule_I_R = new ReactionRule("I->R", new Specie[]{new Specie(I)},
-                new Specie[]{new Specie(R)}, s -> s.getOccupancy(I) * LAMBDA_R);
+        PopulationRule rule_I_R = new ReactionRule("I->R", new Population[]{new Population(I)},
+                new Population[]{new Population(R)}, s -> s.getOccupancy(I) * LAMBDA_R);
 
         PopulationModel f = new PopulationModel();
         f.addState("init", initialState());

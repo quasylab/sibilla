@@ -29,19 +29,19 @@ import java.util.List;
  */
 public interface SimulationSession {
 	
-	public int getSessionId();
+	int getSessionId();
 	
-	public boolean isRunning();
+	boolean isRunning();
 	
-	public void shutdown() throws InterruptedException;
+	void shutdown() throws InterruptedException;
 	
-	public void join() throws InterruptedException;
+	void join() throws InterruptedException;
 	
-	public int computedTrajectories();
+	int computedTrajectories();
 	
-	public double averageExecutionTime();
+	double averageExecutionTime();
 	
-	public SimulationTask<?> nextTask();
+	SimulationTask<?> nextTask();
 	
-	public List<SimulationTask<?>> getTask(int n);
+	List<SimulationTask<?>> getTask(int n);
 }
