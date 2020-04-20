@@ -79,7 +79,7 @@ public class SlaveState implements Serializable {
         sampleRTT = 0.0;
         estimatedRTT = 0.0;
         updateSupport = new PropertyChangeSupport(this);
-        this.addPropertyChangeListener(masterState);
+        this.addPropertyChangeListener("Master", masterState);
     }
 
     /**
@@ -88,7 +88,7 @@ public class SlaveState implements Serializable {
      * @param elapsedTime time used to execute the tasks
      * @param tasksSent   number of tasks executed
      */
-    public void update(long elapsedTime, int tasksSent) {
+    public void update(String property, long elapsedTime, int tasksSent) {
 
         actualTasks = tasksSent;
         runningTime = elapsedTime;
@@ -108,25 +108,25 @@ public class SlaveState implements Serializable {
         sampleRTT = runningTime / actualTasks;
         estimatedRTT = alpha * sampleRTT + (1 - alpha) * estimatedRTT;
         devRTT = devRTT == 0.0 ? sampleRTT * 2 : beta * Math.abs(sampleRTT - estimatedRTT) + (1 - beta) * devRTT;
-        this.updateListeners();
+        this.updateListeners(property);
     }
 
     /**
      * Lowers the expected tasks following the TCP window size algorithm and signals it to the listeners
      */
-    public void forceExpiredTimeLimit() {
+    public void forceExpiredTimeLimit(String property) {
         expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
-        this.updateListeners();
+        this.updateListeners(property);
     }
 
     /**
      * TODO ???
      */
-    public void migrate(ServerInfo newSlaveInfo) {
+    public void migrate(String property, ServerInfo newSlaveInfo) {
         this.slaveInfo = newSlaveInfo;
         isRemoved = false;
         isTimeout = false;
-        this.updateListeners();
+        this.updateListeners(property);
     }
 
     /**
@@ -167,12 +167,12 @@ public class SlaveState implements Serializable {
         return getTimeLimit(tasks) < maxRunningTime;
     }
 
-    public synchronized void addPropertyChangeListener(PropertyChangeListener pcl) {
-        updateSupport.addPropertyChangeListener(pcl);
+    public synchronized void addPropertyChangeListener(String property, PropertyChangeListener pcl) {
+        updateSupport.addPropertyChangeListener(property, pcl);
     }
 
-    private void updateListeners() {
-        updateSupport.firePropertyChange("SlaveState", null, this);
+    private void updateListeners(String property) {
+        updateSupport.firePropertyChange(property, null, this);
     }
 
     public ServerInfo getSlaveInfo(){
@@ -211,17 +211,17 @@ public class SlaveState implements Serializable {
     /**
      * Sets this server as removed and updates his listeners
      */
-    public void removed() {
+    public void removed(String property) {
         isRemoved = true;
-        this.updateListeners();
+        this.updateListeners(property);
     }
 
     /**
      * Sets this server as timed out and updates his listeners
      */
-    public void timedOut() {
+    public void timedOut(String property) {
         isTimeout = true;
-        this.updateListeners();
+        this.updateListeners(property);
     }
 
 }

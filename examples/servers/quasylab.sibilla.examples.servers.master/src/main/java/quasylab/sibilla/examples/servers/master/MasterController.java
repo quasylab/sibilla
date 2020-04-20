@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import quasylab.sibilla.core.server.master.MasterState;
 
+import java.util.Queue;
+
 @RestController
 @RequestMapping("/master")
 public class MasterController {
@@ -14,7 +16,7 @@ public class MasterController {
     MonitoringServerComponent monitoringServerComponent;
 
     @GetMapping("/state")
-    public MasterState getMasterState() {
+    public Queue<MasterState> getMasterState() {
         return monitoringServerComponent.getMasterState();
     }
 }

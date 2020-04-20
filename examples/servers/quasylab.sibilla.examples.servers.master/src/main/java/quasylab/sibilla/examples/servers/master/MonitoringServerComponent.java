@@ -6,20 +6,26 @@ import quasylab.sibilla.core.server.master.MasterState;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 @Component
 public class MonitoringServerComponent implements PropertyChangeListener {
 
-    private MasterState state;
+    private Queue<MasterState> states = new PriorityQueue<MasterState>();
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("Master")) {
-            state = (MasterState) evt.getNewValue();
+            MasterState state = (MasterState) evt.getNewValue();
+            if(states.size() >= 10){
+               states.poll();
+            }
+            states.add(state);
         }
     }
 
-    public MasterState getMasterState() {
-        return this.state;
+    public Queue<MasterState> getMasterState() {
+       return this.states;
     }
 }

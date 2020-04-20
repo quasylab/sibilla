@@ -20,6 +20,7 @@ dependencies {
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
+    compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
 }
 
 mainClassName = 'quasylab.sibilla.examples.servers.master.MasterApplication'

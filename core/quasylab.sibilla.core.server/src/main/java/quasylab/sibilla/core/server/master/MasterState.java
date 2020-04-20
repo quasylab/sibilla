@@ -39,7 +39,7 @@ import java.util.Set;
 /**
  * Class that contains the state of the master server
  */
-public class MasterState implements Serializable, PropertyChangeListener {
+public class MasterState implements Serializable, PropertyChangeListener, Comparable<MasterState>, Cloneable {
 
     private Date startDate;
     private volatile int runningServers;
@@ -48,10 +48,12 @@ public class MasterState implements Serializable, PropertyChangeListener {
     private Set<SlaveState> servers;
     private ServerInfo masterInfo;
     private PropertyChangeSupport updateSupport;
+    private Date lastUpdate;
 
     public MasterState(ServerInfo masterInfo) {
         this.masterInfo = masterInfo;
         this.startDate = new Date();
+        this.lastUpdate = startDate;
         this.runningServers = 0;
         this.connectedServers = 0;
         this.executedSimulations = 0;
@@ -59,6 +61,7 @@ public class MasterState implements Serializable, PropertyChangeListener {
         this.updateSupport = new PropertyChangeSupport(this);
         this.updateListeners();
     }
+
 
     public synchronized void addPropertyChangeListener(PropertyChangeListener pcl) {
         this.updateSupport.addPropertyChangeListener(pcl);
@@ -116,11 +119,12 @@ public class MasterState implements Serializable, PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
+        this.lastUpdate = new Date();
         this.updateListeners();
     }
 
     private void updateListeners() {
-        updateSupport.firePropertyChange("Master", null, this);
+        updateSupport.firePropertyChange("Master", null, this.clone());
     }
 
     public synchronized Set<SlaveState> getServers() {
@@ -145,5 +149,19 @@ public class MasterState implements Serializable, PropertyChangeListener {
 
     public Date getStartDate() {
         return startDate;
+    }
+
+    public Date getLastUpdate(){
+        return this.lastUpdate;
+    }
+
+    @Override
+    public int compareTo(MasterState o) {
+        return this.lastUpdate.compareTo(o.lastUpdate);
+    }
+
+    @Override
+    public MasterState clone(){
+        
     }
 }

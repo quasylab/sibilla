@@ -224,7 +224,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             LOGGER.info(
                     String.format("Creating a new NetworkManager to ping - %s",
                             pingServer.getServerInfo().toString()));
-            oldState.timedOut(); // mark server as timed out and update GUI
+            oldState.timedOut("Master"); // mark server as timed out and update GUI
 
             propertyChange("servers",
                     new String[]{
@@ -241,15 +241,15 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             }
             LOGGER.info(
                     String.format("The response has been received within the time limit. The task window will be reduced by half for the server - %s", pingServer.getServerInfo().toString()));
-            oldState.forceExpiredTimeLimit(); // halve the task window
-            oldState.migrate(pingServerInfo);
+            oldState.forceExpiredTimeLimit("Master"); // halve the task window
+            oldState.migrate("Master", pingServerInfo);
             this.networkManagers.add(pingServer);
 
             server.getSocket().close();
             this.networkManagers.remove(server);
         } catch (Exception e) {
             LOGGER.severe(String.format("The response has been received after the time limit. The server will be removed - %s", pingServer.getServerInfo().toString()));
-            oldState.removed(); // mark server as removed and update GUI
+            oldState.removed("Master"); // mark server as removed and update GUI
             this.networkManagers.remove(server);
             this.masterState.removeServer(server.getServerInfo());
             propertyChange("servers",
@@ -311,7 +311,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
 
             elapsedTime = System.nanoTime() - elapsedTime;
 
-            state.update(elapsedTime, result.getResults().size());
+            state.update("Master", elapsedTime, result.getResults().size());
             LOGGER.info(String.format("The results from the computation have been received from the server - %s", server.getServerInfo().toString()));
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
