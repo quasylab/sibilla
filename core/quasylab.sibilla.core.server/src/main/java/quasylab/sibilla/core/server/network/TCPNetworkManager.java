@@ -62,19 +62,18 @@ public interface TCPNetworkManager {
         }
     }
 
-    public static Socket createServerSocket(TCPNetworkManagerType networkType, int port) throws IOException {
+    public static ServerSocket createServerSocket(TCPNetworkManagerType networkType, int port) throws IOException {
         switch (networkType) {
             case SECURE:
                 SSLContext sslContext = SSLUtils.getInstance().createSSLContext();
                 SSLServerSocketFactory sslServerSocketFactory = sslContext.getServerSocketFactory();
                 SSLServerSocket sslServerSocket = (SSLServerSocket) sslServerSocketFactory.createServerSocket(port);
                 sslServerSocket.setNeedClientAuth(true);
-                return (SSLSocket) sslServerSocket.accept();
-
+                return sslServerSocket;
             case DEFAULT:
             default:
                 ServerSocket simulationSocket = new ServerSocket(port);
-                return simulationSocket.accept();
+                return simulationSocket;
 
         }
     }

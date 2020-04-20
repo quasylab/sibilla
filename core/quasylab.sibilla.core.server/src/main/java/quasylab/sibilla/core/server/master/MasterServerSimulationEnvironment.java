@@ -71,6 +71,7 @@ public class MasterServerSimulationEnvironment {
     private int remotePort;
     private ExecutorService activitiesExecutors = Executors.newCachedThreadPool();
     private ExecutorService connectionExecutor = Executors.newCachedThreadPool();
+
     /**
      * Creates a master server with the given
      * information that broadcasts his discovery messages to the given
@@ -194,10 +195,12 @@ public class MasterServerSimulationEnvironment {
      */
     public void startSimulationServer() {
         try {
+
+            ServerSocket serverSocket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), localSimulationPort);
+            LOGGER.info(String.format("The server is now listening for clients on port: [%d]",
+                    LOCAL_SIMULATION_INFO.getPort()));
             while (true) {
-                Socket socket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), localSimulationPort);
-                LOGGER.info(String.format("The server is now listening for clients on port: [%d]",
-                        LOCAL_SIMULATION_INFO.getPort()));
+                Socket socket = serverSocket.accept();
                 connectionExecutor.execute(() -> {
                     try {
                         manageClientMessage(socket);
@@ -257,6 +260,7 @@ public class MasterServerSimulationEnvironment {
             CustomClassLoader.classes.remove(modelName);
             LOGGER.info(String.format("[%s] Model deleted off the class loader", modelName));
             LOGGER.info(String.format("Client closed the connection"));
+            client.closeConnection();
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             e.printStackTrace();

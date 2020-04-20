@@ -81,9 +81,11 @@ public class BasicSimulationServer implements SimulationServer {
      * @throws IOException
      */
     private void startSimulationServer() throws IOException {
+
+        ServerSocket serverSocket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) networkManagerType, port);
+        LOGGER.info(String.format("The BasicSimulationServer is now listening for servers on port: [%d]", port));
         while (true) {
-            Socket socket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) networkManagerType, port);
-            LOGGER.info(String.format("The BasicSimulationServer is now listening for servers on port: [%d]", port));
+            Socket socket = serverSocket.accept();
             connectionExecutor.execute(() -> {
                 try {
                     manageMasterMessage(socket);

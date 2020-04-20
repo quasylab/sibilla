@@ -83,7 +83,8 @@ public class SimulationEnvironment implements Serializable {
 		}
 		@SuppressWarnings("unchecked")
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, initialState,
-				SamplePredicate.timeDeadlinePredicate(deadline), (Predicate<? super S> & Serializable) s -> true);
+				SamplePredicate.timeDeadlinePredicate(deadline),
+				(Predicate<? super S> & Serializable) s -> true);
 		rgi.register(random);// FIXME: Remove!
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			if (monitor != null) {

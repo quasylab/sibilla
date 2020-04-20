@@ -104,7 +104,7 @@ public class ServerInfo implements Serializable, Cloneable {
             e.printStackTrace();
         }
         try {
-            clone.address = InetAddress.getByName(this.address.getHostName());
+            clone.address = InetAddress.getByAddress(this.address.getAddress());
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
