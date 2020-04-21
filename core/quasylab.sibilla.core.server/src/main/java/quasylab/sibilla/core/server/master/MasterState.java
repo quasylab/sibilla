@@ -50,6 +50,8 @@ public class MasterState implements Serializable, PropertyChangeListener, Compar
     private Set<SlaveState> servers;
     private ServerInfo masterInfo;
     private Date lastUpdate;
+    private int pendingTasks;
+    private int totalSimulationTasks = 0;
     private transient PropertyChangeSupport updateSupport;
 
     public MasterState(ServerInfo masterInfo) {
@@ -153,8 +155,26 @@ public class MasterState implements Serializable, PropertyChangeListener, Compar
         return startDate;
     }
 
-    public Date getLastUpdate(){
+    public Date getLastUpdate() {
         return this.lastUpdate;
+    }
+
+    public int getPendingTasks() {
+        return this.pendingTasks;
+    }
+
+    public int getTotalSimulationTasks() {
+        return this.totalSimulationTasks;
+    }
+
+    public void setPendingTasks(int pendingTasks) {
+        this.pendingTasks = pendingTasks;
+        this.updateListeners();
+    }
+
+    public void setTotalSimulationTasks(int totalSimulationTasks) {
+        this.totalSimulationTasks = totalSimulationTasks;
+        this.updateListeners();
     }
 
     @Override
@@ -163,7 +183,7 @@ public class MasterState implements Serializable, PropertyChangeListener, Compar
     }
 
     @Override
-    public MasterState clone(){
+    public MasterState clone() {
         MasterState clone = null;
         try {
             clone = (MasterState) super.clone();

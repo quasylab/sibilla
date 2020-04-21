@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 public abstract class SimulationManager<S extends State> {
 
 
-    private final BlockingQueue<SimulationTask<S>> pendingTasks = new LinkedBlockingQueue<>();
+    protected final BlockingQueue<SimulationTask<S>> pendingTasks = new LinkedBlockingQueue<>();
     private final Consumer<Trajectory<S>> trajectoryConsumer;
     private final LinkedList<Long> executionTime = new LinkedList<>();
     private final SwingPropertyChangeSupport pcs = new SwingPropertyChangeSupport(this, true);

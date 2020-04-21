@@ -141,6 +141,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             LOGGER.severe(String.format("Server's tasks window has been reduced in half - %s", server.getServerInfo().toString()));
         }
         List<SimulationTask<S>> toRun = getTask(acceptableTasks, true);
+        this.masterState.setPendingTasks(this.pendingTasks.size());
         if (toRun.size() > 0) {
             masterState.increaseRunningServers();
             NetworkTask<S> networkTask = new NetworkTask<>(toRun);

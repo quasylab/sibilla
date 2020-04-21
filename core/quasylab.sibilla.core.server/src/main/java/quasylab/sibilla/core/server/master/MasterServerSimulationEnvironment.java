@@ -278,6 +278,7 @@ public class MasterServerSimulationEnvironment {
         try {
             SimulationDataSet<State> dataSet = (SimulationDataSet<State>) ObjectSerializer
                     .deserializeObject(client.readObject());
+            this.state.setTotalSimulationTasks(dataSet.getReplica());
             LOGGER.info(
                     String.format("Simulation datas received by the client - %s", client.getServerInfo().toString()));
             client.writeObject(ObjectSerializer.serializeObject(MasterCommand.DATA_RESPONSE));
@@ -285,6 +286,7 @@ public class MasterServerSimulationEnvironment {
                     client.getServerInfo().toString()));
             client.writeObject(ObjectSerializer.serializeObject(MasterCommand.RESULTS));
             client.writeObject(ObjectSerializer.serializeObject(this.submitSimulations(dataSet)));
+            this.state.setTotalSimulationTasks(0);
         } catch (Exception e) {
             e.printStackTrace();
         }
