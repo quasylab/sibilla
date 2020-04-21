@@ -33,6 +33,7 @@ import quasylab.sibilla.core.server.serialization.ObjectSerializer;
 import quasylab.sibilla.core.server.slave.SlaveCommand;
 import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
+import quasylab.sibilla.core.simulator.pm.State;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -54,8 +55,8 @@ public class BasicSimulationServer implements SimulationServer {
     private static final Logger LOGGER = Logger.getLogger(BasicSimulationServer.class.getName());
 
     private final TCPNetworkManagerType networkManagerType;
-    private ExecutorService taskExecutor = Executors.newCachedThreadPool();
-    private ExecutorService connectionExecutor = Executors.newCachedThreadPool();
+    private final ExecutorService taskExecutor = Executors.newCachedThreadPool();
+    private final ExecutorService connectionExecutor = Executors.newCachedThreadPool();
     private int port;
 
     /**
@@ -82,7 +83,7 @@ public class BasicSimulationServer implements SimulationServer {
      */
     private void startSimulationServer() throws IOException {
 
-        ServerSocket serverSocket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) networkManagerType, port);
+        ServerSocket serverSocket = TCPNetworkManager.createServerSocket(networkManagerType, port);
         LOGGER.info(String.format("The BasicSimulationServer is now listening for servers on port: [%d]", port));
         while (true) {
             Socket socket = serverSocket.accept();
@@ -136,7 +137,7 @@ public class BasicSimulationServer implements SimulationServer {
             masterActive.set(false);
             CustomClassLoader.classes.remove(modelName);
             LOGGER.info(String.format("[%s] Model deleted off the class loader", modelName));
-            LOGGER.info(String.format("Master closed the connection"));
+            LOGGER.info("Master closed the connection");
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             e.printStackTrace();
@@ -156,9 +157,6 @@ public class BasicSimulationServer implements SimulationServer {
             CustomClassLoader.defClass(modelName, myClass);
             String classLoadedName = Class.forName(modelName).getName();
             LOGGER.info(String.format("[%s] Class loaded with success", classLoadedName));
-        } catch (ClassNotFoundException e) {
-            LOGGER.severe(e.getMessage());
-            e.printStackTrace();
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             e.printStackTrace();

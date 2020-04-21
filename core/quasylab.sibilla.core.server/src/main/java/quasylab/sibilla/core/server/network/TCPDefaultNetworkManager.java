@@ -27,13 +27,12 @@ package quasylab.sibilla.core.server.network;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketException;
 
 public class TCPDefaultNetworkManager implements TCPNetworkManager {
 
-    private Socket socket;
-    private DataInputStream dataInputStream;
-    private DataOutputStream dataOutputStream;
+    private final Socket socket;
+    private final DataInputStream dataInputStream;
+    private final DataOutputStream dataOutputStream;
 
     public TCPDefaultNetworkManager(Socket socket) throws IOException {
         this.socket = socket;
@@ -58,11 +57,6 @@ public class TCPDefaultNetworkManager implements TCPNetworkManager {
         dataOutputStream.writeInt(toWrite.length);
         dataOutputStream.write(toWrite);
         dataOutputStream.flush();
-    }
-
-    @Override
-    public void setTimeout(long timeout) throws SocketException {
-        socket.setSoTimeout((int) (timeout / 1000000));
     }
 
     @Override

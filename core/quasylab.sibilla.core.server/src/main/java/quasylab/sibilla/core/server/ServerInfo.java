@@ -35,8 +35,8 @@ public class ServerInfo implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -2428861423753648117L;
     private InetAddress address;
-    private int port;
-    private NetworkManagerType type;
+    private final int port;
+    private final NetworkManagerType type;
 
     public ServerInfo(InetAddress address, int port, NetworkManagerType serType) {
         this.address = address;
@@ -90,10 +90,7 @@ public class ServerInfo implements Serializable, Cloneable {
         } else if (!address.equals(other.address)) {
             return false;
         }
-        if (port != other.port) {
-            return false;
-        }
-        return true;
+        return port == other.port;
     }
 
     public ServerInfo clone() {
@@ -104,6 +101,7 @@ public class ServerInfo implements Serializable, Cloneable {
             e.printStackTrace();
         }
         try {
+            assert clone != null;
             clone.address = InetAddress.getByAddress(this.address.getAddress());
         } catch (UnknownHostException e) {
             e.printStackTrace();

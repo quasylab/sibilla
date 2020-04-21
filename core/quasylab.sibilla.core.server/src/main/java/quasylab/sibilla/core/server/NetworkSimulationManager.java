@@ -50,20 +50,20 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
 
     private static final Logger LOGGER = Logger.getLogger(NetworkSimulationManager.class.getName());
     private final String modelName;
-    private BlockingQueue<TCPNetworkManager> serverQueue;
-    private ExecutorService executor;
-    private MasterState masterState;
-    private Set<TCPNetworkManager> networkManagers;
+    private final BlockingQueue<TCPNetworkManager> serverQueue;
+    private final ExecutorService executor;
+    private final MasterState masterState;
+    private final Set<TCPNetworkManager> networkManagers;
 
     public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer,
                                     String modelName, MasterState masterState) {
         super(random, consumer);
-        List<ServerInfo> info = masterState.getServers().stream().map(slaveState -> slaveState.getSlaveInfo()).collect(Collectors.toList());
+        List<ServerInfo> info = masterState.getServers().stream().map(SlaveState::getSlaveInfo).collect(Collectors.toList());
         LOGGER.info(String.format("Creating a new NetworkSimulationManager to contact the servers: [%s]", info.toString()));
         this.modelName = modelName;
         this.masterState = masterState;
         executor = Executors.newCachedThreadPool();
-        networkManagers = this.masterState.getServers().stream().map(slaveState -> slaveState.getSlaveInfo()).map(serverInfo -> {
+        networkManagers = this.masterState.getServers().stream().map(SlaveState::getSlaveInfo).map(serverInfo -> {
             try {
                 TCPNetworkManager server = TCPNetworkManager.createNetworkManager(serverInfo);
                 LOGGER.info(String.format("Created a NetworkManager to contact the server - %s",
@@ -104,9 +104,9 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
         server.writeObject(ObjectSerializer.serializeObject(MasterCommand.INIT));
         LOGGER.info(String.format("[%s] command sent to the server - %s", MasterCommand.INIT, server.getServerInfo().toString()));
         server.writeObject(ObjectSerializer.serializeObject(modelName));
-        LOGGER.info(String.format("[%s] Model name has been sent to the server - ", modelName, server.getServerInfo().toString()));
+        LOGGER.info(String.format("[%s] Model name has been sent to the server - ", modelName));
         server.writeObject(ClassBytesLoader.loadClassBytes(modelName));
-        LOGGER.info(String.format("Class bytes have been sent to the server - ", server.getServerInfo().toString()));
+        LOGGER.info("Class bytes have been sent to the server - ");
     }
 
     @Override
@@ -249,6 +249,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             server.getSocket().close();
             this.networkManagers.remove(server);
         } catch (Exception e) {
+            assert pingServer != null;
             LOGGER.severe(String.format("The response has been received after the time limit. The server will be removed - %s", pingServer.getServerInfo().toString()));
             oldState.removed("Master"); // mark server as removed and update GUI
             this.networkManagers.remove(server);

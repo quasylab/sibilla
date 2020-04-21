@@ -39,13 +39,14 @@ import quasylab.sibilla.core.server.util.NetworkUtils;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.pm.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.net.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,15 +62,14 @@ public class MasterServerSimulationEnvironment {
     private final ServerInfo LOCAL_DISCOVERY_INFO;
     private final ServerInfo LOCAL_SIMULATION_INFO;
 
-    private UDPNetworkManager discoveryNetworkManager;
-    private ExecutorService discoveryConnectionExecutor = Executors.newCachedThreadPool();
+    private final UDPNetworkManager discoveryNetworkManager;
+    private final ExecutorService discoveryConnectionExecutor = Executors.newCachedThreadPool();
 
-    private int localSimulationPort;
-    private MasterState state;
+    private final int localSimulationPort;
+    private final MasterState state;
 
-    private int remotePort;
-    private ExecutorService activitiesExecutors = Executors.newCachedThreadPool();
-    private ExecutorService connectionExecutor = Executors.newCachedThreadPool();
+    private final int remotePort;
+    private final ExecutorService connectionExecutor = Executors.newCachedThreadPool();
 
     /**
      * Creates and starts up a master server with the given parameters.
@@ -93,9 +93,7 @@ public class MasterServerSimulationEnvironment {
         this.remotePort = remoteDiscoveryPort;
         this.state = new MasterState(LOCAL_SIMULATION_INFO);
         this.localSimulationPort = localSimulationPort;
-        Arrays.stream(listeners).forEach(listener -> {
-            this.state.addPropertyChangeListener(listener);
-        });
+        Arrays.stream(listeners).forEach(this.state::addPropertyChangeListener);
 
         this.discoveryNetworkManager = UDPNetworkManager.createNetworkManager(LOCAL_DISCOVERY_INFO, true);
 
@@ -109,6 +107,7 @@ public class MasterServerSimulationEnvironment {
                 LOCAL_DISCOVERY_INFO.getType(), LOCAL_SIMULATION_INFO.getPort(),
                 LOCAL_SIMULATION_INFO.getType().getClass(), LOCAL_SIMULATION_INFO.getType()));
 
+        ExecutorService activitiesExecutors = Executors.newCachedThreadPool();
         activitiesExecutors.execute(this::startDiscoveryServer);
         activitiesExecutors.execute(this::startSimulationServer);
         activitiesExecutors.execute(this::broadcastToInterfaces);
@@ -219,7 +218,7 @@ public class MasterServerSimulationEnvironment {
      * sent
      *
      * @param socket Socket on which the message arrived
-     * @throws Exception TODO exception handling
+     * @throws IOException TODO exception handling
      */
     private void manageClientMessage(Socket socket) throws IOException {
         TCPNetworkManager simulationNetworkManager = TCPNetworkManager
@@ -325,7 +324,7 @@ public class MasterServerSimulationEnvironment {
             LOGGER.info(String.format("[%s] Model name read by server - IP: [%s] Port: [%d]", modelName,
                     client.getSocket().getInetAddress().getHostAddress(), client.getSocket().getPort()));
             byte[] modelBytes = client.readObject();
-            new CustomClassLoader().defClass(modelName, modelBytes);
+            CustomClassLoader.defClass(modelName, modelBytes);
             String classLoadedName = Class.forName(modelName).getName();
             LOGGER.info(String.format("[%s] Class loaded with success", classLoadedName));
             client.writeObject(ObjectSerializer.serializeObject(MasterCommand.INIT_RESPONSE));

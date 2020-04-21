@@ -231,6 +231,7 @@ public class SlaveState implements Serializable, Cloneable {
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
+        assert clone != null;
         clone.slaveInfo = this.slaveInfo.clone();
         return clone;
     }

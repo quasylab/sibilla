@@ -46,9 +46,9 @@ public class SlaveServerSimulationEnvironment {
 
     private static final Logger LOGGER = Logger.getLogger(SlaveServerSimulationEnvironment.class.getName());
 
-    private int localDiscoveryPort;
-    private HashSet<ServerInfo> simulationServersInfo;
-    private HashSet<SimulationServer> simulationServers;
+    private final int localDiscoveryPort;
+    private final HashSet<ServerInfo> simulationServersInfo;
+    private final HashSet<SimulationServer> simulationServers;
     private boolean alreadyDiscovered;
 
     /**
@@ -62,11 +62,9 @@ public class SlaveServerSimulationEnvironment {
         this.localDiscoveryPort = localDiscoveryPort;
         this.simulationServersInfo = new HashSet<>(simulationServersInfo);
         this.simulationServers = new HashSet<>();
-        LOGGER.info(String.format("Starting a new Slave server - It will respond for discovery messages on port [%d] and will create simulation servers on ports %s", localDiscoveryPort, simulationServersInfo.stream().map(serverInfo -> serverInfo.getPort()).collect(Collectors.toList())));
+        LOGGER.info(String.format("Starting a new Slave server - It will respond for discovery messages on port [%d] and will create simulation servers on ports %s", localDiscoveryPort, simulationServersInfo.stream().map(ServerInfo::getPort).collect(Collectors.toList())));
 
-        simulationServersInfo.forEach(info -> {
-            new Thread(() -> startupSingleSimulationServer(info)).start();
-        });
+        simulationServersInfo.forEach(info -> new Thread(() -> startupSingleSimulationServer(info)).start());
 
         new Thread(this::startDiscoveryServer).start();
     }

@@ -48,9 +48,8 @@ public class ClientSimulationEnvironment<S extends State> {
 
     private static final Logger LOGGER = Logger.getLogger(ClientSimulationEnvironment.class.getName());
 
-    private SimulationDataSet<S> data;
-    private TCPNetworkManager masterServerNetworkManager;
-    private SamplingFunction samplingFunction;
+    private final SimulationDataSet<S> data;
+    private final TCPNetworkManager masterServerNetworkManager;
 
     /**
      * Creates a new client that sends simulation commands with the parameters of
@@ -73,8 +72,8 @@ public class ClientSimulationEnvironment<S extends State> {
     public ClientSimulationEnvironment(RandomGenerator random, String modelName, Model<S> model, S initialState,
                                        SamplingFunction<S> sampling_function, int replica, double deadline, ServerInfo masterServerInfo)
             throws Exception {
-        this.data = new SimulationDataSet<S>(random, modelName, model, initialState, sampling_function, replica,
-                deadline, masterServerInfo);
+        this.data = new SimulationDataSet<>(random, modelName, model, initialState, sampling_function, replica,
+                deadline);
         this.masterServerNetworkManager = TCPNetworkManager.createNetworkManager(masterServerInfo);
 
         LOGGER.info(String.format("Starting a new client that will submit the simulation to the server - %s",
@@ -124,10 +123,10 @@ public class ClientSimulationEnvironment<S extends State> {
                 LOGGER.info(String.format("Answer received: [%s]", answer));
             } else {
                 LOGGER.severe(
-                        String.format("The answer received wasn't expected. There was an error MasterServer's side"));
+                        "The answer received wasn't expected. There was an error MasterServer's side");
             }
         } catch (ClassCastException e) {
-            LOGGER.severe(String.format("The answer received wasn't expected. There was an error MasterServer's side"));
+            LOGGER.severe("The answer received wasn't expected. There was an error MasterServer's side");
         }
     }
 
@@ -152,24 +151,24 @@ public class ClientSimulationEnvironment<S extends State> {
                 LOGGER.info(String.format("Answer received: [%s]", answer));
             } else {
                 LOGGER.severe(
-                        String.format("The answer received wasn't expected. There was an error MasterServer's side"));
+                        "The answer received wasn't expected. There was an error MasterServer's side");
             }
         } catch (ClassCastException e) {
-            LOGGER.severe(String.format("The answer received wasn't expected. There was an error MasterServer's side"));
+            LOGGER.severe("The answer received wasn't expected. There was an error MasterServer's side");
         }
         try {
             MasterCommand command = (MasterCommand) ObjectSerializer.deserializeObject(targetServer.readObject());
             LOGGER.info(String.format("[%s] command read by the master - %s", command,
                     targetServer.getServerInfo().toString()));
             if (command.equals(MasterCommand.RESULTS)) {
-                this.samplingFunction = (SamplingFunction) ObjectSerializer.deserializeObject(targetServer.readObject());
+                SamplingFunction<?> samplingFunction = (SamplingFunction<?>) ObjectSerializer.deserializeObject(targetServer.readObject());
                 LOGGER.severe(
-                        String.format("The simulation results have been received correctly"));
+                        "The simulation results have been received correctly");
             } else {
-                LOGGER.severe(String.format("The simulation results haven't been received"));
+                LOGGER.severe("The simulation results haven't been received");
             }
         } catch (ClassCastException e) {
-            LOGGER.severe(String.format("The simulation results haven't been received"));
+            LOGGER.severe("The simulation results haven't been received");
         }
     }
 
@@ -183,17 +182,17 @@ public class ClientSimulationEnvironment<S extends State> {
         targetServer.writeObject(ObjectSerializer.serializeObject(ClientCommand.PING));
         LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.PING,
                 targetServer.getServerInfo().toString()));
-        LOGGER.info(String.format("Ping has been sent to the server"));
+        LOGGER.info("Ping has been sent to the server");
         try {
             MasterCommand answer = (MasterCommand) ObjectSerializer.deserializeObject(targetServer.readObject());
             if (answer.equals(MasterCommand.PONG)) {
                 LOGGER.info(String.format("Answer received: [%s]", answer));
             } else {
                 LOGGER.severe(
-                        String.format("The answer received wasn't expected. There was an error MasterServer's side"));
+                        "The answer received wasn't expected. There was an error MasterServer's side");
             }
         } catch (ClassCastException e) {
-            LOGGER.severe(String.format("The answer received wasn't expected. There was an error MasterServer's side"));
+            LOGGER.severe("The answer received wasn't expected. There was an error MasterServer's side");
         }
 
     }

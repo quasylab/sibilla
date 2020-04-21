@@ -44,7 +44,7 @@ public class SimulationDataSet<S extends State> implements Serializable {
     private final double deadline;
 
     public SimulationDataSet(RandomGenerator random, String modelName, Model<S> model, S initialState,
-                             SamplingFunction<S> sampling_function, int replica, double deadline, ServerInfo masterServerInfo) {
+                             SamplingFunction<S> sampling_function, int replica, double deadline) {
         this.modelName = modelName;
         this.randomGenerator = random;
         this.model = model;
@@ -79,7 +79,7 @@ public class SimulationDataSet<S extends State> implements Serializable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        SimulationDataSet other = (SimulationDataSet) obj;
+        SimulationDataSet<?> other = (SimulationDataSet<?>) obj;
         if (Double.doubleToLongBits(deadline) != Double.doubleToLongBits(other.deadline))
             return false;
         if (model == null) {
@@ -107,9 +107,7 @@ public class SimulationDataSet<S extends State> implements Serializable {
                 return false;
         } else if (!randomGenerator.equals(other.randomGenerator))
             return false;
-        if (replica != other.replica)
-            return false;
-        return true;
+        return replica == other.replica;
     }
 
     public RandomGenerator getRandomGenerator() {

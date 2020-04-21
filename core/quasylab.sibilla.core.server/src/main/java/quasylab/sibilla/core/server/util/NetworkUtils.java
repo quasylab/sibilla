@@ -47,7 +47,7 @@ public class NetworkUtils {
                     e.printStackTrace();
                 }
                 return false;
-            }).findFirst().map(networkInterface -> networkInterface.getInterfaceAddresses()).get().stream().filter(interfaceAddress -> interfaceAddress.getAddress() instanceof Inet4Address).findFirst().get().getAddress();
+            }).findFirst().map(NetworkInterface::getInterfaceAddresses).get().stream().filter(interfaceAddress -> interfaceAddress.getAddress() instanceof Inet4Address).findFirst().get().getAddress();
         } catch (SocketException e) {
             e.printStackTrace();
         }

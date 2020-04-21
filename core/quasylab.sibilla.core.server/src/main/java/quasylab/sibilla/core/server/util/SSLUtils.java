@@ -26,7 +26,6 @@
 package quasylab.sibilla.core.server.util;
 
 import javax.net.ssl.*;
-import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 

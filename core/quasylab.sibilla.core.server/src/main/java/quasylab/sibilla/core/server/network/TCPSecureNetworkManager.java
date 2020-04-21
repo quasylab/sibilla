@@ -34,7 +34,6 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.logging.Logger;
 
 public class TCPSecureNetworkManager implements TCPNetworkManager {
@@ -95,11 +94,6 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
         dataOutputStream.writeInt(toWrite.length);
         dataOutputStream.write(toWrite);
         dataOutputStream.flush();
-    }
-
-    @Override
-    public void setTimeout(long timeout) throws SocketException {
-        socket.setSoTimeout((int) (timeout / 1000000));
     }
 
     @Override

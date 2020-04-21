@@ -32,12 +32,10 @@ import java.io.Serializable;
 public class ObjectSerializer {
 
 	public static byte[] serializeObject(Serializable toSerialize) {
-		byte[] data = SerializationUtils.serialize(toSerialize);
-		return data;
+		return SerializationUtils.serialize(toSerialize);
 	}
 	
 	public static Serializable deserializeObject(byte[] toDeserialize) {
-		Serializable object = SerializationUtils.deserialize(toDeserialize);
-		return object;
+		return SerializationUtils.deserialize(toDeserialize);
 	}
 }
