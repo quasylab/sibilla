@@ -52,8 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
 /**
- * Handles the simulations requested by clients, manages a list of slave servers
- * who will perform computations
+ * Manages connection with clients and slave servers to execute and manage the simulations' tasks and their results over network connections.
  */
 public class MasterServerSimulationEnvironment {
 
@@ -73,15 +72,16 @@ public class MasterServerSimulationEnvironment {
     private ExecutorService connectionExecutor = Executors.newCachedThreadPool();
 
     /**
-     * Creates a master server with the given
-     * information that broadcasts his discovery messages to the given
-     * remoteDiscoveryPort
+     * Creates and starts up a master server with the given parameters.
      *
-     * @param localDiscoveryPort      port the server listens to
-     * @param remoteDiscoveryPort     port the server sends discovery messages to
-     * @param discoveryNetworkManager type of network manager used by this server
-     * @throws InterruptedException TODO Exception handling
-     * @throws IOException          TODO Exception handling
+     *
+     * @param localDiscoveryPort port used by the master server to manage the incoming slave servers' registration requests.
+     * @param remoteDiscoveryPort port used by the slave servers to manage the incoming master server discovery message.
+     * @param discoveryNetworkManager type of UDP network communication that will be used during the slave servers' discovery by the master.
+     * @param localSimulationPort port used by the master server to manage the incoming clients' simulation requests.
+     * @param simulationNetworkManager type of TCP network communication that will be used between master server and clients.
+     * @param listeners PropertyChangeListener objects that will be updated about the state of this master server.
+     * @throws IOException
      */
     public MasterServerSimulationEnvironment(int localDiscoveryPort, int remoteDiscoveryPort,
                                              UDPNetworkManagerType discoveryNetworkManager, int localSimulationPort,
@@ -117,7 +117,7 @@ public class MasterServerSimulationEnvironment {
 
 
     /**
-     * Broadcast the discovery message to all the host's network interfaces
+     * Broadcast the discovery message to all master's network interfaces
      */
     private void broadcastToInterfaces() {
         try {
@@ -181,7 +181,7 @@ public class MasterServerSimulationEnvironment {
      *
      * @param info Set of informations received by a slave server
      */
-    public void manageServers(Set<ServerInfo> info) {
+    private void manageServers(Set<ServerInfo> info) {
         info.forEach(singleInfo -> {
             if (state.addServer(singleInfo)) {
                 LOGGER.info(String.format("Added simulation server - %s", singleInfo.toString()));
@@ -193,7 +193,7 @@ public class MasterServerSimulationEnvironment {
     /**
      * Starts the server that listens for simulations to execute
      */
-    public void startSimulationServer() {
+    private void startSimulationServer() {
         try {
 
             ServerSocket serverSocket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), localSimulationPort);

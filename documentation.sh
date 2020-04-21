@@ -1,4 +1,4 @@
-doxygen config
+doxygen doxygenConfig
 cd ./docs/latex
 make
 mv refman.pdf sibilla.pdf

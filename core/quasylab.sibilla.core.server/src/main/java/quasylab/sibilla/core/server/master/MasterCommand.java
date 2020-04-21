@@ -26,8 +26,39 @@
 package quasylab.sibilla.core.server.master;
 
 /**
- * All the possible command that can be sent from a master
+ * All the possible command and signals that can be sent from a Master server.
  */
 public enum MasterCommand {
-    INIT, PING, TASK, RESULTS, PONG, INIT_RESPONSE, DATA_RESPONSE, CLOSE_CONNECTION;
+    /**
+     * The command sent by a master server to initiate a new connection over the network.
+     */
+    INIT,
+    /**
+     * The command sent by a master server to ping an host which has a connection open with.
+     */
+    PING,
+    /**
+     * The command sent by a master server to inform that a batch of tasks will be sent over the network connection.
+     */
+    TASK,
+    /**
+     * The command sent by a master server to inform that a batch of simulations' results will be sent over the network connection.
+     */
+    RESULTS,
+    /**
+     * The command sent by a master server to reply to a ping request received by an host.
+     */
+    PONG,
+    /**
+     * The command sent by a master server to reply to a new connection request received by an host.
+     */
+    INIT_RESPONSE,
+    /**
+     * The command sent by a master server to reply to a data receiving command received by an host.
+     */
+    DATA_RESPONSE,
+    /**
+     * The command sent by a master server to inform that the connection with an host will be closed.
+     */
+    CLOSE_CONNECTION;
 }
