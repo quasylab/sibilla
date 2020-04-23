@@ -133,6 +133,7 @@ public class MasterServerSimulationEnvironment {
                 }).forEach(networkInterface -> networkInterface.getInterfaceAddresses().stream()
                         .map(InterfaceAddress::getBroadcast).filter(Objects::nonNull)
                         .forEach(this::broadcastToSingleInterface));
+                LOGGER.info(String.format("Current set of servers: %s", state.getServers()));
 
                 Thread.sleep(20000);
             }
@@ -171,7 +172,6 @@ public class MasterServerSimulationEnvironment {
                         e.printStackTrace();
                     }
                 });
-                LOGGER.info(String.format("Current set of servers: %s", state.getServers().toString()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -190,6 +190,7 @@ public class MasterServerSimulationEnvironment {
             }
             // LOGGER.warning("This server was already present: " + singleInfo.toString());
         });
+
     }
 
     /**

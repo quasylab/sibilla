@@ -113,11 +113,15 @@ public class MasterState implements Serializable, PropertyChangeListener, Compar
     }
 
     public synchronized void updateServersLife() {
+        List<SlaveState> toRemove = new ArrayList<>();
         this.servers.keySet().stream().forEach(slaveState -> {
             this.servers.put(slaveState, this.servers.get(slaveState) - 1);
-            if(this.servers.get(slaveState) == 0){
-                this.removeServer(slaveState);
+            if (this.servers.get(slaveState) == 0) {
+                toRemove.add(slaveState);
             }
+        });
+        toRemove.stream().forEach(slave -> {
+            this.servers.remove(slave);
         });
     }
 

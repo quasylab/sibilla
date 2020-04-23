@@ -175,7 +175,7 @@ public class SlaveState implements Serializable, Cloneable {
         updateSupport.firePropertyChange(property, null, this);
     }
 
-    public ServerInfo getSlaveInfo(){
+    public ServerInfo getSlaveInfo() {
         return this.slaveInfo;
     }
 
@@ -195,7 +195,8 @@ public class SlaveState implements Serializable, Cloneable {
         if (isTimeout()) {
             return "Server has timed out, reconnecting...";
         }
-        return " - Tasks received: " + actualTasks +
+        return this.slaveInfo +
+                "\n - Tasks received: " + actualTasks +
                 "\n - Window runtime: " + runningTime + "ns " +
                 "\n - sampleRTT: " + sampleRTT + "ns " +
                 "\n - estimatedRTT: " + estimatedRTT + "ns " +
@@ -223,7 +224,7 @@ public class SlaveState implements Serializable, Cloneable {
         isTimeout = true;
         this.updateListeners(property);
     }
-    
+
     public SlaveState clone() {
         SlaveState clone = null;
         try {
