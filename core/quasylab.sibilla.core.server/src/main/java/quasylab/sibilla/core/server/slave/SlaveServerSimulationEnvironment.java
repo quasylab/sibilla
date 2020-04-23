@@ -94,10 +94,11 @@ public class SlaveServerSimulationEnvironment {
             LOGGER.info(String.format("Now listening for discovery messages on port: [%d]", localDiscoveryPort));
             UDPDefaultNetworkManager manager = new UDPDefaultNetworkManager(discoverySocket);
 
-            ServerInfo masterInfo = (ServerInfo) ObjectSerializer.deserializeObject(manager.readObject());
-            LOGGER.info(String.format("Discovered by the master server - %s", masterInfo.toString()));
-            manageDiscoveryMessage(manager, masterInfo);
-
+            while(true) {
+                ServerInfo masterInfo = (ServerInfo) ObjectSerializer.deserializeObject(manager.readObject());
+                LOGGER.info(String.format("Discovered by the master server - %s", masterInfo.toString()));
+                manageDiscoveryMessage(manager, masterInfo);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
