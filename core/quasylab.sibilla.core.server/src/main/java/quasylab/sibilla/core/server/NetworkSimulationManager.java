@@ -58,12 +58,12 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
     public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer,
                                     String modelName, MasterState masterState) {
         super(random, consumer);
-        List<ServerInfo> info = masterState.getServers().stream().map(SlaveState::getSlaveInfo).collect(Collectors.toList());
-        LOGGER.info(String.format("Creating a new NetworkSimulationManager to contact the servers: [%s]", info.toString()));
+        List<ServerInfo> slaveServerInfos = masterState.getServers().keySet().stream().map(SlaveState::getSlaveInfo).collect(Collectors.toList());
+        LOGGER.info(String.format("Creating a new NetworkSimulationManager to contact the servers: [%s]", slaveServerInfos.toString()));
         this.modelName = modelName;
         this.masterState = masterState;
         executor = Executors.newCachedThreadPool();
-        networkManagers = this.masterState.getServers().stream().map(SlaveState::getSlaveInfo).map(serverInfo -> {
+        networkManagers = slaveServerInfos.stream().map(serverInfo -> {
             try {
                 TCPNetworkManager server = TCPNetworkManager.createNetworkManager(serverInfo);
                 LOGGER.info(String.format("Created a NetworkManager to contact the server - %s",

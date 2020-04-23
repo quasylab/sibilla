@@ -121,6 +121,8 @@ public class MasterServerSimulationEnvironment {
     private void broadcastToInterfaces() {
         try {
             while (true) {
+                state.updateServersLife();
+
                 NetworkInterface.networkInterfaces().filter(networkInterface -> {
                     try {
                         return !networkInterface.isLoopback() && networkInterface.isUp();
@@ -131,6 +133,7 @@ public class MasterServerSimulationEnvironment {
                 }).forEach(networkInterface -> networkInterface.getInterfaceAddresses().stream()
                         .map(InterfaceAddress::getBroadcast).filter(Objects::nonNull)
                         .forEach(this::broadcastToSingleInterface));
+
                 Thread.sleep(20000);
             }
         } catch (Exception e) {

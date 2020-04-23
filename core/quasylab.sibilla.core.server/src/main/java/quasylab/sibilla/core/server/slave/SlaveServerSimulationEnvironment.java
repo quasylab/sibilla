@@ -48,8 +48,8 @@ public class SlaveServerSimulationEnvironment {
 
     private final int localDiscoveryPort;
     private final HashSet<ServerInfo> simulationServersInfo;
-    private final HashSet<SimulationServer> simulationServers;
-    private boolean alreadyDiscovered;
+    private final Set<SimulationServer> simulationServers;
+    private final Set<ServerInfo> knownMasters;
 
     /**
      * Create a slave server listening on a given port and creates the simulation servers with the given info
@@ -58,10 +58,10 @@ public class SlaveServerSimulationEnvironment {
      * @param simulationServersInfo collection of ServerInfo in which simulation servers will be instantiated
      */
     public SlaveServerSimulationEnvironment(int localDiscoveryPort, Set<ServerInfo> simulationServersInfo) {
-        this.alreadyDiscovered = false;
         this.localDiscoveryPort = localDiscoveryPort;
         this.simulationServersInfo = new HashSet<>(simulationServersInfo);
         this.simulationServers = new HashSet<>();
+        this.knownMasters = new HashSet<>();
         LOGGER.info(String.format("Starting a new Slave server - It will respond for discovery messages on port [%d] and will create simulation servers on ports %s", localDiscoveryPort, simulationServersInfo.stream().map(ServerInfo::getPort).collect(Collectors.toList())));
 
         simulationServersInfo.forEach(info -> new Thread(() -> startupSingleSimulationServer(info)).start());
@@ -93,12 +93,12 @@ public class SlaveServerSimulationEnvironment {
             DatagramSocket discoverySocket = new DatagramSocket(localDiscoveryPort);
             LOGGER.info(String.format("Now listening for discovery messages on port: [%d]", localDiscoveryPort));
             UDPDefaultNetworkManager manager = new UDPDefaultNetworkManager(discoverySocket);
-            while (!alreadyDiscovered) {
-                ServerInfo masterInfo = (ServerInfo) ObjectSerializer.deserializeObject(manager.readObject());
-                LOGGER.info(String.format("Discovered by the server - %s", masterInfo.toString()));
-                manageDiscoveryMessage(manager, masterInfo);
-                this.alreadyDiscovered = true;
-            }
+
+            ServerInfo masterInfo = (ServerInfo) ObjectSerializer.deserializeObject(manager.readObject());
+            LOGGER.info(String.format("Discovered by the master server - %s", masterInfo.toString()));
+            manageDiscoveryMessage(manager, masterInfo);
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -112,7 +112,9 @@ public class SlaveServerSimulationEnvironment {
      * @throws Exception TODO Exception handling
      */
     private void manageDiscoveryMessage(UDPDefaultNetworkManager manager, ServerInfo masterInfo) throws Exception {
+        this.knownMasters.add(masterInfo);
         manager.writeObject(ObjectSerializer.serializeObject(simulationServersInfo), masterInfo.getAddress(), masterInfo.getPort());
-        LOGGER.info(String.format("Sent the discovery response to the server - %s", masterInfo.toString()));
+        LOGGER.info(String.format("Sent the discovery response to the master server - %s", masterInfo.toString()));
+        LOGGER.info(String.format("Currently known masters - %s", knownMasters.toString()));
     }
 }

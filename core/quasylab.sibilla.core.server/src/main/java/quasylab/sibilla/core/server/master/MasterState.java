@@ -32,10 +32,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -47,7 +44,7 @@ public class MasterState implements Serializable, PropertyChangeListener, Compar
     private volatile int runningServers;
     private volatile int connectedServers;
     private volatile int executedSimulations;
-    private Set<SlaveState> servers;
+    private Map<SlaveState, Integer> servers;
     private ServerInfo masterInfo;
     private Date lastUpdate;
     private int pendingTasks;
@@ -61,7 +58,7 @@ public class MasterState implements Serializable, PropertyChangeListener, Compar
         this.runningServers = 0;
         this.connectedServers = 0;
         this.executedSimulations = 0;
-        this.servers = new HashSet<>();
+        this.servers = new HashMap<>();
         this.updateSupport = new PropertyChangeSupport(this);
         this.updateListeners();
     }
@@ -95,7 +92,7 @@ public class MasterState implements Serializable, PropertyChangeListener, Compar
     }
 
     public synchronized boolean removeServer(SlaveState state) {
-        if (this.servers.remove(state)) {
+        if (this.servers.remove(state) != null) {
             this.connectedServers--;
             this.updateListeners();
             return true;
@@ -105,7 +102,7 @@ public class MasterState implements Serializable, PropertyChangeListener, Compar
     }
 
     public synchronized boolean addServer(SlaveState state) {
-        if (this.servers.add(state)) {
+        if (this.servers.put(state, 5) == null) {
             this.connectedServers++;
             this.updateListeners();
             return true;
@@ -115,8 +112,17 @@ public class MasterState implements Serializable, PropertyChangeListener, Compar
 
     }
 
+    public synchronized void updateServersLife() {
+        this.servers.keySet().stream().forEach(slaveState -> {
+            this.servers.put(slaveState, this.servers.get(slaveState) - 1);
+            if(this.servers.get(slaveState) == 0){
+                this.removeServer(slaveState);
+            }
+        });
+    }
+
     public SlaveState getSlaveStateByServerInfo(ServerInfo serverInfo) {
-        return this.servers.stream().filter(slaveState -> {
+        return this.servers.keySet().stream().filter(slaveState -> {
             return slaveState.getSlaveInfo().equals(serverInfo);
         }).findFirst().get();
     }
@@ -131,8 +137,8 @@ public class MasterState implements Serializable, PropertyChangeListener, Compar
         updateSupport.firePropertyChange("Master", null, this.clone());
     }
 
-    public synchronized Set<SlaveState> getServers() {
-        return new HashSet<>(this.servers);
+    public synchronized Map<SlaveState, Integer> getServers() {
+        return new HashMap<>(this.servers);
     }
 
     public ServerInfo getMasterInfo() {
@@ -191,7 +197,9 @@ public class MasterState implements Serializable, PropertyChangeListener, Compar
             e.printStackTrace();
         }
         clone.startDate = (Date) this.startDate.clone();
-        clone.servers = this.servers.stream().map(server -> server.clone()).collect(Collectors.toSet());
+        final Map<SlaveState, Integer> tempMapCopy = new HashMap<>();
+        this.servers.entrySet().stream().forEach(entry -> tempMapCopy.put(entry.getKey().clone(), entry.getValue()));
+        clone.servers.putAll(tempMapCopy);
         clone.masterInfo = this.masterInfo.clone();
         clone.lastUpdate = (Date) this.lastUpdate.clone();
         return clone;
