@@ -31,14 +31,14 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class ServerInfo implements Serializable, Cloneable {
+public class NetworkInfo implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -2428861423753648117L;
     private InetAddress address;
     private final int port;
     private final NetworkManagerType type;
 
-    public ServerInfo(InetAddress address, int port, NetworkManagerType serType) {
+    public NetworkInfo(InetAddress address, int port, NetworkManagerType serType) {
         this.address = address;
         this.port = port;
         this.type = serType;
@@ -82,7 +82,7 @@ public class ServerInfo implements Serializable, Cloneable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        ServerInfo other = (ServerInfo) obj;
+        NetworkInfo other = (NetworkInfo) obj;
         if (address == null) {
             if (other.address != null) {
                 return false;
@@ -93,10 +93,10 @@ public class ServerInfo implements Serializable, Cloneable {
         return port == other.port;
     }
 
-    public ServerInfo clone() {
-        ServerInfo clone = null;
+    public NetworkInfo clone() {
+        NetworkInfo clone = null;
         try {
-            clone = (ServerInfo) super.clone();
+            clone = (NetworkInfo) super.clone();
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }

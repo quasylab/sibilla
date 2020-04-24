@@ -26,7 +26,7 @@
 package quasylab.sibilla.core.server.network;
 
 
-import quasylab.sibilla.core.server.ServerInfo;
+import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.util.SSLUtils;
 
 import javax.net.ssl.SSLContext;
@@ -35,11 +35,10 @@ import javax.net.ssl.SSLServerSocketFactory;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 
 public interface TCPNetworkManager {
 
-    static TCPNetworkManager createNetworkManager(ServerInfo info) throws IOException {
+    static TCPNetworkManager createNetworkManager(NetworkInfo info) throws IOException {
         if (info.getType() == TCPNetworkManagerType.SECURE) {
             return new TCPSecureNetworkManager(info);
         }
@@ -80,8 +79,8 @@ public interface TCPNetworkManager {
 
     Socket getSocket();
 
-    default ServerInfo getServerInfo() {
-        return new ServerInfo(getSocket().getInetAddress(), getSocket().getPort(), getType());
+    default NetworkInfo getServerInfo() {
+        return new NetworkInfo(getSocket().getInetAddress(), getSocket().getPort(), getType());
     }
 
     void closeConnection();

@@ -2,7 +2,7 @@ package quasylab.sibilla.examples.servers.client;
 
 
 import org.apache.commons.math3.random.AbstractRandomGenerator;
-import quasylab.sibilla.core.server.ServerInfo;
+import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.client.ClientSimulationEnvironment;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.util.NetworkUtils;
@@ -43,7 +43,7 @@ public class ClientApplication implements Serializable {
 
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
     private static final String MODEL_NAME = ClientApplication.class.getName();
-    private static final ServerInfo MASTER_SERVER_INFO = new ServerInfo(NetworkUtils.getLocalIp(), 10001, TCPNetworkManagerType.SECURE);
+    private static final NetworkInfo MASTER_SERVER_INFO = new NetworkInfo(NetworkUtils.getLocalIp(), 10001, TCPNetworkManagerType.SECURE);
 
     public static void main(String[] argv) throws Exception {
 

@@ -25,7 +25,7 @@
 
 package quasylab.sibilla.core.server.slave;
 
-import quasylab.sibilla.core.server.ServerInfo;
+import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.master.MasterState;
 
 import java.beans.PropertyChangeListener;
@@ -47,7 +47,7 @@ public class SlaveState implements Serializable, Cloneable {
     private boolean isRemoved, isTimeout;
     private long runningTime;
     private double sampleRTT;
-    private ServerInfo slaveInfo;
+    private NetworkInfo slaveInfo;
     private transient PropertyChangeSupport updateSupport;
 
     @Override
@@ -68,7 +68,7 @@ public class SlaveState implements Serializable, Cloneable {
      *
      * @param masterState MasterState that listens to the changes of this object
      */
-    public SlaveState(MasterState masterState, ServerInfo slaveInfo) {
+    public SlaveState(MasterState masterState, NetworkInfo slaveInfo) {
         this.slaveInfo = slaveInfo;
         expectedTasks = 1;
         actualTasks = 0;
@@ -122,7 +122,7 @@ public class SlaveState implements Serializable, Cloneable {
     /**
      * TODO ???
      */
-    public void migrate(String property, ServerInfo newSlaveInfo) {
+    public void migrate(String property, NetworkInfo newSlaveInfo) {
         this.slaveInfo = newSlaveInfo;
         isRemoved = false;
         isTimeout = false;
@@ -175,7 +175,7 @@ public class SlaveState implements Serializable, Cloneable {
         updateSupport.firePropertyChange(property, null, this);
     }
 
-    public ServerInfo getSlaveInfo() {
+    public NetworkInfo getSlaveInfo() {
         return this.slaveInfo;
     }
 

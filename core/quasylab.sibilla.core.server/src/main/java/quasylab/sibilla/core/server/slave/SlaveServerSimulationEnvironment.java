@@ -26,7 +26,7 @@
 package quasylab.sibilla.core.server.slave;
 
 import quasylab.sibilla.core.server.BasicSimulationServer;
-import quasylab.sibilla.core.server.ServerInfo;
+import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.SimulationServer;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.network.UDPDefaultNetworkManager;
@@ -47,9 +47,9 @@ public class SlaveServerSimulationEnvironment {
     private static final Logger LOGGER = Logger.getLogger(SlaveServerSimulationEnvironment.class.getName());
 
     private final int localDiscoveryPort;
-    private final HashSet<ServerInfo> simulationServersInfo;
+    private final HashSet<NetworkInfo> simulationServersInfo;
     private final Set<SimulationServer> simulationServers;
-    private final Set<ServerInfo> knownMasters;
+    private final Set<NetworkInfo> knownMasters;
 
     /**
      * Create a slave server listening on a given port and creates the simulation servers with the given info
@@ -57,12 +57,12 @@ public class SlaveServerSimulationEnvironment {
      * @param localDiscoveryPort    port the server listens to
      * @param simulationServersInfo collection of ServerInfo in which simulation servers will be instantiated
      */
-    public SlaveServerSimulationEnvironment(int localDiscoveryPort, Set<ServerInfo> simulationServersInfo) {
+    public SlaveServerSimulationEnvironment(int localDiscoveryPort, Set<NetworkInfo> simulationServersInfo) {
         this.localDiscoveryPort = localDiscoveryPort;
         this.simulationServersInfo = new HashSet<>(simulationServersInfo);
         this.simulationServers = new HashSet<>();
         this.knownMasters = new HashSet<>();
-        LOGGER.info(String.format("Starting a new Slave server - It will respond for discovery messages on port [%d] and will create simulation servers on ports %s", localDiscoveryPort, simulationServersInfo.stream().map(ServerInfo::getPort).collect(Collectors.toList())));
+        LOGGER.info(String.format("Starting a new Slave server - It will respond for discovery messages on port [%d] and will create simulation servers on ports %s", localDiscoveryPort, simulationServersInfo.stream().map(NetworkInfo::getPort).collect(Collectors.toList())));
 
         simulationServersInfo.forEach(info -> new Thread(() -> startupSingleSimulationServer(info)).start());
 
@@ -74,7 +74,7 @@ public class SlaveServerSimulationEnvironment {
      *
      * @param info ServerInfo in which the server will be instantiated
      */
-    private void startupSingleSimulationServer(ServerInfo info) {
+    private void startupSingleSimulationServer(NetworkInfo info) {
         SimulationServer server = new BasicSimulationServer((TCPNetworkManagerType) info.getType());
         this.simulationServers.add(server);
         LOGGER.info(String.format("A new simulation server has been created - %s", info.toString()));
@@ -95,7 +95,7 @@ public class SlaveServerSimulationEnvironment {
             UDPDefaultNetworkManager manager = new UDPDefaultNetworkManager(discoverySocket);
 
             while(true) {
-                ServerInfo masterInfo = (ServerInfo) ObjectSerializer.deserializeObject(manager.readObject());
+                NetworkInfo masterInfo = (NetworkInfo) ObjectSerializer.deserializeObject(manager.readObject());
                 LOGGER.info(String.format("Discovered by the master server - %s", masterInfo.toString()));
                 manageDiscoveryMessage(manager, masterInfo);
             }
@@ -112,7 +112,7 @@ public class SlaveServerSimulationEnvironment {
      * @param masterInfo ServerInfo of the master server
      * @throws Exception TODO Exception handling
      */
-    private void manageDiscoveryMessage(UDPDefaultNetworkManager manager, ServerInfo masterInfo) throws Exception {
+    private void manageDiscoveryMessage(UDPDefaultNetworkManager manager, NetworkInfo masterInfo) throws Exception {
         this.knownMasters.add(masterInfo);
         manager.writeObject(ObjectSerializer.serializeObject(simulationServersInfo), masterInfo.getAddress(), masterInfo.getPort());
         LOGGER.info(String.format("Sent the discovery response to the master server - %s", masterInfo.toString()));

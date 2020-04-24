@@ -26,16 +26,15 @@
 package quasylab.sibilla.core.server.network;
 
 
-import quasylab.sibilla.core.server.ServerInfo;
+import quasylab.sibilla.core.server.NetworkInfo;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 
 public interface UDPNetworkManager {
 
-    static UDPNetworkManager createNetworkManager(ServerInfo info, boolean toBroadcast) throws IOException {
+    static UDPNetworkManager createNetworkManager(NetworkInfo info, boolean toBroadcast) throws IOException {
         DatagramSocket socket = new DatagramSocket(info.getPort(), info.getAddress());
         socket.setBroadcast(toBroadcast);
         if (info.getType() == UDPNetworkManagerType.DEFAULT) {

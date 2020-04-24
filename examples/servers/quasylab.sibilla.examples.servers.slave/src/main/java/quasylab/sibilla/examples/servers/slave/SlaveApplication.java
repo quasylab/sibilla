@@ -1,6 +1,6 @@
 package quasylab.sibilla.examples.servers.slave;
 
-import quasylab.sibilla.core.server.ServerInfo;
+import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.slave.SlaveServerSimulationEnvironment;
 import quasylab.sibilla.core.server.util.NetworkUtils;
@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class SlaveApplication {
     private static final int LOCAL_DISCOVERY_PORT = 59119;
-    private static final Set<ServerInfo> LOCAL_SIMULATION_SERVERS = Set.of(new ServerInfo(NetworkUtils.getLocalIp(), 8081, TCPNetworkManagerType.SECURE)
+    private static final Set<NetworkInfo> LOCAL_SIMULATION_SERVERS = Set.of(new NetworkInfo(NetworkUtils.getLocalIp(), 8081, TCPNetworkManagerType.SECURE)
     );
 
     public static void main(String[] args) throws UnknownHostException {

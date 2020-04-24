@@ -26,7 +26,7 @@
 package quasylab.sibilla.core.server.client;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.server.ServerInfo;
+import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.SimulationDataSet;
 import quasylab.sibilla.core.server.master.MasterCommand;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
@@ -65,19 +65,19 @@ public class ClientSimulationEnvironment<S extends State> {
      *                          data
      * @param replica           Repetitions of the simulation
      * @param deadline          Time interval between two samplings
-     * @param masterServerInfo  ServerInfo of the
+     * @param masterNetworkInfo  ServerInfo of the
      *                          quasylab.sibilla.core.server.master server
      * @throws Exception TODO Exception handling
      */
     public ClientSimulationEnvironment(RandomGenerator random, String modelName, Model<S> model, S initialState,
-                                       SamplingFunction<S> sampling_function, int replica, double deadline, ServerInfo masterServerInfo)
+                                       SamplingFunction<S> sampling_function, int replica, double deadline, NetworkInfo masterNetworkInfo)
             throws Exception {
         this.data = new SimulationDataSet<>(random, modelName, model, initialState, sampling_function, replica,
                 deadline);
-        this.masterServerNetworkManager = TCPNetworkManager.createNetworkManager(masterServerInfo);
+        this.masterServerNetworkManager = TCPNetworkManager.createNetworkManager(masterNetworkInfo);
 
         LOGGER.info(String.format("Starting a new client that will submit the simulation to the server - %s",
-                masterServerInfo.toString()));
+                masterNetworkInfo.toString()));
 
         this.initConnection(masterServerNetworkManager);
         this.sendSimulationInfo(masterServerNetworkManager);

@@ -25,7 +25,7 @@
 
 package quasylab.sibilla.core.server.network;
 
-import quasylab.sibilla.core.server.ServerInfo;
+import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.util.SSLUtils;
 
 import javax.net.ssl.SSLContext;
@@ -45,11 +45,11 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
     private DataOutputStream dataOutputStream;
 
     //The socket needs to be built - Example: Client-side connection
-    public TCPSecureNetworkManager(ServerInfo serverInfo) throws IOException {
-        if (serverInfo.getType().equals(TCPNetworkManagerType.SECURE)) {
+    public TCPSecureNetworkManager(NetworkInfo networkInfo) throws IOException {
+        if (networkInfo.getType().equals(TCPNetworkManagerType.SECURE)) {
             SSLContext sslContext = SSLUtils.getInstance().createSSLContext();
             SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-            SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(serverInfo.getAddress(), serverInfo.getPort());
+            SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(networkInfo.getAddress(), networkInfo.getPort());
             this.buildWithSocket(sslSocket);
         } else {
             throw new IOException("Wrong TCPNetworkManager type");

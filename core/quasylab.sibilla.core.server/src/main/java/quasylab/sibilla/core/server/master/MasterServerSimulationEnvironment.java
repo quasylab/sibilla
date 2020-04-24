@@ -25,8 +25,8 @@
 
 package quasylab.sibilla.core.server.master;
 
+import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.NetworkSimulationManager;
-import quasylab.sibilla.core.server.ServerInfo;
 import quasylab.sibilla.core.server.SimulationDataSet;
 import quasylab.sibilla.core.server.client.ClientCommand;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
@@ -59,8 +59,8 @@ public class MasterServerSimulationEnvironment {
 
     private static final Logger LOGGER = Logger.getLogger(MasterServerSimulationEnvironment.class.getName());
 
-    private final ServerInfo LOCAL_DISCOVERY_INFO;
-    private final ServerInfo LOCAL_SIMULATION_INFO;
+    private final NetworkInfo LOCAL_DISCOVERY_INFO;
+    private final NetworkInfo LOCAL_SIMULATION_INFO;
 
     private final UDPNetworkManager discoveryNetworkManager;
     private final ExecutorService discoveryConnectionExecutor = Executors.newCachedThreadPool();
@@ -87,8 +87,8 @@ public class MasterServerSimulationEnvironment {
                                              UDPNetworkManagerType discoveryNetworkManager, int localSimulationPort,
                                              TCPNetworkManagerType simulationNetworkManager, PropertyChangeListener... listeners)
             throws IOException {
-        LOCAL_DISCOVERY_INFO = new ServerInfo(NetworkUtils.getLocalIp(), localDiscoveryPort, discoveryNetworkManager);
-        LOCAL_SIMULATION_INFO = new ServerInfo(NetworkUtils.getLocalIp(), localSimulationPort,
+        LOCAL_DISCOVERY_INFO = new NetworkInfo(NetworkUtils.getLocalIp(), localDiscoveryPort, discoveryNetworkManager);
+        LOCAL_SIMULATION_INFO = new NetworkInfo(NetworkUtils.getLocalIp(), localSimulationPort,
                 simulationNetworkManager);
         this.remotePort = remoteDiscoveryPort;
         this.state = new MasterState(LOCAL_SIMULATION_INFO);
@@ -121,7 +121,7 @@ public class MasterServerSimulationEnvironment {
     private void broadcastToInterfaces() {
         try {
             while (true) {
-                state.updateServersLife();
+                state.updateServersKeepAlive();
 
                 NetworkInterface.networkInterfaces().filter(networkInterface -> {
                     try {
@@ -133,7 +133,7 @@ public class MasterServerSimulationEnvironment {
                 }).forEach(networkInterface -> networkInterface.getInterfaceAddresses().stream()
                         .map(InterfaceAddress::getBroadcast).filter(Objects::nonNull)
                         .forEach(this::broadcastToSingleInterface));
-                LOGGER.info(String.format("Current set of servers: %s", state.getServers()));
+                LOGGER.info(String.format("Current set of servers: %s", state.getSlaveServersStates()));
 
                 Thread.sleep(20000);
             }
@@ -163,7 +163,7 @@ public class MasterServerSimulationEnvironment {
     private void startDiscoveryServer() {
         while (true) {
             try {
-                Set<ServerInfo> slaveSimulationServers = (Set<ServerInfo>) ObjectSerializer
+                Set<NetworkInfo> slaveSimulationServers = (Set<NetworkInfo>) ObjectSerializer
                         .deserializeObject(discoveryNetworkManager.readObject());
                 discoveryConnectionExecutor.execute(() -> {
                     try {
@@ -183,9 +183,9 @@ public class MasterServerSimulationEnvironment {
      *
      * @param info Set of informations received by a slave server
      */
-    private void manageServers(Set<ServerInfo> info) {
+    private void manageServers(Set<NetworkInfo> info) {
         info.forEach(singleInfo -> {
-            if (state.addServer(singleInfo)) {
+            if (state.addSlaveServer(singleInfo)) {
                 LOGGER.info(String.format("Added simulation server - %s", singleInfo.toString()));
             }
             // LOGGER.warning("This server was already present: " + singleInfo.toString());
