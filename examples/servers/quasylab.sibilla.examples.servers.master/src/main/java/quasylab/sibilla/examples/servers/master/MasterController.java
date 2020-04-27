@@ -1,5 +1,6 @@
 package quasylab.sibilla.examples.servers.master;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +17,7 @@ public class MasterController {
     MonitoringServerComponent monitoringServerComponent;
 
     @GetMapping("/state")
-    public Queue<MasterState> getMasterState() {
+    public MasterState getMasterState() {
         return monitoringServerComponent.getMasterState();
     }
 }

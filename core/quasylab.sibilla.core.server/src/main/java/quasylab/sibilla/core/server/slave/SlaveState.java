@@ -27,6 +27,7 @@ package quasylab.sibilla.core.server.slave;
 
 import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.master.MasterState;
+import quasylab.sibilla.core.server.master.SimulationState;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -63,12 +64,7 @@ public class SlaveState implements Serializable, Cloneable {
         return Objects.hash(slaveInfo);
     }
 
-    /**
-     * Creates a SlaveState object and sets the given MasterState as its listener
-     *
-     * @param masterState MasterState that listens to the changes of this object
-     */
-    public SlaveState(MasterState masterState, NetworkInfo slaveInfo) {
+    public SlaveState(SimulationState simulationState, NetworkInfo slaveInfo) {
         this.slaveInfo = slaveInfo;
         expectedTasks = 1;
         actualTasks = 0;
@@ -79,7 +75,7 @@ public class SlaveState implements Serializable, Cloneable {
         sampleRTT = 0.0;
         estimatedRTT = 0.0;
         updateSupport = new PropertyChangeSupport(this);
-        this.addPropertyChangeListener("Master", masterState);
+        this.addPropertyChangeListener("Simulation Update", simulationState);
     }
 
     /**
@@ -88,7 +84,7 @@ public class SlaveState implements Serializable, Cloneable {
      * @param elapsedTime time used to execute the tasks
      * @param tasksSent   number of tasks executed
      */
-    public void update(String property, long elapsedTime, int tasksSent) {
+    public void update(long elapsedTime, int tasksSent) {
 
         actualTasks = tasksSent;
         runningTime = elapsedTime;
@@ -108,25 +104,25 @@ public class SlaveState implements Serializable, Cloneable {
         sampleRTT = runningTime / actualTasks;
         estimatedRTT = alpha * sampleRTT + (1 - alpha) * estimatedRTT;
         devRTT = devRTT == 0.0 ? sampleRTT * 2 : beta * Math.abs(sampleRTT - estimatedRTT) + (1 - beta) * devRTT;
-        this.updateListeners(property);
+        this.updateListeners();
     }
 
     /**
      * Lowers the expected tasks following the TCP window size algorithm and signals it to the listeners
      */
-    public void forceExpiredTimeLimit(String property) {
+    public void forceExpiredTimeLimit() {
         expectedTasks = expectedTasks == 1 ? 1 : expectedTasks / 2;
-        this.updateListeners(property);
+        this.updateListeners();
     }
 
     /**
      * TODO ???
      */
-    public void migrate(String property, NetworkInfo newSlaveInfo) {
+    public void migrate(NetworkInfo newSlaveInfo) {
         this.slaveInfo = newSlaveInfo;
         isRemoved = false;
         isTimeout = false;
-        this.updateListeners(property);
+        this.updateListeners();
     }
 
     /**
@@ -169,10 +165,11 @@ public class SlaveState implements Serializable, Cloneable {
 
     public synchronized void addPropertyChangeListener(String property, PropertyChangeListener pcl) {
         updateSupport.addPropertyChangeListener(property, pcl);
+        this.updateListeners();
     }
 
-    private void updateListeners(String property) {
-        updateSupport.firePropertyChange(property, null, this);
+    private void updateListeners() {
+        updateSupport.firePropertyChange("Simulation Update", null, this);
     }
 
     public NetworkInfo getSlaveInfo() {
@@ -212,17 +209,17 @@ public class SlaveState implements Serializable, Cloneable {
     /**
      * Sets this server as removed and updates his listeners
      */
-    public void removed(String property) {
+    public void removed() {
         isRemoved = true;
-        this.updateListeners(property);
+        this.updateListeners();
     }
 
     /**
      * Sets this server as timed out and updates his listeners
      */
-    public void timedOut(String property) {
+    public void timedOut() {
         isTimeout = true;
-        this.updateListeners(property);
+        this.updateListeners();
     }
 
     public SlaveState clone() {

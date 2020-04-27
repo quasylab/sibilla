@@ -28,6 +28,7 @@ package quasylab.sibilla.core.server;
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.server.master.MasterCommand;
 import quasylab.sibilla.core.server.master.MasterState;
+import quasylab.sibilla.core.server.master.SimulationState;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
 import quasylab.sibilla.core.server.serialization.ClassBytesLoader;
 import quasylab.sibilla.core.server.serialization.ObjectSerializer;
@@ -52,16 +53,16 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
     private final String modelName;
     private final BlockingQueue<TCPNetworkManager> serverQueue;
     private final ExecutorService executor;
-    private final MasterState masterState;
+    private final SimulationState simulationState;
     private final Set<TCPNetworkManager> networkManagers;
 
     public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer,
-                                    String modelName, MasterState masterState) {
+                                    String modelName, SimulationState simulationState) {
         super(random, consumer);
-        List<NetworkInfo> slaveNetworkInfos = masterState.getSlaveServersStates().stream().map(SlaveState::getSlaveInfo).collect(Collectors.toList());
+        List<NetworkInfo> slaveNetworkInfos = simulationState.getSlaveServersStates().stream().map(SlaveState::getSlaveInfo).collect(Collectors.toList());
         LOGGER.info(String.format("Creating a new NetworkSimulationManager to contact the servers: [%s]", slaveNetworkInfos.toString()));
         this.modelName = modelName;
-        this.masterState = masterState;
+        this.simulationState = simulationState;
         executor = Executors.newCachedThreadPool();
         networkManagers = slaveNetworkInfos.stream().map(serverInfo -> {
             try {
@@ -83,12 +84,12 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
     }
 
     public static SimulationManagerFactory getNetworkSimulationManagerFactory(
-            String modelName, MasterState masterState) {
+            String modelName, SimulationState simulationState) {
         return new SimulationManagerFactory() {
             @Override
             public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
                                                                                Consumer<Trajectory<S>> consumer) {
-                return new NetworkSimulationManager<>(random, consumer, modelName, masterState);
+                return new NetworkSimulationManager<>(random, consumer, modelName, simulationState);
             }
         };
 
@@ -116,7 +117,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
 
     private void handleTasks() {
         try {
-            while ((isRunning() || hasTasks() || this.masterState.getRunningSlaveServers() > 0) && !this.masterState.getSlaveServersStates().isEmpty()) {
+            while ((isRunning() || hasTasks() || this.simulationState.getRunningSlaveServers() > 0) && !this.simulationState.getSlaveServersStates().isEmpty()) {
                 singleTaskExecution();
             }
         } catch (InterruptedException e) {
@@ -133,7 +134,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
         TCPNetworkManager server = findServer();
         LOGGER.info(String.format("Server currently connected to: %s",
                 server.getServerInfo().toString()));
-        SlaveState serverState = this.masterState.getSlaveStateByServerInfo(server.getServerInfo());
+        SlaveState serverState = this.simulationState.getSlaveStateByServerInfo(server.getServerInfo());
         LOGGER.info(String.format("State of the server: [%s]", serverState.toString()));
         int acceptableTasks = serverState.getExpectedTasks();
         if (!serverState.canCompleteTask(acceptableTasks)) {
@@ -141,9 +142,9 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             LOGGER.severe(String.format("Server's tasks window has been reduced in half - %s", server.getServerInfo().toString()));
         }
         List<SimulationTask<S>> toRun = getTask(acceptableTasks, true);
-        this.masterState.setPendingTasks(this.pendingTasks.size());
+        this.simulationState.setPendingTasks(this.pendingTasks.size());
         if (toRun.size() > 0) {
-            masterState.increaseRunningServers();
+            simulationState.increaseRunningServers();
             NetworkTask<S> networkTask = new NetworkTask<>(toRun);
             CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
                     .whenComplete((value, error) -> manageResult(value, error, toRun, server));
@@ -187,22 +188,22 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             if ((newServer = manageTimeout(server)) != null) {
                 LOGGER.info(String.format("The server has responded. New server - %s", newServer.getServerInfo().toString()));
                 enqueueServer(newServer);// add new server to queue, old server won't return
-            } else if (this.masterState.getSlaveServersStates().isEmpty()) {
+            } else if (this.simulationState.getSlaveServersStates().isEmpty()) {
                 synchronized (this) {
                     notifyAll();
                 }
             }
             rescheduleAll(tasks);
-            masterState.decreaseRunningServers();
+            simulationState.decreaseRunningServers();
         } else {
             LOGGER.info(String.format("Timeout did not occurred for server - %s", server.getServerInfo().toString()));
             enqueueServer(server);
-            masterState.decreaseRunningServers();
+            simulationState.decreaseRunningServers();
             value.getResults().forEach(this::handleTrajectory);
             propertyChange("servers",
                     new String[]{
                             server.getSocket().getInetAddress().getHostAddress() + ":" + server.getSocket().getPort(),
-                            this.masterState.getSlaveStateByServerInfo(server.getServerInfo()).toString()});
+                            this.simulationState.getSlaveStateByServerInfo(server.getServerInfo()).toString()});
         }
     }
 
@@ -213,7 +214,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
      * @return new server to use to execute tasks
      */
     private TCPNetworkManager manageTimeout(TCPNetworkManager server) {
-        SlaveState oldState = this.masterState.getSlaveStateByServerInfo(server.getServerInfo());
+        SlaveState oldState = this.simulationState.getSlaveStateByServerInfo(server.getServerInfo());
         TCPNetworkManager pingServer = null;
         NetworkInfo pingNetworkInfo;
         try {
@@ -225,7 +226,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             LOGGER.info(
                     String.format("Creating a new NetworkManager to ping - %s",
                             pingServer.getServerInfo().toString()));
-            oldState.timedOut("Master"); // mark server as timed out and update GUI
+            oldState.timedOut(); // mark server as timed out and update GUI
 
             propertyChange("servers",
                     new String[]{
@@ -242,8 +243,8 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             }
             LOGGER.info(
                     String.format("The response has been received within the time limit. The task window will be reduced by half for the server - %s", pingServer.getServerInfo().toString()));
-            oldState.forceExpiredTimeLimit("Master"); // halve the task window
-            oldState.migrate("Master", pingNetworkInfo);
+            oldState.forceExpiredTimeLimit(); // halve the task window
+            oldState.migrate(pingNetworkInfo);
             this.networkManagers.add(pingServer);
 
             server.getSocket().close();
@@ -251,9 +252,8 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
         } catch (Exception e) {
             assert pingServer != null;
             LOGGER.severe(String.format("The response has been received after the time limit. The server will be removed - %s", pingServer.getServerInfo().toString()));
-            oldState.removed("Master"); // mark server as removed and update GUI
+            oldState.removed(); // mark server as removed and update GUI
             this.networkManagers.remove(server);
-            this.masterState.removeSlaveServer(server.getServerInfo());
             propertyChange("servers",
                     new String[]{
                             server.getSocket().getInetAddress().getHostAddress() + ":" + server.getSocket().getPort(),
@@ -265,7 +265,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
 
     @Override
     public synchronized void join() throws InterruptedException {
-        while ((getRunningTasks() > 0 || hasTasks() || this.masterState.getRunningSlaveServers() > 0) && !this.masterState.getSlaveServersStates().isEmpty()) {
+        while ((getRunningTasks() > 0 || hasTasks() || this.simulationState.getRunningSlaveServers() > 0) && !this.simulationState.getSlaveServersStates().isEmpty()) {
             wait();
         }
         try {
@@ -297,7 +297,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
      * @return result of the computation
      */
     private ComputationResult<S> send(NetworkTask<S> networkTask, TCPNetworkManager server) {
-        SlaveState state = this.masterState.getSlaveStateByServerInfo(server.getServerInfo());
+        SlaveState state = this.simulationState.getSlaveStateByServerInfo(server.getServerInfo());
         ComputationResult<S> result;
         long elapsedTime;
         try {
@@ -313,7 +313,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
 
             elapsedTime = System.nanoTime() - elapsedTime;
 
-            state.update("Master", elapsedTime, result.getResults().size());
+            state.update(elapsedTime, result.getResults().size());
             LOGGER.info(String.format("The results from the computation have been received from the server - %s", server.getServerInfo().toString()));
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());

@@ -74,13 +74,12 @@ public class MasterServerSimulationEnvironment {
     /**
      * Creates and starts up a master server with the given parameters.
      *
-     *
-     * @param localDiscoveryPort port used by the master server to manage the incoming slave servers' registration requests.
-     * @param remoteDiscoveryPort port used by the slave servers to manage the incoming master server discovery message.
-     * @param discoveryNetworkManager type of UDP network communication that will be used during the slave servers' discovery by the master.
-     * @param localSimulationPort port used by the master server to manage the incoming clients' simulation requests.
+     * @param localDiscoveryPort       port used by the master server to manage the incoming slave servers' registration requests.
+     * @param remoteDiscoveryPort      port used by the slave servers to manage the incoming master server discovery message.
+     * @param discoveryNetworkManager  type of UDP network communication that will be used during the slave servers' discovery by the master.
+     * @param localSimulationPort      port used by the master server to manage the incoming clients' simulation requests.
      * @param simulationNetworkManager type of TCP network communication that will be used between master server and clients.
-     * @param listeners PropertyChangeListener objects that will be updated about the state of this master server.
+     * @param listeners                PropertyChangeListener objects that will be updated about the state of this master server.
      * @throws IOException
      */
     public MasterServerSimulationEnvironment(int localDiscoveryPort, int remoteDiscoveryPort,
@@ -93,7 +92,7 @@ public class MasterServerSimulationEnvironment {
         this.remotePort = remoteDiscoveryPort;
         this.state = new MasterState(LOCAL_SIMULATION_INFO);
         this.localSimulationPort = localSimulationPort;
-        Arrays.stream(listeners).forEach(this.state::addPropertyChangeListener);
+        Arrays.stream(listeners).forEach(listener -> this.state.addPropertyChangeListener("Master Listener", listener));
 
         this.discoveryNetworkManager = UDPNetworkManager.createNetworkManager(LOCAL_DISCOVERY_INFO, true);
 
@@ -133,7 +132,7 @@ public class MasterServerSimulationEnvironment {
                 }).forEach(networkInterface -> networkInterface.getInterfaceAddresses().stream()
                         .map(InterfaceAddress::getBroadcast).filter(Objects::nonNull)
                         .forEach(this::broadcastToSingleInterface));
-                LOGGER.info(String.format("Current set of servers: %s", state.getSlaveServersStates()));
+                LOGGER.info(String.format("Current set of servers: %s", state.getSlaveServers()));
 
                 Thread.sleep(20000);
             }
@@ -225,15 +224,18 @@ public class MasterServerSimulationEnvironment {
      * @throws IOException TODO exception handling
      */
     private void manageClientMessage(Socket socket) throws IOException {
+
         TCPNetworkManager simulationNetworkManager = TCPNetworkManager
                 .createNetworkManager((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), socket);
+        SimulationState simulationState = new SimulationState(this.state, LOCAL_SIMULATION_INFO, simulationNetworkManager.getServerInfo(), this.state.getSlaveServersNetworkInfos());
+
         AtomicBoolean clientIsActive = new AtomicBoolean(true);
         try {
             Map<ClientCommand, Runnable> map = Map.of(
                     ClientCommand.PING, () -> this.respondPingRequest(simulationNetworkManager),
-                    ClientCommand.INIT, () -> this.loadModelClass(simulationNetworkManager),
-                    ClientCommand.DATA, () -> this.handleSimulationDataSet(simulationNetworkManager),
-                    ClientCommand.CLOSE_CONNECTION, () -> this.closeConnectionWithClient(simulationNetworkManager, clientIsActive));
+                    ClientCommand.INIT, () -> this.loadModelClass(simulationNetworkManager, simulationState),
+                    ClientCommand.DATA, () -> this.handleSimulationDataSet(simulationNetworkManager, simulationState),
+                    ClientCommand.CLOSE_CONNECTION, () -> this.closeConnectionWithClient(simulationNetworkManager, clientIsActive, simulationState));
             while (clientIsActive.get()) {
                 ClientCommand command = (ClientCommand) ObjectSerializer
                         .deserializeObject(simulationNetworkManager.readObject());
@@ -255,7 +257,7 @@ public class MasterServerSimulationEnvironment {
      * @param client       client which the connection has to be closed
      * @param clientActive whether the client is active or not
      */
-    private void closeConnectionWithClient(TCPNetworkManager client, AtomicBoolean clientActive) {
+    private void closeConnectionWithClient(TCPNetworkManager client, AtomicBoolean clientActive, SimulationState simulationState) {
         try {
             String modelName = (String) ObjectSerializer.deserializeObject(client.readObject());
             LOGGER.info(String.format("[%s] Model name read to be deleted by client - %s", modelName, client.getServerInfo().toString()));
@@ -264,6 +266,7 @@ public class MasterServerSimulationEnvironment {
             LOGGER.info(String.format("[%s] Model deleted off the class loader", modelName));
             LOGGER.info(String.format("Client closed the connection"));
             client.closeConnection();
+            // this.state.removeSimulation(simulationState);
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             e.printStackTrace();
@@ -277,19 +280,18 @@ public class MasterServerSimulationEnvironment {
      * @param client the TCPNetworkManager that represents the connection with the
      *               client
      */
-    private void handleSimulationDataSet(TCPNetworkManager client) {
+    private void handleSimulationDataSet(TCPNetworkManager client, SimulationState simulationState) {
         try {
             SimulationDataSet<State> dataSet = (SimulationDataSet<State>) ObjectSerializer
                     .deserializeObject(client.readObject());
-            this.state.setTotalSimulationTasks(dataSet.getReplica());
+            simulationState.setTotalSimulationTasks(dataSet.getReplica());
             LOGGER.info(
                     String.format("Simulation datas received by the client - %s", client.getServerInfo().toString()));
             client.writeObject(ObjectSerializer.serializeObject(MasterCommand.DATA_RESPONSE));
             LOGGER.info(String.format("[%s] command sent to the client - %s", MasterCommand.DATA_RESPONSE,
                     client.getServerInfo().toString()));
             client.writeObject(ObjectSerializer.serializeObject(MasterCommand.RESULTS));
-            client.writeObject(ObjectSerializer.serializeObject(this.submitSimulations(dataSet)));
-            this.state.setTotalSimulationTasks(0);
+            client.writeObject(ObjectSerializer.serializeObject(this.submitSimulations(dataSet, simulationState)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -300,9 +302,9 @@ public class MasterServerSimulationEnvironment {
      *
      * @param dataSet containing all the simulation oriented datas
      */
-    private SamplingFunction submitSimulations(SimulationDataSet dataSet) {
+    private SamplingFunction submitSimulations(SimulationDataSet dataSet, SimulationState simulationState) {
         SimulationEnvironment sim = new SimulationEnvironment(NetworkSimulationManager
-                .getNetworkSimulationManagerFactory(dataSet.getModelName(), this.state));
+                .getNetworkSimulationManagerFactory(dataSet.getModelName(), simulationState));
         try {
             sim.simulate(dataSet.getRandomGenerator(), dataSet.getModel(),
                     dataSet.getModelInitialState(), dataSet.getModelSamplingFunction(),
@@ -322,7 +324,7 @@ public class MasterServerSimulationEnvironment {
      * @param client the TCPNetworkManager that represents the connection with the
      *               client
      */
-    private void loadModelClass(TCPNetworkManager client) {
+    private void loadModelClass(TCPNetworkManager client, SimulationState simulationState) {
         try {
             String modelName = (String) ObjectSerializer.deserializeObject(client.readObject());
             LOGGER.info(String.format("[%s] Model name read by server - IP: [%s] Port: [%d]", modelName,
@@ -330,6 +332,7 @@ public class MasterServerSimulationEnvironment {
             byte[] modelBytes = client.readObject();
             CustomClassLoader.defClass(modelName, modelBytes);
             String classLoadedName = Class.forName(modelName).getName();
+            simulationState.setSimulationModelName(classLoadedName);
             LOGGER.info(String.format("[%s] Class loaded with success", classLoadedName));
             client.writeObject(ObjectSerializer.serializeObject(MasterCommand.INIT_RESPONSE));
             LOGGER.info(String.format("[%s] command sent to the client - %s", MasterCommand.INIT_RESPONSE,
