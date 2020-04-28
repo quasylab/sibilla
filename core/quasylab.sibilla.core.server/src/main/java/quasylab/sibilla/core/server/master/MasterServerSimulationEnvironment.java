@@ -162,11 +162,11 @@ public class MasterServerSimulationEnvironment {
     private void startDiscoveryServer() {
         while (true) {
             try {
-                Set<NetworkInfo> slaveSimulationServers = (Set<NetworkInfo>) ObjectSerializer
+                NetworkInfo slaveSimulationServer = (NetworkInfo) ObjectSerializer
                         .deserializeObject(discoveryNetworkManager.readObject());
                 discoveryConnectionExecutor.execute(() -> {
                     try {
-                        manageServers(slaveSimulationServers);
+                        manageServers(slaveSimulationServer);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -177,18 +177,14 @@ public class MasterServerSimulationEnvironment {
         }
     }
 
-    /**
-     * Manages the informations received by slave servers
-     *
-     * @param info Set of informations received by a slave server
-     */
-    private void manageServers(Set<NetworkInfo> info) {
-        info.forEach(singleInfo -> {
-            if (state.addSlaveServer(singleInfo)) {
-                LOGGER.info(String.format("Added simulation server - %s", singleInfo.toString()));
-            }
-            // LOGGER.warning("This server was already present: " + singleInfo.toString());
-        });
+
+    private void manageServers(NetworkInfo info) {
+
+        if (state.addSlaveServer(info)) {
+            LOGGER.info(String.format("Added simulation server - %s", info.toString()));
+        }
+        // LOGGER.warning("This server was already present: " + singleInfo.toString());
+
 
     }
 

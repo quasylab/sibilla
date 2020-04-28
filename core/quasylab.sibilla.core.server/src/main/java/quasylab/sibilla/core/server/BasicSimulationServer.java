@@ -31,9 +31,9 @@ import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.serialization.CustomClassLoader;
 import quasylab.sibilla.core.server.serialization.ObjectSerializer;
 import quasylab.sibilla.core.server.slave.SlaveCommand;
+import quasylab.sibilla.core.server.util.NetworkUtils;
 import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
-import quasylab.sibilla.core.simulator.pm.State;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -57,7 +57,8 @@ public class BasicSimulationServer implements SimulationServer {
     private final TCPNetworkManagerType networkManagerType;
     private final ExecutorService taskExecutor = Executors.newCachedThreadPool();
     private final ExecutorService connectionExecutor = Executors.newCachedThreadPool();
-    private int port;
+    private int simulationPort;
+    protected NetworkInfo localServerInfo;
 
     /**
      * Creates a simulation server with the given network manager type
@@ -66,13 +67,15 @@ public class BasicSimulationServer implements SimulationServer {
      */
     public BasicSimulationServer(TCPNetworkManagerType networkManagerType) {
         this.networkManagerType = networkManagerType;
-        LOGGER.info(String.format("Creating a new BasicSimulation server that uses: [%s - %s]",
+        LOGGER.info(String.format("Creating a new BasicSimulationServer that uses: [%s - %s]",
                 this.networkManagerType.getClass(), this.networkManagerType.name()));
     }
 
     @Override
     public void start(int port) throws IOException {
-        this.port = port;
+        this.simulationPort = port;
+        this.localServerInfo = new NetworkInfo(NetworkUtils.getLocalIp(), this.simulationPort, this.networkManagerType);
+        LOGGER.info(String.format("The BasicSimulationServer will accept simulation requests on port [%d]", this.simulationPort));
         this.startSimulationServer();
     }
 
@@ -83,8 +86,8 @@ public class BasicSimulationServer implements SimulationServer {
      */
     private void startSimulationServer() throws IOException {
 
-        ServerSocket serverSocket = TCPNetworkManager.createServerSocket(networkManagerType, port);
-        LOGGER.info(String.format("The BasicSimulationServer is now listening for servers on port: [%d]", port));
+        ServerSocket serverSocket = TCPNetworkManager.createServerSocket(networkManagerType, simulationPort);
+        LOGGER.info(String.format("The BasicSimulationServer is now listening for servers on port: [%d]", simulationPort));
         while (true) {
             Socket socket = serverSocket.accept();
             connectionExecutor.execute(() -> {

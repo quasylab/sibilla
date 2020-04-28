@@ -174,7 +174,7 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getPropertyName() == "Master" && evt.getNewValue() instanceof SimulationState) {
+        if (evt.getNewValue() instanceof SimulationState) {
             SimulationState simState = (SimulationState) evt.getNewValue();
             simState.getSlaveServersStates().stream().filter(slaveState -> slaveState.isRemoved()).forEach(slaveState -> this.removeSlaveServer(slaveState.getSlaveInfo()));
         }

@@ -69,9 +69,11 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
         this.connectedSlaveServers = 0;
         this.totalSimulationTasks = 0;
 
+        this.slaveServers = new HashSet<>();
+
         this.updateSupport = new PropertyChangeSupport(this);
         this.addPropertyChangeListener("Master Update", masterState);
-        this.slaveServers = new HashSet<>();
+
         slaveNetworkInfos.forEach(info -> slaveServers.add(new SlaveState(this, info)));
         masterState.addSimulation(this);
 
@@ -96,7 +98,7 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
     public void propertyChange(PropertyChangeEvent propertyChangeEvent) {
         this.updateListeners();
     }
-    
+
     @Override
     public int compareTo(SimulationState simulationState) {
         return this.lastUpdate.compareTo(simulationState.lastUpdate);

@@ -25,5 +25,65 @@
 
 package quasylab.sibilla.core.server;
 
-public class DiscoverableBasicSimulationServer {
+import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
+import quasylab.sibilla.core.server.network.UDPDefaultNetworkManager;
+import quasylab.sibilla.core.server.serialization.ObjectSerializer;
+
+import java.net.DatagramSocket;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Logger;
+
+public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
+
+    private static final Logger LOGGER = Logger.getLogger(DiscoverableBasicSimulationServer.class.getName());
+
+
+    private final int localDiscoveryPort;
+    private final Set<NetworkInfo> knownMasters;
+
+    public DiscoverableBasicSimulationServer(int localDiscoveryPort, TCPNetworkManagerType networkManagerType) {
+        super(networkManagerType);
+        this.localDiscoveryPort = localDiscoveryPort;
+        this.knownMasters = new HashSet<>();
+
+        LOGGER.info(String.format("Creating a new DiscoverableBasicSimulationServer - It will respond for discovery messages on port [%d]", localDiscoveryPort));
+
+        new Thread(this::startDiscoveryServer).start();
+    }
+
+    /**
+     * Starts the server that listens for the masters and sends them info about the owned simulation servers
+     */
+    private void startDiscoveryServer() {
+        try {
+            DatagramSocket discoverySocket = new DatagramSocket(localDiscoveryPort);
+            LOGGER.info(String.format("Now listening for discovery messages on port: [%d]", localDiscoveryPort));
+            UDPDefaultNetworkManager manager = new UDPDefaultNetworkManager(discoverySocket);
+
+            while (true) {
+                NetworkInfo masterInfo = (NetworkInfo) ObjectSerializer.deserializeObject(manager.readObject());
+                LOGGER.info(String.format("Discovered by the master server - %s", masterInfo.toString()));
+                manageDiscoveryMessage(manager, masterInfo);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Manages a message from the master
+     *
+     * @param manager    UDPNetworkManager that handles the sending of messages
+     * @param masterInfo ServerInfo of the master server
+     * @throws Exception TODO Exception handling
+     */
+    private void manageDiscoveryMessage(UDPDefaultNetworkManager manager, NetworkInfo masterInfo) throws Exception {
+        this.knownMasters.add(masterInfo);
+        manager.writeObject(ObjectSerializer.serializeObject(this.localServerInfo), masterInfo.getAddress(), masterInfo.getPort());
+        LOGGER.info(String.format("Sent the discovery response to the master server - %s", masterInfo.toString()));
+        LOGGER.info(String.format("Currently known masters - %s", knownMasters.toString()));
+    }
+
 }
