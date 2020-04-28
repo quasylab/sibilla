@@ -120,6 +120,7 @@ public class NetworkSimulationManager<S extends State> extends SimulationManager
             while ((isRunning() || hasTasks() || this.simulationState.getRunningSlaveServers() > 0) && !this.simulationState.getSlaveServersStates().isEmpty()) {
                 singleTaskExecution();
             }
+            this.simulationState.setConcluded(true);
         } catch (InterruptedException e) {
             LOGGER.severe(e.getMessage());
         }

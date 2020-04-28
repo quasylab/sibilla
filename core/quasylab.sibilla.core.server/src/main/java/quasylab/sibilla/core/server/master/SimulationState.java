@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 
 public class SimulationState implements Serializable, PropertyChangeListener, Comparable<SimulationState>, Cloneable {
 
-
     private Date simulationStartDate;
 
     private String simulationModelName;
@@ -57,6 +56,8 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
     private int pendingTasks;
 
     private int totalSimulationTasks;
+
+    private boolean concluded;
 
     private transient PropertyChangeSupport updateSupport;
 
@@ -163,17 +164,26 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
         return this.pendingTasks;
     }
 
-    public synchronized int getTotalSimulationTasks() {
-        return this.totalSimulationTasks;
-    }
-
     public synchronized void setPendingTasks(int pendingTasks) {
         this.pendingTasks = pendingTasks;
         this.updateListeners();
     }
 
+    public synchronized int getTotalSimulationTasks() {
+        return this.totalSimulationTasks;
+    }
+
     public synchronized void setTotalSimulationTasks(int totalSimulationTasks) {
         this.totalSimulationTasks = totalSimulationTasks;
+        this.updateListeners();
+    }
+
+    public boolean isConcluded() {
+        return this.concluded;
+    }
+
+    public void setConcluded(boolean concluded) {
+        this.concluded = concluded;
         this.updateListeners();
     }
 
@@ -187,7 +197,7 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
         }
         clone.simulationStartDate = (Date) this.simulationStartDate.clone();
         final Map<SlaveState, Integer> tempMapCopy = new HashMap<>();
-        clone.slaveServers = this.slaveServers.stream().map(slaveState -> slaveState.clone()).collect(Collectors.toSet());
+        clone.slaveServers = this.slaveServers.stream().map(SlaveState::clone).collect(Collectors.toSet());
         clone.masterNetworkInfo = this.masterNetworkInfo.clone();
         clone.clientNetworkInfo = this.clientNetworkInfo.clone();
         clone.lastUpdate = (Date) this.lastUpdate.clone();
