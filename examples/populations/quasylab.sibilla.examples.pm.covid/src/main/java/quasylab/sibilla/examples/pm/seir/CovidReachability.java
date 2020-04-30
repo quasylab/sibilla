@@ -35,7 +35,7 @@ import java.net.UnknownHostException;
  * @author loreti
  *
  */
-public class CovidModel {
+public class CovidReachability {
 
     public final static int SAMPLINGS = 120;
     public final static double DEADLINE = 120;
@@ -45,15 +45,12 @@ public class CovidModel {
     public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
         CovidDefinition def = new CovidDefinition();
         SimulationEnvironment simulator = new SimulationEnvironment();
-        SamplingCollection<PopulationState> collection = new SamplingCollection<>();
-        collection.add(StatisticSampling.measure("S",SAMPLINGS,DEADLINE, s -> s.getFraction(CovidDefinition.S)));
-        collection.add(StatisticSampling.measure("A",SAMPLINGS,DEADLINE,s -> s.getFraction(CovidDefinition.A)));
-        collection.add(StatisticSampling.measure("G",SAMPLINGS,DEADLINE,s -> s.getFraction(CovidDefinition.G)));
-        collection.add(StatisticSampling.measure("AG",SAMPLINGS,DEADLINE,s -> s.getFraction(CovidDefinition.G)+s.getFraction(CovidDefinition.A)));
-        collection.add(StatisticSampling.measure("R",SAMPLINGS,DEADLINE,s -> s.getFraction(CovidDefinition.R)));
-        collection.add(StatisticSampling.measure("D",SAMPLINGS,DEADLINE,s -> s.getFraction(CovidDefinition.D)));
-        simulator.simulate(def.createModel(4),def.state(),collection,REPLICA,DEADLINE);
-        collection.printTimeSeries("data","covid_",".data");
+        SimulationEnvironment.silent = false;
+        double lambda = 4;
+        double p = simulator.reachability(0.01,0.01,200,def.createModel(lambda),
+                def.state(),
+                s ->(s.getFraction(CovidDefinition.A)+s.getFraction(CovidDefinition.G))>0.25);
+        System.out.println(lambda+"->"+p);
     }
 
 

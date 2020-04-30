@@ -69,7 +69,16 @@ public class CovidDefinition implements ModelDefinition<PopulationState> {
 
     @Override
     public PopulationState state(double... parameters) {
-        return new PopulationState( new int[] { INIT_S, INIT_A, INIT_G, INIT_R, INIT_D } );
+        if (parameters.length != 5) {
+            return new PopulationState( new int[] { INIT_S, INIT_A, INIT_G, INIT_R, INIT_D } );
+        } else {
+            return new PopulationState( new int[] {
+                    (int) parameters[S],
+                    (int) parameters[A],
+                    (int) parameters[G],
+                    (int) parameters[R],
+                    (int) parameters[D] });
+        }
     }
 
     @Override

@@ -47,6 +47,7 @@ public class SimulationEnvironment implements Serializable {
 	public final static SimulationManagerFactory DEFAULT_FACTORY = SequentialSimulationManager::new;
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = Logger.getLogger(SimulationEnvironment.class.getName());
+	public static boolean silent = true;
 	private final SimulationManagerFactory simulationManagerFactory;
 
 	/**
@@ -157,7 +158,89 @@ public class SimulationEnvironment implements Serializable {
 	 * The estimated probability differs from the exact one by <code>delta</code> with a probability less or
 	 * equal than <code>errorProbability</code>.
 	 *
+	 * @param errorProbability error probability.
+	 * @param delta error gap.
+	 * @param deadline reachability deadline.
+	 * @param model model to simulate.
+	 * @param state initial state.
+	 * @param goal goal predicate.
+	 * @return the probability to reach a state satisfying the given condition within the given deadline.
+	 * @throws InterruptedException is thrown when simulation is interrupted.
+	 */
+	public <S extends State> double reachability(
+			double errorProbability,
+			double delta,
+			double deadline,
+			Model<S> model,
+			S state,
+			StatePredicate<? super S> goal) throws InterruptedException {
+		return reachability(new DefaultRandomGenerator(),errorProbability,delta,deadline,model,state,s -> true,goal);
+	}
+
+	/**
+	 * Estimates the probability to reach a state satisfying the given goal predicate within the given deadline
+	 * while traversing only states satisfying a given condition.
+	 * The estimated probability differs from the exact one by <code>delta</code> with a probability less or
+	 * equal than <code>errorProbability</code>.
+	 *
+	 * @param errorProbability error probability.
+	 * @param delta error gap.
+	 * @param deadline reachability deadline.
+	 * @param model model to simulate.
+	 * @param state initial state
+	 * @param condition condition predicate.
+	 * @param goal goal predicate.
+	 * @return the probability to reach a state satisfying the given condition within the given deadline.
+	 * @throws InterruptedException is thrown when simulation is interrupted.
+	 */
+	public <S extends State> double reachability(
+			double errorProbability,
+			double delta,
+			double deadline,
+			Model<S> model,
+			S state,
+			StatePredicate<? super S> condition,
+			StatePredicate<? super S> goal) throws InterruptedException {
+		return reachability(new DefaultRandomGenerator(),errorProbability,delta,deadline,model,state,condition,goal);
+	}
+
+	/**
+	 * Estimates the probability to reach a state satisfying the given goal predicate within the given deadline
+	 * while traversing only states satisfying a given condition.
+	 * The estimated probability differs from the exact one by <code>delta</code> with a probability less or
+	 * equal than <code>errorProbability</code>.
+	 *
+	 * @param random random generator used in the simulation.
+	 * @param errorProbability error probability.
+	 * @param delta error gap.
+	 * @param deadline reachability deadline.
+	 * @param model model to simulate.
+	 * @param state initial state
+	 * @param condition condition predicate.
+	 * @param goal goal predicate.
+	 * @return the probability to reach a state satisfying the given condition within the given deadline.
+	 * @throws InterruptedException is thrown when simulation is interrupted.
+	 */
+	public <S extends State> double reachability(
+			RandomGenerator random,
+			double errorProbability,
+			double delta,
+			double deadline,
+			Model<S> model,
+			S state,
+			StatePredicate<? super S> condition,
+			StatePredicate<? super S> goal) throws InterruptedException {
+		return reachability(null,random,errorProbability,delta,deadline,model,state,condition,goal);
+	}
+
+	/**
+	 * Estimates the probability to reach a state satisfying the given goal predicate within the given deadline
+	 * while traversing only states satisfying a given condition.
+	 * The estimated probability differs from the exact one by <code>delta</code> with a probability less or
+	 * equal than <code>errorProbability</code>.
+	 *
 	 * @param monitor monitor used to control simulation.
+	 * @param random random generator used in the simulation.
 	 * @param errorProbability error probability.
 	 * @param delta error gap.
 	 * @param deadline reachability deadline.
@@ -199,6 +282,10 @@ public class SimulationEnvironment implements Serializable {
 		public void accept(Trajectory<S> t) {
 			if (t.isSuccesfull()) {
 				counter++;
+			}
+			if (!silent) {
+				System.out.print(t.isSuccesfull()?'+':'-');
+				System.out.flush();
 			}
 		}
 
