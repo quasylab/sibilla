@@ -20,11 +20,13 @@ package quasylab.sibilla.core.simulator.sampling;
 
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import quasylab.sibilla.core.models.pm.MeasureFunction;
+import quasylab.sibilla.core.models.MeasureFunction;
 import quasylab.sibilla.core.past.State;
 
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.LinkedList;
+import java.util.function.Function;
 
 
 /**
@@ -100,20 +102,20 @@ public class StatisticSampling<S extends State> implements SamplingFunction<S> {
 		return measure.getName();
 	}
 
-	public void printTimeSeries(PrintStream out) {
-		double time = 0.0;
-
-		for (int i = 0; i < this.data.length; i++) {
-			out.println(time + "\t" + this.data[i].getMean() + "\t" + this.data[i].getStandardDeviation());
-			time += dt;
-		}
+	@Override
+	public void printTimeSeries(Function<String, String> nameFunction) throws FileNotFoundException {
+		printTimeSeries(nameFunction,';');
 	}
 
-	public void printTimeSeries(PrintStream out, char separator) {
-		printTimeSeries(out,separator,0.05);
+	@Override
+	public void printTimeSeries(Function<String, String> nameFunction, char separator) throws FileNotFoundException {
+		printTimeSeries(nameFunction,separator,0.05);
 	}
 
-	public void printTimeSeries(PrintStream out, char separator, double significance) {
+	@Override
+	public void printTimeSeries(Function<String, String> nameFunction, char separator, double significance) throws FileNotFoundException {
+		String fileName = nameFunction.apply(this.getName());
+		PrintStream out = new PrintStream(fileName);
 		double time = 0.0;
 		for (int i = 0; i < this.data.length; i++) {
 			double ci = getConfidenceInterval(i,significance);
@@ -122,6 +124,7 @@ public class StatisticSampling<S extends State> implements SamplingFunction<S> {
 					+ separator + ci);
 			time += dt;
 		}
+		out.close();
 	}
 	
 	
@@ -129,14 +132,6 @@ public class StatisticSampling<S extends State> implements SamplingFunction<S> {
 		TDistribution tDist = new TDistribution(this.data[i].getN());
 		double a = tDist.inverseCumulativeProbability(1.0 -significance/2);
 		return a*this.data[i].getStandardDeviation() / Math.sqrt(this.data[i].getN());
-	}
-
-	public void printName(PrintStream out){
-		out.print(this.measure.getName());
-	}
-	
-	public void printlnName(PrintStream out){
-		out.println(this.measure.getName());
 	}
 
 	@Override
@@ -157,7 +152,6 @@ public class StatisticSampling<S extends State> implements SamplingFunction<S> {
 
 			@Override
 			public double measure(S t) {
-				// TODO Auto-generated method stub
 				return m.apply( t );
 			}
 

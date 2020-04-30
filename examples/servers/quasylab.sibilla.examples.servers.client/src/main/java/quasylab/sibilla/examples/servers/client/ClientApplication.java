@@ -20,19 +20,6 @@ import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 import java.io.Serializable;
 
 public class ClientApplication implements Serializable {
-
-    public final static int S = 0;
-    public final static int E = 1;
-    public final static int I = 2;
-    public final static int R = 3;
-    public final static int INIT_S = 99;
-    public final static int INIT_E = 0;
-    public final static int INIT_I = 1;
-    public final static int INIT_R = 0;
-    public final static double N = INIT_S + INIT_E + INIT_I + INIT_R;
-    public final static double LAMBDA_E = 1;
-    public final static double LAMBDA_I = 1 / 3.0;
-    public final static double LAMBDA_R = 1 / 7.0;
     public final static int SAMPLINGS = 100;
     public final static double DEADLINE = 600;
     /**
@@ -54,37 +41,20 @@ public class ClientApplication implements Serializable {
         SSLUtils.getInstance().setTrustStorePath("clientTrustStore.jks");
         SSLUtils.getInstance().setTrustStorePass("clientPass");
 
-        PopulationRule rule_S_E = new ReactionRule("S->E", new Population[]{new Population(S), new Population(I)},
-                new Population[]{new Population(E), new Population(I)},
-                s -> s.getOccupancy(S) * LAMBDA_E * (s.getOccupancy(I) / N));
 
-        PopulationRule rule_E_I = new ReactionRule("E->I", new Population[]{new Population(E)},
-                new Population[]{new Population(I)}, s -> s.getOccupancy(E) * LAMBDA_I);
-
-        PopulationRule rule_I_R = new ReactionRule("I->R", new Population[]{new Population(I)},
-                new Population[]{new Population(R)}, s -> s.getOccupancy(I) * LAMBDA_R);
-
-        PopulationModel f = new PopulationModel();
-        f.addState("init", initialState());
-        f.addRule(rule_S_E);
-        f.addRule(rule_E_I);
-        f.addRule(rule_I_R);
-
-        StatisticSampling<PopulationState> fiSamp = StatisticSampling.measure("Fraction Infected", SAMPLINGS, DEADLINE,
-                s -> s.getOccupancy(I) / N);
-        StatisticSampling<PopulationState> frSamp = StatisticSampling.measure("Fraction Recovered", SAMPLINGS, DEADLINE,
-                s -> s.getOccupancy(R) / N);
+        ClientModelDefinition def = new ClientModelDefinition();
+        StatisticSampling<PopulationState> fiSamp = StatisticSampling.measure("I", SAMPLINGS, DEADLINE,
+                ClientModelDefinition::fractionOfI);
+        StatisticSampling<PopulationState> frSamp = StatisticSampling.measure("R", SAMPLINGS, DEADLINE,
+                ClientModelDefinition::fractionOfR);
 
         SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp, frSamp);
 
         ClientSimulationEnvironment<PopulationState> client = new ClientSimulationEnvironment<PopulationState>(
-				RANDOM_GENERATOR, MODEL_NAME, f,
-                initialState(), sf, REPLICA, DEADLINE, MASTER_SERVER_INFO);
+				RANDOM_GENERATOR,
+                def.createModel(), def.state( ), sf, REPLICA, DEADLINE, MASTER_SERVER_INFO);
 
     }
 
-    public static PopulationState initialState() {
-        return new PopulationState(new int[]{INIT_S, INIT_E, INIT_I, INIT_R});
-    }
 
 }

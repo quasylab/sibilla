@@ -65,10 +65,10 @@ public class ReactionRule implements PopulationRule, Serializable {
 
 	private void initDrift() {
 		for( int i=0 ; i<reactants.length ; i++ ) {
-			this.update.consume(reactants[i].index, reactants[i].size);
+			this.update.consume(reactants[i].getIndex(), reactants[i].getSize());
 		}
 		for( int i=0 ; i<products.length ; i++ ) {
-			this.update.produce(products[i].index, products[i].size);
+			this.update.produce(products[i].getIndex(), products[i].getSize());
 		}
 	}
 
@@ -89,7 +89,7 @@ public class ReactionRule implements PopulationRule, Serializable {
 	
 	private boolean isEnabled(PopulationState state) {
 		for( int i=0 ; i<reactants.length ; i++ ) {
-			if (state.getOccupancy(reactants[i].index)<reactants[i].size) {
+			if (state.getOccupancy(reactants[i].getIndex())<reactants[i].getSize()) {
 				return false;
 			}
 		}

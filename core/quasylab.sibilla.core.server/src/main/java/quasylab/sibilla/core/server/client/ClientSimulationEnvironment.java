@@ -1,6 +1,7 @@
 package quasylab.sibilla.core.server.client;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.server.ServerInfo;
 import quasylab.sibilla.core.server.SimulationDataSet;
 import quasylab.sibilla.core.server.master.MasterCommand;
@@ -33,7 +34,6 @@ public class ClientSimulationEnvironment<S extends State> {
      * master server that will manage such simulation
      *
      * @param random            RandomGenerator of the simulation
-     * @param modelName         String with the name of the class that defines the
      *                          model
      * @param model             The model that will be simulated
      * @param initialState      The initial state of the model
@@ -45,10 +45,13 @@ public class ClientSimulationEnvironment<S extends State> {
      *                          quasylab.sibilla.core.server.master server
      * @throws Exception TODO Exception handling
      */
-    public ClientSimulationEnvironment(RandomGenerator random, String modelName, MarkovProcess<S> model, S initialState,
+    public ClientSimulationEnvironment(RandomGenerator random, Model<S> model, S initialState,
                                        SamplingFunction<S> sampling_function, int replica, double deadline, ServerInfo masterServerInfo)
             throws Exception {
-        this.data = new SimulationDataSet<S>(random, modelName, model, initialState, sampling_function, replica,
+        if (model.getModelDefinition() == null) {
+            throw new IllegalArgumentException("A model without definition cannot be serialised!");
+        }
+        this.data = new SimulationDataSet<S>(random, model.getModelDefinition(), model, initialState, sampling_function, replica,
                 deadline, masterServerInfo);
         this.masterServerNetworkManager = TCPNetworkManager.createNetworkManager(masterServerInfo);
 
@@ -70,7 +73,7 @@ public class ClientSimulationEnvironment<S extends State> {
         server.writeObject(ObjectSerializer.serializeObject(ClientCommand.CLOSE_CONNECTION));
         LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.CLOSE_CONNECTION,
                 server.getServerInfo().toString()));
-        server.writeObject(ObjectSerializer.serializeObject(this.data.getModelName()));
+        server.writeObject(ObjectSerializer.serializeObject(this.data.getModelName().getClass().getCanonicalName()));
         this.masterServerNetworkManager.closeConnection();
         LOGGER.info(String.format("Closed the connection with the master - %s", server.getServerInfo()));
     }
@@ -83,12 +86,12 @@ public class ClientSimulationEnvironment<S extends State> {
      * @throws Exception TODO Exception handling
      */
     private void initConnection(TCPNetworkManager server) throws Exception {
-        byte[] classBytes = ClassBytesLoader.loadClassBytes(data.getModelName());
+        byte[] classBytes = ClassBytesLoader.loadClassBytes(data.getModelName().getClass().getCanonicalName());
 
         server.writeObject(ObjectSerializer.serializeObject(ClientCommand.INIT));
         LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.INIT,
                 server.getServerInfo().toString()));
-        server.writeObject(ObjectSerializer.serializeObject(data.getModelName()));
+        server.writeObject(ObjectSerializer.serializeObject(data.getModelName().getClass().getCanonicalName()));
         LOGGER.info(String.format("[%s] Model name has been sent to the server - %s", data.getModelName(),
                 server.getServerInfo().toString()));
         server.writeObject(classBytes);

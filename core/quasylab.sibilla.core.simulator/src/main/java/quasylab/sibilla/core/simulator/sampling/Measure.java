@@ -28,8 +28,8 @@ import java.io.Serializable;
  */
 public interface Measure<S extends State> extends Serializable{
 
-	public double measure(S t);
+	double measure(S t);
 
-	public String getName();
+	String getName();
 
 }

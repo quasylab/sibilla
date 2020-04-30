@@ -80,7 +80,7 @@ public class UnicastRule implements PopulationRule {
 	}
 
 	@Override
-	public PopulationTransition apply(RandomGenerator r, PopulationState state) {
+	public PopulationTransition apply(RandomGenerator r, double t, PopulationState state) {
 		if (isEnabled(state)) {
 			double rate = rateFunction.apply(state);
 			if (rate > 0.0) {

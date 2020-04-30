@@ -20,6 +20,7 @@
 package quasylab.sibilla.core.simulator;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.past.State;
 
 import java.util.function.Consumer;
@@ -28,50 +29,24 @@ import java.util.function.Consumer;
  * @author belenchia
  *
  */
-public class SequentialSimulationManager<S extends State> extends SimulationManager<S> {
+public class SequentialSimulationManager<S extends State> extends AbstractSimulationManager<S> {
 
-
-
-    
-    public static final SimulationManagerFactory getSequentialSimulationManagerFactory() {
-    	return new SimulationManagerFactory() {
-   		
-			@Override
-			public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
-				return new SequentialSimulationManager<>(random, consumer);
-			}
-    	};
-		
+	public SequentialSimulationManager(RandomGenerator random, SimulationMonitor monitor, ModelDefinition<S> definitions, Consumer<Trajectory<S>> trajectoryConsumer) {
+		super(random, monitor, trajectoryConsumer);
 	}
-    
-
-    public SequentialSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer) {
-    	super(random,consumer);
-	}
-
-    @Override
-    public void simulate(SimulationUnit<S> unit) {
-        SimulationTask<S> task = new SimulationTask<>(getRandom(), unit);
-        handleTrajectory(task.get());
-    }
-
- 
-    @Override
-    public void join(){
-        return;
-    }
 
 	@Override
-	protected void startTasksHandling() {
-        return;
-	}
-    
-    @Override
-	protected void handleTrajectory( Trajectory<S> trj ) {
-		getExecutionTimes().add(trj.getGenerationTime());
-		getConsumer().accept(trj);
-		propertyChange("progress", getExecutionTimes().size());
+	protected synchronized void handleTask(SimulationTask<S> simulationTask) {
+		notifyMonitorStartInteration(simulationTask.getIndex());
+		handleTrajectory( simulationTask.get() );
+		notifyMonitorEndInteration(simulationTask.getIndex());
 	}
 
-    
+	@Override
+	public synchronized int pendingTasks() {
+		return 0;
+	}
+
+	@Override
+	public synchronized void join() { }
 }

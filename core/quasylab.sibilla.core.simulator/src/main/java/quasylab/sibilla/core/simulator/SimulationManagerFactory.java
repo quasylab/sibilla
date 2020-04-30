@@ -20,6 +20,7 @@
 package quasylab.sibilla.core.simulator;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.past.State;
 
 import java.util.function.Consumer;
@@ -31,6 +32,6 @@ import java.util.function.Consumer;
 @FunctionalInterface
 public interface SimulationManagerFactory {
 	
-	<S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer);
+	<S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random, SimulationMonitor monitor, ModelDefinition<S> modelDefinition, Consumer<Trajectory<S>> consumer);
 
 }

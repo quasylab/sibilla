@@ -20,8 +20,12 @@ package quasylab.sibilla.core.simulator.sampling;
 
 import quasylab.sibilla.core.past.State;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author loreti
@@ -29,12 +33,34 @@ import java.util.LinkedList;
  */
 public interface SamplingFunction<S extends State> extends Serializable {
 
-	public void sample(double time, S context);
+	void sample(double time, S context);
 
-	public void end(double time);
+	void end(double time);
 
-	public void start();
+	void start();
 
-	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries(int replications);
+	default void printTimeSeries(Function<String, String> nameFunction) throws FileNotFoundException {
+		printTimeSeries(nameFunction,';');
+	}
+
+	default void printTimeSeries(Function<String, String> nameFunction, char separator) throws FileNotFoundException {
+		printTimeSeries(nameFunction,separator,0.05);
+	}
+
+	void printTimeSeries(Function<String, String> nameFunction, char separator, double significance) throws FileNotFoundException;
+
+	default void printTimeSeries(String dir, String prefix, String postfix, char separator, double significance) throws FileNotFoundException {
+		printTimeSeries(n->dir+"/"+prefix+n+postfix,separator,significance);
+	}
+
+	default void printTimeSeries(String dir, String prefix, String postfix, char separator) throws FileNotFoundException {
+		printTimeSeries(dir,prefix,postfix,separator,0.05);
+	}
+
+	default void printTimeSeries(String dir, String prefix, String postfix) throws FileNotFoundException {
+		printTimeSeries(dir,prefix,postfix,';',0.05);
+	}
+
+	List<SimulationTimeSeries> getSimulationTimeSeries(int replications);
 
 }

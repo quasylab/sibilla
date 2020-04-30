@@ -21,17 +21,26 @@
  */
 package quasylab.sibilla.core.simulator;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 /**
  * @author loreti
  *
  */
 public interface SimulationMonitor {
 
+	String CANCELLED = "CANCELLED";
+
 	void startIteration(int i);
 
-	void endSimulation(int i);
+	void endIteration(int i);
+
+	void endSimulation();
 
 	boolean isCancelled();
 	
 	default void update(double time) { };
+
+	void registerPropertyChangeListener(PropertyChangeListener l);
 }

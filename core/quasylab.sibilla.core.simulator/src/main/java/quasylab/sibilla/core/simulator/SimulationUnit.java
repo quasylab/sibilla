@@ -19,7 +19,8 @@
 
 package quasylab.sibilla.core.simulator;
 
-import quasylab.sibilla.core.models.MarkovProcess;
+import quasylab.sibilla.core.models.Model;
+import quasylab.sibilla.core.models.StatePredicate;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 
@@ -37,22 +38,26 @@ public class SimulationUnit<S extends State> implements Serializable {
 	 */
 	private static final long serialVersionUID = 2809995821274223033L;
 
-	private MarkovProcess<S> model;
+	private Model<S> model;
 	
 	private S state;
 	
 	private SamplePredicate<? super S> stoppingPredicate;
 	
-	private Predicate<? super S> reachPredicate;
-	
-	public SimulationUnit(MarkovProcess<S> model, S state, SamplePredicate<? super S> stoppingPredicate, Predicate<? super S> reachPredicate) {
+	private StatePredicate<? super S> reachPredicate;
+
+	public SimulationUnit(Model<S> model, S state, SamplePredicate<? super S> stoppingPredicate) {
+		this(model,state,stoppingPredicate,StatePredicate.TRUE);
+	}
+
+	public SimulationUnit(Model<S> model, S state, SamplePredicate<? super S> stoppingPredicate, StatePredicate<? super S> reachPredicate) {
 		this.model = model;
 		this.state = state;
 		this.stoppingPredicate = stoppingPredicate;
 		this.reachPredicate = reachPredicate;
 	}
 
-	public MarkovProcess<S> getModel() {
+	public Model<S> getModel() {
 		return model;
 	}
 
@@ -71,7 +76,7 @@ public class SimulationUnit<S extends State> implements Serializable {
 	 * 
 	 * @return the reachPredicate
 	 */
-	public Predicate<? super S> getReachPredicate() {
+	public StatePredicate<? super S> getReachPredicate() {
 		return reachPredicate;
 	}
 	

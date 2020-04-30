@@ -20,6 +20,7 @@ package quasylab.sibilla.core.simulator;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.StepFunction;
+import quasylab.sibilla.core.models.TimeStep;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.util.WeightedElement;
 import quasylab.sibilla.core.simulator.util.WeightedStructure;
@@ -42,11 +43,18 @@ public class SimulationTask<S extends State> implements Supplier<Trajectory<S>>,
 	private SimulationStatus status;
 	private Trajectory<S> trajectory;
 	private long startTime = 0, elapsedTime = 0;
-	
-	public SimulationTask( RandomGenerator random , SimulationUnit<S> unit) {
+
+	private final int index;
+
+	public SimulationTask(RandomGenerator random , SimulationUnit<S> unit) {
+		this(-1,random,unit);
+	}
+
+	public SimulationTask(int index, RandomGenerator random , SimulationUnit<S> unit) {
 		this.random = random;
 		this.unit = unit;
 		this.status = SimulationStatus.INIT;
+		this.index = index;
 	}
 
 	public void reset(){
@@ -55,7 +63,10 @@ public class SimulationTask<S extends State> implements Supplier<Trajectory<S>>,
 		startTime = 0;
 		elapsedTime = 0;
 	}
-	
+
+	public int getIndex() {
+		return index;
+	}
 
 	@Override
 	public Trajectory<S> get() {
@@ -67,7 +78,7 @@ public class SimulationTask<S extends State> implements Supplier<Trajectory<S>>,
 		while (!unit.getStoppingPredicate().test(this.time, currentState)&&(!isCancelled())) {
 			step();
 		}
-		this.trajectory.setSuccesfull(this.unit.getReachPredicate().test(currentState));
+		this.trajectory.setSuccesfull(this.unit.getReachPredicate().check(currentState));
 		completed(true);
 		this.trajectory.setGenerationTime(System.nanoTime()-startTime);
 		return this.getTrajectory();
@@ -89,22 +100,14 @@ public class SimulationTask<S extends State> implements Supplier<Trajectory<S>>,
 	}
 
 	private void step() {
-		WeightedStructure<StepFunction<S>> agents =
-				this.unit.getModel().getTransitions( random , currentState );
-		double totalRate = agents.getTotalWeight();
-		if (totalRate == 0.0) {
+		TimeStep<S> step  =
+				this.unit.getModel().next(random,time,currentState);
+		if (step == null) {
 			cancel();
 			return;
 		}
-		double dt = (1.0 / totalRate) * Math.log(1 / (random.nextDouble()));
-		double select = random.nextDouble() * totalRate;
-		WeightedElement<StepFunction<S>> wa = agents.select(select);
-		if (wa == null) {
-			cancel();
-			return;
-		}
-		currentState = wa.getElement().step(random,time,dt);
-		time += dt;
+		currentState = step.getValue();
+		time += step.getTime();
 		trajectory.add(time, currentState);
 
 	}

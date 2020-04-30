@@ -39,17 +39,6 @@ import java.util.List;
 public interface MarkovProcess<S extends State> extends Model<S> {
 
 	/**
-	 * Returns the transitions enabled in a given state. Each transition is represented via
-	 * a <code>StepFunction</code>, and all the enabled transitions are stored
-	 * in a <code>WeightedStructure</code> that associates each function with its rate.
-	 * 
-	 * @param r random generator used to sample needed random varibales.
-	 * @param s current state.
-	 * @return the weighted structure with all the enabled transitions.
-	 */
-	WeightedStructure<StepFunction<S>> getTransitions(RandomGenerator r, S s);
-
-	/**
 	 * Returns the transitions enabled in a given state at a given time. Each transition
 	 * is represented via a <code>StepFunction</code>, and all the enabled transitions are stored
 	 * in a <code>WeightedStructure</code> that associates each function with its rate.
@@ -60,13 +49,11 @@ public interface MarkovProcess<S extends State> extends Model<S> {
 	 * @param s current state.
 	 * @return the weighted structure with all the enabled transitions.
 	 */
-	default WeightedStructure<StepFunction<S>> getTransitions(RandomGenerator r, double time, S s) {
-		return getTransitions(r, s);
-	}
+	WeightedStructure<StepFunction<S>> getTransitions(RandomGenerator r, double time, S s);
 
 	@Override
 	default TimeStep<S> next(RandomGenerator r, double time, S state) {
-		WeightedStructure<StepFunction<S>> activities = getTransitions(r, state);
+		WeightedStructure<StepFunction<S>> activities = getTransitions(r, time, state);
 		double totalRate = activities.getTotalWeight();
 		if (totalRate == 0.0) {
 			return null;
@@ -79,7 +66,7 @@ public interface MarkovProcess<S extends State> extends Model<S> {
 
 	@Override
 	default List<Action<S>> actions(RandomGenerator r, double time, S state) {
-		WeightedStructure<StepFunction<S>> activities = getTransitions(r, state);
+		WeightedStructure<StepFunction<S>> activities = getTransitions(r, time, state);
 		List<Action<S>> list = new LinkedList<>();
 		for (WeightedElement<StepFunction<S>> w: activities.getAll()) {
 			list.add(Action.actionOfMarkovStepFunction(time,activities.getTotalWeight(),w.getWeight(),state,w.getElement()));

@@ -20,8 +20,11 @@ package quasylab.sibilla.core.simulator.sampling;
 
 import quasylab.sibilla.core.past.State;
 
+import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Function;
 
 /**
  * @author loreti
@@ -29,7 +32,7 @@ import java.util.LinkedList;
  */
 public class SamplingCollection<S extends State> implements SamplingFunction<S> {
 
-	private LinkedList<SamplingFunction<S>> functions;
+	private final LinkedList<SamplingFunction<S>> functions;
 
 	public SamplingCollection() {
 		this.functions = new LinkedList<SamplingFunction<S>>();
@@ -43,14 +46,10 @@ public class SamplingCollection<S extends State> implements SamplingFunction<S> 
 		}
 	}
 
+
 	public SamplingCollection(Collection<? extends SamplingFunction<S>> functions) {
 		this();
-		this.functions = new LinkedList<>();
 		this.functions.addAll(functions);
-	}
-	
-	public void addSamplingFunction(SamplingFunction<S> function) {
-		functions.add(function);
 	}
 
 	@Override
@@ -73,7 +72,14 @@ public class SamplingCollection<S extends State> implements SamplingFunction<S> 
 			f.start();
 		}
 	}
-	
+
+	@Override
+	public void printTimeSeries(Function<String, String> nameFunction, char separator, double significance) throws FileNotFoundException {
+		for (SamplingFunction<S> sf: functions) {
+			sf.printTimeSeries(nameFunction,separator,significance);
+		}
+	}
+
 	public int size(){
 		return this.functions.size();
 	}
@@ -91,4 +97,7 @@ public class SamplingCollection<S extends State> implements SamplingFunction<S> 
 		return toReturn;
 	}
 
+	public void add(StatisticSampling<S> f) {
+		functions.add(f);
+	}
 }

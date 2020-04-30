@@ -2,6 +2,8 @@ package quasylab.sibilla.core.server;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.MarkovProcess;
+import quasylab.sibilla.core.models.Model;
+import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
@@ -11,14 +13,14 @@ public class SimulationDataSet<S extends State> implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private final RandomGenerator randomGenerator;
-    private final String modelName;
-    private final MarkovProcess<S> model;
+    private final ModelDefinition<S> modelName;
+    private final Model<S> model;
     private final S modelInitialState;
     private final SamplingFunction<S> modelSamplingFunction;
     private final int replica;
     private final double deadline;
 
-    public SimulationDataSet(RandomGenerator random, String modelName, MarkovProcess<S> model, S initialState,
+    public SimulationDataSet(RandomGenerator random, ModelDefinition<S> modelName, Model<S> model, S initialState,
                              SamplingFunction<S> sampling_function, int replica, double deadline, ServerInfo masterServerInfo) {
         this.modelName = modelName;
         this.randomGenerator = random;
@@ -92,12 +94,12 @@ public class SimulationDataSet<S extends State> implements Serializable {
     }
 
 
-    public String getModelName() {
+    public ModelDefinition<S> getModelName() {
         return modelName;
     }
 
 
-    public MarkovProcess<S> getModel() {
+    public Model<S> getModel() {
         return model;
     }
 

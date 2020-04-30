@@ -24,8 +24,7 @@ import java.io.Serializable;
 import java.util.Random;
 
 /**
- * @author loreti
- *
+ * Default random generator.
  */
 public class DefaultRandomGenerator extends AbstractRandomGenerator implements Serializable{
 

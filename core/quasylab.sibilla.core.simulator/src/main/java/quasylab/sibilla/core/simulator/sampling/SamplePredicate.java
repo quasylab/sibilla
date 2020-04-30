@@ -19,6 +19,7 @@
 
 package quasylab.sibilla.core.simulator.sampling;
 
+import quasylab.sibilla.core.models.StatePredicate;
 import quasylab.sibilla.core.past.State;
 
 import java.io.Serializable;
@@ -32,13 +33,22 @@ import java.util.function.Predicate;
 @FunctionalInterface
 public interface SamplePredicate<S extends State> extends Serializable {
 
-    public static <S extends State> SamplePredicate<S> statePredicate(Predicate<S> condition) {
-        return (t, s) -> condition.test(s);
+    static <S extends State> SamplePredicate<S> samplePredicate(StatePredicate<S> condition) {
+        return (t, s) -> condition.check(s);
     }
 
-    public static <S extends State> SamplePredicate<S> timeDeadlinePredicate(double d) {
+    static <S extends State> SamplePredicate<S> samplePredicate(double deadline, StatePredicate<? super S> condition) {
+        if (condition == null) {
+            return timeDeadlinePredicate(deadline);
+        } else {
+            return (t, s) -> (t>=deadline)||condition.check(s);
+
+        }
+    }
+
+    static <S extends State> SamplePredicate<S> timeDeadlinePredicate(double d) {
         return (t, s) -> t >= d;
     }
 
-    public boolean test(double time, S state);
+    boolean test(double time, S state);
 }

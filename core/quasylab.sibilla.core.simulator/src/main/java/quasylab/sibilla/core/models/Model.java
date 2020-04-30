@@ -25,6 +25,7 @@
 package quasylab.sibilla.core.models;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.past.State;
 
 import java.util.List;
 
@@ -33,7 +34,7 @@ import java.util.List;
  *
  * @param <S> data type for the state of the process.
  */
-public interface Model<S> {
+public interface Model<S extends State> {
 
     /**
      * Samples possible next state when the process is in a given state at
@@ -57,5 +58,7 @@ public interface Model<S> {
      * @return list of enabled actions.
      */
     List<Action<S>> actions(RandomGenerator r, double time, S state);
+
+    ModelDefinition<S> getModelDefinition();
 
 }

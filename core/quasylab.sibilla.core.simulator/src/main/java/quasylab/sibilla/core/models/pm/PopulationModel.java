@@ -53,40 +53,35 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
 
 	private static final long serialVersionUID = 6871037109869821108L;
 
+	private final PopulationModelDefinition modelDefinition;
+
 	private LinkedList<PopulationRule> rules;
 
-	private double time;
-	
-	private HashMap<String,PopulationState> states;
-	
-	private HashMap<String,Function<? super PopulationState,Double>> measures;
-	
 	public PopulationModel( ) {
-		this.rules = new LinkedList<PopulationRule>();
-		this.states = new HashMap<>();
-		this.measures = new HashMap<>();
+		this( null );
 	}
-	
+
+	public PopulationModel( PopulationModelDefinition modelDefinition ) {
+		this.rules = new LinkedList<PopulationRule>();
+		this.modelDefinition = modelDefinition;
+	}
+
 	@Override
-	public WeightedStructure<StepFunction<PopulationState>> getTransitions(RandomGenerator r, PopulationState state ) {
+	public WeightedStructure<StepFunction<PopulationState>> getTransitions(RandomGenerator r, double now, PopulationState state ) {
 		WeightedLinkedList<StepFunction<PopulationState>> activities = 
 				new WeightedLinkedList<>();
 		for (PopulationRule rule : rules) {
-			PopulationTransition tra = rule.apply(r, state);
+			PopulationTransition tra = rule.apply(r, now, state);
 			if (tra != null) {
 				activities.add(
-					new WeightedElement<StepFunction<PopulationState>>(
-						tra.getRate(), 
-						(rnd,now,dt) -> state.apply(tra.apply(rnd))
-					)						
+						new WeightedElement<>(
+								tra.getRate(),
+								(rnd, t, dt) -> state.apply(tra.apply(rnd))
+						)
 				);
 			}
 		}
 		return activities;
-	}
-
-	public double getTime() {
-		return time;
 	}
 
 	public static Map<String,Integer> createPopulation( String ... species ) {
@@ -104,22 +99,12 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
 		this.rules.add(rule);
 	}
 
-//	@Override
-//	public Function<? super PopulationState, Double> getMeasure(String label) {
-//		return null;
-//	}
-//
-//	@Override
-//	public Set<String> getMeasureLabels() {
-//		return measures.keySet();
-//	}
-
-	public void addState(String label, PopulationState state) {
-		this.states.put(label, state);
-	}
-
 	public void addRules(Collection<PopulationRule> rules) {
 		this.rules.addAll(rules);
 	}
-	
+
+	@Override
+	public PopulationModelDefinition getModelDefinition() {
+		return modelDefinition;
+	}
 }

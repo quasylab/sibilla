@@ -22,13 +22,26 @@
  *
  */
 
-package quasylab.sibilla.core.models.pm;
+package quasylab.sibilla.core.models;
 
 import quasylab.sibilla.core.past.State;
 
 import java.io.Serializable;
 
+/**
+ * A measure is a function associating each state with a real value.
+ *
+ * @param <S> data type of states.
+ */
 @FunctionalInterface
 public interface MeasureFunction<S extends State> extends Serializable {
-    public double apply(S state);
+
+    /**
+     * Returns a double value associated with a state.
+     *
+     * @param state a state
+     *
+     * @return the double value associated with the parameters.
+     */
+    double apply(S state);
 }

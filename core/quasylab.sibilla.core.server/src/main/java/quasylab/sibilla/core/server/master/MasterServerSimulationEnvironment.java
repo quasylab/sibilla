@@ -266,7 +266,7 @@ public class MasterServerSimulationEnvironment {
      */
     private SamplingFunction submitSimulations(SimulationDataSet dataSet) {
         SimulationEnvironment sim = new SimulationEnvironment(NetworkSimulationManager
-                .getNetworkSimulationManagerFactory(dataSet.getModelName(), this.state));
+                .getNetworkSimulationManagerFactory(this.state));
         try {
             sim.simulate(dataSet.getRandomGenerator(), dataSet.getModel(),
                     dataSet.getModelInitialState(), dataSet.getModelSamplingFunction(),

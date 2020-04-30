@@ -26,6 +26,8 @@
  */
 package quasylab.sibilla.core.models.pm;
 
+import quasylab.sibilla.core.past.State;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map.Entry;
@@ -42,7 +44,7 @@ import java.util.stream.IntStream;
  * @author loreti
  *
  */
-public class PopulationState implements Serializable {
+public class PopulationState implements State {
 
 	private static final long serialVersionUID = -4973919753621170006L;
 	/**
@@ -86,7 +88,7 @@ public class PopulationState implements Serializable {
 		this.population = population;
 	}
 
-	public double poluation( ) {
+	public double population( ) {
 		return population;
 	}
 	
@@ -100,6 +102,10 @@ public class PopulationState implements Serializable {
 	
 	public double getOccupancy( int ... idx ) {
 		return IntStream.of(idx).boxed().map(i -> (double) populationVector[i]).reduce(0.0, (x,y) -> x+y);
+	}
+
+	public double getFraction(int idx) {
+		return getOccupancy(idx)/population();
 	}
 	
 	// applies one update function
