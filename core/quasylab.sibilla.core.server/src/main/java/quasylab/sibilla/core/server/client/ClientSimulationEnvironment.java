@@ -70,8 +70,8 @@ public class ClientSimulationEnvironment<S extends State> {
      * @throws Exception TODO Exception handling
      */
     public ClientSimulationEnvironment(RandomGenerator random, ModelDefinition<S> modelDefinition, Model<S> model,
-            S initialState, SamplingFunction<S> sampling_function, int replica, double deadline,
-            NetworkInfo masterNetworkInfo) throws Exception {
+                                       S initialState, SamplingFunction<S> sampling_function, int replica, double deadline,
+                                       NetworkInfo masterNetworkInfo) throws Exception {
         this.data = new SimulationDataSet<>(random, modelDefinition, model, initialState, sampling_function, replica,
                 deadline);
         this.masterServerNetworkManager = TCPNetworkManager.createNetworkManager(masterNetworkInfo);
@@ -107,13 +107,14 @@ public class ClientSimulationEnvironment<S extends State> {
      * @throws Exception TODO Exception handling
      */
     private void initConnection(TCPNetworkManager server) throws Exception {
+        LOGGER.info(String.format("Loading [%s] class bytes to be transmitted over network", data.getModelDefinition().getClass().getName()));
         byte[] classBytes = ClassBytesLoader.loadClassBytes(data.getModelDefinition().getClass().getName());
 
         server.writeObject(ObjectSerializer.serializeObject(ClientCommand.INIT));
         LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.INIT,
                 server.getServerInfo().toString()));
         server.writeObject(ObjectSerializer.serializeObject(data.getModelDefinition().getClass().getName()));
-        LOGGER.info(String.format("[%s] Model name has been sent to the server - %s", data.getModelDefinition(),
+        LOGGER.info(String.format("[%s] Model name has been sent to the server - %s", data.getModelDefinition().getClass().getName(),
                 server.getServerInfo().toString()));
         server.writeObject(classBytes);
         LOGGER.info(String.format("Class bytes have been sent to the server - %s", server.getServerInfo().toString()));

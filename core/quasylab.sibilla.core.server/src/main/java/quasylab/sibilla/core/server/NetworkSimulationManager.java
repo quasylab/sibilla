@@ -104,6 +104,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         server.writeObject(ObjectSerializer.serializeObject(MasterCommand.INIT));
         LOGGER.info(String.format("[%s] command sent to the server - %s", MasterCommand.INIT,
                 server.getServerInfo().toString()));
+        LOGGER.info(String.format("Sassi", modelName.getClass().getName()));
         server.writeObject(ObjectSerializer.serializeObject(modelName.getClass().getName()));
         LOGGER.info(String.format("[%s] Model name has been sent to the server - ", modelName));
         server.writeObject(ClassBytesLoader.loadClassBytes(modelName.getClass().getName()));

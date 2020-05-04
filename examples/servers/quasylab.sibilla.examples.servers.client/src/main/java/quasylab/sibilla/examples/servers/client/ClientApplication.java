@@ -15,6 +15,8 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class ClientApplication implements Serializable {
 
@@ -40,8 +42,16 @@ public class ClientApplication implements Serializable {
 
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
     private static final String MODEL_NAME = ClientApplication.class.getName();
-    private static final NetworkInfo MASTER_SERVER_INFO = new NetworkInfo(NetworkUtils.getLocalIp(), 10001,
-            TCPNetworkManagerType.SECURE);
+    private static NetworkInfo MASTER_SERVER_INFO;
+
+    static {
+        try {
+            MASTER_SERVER_INFO = new NetworkInfo(InetAddress.getByName("192.168.1.202"), 10001,
+                    TCPNetworkManagerType.SECURE);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void main(String[] argv) throws Exception {
 
@@ -53,14 +63,10 @@ public class ClientApplication implements Serializable {
         SSLUtils.getInstance().setTrustStorePass("clientPass");
 
         SEIRModelDefinition modelDefinition = new SEIRModelDefinition();
-        SamplingCollection<PopulationState> collection = new SamplingCollection<>();
-        collection.add(StatisticSampling.measure("S", SAMPLINGS, DEADLINE, SEIRModelDefinition::fractionOfS));
-        collection.add(StatisticSampling.measure("E", SAMPLINGS, DEADLINE, SEIRModelDefinition::fractionOfE));
-        collection.add(StatisticSampling.measure("I", SAMPLINGS, DEADLINE, SEIRModelDefinition::fractionOfI));
-        collection.add(StatisticSampling.measure("R", SAMPLINGS, DEADLINE, SEIRModelDefinition::fractionOfR));
+
 
         ClientSimulationEnvironment<PopulationState> client = new ClientSimulationEnvironment<PopulationState>(
-                RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), collection,
+                RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), SEIRModelDefinition.getCollection(SAMPLINGS, DEADLINE),
                 REPLICA, DEADLINE, MASTER_SERVER_INFO);
 
     }
