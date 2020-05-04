@@ -2,25 +2,27 @@
  * Sibilla:  a Java framework designed to support analysis of Collective
  * Adaptive Systems.
  *
- * Copyright (C) 2020.
+ *  Copyright (C) 2020.
  *
- * See the NOTICE file distributed with this work for additional information
- * regarding copyright ownership.
+ *  See the NOTICE file distributed with this work for additional information
+ *  regarding copyright ownership.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *           http://www.apache.org/licenses/LICENSE-2.0
+ *            http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
  *
  */
+
 package quasylab.sibilla.core.server;
 
 import quasylab.sibilla.core.server.master.MasterCommand;
@@ -29,6 +31,7 @@ import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.serialization.CustomClassLoader;
 import quasylab.sibilla.core.server.serialization.ObjectSerializer;
 import quasylab.sibilla.core.server.slave.SlaveCommand;
+import quasylab.sibilla.core.server.util.NetworkUtils;
 import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
 
@@ -52,9 +55,10 @@ public class BasicSimulationServer implements SimulationServer {
     private static final Logger LOGGER = Logger.getLogger(BasicSimulationServer.class.getName());
 
     private final TCPNetworkManagerType networkManagerType;
-    private ExecutorService taskExecutor = Executors.newCachedThreadPool();
-    private ExecutorService connectionExecutor = Executors.newCachedThreadPool();
-    private int port;
+    private final ExecutorService taskExecutor = Executors.newCachedThreadPool();
+    private final ExecutorService connectionExecutor = Executors.newCachedThreadPool();
+    private int simulationPort;
+    protected NetworkInfo localServerInfo;
 
     /**
      * Creates a simulation server with the given network manager type
@@ -63,13 +67,15 @@ public class BasicSimulationServer implements SimulationServer {
      */
     public BasicSimulationServer(TCPNetworkManagerType networkManagerType) {
         this.networkManagerType = networkManagerType;
-        LOGGER.info(String.format("Creating a new BasicSimulation server that uses: [%s - %s]",
+        LOGGER.info(String.format("Creating a new BasicSimulationServer that uses: [%s - %s]",
                 this.networkManagerType.getClass(), this.networkManagerType.name()));
     }
 
     @Override
     public void start(int port) throws IOException {
-        this.port = port;
+        this.simulationPort = port;
+        this.localServerInfo = new NetworkInfo(NetworkUtils.getLocalIp(), this.simulationPort, this.networkManagerType);
+        LOGGER.info(String.format("The BasicSimulationServer will accept simulation requests on port [%d]", this.simulationPort));
         this.startSimulationServer();
     }
 
@@ -79,9 +85,11 @@ public class BasicSimulationServer implements SimulationServer {
      * @throws IOException
      */
     private void startSimulationServer() throws IOException {
+
+        ServerSocket serverSocket = TCPNetworkManager.createServerSocket(networkManagerType, simulationPort);
+        LOGGER.info(String.format("The BasicSimulationServer is now listening for servers on port: [%d]", simulationPort));
         while (true) {
-            Socket socket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) networkManagerType, port);
-            LOGGER.info(String.format("The BasicSimulationServer is now listening for servers on port: [%d]", port));
+            Socket socket = serverSocket.accept();
             connectionExecutor.execute(() -> {
                 try {
                     manageMasterMessage(socket);
@@ -132,7 +140,7 @@ public class BasicSimulationServer implements SimulationServer {
             masterActive.set(false);
             CustomClassLoader.classes.remove(modelName);
             LOGGER.info(String.format("[%s] Model deleted off the class loader", modelName));
-            LOGGER.info(String.format("Master closed the connection"));
+            LOGGER.info("Master closed the connection");
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             e.printStackTrace();
@@ -152,9 +160,6 @@ public class BasicSimulationServer implements SimulationServer {
             CustomClassLoader.defClass(modelName, myClass);
             String classLoadedName = Class.forName(modelName).getName();
             LOGGER.info(String.format("[%s] Class loaded with success", classLoadedName));
-        } catch (ClassNotFoundException e) {
-            LOGGER.severe(e.getMessage());
-            e.printStackTrace();
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             e.printStackTrace();

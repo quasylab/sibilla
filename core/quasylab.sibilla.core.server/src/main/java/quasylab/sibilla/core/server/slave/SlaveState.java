@@ -1,7 +1,33 @@
+/*
+ * Sibilla:  a Java framework designed to support analysis of Collective
+ * Adaptive Systems.
+ *
+ *  Copyright (C) 2020.
+ *
+ *  See the NOTICE file distributed with this work for additional information
+ *  regarding copyright ownership.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *            http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *
+ */
+
 package quasylab.sibilla.core.server.slave;
 
-import quasylab.sibilla.core.server.ServerInfo;
+import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.master.MasterState;
+import quasylab.sibilla.core.server.master.SimulationState;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -11,7 +37,7 @@ import java.util.Objects;
 /**
  * Represents the state of a slave server
  */
-public class SlaveState implements Serializable {
+public class SlaveState implements Serializable, Cloneable {
     private final static double alpha = 0.125;
     private final static double beta = 0.250;
     private final static int threshold = 256;
@@ -22,8 +48,8 @@ public class SlaveState implements Serializable {
     private boolean isRemoved, isTimeout;
     private long runningTime;
     private double sampleRTT;
-    private PropertyChangeSupport updateSupport;
-    private ServerInfo slaveInfo;
+    private NetworkInfo slaveInfo;
+    private transient PropertyChangeSupport updateSupport;
 
     @Override
     public boolean equals(Object o) {
@@ -38,12 +64,7 @@ public class SlaveState implements Serializable {
         return Objects.hash(slaveInfo);
     }
 
-    /**
-     * Creates a SlaveState object and sets the given MasterState as its listener
-     *
-     * @param masterState MasterState that listens to the changes of this object
-     */
-    public SlaveState(MasterState masterState, ServerInfo slaveInfo) {
+    public SlaveState(SimulationState simulationState, NetworkInfo slaveInfo) {
         this.slaveInfo = slaveInfo;
         expectedTasks = 1;
         actualTasks = 0;
@@ -54,7 +75,7 @@ public class SlaveState implements Serializable {
         sampleRTT = 0.0;
         estimatedRTT = 0.0;
         updateSupport = new PropertyChangeSupport(this);
-        this.addPropertyChangeListener(masterState);
+        this.addPropertyChangeListener("Simulation Update", simulationState);
     }
 
     /**
@@ -97,7 +118,7 @@ public class SlaveState implements Serializable {
     /**
      * TODO ???
      */
-    public void migrate(ServerInfo newSlaveInfo) {
+    public void migrate(NetworkInfo newSlaveInfo) {
         this.slaveInfo = newSlaveInfo;
         isRemoved = false;
         isTimeout = false;
@@ -142,15 +163,16 @@ public class SlaveState implements Serializable {
         return getTimeLimit(tasks) < maxRunningTime;
     }
 
-    public synchronized void addPropertyChangeListener(PropertyChangeListener pcl) {
-        updateSupport.addPropertyChangeListener(pcl);
+    public synchronized void addPropertyChangeListener(String property, PropertyChangeListener pcl) {
+        updateSupport.addPropertyChangeListener(property, pcl);
+        this.updateListeners();
     }
 
     private void updateListeners() {
-        updateSupport.firePropertyChange("SlaveState", null, this);
+        updateSupport.firePropertyChange("Simulation Update", null, this);
     }
 
-    public ServerInfo getSlaveInfo(){
+    public NetworkInfo getSlaveInfo() {
         return this.slaveInfo;
     }
 
@@ -170,7 +192,8 @@ public class SlaveState implements Serializable {
         if (isTimeout()) {
             return "Server has timed out, reconnecting...";
         }
-        return " - Tasks received: " + actualTasks +
+        return this.slaveInfo +
+                "\n - Tasks received: " + actualTasks +
                 "\n - Window runtime: " + runningTime + "ns " +
                 "\n - sampleRTT: " + sampleRTT + "ns " +
                 "\n - estimatedRTT: " + estimatedRTT + "ns " +
@@ -197,6 +220,18 @@ public class SlaveState implements Serializable {
     public void timedOut() {
         isTimeout = true;
         this.updateListeners();
+    }
+
+    public SlaveState clone() {
+        SlaveState clone = null;
+        try {
+            clone = (SlaveState) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        assert clone != null;
+        clone.slaveInfo = this.slaveInfo.clone();
+        return clone;
     }
 
 }

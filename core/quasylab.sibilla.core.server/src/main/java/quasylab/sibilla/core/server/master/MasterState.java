@@ -1,70 +1,139 @@
+/*
+ * Sibilla:  a Java framework designed to support analysis of Collective
+ * Adaptive Systems.
+ *
+ *  Copyright (C) 2020.
+ *
+ *  See the NOTICE file distributed with this work for additional information
+ *  regarding copyright ownership.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *            http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *
+ */
+
 package quasylab.sibilla.core.server.master;
 
-import quasylab.sibilla.core.server.ServerInfo;
+import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.slave.SlaveState;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * Class that contains the state of the master server
+ * Contains the state of a master server.
+ * TODO: update with multiple clients
  */
-public class MasterState implements Serializable, PropertyChangeListener {
 
-    private Date startDate;
-    private volatile int runningServers;
-    private volatile int connectedServers;
+public class MasterState implements Serializable, Comparable<MasterState>, PropertyChangeListener, Cloneable {
+
+    /**
+     * The default integer value associated with a slave server that is up and running.
+     * Any value below the default reports that the associated server has been unreachable for an amount of time
+     */
+    final static Integer SLAVE_SERVER_UP_AND_RUNNING_DEFAULT = 3;
+
+    /**
+     * The date the master server started its execution.
+     */
+    private Date masterServerStartDate;
+
+    /**
+     * The number of client submitted simulations that have been executed since the startup of the master server.
+     */
     private volatile int executedSimulations;
-    private Set<SlaveState> servers;
-    private ServerInfo masterInfo;
-    private PropertyChangeSupport updateSupport;
+    /**
+     * The slave servers currently monitored by the master server.
+     * Every slave server's state is associated with an integer value that is used to signal if the slave server is still up and running.
+     * If the integer value associated to a slave server is not equal to the default value reports that the slave server has been unreachable for an amount of time.
+     * If the integer value associated to a slave server is equal to the default value reports that server is still up and running.
+     */
+    private Map<NetworkInfo, Integer> slaveServers;
+    /**
+     * The network related informations about this master server.
+     */
+    private NetworkInfo masterNetworkInfo;
 
-    public MasterState(ServerInfo masterInfo) {
-        this.masterInfo = masterInfo;
-        this.startDate = new Date();
-        this.runningServers = 0;
-        this.connectedServers = 0;
+    private Set<SimulationState> simulationStates;
+
+    private transient PropertyChangeSupport updateSupport;
+
+
+    /**
+     * Objects constructor.
+     *
+     * @param masterNetworkInfo The network related informations about this master server.
+     */
+    public MasterState(NetworkInfo masterNetworkInfo) {
+        this.masterNetworkInfo = masterNetworkInfo;
+        this.masterServerStartDate = new Date();
         this.executedSimulations = 0;
-        this.servers = new HashSet<>();
+        this.slaveServers = new HashMap<>();
         this.updateSupport = new PropertyChangeSupport(this);
+        this.simulationStates = new HashSet<>();
+    }
+
+    public void addSimulation(SimulationState simulationState) {
+        this.simulationStates.add(simulationState);
+    }
+
+    public Map<NetworkInfo, Integer> getSlaveServers() {
+        return slaveServers;
+    }
+
+    public void setSlaveServers(Map<NetworkInfo, Integer> slaveServers) {
+        this.slaveServers = slaveServers;
+    }
+
+    public Set<SimulationState> getSimulationStates() {
+        return simulationStates;
+    }
+
+    public void setSimulationStates(Set<SimulationState> simulationStates) {
+        this.simulationStates = simulationStates;
+    }
+
+    public boolean removeSimulation(SimulationState simulationState) {
+        return this.simulationStates.remove(simulationState);
+    }
+
+    public Set<NetworkInfo> getSlaveServersNetworkInfos() {
+        return new HashSet<NetworkInfo>(this.slaveServers.keySet());
+    }
+
+    public synchronized void addPropertyChangeListener(String property, PropertyChangeListener pcl) {
+        this.updateSupport.addPropertyChangeListener(property, pcl);
         this.updateListeners();
     }
 
-    public synchronized void addPropertyChangeListener(PropertyChangeListener pcl) {
-        this.updateSupport.addPropertyChangeListener(pcl);
-    }
 
-    public synchronized void increaseRunningServers() {
-        this.runningServers++;
-        this.updateListeners();
-    }
-
-    public synchronized void decreaseRunningServers() {
-        this.runningServers--;
-        this.updateListeners();
-    }
-
-    public void increaseExecutedSimulations() {
+    /**
+     * Increases the number of client submitted simulations that have been executed since the startup of the master server.
+     */
+    public synchronized void increaseExecutedSimulations() {
         this.executedSimulations++;
         this.updateListeners();
     }
 
-    public synchronized boolean addServer(ServerInfo server) {
-        return this.addServer(new SlaveState(this, server));
-    }
 
-    public synchronized boolean removeServer(ServerInfo server) {
-        return this.removeServer(this.getSlaveStateByServerInfo(server));
-    }
-
-    public synchronized boolean removeServer(SlaveState state) {
-        if (this.servers.remove(state)) {
-            this.connectedServers--;
+    //Aggiunta dal discovery
+    public synchronized boolean addSlaveServer(NetworkInfo slaveNetworkInfo) {
+        if (this.slaveServers.put(slaveNetworkInfo, SLAVE_SERVER_UP_AND_RUNNING_DEFAULT) == null) {
             this.updateListeners();
             return true;
         } else {
@@ -72,53 +141,117 @@ public class MasterState implements Serializable, PropertyChangeListener {
         }
     }
 
-    public synchronized boolean addServer(SlaveState state) {
-        if (this.servers.add(state)) {
-            this.connectedServers++;
+
+    public synchronized boolean removeSlaveServer(NetworkInfo slaveNetworkInfo) {
+
+        if (this.slaveServers.remove(slaveNetworkInfo) != null) {
+            this.simulationStates.forEach(simulationState -> {
+                simulationState.getSlaveStateByServerInfo(slaveNetworkInfo).removed();
+            });
             this.updateListeners();
             return true;
         } else {
             return false;
         }
-
     }
 
-    public SlaveState getSlaveStateByServerInfo(ServerInfo serverInfo) {
-        return this.servers.stream().filter(slaveState -> {
-            return slaveState.getSlaveInfo().equals(serverInfo);
-        }).findFirst().get();
+
+    /**
+     * Update the integer value associated with every slave server that signals if that server is still up and running.
+     * A slave server is removed if its associated integer value is equal to zero.
+     */
+    public synchronized void updateServersKeepAlive() {
+        List<NetworkInfo> toRemove = new ArrayList<>();
+        this.slaveServers.keySet().stream().forEach(slaveState -> {
+            this.slaveServers.put(slaveState, this.slaveServers.get(slaveState) - 1);
+            if (this.slaveServers.get(slaveState) == 0) {
+                toRemove.add(slaveState);
+            }
+        });
+        toRemove.stream().forEach(slave -> {
+            this.removeSlaveServer(slave);
+        });
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getNewValue() instanceof SimulationState) {
+            SimulationState simState = (SimulationState) evt.getNewValue();
+            simState.getSlaveServersStates().stream().filter(SlaveState::isRemoved).forEach(slaveState -> this.removeSlaveServer(slaveState.getSlaveInfo()));
+            this.simulationStates.removeIf(SimulationState::isConcluded);
+        }
         this.updateListeners();
     }
 
     private void updateListeners() {
-        updateSupport.firePropertyChange("Master", null, this);
+        updateSupport.firePropertyChange("Master Listener", null, this.clone());
     }
 
-    public synchronized Set<SlaveState> getServers() {
-        return new HashSet<>(this.servers);
+    /**
+     * @return The network related informations about this master server.
+     */
+    public synchronized NetworkInfo getMasterNetworkInfo() {
+        return this.masterNetworkInfo;
     }
 
-    public ServerInfo getMasterInfo() {
-        return this.masterInfo;
+    /**
+     * @return The number of slave servers the master server is currently connected to.
+     */
+    public synchronized int getConnectedSlaveServers() {
+        return this.slaveServers.size();
     }
 
-    public int getConnectedServers() {
-        return this.connectedServers;
-    }
-
-    public synchronized int getRunningServers() {
-        return runningServers;
-    }
-
-    public int getExecutedSimulations() {
+    /**
+     * @return The number of client submitted simulations that have been executed since the startup of the master server.
+     */
+    public synchronized int getExecutedSimulations() {
         return executedSimulations;
     }
 
-    public Date getStartDate() {
-        return startDate;
+    /**
+     * @return The date the master server started its execution.
+     */
+    public synchronized Date getMasterServerStartDate() {
+        return masterServerStartDate;
+    }
+
+
+    @Override
+    public MasterState clone() {
+        MasterState clone = null;
+        try {
+            clone = (MasterState) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        clone.simulationStates = this.simulationStates.stream().map(simulationState -> simulationState.clone()).collect(Collectors.toSet());
+        clone.masterServerStartDate = (Date) this.masterServerStartDate.clone();
+        final Map<NetworkInfo, Integer> tempMapCopy = new HashMap<>();
+        this.slaveServers.entrySet().stream().forEach(entry -> tempMapCopy.put(entry.getKey().clone(), entry.getValue()));
+        clone.slaveServers.putAll(tempMapCopy);
+        clone.masterNetworkInfo = this.masterNetworkInfo.clone();
+        return clone;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MasterState that = (MasterState) o;
+        return
+                executedSimulations == that.executedSimulations &&
+                        Objects.equals(masterServerStartDate, that.masterServerStartDate) &&
+                        Objects.equals(slaveServers, that.slaveServers) &&
+                        Objects.equals(masterNetworkInfo, that.masterNetworkInfo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(masterServerStartDate, executedSimulations, slaveServers, masterNetworkInfo);
+    }
+
+    @Override
+    public int compareTo(MasterState masterState) {
+        return this.masterServerStartDate.compareTo(masterState.masterServerStartDate);
     }
 }

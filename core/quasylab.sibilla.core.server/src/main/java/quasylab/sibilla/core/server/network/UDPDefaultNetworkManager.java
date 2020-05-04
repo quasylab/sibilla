@@ -1,13 +1,37 @@
+/*
+ * Sibilla:  a Java framework designed to support analysis of Collective
+ * Adaptive Systems.
+ *
+ *  Copyright (C) 2020.
+ *
+ *  See the NOTICE file distributed with this work for additional information
+ *  regarding copyright ownership.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *            http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *
+ */
+
 package quasylab.sibilla.core.server.network;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 
 public class UDPDefaultNetworkManager implements UDPNetworkManager {
 
-    private DatagramSocket socket;
+    private final DatagramSocket socket;
 
     public UDPDefaultNetworkManager(DatagramSocket socket) {
         this.socket = socket;
@@ -24,16 +48,6 @@ public class UDPDefaultNetworkManager implements UDPNetworkManager {
     public void writeObject(byte[] toWrite, InetAddress address, int port) throws Exception {
         DatagramPacket p = new DatagramPacket(toWrite, toWrite.length, address, port);
         socket.send(p);
-    }
-
-    @Override
-    public void setTimeout(long timeout) throws SocketException {
-        socket.setSoTimeout((int) (timeout / 1000000));
-    }
-
-    @Override
-    public UDPNetworkManagerType getType() {
-        return UDPNetworkManagerType.DEFAULT;
     }
 
 }

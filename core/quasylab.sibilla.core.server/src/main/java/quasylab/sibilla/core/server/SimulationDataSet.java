@@ -1,7 +1,31 @@
+/*
+ * Sibilla:  a Java framework designed to support analysis of Collective
+ * Adaptive Systems.
+ *
+ *  Copyright (C) 2020.
+ *
+ *  See the NOTICE file distributed with this work for additional information
+ *  regarding copyright ownership.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *            http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ *
+ */
+
 package quasylab.sibilla.core.server;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.models.MarkovProcess;
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.past.State;
@@ -13,16 +37,16 @@ public class SimulationDataSet<S extends State> implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private final RandomGenerator randomGenerator;
-    private final ModelDefinition<S> modelName;
+    private final ModelDefinition<S> modelDefinition;
     private final Model<S> model;
     private final S modelInitialState;
     private final SamplingFunction<S> modelSamplingFunction;
     private final int replica;
     private final double deadline;
 
-    public SimulationDataSet(RandomGenerator random, ModelDefinition<S> modelName, Model<S> model, S initialState,
-                             SamplingFunction<S> sampling_function, int replica, double deadline, ServerInfo masterServerInfo) {
-        this.modelName = modelName;
+    public SimulationDataSet(RandomGenerator random, ModelDefinition<S> modelDefinition, Model<S> model, S initialState,
+                             SamplingFunction<S> sampling_function, int replica, double deadline) {
+        this.modelDefinition = modelDefinition;
         this.randomGenerator = random;
         this.model = model;
         this.modelInitialState = initialState;
@@ -40,7 +64,7 @@ public class SimulationDataSet<S extends State> implements Serializable {
         result = prime * result + (int) (temp ^ (temp >>> 32));
         result = prime * result + ((model == null) ? 0 : model.hashCode());
         result = prime * result + ((modelInitialState == null) ? 0 : modelInitialState.hashCode());
-        result = prime * result + ((modelName == null) ? 0 : modelName.hashCode());
+        result = prime * result + ((modelDefinition == null) ? 0 : modelDefinition.hashCode());
         result = prime * result
                 + ((modelSamplingFunction == null) ? 0 : modelSamplingFunction.hashCode());
         result = prime * result + ((randomGenerator == null) ? 0 : randomGenerator.hashCode());
@@ -56,7 +80,7 @@ public class SimulationDataSet<S extends State> implements Serializable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        SimulationDataSet other = (SimulationDataSet) obj;
+        SimulationDataSet<?> other = (SimulationDataSet<?>) obj;
         if (Double.doubleToLongBits(deadline) != Double.doubleToLongBits(other.deadline))
             return false;
         if (model == null) {
@@ -69,10 +93,10 @@ public class SimulationDataSet<S extends State> implements Serializable {
                 return false;
         } else if (!modelInitialState.equals(other.modelInitialState))
             return false;
-        if (modelName == null) {
-            if (other.modelName != null)
+        if (modelDefinition == null) {
+            if (other.modelDefinition != null)
                 return false;
-        } else if (!modelName.equals(other.modelName))
+        } else if (!modelDefinition.equals(other.modelDefinition))
             return false;
         if (modelSamplingFunction == null) {
             if (other.modelSamplingFunction != null)
@@ -84,9 +108,7 @@ public class SimulationDataSet<S extends State> implements Serializable {
                 return false;
         } else if (!randomGenerator.equals(other.randomGenerator))
             return false;
-        if (replica != other.replica)
-            return false;
-        return true;
+        return replica == other.replica;
     }
 
     public RandomGenerator getRandomGenerator() {
@@ -94,8 +116,8 @@ public class SimulationDataSet<S extends State> implements Serializable {
     }
 
 
-    public ModelDefinition<S> getModelName() {
-        return modelName;
+    public ModelDefinition<S> getModelDefinition() {
+        return modelDefinition;
     }
 
 
@@ -131,7 +153,7 @@ public class SimulationDataSet<S extends State> implements Serializable {
                         + " modelReferenceInitialState hashcode: %d \n" + " modelReferenceInitialState class: %s \n"
                         + " modelReferenceSamplingFunction hashcode: %d \n"
                         + " modelReferenceSamplingFunction class: %s \n" + " replica: %d \n deadline: %e \n",
-                randomGenerator.hashCode(), randomGenerator.getClass().getName(), modelName,
+                randomGenerator.hashCode(), randomGenerator.getClass().getName(), modelDefinition,
                 model.hashCode(), model.getClass().getName(), modelInitialState.hashCode(),
                 modelInitialState.getClass().getName(), modelSamplingFunction.hashCode(),
                 modelSamplingFunction.getClass().getName(), replica, deadline);
