@@ -1,18 +1,15 @@
 package quasylab.sibilla.examples.servers.client;
 
-
 import org.apache.commons.math3.random.AbstractRandomGenerator;
+import quasylab.sibilla.core.models.pm.PopulationRule;
+import quasylab.sibilla.core.models.pm.PopulationState;
+import quasylab.sibilla.core.models.pm.ReactionRule;
 import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.client.ClientSimulationEnvironment;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.util.NetworkUtils;
 import quasylab.sibilla.core.server.util.SSLUtils;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
-import quasylab.sibilla.core.simulator.pm.PopulationModel;
-import quasylab.sibilla.core.simulator.pm.PopulationRule;
-import quasylab.sibilla.core.simulator.pm.PopulationState;
-import quasylab.sibilla.core.simulator.pm.ReactionRule;
-import quasylab.sibilla.core.simulator.pm.ReactionRule.Specie;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
@@ -43,7 +40,8 @@ public class ClientApplication implements Serializable {
 
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
     private static final String MODEL_NAME = ClientApplication.class.getName();
-    private static final NetworkInfo MASTER_SERVER_INFO = new NetworkInfo(NetworkUtils.getLocalIp(), 10001, TCPNetworkManagerType.SECURE);
+    private static final NetworkInfo MASTER_SERVER_INFO = new NetworkInfo(NetworkUtils.getLocalIp(), 10001,
+            TCPNetworkManagerType.SECURE);
 
     public static void main(String[] argv) throws Exception {
 
@@ -54,37 +52,17 @@ public class ClientApplication implements Serializable {
         SSLUtils.getInstance().setTrustStorePath("clientTrustStore.jks");
         SSLUtils.getInstance().setTrustStorePass("clientPass");
 
-        PopulationRule rule_S_E = new ReactionRule("S->E", new Specie[]{new Specie(S), new Specie(I)},
-                new Specie[]{new Specie(E), new Specie(I)},
-                s -> s.getOccupancy(S) * LAMBDA_E * (s.getOccupancy(I) / N));
-
-        PopulationRule rule_E_I = new ReactionRule("E->I", new Specie[]{new Specie(E)},
-                new Specie[]{new Specie(I)}, s -> s.getOccupancy(E) * LAMBDA_I);
-
-        PopulationRule rule_I_R = new ReactionRule("I->R", new Specie[]{new Specie(I)},
-                new Specie[]{new Specie(R)}, s -> s.getOccupancy(I) * LAMBDA_R);
-
-        PopulationModel f = new PopulationModel();
-        f.addState("init", initialState());
-        f.addRule(rule_S_E);
-        f.addRule(rule_E_I);
-        f.addRule(rule_I_R);
-
-        StatisticSampling<PopulationState> fiSamp = StatisticSampling.measure("Fraction Infected", SAMPLINGS, DEADLINE,
-                s -> s.getOccupancy(I) / N);
-        StatisticSampling<PopulationState> frSamp = StatisticSampling.measure("Fraction Recovered", SAMPLINGS, DEADLINE,
-                s -> s.getOccupancy(R) / N);
-
-        SamplingFunction<PopulationState> sf = new SamplingCollection<>(fiSamp, frSamp);
+        SEIRModelDefinition modelDefinition = new SEIRModelDefinition();
+        SamplingCollection<PopulationState> collection = new SamplingCollection<>();
+        collection.add(StatisticSampling.measure("S", SAMPLINGS, DEADLINE, SEIRModelDefinition::fractionOfS));
+        collection.add(StatisticSampling.measure("E", SAMPLINGS, DEADLINE, SEIRModelDefinition::fractionOfE));
+        collection.add(StatisticSampling.measure("I", SAMPLINGS, DEADLINE, SEIRModelDefinition::fractionOfI));
+        collection.add(StatisticSampling.measure("R", SAMPLINGS, DEADLINE, SEIRModelDefinition::fractionOfR));
 
         ClientSimulationEnvironment<PopulationState> client = new ClientSimulationEnvironment<PopulationState>(
-				RANDOM_GENERATOR, MODEL_NAME, f,
-                initialState(), sf, REPLICA, DEADLINE, MASTER_SERVER_INFO);
+                RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), collection,
+                REPLICA, DEADLINE, MASTER_SERVER_INFO);
 
-    }
-
-    public static PopulationState initialState() {
-        return new PopulationState(new int[]{INIT_S, INIT_E, INIT_I, INIT_R});
     }
 
 }

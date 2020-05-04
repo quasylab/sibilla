@@ -26,10 +26,11 @@
 package quasylab.sibilla.core.server;
 
 import quasylab.sibilla.core.simulator.SimulationTask;
-import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.past.State;
 
 import java.io.Serializable;
 import java.util.List;
+
 
 public class NetworkTask<S extends State> implements Serializable {
     private static final long serialVersionUID = 1L;

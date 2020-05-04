@@ -3,8 +3,8 @@
  */
 package quasylab.sibilla.core.simulator.tests.pm;
 
+import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.pm.*;
 import quasylab.sibilla.core.simulator.sampling.Measure;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
@@ -89,7 +89,7 @@ public class GossipUnicast {
 		rules.add(
 				new UnicastRule(//AI: shuffle_00^ii interaction with PI
 					"s_ii" ,	
-					(PopulationState s) -> 
+					(PopulationState s) ->
 						this.lambda_s
 						*(s.getOccupancy(PI_INDEX)/((s.getOccupancy(PI_INDEX)+s.getOccupancy(PS_INDEX)+s.getOccupancy(PU_INDEX)))),
 					AI_INDEX ,
@@ -220,12 +220,13 @@ public class GossipUnicast {
 	//	sim.simulate(new DefaultRandomGenerator(),buildPopulationModel(scale),getInitState(scale),sf,iterations,deadline);
 		
 		System.out.println("Time: "+(System.currentTimeMillis()-start));
-		aiSamp.printTimeSeries(new PrintStream(label+"_ai_.data"));
-		piSamp.printTimeSeries(new PrintStream(label+"_pi_.data"));
-		auSamp.printTimeSeries(new PrintStream(label+"_au_.data"));
-		puSamp.printTimeSeries(new PrintStream(label+"_pu_.data"));
-		asSamp.printTimeSeries(new PrintStream(label+"_as_.data"));
-		psSamp.printTimeSeries(new PrintStream(label+"_ps_.data"));
+//		aiSamp.printTimeSeries(new PrintStream(label+"_ai_.data"));
+//		piSamp.printTimeSeries(new PrintStream(label+"_pi_.data"));
+//		auSamp.printTimeSeries(new PrintStream(label+"_au_.data"));
+//		puSamp.printTimeSeries(new PrintStream(label+"_pu_.data"));
+//		asSamp.printTimeSeries(new PrintStream(label+"_as_.data"));
+//		psSamp.printTimeSeries(new PrintStream(label+"_ps_.data"));
+		sf.printTimeSeries(outputDir,"u_"+scale+"_","_.data");
 
 	}	
 	
@@ -250,7 +251,6 @@ public class GossipUnicast {
 	private PopulationModel buildPopulationModel(int scale) {
 		PopulationModel m = new PopulationModel();
 		m.addRules( buildRules() );
-		m.addState("init", getInitState(scale) );	
 		return m;
 	}
 	

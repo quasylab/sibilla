@@ -3,9 +3,9 @@
  */
 package quasylab.sibilla.core.simulator.tests.pm;
 
+import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.pm.*;
-import quasylab.sibilla.core.simulator.pm.UnicastRule.UnicastReceiver;
+import quasylab.sibilla.core.models.pm.UnicastRule.UnicastReceiver;
 import quasylab.sibilla.core.simulator.sampling.Measure;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
@@ -250,12 +250,7 @@ public class RBModel {
 		//	sim.simulate(new DefaultRandomGenerator(),buildPopulationModel(scale),getInitState(scale),sf,iterations,deadline);
 
 			System.out.println("Time: "+(System.currentTimeMillis()-start));
-			rSamp.printTimeSeries(new PrintStream(label+"_r_.data"));
-			bSamp.printTimeSeries(new PrintStream(label+"_b_.data"));
-			btSamp.printTimeSeries(new PrintStream(label+"_bt_.data"));
-			rtSamp.printTimeSeries(new PrintStream(label+"_rt_.data"));
-			red.printTimeSeries(new PrintStream(label+"_red_.data"));
-			blue.printTimeSeries(new PrintStream(label+"_blue_.data"));
+			sf.printTimeSeries(outputDir,"rb_"+scale+"_","_.data");
 	}	
 	
 	private static StatisticSampling<PopulationState> getMeasure(int samplings, double deadline, String name, Function<PopulationState,Double> m) {
@@ -279,7 +274,6 @@ public class RBModel {
 	private PopulationModel buildPopulationModel(int scale) {
 		PopulationModel m = new PopulationModel();
 		m.addRules( buildRules() );
-		m.addState("init", getInitState(scale) );	
 		return m;
 	}
 	

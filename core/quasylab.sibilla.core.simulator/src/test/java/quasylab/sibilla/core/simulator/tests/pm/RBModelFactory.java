@@ -19,11 +19,11 @@
 
 package quasylab.sibilla.core.simulator.tests.pm;
 
-import quasylab.sibilla.core.simulator.pm.BroadcastRule;
-import quasylab.sibilla.core.simulator.pm.PopulationRule;
-import quasylab.sibilla.core.simulator.pm.PopulationState;
-import quasylab.sibilla.core.simulator.pm.UnicastRule;
-import quasylab.sibilla.core.simulator.pm.UnicastRule.UnicastReceiver;
+import quasylab.sibilla.core.models.pm.BroadcastRule;
+import quasylab.sibilla.core.models.pm.PopulationRule;
+import quasylab.sibilla.core.models.pm.PopulationState;
+import quasylab.sibilla.core.models.pm.UnicastRule;
+import quasylab.sibilla.core.models.pm.UnicastRule.UnicastReceiver;
 
 import java.util.LinkedList;
 

@@ -25,9 +25,11 @@
 
 package quasylab.sibilla.core.simulator.sampling;
 
-import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.past.State;
 
+import java.io.FileNotFoundException;
 import java.util.LinkedList;
+import java.util.function.Function;
 
 /**
  * @author loreti
@@ -58,6 +60,10 @@ public class SamplingLog<S extends State> implements SamplingFunction<S> {
 	@Override
 	public void start() {
 		this.last_time = 0.0;
+	}
+
+	@Override
+	public void printTimeSeries(Function<String, String> nameFunction, char separator, double significance) {
 	}
 
 	@Override

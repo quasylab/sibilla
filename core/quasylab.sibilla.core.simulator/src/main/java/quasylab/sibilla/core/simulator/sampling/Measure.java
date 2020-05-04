@@ -25,7 +25,7 @@
 
 package quasylab.sibilla.core.simulator.sampling;
 
-import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.past.State;
 
 import java.io.Serializable;
 
@@ -35,8 +35,8 @@ import java.io.Serializable;
  */
 public interface Measure<S extends State> extends Serializable{
 
-	public double measure(S t);
+	double measure(S t);
 
-	public String getName();
+	String getName();
 
 }

@@ -25,7 +25,7 @@
 
 package quasylab.sibilla.core.simulator;
 
-import quasylab.sibilla.core.simulator.pm.State;
+import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.sampling.Sample;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
