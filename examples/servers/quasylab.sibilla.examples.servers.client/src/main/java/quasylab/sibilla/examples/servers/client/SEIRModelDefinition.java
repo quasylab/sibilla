@@ -28,7 +28,9 @@ import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.pm.*;
 
-public class SEIRModelDefinition implements ModelDefinition<PopulationState> {
+import java.io.Serializable;
+
+public class SEIRModelDefinition implements ModelDefinition<PopulationState>, Serializable {
 
     public final static int S = 0;
     public final static int E = 1;
