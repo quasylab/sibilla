@@ -24,23 +24,25 @@
 
 package quasylab.sibilla.core.models;
 
+import java.io.Serializable;
+
 /**
  * Indicates a condition or an event that we can observe in a state.
  *
  * @param <T>
  */
 @FunctionalInterface
-public interface StatePredicate<T> {
+public interface StatePredicate<T> extends Serializable {
 
     StatePredicate<Object> TRUE = s -> true;
 
     /**
      * Checks if a state satisfies the predicate.
+     *
      * @param t a state
      * @return true if the state <code>t</code> satisfies the predicate.
      */
     boolean check(T t);
 
 
-    
 }

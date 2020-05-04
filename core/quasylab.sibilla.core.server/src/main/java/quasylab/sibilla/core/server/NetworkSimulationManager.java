@@ -29,7 +29,6 @@ import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.server.master.MasterCommand;
-import quasylab.sibilla.core.server.master.MasterState;
 import quasylab.sibilla.core.server.master.SimulationState;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
 import quasylab.sibilla.core.server.serialization.ClassBytesLoader;
@@ -48,20 +47,20 @@ import java.util.stream.Collectors;
 public class NetworkSimulationManager<S extends State> extends QueuedSimulationManager<S> {
 
     private static final Logger LOGGER = Logger.getLogger(NetworkSimulationManager.class.getName());
-    private final ModelDefinition<S> modelName;
+    private final ModelDefinition<S> modelDefinition;
     private final BlockingQueue<TCPNetworkManager> serverQueue;
     private final ExecutorService executor;
     private final SimulationState simulationState;
     private final Set<TCPNetworkManager> networkManagers;
 
     public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationMonitor monitor,
-            ModelDefinition<S> modelName, SimulationState simulationState) {
+            ModelDefinition<S> modelDefinition, SimulationState simulationState) {
         super(random, monitor, consumer);// TODO: Gestire parametro Monitor
         List<NetworkInfo> slaveNetworkInfos = simulationState.getSlaveServersStates().stream()
                 .map(SlaveState::getSlaveInfo).collect(Collectors.toList());
         LOGGER.info(String.format("Creating a new NetworkSimulationManager to contact the servers: [%s]",
                 slaveNetworkInfos.toString()));
-        this.modelName = modelName;
+        this.modelDefinition = modelDefinition;
         this.simulationState = simulationState;
         executor = Executors.newCachedThreadPool();
         networkManagers = slaveNetworkInfos.stream().map(serverInfo -> {
@@ -104,10 +103,10 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         server.writeObject(ObjectSerializer.serializeObject(MasterCommand.INIT));
         LOGGER.info(String.format("[%s] command sent to the server - %s", MasterCommand.INIT,
                 server.getServerInfo().toString()));
-        LOGGER.info(String.format("Sassi", modelName.getClass().getName()));
-        server.writeObject(ObjectSerializer.serializeObject(modelName.getClass().getName()));
-        LOGGER.info(String.format("[%s] Model name has been sent to the server - ", modelName));
-        server.writeObject(ClassBytesLoader.loadClassBytes(modelName.getClass().getName()));
+        LOGGER.info(String.format("Sassi", modelDefinition.getClass().getName()));
+        server.writeObject(ObjectSerializer.serializeObject(modelDefinition.getClass().getName()));
+        LOGGER.info(String.format("[%s] Model name has been sent to the server - ", modelDefinition));
+        server.writeObject(ClassBytesLoader.loadClassBytes(modelDefinition.getClass().getName()));
         LOGGER.info("Class bytes have been sent to the server - ");
     }
 
@@ -280,7 +279,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     private void closeStreams() throws Exception {
         for (TCPNetworkManager server : this.networkManagers) {
             server.writeObject(ObjectSerializer.serializeObject(MasterCommand.CLOSE_CONNECTION));
-            server.writeObject(ObjectSerializer.serializeObject(this.modelName.getClass().getName()));
+            server.writeObject(ObjectSerializer.serializeObject(this.modelDefinition.getClass().getName()));
             server.closeConnection();
             LOGGER.info(String.format("The connection with the server has been closed - %s",
                     server.getServerInfo().toString()));
