@@ -64,7 +64,7 @@ public class SEIRModelDefinition implements PopulationModelDefinition, Serializa
 
     @Override
     public PopulationState state(double... parameters) {
-        return new PopulationState(new int[]{INIT_S, INIT_I, INIT_R});
+        return new PopulationState(new int[]{INIT_S, INIT_E, INIT_I, INIT_R});
     }
 
     @Override

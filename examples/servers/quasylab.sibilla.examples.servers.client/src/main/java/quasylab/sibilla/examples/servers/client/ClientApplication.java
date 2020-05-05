@@ -1,57 +1,29 @@
 package quasylab.sibilla.examples.servers.client;
 
 import org.apache.commons.math3.random.AbstractRandomGenerator;
-import quasylab.sibilla.core.models.pm.PopulationRule;
 import quasylab.sibilla.core.models.pm.PopulationState;
-import quasylab.sibilla.core.models.pm.ReactionRule;
 import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.client.ClientSimulationEnvironment;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.util.NetworkUtils;
 import quasylab.sibilla.core.server.util.SSLUtils;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
-import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
-import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 public class ClientApplication implements Serializable {
 
-    public final static int S = 0;
-    public final static int E = 1;
-    public final static int I = 2;
-    public final static int R = 3;
-    public final static int INIT_S = 99;
-    public final static int INIT_E = 0;
-    public final static int INIT_I = 1;
-    public final static int INIT_R = 0;
-    public final static double N = INIT_S + INIT_E + INIT_I + INIT_R;
-    public final static double LAMBDA_E = 1;
-    public final static double LAMBDA_I = 1 / 3.0;
-    public final static double LAMBDA_R = 1 / 7.0;
     public final static int SAMPLINGS = 100;
     public final static double DEADLINE = 600;
     /**
      *
      */
     private static final long serialVersionUID = 1L;
-    private static final int REPLICA = 10000;
+    private static final int REPLICA = 1000;
 
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
-    private static final String MODEL_NAME = ClientApplication.class.getName();
-    private static NetworkInfo MASTER_SERVER_INFO;
-
-    static {
-        try {
-            MASTER_SERVER_INFO = new NetworkInfo(InetAddress.getByName("192.168.1.202"), 10001,
-                    TCPNetworkManagerType.SECURE);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-    }
+    private static NetworkInfo MASTER_SERVER_INFO = new NetworkInfo(NetworkUtils.getLocalIp(), 10001,
+            TCPNetworkManagerType.SECURE);
 
     public static void main(String[] argv) throws Exception {
 
