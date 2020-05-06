@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 
 /**
  * An object responsible for managing simulations. When a new request is
- * received, it is delegated to a {@ling SimulationMangaer} that is built via
+ * received, it is delegated to a {@link SimulationManager} that is built via
  * {@link SimulationManagerFactory}.
  */
 public class SimulationEnvironment implements Serializable {

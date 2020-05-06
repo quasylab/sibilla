@@ -136,7 +136,7 @@ public abstract class QueuedSimulationManager<S extends State> extends AbstractS
         return tasks;
     }
 
-    protected boolean hasTasks() {
+    protected synchronized boolean hasTasks() {
         return !pendingTasks.isEmpty();
     }
 
