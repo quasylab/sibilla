@@ -101,7 +101,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
         this.remotePort = remoteDiscoveryPort;
         this.state = new MasterState(LOCAL_SIMULATION_INFO);
         this.localSimulationPort = localSimulationPort;
-        Arrays.stream(listeners).forEach(listener -> this.state.addPropertyChangeListener("Master Listener", listener));
+        Arrays.stream(listeners).forEach(listener -> this.state.addPropertyChangeListener("Master Listener Update", listener));
 
         this.discoveryNetworkManager = UDPNetworkManager.createNetworkManager(LOCAL_DISCOVERY_INFO, true);
 
@@ -229,8 +229,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
         TCPNetworkManager simulationNetworkManager = TCPNetworkManager
                 .createNetworkManager((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), socket);
         SimulationState simulationState = new SimulationState(this.state, LOCAL_SIMULATION_INFO,
-                simulationNetworkManager.getServerInfo(), this.state.getSlaveServersNetworkInfos());
-        simulationState.addPropertyChangeListener("Master Update", this);
+                simulationNetworkManager.getServerInfo(), this.state.getSlaveServersNetworkInfos(), this);
 
         AtomicBoolean clientIsActive = new AtomicBoolean(true);
         try {
@@ -291,15 +290,13 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
             SimulationDataSet<State> dataSet = (SimulationDataSet<State>) ObjectSerializer
                     .deserializeObject(client.readObject());
             simulationState.setSimulationDataSet(dataSet);
-            simulationState.setClient(client);
-            simulationState.setTotalSimulationTasks(dataSet.getReplica());
+            simulationState.setClientConnection(client);
             LOGGER.info(
                     String.format("Simulation datas received by the client - %s", client.getServerInfo().toString()));
             client.writeObject(ObjectSerializer.serializeObject(MasterCommand.DATA_RESPONSE));
             LOGGER.info(String.format("[%s] command sent to the client - %s", MasterCommand.DATA_RESPONSE,
                     client.getServerInfo().toString()));
             this.submitSimulations(dataSet, simulationState);
-            //client.writeObject(ObjectSerializer.serializeObject(this.submitSimulations(dataSet, simulationState)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -371,8 +368,10 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
             SimulationState state = (SimulationState) evt.getNewValue();
             if (state.isConcluded()) {
                 try {
-                    state.client().writeObject(ObjectSerializer.serializeObject(MasterCommand.RESULTS));
-                    state.client().writeObject(ObjectSerializer.serializeObject(state.simulationDataSet().getModelSamplingFunction()));
+                    state.clientConnection().writeObject(ObjectSerializer.serializeObject(MasterCommand.RESULTS));
+                    state.clientConnection().writeObject(ObjectSerializer.serializeObject(state.simulationDataSet().getModelSamplingFunction()));
+                    LOGGER.info(String.format("Results have been sent to the client - %s",
+                            state.clientConnection().getServerInfo().toString()));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

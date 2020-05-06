@@ -184,7 +184,7 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
     }
 
     private void updateListeners() {
-        updateSupport.firePropertyChange("Master Listener", null, this.clone());
+        updateSupport.firePropertyChange("Master Listener Update", null, this.clone());
     }
 
     /**

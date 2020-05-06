@@ -53,7 +53,7 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
 
     private NetworkInfo clientNetworkInfo;
 
-    private TCPNetworkManager client;
+    private TCPNetworkManager clientConnection;
 
     private Date lastUpdate;
 
@@ -67,7 +67,7 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
 
     private transient PropertyChangeSupport updateSupport;
 
-    public SimulationState(MasterState masterState, NetworkInfo masterNetworkInfo, NetworkInfo clientNetworkInfo, Set<NetworkInfo> slaveNetworkInfos) {
+    public SimulationState(MasterState masterState, NetworkInfo masterNetworkInfo, NetworkInfo clientNetworkInfo, Set<NetworkInfo> slaveNetworkInfos, MasterServerSimulationEnvironment masterServerSimulationEnvironment) {
         this.masterNetworkInfo = masterNetworkInfo;
         this.clientNetworkInfo = clientNetworkInfo;
         this.simulationStartDate = new Date();
@@ -79,8 +79,8 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
         this.slaveServers = new HashSet<>();
 
         this.updateSupport = new PropertyChangeSupport(this);
-        this.addPropertyChangeListener("Master Update", masterState);
-
+        this.addPropertyChangeListener("Master State Update", masterState);
+        this.addPropertyChangeListener("Master Environment Update", masterServerSimulationEnvironment);
         slaveNetworkInfos.forEach(info -> slaveServers.add(new SlaveState(this, info)));
         masterState.addSimulation(this);
 
@@ -89,7 +89,8 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
 
     private void updateListeners() {
         this.lastUpdate = new Date();
-        updateSupport.firePropertyChange("Master Update", null, this);
+        updateSupport.firePropertyChange("Master State Update", null, this);
+        updateSupport.firePropertyChange("Master Environment Update", null, this);
     }
 
     public String getSimulationModelName() {
@@ -179,11 +180,6 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
         return this.totalSimulationTasks;
     }
 
-    public synchronized void setTotalSimulationTasks(int totalSimulationTasks) {
-        this.totalSimulationTasks = totalSimulationTasks;
-        this.updateListeners();
-    }
-
     public boolean isConcluded() {
         return this.concluded;
     }
@@ -199,15 +195,17 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
 
     public void setSimulationDataSet(SimulationDataSet<?> simulationDataSet) {
         this.simulationDataSet = simulationDataSet;
+        this.totalSimulationTasks = simulationDataSet.getReplica();
+        this.updateListeners();
     }
 
 
-    public TCPNetworkManager client() {
-        return client;
+    public TCPNetworkManager clientConnection() {
+        return clientConnection;
     }
 
-    public void setClient(TCPNetworkManager client) {
-        this.client = client;
+    public void setClientConnection(TCPNetworkManager clientConnection) {
+        this.clientConnection = clientConnection;
     }
 
 
