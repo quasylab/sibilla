@@ -131,7 +131,7 @@ public class SlaveState implements Serializable, Cloneable {
      * @return timeout length of this server
      */
     public double getTimeout() {
-        return expectedTasks == 1 ? 1000000000 : expectedTasks * estimatedRTT + expectedTasks * 4 * devRTT;
+        return expectedTasks == 1 ? 5000000000L : expectedTasks * estimatedRTT + expectedTasks * 4 * devRTT;
     }
 
     /**
