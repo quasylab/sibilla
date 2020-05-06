@@ -72,6 +72,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     private final int remotePort;
     private final ExecutorService connectionExecutor = Executors.newCachedThreadPool();
 
+    private final int discoveryTime = 5000;
     /**
      * Creates and starts up a master server with the given parameters.
      *
@@ -126,7 +127,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     private void broadcastToInterfaces() {
         try {
             while (true) {
-                state.updateServersKeepAlive();
+                state.resetKeepAlive();
 
                 NetworkInterface.networkInterfaces().filter(networkInterface -> {
                     try {
@@ -138,9 +139,11 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
                 }).forEach(networkInterface -> networkInterface.getInterfaceAddresses().stream()
                         .map(InterfaceAddress::getBroadcast).filter(Objects::nonNull)
                         .forEach(this::broadcastToSingleInterface));
+                Thread.sleep(discoveryTime);
+                state.cleanKeepAlive();
                 LOGGER.info(String.format("Current set of servers: %s", state.getSlaveServers()));
 
-                Thread.sleep(20000);
+
             }
         } catch (Exception e) {
             e.printStackTrace();

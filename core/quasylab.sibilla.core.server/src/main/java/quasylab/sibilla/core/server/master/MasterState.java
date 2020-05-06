@@ -43,12 +43,6 @@ import java.util.stream.Collectors;
 public class MasterState implements Serializable, Comparable<MasterState>, PropertyChangeListener, Cloneable {
 
     /**
-     * The default integer value associated with a slave server that is up and running.
-     * Any value below the default reports that the associated server has been unreachable for an amount of time
-     */
-    final static Integer SLAVE_SERVER_UP_AND_RUNNING_DEFAULT = 3;
-
-    /**
      * The date the master server started its execution.
      */
     private Date masterServerStartDate;
@@ -57,13 +51,8 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
      * The number of client submitted simulations that have been executed since the startup of the master server.
      */
     private volatile int executedSimulations;
-    /**
-     * The slave servers currently monitored by the master server.
-     * Every slave server's state is associated with an integer value that is used to signal if the slave server is still up and running.
-     * If the integer value associated to a slave server is not equal to the default value reports that the slave server has been unreachable for an amount of time.
-     * If the integer value associated to a slave server is equal to the default value reports that server is still up and running.
-     */
-    private Map<NetworkInfo, Integer> slaveServers;
+
+    private Map<NetworkInfo, Boolean> slaveServers;
     /**
      * The network related informations about this master server.
      */
@@ -88,31 +77,27 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
         this.simulationStates = new HashSet<>();
     }
 
-    public void addSimulation(SimulationState simulationState) {
+    public synchronized void addSimulation(SimulationState simulationState) {
         this.simulationStates.add(simulationState);
     }
 
-    public Map<NetworkInfo, Integer> getSlaveServers() {
+    public synchronized  Map<NetworkInfo, Boolean> getSlaveServers() {
         return slaveServers;
     }
 
-    public void setSlaveServers(Map<NetworkInfo, Integer> slaveServers) {
-        this.slaveServers = slaveServers;
-    }
-
-    public Set<SimulationState> getSimulationStates() {
+    public synchronized Set<SimulationState> getSimulationStates() {
         return simulationStates;
     }
 
-    public void setSimulationStates(Set<SimulationState> simulationStates) {
+    public synchronized void setSimulationStates(Set<SimulationState> simulationStates) {
         this.simulationStates = simulationStates;
     }
 
-    public boolean removeSimulation(SimulationState simulationState) {
+    public synchronized boolean removeSimulation(SimulationState simulationState) {
         return this.simulationStates.remove(simulationState);
     }
 
-    public Set<NetworkInfo> getSlaveServersNetworkInfos() {
+    public synchronized Set<NetworkInfo> getSlaveServersNetworkInfos() {
         return new HashSet<NetworkInfo>(this.slaveServers.keySet());
     }
 
@@ -133,7 +118,7 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
 
     //Aggiunta dal discovery
     public synchronized boolean addSlaveServer(NetworkInfo slaveNetworkInfo) {
-        if (this.slaveServers.put(slaveNetworkInfo, SLAVE_SERVER_UP_AND_RUNNING_DEFAULT) == null) {
+        if (this.slaveServers.put(slaveNetworkInfo, true) == null) {
             this.updateListeners();
             return true;
         } else {
@@ -160,11 +145,18 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
      * Update the integer value associated with every slave server that signals if that server is still up and running.
      * A slave server is removed if its associated integer value is equal to zero.
      */
-    public synchronized void updateServersKeepAlive() {
+    public synchronized void resetKeepAlive() {
+        this.slaveServers.keySet().stream().forEach(slaveState -> {
+            this.slaveServers.put(slaveState, false);
+        });
+
+    }
+
+    public synchronized void cleanKeepAlive() {
         List<NetworkInfo> toRemove = new ArrayList<>();
         this.slaveServers.keySet().stream().forEach(slaveState -> {
-            this.slaveServers.put(slaveState, this.slaveServers.get(slaveState) - 1);
-            if (this.slaveServers.get(slaveState) == 0) {
+
+            if (!this.slaveServers.get(slaveState)) {
                 toRemove.add(slaveState);
             }
         });
@@ -226,7 +218,7 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
         }
         clone.simulationStates = this.simulationStates.stream().map(simulationState -> simulationState.clone()).collect(Collectors.toSet());
         clone.masterServerStartDate = (Date) this.masterServerStartDate.clone();
-        final Map<NetworkInfo, Integer> tempMapCopy = new HashMap<>();
+        final Map<NetworkInfo, Boolean> tempMapCopy = new HashMap<>();
         this.slaveServers.entrySet().stream().forEach(entry -> tempMapCopy.put(entry.getKey().clone(), entry.getValue()));
         clone.slaveServers.putAll(tempMapCopy);
         clone.masterNetworkInfo = this.masterNetworkInfo.clone();
