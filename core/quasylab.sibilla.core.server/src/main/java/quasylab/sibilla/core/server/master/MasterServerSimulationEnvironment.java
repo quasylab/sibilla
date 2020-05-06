@@ -40,13 +40,13 @@ import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.*;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,7 +56,7 @@ import java.util.logging.Logger;
  * Manages connection with clients and slave servers to execute and manage the
  * simulations' tasks and their results over network connections.
  */
-public class MasterServerSimulationEnvironment {
+public class MasterServerSimulationEnvironment implements PropertyChangeListener{
 
     private static final Logger LOGGER = Logger.getLogger(MasterServerSimulationEnvironment.class.getName());
 
@@ -104,8 +104,6 @@ public class MasterServerSimulationEnvironment {
         Arrays.stream(listeners).forEach(listener -> this.state.addPropertyChangeListener("Master Listener", listener));
 
         this.discoveryNetworkManager = UDPNetworkManager.createNetworkManager(LOCAL_DISCOVERY_INFO, true);
-
-        // this.simulationServers = new HashSet<>();
 
         LOGGER.info(String.format(
                 "Starting a new Master server"
@@ -232,6 +230,7 @@ public class MasterServerSimulationEnvironment {
                 .createNetworkManager((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), socket);
         SimulationState simulationState = new SimulationState(this.state, LOCAL_SIMULATION_INFO,
                 simulationNetworkManager.getServerInfo(), this.state.getSlaveServersNetworkInfos());
+        simulationState.addPropertyChangeListener("Master Update", this);
 
         AtomicBoolean clientIsActive = new AtomicBoolean(true);
         try {
@@ -291,14 +290,16 @@ public class MasterServerSimulationEnvironment {
         try {
             SimulationDataSet<State> dataSet = (SimulationDataSet<State>) ObjectSerializer
                     .deserializeObject(client.readObject());
+            simulationState.setSimulationDataSet(dataSet);
+            simulationState.setClient(client);
             simulationState.setTotalSimulationTasks(dataSet.getReplica());
             LOGGER.info(
                     String.format("Simulation datas received by the client - %s", client.getServerInfo().toString()));
             client.writeObject(ObjectSerializer.serializeObject(MasterCommand.DATA_RESPONSE));
             LOGGER.info(String.format("[%s] command sent to the client - %s", MasterCommand.DATA_RESPONSE,
                     client.getServerInfo().toString()));
-            client.writeObject(ObjectSerializer.serializeObject(MasterCommand.RESULTS));
-            client.writeObject(ObjectSerializer.serializeObject(this.submitSimulations(dataSet, simulationState)));
+            this.submitSimulations(dataSet, simulationState);
+            //client.writeObject(ObjectSerializer.serializeObject(this.submitSimulations(dataSet, simulationState)));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -361,6 +362,21 @@ public class MasterServerSimulationEnvironment {
                     client.getServerInfo().toString()));
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt.getNewValue() instanceof SimulationState){
+            SimulationState state = (SimulationState) evt.getNewValue();
+            if (state.isConcluded()) {
+                try {
+                    state.client().writeObject(ObjectSerializer.serializeObject(MasterCommand.RESULTS));
+                    state.client().writeObject(ObjectSerializer.serializeObject(state.simulationDataSet().getModelSamplingFunction()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

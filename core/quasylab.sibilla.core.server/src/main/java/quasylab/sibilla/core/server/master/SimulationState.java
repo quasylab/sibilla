@@ -26,6 +26,8 @@
 package quasylab.sibilla.core.server.master;
 
 import quasylab.sibilla.core.server.NetworkInfo;
+import quasylab.sibilla.core.server.SimulationDataSet;
+import quasylab.sibilla.core.server.network.TCPNetworkManager;
 import quasylab.sibilla.core.server.slave.SlaveState;
 
 import java.beans.PropertyChangeEvent;
@@ -51,6 +53,8 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
 
     private NetworkInfo clientNetworkInfo;
 
+    private TCPNetworkManager client;
+
     private Date lastUpdate;
 
     private int pendingTasks;
@@ -58,6 +62,8 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
     private int totalSimulationTasks;
 
     private boolean concluded;
+
+    private SimulationDataSet<?> simulationDataSet;
 
     private transient PropertyChangeSupport updateSupport;
 
@@ -186,6 +192,24 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
         this.concluded = concluded;
         this.updateListeners();
     }
+
+    public SimulationDataSet<?> simulationDataSet() {
+        return simulationDataSet;
+    }
+
+    public void setSimulationDataSet(SimulationDataSet<?> simulationDataSet) {
+        this.simulationDataSet = simulationDataSet;
+    }
+
+
+    public TCPNetworkManager client() {
+        return client;
+    }
+
+    public void setClient(TCPNetworkManager client) {
+        this.client = client;
+    }
+
 
     @Override
     public SimulationState clone() {
