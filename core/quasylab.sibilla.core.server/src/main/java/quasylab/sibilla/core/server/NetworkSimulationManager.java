@@ -104,7 +104,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         LOGGER.info(String.format("[%s] command sent to the server - %s", MasterCommand.INIT,
                 server.getServerInfo().toString()));
         server.writeObject(ObjectSerializer.serializeObject(modelDefinition.getClass().getName()));
-        LOGGER.info(String.format("[%s] Model name has been sent to the server - ", modelDefinition));
+        LOGGER.info(String.format("[%s] Model name has been sent to the server - ", modelDefinition.getClass().getName()));
         server.writeObject(ClassBytesLoader.loadClassBytes(modelDefinition.getClass().getName()));
         LOGGER.info("Class bytes have been sent to the server - ");
     }
@@ -184,6 +184,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             TCPNetworkManager server) {
         LOGGER.info(String.format("Managing results by the server - %s", server.getServerInfo().toString()));
         if (error != null) {
+            error.printStackTrace();
             LOGGER.severe(String.format("Timeout occurred for server - %s", server.getServerInfo().toString()));
             TCPNetworkManager newServer;
             if ((newServer = manageTimeout(server)) != null) {
