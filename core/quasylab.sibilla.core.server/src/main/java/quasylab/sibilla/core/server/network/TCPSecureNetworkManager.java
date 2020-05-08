@@ -79,7 +79,7 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
     }
 
     @Override
-    public byte[] readObject() throws Exception {
+    public byte[] readObject() throws IOException {
         int length = dataInputStream.readInt();
         byte[] message = null;
         if (length > 0) {
@@ -90,7 +90,7 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
     }
 
     @Override
-    public void writeObject(byte[] toWrite) throws Exception {
+    public void writeObject(byte[] toWrite) throws IOException {
         dataOutputStream.writeInt(toWrite.length);
         dataOutputStream.write(toWrite);
         dataOutputStream.flush();
@@ -102,14 +102,10 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
     }
 
     @Override
-    public void closeConnection() {
-        try {
-            this.socket.close();
-            this.dataInputStream.close();
-            this.dataOutputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void closeConnection() throws IOException {
+        this.socket.close();
+        this.dataInputStream.close();
+        this.dataOutputStream.close();
     }
 
     @Override

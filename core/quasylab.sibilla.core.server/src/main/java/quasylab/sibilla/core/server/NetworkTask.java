@@ -25,8 +25,8 @@
 
 package quasylab.sibilla.core.server;
 
-import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.simulator.SimulationTask;
 
 import java.io.Serializable;
 import java.util.List;

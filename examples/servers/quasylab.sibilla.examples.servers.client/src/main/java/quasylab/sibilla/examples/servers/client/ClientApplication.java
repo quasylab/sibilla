@@ -10,6 +10,7 @@ import quasylab.sibilla.core.server.util.SSLUtils;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 
 import java.io.Serializable;
+import java.net.SocketException;
 
 public class ClientApplication implements Serializable {
 
@@ -19,11 +20,19 @@ public class ClientApplication implements Serializable {
      *
      */
     private static final long serialVersionUID = 1L;
-    private static final int REPLICA = 10;
+    private static final int REPLICA = 100;
 
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
-    private static NetworkInfo MASTER_SERVER_INFO = new NetworkInfo(NetworkUtils.getLocalIp(), 10001,
-            TCPNetworkManagerType.SECURE);
+    private static NetworkInfo MASTER_SERVER_INFO;
+
+    static {
+        try {
+            MASTER_SERVER_INFO = new NetworkInfo(NetworkUtils.getLocalAddress(), 10001,
+                    TCPNetworkManagerType.SECURE);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void main(String[] argv) throws Exception {
 

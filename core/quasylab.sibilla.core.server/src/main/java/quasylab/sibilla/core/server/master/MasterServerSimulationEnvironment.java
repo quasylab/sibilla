@@ -25,6 +25,7 @@
 
 package quasylab.sibilla.core.server.master;
 
+import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.NetworkSimulationManager;
 import quasylab.sibilla.core.server.SimulationDataSet;
@@ -37,16 +38,17 @@ import quasylab.sibilla.core.server.serialization.CustomClassLoader;
 import quasylab.sibilla.core.server.serialization.ObjectSerializer;
 import quasylab.sibilla.core.server.util.NetworkUtils;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -56,23 +58,24 @@ import java.util.logging.Logger;
  * Manages connection with clients and slave servers to execute and manage the
  * simulations' tasks and their results over network connections.
  */
-public class MasterServerSimulationEnvironment implements PropertyChangeListener{
+public class MasterServerSimulationEnvironment implements PropertyChangeListener {
 
     private static final Logger LOGGER = Logger.getLogger(MasterServerSimulationEnvironment.class.getName());
 
-    private final NetworkInfo LOCAL_DISCOVERY_INFO;
-    private final NetworkInfo LOCAL_SIMULATION_INFO;
+    private NetworkInfo LOCAL_DISCOVERY_INFO;
+    private NetworkInfo LOCAL_SIMULATION_INFO;
 
-    private final UDPNetworkManager discoveryNetworkManager;
+    private UDPNetworkManager discoveryNetworkManager;
     private final ExecutorService discoveryConnectionExecutor = Executors.newCachedThreadPool();
 
-    private final int localSimulationPort;
-    private final MasterState state;
+    private int localSimulationPort;
+    private MasterState state;
 
-    private final int remotePort;
+    private int remotePort;
     private final ExecutorService connectionExecutor = Executors.newCachedThreadPool();
 
     private final int discoveryTime = 5000;
+
     /**
      * Creates and starts up a master server with the given parameters.
      *
@@ -91,33 +94,36 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
      * @param listeners                PropertyChangeListener objects that will be
      *                                 updated about the state of this master
      *                                 server.
-     * @throws IOException
      */
     public MasterServerSimulationEnvironment(int localDiscoveryPort, int remoteDiscoveryPort,
-            UDPNetworkManagerType discoveryNetworkManager, int localSimulationPort,
-            TCPNetworkManagerType simulationNetworkManager, PropertyChangeListener... listeners) throws IOException {
-        LOCAL_DISCOVERY_INFO = new NetworkInfo(NetworkUtils.getLocalIp(), localDiscoveryPort, discoveryNetworkManager);
-        LOCAL_SIMULATION_INFO = new NetworkInfo(NetworkUtils.getLocalIp(), localSimulationPort,
-                simulationNetworkManager);
-        this.remotePort = remoteDiscoveryPort;
-        this.state = new MasterState(LOCAL_SIMULATION_INFO);
-        this.localSimulationPort = localSimulationPort;
-        Arrays.stream(listeners).forEach(listener -> this.state.addPropertyChangeListener("Master Listener Update", listener));
+                                             UDPNetworkManagerType discoveryNetworkManager, int localSimulationPort,
+                                             TCPNetworkManagerType simulationNetworkManager, PropertyChangeListener... listeners) {
+        try {
+            LOCAL_DISCOVERY_INFO = new NetworkInfo(NetworkUtils.getLocalAddress(), localDiscoveryPort, discoveryNetworkManager);
+            LOCAL_SIMULATION_INFO = new NetworkInfo(NetworkUtils.getLocalAddress(), localSimulationPort,
+                    simulationNetworkManager);
+            this.remotePort = remoteDiscoveryPort;
+            this.state = new MasterState(LOCAL_SIMULATION_INFO);
+            this.localSimulationPort = localSimulationPort;
+            Arrays.stream(listeners).forEach(listener -> this.state.addPropertyChangeListener("Master Listener Update", listener));
 
-        this.discoveryNetworkManager = UDPNetworkManager.createNetworkManager(LOCAL_DISCOVERY_INFO, true);
+            this.discoveryNetworkManager = UDPNetworkManager.createNetworkManager(LOCAL_DISCOVERY_INFO, true);
 
-        LOGGER.info(String.format(
-                "Starting a new Master server"
-                        + "\n- Local discovery port: [%d] - Discovery communication type: [%s - %s]"
-                        + "\n- Local simulation handling port: [%d] - Simulation handling communication type[%s - %s]",
-                LOCAL_DISCOVERY_INFO.getPort(), LOCAL_DISCOVERY_INFO.getType().getClass(),
-                LOCAL_DISCOVERY_INFO.getType(), LOCAL_SIMULATION_INFO.getPort(),
-                LOCAL_SIMULATION_INFO.getType().getClass(), LOCAL_SIMULATION_INFO.getType()));
+            LOGGER.info(String.format(
+                    "Starting a new Master server"
+                            + "\n- Local discovery port: [%d] - Discovery communication type: [%s - %s]"
+                            + "\n- Local simulation handling port: [%d] - Simulation handling communication type[%s - %s]",
+                    LOCAL_DISCOVERY_INFO.getPort(), LOCAL_DISCOVERY_INFO.getType().getClass(),
+                    LOCAL_DISCOVERY_INFO.getType(), LOCAL_SIMULATION_INFO.getPort(),
+                    LOCAL_SIMULATION_INFO.getType().getClass(), LOCAL_SIMULATION_INFO.getType()));
 
-        ExecutorService activitiesExecutors = Executors.newCachedThreadPool();
-        activitiesExecutors.execute(this::startDiscoveryServer);
-        activitiesExecutors.execute(this::startSimulationServer);
-        activitiesExecutors.execute(this::broadcastToInterfaces);
+            ExecutorService activitiesExecutors = Executors.newCachedThreadPool();
+            activitiesExecutors.execute(this::startDiscoveryServer);
+            activitiesExecutors.execute(this::startSimulationServer);
+            activitiesExecutors.execute(this::broadcastToInterfaces);
+        } catch (SocketException e) {
+            LOGGER.severe(String.format("Network interfaces exception - %s", e.getMessage()));
+        }
 
     }
 
@@ -128,25 +134,15 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
         try {
             while (true) {
                 state.resetKeepAlive();
-
-                NetworkInterface.networkInterfaces().filter(networkInterface -> {
-                    try {
-                        return !networkInterface.isLoopback() && networkInterface.isUp();
-                    } catch (SocketException e) {
-                        e.printStackTrace();
-                    }
-                    return false;
-                }).forEach(networkInterface -> networkInterface.getInterfaceAddresses().stream()
-                        .map(InterfaceAddress::getBroadcast).filter(Objects::nonNull)
-                        .forEach(this::broadcastToSingleInterface));
+                NetworkUtils.getBroadcastAddresses().stream().forEach(this::broadcastToSingleInterface);
                 Thread.sleep(discoveryTime);
                 state.cleanKeepAlive();
                 LOGGER.info(String.format("Current set of servers: %s", state.getSlaveServers()));
-
-
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (InterruptedException e) {
+            LOGGER.severe(String.format("Interrupted exception - %s", e.getMessage()));
+        } catch (SocketException e) {
+            LOGGER.severe(String.format("Network interfaces exception - %s", e.getMessage()));
         }
     }
 
@@ -159,8 +155,8 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
             discoveryNetworkManager.writeObject(ObjectSerializer.serializeObject(LOCAL_DISCOVERY_INFO), address,
                     remotePort);
             LOGGER.info(String.format("Sent the discovery broadcast packet to the port: [%d]", remotePort));
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the broadcast  - %s", e.getMessage()));
         }
     }
 
@@ -169,30 +165,23 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
      * informations
      */
     private void startDiscoveryServer() {
-        while (true) {
-            try {
+        try {
+            while (true) {
                 NetworkInfo slaveSimulationServer = (NetworkInfo) ObjectSerializer
                         .deserializeObject(discoveryNetworkManager.readObject());
                 discoveryConnectionExecutor.execute(() -> {
-                    try {
-                        manageServers(slaveSimulationServer);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    manageServers(slaveSimulationServer);
                 });
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the discovery server startup  - %s", e.getMessage()));
         }
     }
 
     private void manageServers(NetworkInfo info) {
-
         if (state.addSlaveServer(info)) {
             LOGGER.info(String.format("Added simulation server - %s", info.toString()));
         }
-        // LOGGER.warning("This server was already present: " + singleInfo.toString());
-
     }
 
     /**
@@ -200,7 +189,6 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
      */
     private void startSimulationServer() {
         try {
-
             ServerSocket serverSocket = TCPNetworkManager
                     .createServerSocket((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), localSimulationPort);
             LOGGER.info(String.format("The server is now listening for clients on port: [%d]",
@@ -208,15 +196,11 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
             while (true) {
                 Socket socket = serverSocket.accept();
                 connectionExecutor.execute(() -> {
-                    try {
-                        manageClientMessage(socket);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    manageClientMessage(socket);
                 });
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.severe(String.format("Network communication failure during the server socket startup - %s", e.getMessage()));
         }
     }
 
@@ -225,17 +209,16 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
      * sent
      *
      * @param socket Socket on which the message arrived
-     * @throws IOException TODO exception handling
      */
-    private void manageClientMessage(Socket socket) throws IOException {
-
-        TCPNetworkManager simulationNetworkManager = TCPNetworkManager
-                .createNetworkManager((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), socket);
-        SimulationState simulationState = new SimulationState(this.state, LOCAL_SIMULATION_INFO,
-                simulationNetworkManager.getServerInfo(), this.state.getSlaveServersNetworkInfos(), this);
-
-        AtomicBoolean clientIsActive = new AtomicBoolean(true);
+    private void manageClientMessage(Socket socket) {
         try {
+            TCPNetworkManager simulationNetworkManager = TCPNetworkManager
+                    .createNetworkManager((TCPNetworkManagerType) LOCAL_SIMULATION_INFO.getType(), socket);
+            SimulationState simulationState = new SimulationState(this.state, LOCAL_SIMULATION_INFO,
+                    simulationNetworkManager.getServerInfo(), this.state.getSlaveServersNetworkInfos(), this);
+
+            AtomicBoolean clientIsActive = new AtomicBoolean(true);
+
             Map<ClientCommand, Runnable> map = Map.of(ClientCommand.PING,
                     () -> this.respondPingRequest(simulationNetworkManager), ClientCommand.INIT,
                     () -> this.loadModelClass(simulationNetworkManager, simulationState), ClientCommand.DATA,
@@ -250,11 +233,9 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
                 map.getOrDefault(command, () -> {
                 }).run();
             }
-        } catch (Exception e) {
-            LOGGER.severe(e.getMessage());
-            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during client communication - %s", e.getMessage()));
         }
-
     }
 
     /**
@@ -264,7 +245,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
      * @param clientActive whether the client is active or not
      */
     private void closeConnectionWithClient(TCPNetworkManager client, AtomicBoolean clientActive,
-            SimulationState simulationState) {
+                                           SimulationState simulationState) {
         try {
             String modelName = (String) ObjectSerializer.deserializeObject(client.readObject());
             LOGGER.info(String.format("[%s] Model name read to be deleted by client - %s", modelName,
@@ -274,10 +255,8 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
             LOGGER.info(String.format("[%s] Model deleted off the class loader", modelName));
             LOGGER.info(String.format("Client closed the connection"));
             client.closeConnection();
-            // this.state.removeSimulation(simulationState);
-        } catch (Exception e) {
-            LOGGER.severe(e.getMessage());
-            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the connection closure - %s", e.getMessage()));
         }
     }
 
@@ -300,8 +279,8 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
             LOGGER.info(String.format("[%s] command sent to the client - %s", MasterCommand.DATA_RESPONSE,
                     client.getServerInfo().toString()));
             this.submitSimulations(dataSet, simulationState);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the simulation dataset reception - %s", e.getMessage()));
         }
     }
 
@@ -311,17 +290,17 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
      * @param dataSet containing all the simulation oriented datas
      */
     private SamplingFunction submitSimulations(SimulationDataSet dataSet, SimulationState simulationState) {
-        SimulationEnvironment sim = new SimulationEnvironment(
-                NetworkSimulationManager.getNetworkSimulationManagerFactory(simulationState));
         try {
+            SimulationEnvironment sim = new SimulationEnvironment(
+                    NetworkSimulationManager.getNetworkSimulationManagerFactory(simulationState));
             sim.simulate(dataSet.getRandomGenerator(), dataSet.getModel(), dataSet.getModelInitialState(),
                     dataSet.getModelSamplingFunction(), dataSet.getReplica(), dataSet.getDeadline());
             this.state.increaseExecutedSimulations();
             return dataSet.getModelSamplingFunction();
         } catch (InterruptedException e) {
-            e.printStackTrace();
-            return null;
+            LOGGER.severe(String.format("Simulation has been interrupted before its completion - %s", e.getMessage()));
         }
+        return null;
     }
 
     /**
@@ -344,8 +323,10 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
             client.writeObject(ObjectSerializer.serializeObject(MasterCommand.INIT_RESPONSE));
             LOGGER.info(String.format("[%s] command sent to the client - %s", MasterCommand.INIT_RESPONSE,
                     client.getServerInfo().toString()));
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            LOGGER.severe(String.format("The simulation model was not loaded with success - %s", e.getMessage()));
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the simulation model loading - %s", e.getMessage()));
         }
     }
 
@@ -360,14 +341,14 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
             client.writeObject(ObjectSerializer.serializeObject(MasterCommand.PONG));
             LOGGER.info(String.format("[%s] command sent to the client - %s", MasterCommand.PONG,
                     client.getServerInfo().toString()));
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the ping response - %s", e.getMessage()));
         }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getNewValue() instanceof SimulationState){
+        if (evt.getNewValue() instanceof SimulationState) {
             SimulationState state = (SimulationState) evt.getNewValue();
             if (state.isConcluded()) {
                 try {

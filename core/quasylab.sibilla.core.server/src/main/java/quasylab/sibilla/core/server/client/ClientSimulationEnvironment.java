@@ -28,15 +28,16 @@ package quasylab.sibilla.core.server.client;
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
+import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.SimulationDataSet;
 import quasylab.sibilla.core.server.master.MasterCommand;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
 import quasylab.sibilla.core.server.serialization.ClassBytesLoader;
 import quasylab.sibilla.core.server.serialization.ObjectSerializer;
-import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
+import java.io.IOException;
 import java.util.logging.Logger;
 
 /**
@@ -49,8 +50,8 @@ public class ClientSimulationEnvironment<S extends State> {
 
     private static final Logger LOGGER = Logger.getLogger(ClientSimulationEnvironment.class.getName());
 
-    private final SimulationDataSet<S> data;
-    private final TCPNetworkManager masterServerNetworkManager;
+    private SimulationDataSet<S> data;
+    private TCPNetworkManager masterServerNetworkManager;
 
     /**
      * Creates a new client that sends simulation commands with the parameters of
@@ -67,36 +68,42 @@ public class ClientSimulationEnvironment<S extends State> {
      * @param deadline          Time interval between two samplings
      * @param masterNetworkInfo ServerInfo of the
      *                          quasylab.sibilla.core.server.master server
-     * @throws Exception TODO Exception handling
      */
     public ClientSimulationEnvironment(RandomGenerator random, ModelDefinition<S> modelDefinition, Model<S> model,
                                        S initialState, SamplingFunction<S> sampling_function, int replica, double deadline,
-                                       NetworkInfo masterNetworkInfo) throws Exception {
+                                       NetworkInfo masterNetworkInfo) {
         this.data = new SimulationDataSet<>(random, modelDefinition, model, initialState, sampling_function, replica,
                 deadline);
-        this.masterServerNetworkManager = TCPNetworkManager.createNetworkManager(masterNetworkInfo);
+        try {
+            this.masterServerNetworkManager = TCPNetworkManager.createNetworkManager(masterNetworkInfo);
+            LOGGER.info(String.format("Starting a new client that will submit the simulation to the server - %s",
+                    masterNetworkInfo.toString()));
 
-        LOGGER.info(String.format("Starting a new client that will submit the simulation to the server - %s",
-                masterNetworkInfo.toString()));
+            this.initConnection(masterServerNetworkManager);
+            this.sendSimulationInfo(masterServerNetworkManager);
+            this.closeConnection(masterServerNetworkManager);
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network Manager initialization error - %s", e.getMessage()));
+        }
 
-        this.initConnection(masterServerNetworkManager);
-        this.sendSimulationInfo(masterServerNetworkManager);
-        this.closeConnection(masterServerNetworkManager);
     }
 
     /**
      * Closes the connection with the given master server
      *
      * @param server server the connection has to be closed with
-     * @throws Exception TODO ???
      */
-    private void closeConnection(TCPNetworkManager server) throws Exception {
-        server.writeObject(ObjectSerializer.serializeObject(ClientCommand.CLOSE_CONNECTION));
-        LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.CLOSE_CONNECTION,
-                server.getServerInfo().toString()));
-        server.writeObject(ObjectSerializer.serializeObject(this.data.getModelDefinition().getClass().getName()));
-        this.masterServerNetworkManager.closeConnection();
-        LOGGER.info(String.format("Closed the connection with the master - %s", server.getServerInfo()));
+    private void closeConnection(TCPNetworkManager server) {
+        try {
+            server.writeObject(ObjectSerializer.serializeObject(ClientCommand.CLOSE_CONNECTION));
+            LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.CLOSE_CONNECTION,
+                    server.getServerInfo().toString()));
+            server.writeObject(ObjectSerializer.serializeObject(this.data.getModelDefinition().getClass().getName()));
+            this.masterServerNetworkManager.closeConnection();
+            LOGGER.info(String.format("Closed the connection with the master - %s", server.getServerInfo()));
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the connection closure - %s", e.getMessage()));
+        }
     }
 
     /**
@@ -104,29 +111,32 @@ public class ClientSimulationEnvironment<S extends State> {
      *
      * @param server NetworkManager to the quasylab.sibilla.core.server.master
      *               server
-     * @throws Exception TODO Exception handling
      */
-    private void initConnection(TCPNetworkManager server) throws Exception {
-        LOGGER.info(String.format("Loading [%s] class bytes to be transmitted over network", data.getModelDefinition().getClass().getName()));
-        byte[] classBytes = ClassBytesLoader.loadClassBytes(data.getModelDefinition().getClass().getName());
-
-        server.writeObject(ObjectSerializer.serializeObject(ClientCommand.INIT));
-        LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.INIT,
-                server.getServerInfo().toString()));
-        server.writeObject(ObjectSerializer.serializeObject(data.getModelDefinition().getClass().getName()));
-        LOGGER.info(String.format("[%s] Model name has been sent to the server - %s", data.getModelDefinition().getClass().getName(),
-                server.getServerInfo().toString()));
-        server.writeObject(classBytes);
-        LOGGER.info(String.format("Class bytes have been sent to the server - %s", server.getServerInfo().toString()));
+    private void initConnection(TCPNetworkManager server) {
         try {
+            LOGGER.info(String.format("Loading [%s] class bytes to be transmitted over network", data.getModelDefinition().getClass().getName()));
+            byte[] classBytes = ClassBytesLoader.loadClassBytes(data.getModelDefinition().getClass().getName());
+
+            server.writeObject(ObjectSerializer.serializeObject(ClientCommand.INIT));
+            LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.INIT,
+                    server.getServerInfo().toString()));
+            server.writeObject(ObjectSerializer.serializeObject(data.getModelDefinition().getClass().getName()));
+            LOGGER.info(String.format("[%s] Model name has been sent to the server - %s", data.getModelDefinition().getClass().getName(),
+                    server.getServerInfo().toString()));
+            server.writeObject(classBytes);
+            LOGGER.info(String.format("Class bytes have been sent to the server - %s", server.getServerInfo().toString()));
+
             MasterCommand answer = (MasterCommand) ObjectSerializer.deserializeObject(server.readObject());
             if (answer.equals(MasterCommand.INIT_RESPONSE)) {
                 LOGGER.info(String.format("Answer received: [%s]", answer));
             } else {
-                LOGGER.severe("The answer received wasn't expected. There was an error MasterServer's side");
+                throw new ClassCastException();
             }
+
         } catch (ClassCastException e) {
-            LOGGER.severe("The answer received wasn't expected. There was an error MasterServer's side");
+            LOGGER.severe(String.format("Master communication failure during the connection initialization - %s", e.getMessage()));
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the connection initialization  - %s", e.getMessage()));
         }
     }
 
@@ -134,26 +144,22 @@ public class ClientSimulationEnvironment<S extends State> {
      * Sends the info of the simulation to execute to the master server
      *
      * @param targetServer NetworkManager to the master server
-     * @throws Exception TODO exception handling
      */
-    private void sendSimulationInfo(TCPNetworkManager targetServer) throws Exception {
-        targetServer.writeObject(ObjectSerializer.serializeObject(ClientCommand.DATA));
-        LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.DATA,
-                targetServer.getServerInfo().toString()));
-        targetServer.writeObject(ObjectSerializer.serializeObject(data));
-        LOGGER.info(String.format("Simulation datas have been sent to the server - %s",
-                targetServer.getServerInfo().toString()));
+    private void sendSimulationInfo(TCPNetworkManager targetServer) {
         try {
+            targetServer.writeObject(ObjectSerializer.serializeObject(ClientCommand.DATA));
+            LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.DATA,
+                    targetServer.getServerInfo().toString()));
+            targetServer.writeObject(ObjectSerializer.serializeObject(data));
+            LOGGER.info(String.format("Simulation datas have been sent to the server - %s",
+                    targetServer.getServerInfo().toString()));
+
             MasterCommand answer = (MasterCommand) ObjectSerializer.deserializeObject(targetServer.readObject());
             if (answer.equals(MasterCommand.DATA_RESPONSE)) {
                 LOGGER.info(String.format("Answer received: [%s]", answer));
             } else {
-                LOGGER.severe("The answer received wasn't expected. There was an error MasterServer's side");
+                throw new ClassCastException();
             }
-        } catch (ClassCastException e) {
-            LOGGER.severe("The answer received wasn't expected. There was an error MasterServer's side");
-        }
-        try {
             MasterCommand command = (MasterCommand) ObjectSerializer.deserializeObject(targetServer.readObject());
             LOGGER.info(String.format("[%s] command read by the master - %s", command,
                     targetServer.getServerInfo().toString()));
@@ -162,10 +168,12 @@ public class ClientSimulationEnvironment<S extends State> {
                         .deserializeObject(targetServer.readObject());
                 LOGGER.severe("The simulation results have been received correctly");
             } else {
-                LOGGER.severe("The simulation results haven't been received");
+                throw new ClassCastException();
             }
         } catch (ClassCastException e) {
-            LOGGER.severe("The simulation results haven't been received");
+            LOGGER.severe(String.format("Master communication failure during the simulation sending - %s", e.getMessage()));
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the simulation sending - %s", e.getMessage()));
         }
     }
 
@@ -173,14 +181,14 @@ public class ClientSimulationEnvironment<S extends State> {
      * Sends a ping command to the given master server
      *
      * @param targetServer server to send the ping command to
-     * @throws Exception TODO ???
      */
-    private void sendPing(TCPNetworkManager targetServer) throws Exception {
-        targetServer.writeObject(ObjectSerializer.serializeObject(ClientCommand.PING));
-        LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.PING,
-                targetServer.getServerInfo().toString()));
-        LOGGER.info("Ping has been sent to the server");
+    private void sendPing(TCPNetworkManager targetServer) {
         try {
+            targetServer.writeObject(ObjectSerializer.serializeObject(ClientCommand.PING));
+            LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.PING,
+                    targetServer.getServerInfo().toString()));
+            LOGGER.info("Ping has been sent to the server");
+
             MasterCommand answer = (MasterCommand) ObjectSerializer.deserializeObject(targetServer.readObject());
             if (answer.equals(MasterCommand.PONG)) {
                 LOGGER.info(String.format("Answer received: [%s]", answer));
@@ -188,7 +196,9 @@ public class ClientSimulationEnvironment<S extends State> {
                 LOGGER.severe("The answer received wasn't expected. There was an error MasterServer's side");
             }
         } catch (ClassCastException e) {
-            LOGGER.severe("The answer received wasn't expected. There was an error MasterServer's side");
+            LOGGER.severe(String.format("Master communication failure during the ping - %s", e.getMessage()));
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the ping - %s", e.getMessage()));
         }
 
     }

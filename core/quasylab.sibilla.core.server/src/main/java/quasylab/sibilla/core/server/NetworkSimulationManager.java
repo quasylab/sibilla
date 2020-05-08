@@ -37,6 +37,7 @@ import quasylab.sibilla.core.server.slave.SlaveCommand;
 import quasylab.sibilla.core.server.slave.SlaveState;
 import quasylab.sibilla.core.simulator.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -54,7 +55,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     private final Set<TCPNetworkManager> networkManagers;
 
     public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationMonitor monitor,
-            ModelDefinition<S> modelDefinition, SimulationState simulationState) {
+                                    ModelDefinition<S> modelDefinition, SimulationState simulationState) {
         super(random, monitor, consumer);// TODO: Gestire parametro Monitor
         List<NetworkInfo> slaveNetworkInfos = simulationState.getSlaveServersStates().stream()
                 .map(SlaveState::getSlaveInfo).collect(Collectors.toList());
@@ -72,9 +73,8 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
                 LOGGER.info(String.format("All the model informations have been sent to the server: %s",
                         server.getServerInfo().toString()));
                 return server;
-            } catch (Exception e) {
-                LOGGER.severe("Error during server initialization, removing server...");
-                e.printStackTrace();
+            } catch (IOException e) {
+                LOGGER.severe(String.format("Error during server initialization, removing server - %s", e.getMessage()));
             }
             return null;
         }).collect(Collectors.toSet());
@@ -86,7 +86,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         return new SimulationManagerFactory() {
             @Override
             public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
-                    SimulationMonitor monitor, ModelDefinition<S> modelDefinition, Consumer<Trajectory<S>> consumer) {
+                                                                               SimulationMonitor monitor, ModelDefinition<S> modelDefinition, Consumer<Trajectory<S>> consumer) {
                 return new NetworkSimulationManager<>(random, consumer, monitor, modelDefinition, simulationState);
             }
         };
@@ -97,16 +97,19 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      * Initializes a connection to the target server sending the model class
      *
      * @param server NetworkManager throught the model is passed
-     * @throws Exception TODO ???
      */
-    private void initConnection(TCPNetworkManager server) throws Exception {
-        server.writeObject(ObjectSerializer.serializeObject(MasterCommand.INIT));
-        LOGGER.info(String.format("[%s] command sent to the server - %s", MasterCommand.INIT,
-                server.getServerInfo().toString()));
-        server.writeObject(ObjectSerializer.serializeObject(modelDefinition.getClass().getName()));
-        LOGGER.info(String.format("[%s] Model name has been sent to the server - ", modelDefinition.getClass().getName()));
-        server.writeObject(ClassBytesLoader.loadClassBytes(modelDefinition.getClass().getName()));
-        LOGGER.info("Class bytes have been sent to the server - ");
+    private void initConnection(TCPNetworkManager server) {
+        try {
+            server.writeObject(ObjectSerializer.serializeObject(MasterCommand.INIT));
+            LOGGER.info(String.format("[%s] command sent to the server - %s", MasterCommand.INIT,
+                    server.getServerInfo().toString()));
+            server.writeObject(ObjectSerializer.serializeObject(modelDefinition.getClass().getName()));
+            LOGGER.info(String.format("[%s] Model name has been sent to the server - ", modelDefinition.getClass().getName()));
+            server.writeObject(ClassBytesLoader.loadClassBytes(modelDefinition.getClass().getName()));
+            LOGGER.info("Class bytes have been sent to the server - ");
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the connection initialization  - %s", e.getMessage()));
+        }
     }
 
     @Override
@@ -115,41 +118,39 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     }
 
     private void handleTasks() {
-        try {
-            while ((isRunning() || hasTasks() || this.simulationState.getRunningSlaveServers() > 0)
-                    && !this.simulationState.getSlaveServersStates().isEmpty()) {
-                singleTaskExecution();
-            }
-            this.simulationState.setConcluded(true);
-        } catch (InterruptedException e) {
-            LOGGER.severe(e.getMessage());
+        while ((isRunning() || hasTasks() || this.simulationState.getRunningSlaveServers() > 0)
+                && !this.simulationState.getSlaveServersStates().isEmpty()) {
+            singleTaskExecution();
         }
+        this.simulationState.setConcluded(true);
     }
 
     /**
      * Sends to the next server in the queue the task to execute and waits for the
      * results
-     *
-     * @throws InterruptedException TODO ???
      */
-    private void singleTaskExecution() throws InterruptedException {
-        TCPNetworkManager server = findServer();
-        LOGGER.info(String.format("Server currently connected to: %s", server.getServerInfo().toString()));
-        SlaveState serverState = this.simulationState.getSlaveStateByServerInfo(server.getServerInfo());
-        LOGGER.info(String.format("State of the server: [%s]", serverState.toString()));
-        int acceptableTasks = serverState.getExpectedTasks();
-        if (!serverState.canCompleteTask(acceptableTasks)) {
-            acceptableTasks = acceptableTasks == 1 ? 1 : acceptableTasks / 2;
-            LOGGER.severe(String.format("Server's tasks window has been reduced in half - %s",
-                    server.getServerInfo().toString()));
-        }
-        List<SimulationTask<S>> toRun = getTask(acceptableTasks, true);
-        this.simulationState.setPendingTasks(this.pendingTasks());
-        if (toRun.size() > 0) {
-            simulationState.increaseRunningServers();
-            NetworkTask<S> networkTask = new NetworkTask<>(toRun);
-            CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
-                    .whenComplete((value, error) -> manageResult(value, error, toRun, server));
+    private void singleTaskExecution() {
+        try {
+            TCPNetworkManager server = findServer();
+            LOGGER.info(String.format("Server currently connected to: %s", server.getServerInfo().toString()));
+            SlaveState serverState = this.simulationState.getSlaveStateByServerInfo(server.getServerInfo());
+            LOGGER.info(String.format("State of the server: [%s]", serverState.toString()));
+            int acceptableTasks = serverState.getExpectedTasks();
+            if (!serverState.canCompleteTask(acceptableTasks)) {
+                acceptableTasks = acceptableTasks == 1 ? 1 : acceptableTasks / 2;
+                LOGGER.severe(String.format("Server's tasks window has been reduced in half - %s",
+                        server.getServerInfo().toString()));
+            }
+            List<SimulationTask<S>> toRun = getTask(acceptableTasks, true);
+            this.simulationState.setPendingTasks(this.pendingTasks());
+            if (toRun.size() > 0) {
+                simulationState.increaseRunningServers();
+                NetworkTask<S> networkTask = new NetworkTask<>(toRun);
+                CompletableFuture.supplyAsync(() -> send(networkTask, server), executor)
+                        .whenComplete((value, error) -> manageResult(value, error, toRun, server));
+            }
+        } catch (InterruptedException e) {
+            LOGGER.severe(String.format("Interrupted exception - %s", e.getMessage()));
         }
     }
 
@@ -157,7 +158,6 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      * Takes the first server from the queue
      *
      * @return First server available in the queue
-     * @throws InterruptedException TODO ???
      */
     private TCPNetworkManager findServer() throws InterruptedException {
         return serverQueue.take();
@@ -181,7 +181,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      * @param server server which has been used for the simulation
      */
     private void manageResult(ComputationResult<S> value, Throwable error, List<SimulationTask<S>> tasks,
-            TCPNetworkManager server) {
+                              TCPNetworkManager server) {
         LOGGER.info(String.format("Managing results by the server - %s", server.getServerInfo().toString()));
         if (error != null) {
             error.printStackTrace();
@@ -229,11 +229,11 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             initConnection(pingServer); // initialize connection sending model data
             pingServer.writeObject(ObjectSerializer.serializeObject(MasterCommand.PING));
             LOGGER.info(String.format("Ping request sent to server - %s", pingServer.getServerInfo().toString())); // send
-                                                                                                                   // ping
-                                                                                                                   // request
+            // ping
+            // request
             SlaveCommand response = (SlaveCommand) ObjectSerializer.deserializeObject(pingServer.readObject()); // wait
-                                                                                                                // for
-                                                                                                                // response
+            // for
+            // response
             if (!response.equals(SlaveCommand.PONG)) {
                 LOGGER.severe(String.format("The response received wasn't the one expected by the server - %s",
                         pingServer.getServerInfo().toString()));
@@ -266,23 +266,24 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
                 && !this.simulationState.getSlaveServersStates().isEmpty()) {
             wait();
         }
-        try {
-            closeStreams();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        closeStreams();
+
     }
 
     /**
      * Closes all the connection streams
      */
-    private void closeStreams() throws Exception {
-        for (TCPNetworkManager server : this.networkManagers) {
-            server.writeObject(ObjectSerializer.serializeObject(MasterCommand.CLOSE_CONNECTION));
-            server.writeObject(ObjectSerializer.serializeObject(this.modelDefinition.getClass().getName()));
-            server.closeConnection();
-            LOGGER.info(String.format("The connection with the server has been closed - %s",
-                    server.getServerInfo().toString()));
+    private void closeStreams() {
+        try {
+            for (TCPNetworkManager server : this.networkManagers) {
+                server.writeObject(ObjectSerializer.serializeObject(MasterCommand.CLOSE_CONNECTION));
+                server.writeObject(ObjectSerializer.serializeObject(this.modelDefinition.getClass().getName()));
+                server.closeConnection();
+                LOGGER.info(String.format("The connection with the server has been closed - %s",
+                        server.getServerInfo().toString()));
+            }
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the connection closure - %s", e.getMessage()));
         }
     }
 

@@ -42,13 +42,22 @@ public class TCPFSTNetworkManager implements TCPNetworkManager {
     }
 
     @Override
-    public byte[] readObject() throws Exception {
-        return (byte[]) FSTSocket.readObject();
+    public byte[] readObject() throws IOException {
+        try {
+            return (byte[]) FSTSocket.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
-    public void writeObject(byte[] toWrite) throws Exception {
-        FSTSocket.writeObject(toWrite);
+    public void writeObject(byte[] toWrite) throws IOException {
+        try {
+            FSTSocket.writeObject(toWrite);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         FSTSocket.flush();
     }
 
@@ -58,14 +67,9 @@ public class TCPFSTNetworkManager implements TCPNetworkManager {
     }
 
     @Override
-    public void closeConnection() {
-        try {
+    public void closeConnection() throws IOException {
             this.socket.close();
             this.FSTSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     @Override

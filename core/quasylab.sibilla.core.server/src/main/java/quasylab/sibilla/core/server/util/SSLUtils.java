@@ -26,6 +26,7 @@
 package quasylab.sibilla.core.server.util;
 
 import javax.net.ssl.*;
+import java.io.IOException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 
@@ -76,7 +77,7 @@ public class SSLUtils {
         this.trustStoreType = trustStoreType;
     }
 
-    public SSLContext createSSLContext() {
+    public SSLContext createSSLContext() throws IOException {
         try {
             if (this.keyStorePath == null || this.keyStorePass == null || this.keyStoreType == null) {
                 throw new Exception("Missing KeyStore infos");
@@ -105,10 +106,8 @@ public class SSLUtils {
             sslContext.init(km, tm, new SecureRandom());
 
             return sslContext;
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            throw new IOException(String.format("SSL context exception %s", e.getClass()));
         }
-
-        return null;
     }
 }

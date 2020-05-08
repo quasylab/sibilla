@@ -25,8 +25,8 @@
 
 package quasylab.sibilla.core.server;
 
-import quasylab.sibilla.core.simulator.Trajectory;
 import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.simulator.Trajectory;
 
 import java.io.Serializable;
 import java.util.LinkedList;

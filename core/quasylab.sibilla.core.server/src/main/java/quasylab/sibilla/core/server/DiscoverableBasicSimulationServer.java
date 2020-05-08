@@ -29,6 +29,7 @@ import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
 import quasylab.sibilla.core.server.network.UDPDefaultNetworkManager;
 import quasylab.sibilla.core.server.serialization.ObjectSerializer;
 
+import java.io.IOException;
 import java.net.DatagramSocket;
 import java.util.HashSet;
 import java.util.Set;
@@ -77,13 +78,15 @@ public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
      *
      * @param manager    UDPNetworkManager that handles the sending of messages
      * @param masterInfo ServerInfo of the master server
-     * @throws Exception TODO Exception handling
      */
-    private void manageDiscoveryMessage(UDPDefaultNetworkManager manager, NetworkInfo masterInfo) throws Exception {
-        this.knownMasters.add(masterInfo);
-        manager.writeObject(ObjectSerializer.serializeObject(this.localServerInfo), masterInfo.getAddress(), masterInfo.getPort());
-        LOGGER.info(String.format("Sent the discovery response to the master server - %s", masterInfo.toString()));
-        LOGGER.info(String.format("Currently known masters - %s", knownMasters.toString()));
+    private void manageDiscoveryMessage(UDPDefaultNetworkManager manager, NetworkInfo masterInfo) {
+        try {
+            this.knownMasters.add(masterInfo);
+            manager.writeObject(ObjectSerializer.serializeObject(this.localServerInfo), masterInfo.getAddress(), masterInfo.getPort());
+            LOGGER.info(String.format("Sent the discovery response to the master server - %s", masterInfo.toString()));
+            LOGGER.info(String.format("Currently known masters - %s", knownMasters.toString()));
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the discovery message management - %s", e.getMessage()));
+        }
     }
-
 }

@@ -25,6 +25,7 @@
 
 package quasylab.sibilla.core.server.network;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -38,14 +39,14 @@ public class UDPDefaultNetworkManager implements UDPNetworkManager {
     }
 
     @Override
-    public byte[] readObject() throws Exception {
+    public byte[] readObject() throws IOException {
         DatagramPacket p = new DatagramPacket(new byte[1500], 1500);
         socket.receive(p);
         return p.getData();
     }
 
     @Override
-    public void writeObject(byte[] toWrite, InetAddress address, int port) throws Exception {
+    public void writeObject(byte[] toWrite, InetAddress address, int port) throws IOException {
         DatagramPacket p = new DatagramPacket(toWrite, toWrite.length, address, port);
         socket.send(p);
     }

@@ -31,11 +31,11 @@ import java.io.Serializable;
 
 public class ObjectSerializer {
 
-	public static byte[] serializeObject(Serializable toSerialize) {
-		return SerializationUtils.serialize(toSerialize);
-	}
-	
-	public static Serializable deserializeObject(byte[] toDeserialize) {
-		return SerializationUtils.deserialize(toDeserialize);
-	}
+    public static byte[] serializeObject(Serializable toSerialize) {
+        return SerializationUtils.serialize(toSerialize);
+    }
+
+    public static Serializable deserializeObject(byte[] toDeserialize) {
+        return SerializationUtils.deserialize(toDeserialize);
+    }
 }

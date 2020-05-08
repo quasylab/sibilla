@@ -48,8 +48,6 @@ public interface TCPNetworkManager {
 
     static TCPNetworkManager createNetworkManager(TCPNetworkManagerType networkType, Socket socket) throws IOException {
         switch (networkType) {
-            case FST:
-                return new TCPFSTNetworkManager(socket);
             case SECURE:
                 return new TCPSecureNetworkManager(socket);
             case DEFAULT:
@@ -73,9 +71,9 @@ public interface TCPNetworkManager {
         }
     }
 
-    byte[] readObject() throws Exception;
+    byte[] readObject() throws IOException;
 
-    void writeObject(byte[] toWrite) throws Exception;
+    void writeObject(byte[] toWrite) throws IOException;
 
     Socket getSocket();
 
@@ -83,7 +81,7 @@ public interface TCPNetworkManager {
         return new NetworkInfo(getSocket().getInetAddress(), getSocket().getPort(), getType());
     }
 
-    void closeConnection();
+    void closeConnection() throws IOException;
 
     TCPNetworkManagerType getType();
 }

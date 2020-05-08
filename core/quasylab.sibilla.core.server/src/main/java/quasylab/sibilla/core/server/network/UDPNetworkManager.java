@@ -31,10 +31,11 @@ import quasylab.sibilla.core.server.NetworkInfo;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 
 public interface UDPNetworkManager {
 
-    static UDPNetworkManager createNetworkManager(NetworkInfo info, boolean toBroadcast) throws IOException {
+    static UDPNetworkManager createNetworkManager(NetworkInfo info, boolean toBroadcast) throws SocketException {
         DatagramSocket socket = new DatagramSocket(info.getPort(), info.getAddress());
         socket.setBroadcast(toBroadcast);
         if (info.getType() == UDPNetworkManagerType.DEFAULT) {
@@ -43,8 +44,8 @@ public interface UDPNetworkManager {
         return null;
     }
 
-    byte[] readObject() throws Exception;
+    byte[] readObject() throws IOException;
 
-    void writeObject(byte[] toWrite, InetAddress address, int port) throws Exception;
+    void writeObject(byte[] toWrite, InetAddress address, int port) throws IOException;
 
 }

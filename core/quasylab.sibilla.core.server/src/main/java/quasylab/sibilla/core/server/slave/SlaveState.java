@@ -26,7 +26,6 @@
 package quasylab.sibilla.core.server.slave;
 
 import quasylab.sibilla.core.server.NetworkInfo;
-import quasylab.sibilla.core.server.master.MasterState;
 import quasylab.sibilla.core.server.master.SimulationState;
 
 import java.beans.PropertyChangeListener;

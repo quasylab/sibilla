@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 
 /**
  * Contains the state of a master server.
- * TODO: update with multiple clients
  */
 
 public class MasterState implements Serializable, Comparable<MasterState>, PropertyChangeListener, Cloneable {
@@ -81,7 +80,7 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
         this.simulationStates.add(simulationState);
     }
 
-    public synchronized  Map<NetworkInfo, Boolean> getSlaveServers() {
+    public synchronized Map<NetworkInfo, Boolean> getSlaveServers() {
         return slaveServers;
     }
 
