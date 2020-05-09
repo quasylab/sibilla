@@ -2,23 +2,24 @@
  * Sibilla:  a Java framework designed to support analysis of Collective
  * Adaptive Systems.
  *
- *  Copyright (C) 2020.
+ * Copyright (C) 2020.
  *
- *  See the NOTICE file distributed with this work for additional information
- *  regarding copyright ownership.
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *            http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- *  or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  *
  */
@@ -41,10 +42,10 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 /**
- * Sends request to a quasylab.sibilla.core.server.master server for the
- * execution of simulations
+ * Manages the connection with a master server to submit simulations and retrieve related results.
  *
- * @param <S> The class of the state of the model
+ * @param <S> The {@link quasylab.sibilla.core.past.State} of the simulation model.
+ * @author Stelluti Francesco Pio, Zamponi Marco
  */
 public class ClientSimulationEnvironment<S extends State> {
 
@@ -54,20 +55,19 @@ public class ClientSimulationEnvironment<S extends State> {
     private TCPNetworkManager masterServerNetworkManager;
 
     /**
-     * Creates a new client that sends simulation commands with the parameters of
-     * the simulation to execute and the ServerInfo of the master server that will
-     * manage such simulation
+     * Initiates a new client that submits simulations using the parameters of
+     * the simulation to execute and the network related data of the
+     * master server that will manage such simulation.
      *
-     * @param random            RandomGenerator of the simulation
-     * @param modelDefinition   The class that defines the model
-     * @param model             The model that will be simulated
-     * @param initialState      The initial state of the model
-     * @param sampling_function The sampling function that will be used to collect
-     *                          data
-     * @param replica           Repetitions of the simulation
-     * @param deadline          Time interval between two samplings
-     * @param masterNetworkInfo ServerInfo of the
-     *                          quasylab.sibilla.core.server.master server
+     * @param random            {@link org.apache.commons.math3.random.RandomGenerator} of the simulation.
+     * @param modelDefinition   {@link quasylab.sibilla.core.models.ModelDefinition} that defines the simulation model to be sent.
+     * @param model             The {@link quasylab.sibilla.core.models.Model} of the simulation.
+     * @param initialState      The initial {@link quasylab.sibilla.core.past.State} of the model.
+     * @param sampling_function The {@link quasylab.sibilla.core.simulator.sampling.SamplingFunction} that will be used to collect
+     *                          data.
+     * @param replica           Repetitions of the simulation.
+     * @param deadline          Time interval between two samplings.
+     * @param masterNetworkInfo {@link quasylab.sibilla.core.server.NetworkInfo} of the master to be reached.
      */
     public ClientSimulationEnvironment(RandomGenerator random, ModelDefinition<S> modelDefinition, Model<S> model,
                                        S initialState, SamplingFunction<S> sampling_function, int replica, double deadline,
