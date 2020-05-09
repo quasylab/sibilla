@@ -26,6 +26,8 @@
 
 /**
  * Serialization package of the server package
+ *
+ * @author Stelluti Francesco Pio, Zamponi Marco
  */
 
 package quasylab.sibilla.core.server.serialization;

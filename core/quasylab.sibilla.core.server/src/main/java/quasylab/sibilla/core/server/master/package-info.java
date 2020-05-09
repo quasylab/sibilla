@@ -25,7 +25,9 @@
  */
 
 /**
- * Master server package of the server package
+ * Contains the classes that manage the behavior of a master that submits simulations received from a client to the registered slave servers.
+ *
+ * @author Stelluti Francesco Pio, Zamponi Marco
  */
 
 package quasylab.sibilla.core.server.master;

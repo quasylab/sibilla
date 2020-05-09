@@ -27,7 +27,7 @@
 package quasylab.sibilla.core.server.client;
 
 /**
- * All the possible command that can be sent from a client
+ * All the possible command that can be sent from a client.
  *
  * @author Stelluti Francesco Pio, Zamponi Marco
  */

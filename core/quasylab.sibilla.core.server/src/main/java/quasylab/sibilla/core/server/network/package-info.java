@@ -24,8 +24,10 @@
  *
  */
 
-/**
- * Network communication package of the server package
- */
 
+/**
+ * Contains the classes that manage the communication between hosts in the network.
+ *
+ * @author Stelluti Francesco Pio, Zamponi Marco
+ */
 package quasylab.sibilla.core.server.network;

@@ -27,7 +27,9 @@
 package quasylab.sibilla.core.server.master;
 
 /**
- * All the possible command and signals that can be sent from a Master server.
+ * All the possible command and signals that can be sent from a master server.
+ *
+ * @author Stelluti Francesco Pio, Zamponi Marco
  */
 public enum MasterCommand {
     /**
