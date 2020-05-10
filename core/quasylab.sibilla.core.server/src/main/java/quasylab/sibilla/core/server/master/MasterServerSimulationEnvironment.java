@@ -58,23 +58,60 @@ import java.util.logging.Logger;
 /**
  * Manages connection with clients and slave servers to execute and manage the
  * simulations' tasks and their results over network connections.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
  */
 public class MasterServerSimulationEnvironment implements PropertyChangeListener {
 
+    /**
+     * Class logger.
+     */
     private static final Logger LOGGER = Logger.getLogger(MasterServerSimulationEnvironment.class.getName());
 
+    /**
+     * Discovery's network communication related infos.
+     */
     private NetworkInfo LOCAL_DISCOVERY_INFO;
+
+    /**
+     * Simulation's network communication related infos.
+     */
     private NetworkInfo LOCAL_SIMULATION_INFO;
 
+    /**
+     * Manages the network communication with the slave servers to be discovered.
+     */
     private UDPNetworkManager discoveryNetworkManager;
-    private final ExecutorService discoveryConnectionExecutor = Executors.newCachedThreadPool();
 
+    /**
+     * Slave servers' discovery related thread executor.
+     */
+    private final ExecutorService slaveDiscoveryConnectionExecutor = Executors.newCachedThreadPool();
+
+    /**
+     * Used by the master server to manage the incoming clients' simulation requests.
+     */
     private int localSimulationPort;
+
+    /**
+     * State of the master server.
+     */
     private MasterState state;
 
-    private int remotePort;
-    private final ExecutorService connectionExecutor = Executors.newCachedThreadPool();
+    /**
+     * Used by the slave servers to manage the incoming master server discovery message.
+     */
+    private int remoteDiscoveryPort;
 
+    /**
+     * Clients' communications related thread executor.
+     */
+    private final ExecutorService clientConnectionExecutor = Executors.newCachedThreadPool();
+
+    /**
+     * Milliseconds between two broadcast slave server discovery messages.
+     */
     private final int discoveryTime = 5000;
 
     /**
@@ -85,17 +122,18 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
      *                                 requests.
      * @param remoteDiscoveryPort      port used by the slave servers to manage the
      *                                 incoming master server discovery message.
-     * @param discoveryNetworkManager  type of UDP network communication that will
+     * @param discoveryNetworkManager  {@link quasylab.sibilla.core.server.network.UDPNetworkManagerType} of UDP network communication that will
      *                                 be used during the slave servers' discovery
      *                                 by the master.
      * @param localSimulationPort      port used by the master server to manage the
      *                                 incoming clients' simulation requests.
-     * @param simulationNetworkManager type of TCP network communication that will
+     * @param simulationNetworkManager {@link quasylab.sibilla.core.server.network.TCPNetworkManagerType} of TCP network communication that will
      *                                 be used between master server and clients.
-     * @param listeners                PropertyChangeListener objects that will be
+     * @param listeners                {@link java.beans.PropertyChangeListener} instances that will be
      *                                 updated about the state of this master
      *                                 server.
      */
+
     public MasterServerSimulationEnvironment(int localDiscoveryPort, int remoteDiscoveryPort,
                                              UDPNetworkManagerType discoveryNetworkManager, int localSimulationPort,
                                              TCPNetworkManagerType simulationNetworkManager, PropertyChangeListener... listeners) {
@@ -103,7 +141,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
             LOCAL_DISCOVERY_INFO = new NetworkInfo(NetworkUtils.getLocalAddress(), localDiscoveryPort, discoveryNetworkManager);
             LOCAL_SIMULATION_INFO = new NetworkInfo(NetworkUtils.getLocalAddress(), localSimulationPort,
                     simulationNetworkManager);
-            this.remotePort = remoteDiscoveryPort;
+            this.remoteDiscoveryPort = remoteDiscoveryPort;
             this.state = new MasterState(LOCAL_SIMULATION_INFO);
             this.localSimulationPort = localSimulationPort;
             Arrays.stream(listeners).forEach(listener -> this.state.addPropertyChangeListener("Master Listener Update", listener));
@@ -129,7 +167,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     }
 
     /**
-     * Broadcast the discovery message to all master's network interfaces
+     * Broadcasts the slave server discovery message through every master's network interface.
      */
     private void broadcastToInterfaces() {
         try {
@@ -148,37 +186,44 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     }
 
     /**
-     * Sends a broadcast message to a specified network interface, associated with
-     * the ip passed as an argument
+     * Sends a broadcast message through a specified network interface.
+     *
+     * @param address of broadcast related to a specific interface.
      */
     private void broadcastToSingleInterface(InetAddress address) {
         try {
             discoveryNetworkManager.writeObject(ObjectSerializer.serializeObject(LOCAL_DISCOVERY_INFO), address,
-                    remotePort);
-            LOGGER.info(String.format("Sent the discovery broadcast packet to the port: [%d]", remotePort));
+                    remoteDiscoveryPort);
+            LOGGER.info(String.format("Sent the discovery broadcast packet to the port: [%d]", remoteDiscoveryPort));
         } catch (IOException e) {
             LOGGER.severe(String.format("Network communication failure during the broadcast  - %s", e.getMessage()));
         }
     }
 
     /**
-     * Starts the server that receives messages from slave servers about their
-     * informations
+     * Starts the server that manages incoming discovery response messages from slave servers.
      */
     private void startDiscoveryServer() {
         try {
             while (true) {
                 NetworkInfo slaveSimulationServer = (NetworkInfo) ObjectSerializer
                         .deserializeObject(discoveryNetworkManager.readObject());
-                discoveryConnectionExecutor.execute(() -> {
+                slaveDiscoveryConnectionExecutor.execute(() -> {
                     manageServers(slaveSimulationServer);
                 });
             }
+        } catch (ClassCastException e) {
+            LOGGER.severe(String.format("Message cast failure during the discovery server startup - %s", e.getMessage()));
         } catch (IOException e) {
             LOGGER.severe(String.format("Network communication failure during the discovery server startup  - %s", e.getMessage()));
         }
     }
 
+    /**
+     * Adds the network related informations received by a discovered slave server.
+     *
+     * @param info {@link quasylab.sibilla.core.server.NetworkInfo} received by a discovered slave server that will be used to submit it simulations.
+     */
     private void manageServers(NetworkInfo info) {
         if (state.addSlaveServer(info)) {
             LOGGER.info(String.format("Added simulation server - %s", info.toString()));
@@ -186,7 +231,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     }
 
     /**
-     * Starts the server that listens for simulations to execute
+     * Starts the server that listens for clients that want to submit simulations.
      */
     private void startSimulationServer() {
         try {
@@ -196,7 +241,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
                     LOCAL_SIMULATION_INFO.getPort()));
             while (true) {
                 Socket socket = serverSocket.accept();
-                connectionExecutor.execute(() -> {
+                clientConnectionExecutor.execute(() -> {
                     manageClientMessage(socket);
                 });
             }
@@ -206,10 +251,9 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     }
 
     /**
-     * Handles a message sent by a client and executes the simulation that has been
-     * sent
+     * Handles a message received by a client.
      *
-     * @param socket Socket on which the message arrived
+     * @param socket {@link java.net.Socket} through which the message arrived.
      */
     private void manageClientMessage(Socket socket) {
         try {
@@ -234,39 +278,43 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
                 map.getOrDefault(command, () -> {
                 }).run();
             }
+        } catch (ClassCastException e) {
+            LOGGER.severe(String.format("Message cast failure during client communication - %s", e.getMessage()));
         } catch (IOException e) {
             LOGGER.severe(String.format("Network communication failure during client communication - %s", e.getMessage()));
         }
     }
 
     /**
-     * Closes the connection with the given client
+     * Closes a client related network communication, removes the received simulation model from the master memory and signals that the client is no longer communicating with the master server.
      *
-     * @param client       client which the connection has to be closed
-     * @param clientActive whether the client is active or not
+     * @param client          client related {@link quasylab.sibilla.core.server.network.TCPNetworkManager} which connection has to be closed.
+     * @param clientActive    whether the client is active or not.
+     * @param simulationState the state of the simulation related to the client's connection that needs to be closed.
      */
     private void closeConnectionWithClient(TCPNetworkManager client, AtomicBoolean clientActive,
                                            SimulationState simulationState) {
         try {
             String modelName = (String) ObjectSerializer.deserializeObject(client.readObject());
-            LOGGER.info(String.format("[%s] Model name read to be deleted by client - %s", modelName,
+            LOGGER.info(String.format("[%s] Model name to be deleted read by client - %s", modelName,
                     client.getServerInfo().toString()));
             clientActive.set(false);
             CustomClassLoader.classes.remove(modelName);
             LOGGER.info(String.format("[%s] Model deleted off the class loader", modelName));
             LOGGER.info(String.format("Client closed the connection"));
             client.closeConnection();
+        } catch (ClassCastException e) {
+            LOGGER.severe(String.format("Message cast failure during connection closure - %s", e.getMessage()));
         } catch (IOException e) {
             LOGGER.severe(String.format("Network communication failure during the connection closure - %s", e.getMessage()));
         }
     }
 
     /**
-     * The server receives the simulation datas' from the client and submits a new
-     * set of simulations
+     * Handles the simulation datas' from the client and submits the slave servers a new set of simulations.
      *
-     * @param client the TCPNetworkManager that represents the connection with the
-     *               client
+     * @param client          client related {@link quasylab.sibilla.core.server.network.TCPNetworkManager}.
+     * @param simulationState the state of the simulation related to the datas that need to be managed.
      */
     private void handleSimulationDataSet(TCPNetworkManager client, SimulationState simulationState) {
         try {
@@ -286,9 +334,9 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     }
 
     /**
-     * The server submits a new set of simulations
+     * Submits the slave servers a new set of simulations.
      *
-     * @param dataSet containing all the simulation oriented datas
+     * @param dataSet containing all the simulation oriented datas.
      */
     private SamplingFunction submitSimulations(SimulationDataSet dataSet, SimulationState simulationState) {
         try {
@@ -305,11 +353,10 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     }
 
     /**
-     * The server receives the class containing the model upon which the simulations
-     * are built
+     * Manages the reception of the simulation model from the client.
      *
-     * @param client the TCPNetworkManager that represents the connection with the
-     *               client
+     * @param client          client related {@link quasylab.sibilla.core.server.network.TCPNetworkManager}.
+     * @param simulationState the state of the simulation related to the simulation model that need to be managed.
      */
     private void loadModelClass(TCPNetworkManager client, SimulationState simulationState) {
         try {
@@ -324,6 +371,8 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
             client.writeObject(ObjectSerializer.serializeObject(MasterCommand.INIT_RESPONSE));
             LOGGER.info(String.format("[%s] command sent to the client - %s", MasterCommand.INIT_RESPONSE,
                     client.getServerInfo().toString()));
+        } catch (ClassCastException e) {
+            LOGGER.severe(String.format("Message cast failure during the simulation model loading - %s", e.getMessage()));
         } catch (ClassNotFoundException e) {
             LOGGER.severe(String.format("The simulation model was not loaded with success - %s", e.getMessage()));
         } catch (IOException e) {
@@ -332,10 +381,9 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     }
 
     /**
-     * The server responds to a ping request received by the client
+     * Manages a ping request from the client.
      *
-     * @param client the TCPNetworkManager that represents the connection with the
-     *               client
+     * @param client client related {@link quasylab.sibilla.core.server.network.TCPNetworkManager}.
      */
     private void respondPingRequest(TCPNetworkManager client) {
         try {

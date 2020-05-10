@@ -25,7 +25,7 @@
  */
 
 /**
- * Contains the classes that manage the behavior of a master that submits simulations received from a client to the registered slave servers.
+ * Contains the classes that manage the behavior of a master that submits clients' simulations received to registered slave servers.
  *
  * @author Stelluti Francesco Pio, Zamponi Marco
  */

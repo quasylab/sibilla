@@ -123,7 +123,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
                 && !this.simulationState.getSlaveServersStates().isEmpty()) {
             singleTaskExecution();
         }
-        this.simulationState.setConcluded(true);
+        this.simulationState.setConcluded();
     }
 
     /**
@@ -254,7 +254,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             LOGGER.severe(String.format(
                     "The response has been received after the time limit. The server will be removed - %s",
                     pingServer.getServerInfo().toString()));
-            oldState.removed(); // mark server as removed and update GUI
+            oldState.setRemoved(); // mark server as removed and update GUI
             this.networkManagers.remove(server);
             return null;
         }

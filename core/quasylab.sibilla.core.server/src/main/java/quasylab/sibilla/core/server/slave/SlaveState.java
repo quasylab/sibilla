@@ -209,7 +209,7 @@ public class SlaveState implements Serializable, Cloneable {
     /**
      * Sets this server as removed and updates his listeners
      */
-    public void removed() {
+    public void setRemoved() {
         isRemoved = true;
         this.updateListeners();
     }

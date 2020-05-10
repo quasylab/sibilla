@@ -27,7 +27,8 @@
 /**
  * Contains the classes that manage the behavior of a client that submits simulations to a master server.
  *
- * @author Stelluti Francesco Pio, Zamponi Marco
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
  */
 
 package quasylab.sibilla.core.server.client;

@@ -26,6 +26,7 @@
 
 package quasylab.sibilla.core.server.master;
 
+import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.server.NetworkInfo;
 import quasylab.sibilla.core.server.SimulationDataSet;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
@@ -38,43 +39,95 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Wraps the state of a client submitted simulation.
+ * Its updates can be listened by {@link java.beans.PropertyChangeListener} instances.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class SimulationState implements Serializable, PropertyChangeListener, Comparable<SimulationState>, Cloneable {
 
+    /**
+     * The date the simulation was initiated.
+     */
     private Date simulationStartDate;
 
+    /**
+     * The simulation model name.
+     */
     private String simulationModelName;
 
+    /**
+     * The number of slave servers that are currently executing the simulation.
+     */
     private volatile int runningSlaveServers;
 
-    private volatile int connectedSlaveServers;
-
+    /**
+     * Collection that contains the state of every connected slave server.
+     */
     private Set<SlaveState> slaveServers;
 
+    /**
+     * Network related infos about the master server that initiated the simulation.
+     */
     private NetworkInfo masterNetworkInfo;
 
+    /**
+     * Network related infos about the client that submitted the simulation.
+     */
     private NetworkInfo clientNetworkInfo;
 
+    /**
+     * The client communication related manager.
+     */
     private TCPNetworkManager clientConnection;
 
+    /**
+     * The last time the state was updated.
+     */
     private Date lastUpdate;
 
+    /**
+     * The number of pending simulation tasks.
+     */
     private int pendingTasks;
 
+    /**
+     * The number of total simulation tasks.
+     */
     private int totalSimulationTasks;
 
+    /**
+     * Signals if the simulation is concluded.
+     */
     private boolean concluded;
 
+    /**
+     * The wrapper related to the simulation datas.
+     */
     private SimulationDataSet<?> simulationDataSet;
 
+    /**
+     * To manage the {@link java.beans.PropertyChangeListener} instances.
+     */
     private transient PropertyChangeSupport updateSupport;
 
+    /**
+     * Initializes the state
+     *
+     * @param masterState                       the state of the master that initiated the simulation. It will be updated at every simulation update.
+     * @param masterNetworkInfo                 related to the master that initiated the simulation.
+     * @param clientNetworkInfo                 related to the client that submitted the simulation.
+     * @param slaveNetworkInfos                 related to the slave servers the simulation will be submitted to.
+     * @param masterServerSimulationEnvironment the environment that manages the simulation. It will be updated at every simulation update.
+     */
     public SimulationState(MasterState masterState, NetworkInfo masterNetworkInfo, NetworkInfo clientNetworkInfo, Set<NetworkInfo> slaveNetworkInfos, MasterServerSimulationEnvironment masterServerSimulationEnvironment) {
         this.masterNetworkInfo = masterNetworkInfo;
         this.clientNetworkInfo = clientNetworkInfo;
         this.simulationStartDate = new Date();
         this.lastUpdate = simulationStartDate;
         this.runningSlaveServers = 0;
-        this.connectedSlaveServers = 0;
         this.totalSimulationTasks = 0;
 
         this.slaveServers = new HashSet<>();
@@ -88,16 +141,27 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
         this.updateListeners();
     }
 
+    /**
+     * Updates the registered {@link java.beans.PropertyChangeListener} instances.
+     */
     private void updateListeners() {
         this.lastUpdate = new Date();
         updateSupport.firePropertyChange("Master State Update", null, this);
         updateSupport.firePropertyChange("Master Environment Update", null, this);
     }
 
+    /**
+     * @return the simulation model name.
+     */
     public String getSimulationModelName() {
         return simulationModelName;
     }
 
+    /**
+     * Sets the simulation model name.
+     *
+     * @param simulationModelName the name to be set.
+     */
     public void setSimulationModelName(String simulationModelName) {
         this.simulationModelName = simulationModelName;
         this.updateListeners();
@@ -108,10 +172,17 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
         this.updateListeners();
     }
 
+    /**
+     * Compares two simulation states for ordering.
+     *
+     * @param simulationState the {@link quasylab.sibilla.core.server.master.SimulationState} to be compared.
+     * @return the result of the compareTo method called on the lastUpdate instance.
+     */
     @Override
     public int compareTo(SimulationState simulationState) {
         return this.lastUpdate.compareTo(simulationState.lastUpdate);
     }
+
 
     public synchronized void addPropertyChangeListener(String property, PropertyChangeListener pcl) {
         updateSupport.addPropertyChangeListener(property, pcl);
@@ -134,82 +205,144 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
         this.updateListeners();
     }
 
+    /**
+     * Returns the state associated with a specific slave server.
+     *
+     * @param slaveNetworkInfo related to the slave.
+     * @return {@link quasylab.sibilla.core.server.slave.SlaveState} associated with the slave.
+     */
     public synchronized SlaveState getSlaveStateByServerInfo(NetworkInfo slaveNetworkInfo) {
         return this.slaveServers.stream().filter(slaveState -> {
             return slaveState.getSlaveInfo().equals(slaveNetworkInfo);
         }).findFirst().get();
     }
 
+    /**
+     * @return {@link java.util.Set} related to registered slave servers' states.
+     */
     public synchronized Set<SlaveState> getSlaveServersStates() {
         return new HashSet<>(this.slaveServers);
     }
 
+    /**
+     * @return Network related infos about the master server that initiated the simulation.
+     */
     public synchronized NetworkInfo getMasterNetworkInfo() {
         return this.masterNetworkInfo;
     }
 
+    /**
+     * @return Network related infos about the client that submitted the simulation.
+     */
     public synchronized NetworkInfo getClientNetworkInfo() {
         return this.clientNetworkInfo;
     }
 
-    public synchronized int getConnectedSlaveServers() {
+    /**
+     * @return the number of registered and running slave servers.
+     */
+    public synchronized int getRegisteredSlaveServers() {
         return (int) this.slaveServers.stream().filter(slaveState -> !slaveState.isRemoved()).count();
     }
 
+    /**
+     * @return The number of slave servers that are currently executing the simulation.
+     */
     public synchronized int getRunningSlaveServers() {
         return runningSlaveServers;
     }
 
+    /**
+     * @return The date the simulation was initiated.
+     */
     public synchronized Date getSimulationStartDate() {
         return simulationStartDate;
     }
 
+    /**
+     * @return The last time the state was updated.
+     */
     public synchronized Date getLastUpdate() {
         return this.lastUpdate;
     }
 
+    /**
+     * @return The number of pending simulation tasks.
+     */
     public synchronized int getPendingTasks() {
         return this.pendingTasks;
     }
 
+    /**
+     * Sets the value of pending simulation tasks.
+     *
+     * @param pendingTasks the value to be set.
+     */
     public synchronized void setPendingTasks(int pendingTasks) {
         this.pendingTasks = pendingTasks;
         this.updateListeners();
     }
 
+    /**
+     * @return The number of total simulation tasks.
+     */
     public synchronized int getTotalSimulationTasks() {
         return this.totalSimulationTasks;
     }
 
+    /**
+     * @return if the simulation is concluded.
+     */
     public boolean isConcluded() {
         return this.concluded;
     }
 
-    public void setConcluded(boolean concluded) {
-        this.concluded = concluded;
+    /**
+     * Marks the simulation related to this state as concluded.
+     */
+    public void setConcluded() {
+        this.concluded = true;
         this.updateListeners();
     }
 
+    /**
+     * @return The wrapper related to the simulation datas.
+     */
     public SimulationDataSet<?> simulationDataSet() {
         return simulationDataSet;
     }
 
+    /**
+     * Sets a new simulation data set.
+     *
+     * @param simulationDataSet the set to be set.
+     */
     public void setSimulationDataSet(SimulationDataSet<?> simulationDataSet) {
         this.simulationDataSet = simulationDataSet;
         this.totalSimulationTasks = simulationDataSet.getReplica();
         this.updateListeners();
     }
 
-
+    /**
+     * @return The client communication related manager.
+     */
     public TCPNetworkManager clientConnection() {
         return clientConnection;
     }
 
+    /**
+     * Sets a new client communication related manager.
+     *
+     * @param clientConnection the manager to be set.
+     */
     public void setClientConnection(TCPNetworkManager clientConnection) {
         this.clientConnection = clientConnection;
     }
 
 
+    /**
+     * @return a deep clone of the {@link quasylab.sibilla.core.server.master.SimulationState} in which is called.
+     */
     @Override
     public SimulationState clone() {
         SimulationState clone = null;
@@ -233,7 +366,6 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
         if (o == null || getClass() != o.getClass()) return false;
         SimulationState that = (SimulationState) o;
         return runningSlaveServers == that.runningSlaveServers &&
-                connectedSlaveServers == that.connectedSlaveServers &&
                 pendingTasks == that.pendingTasks &&
                 totalSimulationTasks == that.totalSimulationTasks &&
                 Objects.equals(simulationStartDate, that.simulationStartDate) &&
@@ -246,6 +378,6 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
 
     @Override
     public int hashCode() {
-        return Objects.hash(simulationStartDate, runningSlaveServers, connectedSlaveServers, slaveServers, masterNetworkInfo, clientNetworkInfo, lastUpdate, pendingTasks, totalSimulationTasks, updateSupport);
+        return Objects.hash(simulationStartDate, runningSlaveServers, slaveServers, masterNetworkInfo, clientNetworkInfo, lastUpdate, pendingTasks, totalSimulationTasks, updateSupport);
     }
 }

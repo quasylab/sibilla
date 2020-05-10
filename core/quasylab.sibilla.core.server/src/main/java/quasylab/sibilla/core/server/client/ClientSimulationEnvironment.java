@@ -45,13 +45,24 @@ import java.util.logging.Logger;
  * Manages the connection with a master server to submit simulations and retrieve related results.
  *
  * @param <S> The {@link quasylab.sibilla.core.past.State} of the simulation model.
- * @author Stelluti Francesco Pio, Zamponi Marco
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
  */
 public class ClientSimulationEnvironment<S extends State> {
 
+    /**
+     * Class logger.
+     */
     private static final Logger LOGGER = Logger.getLogger(ClientSimulationEnvironment.class.getName());
 
+    /**
+     * The {@link quasylab.sibilla.core.server.SimulationDataSet} object to be sent to the master server.
+     */
     private SimulationDataSet<S> data;
+
+    /**
+     * Manages the network communication with the master server.
+     */
     private TCPNetworkManager masterServerNetworkManager;
 
     /**
@@ -121,7 +132,7 @@ public class ClientSimulationEnvironment<S extends State> {
             LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.INIT,
                     server.getServerInfo().toString()));
             server.writeObject(ObjectSerializer.serializeObject(data.getModelDefinition().getClass().getName()));
-            LOGGER.info(String.format("[%s] Model name has been sent to the server - %s", data.getModelDefinition().getClass().getName(),
+            LOGGER.info(String.format("[%s] Model name has been sent to the server - %s", this.data.getModelDefinition().getClass().getName(),
                     server.getServerInfo().toString()));
             server.writeObject(classBytes);
             LOGGER.info(String.format("Class bytes have been sent to the server - %s", server.getServerInfo().toString()));
@@ -134,7 +145,7 @@ public class ClientSimulationEnvironment<S extends State> {
             }
 
         } catch (ClassCastException e) {
-            LOGGER.severe(String.format("Master communication failure during the connection initialization - %s", e.getMessage()));
+            LOGGER.severe(String.format("Message cast failure during the connection initialization - %s", e.getMessage()));
         } catch (IOException e) {
             LOGGER.severe(String.format("Network communication failure during the connection initialization  - %s", e.getMessage()));
         }
@@ -171,7 +182,7 @@ public class ClientSimulationEnvironment<S extends State> {
                 throw new ClassCastException();
             }
         } catch (ClassCastException e) {
-            LOGGER.severe(String.format("Master communication failure during the simulation sending - %s", e.getMessage()));
+            LOGGER.severe(String.format("Message cast failure during the simulation sending - %s", e.getMessage()));
         } catch (IOException e) {
             LOGGER.severe(String.format("Network communication failure during the simulation sending - %s", e.getMessage()));
         }
@@ -196,7 +207,7 @@ public class ClientSimulationEnvironment<S extends State> {
                 LOGGER.severe("The answer received wasn't expected. There was an error MasterServer's side");
             }
         } catch (ClassCastException e) {
-            LOGGER.severe(String.format("Master communication failure during the ping - %s", e.getMessage()));
+            LOGGER.severe(String.format("Message cast failure during the ping - %s", e.getMessage()));
         } catch (IOException e) {
             LOGGER.severe(String.format("Network communication failure during the ping - %s", e.getMessage()));
         }
