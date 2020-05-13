@@ -103,7 +103,7 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
     /**
      * @return {@link java.util.Map} related to registered slave servers.
      */
-    public synchronized Map<NetworkInfo, Boolean> getSlaveServers() {
+    public synchronized Map<NetworkInfo, Boolean> slaveServersMap() {
         return new HashMap<NetworkInfo, Boolean>(slaveServers);
     }
 
