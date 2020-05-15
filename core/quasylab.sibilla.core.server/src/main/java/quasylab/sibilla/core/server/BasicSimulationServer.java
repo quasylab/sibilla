@@ -2,23 +2,24 @@
  * Sibilla:  a Java framework designed to support analysis of Collective
  * Adaptive Systems.
  *
- *  Copyright (C) 2020.
+ * Copyright (C) 2020.
  *
- *  See the NOTICE file distributed with this work for additional information
- *  regarding copyright ownership.
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *            http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- *  or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied.
+ *
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  *
  */
@@ -38,6 +39,7 @@ import quasylab.sibilla.core.simulator.Trajectory;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -72,31 +74,33 @@ public class BasicSimulationServer implements SimulationServer {
     }
 
     @Override
-    public void start(int port) throws IOException {
-        this.simulationPort = port;
-        this.localServerInfo = new NetworkInfo(NetworkUtils.getLocalIp(), this.simulationPort, this.networkManagerType);
-        LOGGER.info(String.format("The BasicSimulationServer will accept simulation requests on port [%d]", this.simulationPort));
-        this.startSimulationServer();
+    public void start(int port) {
+        try {
+            this.simulationPort = port;
+            this.localServerInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), this.simulationPort, this.networkManagerType);
+            LOGGER.info(String.format("The BasicSimulationServer will accept simulation requests on port [%d]", this.simulationPort));
+            this.startSimulationServer();
+        } catch (
+                SocketException e) {
+            LOGGER.severe(String.format("Network interfaces exception - %s", e.getMessage()));
+        }
     }
 
     /**
      * Starts a simulation server
-     *
-     * @throws IOException
      */
-    private void startSimulationServer() throws IOException {
-
-        ServerSocket serverSocket = TCPNetworkManager.createServerSocket(networkManagerType, simulationPort);
-        LOGGER.info(String.format("The BasicSimulationServer is now listening for servers on port: [%d]", simulationPort));
-        while (true) {
-            Socket socket = serverSocket.accept();
-            connectionExecutor.execute(() -> {
-                try {
+    private void startSimulationServer() {
+        try {
+            ServerSocket serverSocket = TCPNetworkManager.createServerSocket(networkManagerType, simulationPort);
+            LOGGER.info(String.format("The BasicSimulationServer is now listening for servers on port: [%d]", simulationPort));
+            while (true) {
+                Socket socket = serverSocket.accept();
+                connectionExecutor.execute(() -> {
                     manageMasterMessage(socket);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
+                });
+            }
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the server socket startup - %s", e.getMessage()));
         }
     }
 
@@ -104,12 +108,12 @@ public class BasicSimulationServer implements SimulationServer {
      * Manages the messages that come from the master server
      *
      * @param socket socket where the server listens for master messages
-     * @throws IOException
      */
-    private void manageMasterMessage(Socket socket) throws IOException {
-        TCPNetworkManager master = TCPNetworkManager.createNetworkManager(networkManagerType, socket);
-        AtomicBoolean masterIsActive = new AtomicBoolean(true);
+    private void manageMasterMessage(Socket socket) {
         try {
+            TCPNetworkManager master = TCPNetworkManager.createNetworkManager(networkManagerType, socket);
+            AtomicBoolean masterIsActive = new AtomicBoolean(true);
+
             Map<MasterCommand, Runnable> map = Map.of(
                     MasterCommand.PING, () -> respondPingRequest(master),
                     MasterCommand.INIT, () -> loadModelClass(master),
@@ -121,11 +125,12 @@ public class BasicSimulationServer implements SimulationServer {
                 map.getOrDefault(request, () -> {
                 }).run();
             }
-        } catch (Exception e) {
-            LOGGER.severe(e.getMessage());
-            e.printStackTrace();
+
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during master communication - %s", e.getMessage()));
         }
     }
+
 
     /**
      * Closes the connection with the master server
@@ -141,9 +146,8 @@ public class BasicSimulationServer implements SimulationServer {
             CustomClassLoader.classes.remove(modelName);
             LOGGER.info(String.format("[%s] Model deleted off the class loader", modelName));
             LOGGER.info("Master closed the connection");
-        } catch (Exception e) {
-            LOGGER.severe(e.getMessage());
-            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the connection closure - %s", e.getMessage()));
         }
     }
 
@@ -160,9 +164,10 @@ public class BasicSimulationServer implements SimulationServer {
             CustomClassLoader.defClass(modelName, myClass);
             String classLoadedName = Class.forName(modelName).getName();
             LOGGER.info(String.format("[%s] Class loaded with success", classLoadedName));
-        } catch (Exception e) {
-            LOGGER.severe(e.getMessage());
-            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            LOGGER.severe(String.format("The simulation model was not loaded with success - %s", e.getMessage()));
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the simulation model loading - %s", e.getMessage()));
         }
     }
 
@@ -187,9 +192,8 @@ public class BasicSimulationServer implements SimulationServer {
             master.writeObject(ObjectSerializer.serializeObject(new ComputationResult(results)));
             LOGGER.info(String.format("Computation's results have been sent to the server - %s",
                     master.getServerInfo().toString()));
-        } catch (Exception e) {
-            LOGGER.severe(e.getMessage());
-            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the task handling - %s", e.getMessage()));
         }
     }
 
@@ -203,9 +207,8 @@ public class BasicSimulationServer implements SimulationServer {
             master.writeObject(ObjectSerializer.serializeObject(SlaveCommand.PONG));
             LOGGER.info(String.format("Ping request answered, it was sent by the server - %s",
                     master.getServerInfo().toString()));
-        } catch (Exception e) {
-            LOGGER.severe(e.getMessage());
-            e.printStackTrace();
+        } catch (IOException e) {
+            LOGGER.severe(String.format("Network communication failure during the ping response - %s", e.getMessage()));
         }
     }
 
