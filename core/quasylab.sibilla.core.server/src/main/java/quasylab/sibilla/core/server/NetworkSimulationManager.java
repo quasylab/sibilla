@@ -61,7 +61,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         super(random, monitor, consumer);// TODO: Gestire parametro Monitor
         List<NetworkInfo> slaveNetworkInfos = simulationState.getSlaveServersStates().stream()
                 .map(SlaveState::getSlaveInfo).collect(Collectors.toList());
-        LOGGER.info(String.format("Creating a new NetworkSimulationManager to contact the servers: [%s]",
+        LOGGER.info(String.format("Creating a new NetworkSimulationManager to contact the slaves: [%s]",
                 slaveNetworkInfos.toString()));
         this.modelDefinition = modelDefinition;
         this.simulationState = simulationState;
@@ -69,14 +69,14 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         networkManagers = slaveNetworkInfos.stream().map(serverInfo -> {
             try {
                 TCPNetworkManager server = TCPNetworkManager.createNetworkManager(serverInfo);
-                LOGGER.info(String.format("Created a NetworkManager to contact the server - %s",
+                LOGGER.info(String.format("Created a NetworkManager to contact the slave: %s",
                         server.getServerInfo().toString()));
                 initConnection(server);
-                LOGGER.info(String.format("All the model informations have been sent to the server: %s",
+                LOGGER.info(String.format("All the model informations have been sent to the slave: %s",
                         server.getServerInfo().toString()));
                 return server;
             } catch (IOException e) {
-                LOGGER.severe(String.format("Error during server initialization, removing server - %s", e.getMessage()));
+                LOGGER.severe(String.format("[%s] Error during server initialization, removing slave", e.getMessage()));
             }
             return null;
         }).collect(Collectors.toSet());
@@ -98,19 +98,31 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     /**
      * Initializes a connection to the target server sending the model class
      *
-     * @param server NetworkManager throught the model is passed
+     * @param slave NetworkManager throught the model is passed
      */
-    private void initConnection(TCPNetworkManager server) {
+    private void initConnection(TCPNetworkManager slave) throws IOException {
         try {
-            server.writeObject(ObjectSerializer.serializeObject(MasterCommand.INIT));
-            LOGGER.info(String.format("[%s] command sent to the server - %s", MasterCommand.INIT,
-                    server.getServerInfo().toString()));
-            server.writeObject(ObjectSerializer.serializeObject(modelDefinition.getClass().getName()));
-            LOGGER.info(String.format("[%s] Model name has been sent to the server - ", modelDefinition.getClass().getName()));
-            server.writeObject(ClassBytesLoader.loadClassBytes(modelDefinition.getClass().getName()));
-            LOGGER.info("Class bytes have been sent to the server - ");
+            slave.writeObject(ObjectSerializer.serializeObject(MasterCommand.INIT));
+            LOGGER.info(String.format("[%s] command sent to the slave: %s", MasterCommand.INIT,
+                    slave.getServerInfo().toString()));
+            slave.writeObject(ObjectSerializer.serializeObject(modelDefinition.getClass().getName()));
+            LOGGER.info(String.format("[%s] Model name has been sent to the slave: %s", modelDefinition.getClass().getName(), slave.getServerInfo().toString()));
+            slave.writeObject(ClassBytesLoader.loadClassBytes(modelDefinition.getClass().getName()));
+            LOGGER.info(String.format("Class bytes have been sent to the slave: %s", slave.getServerInfo().toString()));
+
+            SlaveCommand answer = (SlaveCommand) ObjectSerializer.deserializeObject(slave.readObject());
+            if (answer.equals(SlaveCommand.INIT_RESPONSE)) {
+                LOGGER.info(String.format("Answer received: [%s] - Slave: %s", answer, slave.getServerInfo().toString()));
+            } else {
+                throw new ClassCastException("Wrong answer after INIT command. Expected INIT_RESPONSE");
+            }
+
+        } catch (ClassCastException e) {
+            LOGGER.severe(String.format("[%s] Message cast failure during the connection initialization - Slave: %s", e.getMessage(), slave.getServerInfo().toString()));
+            throw new IOException();
         } catch (IOException e) {
-            LOGGER.severe(String.format("Network communication failure during the connection initialization  - %s", e.getMessage()));
+            LOGGER.severe(String.format("[%s] Network communication failure during the connection initialization  - Slave: %s", e.getMessage(), slave.getServerInfo().toString()));
+            throw new IOException();
         }
     }
 
@@ -125,6 +137,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             singleTaskExecution();
         }
         this.simulationState.setConcluded();
+        this.closeStreams();
     }
 
     /**
@@ -134,9 +147,9 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     private void singleTaskExecution() {
         try {
             TCPNetworkManager server = findServer();
-            LOGGER.info(String.format("Server currently connected to: %s", server.getServerInfo().toString()));
+            LOGGER.info(String.format("Slave currently connected to: %s", server.getServerInfo().toString()));
             SlaveState serverState = this.simulationState.getSlaveStateByServerInfo(server.getServerInfo());
-            LOGGER.info(String.format("State of the server: [%s]", serverState.toString()));
+            LOGGER.info(String.format("State of the slave: [%s]", serverState.toString()));
             int acceptableTasks = serverState.getExpectedTasks();
             if (!serverState.canCompleteTask(acceptableTasks)) {
                 acceptableTasks = acceptableTasks == 1 ? 1 : acceptableTasks / 2;
@@ -152,7 +165,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
                         .whenComplete((value, error) -> manageResult(value, error, toRun, server));
             }
         } catch (InterruptedException e) {
-            LOGGER.severe(String.format("Interrupted exception - %s", e.getMessage()));
+            LOGGER.severe(String.format("[%s] Interrupted exception", e.getMessage()));
         }
     }
 
@@ -184,13 +197,13 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      */
     private void manageResult(ComputationResult<S> value, Throwable error, List<SimulationTask<S>> tasks,
                               TCPNetworkManager server) {
-        LOGGER.info(String.format("Managing results by the server - %s", server.getServerInfo().toString()));
+        LOGGER.info(String.format("Managing results by the slave: %s", server.getServerInfo().toString()));
         if (error != null) {
             error.printStackTrace();
-            LOGGER.severe(String.format("Timeout occurred for server - %s", server.getServerInfo().toString()));
+            LOGGER.severe(String.format("Timeout occurred for slave: %s", server.getServerInfo().toString()));
             TCPNetworkManager newServer;
             if ((newServer = manageTimeout(server)) != null) {
-                LOGGER.info(String.format("The server has responded. New server - %s",
+                LOGGER.info(String.format("The slave has responded. New server: %s",
                         newServer.getServerInfo().toString()));
                 enqueueServer(newServer);// add new server to queue, old server won't return
             } else if (this.simulationState.getSlaveServersStates().isEmpty()) {
@@ -201,7 +214,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             rescheduleAll(tasks);
             simulationState.decreaseRunningServers();
         } else {
-            LOGGER.info(String.format("Timeout did not occurred for server - %s", server.getServerInfo().toString()));
+            LOGGER.info(String.format("Timeout did not occurred for slave: %s", server.getServerInfo().toString()));
             enqueueServer(server);
             simulationState.decreaseRunningServers();
             value.getResults().forEach(this::handleTrajectory);
@@ -211,7 +224,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     /**
      * Manages a timeout
      *
-     * @param server server whuch was in timeout
+     * @param server server that was in timeout
      * @return new server to use to execute tasks
      */
     private TCPNetworkManager manageTimeout(TCPNetworkManager server) {
@@ -219,30 +232,30 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         TCPNetworkManager pingServer = null;
         NetworkInfo pingNetworkInfo;
         try {
-            LOGGER.warning(String.format("Managing timeout of server - %s", server.getServerInfo().toString()));
+            LOGGER.warning(String.format("Managing timeout of slave: %s", server.getServerInfo().toString()));
             pingNetworkInfo = new NetworkInfo(server.getSocket().getInetAddress(), server.getSocket().getPort(),
                     server.getType());
             pingServer = TCPNetworkManager.createNetworkManager(pingNetworkInfo);
             pingServer.getSocket().setSoTimeout(5000); // set 5 seconds timeout on read operations
             LOGGER.info(
-                    String.format("Creating a new NetworkManager to ping - %s", pingServer.getServerInfo().toString()));
+                    String.format("Creating a new NetworkManager to ping slave: %s", pingServer.getServerInfo().toString()));
             oldState.timedOut(); // mark server as timed out and update GUI
 
             initConnection(pingServer); // initialize connection sending model data
             pingServer.writeObject(ObjectSerializer.serializeObject(MasterCommand.PING));
-            LOGGER.info(String.format("Ping request sent to server - %s", pingServer.getServerInfo().toString())); // send
+            LOGGER.info(String.format("Ping request sent to slave: %s", pingServer.getServerInfo().toString())); // send
             // ping
             // request
             SlaveCommand response = (SlaveCommand) ObjectSerializer.deserializeObject(pingServer.readObject()); // wait
             // for
             // response
             if (!response.equals(SlaveCommand.PONG)) {
-                LOGGER.severe(String.format("The response received wasn't the one expected by the server - %s",
+                LOGGER.severe(String.format("The response received wasn't the one expected by the slave: %s",
                         pingServer.getServerInfo().toString()));
                 throw new IllegalStateException("Expected a different reply!");
             }
             LOGGER.info(String.format(
-                    "The response has been received within the time limit. The task window will be reduced by half for the server - %s",
+                    "The response has been received within the time limit. The task window will be reduced by half for the slave: %s",
                     pingServer.getServerInfo().toString()));
             oldState.forceExpiredTimeLimit(); // halve the task window
             oldState.migrate(pingNetworkInfo);
@@ -253,7 +266,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         } catch (Exception e) {
             assert pingServer != null;
             LOGGER.severe(String.format(
-                    "The response has been received after the time limit. The server will be removed - %s",
+                    "The response has been received after the time limit. The slave will be removed: %s",
                     pingServer.getServerInfo().toString()));
             oldState.setRemoved(); // mark server as removed and update GUI
             this.networkManagers.remove(server);
@@ -279,13 +292,23 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         try {
             for (TCPNetworkManager server : this.networkManagers) {
                 server.writeObject(ObjectSerializer.serializeObject(MasterCommand.CLOSE_CONNECTION));
+                LOGGER.info(String.format("[%s] command sent to the slave: %s", MasterCommand.CLOSE_CONNECTION,
+                        server.getServerInfo().toString()));
                 server.writeObject(ObjectSerializer.serializeObject(this.modelDefinition.getClass().getName()));
+
+                SlaveCommand answer = (SlaveCommand) ObjectSerializer.deserializeObject(server.readObject());
+                if (answer.equals(SlaveCommand.CLOSE_CONNECTION)) {
+                    LOGGER.info(String.format("Answer received: [%s] - Slave: %s", answer, server.getServerInfo().toString()));
+                } else {
+                    throw new ClassCastException(String.format("Wrong answer after CLOSE_CONNECTION command. Expected CLOSE_CONNECTION from slave: %s ", server.getServerInfo().toString()));
+                }
+
                 server.closeConnection();
-                LOGGER.info(String.format("The connection with the server has been closed - %s",
+                LOGGER.info(String.format("Closed the connection with the slave: %s",
                         server.getServerInfo().toString()));
             }
         } catch (IOException e) {
-            LOGGER.severe(String.format("Network communication failure during the connection closure - %s", e.getMessage()));
+            LOGGER.severe(String.format("[%s] Network communication failure during the connection closure", e.getMessage()));
         }
     }
 
