@@ -54,11 +54,11 @@ public enum MasterCommand {
      */
     PONG,
     /**
-     * The command sent by a master server to reply to a new connection request received by an host.
+     * The command sent by a master server that has received an INIT command from a client.
      */
     INIT_RESPONSE,
     /**
-     * The command sent by a master server to reply to a data receiving command received by an host.
+     * The command sent by a master server that has received a DATA command from a client.
      */
     DATA_RESPONSE,
     /**

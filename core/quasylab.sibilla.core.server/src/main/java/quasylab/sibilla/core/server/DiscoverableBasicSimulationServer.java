@@ -32,6 +32,7 @@ import quasylab.sibilla.core.server.serialization.ObjectSerializer;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
+import java.net.SocketException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -65,12 +66,14 @@ public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
 
             while (true) {
                 NetworkInfo masterInfo = (NetworkInfo) ObjectSerializer.deserializeObject(manager.readObject());
-                LOGGER.info(String.format("Discovered by the master server - %s", masterInfo.toString()));
+                LOGGER.info(String.format("Discovered by the master: %s", masterInfo.toString()));
                 manageDiscoveryMessage(manager, masterInfo);
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SocketException e) {
+            LOGGER.severe(String.format("[%s] Datagram socket creation exception", e.getMessage()));
+        } catch (IOException e) {
+            LOGGER.severe(String.format("[%s] Network communication failure during the discovery server startup", e.getMessage()));
         }
     }
 
@@ -84,10 +87,10 @@ public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
         try {
             this.knownMasters.add(masterInfo);
             manager.writeObject(ObjectSerializer.serializeObject(this.localServerInfo), masterInfo.getAddress(), masterInfo.getPort());
-            LOGGER.info(String.format("Sent the discovery response to the master server - %s", masterInfo.toString()));
+            LOGGER.info(String.format("Sent the discovery response to the master: %s", masterInfo.toString()));
             LOGGER.info(String.format("Currently known masters - %s", knownMasters.toString()));
         } catch (IOException e) {
-            LOGGER.severe(String.format("Network communication failure during the discovery message management - %s", e.getMessage()));
+            LOGGER.severe(String.format("[%s] Network communication failure during the discovery message management - Master: %s", e.getMessage(), masterInfo.toString()));
         }
     }
 }
