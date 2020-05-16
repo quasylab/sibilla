@@ -26,6 +26,7 @@
 
 package quasylab.sibilla.core.server;
 
+import quasylab.sibilla.core.server.compression.Compressor;
 import quasylab.sibilla.core.server.master.MasterCommand;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
 import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
@@ -189,7 +190,7 @@ public class BasicSimulationServer implements SimulationServer {
             for (SimulationTask<?> task : tasks) {
                 results.add(task.getTrajectory());
             }
-            master.writeObject(ObjectSerializer.serializeObject(new ComputationResult(results)));
+            master.writeObject(Compressor.compress(ObjectSerializer.serializeObject(new ComputationResult(results))));
             LOGGER.info(String.format("Computation's results have been sent to the server - %s",
                     master.getServerInfo().toString()));
         } catch (IOException e) {

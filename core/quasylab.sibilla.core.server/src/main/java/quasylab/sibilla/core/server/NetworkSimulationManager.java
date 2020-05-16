@@ -29,6 +29,7 @@ package quasylab.sibilla.core.server;
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.server.compression.Compressor;
 import quasylab.sibilla.core.server.master.MasterCommand;
 import quasylab.sibilla.core.server.master.SimulationState;
 import quasylab.sibilla.core.server.network.TCPNetworkManager;
@@ -308,7 +309,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             LOGGER.info(String.format("A group of tasks has been sent to the server - %s",
                     server.getServerInfo().toString()));
 
-            result = (ComputationResult<S>) ObjectSerializer.deserializeObject(server.readObject());
+            result = (ComputationResult<S>) ObjectSerializer.deserializeObject(Compressor.uncompress(server.readObject()));
 
             elapsedTime = System.nanoTime() - elapsedTime;
 
