@@ -94,7 +94,7 @@ public class ClientSimulationEnvironment<S extends State> {
             this.sendSimulationInfo(masterServerNetworkManager);
             this.closeConnection(masterServerNetworkManager);
         } catch (IOException e) {
-            LOGGER.severe(String.format("Network Manager initialization error - %s", e.getMessage()));
+            LOGGER.severe(String.format("Master communication error - %s", e.getMessage()));
         }
 
     }
@@ -104,7 +104,7 @@ public class ClientSimulationEnvironment<S extends State> {
      *
      * @param server server the connection has to be closed with
      */
-    private void closeConnection(TCPNetworkManager server) {
+    private void closeConnection(TCPNetworkManager server) throws IOException {
         try {
             server.writeObject(ObjectSerializer.serializeObject(ClientCommand.CLOSE_CONNECTION));
             LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.CLOSE_CONNECTION,
@@ -114,6 +114,7 @@ public class ClientSimulationEnvironment<S extends State> {
             LOGGER.info(String.format("Closed the connection with the master - %s", server.getServerInfo()));
         } catch (IOException e) {
             LOGGER.severe(String.format("Network communication failure during the connection closure - %s", e.getMessage()));
+            throw new IOException();
         }
     }
 
@@ -123,7 +124,7 @@ public class ClientSimulationEnvironment<S extends State> {
      * @param server NetworkManager to the quasylab.sibilla.core.server.master
      *               server
      */
-    private void initConnection(TCPNetworkManager server) {
+    private void initConnection(TCPNetworkManager server) throws IOException {
         try {
             LOGGER.info(String.format("Loading [%s] class bytes to be transmitted over network", data.getModelDefinition().getClass().getName()));
             byte[] classBytes = ClassBytesLoader.loadClassBytes(data.getModelDefinition().getClass().getName());
@@ -146,8 +147,10 @@ public class ClientSimulationEnvironment<S extends State> {
 
         } catch (ClassCastException e) {
             LOGGER.severe(String.format("Message cast failure during the connection initialization - %s", e.getMessage()));
+            throw new IOException();
         } catch (IOException e) {
             LOGGER.severe(String.format("Network communication failure during the connection initialization  - %s", e.getMessage()));
+            throw new IOException();
         }
     }
 
@@ -156,7 +159,7 @@ public class ClientSimulationEnvironment<S extends State> {
      *
      * @param targetServer NetworkManager to the master server
      */
-    private void sendSimulationInfo(TCPNetworkManager targetServer) {
+    private void sendSimulationInfo(TCPNetworkManager targetServer) throws IOException {
         try {
             targetServer.writeObject(ObjectSerializer.serializeObject(ClientCommand.DATA));
             LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.DATA,
@@ -183,8 +186,10 @@ public class ClientSimulationEnvironment<S extends State> {
             }
         } catch (ClassCastException e) {
             LOGGER.severe(String.format("Message cast failure during the simulation sending - %s", e.getMessage()));
+            throw new IOException();
         } catch (IOException e) {
             LOGGER.severe(String.format("Network communication failure during the simulation sending - %s", e.getMessage()));
+            throw new IOException();
         }
     }
 
@@ -193,7 +198,7 @@ public class ClientSimulationEnvironment<S extends State> {
      *
      * @param targetServer server to send the ping command to
      */
-    private void sendPing(TCPNetworkManager targetServer) {
+    private void sendPing(TCPNetworkManager targetServer) throws IOException {
         try {
             targetServer.writeObject(ObjectSerializer.serializeObject(ClientCommand.PING));
             LOGGER.info(String.format("[%s] command sent to the server - %s", ClientCommand.PING,
@@ -208,8 +213,10 @@ public class ClientSimulationEnvironment<S extends State> {
             }
         } catch (ClassCastException e) {
             LOGGER.severe(String.format("Message cast failure during the ping - %s", e.getMessage()));
+            throw new IOException();
         } catch (IOException e) {
             LOGGER.severe(String.format("Network communication failure during the ping - %s", e.getMessage()));
+            throw new IOException();
         }
 
     }
