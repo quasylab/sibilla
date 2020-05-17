@@ -24,28 +24,29 @@
  *
  */
 
-package quasylab.sibilla.examples.servers.master;
+package quasylab.sibilla.core.network.client;
 
-
-import org.springframework.stereotype.Component;
-import quasylab.sibilla.core.network.master.MasterState;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-@Component
-public class MonitoringServerComponent implements PropertyChangeListener {
-
-    private MasterState state;
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        this.state = (MasterState) evt.getNewValue();
-
-
-    }
-
-    public MasterState getMasterState() {
-        return this.state;
-    }
+/**
+ * All the possible command that can be sent from a client.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
+public enum ClientCommand {
+    /**
+     * The command sent by a client to initiate a new connection over the network.
+     */
+    INIT,
+    /**
+     * The command sent by a client to signal that data will be passed over the network.
+     */
+    DATA,
+    /**
+     * The command sent by a client to ping an host which has a connection open with.
+     */
+    PING,
+    /**
+     * The command sent by a client to inform that the connection with an host will be closed.
+     */
+    CLOSE_CONNECTION
 }

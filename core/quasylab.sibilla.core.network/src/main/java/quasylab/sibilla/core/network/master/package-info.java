@@ -24,28 +24,10 @@
  *
  */
 
-package quasylab.sibilla.examples.servers.master;
+/**
+ * Contains the classes that manage the behavior of a master that submits clients' simulations received to registered slave servers.
+ *
+ * @author Stelluti Francesco Pio, Zamponi Marco
+ */
 
-
-import org.springframework.stereotype.Component;
-import quasylab.sibilla.core.network.master.MasterState;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-@Component
-public class MonitoringServerComponent implements PropertyChangeListener {
-
-    private MasterState state;
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        this.state = (MasterState) evt.getNewValue();
-
-
-    }
-
-    public MasterState getMasterState() {
-        return this.state;
-    }
-}
+package quasylab.sibilla.core.network.master;

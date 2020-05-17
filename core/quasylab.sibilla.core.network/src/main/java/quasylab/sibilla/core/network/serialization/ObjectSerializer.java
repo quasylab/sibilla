@@ -24,28 +24,19 @@
  *
  */
 
-package quasylab.sibilla.examples.servers.master;
+package quasylab.sibilla.core.network.serialization;
 
+import org.apache.commons.lang3.SerializationUtils;
 
-import org.springframework.stereotype.Component;
-import quasylab.sibilla.core.network.master.MasterState;
+import java.io.Serializable;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+public class ObjectSerializer {
 
-@Component
-public class MonitoringServerComponent implements PropertyChangeListener {
-
-    private MasterState state;
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        this.state = (MasterState) evt.getNewValue();
-
-
+    public static byte[] serializeObject(Serializable toSerialize) {
+        return SerializationUtils.serialize(toSerialize);
     }
 
-    public MasterState getMasterState() {
-        return this.state;
+    public static Serializable deserializeObject(byte[] toDeserialize) {
+        return SerializationUtils.deserialize(toDeserialize);
     }
 }

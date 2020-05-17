@@ -24,28 +24,32 @@
  *
  */
 
-package quasylab.sibilla.examples.servers.master;
+package quasylab.sibilla.core.network.communication;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 
-import org.springframework.stereotype.Component;
-import quasylab.sibilla.core.network.master.MasterState;
+public class UDPDefaultNetworkManager implements UDPNetworkManager {
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+    private final DatagramSocket socket;
 
-@Component
-public class MonitoringServerComponent implements PropertyChangeListener {
-
-    private MasterState state;
+    public UDPDefaultNetworkManager(DatagramSocket socket) {
+        this.socket = socket;
+    }
 
     @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        this.state = (MasterState) evt.getNewValue();
-
-
+    public byte[] readObject() throws IOException {
+        DatagramPacket p = new DatagramPacket(new byte[1500], 1500);
+        socket.receive(p);
+        return p.getData();
     }
 
-    public MasterState getMasterState() {
-        return this.state;
+    @Override
+    public void writeObject(byte[] toWrite, InetAddress address, int port) throws IOException {
+        DatagramPacket p = new DatagramPacket(toWrite, toWrite.length, address, port);
+        socket.send(p);
     }
+
 }

@@ -24,28 +24,25 @@
  *
  */
 
-package quasylab.sibilla.examples.servers.master;
+package quasylab.sibilla.core.network.serialization;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.springframework.stereotype.Component;
-import quasylab.sibilla.core.network.master.MasterState;
+public class CustomClassLoader extends ClassLoader {
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+	public static Map<String, byte[]> classes = new HashMap<>();
 
-@Component
-public class MonitoringServerComponent implements PropertyChangeListener {
-
-    private MasterState state;
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        this.state = (MasterState) evt.getNewValue();
-
-
-    }
-
-    public MasterState getMasterState() {
-        return this.state;
-    }
+	public static void defClass(String name, byte[] b) {
+		try {
+			Method m = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class,
+					int.class);
+			m.setAccessible(true);
+			classes.put(name, b);
+			m.invoke(ClassLoader.getSystemClassLoader(), name, b, 0, b.length);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

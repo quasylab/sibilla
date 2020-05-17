@@ -28,15 +28,17 @@ package quasylab.sibilla.examples.servers.client;
 
 import org.apache.commons.math3.random.AbstractRandomGenerator;
 import quasylab.sibilla.core.models.pm.PopulationState;
-import quasylab.sibilla.core.server.NetworkInfo;
-import quasylab.sibilla.core.server.client.ClientSimulationEnvironment;
-import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
-import quasylab.sibilla.core.server.util.NetworkUtils;
-import quasylab.sibilla.core.server.util.SSLUtils;
+import quasylab.sibilla.core.network.NetworkInfo;
+import quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
+import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import quasylab.sibilla.core.network.util.NetworkUtils;
+import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 
 public class ClientApplication implements Serializable {
 
@@ -46,7 +48,7 @@ public class ClientApplication implements Serializable {
      *
      */
     private static final long serialVersionUID = 1L;
-    private static final int REPLICA = 1000;
+    private static final int REPLICA = 10000;
 
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
     private static NetworkInfo MASTER_SERVER_INFO;
@@ -55,7 +57,7 @@ public class ClientApplication implements Serializable {
         try {
             MASTER_SERVER_INFO = new NetworkInfo(NetworkUtils.getLocalAddress(), 10001,
                     TCPNetworkManagerType.SECURE);
-        } catch (SocketException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

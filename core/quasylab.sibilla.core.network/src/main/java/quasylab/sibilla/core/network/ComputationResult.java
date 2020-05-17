@@ -24,28 +24,25 @@
  *
  */
 
-package quasylab.sibilla.examples.servers.master;
+package quasylab.sibilla.core.network;
 
+import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.simulator.Trajectory;
 
-import org.springframework.stereotype.Component;
-import quasylab.sibilla.core.network.master.MasterState;
+import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+public class ComputationResult<S extends State> implements Serializable {
+    private static final long serialVersionUID = -545122842766553412L;
+    private final LinkedList<Trajectory<S>> results;
 
-@Component
-public class MonitoringServerComponent implements PropertyChangeListener {
-
-    private MasterState state;
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        this.state = (MasterState) evt.getNewValue();
-
-
+    public ComputationResult(LinkedList<Trajectory<S>> results) {
+        this.results = results;
     }
 
-    public MasterState getMasterState() {
-        return this.state;
+    public List<Trajectory<S>> getResults() {
+        return results;
     }
+
 }

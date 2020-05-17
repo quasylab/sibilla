@@ -1,0 +1,17 @@
+apply plugin: 'java-library'
+
+group = 'quasylab.sibilla.core.network'
+version = '1.0.0'
+sourceCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':core:quasylab.sibilla.core.simulator')
+}
+
+test {
+    useJUnitPlatform()
+}
