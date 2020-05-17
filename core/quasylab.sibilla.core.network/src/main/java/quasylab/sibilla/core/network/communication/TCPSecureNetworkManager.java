@@ -37,6 +37,12 @@ import java.io.*;
 import java.net.Socket;
 import java.util.logging.Logger;
 
+/**
+ * TCP based communication class that relies on SSL protocol.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class TCPSecureNetworkManager implements TCPNetworkManager {
 
     private static final Logger LOGGER = Logger.getLogger(TCPSecureNetworkManager.class.getName());
@@ -45,7 +51,14 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
     private DataInputStream dataInputStream;
     private DataOutputStream dataOutputStream;
 
-    //The socket needs to be built - Example: Client-side connection
+
+    /**
+     * Initiates the manager as a client.
+     * The socket upon which the communication is based will be built.
+     *
+     * @param networkInfo The network related infos about the connection that the manager will manage
+     * @throws IOException
+     */
     public TCPSecureNetworkManager(NetworkInfo networkInfo) throws IOException {
         if (networkInfo.getType().equals(TCPNetworkManagerType.SECURE)) {
             SSLContext sslContext = SSLUtils.getInstance().createSSLContext();
@@ -58,6 +71,14 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
     }
 
     //The socket has already been built - Example: Server-side connection
+
+    /**
+     * Initiates the manager as a server.
+     * The socket upon which the communication is based has already been built.
+     *
+     * @param socket upon which the network communication will be based
+     * @throws IOException
+     */
     public TCPSecureNetworkManager(Socket socket) throws IOException {
         if (socket instanceof SSLSocket) {
             this.buildWithSocket((SSLSocket) socket);
@@ -66,6 +87,12 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
         }
     }
 
+    /**
+     * Configures and manages the SSL connection.
+     *
+     * @param sslSocket upon which the network communication will be based
+     * @throws IOException
+     */
     private void buildWithSocket(SSLSocket sslSocket) throws IOException {
 
         sslSocket.setEnabledCipherSuites(sslSocket.getSupportedCipherSuites());

@@ -24,19 +24,11 @@
  *
  */
 
-package quasylab.sibilla.core.network.serialization;
 
-import org.apache.commons.lang3.SerializationUtils;
-
-import java.io.Serializable;
-
-public class ObjectSerializer {
-
-    public static byte[] serializeObject(Serializable toSerialize) {
-        return SerializationUtils.serialize(toSerialize);
-    }
-
-    public static Serializable deserializeObject(byte[] toDeserialize) {
-        return SerializationUtils.deserialize(toDeserialize);
-    }
-}
+/**
+ * Contains the classes that manage the data compression and decompression.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
+package quasylab.sibilla.core.network.compression;

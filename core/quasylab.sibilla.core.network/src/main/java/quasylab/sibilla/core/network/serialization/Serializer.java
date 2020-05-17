@@ -24,10 +24,38 @@
  *
  */
 
+package quasylab.sibilla.core.network.serialization;
+
+import org.apache.commons.lang3.SerializationUtils;
+
+import java.io.Serializable;
+
 /**
- * Contains the classes that manage the data serialization.
+ * Utility class used to serialize and deserialize data.
+ * The class operations are based upon the Apache's SerializationUtils suite.
  *
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */
-package quasylab.sibilla.core.network.serialization;
+public class Serializer {
+
+    /**
+     * Serializes a Serializable instance.
+     *
+     * @param toSerialize instance to be compressed
+     * @return serialized byte array
+     */
+    public static byte[] serialize(Serializable toSerialize) {
+        return SerializationUtils.serialize(toSerialize);
+    }
+
+    /**
+     * Deserializes a byte array.
+     *
+     * @param toDeserialize byte array to be deserialized
+     * @return deserialized Serializable instance
+     */
+    public static Serializable deserialize(byte[] toDeserialize) {
+        return SerializationUtils.deserialize(toDeserialize);
+    }
+}

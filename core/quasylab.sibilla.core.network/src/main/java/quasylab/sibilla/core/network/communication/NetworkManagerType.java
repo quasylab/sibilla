@@ -26,5 +26,11 @@
 
 package quasylab.sibilla.core.network.communication;
 
+/**
+ * Interface that needs to be implemented by all of the enum classes related to communication oriented classes that are based upon TCP/IP transport layer protocols.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public interface NetworkManagerType {
 }

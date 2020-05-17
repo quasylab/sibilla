@@ -29,7 +29,7 @@ package quasylab.sibilla.core.network.slave;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.communication.UDPDefaultNetworkManager;
-import quasylab.sibilla.core.network.serialization.ObjectSerializer;
+import quasylab.sibilla.core.network.serialization.Serializer;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -66,7 +66,7 @@ public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
             UDPDefaultNetworkManager manager = new UDPDefaultNetworkManager(discoverySocket);
 
             while (true) {
-                NetworkInfo masterInfo = (NetworkInfo) ObjectSerializer.deserializeObject(manager.readObject());
+                NetworkInfo masterInfo = (NetworkInfo) Serializer.deserialize(manager.readObject());
                 LOGGER.info(String.format("Discovered by the master: %s", masterInfo.toString()));
                 manageDiscoveryMessage(manager, masterInfo);
             }
@@ -87,7 +87,7 @@ public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
     private void manageDiscoveryMessage(UDPDefaultNetworkManager manager, NetworkInfo masterInfo) {
         try {
             this.knownMasters.add(masterInfo);
-            manager.writeObject(ObjectSerializer.serializeObject(this.localServerInfo), masterInfo.getAddress(), masterInfo.getPort());
+            manager.writeObject(Serializer.serialize(this.localServerInfo), masterInfo.getAddress(), masterInfo.getPort());
             LOGGER.info(String.format("Sent the discovery response to the master: %s", masterInfo.toString()));
             LOGGER.info(String.format("Currently known masters - %s", knownMasters.toString()));
         } catch (IOException e) {

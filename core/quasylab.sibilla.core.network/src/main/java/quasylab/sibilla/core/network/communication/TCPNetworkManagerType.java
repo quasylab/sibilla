@@ -26,6 +26,23 @@
 
 package quasylab.sibilla.core.network.communication;
 
+/**
+ * All of the names associated to the classes that implement {@link quasylab.sibilla.core.network.communication.TCPNetworkManager} and are based upon the TCP transport protocol.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public enum TCPNetworkManagerType implements NetworkManagerType {
-    FST, DEFAULT, SECURE
+    /**
+     * The implementation based upon FST.
+     */
+    FST,
+    /**
+     * The simplest interface implementation.
+     */
+    DEFAULT,
+    /**
+     * The implementation that relies upon SSL.
+     */
+    SECURE
 };

@@ -30,8 +30,19 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * Utility class used to extract the data associated to the .class file of a compiled Java class.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class ClassBytesLoader {
 
+    /**
+     * @param className of the class which data need to be extracted.
+     * @return byte array containing the data associated to the .class file related to the qualified name passed as an argument.
+     * @throws IOException
+     */
     public static byte[] loadClassBytes(String className) throws IOException {
         int size;
         byte[] classBytes;
@@ -53,8 +64,8 @@ public class ClassBytesLoader {
 
             return classBytes;
         } else {
-            classBytes = CustomClassLoader.classes.get(className);
-            if(classBytes == null){
+            classBytes = CustomClassLoader.loadClassBytes(className);
+            if (classBytes == null) {
                 throw new FileNotFoundException(className);
             } else {
                 return classBytes;

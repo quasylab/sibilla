@@ -29,12 +29,12 @@ package quasylab.sibilla.core.network.slave;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.NetworkTask;
-import quasylab.sibilla.core.network.compression.Compressor;
-import quasylab.sibilla.core.network.master.MasterCommand;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import quasylab.sibilla.core.network.compression.Compressor;
+import quasylab.sibilla.core.network.master.MasterCommand;
 import quasylab.sibilla.core.network.serialization.CustomClassLoader;
-import quasylab.sibilla.core.network.serialization.ObjectSerializer;
+import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
@@ -124,8 +124,8 @@ public class BasicSimulationServer implements SimulationServer {
                     MasterCommand.TASK, () -> handleTaskExecution(master),
                     MasterCommand.CLOSE_CONNECTION, () -> closeConnectionWithMaster(masterIsActive, master));
             while (masterIsActive.get()) {
-                MasterCommand request = (MasterCommand) ObjectSerializer.deserializeObject(master.readObject());
-                LOGGER.info(String.format("[%s] command received by master: %s", request, master.getServerInfo().toString()));
+                MasterCommand request = (MasterCommand) Serializer.deserialize(master.readObject());
+                LOGGER.info(String.format("[%s] command received by master: %s", request, master.getNetworkInfo().toString()));
                 map.getOrDefault(request, () -> {
                     throw new ClassCastException("Command received from master server wasn't expected.");
                 }).run();
@@ -145,22 +145,22 @@ public class BasicSimulationServer implements SimulationServer {
      */
     private void closeConnectionWithMaster(AtomicBoolean masterActive, TCPNetworkManager master) {
         try {
-            String modelName = (String) ObjectSerializer.deserializeObject(master.readObject());
-            LOGGER.info(String.format("[%s] Model name read to be deleted by master: %s", modelName, master.getServerInfo().toString()));
+            String modelName = (String) Serializer.deserialize(master.readObject());
+            LOGGER.info(String.format("[%s] Model name read to be deleted by master: %s", modelName, master.getNetworkInfo().toString()));
             masterActive.set(false);
-            CustomClassLoader.classes.remove(modelName);
+            CustomClassLoader.removeClassBytes(modelName);
             LOGGER.info(String.format("[%s] Model deleted off the class loader", modelName));
 
-            master.writeObject(ObjectSerializer.serializeObject(SlaveCommand.CLOSE_CONNECTION));
+            master.writeObject(Serializer.serialize(SlaveCommand.CLOSE_CONNECTION));
             LOGGER.info(String.format("[%s] command sent to the master: %s", SlaveCommand.CLOSE_CONNECTION,
-                    master.getServerInfo().toString()));
+                    master.getNetworkInfo().toString()));
 
             master.closeConnection();
-            LOGGER.info(String.format("Slave closed the connection with master: %s", master.getServerInfo().toString()));
+            LOGGER.info(String.format("Slave closed the connection with master: %s", master.getNetworkInfo().toString()));
         } catch (ClassCastException e) {
-            LOGGER.severe(String.format("[%s] Message cast failure during connection closure - Master: %s", e.getMessage(), master.getServerInfo().toString()));
+            LOGGER.severe(String.format("[%s] Message cast failure during connection closure - Master: %s", e.getMessage(), master.getNetworkInfo().toString()));
         } catch (IOException e) {
-            LOGGER.severe(String.format("[%s] Network communication failure during the connection closure - Master: %s", e.getMessage(), master.getServerInfo().toString()));
+            LOGGER.severe(String.format("[%s] Network communication failure during the connection closure - Master: %s", e.getMessage(), master.getNetworkInfo().toString()));
         }
     }
 
@@ -171,19 +171,19 @@ public class BasicSimulationServer implements SimulationServer {
      */
     private void loadModelClass(TCPNetworkManager master) {
         try {
-            String modelName = (String) ObjectSerializer.deserializeObject(master.readObject());
-            LOGGER.info(String.format("[%s] Model name read by master: %s", modelName, master.getServerInfo().toString()));
+            String modelName = (String) Serializer.deserialize(master.readObject());
+            LOGGER.info(String.format("[%s] Model name read by master: %s", modelName, master.getNetworkInfo().toString()));
             byte[] myClass = master.readObject();
             CustomClassLoader.defClass(modelName, myClass);
             String classLoadedName = Class.forName(modelName).getName();
             LOGGER.info(String.format("[%s] Class loaded with success", classLoadedName));
-            master.writeObject(ObjectSerializer.serializeObject(SlaveCommand.INIT_RESPONSE));
+            master.writeObject(Serializer.serialize(SlaveCommand.INIT_RESPONSE));
             LOGGER.info(String.format("[%s] command sent to the master: %s", SlaveCommand.INIT_RESPONSE,
-                    master.getServerInfo().toString()));
+                    master.getNetworkInfo().toString()));
         } catch (ClassNotFoundException e) {
-            LOGGER.severe(String.format("[%s] The simulation model was not loaded with success - Master: %s", e.getMessage(), master.getServerInfo().toString()));
+            LOGGER.severe(String.format("[%s] The simulation model was not loaded with success - Master: %s", e.getMessage(), master.getNetworkInfo().toString()));
         } catch (IOException e) {
-            LOGGER.severe(String.format("[%s] Network communication failure during the simulation model loading - Master: %s", e.getMessage(), master.getServerInfo().toString()));
+            LOGGER.severe(String.format("[%s] Network communication failure during the simulation model loading - Master: %s", e.getMessage(), master.getNetworkInfo().toString()));
         }
     }
 
@@ -194,7 +194,7 @@ public class BasicSimulationServer implements SimulationServer {
      */
     private void handleTaskExecution(TCPNetworkManager master) {
         try {
-            NetworkTask<?> networkTask = (NetworkTask<?>) ObjectSerializer.deserializeObject(master.readObject());
+            NetworkTask<?> networkTask = (NetworkTask<?>) Serializer.deserialize(master.readObject());
             List<? extends SimulationTask<?>> tasks = networkTask.getTasks();
             LinkedList<Trajectory<?>> results = new LinkedList<>();
             CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
@@ -205,11 +205,11 @@ public class BasicSimulationServer implements SimulationServer {
             for (SimulationTask<?> task : tasks) {
                 results.add(task.getTrajectory());
             }
-            master.writeObject(Compressor.compress(ObjectSerializer.serializeObject(new ComputationResult(results))));
+            master.writeObject(Compressor.compress(Serializer.serialize(new ComputationResult(results))));
             LOGGER.info(String.format("Computation's results have been sent to the server - %s",
-                    master.getServerInfo().toString()));
+                    master.getNetworkInfo().toString()));
         } catch (IOException e) {
-            LOGGER.severe(String.format("[%s] Network communication failure during the task handling - Master: %s", e.getMessage(), master.getServerInfo().toString()));
+            LOGGER.severe(String.format("[%s] Network communication failure during the task handling - Master: %s", e.getMessage(), master.getNetworkInfo().toString()));
         }
     }
 
@@ -220,11 +220,11 @@ public class BasicSimulationServer implements SimulationServer {
      */
     private void respondPingRequest(TCPNetworkManager master) {
         try {
-            master.writeObject(ObjectSerializer.serializeObject(SlaveCommand.PONG));
+            master.writeObject(Serializer.serialize(SlaveCommand.PONG));
             LOGGER.info(String.format("Ping request answered, it was sent by the master: %s",
-                    master.getServerInfo().toString()));
+                    master.getNetworkInfo().toString()));
         } catch (IOException e) {
-            LOGGER.severe(String.format("[%s] Network communication failure during the ping response - Master: %s", e.getMessage(), master.getServerInfo().toString()));
+            LOGGER.severe(String.format("[%s] Network communication failure during the ping response - Master: %s", e.getMessage(), master.getNetworkInfo().toString()));
         }
     }
 

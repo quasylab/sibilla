@@ -29,12 +29,25 @@ package quasylab.sibilla.core.network.communication;
 import java.io.*;
 import java.net.Socket;
 
+/**
+ * Simple TCP based communication class.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class TCPDefaultNetworkManager implements TCPNetworkManager {
 
     private final Socket socket;
     private final DataInputStream dataInputStream;
     private final DataOutputStream dataOutputStream;
 
+    /**
+     * Initiates the manager.
+     * The socket upon which the communication is based has already been built.
+     *
+     * @param socket upon which the network communication will be based
+     * @throws IOException
+     */
     public TCPDefaultNetworkManager(Socket socket) throws IOException {
         this.socket = socket;
         dataOutputStream = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));

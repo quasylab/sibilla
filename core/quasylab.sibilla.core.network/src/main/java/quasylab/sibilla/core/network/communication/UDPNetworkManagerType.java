@@ -26,6 +26,15 @@
 
 package quasylab.sibilla.core.network.communication;
 
+/**
+ * All of the names associated to the classes that implement {@link quasylab.sibilla.core.network.communication.UDPNetworkManager} and are based upon the UDP transport protocol.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public enum UDPNetworkManagerType implements NetworkManagerType {
+    /**
+     * The simplest interface implementation.
+     */
     DEFAULT
 }

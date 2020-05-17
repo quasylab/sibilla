@@ -31,10 +31,22 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+/**
+ * Simple communication class based upon the UDP transport protocol.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class UDPDefaultNetworkManager implements UDPNetworkManager {
 
     private final DatagramSocket socket;
 
+    /**
+     * Initiates the manager as a client.
+     * The socket upon which the communication is based has already been built.
+     *
+     * @param socket upon which the network communication will be based
+     */
     public UDPDefaultNetworkManager(DatagramSocket socket) {
         this.socket = socket;
     }

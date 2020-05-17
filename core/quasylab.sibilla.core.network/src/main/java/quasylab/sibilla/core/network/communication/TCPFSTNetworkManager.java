@@ -32,11 +32,24 @@ import org.nustaq.serialization.FSTConfiguration;
 import java.io.IOException;
 import java.net.Socket;
 
+/**
+ * Efficient TCP based communication class.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class TCPFSTNetworkManager implements TCPNetworkManager {
     private final Socket socket;
     private final TCPObjectSocket FSTSocket;
     private final FSTConfiguration conf = FSTConfiguration.getDefaultConfiguration();
 
+    /**
+     * Initiates the manager.
+     * The socket upon which the communication is based has already been built.
+     *
+     * @param socket upon which the network communication will be based
+     * @throws IOException
+     */
     public TCPFSTNetworkManager(Socket socket) throws IOException {
         this.socket = socket;
         FSTSocket = new TCPObjectSocket(socket, conf);
@@ -69,8 +82,8 @@ public class TCPFSTNetworkManager implements TCPNetworkManager {
 
     @Override
     public void closeConnection() throws IOException {
-            this.socket.close();
-            this.FSTSocket.close();
+        this.socket.close();
+        this.FSTSocket.close();
     }
 
     @Override

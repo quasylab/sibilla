@@ -30,19 +30,56 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Utility class used to load the data associated to a .class file into the memory.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
+
 public class CustomClassLoader extends ClassLoader {
 
-	public static Map<String, byte[]> classes = new HashMap<>();
+    /**
+     * Map that contains the names of all the classes loaded into memory through this loader.
+     * All the names are associated with the byte array containing the datas of the .class file of the class related to the given name.
+     */
+    private static Map<String, byte[]> classes = new HashMap<>();
 
-	public static void defClass(String name, byte[] b) {
-		try {
-			Method m = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class,
-					int.class);
-			m.setAccessible(true);
-			classes.put(name, b);
-			m.invoke(ClassLoader.getSystemClassLoader(), name, b, 0, b.length);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    /**
+     * Retrieves the byte array associated to a class name that was previously loaded through this loader.
+     *
+     * @param className the name of the class which byte array data needs to be retrieved.
+     * @return byte array associated with the requested class name.
+     */
+    public static byte[] loadClassBytes(String className) {
+        return classes.get(className);
+    }
+
+    /**
+     * Deletes the byte array associated to a class name that was previously loaded through this loader.
+     *
+     * @param className the name of the class which byte array data needs to be deleted.
+     * @return byte array associated with the requested class name or null if the class wasn't loaded using this loader.
+     */
+    public static byte[] removeClassBytes(String className) {
+        return classes.remove(className);
+    }
+
+    /**
+     * Loads into memory the data associated to a .class file
+     *
+     * @param name of the class to be loaded in memory.
+     * @param b    byte array containing the data of the class to be loaded in memory.
+     */
+    public static void defClass(String name, byte[] b) {
+        try {
+            Method m = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class,
+                    int.class);
+            m.setAccessible(true);
+            classes.put(name, b);
+            m.invoke(ClassLoader.getSystemClassLoader(), name, b, 0, b.length);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
