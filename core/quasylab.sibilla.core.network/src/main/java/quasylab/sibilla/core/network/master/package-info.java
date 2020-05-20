@@ -27,7 +27,8 @@
 /**
  * Contains the classes that manage the behavior of a master that submits clients' simulations received to registered slave servers.
  *
- * @author Stelluti Francesco Pio, Zamponi Marco
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
  */
 
 package quasylab.sibilla.core.network.master;

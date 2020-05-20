@@ -25,7 +25,11 @@
  */
 
 /**
- * Server package of the project
+ * Contains all the network related classes of the library.
+ *
+ * @author Belenchia Matteo
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
  */
 
 package quasylab.sibilla.core.network;

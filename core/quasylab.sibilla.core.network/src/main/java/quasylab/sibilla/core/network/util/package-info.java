@@ -25,7 +25,9 @@
  */
 
 /**
- * Util package of the server package
+ * Contains utility classes that are used in the library.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
  */
-
 package quasylab.sibilla.core.network.util;

@@ -38,10 +38,17 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
+/**
+ * Extensions of a simple server that executes the simulations passed by a master server.
+ * It replies to discovery messages sent from master servers.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
 
     private static final Logger LOGGER = Logger.getLogger(DiscoverableBasicSimulationServer.class.getName());
-    
+
     private final int localDiscoveryPort;
     private final Set<NetworkInfo> knownMasters;
 

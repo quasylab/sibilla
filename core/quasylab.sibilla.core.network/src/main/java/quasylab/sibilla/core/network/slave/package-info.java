@@ -25,7 +25,11 @@
  */
 
 /**
- * Slave server package of the server package
+ * Contains the classes that manage the behavior of a slave that receives submitted simulations from a master server.
+ *
+ * @author Belenchia Matteo
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
  */
 
 package quasylab.sibilla.core.network.slave;

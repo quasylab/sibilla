@@ -28,6 +28,7 @@
 /**
  * Contains the classes that manage the communication between hosts in the network.
  *
+ * @authore Belenchia Matteo
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */
