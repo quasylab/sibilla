@@ -30,10 +30,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import quasylab.sibilla.core.server.master.MasterServerSimulationEnvironment;
-import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
-import quasylab.sibilla.core.server.network.UDPNetworkManagerType;
-import quasylab.sibilla.core.server.util.SSLUtils;
+import quasylab.sibilla.core.network.master.MasterServerSimulationEnvironment;
+import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
+import quasylab.sibilla.core.network.util.SSLUtils;
 
 @SpringBootApplication
 public class MasterApplication implements CommandLineRunner {

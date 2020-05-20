@@ -26,9 +26,9 @@
 
 package quasylab.sibilla.examples.servers.slave;
 
-import quasylab.sibilla.core.server.DiscoverableBasicSimulationServer;
-import quasylab.sibilla.core.server.network.TCPNetworkManagerType;
-import quasylab.sibilla.core.server.util.SSLUtils;
+import quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer;
+import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import quasylab.sibilla.core.network.util.SSLUtils;
 
 import java.io.IOException;
 

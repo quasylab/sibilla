@@ -24,28 +24,14 @@
  *
  */
 
-package quasylab.sibilla.examples.servers.master;
+package quasylab.sibilla.core.network.communication;
 
-
-import org.springframework.stereotype.Component;
-import quasylab.sibilla.core.network.master.MasterState;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-@Component
-public class MonitoringServerComponent implements PropertyChangeListener {
-
-    private MasterState state;
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        this.state = (MasterState) evt.getNewValue();
-
-
-    }
-
-    public MasterState getMasterState() {
-        return this.state;
-    }
+/**
+ * Interface that needs to be implemented by all of the enum classes related to communication oriented classes that are based upon TCP/IP transport layer protocols.
+ *
+ * @author Belenchia Matteo
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
+public interface NetworkManagerType {
 }

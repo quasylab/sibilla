@@ -24,28 +24,25 @@
  *
  */
 
-package quasylab.sibilla.examples.servers.master;
+package quasylab.sibilla.core.network.slave;
 
-
-import org.springframework.stereotype.Component;
-import quasylab.sibilla.core.network.master.MasterState;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-@Component
-public class MonitoringServerComponent implements PropertyChangeListener {
-
-    private MasterState state;
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        this.state = (MasterState) evt.getNewValue();
-
-
-    }
-
-    public MasterState getMasterState() {
-        return this.state;
-    }
+/**
+ * All the possible command and signals that can be sent from a slave server.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
+public enum SlaveCommand {
+    /**
+     * The command sent by a slave server respond to a master server ping command.
+     */
+    PONG,
+    /**
+     * The command sent by a slave server to respond to a master server init command.
+     */
+    INIT_RESPONSE,
+    /**
+     * The command sent by a slave server to inform that the connection with an host will be closed.
+     */
+    CLOSE_CONNECTION
 }

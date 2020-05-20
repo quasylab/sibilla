@@ -24,28 +24,24 @@
  *
  */
 
-package quasylab.sibilla.examples.servers.master;
+package quasylab.sibilla.core.network.slave;
 
+import java.io.IOException;
 
-import org.springframework.stereotype.Component;
-import quasylab.sibilla.core.network.master.MasterState;
+/**
+ * Interface for slave servers that execute simulations
+ *
+ * @author Belenchia Matteo
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
+public interface SimulationServer {
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-@Component
-public class MonitoringServerComponent implements PropertyChangeListener {
-
-    private MasterState state;
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        this.state = (MasterState) evt.getNewValue();
-
-
-    }
-
-    public MasterState getMasterState() {
-        return this.state;
-    }
+    /**
+     * Creates and starts the slave server on the given port.
+     *
+     * @param port port used by the slave server to manage the incoming requests from the master servers
+     * @throws IOException when problems arise in network interfaces usage
+     */
+    public void start(int port) throws IOException;
 }
