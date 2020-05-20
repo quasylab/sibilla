@@ -59,7 +59,7 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
     /**
      * Collection of the {@link quasylab.sibilla.core.network.NetworkInfo} associated with every slave server registered.
      */
-    private List<NetworkInfo> slaveServers;
+    private Set<NetworkInfo> slaveServers;
     /**
      * The network related informations about this master server.
      */
@@ -85,7 +85,7 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
         this.masterNetworkInfo = masterNetworkInfo;
         this.masterServerStartDate = new Date();
         this.executedSimulations = 0;
-        this.slaveServers = new ArrayList<>();
+        this.slaveServers = new HashSet<>();
         this.updateSupport = new PropertyChangeSupport(this);
         this.simulationStates = new HashSet<>();
     }
@@ -100,10 +100,10 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
     }
 
     /**
-     * @return {@link java.util.List} related to registered slave servers.
+     * @return {@link java.util.Set} related to registered slave servers.
      */
-    public synchronized List<NetworkInfo> getSlaveServersNetworkInfos() {
-        return new ArrayList<>(slaveServers);
+    public synchronized Set<NetworkInfo> getSlaveServersNetworkInfos() {
+        return new HashSet<>(slaveServers);
     }
 
     /**
@@ -222,7 +222,7 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
         clone.simulationStates = this.simulationStates.stream().map(simulationState -> simulationState.clone()).collect(Collectors.toSet());
         clone.masterServerStartDate = (Date) this.masterServerStartDate.clone();
         final Map<NetworkInfo, Boolean> tempMapCopy = new HashMap<>();
-        clone.slaveServers = this.slaveServers.stream().map(slaveServer -> slaveServer.clone()).collect(Collectors.toList());
+        clone.slaveServers = this.slaveServers.stream().map(slaveServer -> slaveServer.clone()).collect(Collectors.toSet());
         clone.masterNetworkInfo = this.masterNetworkInfo.clone();
         return clone;
     }

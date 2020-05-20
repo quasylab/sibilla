@@ -121,7 +121,7 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
      * @param slaveNetworkInfos                 related to the slave servers the simulation will be submitted to.
      * @param masterServerSimulationEnvironment the environment that manages the simulation. It will be updated at every simulation update.
      */
-    public SimulationState(MasterState masterState, NetworkInfo masterNetworkInfo, NetworkInfo clientNetworkInfo, List<NetworkInfo> slaveNetworkInfos, MasterServerSimulationEnvironment masterServerSimulationEnvironment) {
+    public SimulationState(MasterState masterState, NetworkInfo masterNetworkInfo, NetworkInfo clientNetworkInfo, Set<NetworkInfo> slaveNetworkInfos, MasterServerSimulationEnvironment masterServerSimulationEnvironment) {
         this.masterNetworkInfo = masterNetworkInfo;
         this.clientNetworkInfo = clientNetworkInfo;
         this.simulationStartDate = new Date();

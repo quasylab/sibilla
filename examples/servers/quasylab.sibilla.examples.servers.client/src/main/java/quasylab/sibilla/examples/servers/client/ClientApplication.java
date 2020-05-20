@@ -55,7 +55,7 @@ public class ClientApplication implements Serializable {
 
     static {
         try {
-            MASTER_SERVER_INFO = new NetworkInfo(NetworkUtils.getLocalAddress(), 10001,
+            MASTER_SERVER_INFO = new NetworkInfo(InetAddress.getByName("192.168.1.202"), 10001,
                     TCPNetworkManagerType.SECURE);
         } catch (Exception e) {
             e.printStackTrace();
