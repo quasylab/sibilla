@@ -48,7 +48,7 @@ public class ClientApplication implements Serializable {
      *
      */
     private static final long serialVersionUID = 1L;
-    private static final int REPLICA = 10000;
+    private static final int REPLICA = 5000;
 
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
     private static NetworkInfo MASTER_SERVER_INFO;

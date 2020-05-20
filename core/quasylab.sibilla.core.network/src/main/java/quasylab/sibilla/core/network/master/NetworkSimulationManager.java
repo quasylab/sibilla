@@ -42,6 +42,7 @@ import quasylab.sibilla.core.simulator.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -120,7 +121,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
                 LOGGER.severe(String.format("[%s] Error during server initialization, removing slave", e.getMessage()));
             }
             return null;
-        }).collect(Collectors.toSet());
+        }).filter(Objects::nonNull).collect(Collectors.toSet());
         serverQueue = new LinkedBlockingQueue<>(networkManagers);
         this.startTasksHandling();
     }
