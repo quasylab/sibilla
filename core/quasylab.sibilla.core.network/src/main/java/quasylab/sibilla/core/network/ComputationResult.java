@@ -33,14 +33,36 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Class that stores the results of a simulation executed by a slave.
+ *
+ * @param <S> The {@link quasylab.sibilla.core.past.State} of the simulation model.
+ * @author Belenchia Matteo
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class ComputationResult<S extends State> implements Serializable {
     private static final long serialVersionUID = -545122842766553412L;
+
+    /**
+     * List of trajectory that contains the results of a simulation.
+     */
     private final LinkedList<Trajectory<S>> results;
 
+    /**
+     * Creates a new ComputationResult object with the list of trajectories passed in input
+     *
+     * @param results list of trajectories that compose the result of a simulation
+     */
     public ComputationResult(LinkedList<Trajectory<S>> results) {
         this.results = results;
     }
 
+    /**
+     * Returns the list of trajectories of a simulation
+     *
+     * @return list of trajectories that compose the result of a simulation
+     */
     public List<Trajectory<S>> getResults() {
         return results;
     }

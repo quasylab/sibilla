@@ -54,15 +54,41 @@ import java.util.logging.Logger;
 
 /**
  * Represent a simple server that executes the simulations passed by a master server
+ *
+ * @author Belenchia Matteo
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
  */
 public class BasicSimulationServer implements SimulationServer {
 
+    /**
+     * Class logger.
+     */
     private static final Logger LOGGER = Logger.getLogger(BasicSimulationServer.class.getName());
 
+    /**
+     * Slave server related network manager type
+     */
     private final TCPNetworkManagerType networkManagerType;
+
+    /**
+     * Tasks execution related thread executor.
+     */
     private final ExecutorService taskExecutor = Executors.newCachedThreadPool();
+
+    /**
+     * Master communications related thread executor.
+     */
     private final ExecutorService connectionExecutor = Executors.newCachedThreadPool();
+
+    /**
+     * Used by the slave server to manage incoming simulations.
+     */
     private int simulationPort;
+
+    /**
+     * Slave server network communication related info.
+     */
     protected NetworkInfo localServerInfo;
 
     /**

@@ -48,15 +48,55 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+/**
+ * Handles and coordinates a simulation between the slave servers
+ *
+ * @param <S> The {@link quasylab.sibilla.core.past.State} of the simulation model.
+ * @author Belenchia Matteo
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class NetworkSimulationManager<S extends State> extends QueuedSimulationManager<S> {
 
+    /**
+     * Class logger.
+     */
     private static final Logger LOGGER = Logger.getLogger(NetworkSimulationManager.class.getName());
+
+    /**
+     * {@link quasylab.sibilla.core.models.ModelDefinition} that represent the Model used in the simulation.
+     */
     private final ModelDefinition<S> modelDefinition;
+
+    /**
+     * Queue of servers used to fetch the slave servers the tasks are sent to.
+     */
     private final BlockingQueue<TCPNetworkManager> serverQueue;
+
+    /**
+     * Tasks handling related thread executor.
+     */
     private final ExecutorService executor;
+
+    /**
+     * State of the simulation that is being executed
+     */
     private final SimulationState simulationState;
+
+    /**
+     * Set of network managers associated to the connected slave servers
+     */
     private final Set<TCPNetworkManager> networkManagers;
 
+    /**
+     * Creates a NetworkSimulationManager with the parameters given in input
+     *
+     * @param random RandomGenerator used in the simulation
+     * @param consumer
+     * @param monitor TODO
+     * @param modelDefinition model definition that represent the Model used in the simulation
+     * @param simulationState state of the simulation that is being executed
+     */
     public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationMonitor monitor,
                                     ModelDefinition<S> modelDefinition, SimulationState simulationState) {
         super(random, monitor, consumer);// TODO: Gestire parametro Monitor
@@ -99,7 +139,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     /**
      * Initializes a connection to the target server sending the model class
      *
-     * @param slave NetworkManager throught the model is passed
+     * @param slave NetworkManager through the model is passed
      */
     private void initConnection(TCPNetworkManager slave) throws IOException {
         try {

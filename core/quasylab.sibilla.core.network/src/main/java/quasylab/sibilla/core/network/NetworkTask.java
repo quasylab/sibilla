@@ -32,15 +32,36 @@ import quasylab.sibilla.core.simulator.SimulationTask;
 import java.io.Serializable;
 import java.util.List;
 
-
+/**
+ * Class that stores a list of tasks sent through network.
+ *
+ * @param <S> The {@link quasylab.sibilla.core.past.State} of the simulation model.
+ * @author Belenchia Matteo
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class NetworkTask<S extends State> implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    /**
+     * List of tasks to be executed by a slave server
+     */
     private final List<SimulationTask<S>> tasks;
 
+    /**
+     * Creates a NetworkTask object from a list of tasks
+     *
+     * @param tasks list of tasks to be executed by a slave server
+     */
     public NetworkTask(List<SimulationTask<S>> tasks) {
         this.tasks = tasks;
     }
 
+    /**
+     * Returns the list of tasks to be executed by a slave server
+     *
+     * @return list of tasks to be executed by a slave server
+     */
     public List<SimulationTask<S>> getTasks() {
         return tasks;
     }

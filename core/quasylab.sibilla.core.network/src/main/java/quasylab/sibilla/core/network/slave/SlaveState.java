@@ -35,34 +35,68 @@ import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * Represents the state of a slave server
+ * Wraps the state of a slave server.
+ * Its updates can be listened by {@link java.beans.PropertyChangeListener} instances.
+ *
+ * @author Belenchia Matteo
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
  */
 public class SlaveState implements Serializable, Cloneable {
     private final static double alpha = 0.125;
     private final static double beta = 0.250;
     private final static int threshold = 256;
     private final static long maxRunningTime = 3600000000000L; // 1 hour in nanoseconds
+
+    /**
+     * The standard deviation of the round trip time of the simulation tasks execution
+     */
     public double devRTT;
+
+    /**
+     * The estimated round trip time of the simulation tasks to be executed
+     */
     public double estimatedRTT;
-    private int expectedTasks, actualTasks;
-    private boolean isRemoved, isTimeout;
-    private long runningTime;
+
+    /**
+     * The round trip time of the last simulation tasks executed by the slave
+     */
     private double sampleRTT;
+
+    /**
+     * Number of tasks that the slave server is expected to execute within the set time limit.
+     */
+    private int expectedTasks;
+
+    /**
+     * Number of tasks actually to simulate actually received
+     */
+    private int actualTasks;
+
+    /**
+     * Whether this slave server has been removed from the master server known slaves.
+     */
+    private boolean isRemoved;
+
+    /**
+     * Whether this slave server didn't send computation results to a master within time limit.
+     */
+    private boolean isTimeout;
+
+    /**
+     * The slave server running time.
+     */
+    private long runningTime;
+
+    /**
+     * The network related info about this slave server.
+     */
     private NetworkInfo slaveInfo;
+
+    /**
+     * To manage the {@link java.beans.PropertyChangeListener} instances.
+     */
     private transient PropertyChangeSupport updateSupport;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SlaveState that = (SlaveState) o;
-        return Objects.equals(slaveInfo, that.slaveInfo);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(slaveInfo);
-    }
 
     public SlaveState(SimulationState simulationState, NetworkInfo slaveInfo) {
         this.slaveInfo = slaveInfo;
@@ -76,6 +110,19 @@ public class SlaveState implements Serializable, Cloneable {
         estimatedRTT = 0.0;
         updateSupport = new PropertyChangeSupport(this);
         this.addPropertyChangeListener("Simulation Update", simulationState);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SlaveState that = (SlaveState) o;
+        return Objects.equals(slaveInfo, that.slaveInfo);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(slaveInfo);
     }
 
     /**
@@ -116,7 +163,7 @@ public class SlaveState implements Serializable, Cloneable {
     }
 
     /**
-     * TODO ???
+     * Migrates the network info from this slave server to another slave server
      */
     public void migrate(NetworkInfo newSlaveInfo) {
         this.slaveInfo = newSlaveInfo;
@@ -168,40 +215,37 @@ public class SlaveState implements Serializable, Cloneable {
         this.updateListeners();
     }
 
+    /**
+     * Updates the registered {@link java.beans.PropertyChangeListener} instances.
+     */
     private void updateListeners() {
         updateSupport.firePropertyChange("Simulation Update", null, this);
     }
 
+    /**
+     * @return the network related info about this slave server.
+     */
     public NetworkInfo getSlaveInfo() {
         return this.slaveInfo;
     }
 
+    /**
+     * @return number of tasks that the slave server is expected to execute within the set time limit.
+     */
     public int getExpectedTasks() {
         return expectedTasks;
     }
 
+    /**
+     * @return whether this slave server didn't send computation results to a master within time limit.
+     */
     public boolean isTimeout() {
         return isTimeout;
     }
 
-    @Override
-    public String toString() {
-        if (isRemoved()) {
-            return "Server has been removed.";
-        }
-        if (isTimeout()) {
-            return "Server has timed out, reconnecting...";
-        }
-        return this.slaveInfo +
-                "\n - Tasks received: " + actualTasks +
-                "\n - Window runtime: " + runningTime + "ns " +
-                "\n - sampleRTT: " + sampleRTT + "ns " +
-                "\n - estimatedRTT: " + estimatedRTT + "ns " +
-                "\n - devRTT: " + devRTT + "ns "
-                + "\n - Next task window: " + expectedTasks + " " + "\n - Next time limit: " + getTimeLimit() + "ns "
-                + "\n - Next timeout: " + getTimeout() + "ns";
-    }
-
+    /**
+     * @return whether this slave server has been removed from the master server known slaves.
+     */
     public boolean isRemoved() {
         return isRemoved;
     }
@@ -220,6 +264,24 @@ public class SlaveState implements Serializable, Cloneable {
     public void timedOut() {
         isTimeout = true;
         this.updateListeners();
+    }
+
+    @Override
+    public String toString() {
+        if (isRemoved()) {
+            return "Server has been removed.";
+        }
+        if (isTimeout()) {
+            return "Server has timed out, reconnecting...";
+        }
+        return this.slaveInfo +
+                "\n - Tasks received: " + actualTasks +
+                "\n - Window runtime: " + runningTime + "ns " +
+                "\n - sampleRTT: " + sampleRTT + "ns " +
+                "\n - estimatedRTT: " + estimatedRTT + "ns " +
+                "\n - devRTT: " + devRTT + "ns "
+                + "\n - Next task window: " + expectedTasks + " " + "\n - Next time limit: " + getTimeLimit() + "ns "
+                + "\n - Next timeout: " + getTimeout() + "ns";
     }
 
     public SlaveState clone() {

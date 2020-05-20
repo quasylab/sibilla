@@ -32,13 +32,19 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 
+/**
+ * Utility class used to manage and find the local ip of the host and its interfaces in an easy way
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class NetworkUtils {
 
     /**
-     * Returns the local IPV4 address of the machine
+     * Returns the local IPV4 address of the machine.
      *
-     * @return the address
-     * @throws SocketException TODO Exception
+     * @return local IPV4 address of the machine.
+     * @throws SocketException if the host has no network interfaces configured or if an I/O exception happens
      */
     public static InetAddress getLocalAddress() throws SocketException {
         return NetworkInterface.networkInterfaces().filter(networkInterface -> {
@@ -51,6 +57,12 @@ public class NetworkUtils {
         }).findFirst().map(NetworkInterface::getInterfaceAddresses).get().stream().filter(interfaceAddress -> interfaceAddress.getAddress() instanceof Inet4Address).findFirst().get().getAddress();
     }
 
+    /**
+     * Returns a list of the broadcast addresses linked to each network interface on the host.
+     *
+     * @return list of broadcast addresses linked to the network interfaces of the host
+     * @throws SocketException if the host has no network interfaces configured or if an I/O exception happens
+     */
     public static List<InetAddress> getBroadcastAddresses() throws SocketException {
         return NetworkInterface.networkInterfaces().filter(networkInterface -> {
             try {

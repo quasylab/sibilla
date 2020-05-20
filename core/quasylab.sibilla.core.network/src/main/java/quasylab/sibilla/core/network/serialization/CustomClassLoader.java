@@ -33,6 +33,7 @@ import java.util.Map;
 /**
  * Utility class used to load the data associated to a .class file into the memory.
  *
+ * @author Belenchia Matteo
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */

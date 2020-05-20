@@ -33,6 +33,7 @@ import java.io.InputStream;
 /**
  * Utility class used to extract the data associated to the .class file of a compiled Java class.
  *
+ * @author Belenchia Matteo
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */

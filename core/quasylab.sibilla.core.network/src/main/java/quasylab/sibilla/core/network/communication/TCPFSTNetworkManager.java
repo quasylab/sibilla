@@ -35,6 +35,7 @@ import java.net.Socket;
 /**
  * Efficient TCP based communication class.
  *
+ * @author Belenchia Matteo
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */

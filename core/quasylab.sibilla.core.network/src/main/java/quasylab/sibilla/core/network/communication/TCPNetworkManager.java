@@ -40,6 +40,7 @@ import java.net.Socket;
 /**
  * Interface that needs to be extended from all of the communication related classes that are based upon the TCP transport protocol.
  *
+ * @author Belenchia Matteo
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */

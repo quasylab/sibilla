@@ -34,17 +34,63 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 import java.io.Serializable;
 
+/**
+ * Class that stores info about the simulation that is executed by slaves.
+ *
+ * @param <S> The {@link quasylab.sibilla.core.past.State} of the simulation model.
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class SimulationDataSet<S extends State> implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    /**
+     * RandomGenerator used by the simulation.
+     */
     private final RandomGenerator randomGenerator;
+
+    /**
+     * {@link quasylab.sibilla.core.models.ModelDefinition} that represent the Model used in the simulation.
+     */
     private final ModelDefinition<S> modelDefinition;
+
+    /**
+     * {@link quasylab.sibilla.core.models.Model} used in the simulation.
+     */
     private final Model<S> model;
+
+    /**
+     * Initial state of the model.
+     */
     private final S modelInitialState;
+
+    /**
+     * {@link quasylab.sibilla.core.simulator.sampling.SamplingFunction} used to sample the model.
+     */
     private final SamplingFunction<S> modelSamplingFunction;
+
+    /**
+     * Number of times the simulation is executed.
+     */
     private final int replica;
+
+    /**
+     * The deadline of the simulation.
+     */
     private final double deadline;
 
+    /**
+     * Creates a SimulationDataSet object with the parameters given in input.
+     *
+     * @param random            RandomGenerator used by the simulation
+     * @param modelDefinition   {@link quasylab.sibilla.core.models.ModelDefinition} that represent the Model used in the simulation
+     * @param model             {@link quasylab.sibilla.core.models.Model} used in the simulation
+     * @param initialState      Initial state of the model
+     * @param sampling_function {@link quasylab.sibilla.core.simulator.sampling.SamplingFunction} used to sample the model
+     * @param replica           Number of times the simulation is executed
+     * @param deadline          The deadline of the simulation
+     */
     public SimulationDataSet(RandomGenerator random, ModelDefinition<S> modelDefinition, Model<S> model, S initialState,
                              SamplingFunction<S> sampling_function, int replica, double deadline) {
         this.modelDefinition = modelDefinition;
@@ -112,36 +158,65 @@ public class SimulationDataSet<S extends State> implements Serializable {
         return replica == other.replica;
     }
 
+    /**
+     * Returns the RandomGenerator used in the simulation.
+     *
+     * @return RandomGenerator used in the simulation
+     */
     public RandomGenerator getRandomGenerator() {
         return randomGenerator;
     }
 
-
+    /**
+     * Returns the {@link quasylab.sibilla.core.models.ModelDefinition} that represent the Model used in the simulation.
+     *
+     * @return ModelDefinition that represent the Model used in the simulation
+     */
     public ModelDefinition<S> getModelDefinition() {
         return modelDefinition;
     }
 
-
+    /**
+     * {@link quasylab.sibilla.core.models.Model} used in the simulation.
+     *
+     * @return Model used in the simulation
+     */
     public Model<S> getModel() {
         return model;
     }
 
-
+    /**
+     * Returns the initial state of the model.
+     *
+     * @return initial state of the model
+     */
     public S getModelInitialState() {
         return modelInitialState;
     }
 
-
+    /**
+     * Returns the {@link quasylab.sibilla.core.simulator.sampling.SamplingFunction} used to sample the model.
+     *
+     * @return SamplingFunction used to sample the model
+     */
     public SamplingFunction<S> getModelSamplingFunction() {
         return modelSamplingFunction;
     }
 
-
+    /**
+     * Return the number of times the simulation is executed.
+     *
+     * @return number of times the simulation is executed
+     */
     public int getReplica() {
         return replica;
     }
 
-
+    /**
+     * Returns the deadline of the simulation.
+     *
+     * @return deadline of the simulation
+     */
     public double getDeadline() {
         return deadline;
     }

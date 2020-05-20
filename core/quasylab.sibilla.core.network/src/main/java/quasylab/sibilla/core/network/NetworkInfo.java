@@ -32,13 +32,38 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+/**
+ * Class that stores info about the connection with a server
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class NetworkInfo implements Serializable, Cloneable {
 
     private static final long serialVersionUID = -2428861423753648117L;
-    private InetAddress address;
+
+    /**
+     * Ports the server listens to.
+     */
     private final int port;
+
+    /**
+     * Type of network manager used by the server.
+     */
     private final NetworkManagerType type;
 
+    /**
+     * Address of the server.
+     */
+    private InetAddress address;
+
+    /**
+     * Creates a new NetworkInfo object with the parameters given in input
+     *
+     * @param address address of the server
+     * @param port port the server listens to
+     * @param serType type of the network manager used by the server
+     */
     public NetworkInfo(InetAddress address, int port, NetworkManagerType serType) {
         this.address = address;
         this.port = port;
@@ -46,14 +71,29 @@ public class NetworkInfo implements Serializable, Cloneable {
 
     }
 
+    /**
+     * Returns the address of the server
+     *
+     * @return address of the server
+     */
     public InetAddress getAddress() {
         return address;
     }
 
+    /**
+     * Returns the port the server listens to
+     *
+     * @return port the server listens to
+     */
     public int getPort() {
         return port;
     }
 
+    /**
+     * Returns the type of network manager used by the server.
+     *
+     * @return type of network manager used by the server.
+     */
     public NetworkManagerType getType() {
         return type;
     }

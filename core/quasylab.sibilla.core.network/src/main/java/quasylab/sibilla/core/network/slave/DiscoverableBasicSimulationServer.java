@@ -41,8 +41,7 @@ import java.util.logging.Logger;
 public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
 
     private static final Logger LOGGER = Logger.getLogger(DiscoverableBasicSimulationServer.class.getName());
-
-
+    
     private final int localDiscoveryPort;
     private final Set<NetworkInfo> knownMasters;
 

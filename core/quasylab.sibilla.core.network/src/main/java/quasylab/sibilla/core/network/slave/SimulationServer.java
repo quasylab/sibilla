@@ -28,6 +28,20 @@ package quasylab.sibilla.core.network.slave;
 
 import java.io.IOException;
 
+/**
+ * Interface for slave servers that execute simulations
+ *
+ * @author Belenchia Matteo
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public interface SimulationServer {
+
+    /**
+     * Creates and starts the slave server on the given port.
+     *
+     * @param port port used by the slave server to manage the incoming requests from the master servers
+     * @throws IOException when problems arise in network interfaces usage
+     */
     public void start(int port) throws IOException;
 }

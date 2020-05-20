@@ -32,6 +32,7 @@ import java.net.Socket;
 /**
  * Simple TCP based communication class.
  *
+ * @author Belenchia Matteo
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */

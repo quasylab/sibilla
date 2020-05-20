@@ -31,15 +31,42 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 
-
+/**
+ * Utility class used to store the data used to create SSL connection and to easily create SSLContext
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class SSLUtils {
 
+    /**
+     * Path of the KeyStore file.
+     */
     private String keyStorePath;
+
+    /**
+     * Password to access the KeyStore file.
+     */
     private String keyStorePass;
+
+    /**
+     * Type of the KeyStore file.
+     */
     private String keyStoreType;
 
+    /**
+     * Path of the TrustStore file.
+     */
     private String trustStorePath;
+
+    /**
+     * Password to access the TrustStore file.
+     */
     private String trustStorePass;
+
+    /**
+     * Type of the TrustStore file.
+     */
     private String trustStoreType;
 
     private static SSLUtils instance;
@@ -78,6 +105,13 @@ public class SSLUtils {
         this.trustStoreType = trustStoreType;
     }
 
+
+    /**
+     * Creates the SSLContext with the parameters that has been set previously.
+     *
+     * @return SSLContext used to create a secure connection
+     * @throws IOException when TrustStores and KeyStores filer are invalid.
+     */
     public SSLContext createSSLContext() throws IOException {
         try {
             if (this.keyStorePath == null || this.keyStorePass == null || this.keyStoreType == null) {

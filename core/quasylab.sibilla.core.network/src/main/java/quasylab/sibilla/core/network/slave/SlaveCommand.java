@@ -27,8 +27,22 @@
 package quasylab.sibilla.core.network.slave;
 
 /**
- * All the possible command that can be sent from a slave
+ * All the possible command and signals that can be sent from a slave server.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
  */
 public enum SlaveCommand {
-    PONG, RESULTS, INIT_RESPONSE, CLOSE_CONNECTION
+    /**
+     * The command sent by a slave server respond to a master server ping command.
+     */
+    PONG,
+    /**
+     * The command sent by a slave server to respond to a master server init command.
+     */
+    INIT_RESPONSE,
+    /**
+     * The command sent by a slave server to inform that the connection with an host will be closed.
+     */
+    CLOSE_CONNECTION
 }
