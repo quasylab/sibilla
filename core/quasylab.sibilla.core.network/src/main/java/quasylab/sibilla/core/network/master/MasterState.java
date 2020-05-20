@@ -170,10 +170,13 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
      * @return {@link java.lang.Boolean} that indicates the result of the operation.
      */
     public synchronized boolean removeSlaveServer(NetworkInfo slaveNetworkInfo) {
-
         if (this.slaveServers.remove(slaveNetworkInfo) != null) {
             this.simulationStates.forEach(simulationState -> {
                 simulationState.getSlaveStateByServerInfo(slaveNetworkInfo).setRemoved();
+                SlaveState toRemove = simulationState.getSlaveStateByServerInfo(slaveNetworkInfo);
+                if (toRemove != null) {
+                    toRemove.setRemoved();
+                }
             });
             this.updateListeners();
             return true;
