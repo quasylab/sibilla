@@ -171,11 +171,9 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     private void broadcastToInterfaces() {
         try {
             while (true) {
-                state.resetKeepAlive();
                 NetworkUtils.getBroadcastAddresses().stream().forEach(this::broadcastToSingleInterface);
                 Thread.sleep(discoveryTime);
-                state.cleanKeepAlive();
-                LOGGER.info(String.format("Current set of servers: %s", state.slaveServersMap()));
+                LOGGER.info(String.format("Current set of servers: %s", state.getSlaveServersNetworkInfos()));
             }
         } catch (InterruptedException e) {
             LOGGER.severe(String.format("[%s] Interrupted exception", e.getMessage()));

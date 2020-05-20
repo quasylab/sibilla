@@ -283,7 +283,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             pingServer.getSocket().setSoTimeout(5000); // set 5 seconds timeout on read operations
             LOGGER.info(
                     String.format("Creating a new NetworkManager to ping slave: %s", pingServer.getNetworkInfo().toString()));
-            oldState.timedOut(); // mark server as timed out and update GUI
+            oldState.timedOut(); // mark server as timed out
 
             initConnection(pingServer); // initialize connection sending model data
             pingServer.writeObject(Serializer.serialize(MasterCommand.PING));
@@ -312,7 +312,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             LOGGER.severe(String.format(
                     "The response has been received after the time limit. The slave will be removed: %s",
                     pingServer.getNetworkInfo().toString()));
-            oldState.setRemoved(); // mark server as removed and update GUI
+            oldState.setRemoved(); // mark server as removed
             this.networkManagers.remove(server);
             return null;
         }

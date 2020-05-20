@@ -73,8 +73,10 @@ public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
 
             while (true) {
                 NetworkInfo masterInfo = (NetworkInfo) Serializer.deserialize(manager.readObject());
-                LOGGER.info(String.format("Discovered by the master: %s", masterInfo.toString()));
-                manageDiscoveryMessage(manager, masterInfo);
+                if (!this.knownMasters.contains(masterInfo)) {
+                    LOGGER.info(String.format("Discovered the master: %s", masterInfo.toString()));
+                    manageDiscoveryMessage(manager, masterInfo);
+                }
             }
 
         } catch (SocketException e) {
