@@ -35,6 +35,11 @@ import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
 import quasylab.sibilla.core.network.util.SSLUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @SpringBootApplication
 public class MasterApplication implements CommandLineRunner {
 
@@ -51,14 +56,35 @@ public class MasterApplication implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
-        SSLUtils.getInstance().setKeyStoreType("JKS");
-        SSLUtils.getInstance().setKeyStorePath("masterKeyStore.jks");
-        SSLUtils.getInstance().setKeyStorePass("masterPass");
-        SSLUtils.getInstance().setTrustStoreType("JKS");
-        SSLUtils.getInstance().setTrustStorePath("masterTrustStore.jks");
-        SSLUtils.getInstance().setTrustStorePass("masterPass");
+    public void run(String... args) {
+        final Map<String, String> options = parseOptions(args);
 
-        MasterServerSimulationEnvironment masterEnvironment = new MasterServerSimulationEnvironment(LOCAL_DISCOVERY_PORT, REMOTE_DISCOVERY_PORT, DISCOVERY_NETWORK_MANAGER_TYPE, LOCAL_SIMULATION_PORT, SIMULATION_NETWORK_MANAGER_TYPE, monitoringServerComponent);
+        SSLUtils.getInstance().setKeyStoreType(options.getOrDefault("keyStoreType", "JKS"));
+        SSLUtils.getInstance().setKeyStorePath(options.getOrDefault("keyStorePath", "masterKeyStore.jks"));
+        SSLUtils.getInstance().setKeyStorePass(options.getOrDefault("keyStorePass", "masterPass"));
+        SSLUtils.getInstance().setTrustStoreType(options.getOrDefault("trustStoreType", "JKS"));
+        SSLUtils.getInstance().setTrustStorePath(options.getOrDefault("trustStorePath", "masterTrustStore.jks"));
+        SSLUtils.getInstance().setTrustStorePass(options.getOrDefault("trustStorePass", "masterPass"));
+
+        new MasterServerSimulationEnvironment(LOCAL_DISCOVERY_PORT, REMOTE_DISCOVERY_PORT, DISCOVERY_NETWORK_MANAGER_TYPE, LOCAL_SIMULATION_PORT, SIMULATION_NETWORK_MANAGER_TYPE, monitoringServerComponent);
+    }
+
+    private Map<String, String> parseOptions(String[] args) {
+        final Map<String, String> options = new HashMap<>();
+
+        String optionArgument = null;
+        for (final String a : args) {
+            if (a.charAt(0) == '-') {
+                if (a.length() < 2) {
+                    System.out.println("Invalid parameter: " + a);
+                    continue;
+                }
+                optionArgument = a;
+            } else if (optionArgument != null) {
+                options.put(optionArgument.substring(1), a);
+                optionArgument = null;
+            }
+        }
+        return options;
     }
 }
