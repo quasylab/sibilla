@@ -33,50 +33,77 @@ import quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
+import quasylab.sibilla.core.network.util.StartupUtils;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Map;
+import java.util.logging.Logger;
 
 public class ClientApplication implements Serializable {
 
+    private static final Logger LOGGER = Logger.getLogger(ClientApplication.class.getName());
+
     public final static int SAMPLINGS = 100;
     public final static double DEADLINE = 600;
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
     private static final int REPLICA = 5000;
 
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
-    private static NetworkInfo MASTER_SERVER_INFO;
 
-    static {
-        try {
-            MASTER_SERVER_INFO = new NetworkInfo(InetAddress.getByName("192.168.1.202"), 10001,
-                    TCPNetworkManagerType.SECURE);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    public static void main(String[] argv) throws Exception {
+    public static void main(String... args) throws Exception {
 
-        SSLUtils.getInstance().setKeyStoreType("JKS");
-        SSLUtils.getInstance().setKeyStorePath("clientKeyStore.jks");
-        SSLUtils.getInstance().setKeyStorePass("clientPass");
-        SSLUtils.getInstance().setTrustStoreType("JKS");
-        SSLUtils.getInstance().setTrustStorePath("clientTrustStore.jks");
-        SSLUtils.getInstance().setTrustStorePass("clientPass");
+        final Map<String, String> options = StartupUtils.parseOptions(args);
+
+        final String keyStoreType = options.getOrDefault("keyStoreType", "JKS");
+        final String keyStorePath = options.getOrDefault("keyStorePath", "clientKeyStore.jks");
+        final String keyStorePass = options.getOrDefault("keyStorePass", "clientPass");
+        final String trustStoreType = options.getOrDefault("trustStoreType", "JKS");
+        final String trustStorePath = options.getOrDefault("trustStorePath", "clientTrustStore.jks");
+        final String trustStorePass = options.getOrDefault("trustStorePass", "clientPass");
+
+        SSLUtils.getInstance().setKeyStoreType(keyStoreType);
+        SSLUtils.getInstance().setKeyStorePath(keyStorePath);
+        SSLUtils.getInstance().setKeyStorePass(keyStorePass);
+        SSLUtils.getInstance().setTrustStoreType(trustStoreType);
+        SSLUtils.getInstance().setTrustStorePath(trustStorePath);
+        SSLUtils.getInstance().setTrustStorePass(trustStorePass);
+
+        final String masterAddress = options.getOrDefault("masterAddress", "");
+        final int masterSimulationPort = Integer.parseInt(options.getOrDefault("masterSimulationPort", "10001"));
+        final TCPNetworkManagerType masterSimulationNetworkManagerType = StartupUtils.TCPNetworkManagerParser(options.getOrDefault("masterSimulationCommunicationType", "SECURE"));
+
+
+        final NetworkInfo masterServerInfo = new NetworkInfo(InetAddress.getByName(masterAddress), masterSimulationPort,
+                masterSimulationNetworkManagerType);
+
+
+        LOGGER.info(String.format("Starting the Master Server with the params:\n" +
+                        "-keyStoreType: [%s]\n" +
+                        "-keyStorePath: [%s]\n" +
+                        "-trustStoreType: [%s]\n" +
+                        "-trustStorePath: [%s]\n" +
+                        "-masterAddress: [%s]\n" +
+                        "-masterSimulationPort: [%d]\n" +
+                        "-masterSimulationCommunicationType: [%s]",
+                keyStoreType,
+                keyStorePath,
+                trustStoreType,
+                trustStorePath,
+                masterAddress,
+                masterSimulationPort,
+                masterSimulationNetworkManagerType));
 
         SEIRModelDefinition modelDefinition = new SEIRModelDefinition();
 
 
         ClientSimulationEnvironment<PopulationState> client = new ClientSimulationEnvironment<PopulationState>(
                 RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), SEIRModelDefinition.getCollection(SAMPLINGS, DEADLINE),
-                REPLICA, DEADLINE, MASTER_SERVER_INFO);
+                REPLICA, DEADLINE, masterServerInfo);
 
     }
 

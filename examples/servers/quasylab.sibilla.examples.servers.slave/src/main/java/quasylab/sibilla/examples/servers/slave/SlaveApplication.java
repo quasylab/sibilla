@@ -26,52 +26,68 @@
 
 package quasylab.sibilla.examples.servers.slave;
 
+import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
 import quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.util.SSLUtils;
+import quasylab.sibilla.core.network.util.StartupUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 
 public class SlaveApplication {
-    private static final int LOCAL_DISCOVERY_PORT = 59119;
-    private static final int LOCAL_SIMULATION_PORT = 8082;
-    private static final TCPNetworkManagerType SIMULATION_TCP_NETWORK_MANAGER = TCPNetworkManagerType.SECURE;
 
+    private static final Logger LOGGER = Logger.getLogger(SlaveApplication.class.getName());
 
     public static void main(String[] args) {
-        final Map<String, String> options = parseOptions(args);
+        final Map<String, String> options = StartupUtils.parseOptions(args);
 
-        SSLUtils.getInstance().setKeyStoreType(options.getOrDefault("keyStoreType", "JKS"));
-        SSLUtils.getInstance().setKeyStorePath(options.getOrDefault("keyStorePath", "slaveKeyStore.jks"));
-        SSLUtils.getInstance().setKeyStorePass(options.getOrDefault("keyStorePass", "slavePass"));
-        SSLUtils.getInstance().setTrustStoreType(options.getOrDefault("trustStoreType", "JKS"));
-        SSLUtils.getInstance().setTrustStorePath(options.getOrDefault("trustStorePath", "slaveTrustStore.jks"));
-        SSLUtils.getInstance().setTrustStorePass(options.getOrDefault("trustStorePass", "slavePass"));
+        final int localDiscoveryPort = Integer.parseInt(options.getOrDefault("slaveDiscoveryPort", "59119"));
+        final int localSimulationPort = Integer.parseInt(options.getOrDefault("slaveSimulationPort", "8082"));
 
-        new DiscoverableBasicSimulationServer(LOCAL_DISCOVERY_PORT, SIMULATION_TCP_NETWORK_MANAGER).start(LOCAL_SIMULATION_PORT);
+        final UDPNetworkManagerType masterDiscoveryNetworkManagerType = StartupUtils.UDPNetworkManagerParser(options.getOrDefault("masterDiscoveryCommunicationType", "DEFAULT"));
+        final TCPNetworkManagerType masterSimulationNetworkManagerType = StartupUtils.TCPNetworkManagerParser(options.getOrDefault("masterSimulationCommunicationType", "SECURE"));
+
+        final String keyStoreType = options.getOrDefault("keyStoreType", "JKS");
+        final String keyStorePath = options.getOrDefault("keyStorePath", "slaveKeyStore.jks");
+        final String keyStorePass = options.getOrDefault("keyStorePass", "slavePass");
+        final String trustStoreType = options.getOrDefault("trustStoreType", "JKS");
+        final String trustStorePath = options.getOrDefault("trustStorePath", "slaveTrustStore.jks");
+        final String trustStorePass = options.getOrDefault("trustStorePass", "slavePass");
+
+        SSLUtils.getInstance().setKeyStoreType(keyStoreType);
+        SSLUtils.getInstance().setKeyStorePath(keyStorePath);
+        SSLUtils.getInstance().setKeyStorePass(keyStorePass);
+        SSLUtils.getInstance().setTrustStoreType(trustStoreType);
+        SSLUtils.getInstance().setTrustStorePath(trustStorePath);
+        SSLUtils.getInstance().setTrustStorePass(trustStorePass);
+
+        LOGGER.info(String.format("Starting the Master Server with the params:\n" +
+                        "-keyStoreType: [%s]\n" +
+                        "-keyStorePath: [%s]\n" +
+                        "-trustStoreType: [%s]\n" +
+                        "-trustStorePath: [%s]\n" +
+                        "-slaveDiscoveryPort: [%d]\n" +
+                        "-slaveSimulationPort: [%d]\n" +
+                        "-masterDiscoveryCommunicationType: [%s]\n" +
+                        "-masterSimulationCommunicationType: [%s]",
+                keyStoreType,
+                keyStorePath,
+                trustStoreType,
+                trustStorePath,
+                localDiscoveryPort,
+                localSimulationPort,
+                masterDiscoveryNetworkManagerType,
+                masterSimulationNetworkManagerType));
+
+
+        new DiscoverableBasicSimulationServer(localDiscoveryPort, masterSimulationNetworkManagerType, masterDiscoveryNetworkManagerType).start(localSimulationPort);
     }
 
-    private static Map<String, String> parseOptions(String[] args) {
-        final Map<String, String> options = new HashMap<>();
 
-        String optionArgument = null;
-        for (final String a : args) {
-            if (a.charAt(0) == '-') {
-                if (a.length() < 2) {
-                    System.err.println("Error at argument " + a);
-                    return null;
-                }
-                optionArgument = a;
-            } else if (optionArgument != null) {
-                options.put(optionArgument.substring(1), a);
-                optionArgument = null;
-            }
-        }
-        return options;
-    }
 }
