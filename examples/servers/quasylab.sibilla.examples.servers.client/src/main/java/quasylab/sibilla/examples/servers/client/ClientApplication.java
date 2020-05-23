@@ -27,28 +27,23 @@
 package quasylab.sibilla.examples.servers.client;
 
 import org.apache.commons.math3.random.AbstractRandomGenerator;
-import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
-import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.network.util.StartupUtils;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.logging.Logger;
 
 public class ClientApplication implements Serializable {
 
-    private static final Logger LOGGER = Logger.getLogger(ClientApplication.class.getName());
-
     public final static int SAMPLINGS = 100;
     public final static double DEADLINE = 600;
+    private static final Logger LOGGER = Logger.getLogger(ClientApplication.class.getName());
     private static final long serialVersionUID = 1L;
     private static final int REPLICA = 5000;
 
@@ -74,13 +69,11 @@ public class ClientApplication implements Serializable {
         SSLUtils.getInstance().setTrustStorePass(trustStorePass);
 
         final String masterAddress = options.getOrDefault("masterAddress", "");
-        final int masterSimulationPort = Integer.parseInt(options.getOrDefault("masterSimulationPort", "10001"));
-        final TCPNetworkManagerType masterSimulationNetworkManagerType = StartupUtils.TCPNetworkManagerParser(options.getOrDefault("masterSimulationCommunicationType", "SECURE"));
+        final int masterPort = Integer.parseInt(options.getOrDefault("masterPort", "10001"));
+        final TCPNetworkManagerType masterNetworkManagerType = StartupUtils.TCPNetworkManagerParser(options.getOrDefault("masterCommunicationType", "SECURE"));
 
-
-        final NetworkInfo masterServerInfo = new NetworkInfo(InetAddress.getByName(masterAddress), masterSimulationPort,
-                masterSimulationNetworkManagerType);
-
+        final NetworkInfo masterServerInfo = new NetworkInfo(InetAddress.getByName(masterAddress), masterPort,
+                masterNetworkManagerType);
 
         LOGGER.info(String.format("Starting the Master Server with the params:\n" +
                         "-keyStoreType: [%s]\n" +
@@ -88,20 +81,19 @@ public class ClientApplication implements Serializable {
                         "-trustStoreType: [%s]\n" +
                         "-trustStorePath: [%s]\n" +
                         "-masterAddress: [%s]\n" +
-                        "-masterSimulationPort: [%d]\n" +
-                        "-masterSimulationCommunicationType: [%s]",
+                        "-masterPort: [%d]\n" +
+                        "-masterCommunicationType: [%s]",
                 keyStoreType,
                 keyStorePath,
                 trustStoreType,
                 trustStorePath,
                 masterAddress,
-                masterSimulationPort,
-                masterSimulationNetworkManagerType));
+                masterPort,
+                masterNetworkManagerType));
 
         SEIRModelDefinition modelDefinition = new SEIRModelDefinition();
 
-
-        ClientSimulationEnvironment<PopulationState> client = new ClientSimulationEnvironment<PopulationState>(
+        new ClientSimulationEnvironment(
                 RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), SEIRModelDefinition.getCollection(SAMPLINGS, DEADLINE),
                 REPLICA, DEADLINE, masterServerInfo);
 
