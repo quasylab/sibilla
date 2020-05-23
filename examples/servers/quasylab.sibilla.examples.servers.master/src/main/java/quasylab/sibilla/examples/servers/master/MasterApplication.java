@@ -30,16 +30,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
-import quasylab.sibilla.core.network.master.MasterServerSimulationEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
+import quasylab.sibilla.core.network.master.MasterServerSimulationEnvironment;
 import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.network.util.StartupUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -66,19 +62,22 @@ public class MasterApplication implements CommandLineRunner {
         final UDPNetworkManagerType slaveDiscoveryNetworkManagerType = StartupUtils.UDPNetworkManagerParser(options.getOrDefault("slaveDiscoveryCommunicationType", "DEFAULT"));
         final TCPNetworkManagerType clientSimulationNetworkManagerType = StartupUtils.TCPNetworkManagerParser(options.getOrDefault("clientSimulationCommunicationType", "SECURE"));
 
-        final String keyStoreType = options.getOrDefault("keyStoreType", "JKS");
-        final String keyStorePath = options.getOrDefault("keyStorePath", "masterKeyStore.jks");
-        final String keyStorePass = options.getOrDefault("keyStorePass", "masterPass");
-        final String trustStoreType = options.getOrDefault("trustStoreType", "JKS");
-        final String trustStorePath = options.getOrDefault("trustStorePath", "masterTrustStore.jks");
-        final String trustStorePass = options.getOrDefault("trustStorePass", "masterPass");
+            final String keyStoreType = options.getOrDefault("keyStoreType", "JKS");
+            final String keyStorePath = options.getOrDefault("keyStorePath", "masterKeyStore.jks");
+            final String keyStorePass = options.getOrDefault("keyStorePass", "masterPass");
+            final String trustStoreType = options.getOrDefault("trustStoreType", "JKS");
+            final String trustStorePath = options.getOrDefault("trustStorePath", "masterTrustStore.jks");
+            final String trustStorePass = options.getOrDefault("trustStorePass", "masterPass");
 
-        SSLUtils.getInstance().setKeyStoreType(keyStoreType);
-        SSLUtils.getInstance().setKeyStorePath(keyStorePath);
-        SSLUtils.getInstance().setKeyStorePass(keyStorePass);
-        SSLUtils.getInstance().setTrustStoreType(trustStoreType);
-        SSLUtils.getInstance().setTrustStorePath(trustStorePath);
-        SSLUtils.getInstance().setTrustStorePass(trustStorePass);
+        if (clientSimulationNetworkManagerType.equals(TCPNetworkManagerType.SECURE)) {
+
+            SSLUtils.getInstance().setKeyStoreType(keyStoreType);
+            SSLUtils.getInstance().setKeyStorePath(keyStorePath);
+            SSLUtils.getInstance().setKeyStorePass(keyStorePass);
+            SSLUtils.getInstance().setTrustStoreType(trustStoreType);
+            SSLUtils.getInstance().setTrustStorePath(trustStorePath);
+            SSLUtils.getInstance().setTrustStorePass(trustStorePass);
+        }
 
         LOGGER.info(String.format("Starting the Master Server with the params:\n" +
                         "-keyStoreType: [%s]\n" +

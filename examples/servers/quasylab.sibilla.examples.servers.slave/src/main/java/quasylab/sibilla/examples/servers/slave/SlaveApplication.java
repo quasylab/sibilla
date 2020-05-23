@@ -26,16 +26,12 @@
 
 package quasylab.sibilla.examples.servers.slave;
 
+import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
 import quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer;
-import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.network.util.StartupUtils;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -60,12 +56,14 @@ public class SlaveApplication {
         final String trustStorePath = options.getOrDefault("trustStorePath", "slaveTrustStore.jks");
         final String trustStorePass = options.getOrDefault("trustStorePass", "slavePass");
 
-        SSLUtils.getInstance().setKeyStoreType(keyStoreType);
-        SSLUtils.getInstance().setKeyStorePath(keyStorePath);
-        SSLUtils.getInstance().setKeyStorePass(keyStorePass);
-        SSLUtils.getInstance().setTrustStoreType(trustStoreType);
-        SSLUtils.getInstance().setTrustStorePath(trustStorePath);
-        SSLUtils.getInstance().setTrustStorePass(trustStorePass);
+        if (masterSimulationNetworkManagerType.equals(TCPNetworkManagerType.SECURE)) {
+            SSLUtils.getInstance().setKeyStoreType(keyStoreType);
+            SSLUtils.getInstance().setKeyStorePath(keyStorePath);
+            SSLUtils.getInstance().setKeyStorePass(keyStorePass);
+            SSLUtils.getInstance().setTrustStoreType(trustStoreType);
+            SSLUtils.getInstance().setTrustStorePath(trustStorePath);
+            SSLUtils.getInstance().setTrustStorePass(trustStorePass);
+        }
 
         LOGGER.info(String.format("Starting the Master Server with the params:\n" +
                         "-keyStoreType: [%s]\n" +

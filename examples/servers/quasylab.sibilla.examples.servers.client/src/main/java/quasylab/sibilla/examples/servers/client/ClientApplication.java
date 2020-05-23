@@ -51,8 +51,15 @@ public class ClientApplication implements Serializable {
 
 
     public static void main(String... args) throws Exception {
-
         final Map<String, String> options = StartupUtils.parseOptions(args);
+
+
+        final String masterAddress = options.getOrDefault("masterAddress", "");
+        final int masterPort = Integer.parseInt(options.getOrDefault("masterPort", "10001"));
+        final TCPNetworkManagerType masterNetworkManagerType = StartupUtils.TCPNetworkManagerParser(options.getOrDefault("masterCommunicationType", "SECURE"));
+
+        final NetworkInfo masterServerInfo = new NetworkInfo(InetAddress.getByName(masterAddress), masterPort,
+                masterNetworkManagerType);
 
         final String keyStoreType = options.getOrDefault("keyStoreType", "JKS");
         final String keyStorePath = options.getOrDefault("keyStorePath", "clientKeyStore.jks");
@@ -61,19 +68,14 @@ public class ClientApplication implements Serializable {
         final String trustStorePath = options.getOrDefault("trustStorePath", "clientTrustStore.jks");
         final String trustStorePass = options.getOrDefault("trustStorePass", "clientPass");
 
-        SSLUtils.getInstance().setKeyStoreType(keyStoreType);
-        SSLUtils.getInstance().setKeyStorePath(keyStorePath);
-        SSLUtils.getInstance().setKeyStorePass(keyStorePass);
-        SSLUtils.getInstance().setTrustStoreType(trustStoreType);
-        SSLUtils.getInstance().setTrustStorePath(trustStorePath);
-        SSLUtils.getInstance().setTrustStorePass(trustStorePass);
-
-        final String masterAddress = options.getOrDefault("masterAddress", "");
-        final int masterPort = Integer.parseInt(options.getOrDefault("masterPort", "10001"));
-        final TCPNetworkManagerType masterNetworkManagerType = StartupUtils.TCPNetworkManagerParser(options.getOrDefault("masterCommunicationType", "SECURE"));
-
-        final NetworkInfo masterServerInfo = new NetworkInfo(InetAddress.getByName(masterAddress), masterPort,
-                masterNetworkManagerType);
+        if (masterNetworkManagerType.equals(TCPNetworkManagerType.SECURE)) {
+            SSLUtils.getInstance().setKeyStoreType(keyStoreType);
+            SSLUtils.getInstance().setKeyStorePath(keyStorePath);
+            SSLUtils.getInstance().setKeyStorePass(keyStorePass);
+            SSLUtils.getInstance().setTrustStoreType(trustStoreType);
+            SSLUtils.getInstance().setTrustStorePath(trustStorePath);
+            SSLUtils.getInstance().setTrustStorePass(trustStorePass);
+        }
 
         LOGGER.info(String.format("Starting the Master Server with the params:\n" +
                         "-keyStoreType: [%s]\n" +
