@@ -1,5 +1,6 @@
 #!/bin/bash
 ARGS=$1
+	
 if [ "$ARGS" = "-h" ]; then
 	echo "Sibilla Master Server Help:
 	-keyStoreType                       specify the key store type [JKS]
@@ -13,9 +14,15 @@ if [ "$ARGS" = "-h" ]; then
 	-masterSimulationPort               specify the local port for simulations
 	-slaveDiscoveryCommunicationType    specify the type of UDP network communication used for discovery [DEFAULT]
 	-clientSimulationCommunicationType  specify the type of TCP network communication used for simulations [DEFAULT/SECURE/FST]"
+	
 else
 	git clone https://github.com/FrancisFire/sibilla.git -b master sibilla_master
+		rm -rf sibilla_master/examples/servers/quasylab.sibilla.examples.servers.slave
+	rm -rf sibilla_master/examples/servers/quasylab.sibilla.examples.servers.client
 	cd sibilla_master/examples/servers/quasylab.sibilla.examples.servers.master|| exit
-	gradle build
-	gradle run --args="$ARGS"
+	if ["$ARGS" = ""]; then 
+		gradle run
+	else
+		gradle run --args="$ARGS"
+	fi
 fi

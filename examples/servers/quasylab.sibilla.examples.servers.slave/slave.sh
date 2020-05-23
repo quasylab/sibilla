@@ -14,7 +14,12 @@ if [ "$ARGS" = "-h" ]; then
 	-masterSimulationCommunicationType	specify the type of TCP network communication used for simulations [DEFAULT/SECURE/FST]"
 else
 	git clone https://github.com/FrancisFire/sibilla.git -b master sibilla_slave
-	cd sibilla_slave/examples/servers/quasylab.sibilla.examples.servers.slave || exit
-	gradle build
-	gradle run --args="$ARGS"
+	rm -rf sibilla_slave/examples/servers/quasylab.sibilla.examples.servers.master
+	rm -rf sibilla_slave/examples/servers/quasylab.sibilla.examples.servers.client
+	cd sibilla_slave/examples/servers/quasylab.sibilla.examples.servers.slave|| exit
+	if ["$ARGS" = ""]; then
+		gradle run
+	else
+		gradle run --args="$ARGS"
+	fi
 fi

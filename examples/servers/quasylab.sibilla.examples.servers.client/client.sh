@@ -11,9 +11,15 @@ if [ "$ARGS" = "-h" ]; then
 	-masterAddress            specify the master server address
 	-masterPort               specify the master simulation port
 	-masterCommunicationType  specify the type of TCP network communication used for simulations [DEFAULT/SECURE/FST]"
+
 else
 	git clone https://github.com/FrancisFire/sibilla.git -b master sibilla_client
+		rm -rf sibilla_client/examples/servers/quasylab.sibilla.examples.servers.master
+	rm -rf sibilla_client/examples/servers/quasylab.sibilla.examples.servers.slave
 	cd sibilla_client/examples/servers/quasylab.sibilla.examples.servers.client|| exit
-	gradle build
-	gradle run --args="$ARGS"
+	if ["$ARGS" = ""]; then
+		gradle run
+	else
+		gradle run --args="$ARGS"
+	fi
 fi
