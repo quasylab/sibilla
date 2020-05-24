@@ -30,6 +30,7 @@ import org.apache.commons.math3.random.AbstractRandomGenerator;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.network.util.StartupUtils;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
@@ -74,7 +75,7 @@ public class ClientApplication implements Serializable {
 
         final NetworkInfo masterServerInfo = new NetworkInfo(InetAddress.getByName(masterAddress), masterPort,
                 masterNetworkManagerType);
-
+        LOGGER.info(String.format("Local address: [%s]", NetworkUtils.getLocalAddress()));
         LOGGER.info(String.format("Starting the Master Server with the params:\n" +
                         "-keyStoreType: [%s]\n" +
                         "-keyStorePath: [%s]\n" +

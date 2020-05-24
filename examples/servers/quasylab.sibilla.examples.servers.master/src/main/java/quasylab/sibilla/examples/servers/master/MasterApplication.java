@@ -34,9 +34,11 @@ import quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
 import quasylab.sibilla.core.network.master.MasterServerSimulationEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
+import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.network.util.StartupUtils;
 
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +58,7 @@ public class MasterApplication implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) {
+    public void run(String... args) throws SocketException {
         final Map<String, String> options = StartupUtils.parseOptions(args);
 
         final int localDiscoveryPort = Integer.parseInt(options.getOrDefault("masterDiscoveryPort", "10000"));
@@ -79,7 +81,7 @@ public class MasterApplication implements CommandLineRunner {
         SSLUtils.getInstance().setTrustStoreType(trustStoreType);
         SSLUtils.getInstance().setTrustStorePath(trustStorePath);
         SSLUtils.getInstance().setTrustStorePass(trustStorePass);
-
+        LOGGER.info(String.format("Local address: [%s]", NetworkUtils.getLocalAddress()));
         LOGGER.info(String.format("Starting the Master Server with the params:\n" +
                         "-keyStoreType: [%s]\n" +
                         "-keyStorePath: [%s]\n" +

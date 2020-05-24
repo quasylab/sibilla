@@ -29,10 +29,12 @@ package quasylab.sibilla.examples.servers.slave;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
 import quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.network.util.StartupUtils;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +46,7 @@ public class SlaveApplication {
 
     private static final Logger LOGGER = Logger.getLogger(SlaveApplication.class.getName());
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SocketException {
         final Map<String, String> options = StartupUtils.parseOptions(args);
 
         final int localDiscoveryPort = Integer.parseInt(options.getOrDefault("slaveDiscoveryPort", "59119"));
@@ -66,7 +68,7 @@ public class SlaveApplication {
         SSLUtils.getInstance().setTrustStoreType(trustStoreType);
         SSLUtils.getInstance().setTrustStorePath(trustStorePath);
         SSLUtils.getInstance().setTrustStorePass(trustStorePass);
-
+        LOGGER.info(String.format("Local address: [%s]", NetworkUtils.getLocalAddress()));
         LOGGER.info(String.format("Starting the Master Server with the params:\n" +
                         "-keyStoreType: [%s]\n" +
                         "-keyStorePath: [%s]\n" +
