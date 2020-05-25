@@ -38,7 +38,7 @@ import java.net.Socket;
 import java.util.logging.Logger;
 
 /**
- * TCP based communication class that relies on SSL protocol.
+ * TCP based communication class that relies on TLS protocol.
  *
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
@@ -88,7 +88,7 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
     }
 
     /**
-     * Configures and manages the SSL connection.
+     * Configures and manages the TLS connection.
      *
      * @param sslSocket upon which the network communication will be based
      * @throws IOException
