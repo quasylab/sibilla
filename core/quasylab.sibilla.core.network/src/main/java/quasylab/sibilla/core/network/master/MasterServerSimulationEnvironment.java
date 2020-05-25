@@ -111,7 +111,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     /**
      * Milliseconds between two broadcast slave server discovery messages.
      */
-    private final int discoveryTime = 5000;
+    private final int discoveryTime = 15000;
 
     /**
      * Creates and starts up a master server with the given parameters.
