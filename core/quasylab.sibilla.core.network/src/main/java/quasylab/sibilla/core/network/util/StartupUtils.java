@@ -47,8 +47,6 @@ public class StartupUtils {
             case "SECURE":
                 return TCPNetworkManagerType.SECURE;
 
-            case "FST":
-                return TCPNetworkManagerType.FST;
 
             case "DEFAULT":
             default:

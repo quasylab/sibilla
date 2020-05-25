@@ -35,10 +35,6 @@ package quasylab.sibilla.core.network.communication;
  */
 public enum TCPNetworkManagerType implements NetworkManagerType {
     /**
-     * The implementation based upon FST.
-     */
-    FST,
-    /**
      * The simplest interface implementation.
      */
     DEFAULT,
