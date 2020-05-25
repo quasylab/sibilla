@@ -10,7 +10,7 @@ if [ "$ARGS" = "-h" ]; then
 	-trustStorePass           specify the trust store password
 	-masterAddress            specify the master server address
 	-masterPort               specify the master simulation port
-	-masterCommunicationType  specify the type of TCP network communication used for simulations [DEFAULT/SECURE/FST]"
+	-masterCommunicationType  specify the type of TCP network communication used for simulations [DEFAULT/SECURE]"
 
 else
 	git clone https://github.com/FrancisFire/sibilla.git -b master sibilla_client

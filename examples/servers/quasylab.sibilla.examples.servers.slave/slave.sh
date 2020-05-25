@@ -11,7 +11,7 @@ if [ "$ARGS" = "-h" ]; then
 	-slaveDiscoveryPort		              specify the local port for discovery
 	-slaveSimulationPort	            	specify the local port for simulations
 	-masterDiscoveryCommunicationType   specify the type of UDP network communication used for discovery [DEFAULT]
-	-masterSimulationCommunicationType	specify the type of TCP network communication used for simulations [DEFAULT/SECURE/FST]"
+	-masterSimulationCommunicationType	specify the type of TCP network communication used for simulations [DEFAULT/SECURE]"
 else
 	git clone https://github.com/FrancisFire/sibilla.git -b master sibilla_slave
 	rm -rf sibilla_slave/examples/servers/quasylab.sibilla.examples.servers.master
