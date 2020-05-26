@@ -95,4 +95,11 @@ public interface UDPNetworkManager {
      */
     void writeObject(byte[] toWrite, InetAddress address, int port) throws IOException;
 
+    /**
+     * Closes the network communication.
+     *
+     * @throws IOException
+     */
+    void closeConnection() throws IOException;
+
 }
