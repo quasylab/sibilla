@@ -13,7 +13,7 @@ if [ "$ARGS" = "-h" ]; then
 	-masterDiscoveryCommunicationType   specify the type of UDP network communication used for discovery [DEFAULT]
 	-masterSimulationCommunicationType	specify the type of TCP network communication used for simulations [DEFAULT/SECURE]"
 else
-	git clone https://github.com/FrancisFire/sibilla.git -b master sibilla_slave
+	git clone https://github.com/quasylab/sibilla.git -b master sibilla_slave
 	rm -rf sibilla_slave/examples/servers/quasylab.sibilla.examples.servers.master
 	rm -rf sibilla_slave/examples/servers/quasylab.sibilla.examples.servers.client
 	cd sibilla_slave/examples/servers/quasylab.sibilla.examples.servers.slave|| exit

@@ -16,7 +16,7 @@ if [ "$ARGS" = "-h" ]; then
 	-clientSimulationCommunicationType  specify the type of TCP network communication used for simulations [DEFAULT/SECURE]"
 	
 else
-	git clone https://github.com/FrancisFire/sibilla.git -b master sibilla_master
+	git clone https://github.com/quasylab/sibilla.git -b master sibilla_master
 		rm -rf sibilla_master/examples/servers/quasylab.sibilla.examples.servers.slave
 	rm -rf sibilla_master/examples/servers/quasylab.sibilla.examples.servers.client
 	cd sibilla_master/examples/servers/quasylab.sibilla.examples.servers.master|| exit
