@@ -27,6 +27,7 @@
 package quasylab.sibilla.examples.servers.client;
 
 import org.apache.commons.math3.random.AbstractRandomGenerator;
+import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
@@ -44,14 +45,17 @@ public class ClientApplication implements Serializable {
 
     public final static int SAMPLINGS = 100;
     public final static double DEADLINE = 600;
-    private static final Logger LOGGER = Logger.getLogger(ClientApplication.class.getName());
+    private static Logger LOGGER;
     private static final long serialVersionUID = 1L;
-    private static final int REPLICA = 5000;
+    private static final int REPLICA = 100;
 
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
 
 
     public static void main(String... args) throws Exception {
+
+        LOGGER = HostLoggerSupplier.getInstance(String.format("Client")).getLogger();
+
 
         final Map<String, String> options = StartupUtils.parseOptions(args);
 

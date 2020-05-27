@@ -26,6 +26,7 @@
 
 package quasylab.sibilla.examples.servers.slave;
 
+import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
 import quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
@@ -33,20 +34,19 @@ import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.network.util.StartupUtils;
 
-import java.io.IOException;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
 
 public class SlaveApplication {
 
-    private static final Logger LOGGER = Logger.getLogger(SlaveApplication.class.getName());
+    private static Logger LOGGER;
 
     public static void main(String[] args) throws SocketException {
+
+        LOGGER = HostLoggerSupplier.getInstance(String.format("SlaveServer")).getLogger();
+
         final Map<String, String> options = StartupUtils.parseOptions(args);
 
         final int localDiscoveryPort = Integer.parseInt(options.getOrDefault("slaveDiscoveryPort", "59119"));

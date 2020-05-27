@@ -29,6 +29,7 @@ package quasylab.sibilla.core.network.master;
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.network.ComputationResult;
+import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.NetworkTask;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
@@ -62,7 +63,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     /**
      * Class logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(NetworkSimulationManager.class.getName());
+    private Logger LOGGER;
 
     /**
      * {@link quasylab.sibilla.core.models.ModelDefinition} that represent the Model used in the simulation.
@@ -101,6 +102,9 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationMonitor monitor,
                                     ModelDefinition<S> modelDefinition, SimulationState simulationState) {
         super(random, monitor, consumer);// TODO: Gestire parametro Monitor
+
+        this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
+
         List<NetworkInfo> slaveNetworkInfos = simulationState.getSlaveServersStates().stream()
                 .map(SlaveState::getSlaveInfo).collect(Collectors.toList());
         LOGGER.info(String.format("Creating a new NetworkSimulationManager to contact the slaves: [%s]",

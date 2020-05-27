@@ -27,6 +27,7 @@
 package quasylab.sibilla.core.network.slave;
 
 import quasylab.sibilla.core.network.ComputationResult;
+import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.NetworkTask;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
@@ -64,7 +65,7 @@ public class BasicSimulationServer implements SimulationServer {
     /**
      * Class logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(BasicSimulationServer.class.getName());
+    protected Logger LOGGER;
 
     /**
      * Slave server related network manager type
@@ -97,6 +98,7 @@ public class BasicSimulationServer implements SimulationServer {
      * @param networkManagerType type of the network manager
      */
     public BasicSimulationServer(TCPNetworkManagerType networkManagerType) {
+        this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         this.networkManagerType = networkManagerType;
         LOGGER.info(String.format("Creating a new BasicSimulationServer that uses: [%s - %s]",
                 this.networkManagerType.getClass(), this.networkManagerType.name()));

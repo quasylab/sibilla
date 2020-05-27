@@ -50,7 +50,6 @@ import java.util.logging.Logger;
  */
 public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
 
-    private static final Logger LOGGER = Logger.getLogger(DiscoverableBasicSimulationServer.class.getName());
 
     /**
      * Discovery's network communication related infos.

@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
+import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.master.MasterServerSimulationEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
@@ -39,16 +39,13 @@ import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.network.util.StartupUtils;
 
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
 @SpringBootApplication
 public class MasterApplication implements CommandLineRunner {
 
-    private static final Logger LOGGER = Logger.getLogger(MasterApplication.class.getName());
+    private static Logger LOGGER;
 
     @Autowired
     MonitoringServerComponent monitoringServerComponent;
@@ -59,6 +56,9 @@ public class MasterApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws SocketException {
+
+        LOGGER = HostLoggerSupplier.getInstance(String.format("MasterServer")).getLogger();
+
         final Map<String, String> options = StartupUtils.parseOptions(args);
 
         final int localDiscoveryPort = Integer.parseInt(options.getOrDefault("masterDiscoveryPort", "10000"));

@@ -26,6 +26,7 @@
 
 package quasylab.sibilla.core.network.master;
 
+import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.SimulationDataSet;
 import quasylab.sibilla.core.network.client.ClientCommand;
@@ -66,7 +67,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     /**
      * Class logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(MasterServerSimulationEnvironment.class.getName());
+    private Logger LOGGER;
 
     /**
      * Discovery's network communication related infos.
@@ -136,6 +137,9 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     public MasterServerSimulationEnvironment(int localDiscoveryPort, int remoteDiscoveryPort,
                                              UDPNetworkManagerType discoveryNetworkManager, int localSimulationPort,
                                              TCPNetworkManagerType simulationNetworkManager, PropertyChangeListener... listeners) {
+
+        this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
+
         try {
             LOCAL_DISCOVERY_INFO = new NetworkInfo(NetworkUtils.getLocalAddress(), localDiscoveryPort, discoveryNetworkManager);
             LOCAL_SIMULATION_INFO = new NetworkInfo(NetworkUtils.getLocalAddress(), localSimulationPort,
