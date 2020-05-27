@@ -46,24 +46,7 @@ public class HostLoggerSupplier {
     }
 
     public static HostLoggerSupplier getInstance() {
-        if (instance == null) {
-            instance = new HostLoggerSupplier();
-
-            Date date = new Date();
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd_hh-mm-ss_a");
-            String strDate = dateFormat.format(date);
-
-            loggerInstance = Logger.getLogger(String.format("HostLog_%s", strDate));
-            try {
-                FileHandler fh = new FileHandler(String.format("./Host_%s.log", strDate));
-                loggerInstance.addHandler(fh);
-                SimpleFormatter formatter = new SimpleFormatter();
-                fh.setFormatter(formatter);
-            } catch (IOException e) {
-                System.out.println("The logger won't write on file");
-            }
-        }
-        return instance;
+        return getInstance("Host");
     }
 
     public Logger getLogger() {
