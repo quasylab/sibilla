@@ -54,7 +54,7 @@ public class ClientSimulationEnvironment<S extends State> {
     /**
      * Class logger.
      */
-    private Logger LOGGER;
+    private final Logger LOGGER;
 
     /**
      * The {@link quasylab.sibilla.core.network.SimulationDataSet} object to be sent to the master server.

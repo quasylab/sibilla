@@ -50,7 +50,7 @@ public class HostLoggerSupplier {
     }
 
     public Logger getLogger() {
-        return this.loggerInstance;
+        return loggerInstance;
     }
 
 }

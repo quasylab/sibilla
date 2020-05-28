@@ -354,8 +354,8 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
+        assert clone != null;
         clone.simulationStartDate = (Date) this.simulationStartDate.clone();
-        final Map<SlaveState, Integer> tempMapCopy = new HashMap<>();
         clone.slaveServers = this.slaveServers.stream().map(SlaveState::clone).collect(Collectors.toSet());
         clone.masterNetworkInfo = this.masterNetworkInfo.clone();
         clone.clientNetworkInfo = this.clientNetworkInfo.clone();

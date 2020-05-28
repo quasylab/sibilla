@@ -64,5 +64,5 @@ public enum MasterCommand {
     /**
      * The command sent by a master server to inform that the connection with an host will be closed.
      */
-    CLOSE_CONNECTION;
+    CLOSE_CONNECTION
 }

@@ -125,9 +125,7 @@ public class BasicSimulationServer implements SimulationServer {
             LOGGER.info(String.format("The BasicSimulationServer is now listening for servers on port: [%d]", simulationPort));
             while (true) {
                 Socket socket = serverSocket.accept();
-                connectionExecutor.execute(() -> {
-                    manageNewMaster(socket);
-                });
+                connectionExecutor.execute(() -> manageNewMaster(socket));
             }
         } catch (IOException e) {
             LOGGER.severe(String.format("[%s] Network communication failure during the server socket startup", e.getMessage()));

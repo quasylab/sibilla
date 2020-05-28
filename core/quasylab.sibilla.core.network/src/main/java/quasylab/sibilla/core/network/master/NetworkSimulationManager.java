@@ -63,7 +63,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     /**
      * Class logger.
      */
-    private Logger LOGGER;
+    private final Logger LOGGER;
 
     /**
      * {@link quasylab.sibilla.core.models.ModelDefinition} that represent the Model used in the simulation.
