@@ -29,7 +29,7 @@ public class HostLoggerSupplier {
             instance = new HostLoggerSupplier();
 
             Date date = new Date();
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd_hh-mm-ss_a");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss_a");
             String strDate = dateFormat.format(date);
 
             loggerInstance = Logger.getLogger(String.format("%sLog_%s", hostName, strDate));
