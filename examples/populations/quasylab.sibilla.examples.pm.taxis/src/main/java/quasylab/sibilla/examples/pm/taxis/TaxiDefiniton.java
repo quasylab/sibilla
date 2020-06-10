@@ -1,10 +1,10 @@
-package quasylab.sibilla.examples.pm.molecule;
+package quasylab.sibilla.examples.pm.taxis;
 
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.pm.*;
 
-public class MoleculeDefiniton implements ModelDefinition<PopulationState> {
+public class TaxiDefiniton implements ModelDefinition<PopulationState> {
 
 
 
