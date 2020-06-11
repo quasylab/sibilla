@@ -29,6 +29,7 @@ package quasylab.sibilla.core.network.master;
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.network.ComputationResult;
+import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.NetworkTask;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
@@ -42,6 +43,7 @@ import quasylab.sibilla.core.simulator.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
@@ -61,7 +63,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     /**
      * Class logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(NetworkSimulationManager.class.getName());
+    private final Logger LOGGER;
 
     /**
      * {@link quasylab.sibilla.core.models.ModelDefinition} that represent the Model used in the simulation.
@@ -91,15 +93,18 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     /**
      * Creates a NetworkSimulationManager with the parameters given in input
      *
-     * @param random RandomGenerator used in the simulation
+     * @param random          RandomGenerator used in the simulation
      * @param consumer
-     * @param monitor TODO
+     * @param monitor         TODO
      * @param modelDefinition model definition that represent the Model used in the simulation
      * @param simulationState state of the simulation that is being executed
      */
     public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationMonitor monitor,
                                     ModelDefinition<S> modelDefinition, SimulationState simulationState) {
         super(random, monitor, consumer);// TODO: Gestire parametro Monitor
+
+        this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
+
         List<NetworkInfo> slaveNetworkInfos = simulationState.getSlaveServersStates().stream()
                 .map(SlaveState::getSlaveInfo).collect(Collectors.toList());
         LOGGER.info(String.format("Creating a new NetworkSimulationManager to contact the slaves: [%s]",
@@ -120,7 +125,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
                 LOGGER.severe(String.format("[%s] Error during server initialization, removing slave", e.getMessage()));
             }
             return null;
-        }).collect(Collectors.toSet());
+        }).filter(Objects::nonNull).collect(Collectors.toSet());
         serverQueue = new LinkedBlockingQueue<>(networkManagers);
         this.startTasksHandling();
     }
@@ -197,7 +202,10 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
                 LOGGER.severe(String.format("Server's tasks window has been reduced in half - %s",
                         server.getNetworkInfo().toString()));
             }
+            LOGGER.info(String.format("Has tasks: %s", hasTasks()));
+            LOGGER.info(String.format("Is running: %s", isRunning()));
             List<SimulationTask<S>> toRun = getTask(acceptableTasks, true);
+            LOGGER.info(String.format("Tasks to run: %d", toRun.size()));
             this.simulationState.setPendingTasks(this.pendingTasks());
             if (toRun.size() > 0) {
                 simulationState.increaseRunningServers();
@@ -280,7 +288,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             pingServer.getSocket().setSoTimeout(5000); // set 5 seconds timeout on read operations
             LOGGER.info(
                     String.format("Creating a new NetworkManager to ping slave: %s", pingServer.getNetworkInfo().toString()));
-            oldState.timedOut(); // mark server as timed out and update GUI
+            oldState.timedOut(); // mark server as timed out
 
             initConnection(pingServer); // initialize connection sending model data
             pingServer.writeObject(Serializer.serialize(MasterCommand.PING));
@@ -309,7 +317,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             LOGGER.severe(String.format(
                     "The response has been received after the time limit. The slave will be removed: %s",
                     pingServer.getNetworkInfo().toString()));
-            oldState.setRemoved(); // mark server as removed and update GUI
+            oldState.setRemoved(); // mark server as removed
             this.networkManagers.remove(server);
             return null;
         }

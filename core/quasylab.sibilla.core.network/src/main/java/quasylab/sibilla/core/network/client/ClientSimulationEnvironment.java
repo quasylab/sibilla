@@ -29,6 +29,7 @@ package quasylab.sibilla.core.network.client;
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
+import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.SimulationDataSet;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
@@ -53,7 +54,7 @@ public class ClientSimulationEnvironment<S extends State> {
     /**
      * Class logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(ClientSimulationEnvironment.class.getName());
+    private final Logger LOGGER;
 
     /**
      * The {@link quasylab.sibilla.core.network.SimulationDataSet} object to be sent to the master server.
@@ -83,6 +84,9 @@ public class ClientSimulationEnvironment<S extends State> {
     public ClientSimulationEnvironment(RandomGenerator random, ModelDefinition<S> modelDefinition, Model<S> model,
                                        S initialState, SamplingFunction<S> sampling_function, int replica, double deadline,
                                        NetworkInfo masterNetworkInfo) {
+
+        LOGGER = HostLoggerSupplier.getInstance().getLogger();
+
         this.data = new SimulationDataSet<>(random, modelDefinition, model, initialState, sampling_function, replica,
                 deadline);
         try {
@@ -191,7 +195,7 @@ public class ClientSimulationEnvironment<S extends State> {
             if (command.equals(MasterCommand.RESULTS)) {
                 SamplingFunction<?> samplingFunction = (SamplingFunction<?>) Serializer
                         .deserialize(targetMaster.readObject());
-                LOGGER.severe("The simulation results have been received correctly");
+                LOGGER.info("The simulation results have been received correctly");
             } else {
                 throw new ClassCastException("Wrong command from master. Expected RESULTS");
             }

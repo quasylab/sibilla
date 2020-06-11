@@ -29,7 +29,10 @@ package quasylab.sibilla.core.network.slave;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.communication.UDPDefaultNetworkManager;
+import quasylab.sibilla.core.network.communication.UDPNetworkManager;
+import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
 import quasylab.sibilla.core.network.serialization.Serializer;
+import quasylab.sibilla.core.network.util.NetworkUtils;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -47,19 +50,30 @@ import java.util.logging.Logger;
  */
 public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
 
-    private static final Logger LOGGER = Logger.getLogger(DiscoverableBasicSimulationServer.class.getName());
 
-    private final int localDiscoveryPort;
-    private final Set<NetworkInfo> knownMasters;
+    /**
+     * Discovery's network communication related infos.
+     */
+    private NetworkInfo LOCAL_DISCOVERY_INFO;
+    private Set<NetworkInfo> knownMasters;
 
-    public DiscoverableBasicSimulationServer(int localDiscoveryPort, TCPNetworkManagerType networkManagerType) {
-        super(networkManagerType);
-        this.localDiscoveryPort = localDiscoveryPort;
-        this.knownMasters = new HashSet<>();
+    /**
+     * Manages the discovery network communication with the master servers.
+     */
+    private UDPNetworkManager discoveryNetworkManager;
 
-        LOGGER.info(String.format("Creating a new DiscoverableBasicSimulationServer - It will respond for discovery messages on port [%d]", localDiscoveryPort));
+    public DiscoverableBasicSimulationServer(int localDiscoveryPort, TCPNetworkManagerType simulationNetworkManager, UDPNetworkManagerType discoveryNetworkManager) {
+        super(simulationNetworkManager);
+        try {
+            LOCAL_DISCOVERY_INFO = new NetworkInfo(NetworkUtils.getLocalAddress(), localDiscoveryPort, discoveryNetworkManager);
+            this.knownMasters = new HashSet<>();
 
-        new Thread(this::startDiscoveryServer).start();
+            LOGGER.info(String.format("Creating a new DiscoverableBasicSimulationServer - It will respond for discovery messages on port [%d]", localDiscoveryPort));
+
+            new Thread(this::startDiscoveryServer).start();
+        } catch (SocketException e) {
+            LOGGER.severe(String.format("[%s] Network interfaces exception", e.getMessage()));
+        }
     }
 
     /**
@@ -67,14 +81,16 @@ public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
      */
     private void startDiscoveryServer() {
         try {
-            DatagramSocket discoverySocket = new DatagramSocket(localDiscoveryPort);
-            LOGGER.info(String.format("Now listening for discovery messages on port: [%d]", localDiscoveryPort));
-            UDPDefaultNetworkManager manager = new UDPDefaultNetworkManager(discoverySocket);
+            DatagramSocket discoverySocket = new DatagramSocket(LOCAL_DISCOVERY_INFO.getPort());
+            LOGGER.info(String.format("Now listening for discovery messages on port: [%d]", LOCAL_DISCOVERY_INFO.getPort()));
+            this.discoveryNetworkManager = UDPNetworkManager.createNetworkManager((UDPNetworkManagerType) LOCAL_DISCOVERY_INFO.getType(), discoverySocket);
 
             while (true) {
-                NetworkInfo masterInfo = (NetworkInfo) Serializer.deserialize(manager.readObject());
-                LOGGER.info(String.format("Discovered by the master: %s", masterInfo.toString()));
-                manageDiscoveryMessage(manager, masterInfo);
+                NetworkInfo masterInfo = (NetworkInfo) Serializer.deserialize(this.discoveryNetworkManager.readObject());
+
+                LOGGER.info(String.format("Discovered the master: %s", masterInfo.toString()));
+                manageDiscoveryMessage(this.discoveryNetworkManager, masterInfo);
+
             }
 
         } catch (SocketException e) {
@@ -90,7 +106,7 @@ public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
      * @param manager    UDPNetworkManager that handles the sending of messages
      * @param masterInfo ServerInfo of the master server
      */
-    private void manageDiscoveryMessage(UDPDefaultNetworkManager manager, NetworkInfo masterInfo) {
+    private void manageDiscoveryMessage(UDPNetworkManager manager, NetworkInfo masterInfo) {
         try {
             this.knownMasters.add(masterInfo);
             manager.writeObject(Serializer.serialize(this.localServerInfo), masterInfo.getAddress(), masterInfo.getPort());

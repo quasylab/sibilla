@@ -32,7 +32,7 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 
 /**
- * Utility class used to store the data used to create SSL connection and to easily create SSLContext
+ * Utility class used to store the data used to initiate a TLS connection and to easily create SSLContext instances
  *
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco

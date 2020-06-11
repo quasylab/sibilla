@@ -58,9 +58,8 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
 
     /**
      * Collection of the {@link quasylab.sibilla.core.network.NetworkInfo} associated with every slave server registered.
-     * Every entry is associated with a boolean value that is used to remove the slave servers' infos if no longer reachable.
      */
-    private Map<NetworkInfo, Boolean> slaveServers;
+    private Set<NetworkInfo> slaveServers;
     /**
      * The network related informations about this master server.
      */
@@ -69,7 +68,7 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
     /**
      * The states of the simulations submitted by this master.
      */
-    private Set<SimulationState> simulationStates;
+    private volatile Set<SimulationState> simulationStates;
 
     /**
      * To manage the {@link java.beans.PropertyChangeListener} instances.
@@ -86,7 +85,7 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
         this.masterNetworkInfo = masterNetworkInfo;
         this.masterServerStartDate = new Date();
         this.executedSimulations = 0;
-        this.slaveServers = new HashMap<>();
+        this.slaveServers = new HashSet<>();
         this.updateSupport = new PropertyChangeSupport(this);
         this.simulationStates = new HashSet<>();
     }
@@ -101,10 +100,10 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
     }
 
     /**
-     * @return {@link java.util.Map} related to registered slave servers.
+     * @return {@link java.util.Set} related to registered slave servers.
      */
-    public synchronized Map<NetworkInfo, Boolean> slaveServersMap() {
-        return new HashMap<NetworkInfo, Boolean>(slaveServers);
+    public synchronized Set<NetworkInfo> getSlaveServersNetworkInfos() {
+        return new HashSet<>(slaveServers);
     }
 
     /**
@@ -122,13 +121,6 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
      */
     public synchronized boolean removeSimulation(SimulationState simulationState) {
         return this.simulationStates.remove(simulationState);
-    }
-
-    /**
-     * @return {@link java.util.Set} contaning {@link quasylab.sibilla.core.network.NetworkInfo} related to registered slave servers.
-     */
-    public synchronized Set<NetworkInfo> getSlaveServersNetworkInfos() {
-        return new HashSet<NetworkInfo>(this.slaveServers.keySet());
     }
 
 
@@ -154,12 +146,9 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
      * @return {@link java.lang.Boolean} that indicates the result of the operation.
      */
     public synchronized boolean addSlaveServer(NetworkInfo slaveNetworkInfo) {
-        if (this.slaveServers.put(slaveNetworkInfo, true) == null) {
-            this.updateListeners();
-            return true;
-        } else {
-            return false;
-        }
+        boolean result = this.slaveServers.add(slaveNetworkInfo);
+        this.updateListeners();
+        return result;
     }
 
 
@@ -170,45 +159,11 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
      * @return {@link java.lang.Boolean} that indicates the result of the operation.
      */
     public synchronized boolean removeSlaveServer(NetworkInfo slaveNetworkInfo) {
-
-        if (this.slaveServers.remove(slaveNetworkInfo) != null) {
-            this.simulationStates.forEach(simulationState -> {
-                simulationState.getSlaveStateByServerInfo(slaveNetworkInfo).setRemoved();
-            });
-            this.updateListeners();
-            return true;
-        } else {
-            return false;
-        }
+        boolean result = this.slaveServers.remove(slaveNetworkInfo);
+        this.updateListeners();
+        return result;
     }
 
-
-    /**
-     * Updates the {@link java.lang.Boolean} value associated with every slave server that signals if that server is still up and running.
-     * Every slave servers is declared as unreachable after the calling of this method.
-     */
-    public synchronized void resetKeepAlive() {
-        this.slaveServers.keySet().stream().forEach(slaveState -> {
-            this.slaveServers.put(slaveState, false);
-        });
-
-    }
-
-    /**
-     * Removes any registered slave server that is marked as no longer reachable.
-     */
-    public synchronized void cleanKeepAlive() {
-        List<NetworkInfo> toRemove = new ArrayList<>();
-        this.slaveServers.keySet().stream().forEach(slaveState -> {
-
-            if (!this.slaveServers.get(slaveState)) {
-                toRemove.add(slaveState);
-            }
-        });
-        toRemove.stream().forEach(slave -> {
-            this.removeSlaveServer(slave);
-        });
-    }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -267,8 +222,7 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
         clone.simulationStates = this.simulationStates.stream().map(simulationState -> simulationState.clone()).collect(Collectors.toSet());
         clone.masterServerStartDate = (Date) this.masterServerStartDate.clone();
         final Map<NetworkInfo, Boolean> tempMapCopy = new HashMap<>();
-        this.slaveServers.entrySet().stream().forEach(entry -> tempMapCopy.put(entry.getKey().clone(), entry.getValue()));
-        clone.slaveServers.putAll(tempMapCopy);
+        clone.slaveServers = this.slaveServers.stream().map(slaveServer -> slaveServer.clone()).collect(Collectors.toSet());
         clone.masterNetworkInfo = this.masterNetworkInfo.clone();
         return clone;
     }
