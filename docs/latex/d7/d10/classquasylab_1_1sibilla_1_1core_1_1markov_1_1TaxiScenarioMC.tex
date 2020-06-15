@@ -1,0 +1,126 @@
+\hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC}{}\doxysection{quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+MC Class Reference}
+\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC}\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static Hash\+Map$<$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1State}{State}}, Double $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_afc1e0e7c08692b2ce9fd21f8f4160497}{next}} (\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1State}{State}} s)
+\item 
+static \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1ContinuousTimeMarkovChain}{Continuous\+Time\+Markov\+Chain}}$<$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1State}{State}} $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a215b2546c2322f46b3c6feecd7a641c7}{generate\+C\+T\+MC}} ()
+\item 
+static void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a08a928f1550646e5b7d2d1ea88f137a2}{main}} (String\mbox{[}$\,$\mbox{]} args)
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a7560966985df039f4e16fc96619efccc}{T}} = 0
+\item 
+static int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a8c86705ee0c2a2a1490151ab30cf3bef}{U}} = 1
+\item 
+static int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a4881a2521fd9b7bd881dc975202758ac}{TS}} = 2
+\item 
+static int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a286e65b7a183957dc98b5e814660100b}{TL}} = 3
+\item 
+static int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a46d1c0b2f81b4a95b1c92d416918ad67}{M\+A\+X\+\_\+\+U\+S\+E\+RS}} = 6
+\item 
+static int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_abdc040c53eae8982eaa27abbe1d7002f}{N\+U\+M\+B\+E\+R\+\_\+\+O\+F\+\_\+\+T\+A\+X\+IS}} = 10
+\item 
+static double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_aea08fff86d9da868ada628c0aeb7b57d}{L\+A\+M\+B\+DA}} = 1.\+0/5.\+0
+\item 
+static double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a8d56cc455f04a00d501ed4bd0b35ef33}{B\+E\+TA}} = 1.\+0
+\item 
+static double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a338a4bdf4d23f34f6dff27161b282f3d}{M\+U\+\_\+\+S\+H\+O\+RT}} = 1.\+0/10.\+0
+\item 
+static double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_aecfa5abc3630deb264d560df8dca969a}{M\+U\+\_\+\+L\+O\+NG}} = 1.\+0/30.\+0
+\item 
+static double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a2bb0ab6be2ffb7fff399a89039121c52}{P\+\_\+\+S\+H\+O\+RT}} = 0.\+5
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a215b2546c2322f46b3c6feecd7a641c7}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a215b2546c2322f46b3c6feecd7a641c7}} 
+\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}!generateCTMC@{generateCTMC}}
+\index{generateCTMC@{generateCTMC}!quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsubsection{\texorpdfstring{generateCTMC()}{generateCTMC()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1ContinuousTimeMarkovChain}{Continuous\+Time\+Markov\+Chain}}$<$\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1State}{State}}$>$ quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+M\+C.\+generate\+C\+T\+MC (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a08a928f1550646e5b7d2d1ea88f137a2}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a08a928f1550646e5b7d2d1ea88f137a2}} 
+\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}!main@{main}}
+\index{main@{main}!quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily static void quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+M\+C.\+main (\begin{DoxyParamCaption}\item[{String\mbox{[}$\,$\mbox{]}}]{args }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_afc1e0e7c08692b2ce9fd21f8f4160497}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_afc1e0e7c08692b2ce9fd21f8f4160497}} 
+\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}!next@{next}}
+\index{next@{next}!quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsubsection{\texorpdfstring{next()}{next()}}
+{\footnotesize\ttfamily static Hash\+Map$<$\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1State}{State}},Double$>$ quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+M\+C.\+next (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1State}{State}}}]{s }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a8d56cc455f04a00d501ed4bd0b35ef33}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a8d56cc455f04a00d501ed4bd0b35ef33}} 
+\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}!BETA@{BETA}}
+\index{BETA@{BETA}!quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsubsection{\texorpdfstring{BETA}{BETA}}
+{\footnotesize\ttfamily double quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+M\+C.\+B\+E\+TA = 1.\+0\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_aea08fff86d9da868ada628c0aeb7b57d}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_aea08fff86d9da868ada628c0aeb7b57d}} 
+\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}!LAMBDA@{LAMBDA}}
+\index{LAMBDA@{LAMBDA}!quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsubsection{\texorpdfstring{LAMBDA}{LAMBDA}}
+{\footnotesize\ttfamily double quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+M\+C.\+L\+A\+M\+B\+DA = 1.\+0/5.\+0\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a46d1c0b2f81b4a95b1c92d416918ad67}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a46d1c0b2f81b4a95b1c92d416918ad67}} 
+\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}!MAX\_USERS@{MAX\_USERS}}
+\index{MAX\_USERS@{MAX\_USERS}!quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsubsection{\texorpdfstring{MAX\_USERS}{MAX\_USERS}}
+{\footnotesize\ttfamily int quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+M\+C.\+M\+A\+X\+\_\+\+U\+S\+E\+RS = 6\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_aecfa5abc3630deb264d560df8dca969a}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_aecfa5abc3630deb264d560df8dca969a}} 
+\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}!MU\_LONG@{MU\_LONG}}
+\index{MU\_LONG@{MU\_LONG}!quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsubsection{\texorpdfstring{MU\_LONG}{MU\_LONG}}
+{\footnotesize\ttfamily double quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+M\+C.\+M\+U\+\_\+\+L\+O\+NG = 1.\+0/30.\+0\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a338a4bdf4d23f34f6dff27161b282f3d}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a338a4bdf4d23f34f6dff27161b282f3d}} 
+\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}!MU\_SHORT@{MU\_SHORT}}
+\index{MU\_SHORT@{MU\_SHORT}!quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsubsection{\texorpdfstring{MU\_SHORT}{MU\_SHORT}}
+{\footnotesize\ttfamily double quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+M\+C.\+M\+U\+\_\+\+S\+H\+O\+RT = 1.\+0/10.\+0\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_abdc040c53eae8982eaa27abbe1d7002f}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_abdc040c53eae8982eaa27abbe1d7002f}} 
+\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}!NUMBER\_OF\_TAXIS@{NUMBER\_OF\_TAXIS}}
+\index{NUMBER\_OF\_TAXIS@{NUMBER\_OF\_TAXIS}!quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsubsection{\texorpdfstring{NUMBER\_OF\_TAXIS}{NUMBER\_OF\_TAXIS}}
+{\footnotesize\ttfamily int quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+M\+C.\+N\+U\+M\+B\+E\+R\+\_\+\+O\+F\+\_\+\+T\+A\+X\+IS = 10\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a2bb0ab6be2ffb7fff399a89039121c52}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a2bb0ab6be2ffb7fff399a89039121c52}} 
+\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}!P\_SHORT@{P\_SHORT}}
+\index{P\_SHORT@{P\_SHORT}!quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsubsection{\texorpdfstring{P\_SHORT}{P\_SHORT}}
+{\footnotesize\ttfamily double quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+M\+C.\+P\+\_\+\+S\+H\+O\+RT = 0.\+5\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a7560966985df039f4e16fc96619efccc}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a7560966985df039f4e16fc96619efccc}} 
+\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}!T@{T}}
+\index{T@{T}!quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsubsection{\texorpdfstring{T}{T}}
+{\footnotesize\ttfamily int quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+M\+C.\+T = 0\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a286e65b7a183957dc98b5e814660100b}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a286e65b7a183957dc98b5e814660100b}} 
+\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}!TL@{TL}}
+\index{TL@{TL}!quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsubsection{\texorpdfstring{TL}{TL}}
+{\footnotesize\ttfamily int quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+M\+C.\+TL = 3\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a4881a2521fd9b7bd881dc975202758ac}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a4881a2521fd9b7bd881dc975202758ac}} 
+\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}!TS@{TS}}
+\index{TS@{TS}!quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsubsection{\texorpdfstring{TS}{TS}}
+{\footnotesize\ttfamily int quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+M\+C.\+TS = 2\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a8c86705ee0c2a2a1490151ab30cf3bef}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC_a8c86705ee0c2a2a1490151ab30cf3bef}} 
+\index{quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}!U@{U}}
+\index{U@{U}!quasylab.sibilla.core.markov.TaxiScenarioMC@{quasylab.sibilla.core.markov.TaxiScenarioMC}}
+\doxysubsubsection{\texorpdfstring{U}{U}}
+{\footnotesize\ttfamily int quasylab.\+sibilla.\+core.\+markov.\+Taxi\+Scenario\+M\+C.\+U = 1\hspace{0.3cm}{\ttfamily [static]}}
+

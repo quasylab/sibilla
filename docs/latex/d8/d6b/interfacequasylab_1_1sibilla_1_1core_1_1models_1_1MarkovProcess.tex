@@ -1,0 +1,78 @@
+\hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess}{}\doxysection{quasylab.\+sibilla.\+core.\+models.\+Markov\+Process$<$ S extends State $>$ Interface Template Reference}
+\label{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess}\index{quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$@{quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$}}
+Inheritance diagram for quasylab.\+sibilla.\+core.\+models.\+Markov\+Process$<$ S extends State $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{d8/d6b/interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1simulator_1_1util_1_1WeightedStructure}{Weighted\+Structure}}$<$ \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1StepFunction}{Step\+Function}}$<$ S $>$ $>$ \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess_afdbdf8b130f032632787b61f57870afc}{get\+Transitions}} (Random\+Generator r, double time, S s)
+\item 
+default \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1TimeStep}{Time\+Step}}$<$ S $>$ \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess_ae14c87168f811fdf00b9aafe6cfc508a}{next}} (Random\+Generator r, double time, S state)
+\item 
+default List$<$ \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action}{Action}}$<$ S $>$ $>$ \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess_a4230e298f8dc9a28653c1c71fd1b9208}{actions}} (Random\+Generator r, double time, S state)
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static double \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess_af67a5217ef4e3c1c6af0482dff6c2a5f}{sample\+Exponential\+Distribution}} (double rate, Random\+Generator r)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This is a model implementing a Markov process. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess_a4230e298f8dc9a28653c1c71fd1b9208}\label{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess_a4230e298f8dc9a28653c1c71fd1b9208}} 
+\index{quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$@{quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$}!actions@{actions}}
+\index{actions@{actions}!quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$@{quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{actions()}{actions()}}
+{\footnotesize\ttfamily default List$<$\mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action}{Action}}$<$S$>$ $>$ \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess}{quasylab.\+sibilla.\+core.\+models.\+Markov\+Process}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.actions (\begin{DoxyParamCaption}\item[{Random\+Generator}]{r,  }\item[{double}]{time,  }\item[{S}]{state }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess_afdbdf8b130f032632787b61f57870afc}\label{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess_afdbdf8b130f032632787b61f57870afc}} 
+\index{quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$@{quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$}!getTransitions@{getTransitions}}
+\index{getTransitions@{getTransitions}!quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$@{quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{getTransitions()}{getTransitions()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1simulator_1_1util_1_1WeightedStructure}{Weighted\+Structure}}$<$\mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1StepFunction}{Step\+Function}}$<$S$>$ $>$ \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess}{quasylab.\+sibilla.\+core.\+models.\+Markov\+Process}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.get\+Transitions (\begin{DoxyParamCaption}\item[{Random\+Generator}]{r,  }\item[{double}]{time,  }\item[{S}]{s }\end{DoxyParamCaption})}
+
+Returns the transitions enabled in a given state at a given time. Each transition is represented via a {\ttfamily \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1StepFunction}{Step\+Function}}}, and all the enabled transitions are stored in a {\ttfamily Weighted\+Structure} that associates each function with its rate.
+
+
+\begin{DoxyParams}{Parameters}
+{\em r} & random generator used to sample needed random varibales. \\
+\hline
+{\em time} & current time. \\
+\hline
+{\em s} & current state. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the weighted structure with all the enabled transitions. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess_ae14c87168f811fdf00b9aafe6cfc508a}\label{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess_ae14c87168f811fdf00b9aafe6cfc508a}} 
+\index{quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$@{quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$}!next@{next}}
+\index{next@{next}!quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$@{quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{next()}{next()}}
+{\footnotesize\ttfamily default \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1TimeStep}{Time\+Step}}$<$S$>$ \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess}{quasylab.\+sibilla.\+core.\+models.\+Markov\+Process}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.next (\begin{DoxyParamCaption}\item[{Random\+Generator}]{r,  }\item[{double}]{time,  }\item[{S}]{state }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess_af67a5217ef4e3c1c6af0482dff6c2a5f}\label{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess_af67a5217ef4e3c1c6af0482dff6c2a5f}} 
+\index{quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$@{quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$}!sampleExponentialDistribution@{sampleExponentialDistribution}}
+\index{sampleExponentialDistribution@{sampleExponentialDistribution}!quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$@{quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{sampleExponentialDistribution()}{sampleExponentialDistribution()}}
+{\footnotesize\ttfamily static double \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1MarkovProcess}{quasylab.\+sibilla.\+core.\+models.\+Markov\+Process}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.sample\+Exponential\+Distribution (\begin{DoxyParamCaption}\item[{double}]{rate,  }\item[{Random\+Generator}]{r }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Sample a random value of a random variable exponentially distributed with parameter {\ttfamily rate}.
+
+
+\begin{DoxyParams}{Parameters}
+{\em rate} & a positive value representing the parameter of an exponentially distributed random variable. \\
+\hline
+{\em r} & a random generator. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a random value sampled from an exponentially distributed random variable with parameter {\ttfamily rate}. 
+\end{DoxyReturn}

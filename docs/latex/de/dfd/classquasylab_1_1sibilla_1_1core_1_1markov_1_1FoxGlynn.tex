@@ -1,0 +1,171 @@
+\hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn}{}\doxysection{quasylab.\+sibilla.\+core.\+markov.\+Fox\+Glynn Class Reference}
+\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn}\index{quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_a9c6e4b2f465c22aceff00591c4a2c1e3}{left\+Point}} ()
+\item 
+int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_a6aa863a8854ec9a1cd0dc7f4db557885}{right\+Point}} ()
+\item 
+double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_ae9592176cc3b98603eb80c2839a4e1f4}{weight}} (int i)
+\item 
+double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_a1fbcc04b5cf65438a21510a0ef0ecc64}{total\+Weight}} ()
+\item 
+double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_a7143517fdb1cc650b576af8d0ec9bdc0}{poisson\+Prob}} (int i)
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn}{Fox\+Glynn}} \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_ac7d5145eb0ee686e4ce473349837abf4}{compute\+Reduced}} (double lambda, double error)
+\item 
+static \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn}{Fox\+Glynn}} \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_ac58123798450e01e7f97c2aa1966b026}{compute}} (double lambda, double error)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Based on \href{https://github.com/oris-tool/sirio/blob/master/sirio/src/main/java/org/oristool/models/gspn/chains/FoxGlynn.java}{\texttt{ https\+://github.\+com/oris-\/tool/sirio/blob/master/sirio/src/main/java/org/oristool/models/gspn/chains/\+Fox\+Glynn.\+java}} 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_ac58123798450e01e7f97c2aa1966b026}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_ac58123798450e01e7f97c2aa1966b026}} 
+\index{quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}!compute@{compute}}
+\index{compute@{compute}!quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}}
+\doxysubsubsection{\texorpdfstring{compute()}{compute()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn}{Fox\+Glynn}} quasylab.\+sibilla.\+core.\+markov.\+Fox\+Glynn.\+compute (\begin{DoxyParamCaption}\item[{double}]{lambda,  }\item[{double}]{error }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Computes the Fox-\/\+Glynn approximation of Poisson probabilities.
+
+
+\begin{DoxyParams}{Parameters}
+{\em lambda} & rate of the Poisson distribution \\
+\hline
+{\em error} & the maximum allowed value of probabilities not included \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+truncation points and weights/probabilities between them 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em Illegal\+State\+Exception} & if underflow can occur or the tails cannot be bounded \\
+\hline
+\end{DoxyExceptions}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_ac7d5145eb0ee686e4ce473349837abf4}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_ac7d5145eb0ee686e4ce473349837abf4}} 
+\index{quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}!computeReduced@{computeReduced}}
+\index{computeReduced@{computeReduced}!quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}}
+\doxysubsubsection{\texorpdfstring{computeReduced()}{computeReduced()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn}{Fox\+Glynn}} quasylab.\+sibilla.\+core.\+markov.\+Fox\+Glynn.\+compute\+Reduced (\begin{DoxyParamCaption}\item[{double}]{lambda,  }\item[{double}]{error }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Computes a reduced Fox-\/\+Glynn approximation of Poisson probabilities.
+
+After bounding tails and computing Poisson probabilities with Fox-\/\+Glynn algorithm, a simple heuristic is applied to reduce the size of the distribution (under the target error).
+
+
+\begin{DoxyParams}{Parameters}
+{\em lambda} & rate of the Poisson distribution \\
+\hline
+{\em error} & the maximum allowed value of probabilities not included \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+truncation points and weights/probabilities between them 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em Illegal\+State\+Exception} & if underflow can occur or the tails cannot be bounded \\
+\hline
+\end{DoxyExceptions}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_a9c6e4b2f465c22aceff00591c4a2c1e3}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_a9c6e4b2f465c22aceff00591c4a2c1e3}} 
+\index{quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}!leftPoint@{leftPoint}}
+\index{leftPoint@{leftPoint}!quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}}
+\doxysubsubsection{\texorpdfstring{leftPoint()}{leftPoint()}}
+{\footnotesize\ttfamily int quasylab.\+sibilla.\+core.\+markov.\+Fox\+Glynn.\+left\+Point (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Returns the point used to truncate the left tail of the Poisson distribution.
+
+\begin{DoxyReturn}{Returns}
+first point of the Poisson distribution approximation 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_a7143517fdb1cc650b576af8d0ec9bdc0}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_a7143517fdb1cc650b576af8d0ec9bdc0}} 
+\index{quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}!poissonProb@{poissonProb}}
+\index{poissonProb@{poissonProb}!quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}}
+\doxysubsubsection{\texorpdfstring{poissonProb()}{poissonProb()}}
+{\footnotesize\ttfamily double quasylab.\+sibilla.\+core.\+markov.\+Fox\+Glynn.\+poisson\+Prob (\begin{DoxyParamCaption}\item[{int}]{i }\end{DoxyParamCaption})}
+
+Returns the Poisson probability for a point in the approximation.
+
+The input index must belong to the range 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{[leftPoint(), rightPoint()] }
+\end{DoxyCode}
+ .
+
+
+\begin{DoxyParams}{Parameters}
+{\em i} & time point \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Poisson probability for the given point 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em Index\+Out\+Of\+Bounds\+Exception} & unless 
+\begin{DoxyCode}{1}
+\DoxyCodeLine{leftPoint() <= i <= rightPoint() }
+\end{DoxyCode}
+ \\
+\hline
+\end{DoxyExceptions}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_a6aa863a8854ec9a1cd0dc7f4db557885}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_a6aa863a8854ec9a1cd0dc7f4db557885}} 
+\index{quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}!rightPoint@{rightPoint}}
+\index{rightPoint@{rightPoint}!quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}}
+\doxysubsubsection{\texorpdfstring{rightPoint()}{rightPoint()}}
+{\footnotesize\ttfamily int quasylab.\+sibilla.\+core.\+markov.\+Fox\+Glynn.\+right\+Point (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Returns the point used to truncate the right tail of the Poisson distribution.
+
+\begin{DoxyReturn}{Returns}
+last point of the Poisson distribution approximation 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_a1fbcc04b5cf65438a21510a0ef0ecc64}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_a1fbcc04b5cf65438a21510a0ef0ecc64}} 
+\index{quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}!totalWeight@{totalWeight}}
+\index{totalWeight@{totalWeight}!quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}}
+\doxysubsubsection{\texorpdfstring{totalWeight()}{totalWeight()}}
+{\footnotesize\ttfamily double quasylab.\+sibilla.\+core.\+markov.\+Fox\+Glynn.\+total\+Weight (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Returns a normalization constant for the Poisson approximation.
+
+\begin{DoxyReturn}{Returns}
+normalization constant 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_ae9592176cc3b98603eb80c2839a4e1f4}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1FoxGlynn_ae9592176cc3b98603eb80c2839a4e1f4}} 
+\index{quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}!weight@{weight}}
+\index{weight@{weight}!quasylab.sibilla.core.markov.FoxGlynn@{quasylab.sibilla.core.markov.FoxGlynn}}
+\doxysubsubsection{\texorpdfstring{weight()}{weight()}}
+{\footnotesize\ttfamily double quasylab.\+sibilla.\+core.\+markov.\+Fox\+Glynn.\+weight (\begin{DoxyParamCaption}\item[{int}]{i }\end{DoxyParamCaption})}
+
+Returns the weight of a point in the approximation.
+
+The input index must belong to the range 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{[leftPoint(), rightPoint()] }
+\end{DoxyCode}
+ .
+
+
+\begin{DoxyParams}{Parameters}
+{\em i} & time point \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+weight for the given point 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em Index\+Out\+Of\+Bounds\+Exception} & unless 
+\begin{DoxyCode}{1}
+\DoxyCodeLine{leftPoint() <= i <= rightPoint() }
+\end{DoxyCode}
+ \\
+\hline
+\end{DoxyExceptions}

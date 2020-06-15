@@ -1,0 +1,79 @@
+\hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1serialization_1_1CustomClassLoader}{}\doxysection{quasylab.\+sibilla.\+core.\+network.\+serialization.\+Custom\+Class\+Loader Class Reference}
+\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1serialization_1_1CustomClassLoader}\index{quasylab.sibilla.core.network.serialization.CustomClassLoader@{quasylab.sibilla.core.network.serialization.CustomClassLoader}}
+Inheritance diagram for quasylab.\+sibilla.\+core.\+network.\+serialization.\+Custom\+Class\+Loader\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{de/d69/classquasylab_1_1sibilla_1_1core_1_1network_1_1serialization_1_1CustomClassLoader}
+\end{center}
+\end{figure}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static byte\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1serialization_1_1CustomClassLoader_aa4f7fdf3d9199e43e90835e1a415c9dd}{load\+Class\+Bytes}} (String class\+Name)
+\item 
+static byte\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1serialization_1_1CustomClassLoader_a0b0ccb8055719ce07e886b9fa9192744}{remove\+Class\+Bytes}} (String class\+Name)
+\item 
+static void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1serialization_1_1CustomClassLoader_ad622a4bd7ad29753ee1443be636fc201}{def\+Class}} (String name, byte\mbox{[}$\,$\mbox{]} b)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Utility class used to load the data associated to a .class file into the memory.
+
+\begin{DoxyAuthor}{Author}
+Belenchia Matteo 
+
+Stelluti Francesco Pio 
+
+Zamponi Marco 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1serialization_1_1CustomClassLoader_ad622a4bd7ad29753ee1443be636fc201}\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1serialization_1_1CustomClassLoader_ad622a4bd7ad29753ee1443be636fc201}} 
+\index{quasylab.sibilla.core.network.serialization.CustomClassLoader@{quasylab.sibilla.core.network.serialization.CustomClassLoader}!defClass@{defClass}}
+\index{defClass@{defClass}!quasylab.sibilla.core.network.serialization.CustomClassLoader@{quasylab.sibilla.core.network.serialization.CustomClassLoader}}
+\doxysubsubsection{\texorpdfstring{defClass()}{defClass()}}
+{\footnotesize\ttfamily static void quasylab.\+sibilla.\+core.\+network.\+serialization.\+Custom\+Class\+Loader.\+def\+Class (\begin{DoxyParamCaption}\item[{String}]{name,  }\item[{byte\mbox{[}$\,$\mbox{]}}]{b }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Loads into memory the data associated to a .class file
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & of the class to be loaded in memory. \\
+\hline
+{\em b} & byte array containing the data of the class to be loaded in memory. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1serialization_1_1CustomClassLoader_aa4f7fdf3d9199e43e90835e1a415c9dd}\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1serialization_1_1CustomClassLoader_aa4f7fdf3d9199e43e90835e1a415c9dd}} 
+\index{quasylab.sibilla.core.network.serialization.CustomClassLoader@{quasylab.sibilla.core.network.serialization.CustomClassLoader}!loadClassBytes@{loadClassBytes}}
+\index{loadClassBytes@{loadClassBytes}!quasylab.sibilla.core.network.serialization.CustomClassLoader@{quasylab.sibilla.core.network.serialization.CustomClassLoader}}
+\doxysubsubsection{\texorpdfstring{loadClassBytes()}{loadClassBytes()}}
+{\footnotesize\ttfamily static byte \mbox{[}$\,$\mbox{]} quasylab.\+sibilla.\+core.\+network.\+serialization.\+Custom\+Class\+Loader.\+load\+Class\+Bytes (\begin{DoxyParamCaption}\item[{String}]{class\+Name }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Retrieves the byte array associated to a class name that was previously loaded through this loader.
+
+
+\begin{DoxyParams}{Parameters}
+{\em class\+Name} & the name of the class which byte array data needs to be retrieved. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+byte array associated with the requested class name. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1serialization_1_1CustomClassLoader_a0b0ccb8055719ce07e886b9fa9192744}\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1serialization_1_1CustomClassLoader_a0b0ccb8055719ce07e886b9fa9192744}} 
+\index{quasylab.sibilla.core.network.serialization.CustomClassLoader@{quasylab.sibilla.core.network.serialization.CustomClassLoader}!removeClassBytes@{removeClassBytes}}
+\index{removeClassBytes@{removeClassBytes}!quasylab.sibilla.core.network.serialization.CustomClassLoader@{quasylab.sibilla.core.network.serialization.CustomClassLoader}}
+\doxysubsubsection{\texorpdfstring{removeClassBytes()}{removeClassBytes()}}
+{\footnotesize\ttfamily static byte \mbox{[}$\,$\mbox{]} quasylab.\+sibilla.\+core.\+network.\+serialization.\+Custom\+Class\+Loader.\+remove\+Class\+Bytes (\begin{DoxyParamCaption}\item[{String}]{class\+Name }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Deletes the byte array associated to a class name that was previously loaded through this loader.
+
+
+\begin{DoxyParams}{Parameters}
+{\em class\+Name} & the name of the class which byte array data needs to be deleted. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+byte array associated with the requested class name or null if the class wasn\textquotesingle{}t loaded using this loader. 
+\end{DoxyReturn}

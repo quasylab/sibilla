@@ -1,0 +1,123 @@
+\hypertarget{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}{}\doxysection{quasylab.\+sibilla.\+core.\+simulator.\+Abstract\+Simulation\+Manager$<$ S extends State $>$ Class Template Reference}
+\label{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}\index{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}}
+Inheritance diagram for quasylab.\+sibilla.\+core.\+simulator.\+Abstract\+Simulation\+Manager$<$ S extends State $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{d4/d5d/classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_ace56fa28ae3c077068bcbef11466b11a}{Abstract\+Simulation\+Manager}} (Random\+Generator random, \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1simulator_1_1SimulationMonitor}{Simulation\+Monitor}} monitor, Consumer$<$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1Trajectory}{Trajectory}}$<$ S $>$$>$ trajectory\+Consumer)
+\item 
+synchronized void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a871522f334aba8ad03f06f1f08e19abf}{simulate}} (\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1SimulationUnit}{Simulation\+Unit}}$<$ S $>$ unit)
+\item 
+\mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1simulator_1_1SimulationMonitor}{Simulation\+Monitor}} \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a75b54ab41dcf02d93d8456c494fa3298}{get\+Monitor}} ()
+\item 
+int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a0275e21d49a18a600783c7994b44ba4a}{computed\+Trajectories}} ()
+\item 
+double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a34e0cb2ecc64c1397d646370e5dc94a8}{average\+Execution\+Time}} ()
+\item 
+synchronized boolean \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_ace5b381da335944283d68be7eb67e489}{is\+Running}} ()
+\item 
+void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a4adfe34fd578618d3d8154c72dc51869}{shutdown}} ()  throws Interrupted\+Exception 
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+synchronized void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_aaf46dfc92121b4812ee45776ced3d94b}{handle\+Trajectory}} (\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1Trajectory}{Trajectory}}$<$ S $>$ trj)
+\item 
+abstract void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a982ae2bcd6ba90af60b7e55f1ac4458e}{handle\+Task}} (\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1SimulationTask}{Simulation\+Task}}$<$ S $>$ simulation\+Task)
+\item 
+synchronized void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a1b11e19787785884fe82d5fab4a5aa49}{set\+Running}} (boolean flag)
+\item 
+void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a28773a1829c28f45be12c979ed527771}{notify\+Monitor\+Start\+Interation}} (int iteration\+Index)
+\item 
+void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a415839e0d9c110e76c48a22101dd66ac}{notify\+Monitor\+End\+Interation}} (int iteration\+Index)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_ace56fa28ae3c077068bcbef11466b11a}\label{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_ace56fa28ae3c077068bcbef11466b11a}} 
+\index{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}!AbstractSimulationManager@{AbstractSimulationManager}}
+\index{AbstractSimulationManager@{AbstractSimulationManager}!quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{AbstractSimulationManager()}{AbstractSimulationManager()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}{quasylab.\+sibilla.\+core.\+simulator.\+Abstract\+Simulation\+Manager}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}{Abstract\+Simulation\+Manager}} (\begin{DoxyParamCaption}\item[{Random\+Generator}]{random,  }\item[{\mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1simulator_1_1SimulationMonitor}{Simulation\+Monitor}}}]{monitor,  }\item[{Consumer$<$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1Trajectory}{Trajectory}}$<$ S $>$$>$}]{trajectory\+Consumer }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a34e0cb2ecc64c1397d646370e5dc94a8}\label{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a34e0cb2ecc64c1397d646370e5dc94a8}} 
+\index{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}!averageExecutionTime@{averageExecutionTime}}
+\index{averageExecutionTime@{averageExecutionTime}!quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{averageExecutionTime()}{averageExecutionTime()}}
+{\footnotesize\ttfamily double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}{quasylab.\+sibilla.\+core.\+simulator.\+Abstract\+Simulation\+Manager}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.average\+Execution\+Time (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a0275e21d49a18a600783c7994b44ba4a}\label{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a0275e21d49a18a600783c7994b44ba4a}} 
+\index{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}!computedTrajectories@{computedTrajectories}}
+\index{computedTrajectories@{computedTrajectories}!quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{computedTrajectories()}{computedTrajectories()}}
+{\footnotesize\ttfamily int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}{quasylab.\+sibilla.\+core.\+simulator.\+Abstract\+Simulation\+Manager}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.computed\+Trajectories (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a75b54ab41dcf02d93d8456c494fa3298}\label{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a75b54ab41dcf02d93d8456c494fa3298}} 
+\index{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}!getMonitor@{getMonitor}}
+\index{getMonitor@{getMonitor}!quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{getMonitor()}{getMonitor()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1simulator_1_1SimulationMonitor}{Simulation\+Monitor}} \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}{quasylab.\+sibilla.\+core.\+simulator.\+Abstract\+Simulation\+Manager}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.get\+Monitor (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a982ae2bcd6ba90af60b7e55f1ac4458e}\label{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a982ae2bcd6ba90af60b7e55f1ac4458e}} 
+\index{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}!handleTask@{handleTask}}
+\index{handleTask@{handleTask}!quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{handleTask()}{handleTask()}}
+{\footnotesize\ttfamily abstract void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}{quasylab.\+sibilla.\+core.\+simulator.\+Abstract\+Simulation\+Manager}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.handle\+Task (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1SimulationTask}{Simulation\+Task}}$<$ S $>$}]{simulation\+Task }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [abstract]}, {\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_aaf46dfc92121b4812ee45776ced3d94b}\label{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_aaf46dfc92121b4812ee45776ced3d94b}} 
+\index{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}!handleTrajectory@{handleTrajectory}}
+\index{handleTrajectory@{handleTrajectory}!quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{handleTrajectory()}{handleTrajectory()}}
+{\footnotesize\ttfamily synchronized void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}{quasylab.\+sibilla.\+core.\+simulator.\+Abstract\+Simulation\+Manager}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.handle\+Trajectory (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1Trajectory}{Trajectory}}$<$ S $>$}]{trj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+Handles the trajectory given in input
+
+
+\begin{DoxyParams}{Parameters}
+{\em trj} & trajectory to be handled \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_ace5b381da335944283d68be7eb67e489}\label{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_ace5b381da335944283d68be7eb67e489}} 
+\index{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}!isRunning@{isRunning}}
+\index{isRunning@{isRunning}!quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{isRunning()}{isRunning()}}
+{\footnotesize\ttfamily synchronized boolean \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}{quasylab.\+sibilla.\+core.\+simulator.\+Abstract\+Simulation\+Manager}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.is\+Running (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a415839e0d9c110e76c48a22101dd66ac}\label{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a415839e0d9c110e76c48a22101dd66ac}} 
+\index{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}!notifyMonitorEndInteration@{notifyMonitorEndInteration}}
+\index{notifyMonitorEndInteration@{notifyMonitorEndInteration}!quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{notifyMonitorEndInteration()}{notifyMonitorEndInteration()}}
+{\footnotesize\ttfamily void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}{quasylab.\+sibilla.\+core.\+simulator.\+Abstract\+Simulation\+Manager}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.notify\+Monitor\+End\+Interation (\begin{DoxyParamCaption}\item[{int}]{iteration\+Index }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a28773a1829c28f45be12c979ed527771}\label{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a28773a1829c28f45be12c979ed527771}} 
+\index{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}!notifyMonitorStartInteration@{notifyMonitorStartInteration}}
+\index{notifyMonitorStartInteration@{notifyMonitorStartInteration}!quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{notifyMonitorStartInteration()}{notifyMonitorStartInteration()}}
+{\footnotesize\ttfamily void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}{quasylab.\+sibilla.\+core.\+simulator.\+Abstract\+Simulation\+Manager}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.notify\+Monitor\+Start\+Interation (\begin{DoxyParamCaption}\item[{int}]{iteration\+Index }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a1b11e19787785884fe82d5fab4a5aa49}\label{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a1b11e19787785884fe82d5fab4a5aa49}} 
+\index{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}!setRunning@{setRunning}}
+\index{setRunning@{setRunning}!quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{setRunning()}{setRunning()}}
+{\footnotesize\ttfamily synchronized void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}{quasylab.\+sibilla.\+core.\+simulator.\+Abstract\+Simulation\+Manager}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.set\+Running (\begin{DoxyParamCaption}\item[{boolean}]{flag }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a4adfe34fd578618d3d8154c72dc51869}\label{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a4adfe34fd578618d3d8154c72dc51869}} 
+\index{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}!shutdown@{shutdown}}
+\index{shutdown@{shutdown}!quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{shutdown()}{shutdown()}}
+{\footnotesize\ttfamily void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}{quasylab.\+sibilla.\+core.\+simulator.\+Abstract\+Simulation\+Manager}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.shutdown (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) throws Interrupted\+Exception}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a871522f334aba8ad03f06f1f08e19abf}\label{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager_a871522f334aba8ad03f06f1f08e19abf}} 
+\index{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}!simulate@{simulate}}
+\index{simulate@{simulate}!quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{simulate()}{simulate()}}
+{\footnotesize\ttfamily synchronized void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1AbstractSimulationManager}{quasylab.\+sibilla.\+core.\+simulator.\+Abstract\+Simulation\+Manager}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.simulate (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1SimulationUnit}{Simulation\+Unit}}$<$ S $>$}]{unit }\end{DoxyParamCaption})}
+

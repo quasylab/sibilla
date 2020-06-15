@@ -1,0 +1,90 @@
+\hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action}{}\doxysection{quasylab.\+sibilla.\+core.\+models.\+Action$<$ S $>$ Interface Template Reference}
+\label{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action}\index{quasylab.sibilla.core.models.Action$<$ S $>$@{quasylab.sibilla.core.models.Action$<$ S $>$}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+double \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action_a2c0690b43c924fab5dedb09a8afa440b}{probability}} ()
+\item 
+\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1TimeStep}{Time\+Step}}$<$ S $>$ \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action_a8de9c354f8db5202f908bcc9173db14d}{execute}} (Random\+Generator r)
+\item 
+S \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action_a62b95dd15940bdce21fc6a875b3331b9}{revert}} ()
+\item 
+static$<$ S $>$ \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action}{Action}}$<$ S $>$ \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action_afc95b72ae15d0c2aacaab3b9f6f803ae}{action\+Of\+Markov\+Step\+Function}} (double now, double total\+Rate, double step\+Rate, S state, \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1StepFunction}{Step\+Function}}$<$ S $>$ f)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Represents an action that may change current state of a model. When action is executed, it duration time is sampled together with the next state. An action is selected with a given probability. Moreover an action can be reverted to obtain the state originating the action.
+
+
+\begin{DoxyParams}{Parameters}
+{\em $<$\+S$>$} & type of model state. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action_afc95b72ae15d0c2aacaab3b9f6f803ae}\label{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action_afc95b72ae15d0c2aacaab3b9f6f803ae}} 
+\index{quasylab.sibilla.core.models.Action$<$ S $>$@{quasylab.sibilla.core.models.Action$<$ S $>$}!actionOfMarkovStepFunction@{actionOfMarkovStepFunction}}
+\index{actionOfMarkovStepFunction@{actionOfMarkovStepFunction}!quasylab.sibilla.core.models.Action$<$ S $>$@{quasylab.sibilla.core.models.Action$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{actionOfMarkovStepFunction()}{actionOfMarkovStepFunction()}}
+{\footnotesize\ttfamily static$<$S$>$ \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action}{Action}}$<$S$>$ \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action}{quasylab.\+sibilla.\+core.\+models.\+Action}}$<$ S $>$.action\+Of\+Markov\+Step\+Function (\begin{DoxyParamCaption}\item[{double}]{now,  }\item[{double}]{total\+Rate,  }\item[{double}]{step\+Rate,  }\item[{S}]{state,  }\item[{\mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1StepFunction}{Step\+Function}}$<$ S $>$}]{f }\end{DoxyParamCaption})}
+
+Utility method that is used to create the action associated to a transition in a markov process.
+
+
+\begin{DoxyParams}{Parameters}
+{\em now} & time when the transition is performed. \\
+\hline
+{\em total\+Rate} & total exit rate of current state. \\
+\hline
+{\em step\+Rate} & rate of the selected step. \\
+\hline
+{\em state} & current state. \\
+\hline
+{\em f} & lazy function used to compute next state. \\
+\hline
+{\em $<$\+S$>$} & type of states of Markov process. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the action associated to a transition in a markov process. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action_a8de9c354f8db5202f908bcc9173db14d}\label{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action_a8de9c354f8db5202f908bcc9173db14d}} 
+\index{quasylab.sibilla.core.models.Action$<$ S $>$@{quasylab.sibilla.core.models.Action$<$ S $>$}!execute@{execute}}
+\index{execute@{execute}!quasylab.sibilla.core.models.Action$<$ S $>$@{quasylab.sibilla.core.models.Action$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{execute()}{execute()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1TimeStep}{Time\+Step}}$<$S$>$ \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action}{quasylab.\+sibilla.\+core.\+models.\+Action}}$<$ S $>$.execute (\begin{DoxyParamCaption}\item[{Random\+Generator}]{r }\end{DoxyParamCaption})}
+
+Returns the model state after action execution. The {\ttfamily Random\+Generator} is the one used by the action to sample possible random values.
+
+
+\begin{DoxyParams}{Parameters}
+{\em r} & random generator used to sample needed random varibales. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+result of action execution. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action_a2c0690b43c924fab5dedb09a8afa440b}\label{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action_a2c0690b43c924fab5dedb09a8afa440b}} 
+\index{quasylab.sibilla.core.models.Action$<$ S $>$@{quasylab.sibilla.core.models.Action$<$ S $>$}!probability@{probability}}
+\index{probability@{probability}!quasylab.sibilla.core.models.Action$<$ S $>$@{quasylab.sibilla.core.models.Action$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{probability()}{probability()}}
+{\footnotesize\ttfamily double \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action}{quasylab.\+sibilla.\+core.\+models.\+Action}}$<$ S $>$.probability (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Returns the probability that this action is selected as next step.
+
+\begin{DoxyReturn}{Returns}
+the probability that this action is selected as next step. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action_a62b95dd15940bdce21fc6a875b3331b9}\label{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action_a62b95dd15940bdce21fc6a875b3331b9}} 
+\index{quasylab.sibilla.core.models.Action$<$ S $>$@{quasylab.sibilla.core.models.Action$<$ S $>$}!revert@{revert}}
+\index{revert@{revert}!quasylab.sibilla.core.models.Action$<$ S $>$@{quasylab.sibilla.core.models.Action$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{revert()}{revert()}}
+{\footnotesize\ttfamily S \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Action}{quasylab.\+sibilla.\+core.\+models.\+Action}}$<$ S $>$.revert (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Returns the model state before action execution.
+
+\begin{DoxyReturn}{Returns}
+model state before action execution. 
+\end{DoxyReturn}

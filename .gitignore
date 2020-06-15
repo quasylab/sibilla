@@ -2,7 +2,6 @@
 # Edit at https://www.gitignore.io/?templates=java,gradle,eclipse,intellij
 
 ###Doxygen###
-docs/
 xtend-gen/*
 xtext-gen/*
 

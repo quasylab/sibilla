@@ -1,0 +1,237 @@
+\hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{}\doxysection{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain$<$ S $>$ Class Template Reference}
+\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+Inheritance diagram for quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain$<$ S $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.465969cm]{da/d71/classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_ae7872a2fe5b85f622b5417af25dedaf2}{Markov\+Chain}} ()
+\item 
+boolean \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a7a928832e674fffdc1b5d641ec09b8d8}{contains}} (S s)
+\item 
+int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aa9f368b957df2f4671a9ceb2d28fde54}{number\+Of\+States}} ()
+\item 
+abstract void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a5f7c66e0b3fd12f3a37b007ae0ff9df9}{add}} (S s, Map$<$ S, Double $>$ map)
+\item 
+double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a1c7c6355fd584c6e8c3b5e7dedbcffb4}{sum\+Of\+Row}} (S s)
+\item 
+double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a77ce682fed8a627bb6a57bb54a1e1a36}{rate}} (S s1, S s2)
+\item 
+Set$<$ S $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a1bf0651f212418aadf29ce9c1a4e5c27}{reach\+Set}} (Predicate$<$ S $>$ condition, Set$<$ S $>$ nodes)
+\item 
+Set$<$ S $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a0af6ee8af7bf1e5f801c2d9c66cbbc69}{select}} (Predicate$<$ S $>$ filter)
+\item 
+Set$<$ S $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_ac577fbbebe316d849136449b4c6b2f90}{get\+States}} ()
+\item 
+abstract Map$<$ S, Double $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_af540eab23742603c99d08dab1e1d01e8}{probability\+Matrix\+Row}} (S s)
+\item 
+Map$<$ S, Double $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a4681d99d5e899f896289ba1b95591978}{forward}} (Map$<$ S, Double $>$ v)
+\item 
+Map$<$ S, Double $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_ac9fd7ae8314019ae8830ea0640b45354}{backward}} (Map$<$ S, Double $>$ v)
+\item 
+List$<$ Map$<$ S, Double $>$ $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a09af10fd763b266195605f9d7f83563b}{forward}} (Map$<$ S, Double $>$ v, int steps)
+\item 
+List$<$ Map$<$ S, Double $>$ $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a368f0675041375a4bea5f10c6a553195}{move}} (Function$<$ Map$<$ S, Double $>$, Map$<$ S, Double $>$$>$ transition, Map$<$ S, Double $>$ v, int steps)
+\item 
+List$<$ Map$<$ S, Double $>$ $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aff4fa2ad7405f578284aeceace354690}{backward}} (Map$<$ S, Double $>$ v, int steps)
+\item 
+Set$<$ S $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aa661ca84ca19b6b0d27e4ad57c65663c}{next}} (S s)
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static$<$ S, M extends \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{Markov\+Chain}}$<$ S $>$ M \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a302fdc13f3877ee057a8e9d65cb96b5c}{generate\+Markov\+Chain}} (Supplier$<$ M $>$ builder, S init, Function$<$ S, Map$<$ S, Double $>$$>$ step\+Function)
+\item 
+static$<$ S $>$ Map$<$ S, Double $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_adce2e092d46ae3d28ac343589e9d1e77}{move}} (Map$<$ S, Map$<$ S, Double $>$$>$ transition, Map$<$ S, Double $>$ v)
+\item 
+static$<$ S $>$ void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aa5c127daf1695d48d3e26f5be7fd5f6f}{add\+To}} (Map$<$ S, Double $>$ m, S s, double v)
+\item 
+static$<$ S $>$ Map$<$ S, Double $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_ad112d26f7912584a9efad8eca58675b4}{sum}} (Map$<$ S, Double $>$ m1, Map$<$ S, Double $>$ m2)
+\item 
+static$<$ S $>$ Real\+Matrix \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a9998412cdde1b096c4309adbf98af013}{generate\+Matrix}} (Int\+Function$<$ Real\+Matrix $>$ matrix\+Builder, Function$<$ S, Stream$<$ Map.\+Entry$<$ S, Double $>$$>$$>$ row\+Function, Map$<$ S, Integer $>$ index)
+\item 
+static$<$ S $>$ Real\+Vector \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aca0a1615687d371d931edd8b422a7f4c}{generate\+Vector}} (Int\+Function$<$ Real\+Vector $>$ vector\+Builder, Map$<$ S, Integer $>$ index, Function$<$ S, Double $>$ init)
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a720c5609cb1ff699aee90c24b3a36144}{add\+To\+Row}} (S s, Map$<$ S, Double $>$ row)
+\item 
+Map$<$ S, Double $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aab19658870ca77a79d46e45e7f642e64}{get\+Row}} (S s)
+\item 
+void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a1a39ac856029689110caa94c76eaaf8a}{create\+If\+Not\+Exists}} (S s)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyAuthor}{Author}
+loreti 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_ae7872a2fe5b85f622b5417af25dedaf2}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_ae7872a2fe5b85f622b5417af25dedaf2}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!MarkovChain@{MarkovChain}}
+\index{MarkovChain@{MarkovChain}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{MarkovChain()}{MarkovChain()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{Markov\+Chain}} (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a5f7c66e0b3fd12f3a37b007ae0ff9df9}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a5f7c66e0b3fd12f3a37b007ae0ff9df9}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!add@{add}}
+\index{add@{add}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{add()}{add()}}
+{\footnotesize\ttfamily abstract void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.add (\begin{DoxyParamCaption}\item[{S}]{s,  }\item[{Map$<$ S, Double $>$}]{map }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [abstract]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1DiscreteTimeMarkovChain_ad17328a8f3b73a8f2b3b449bc36280e6}{quasylab.\+sibilla.\+core.\+markov.\+Discrete\+Time\+Markov\+Chain$<$ S $>$}}, and \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1ContinuousTimeMarkovChain_a228a4db9e3eaabbc7b8528f381c96ad7}{quasylab.\+sibilla.\+core.\+markov.\+Continuous\+Time\+Markov\+Chain$<$ S $>$}}.
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aa5c127daf1695d48d3e26f5be7fd5f6f}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aa5c127daf1695d48d3e26f5be7fd5f6f}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!addTo@{addTo}}
+\index{addTo@{addTo}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{addTo()}{addTo()}}
+{\footnotesize\ttfamily static $<$S$>$ void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.add\+To (\begin{DoxyParamCaption}\item[{Map$<$ S, Double $>$}]{m,  }\item[{S}]{s,  }\item[{double}]{v }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a720c5609cb1ff699aee90c24b3a36144}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a720c5609cb1ff699aee90c24b3a36144}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!addToRow@{addToRow}}
+\index{addToRow@{addToRow}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{addToRow()}{addToRow()}}
+{\footnotesize\ttfamily double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.add\+To\+Row (\begin{DoxyParamCaption}\item[{S}]{s,  }\item[{Map$<$ S, Double $>$}]{row }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_ac9fd7ae8314019ae8830ea0640b45354}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_ac9fd7ae8314019ae8830ea0640b45354}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!backward@{backward}}
+\index{backward@{backward}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{backward()}{backward()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily Map$<$S,Double$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.backward (\begin{DoxyParamCaption}\item[{Map$<$ S, Double $>$}]{v }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aff4fa2ad7405f578284aeceace354690}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aff4fa2ad7405f578284aeceace354690}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!backward@{backward}}
+\index{backward@{backward}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{backward()}{backward()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily List$<$Map$<$S,Double$>$ $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.backward (\begin{DoxyParamCaption}\item[{Map$<$ S, Double $>$}]{v,  }\item[{int}]{steps }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a7a928832e674fffdc1b5d641ec09b8d8}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a7a928832e674fffdc1b5d641ec09b8d8}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!contains@{contains}}
+\index{contains@{contains}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{contains()}{contains()}}
+{\footnotesize\ttfamily boolean \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.contains (\begin{DoxyParamCaption}\item[{S}]{s }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a1a39ac856029689110caa94c76eaaf8a}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a1a39ac856029689110caa94c76eaaf8a}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!createIfNotExists@{createIfNotExists}}
+\index{createIfNotExists@{createIfNotExists}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{createIfNotExists()}{createIfNotExists()}}
+{\footnotesize\ttfamily void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.create\+If\+Not\+Exists (\begin{DoxyParamCaption}\item[{S}]{s }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a4681d99d5e899f896289ba1b95591978}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a4681d99d5e899f896289ba1b95591978}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!forward@{forward}}
+\index{forward@{forward}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{forward()}{forward()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily Map$<$S,Double$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.forward (\begin{DoxyParamCaption}\item[{Map$<$ S, Double $>$}]{v }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a09af10fd763b266195605f9d7f83563b}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a09af10fd763b266195605f9d7f83563b}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!forward@{forward}}
+\index{forward@{forward}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{forward()}{forward()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily List$<$Map$<$S,Double$>$ $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.forward (\begin{DoxyParamCaption}\item[{Map$<$ S, Double $>$}]{v,  }\item[{int}]{steps }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a302fdc13f3877ee057a8e9d65cb96b5c}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a302fdc13f3877ee057a8e9d65cb96b5c}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!generateMarkovChain@{generateMarkovChain}}
+\index{generateMarkovChain@{generateMarkovChain}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{generateMarkovChain()}{generateMarkovChain()}}
+{\footnotesize\ttfamily static $<$S, M extends \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{Markov\+Chain}}$<$S$>$ M \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.generate\+Markov\+Chain (\begin{DoxyParamCaption}\item[{Supplier$<$ M $>$}]{builder,  }\item[{S}]{init,  }\item[{Function$<$ S, Map$<$ S, Double $>$$>$}]{step\+Function }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a9998412cdde1b096c4309adbf98af013}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a9998412cdde1b096c4309adbf98af013}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!generateMatrix@{generateMatrix}}
+\index{generateMatrix@{generateMatrix}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{generateMatrix()}{generateMatrix()}}
+{\footnotesize\ttfamily static $<$S$>$ Real\+Matrix \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.generate\+Matrix (\begin{DoxyParamCaption}\item[{Int\+Function$<$ Real\+Matrix $>$}]{matrix\+Builder,  }\item[{Function$<$ S, Stream$<$ Map.\+Entry$<$ S, Double $>$$>$$>$}]{row\+Function,  }\item[{Map$<$ S, Integer $>$}]{index }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aca0a1615687d371d931edd8b422a7f4c}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aca0a1615687d371d931edd8b422a7f4c}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!generateVector@{generateVector}}
+\index{generateVector@{generateVector}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{generateVector()}{generateVector()}}
+{\footnotesize\ttfamily static $<$S$>$ Real\+Vector \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.generate\+Vector (\begin{DoxyParamCaption}\item[{Int\+Function$<$ Real\+Vector $>$}]{vector\+Builder,  }\item[{Map$<$ S, Integer $>$}]{index,  }\item[{Function$<$ S, Double $>$}]{init }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aab19658870ca77a79d46e45e7f642e64}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aab19658870ca77a79d46e45e7f642e64}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!getRow@{getRow}}
+\index{getRow@{getRow}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{getRow()}{getRow()}}
+{\footnotesize\ttfamily Map$<$S,Double$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.get\+Row (\begin{DoxyParamCaption}\item[{S}]{s }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_ac577fbbebe316d849136449b4c6b2f90}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_ac577fbbebe316d849136449b4c6b2f90}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!getStates@{getStates}}
+\index{getStates@{getStates}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{getStates()}{getStates()}}
+{\footnotesize\ttfamily Set$<$S$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.get\+States (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a368f0675041375a4bea5f10c6a553195}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a368f0675041375a4bea5f10c6a553195}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!move@{move}}
+\index{move@{move}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{move()}{move()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily List$<$Map$<$S, Double$>$ $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.move (\begin{DoxyParamCaption}\item[{Function$<$ Map$<$ S, Double $>$, Map$<$ S, Double $>$$>$}]{transition,  }\item[{Map$<$ S, Double $>$}]{v,  }\item[{int}]{steps }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_adce2e092d46ae3d28ac343589e9d1e77}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_adce2e092d46ae3d28ac343589e9d1e77}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!move@{move}}
+\index{move@{move}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{move()}{move()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily static $<$S$>$ Map$<$S,Double$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.move (\begin{DoxyParamCaption}\item[{Map$<$ S, Map$<$ S, Double $>$$>$}]{transition,  }\item[{Map$<$ S, Double $>$}]{v }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aa661ca84ca19b6b0d27e4ad57c65663c}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aa661ca84ca19b6b0d27e4ad57c65663c}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!next@{next}}
+\index{next@{next}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{next()}{next()}}
+{\footnotesize\ttfamily Set$<$S$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.next (\begin{DoxyParamCaption}\item[{S}]{s }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aa9f368b957df2f4671a9ceb2d28fde54}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_aa9f368b957df2f4671a9ceb2d28fde54}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!numberOfStates@{numberOfStates}}
+\index{numberOfStates@{numberOfStates}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{numberOfStates()}{numberOfStates()}}
+{\footnotesize\ttfamily int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.number\+Of\+States (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_af540eab23742603c99d08dab1e1d01e8}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_af540eab23742603c99d08dab1e1d01e8}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!probabilityMatrixRow@{probabilityMatrixRow}}
+\index{probabilityMatrixRow@{probabilityMatrixRow}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{probabilityMatrixRow()}{probabilityMatrixRow()}}
+{\footnotesize\ttfamily abstract Map$<$S,Double$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.probability\+Matrix\+Row (\begin{DoxyParamCaption}\item[{S}]{s }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [abstract]}}
+
+
+
+Reimplemented in \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1DiscreteTimeMarkovChain_af22617d525a3d0d3d92f7020d3efedab}{quasylab.\+sibilla.\+core.\+markov.\+Discrete\+Time\+Markov\+Chain$<$ S $>$}}, and \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1ContinuousTimeMarkovChain_afcf564640bea31cdcaf8c57cef8de55d}{quasylab.\+sibilla.\+core.\+markov.\+Continuous\+Time\+Markov\+Chain$<$ S $>$}}.
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a77ce682fed8a627bb6a57bb54a1e1a36}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a77ce682fed8a627bb6a57bb54a1e1a36}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!rate@{rate}}
+\index{rate@{rate}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{rate()}{rate()}}
+{\footnotesize\ttfamily double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.rate (\begin{DoxyParamCaption}\item[{S}]{s1,  }\item[{S}]{s2 }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a1bf0651f212418aadf29ce9c1a4e5c27}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a1bf0651f212418aadf29ce9c1a4e5c27}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!reachSet@{reachSet}}
+\index{reachSet@{reachSet}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{reachSet()}{reachSet()}}
+{\footnotesize\ttfamily Set$<$S$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.reach\+Set (\begin{DoxyParamCaption}\item[{Predicate$<$ S $>$}]{condition,  }\item[{Set$<$ S $>$}]{nodes }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a0af6ee8af7bf1e5f801c2d9c66cbbc69}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a0af6ee8af7bf1e5f801c2d9c66cbbc69}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!select@{select}}
+\index{select@{select}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{select()}{select()}}
+{\footnotesize\ttfamily Set$<$S$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.select (\begin{DoxyParamCaption}\item[{Predicate$<$ S $>$}]{filter }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_ad112d26f7912584a9efad8eca58675b4}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_ad112d26f7912584a9efad8eca58675b4}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!sum@{sum}}
+\index{sum@{sum}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{sum()}{sum()}}
+{\footnotesize\ttfamily static $<$S$>$ Map$<$S,Double$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.sum (\begin{DoxyParamCaption}\item[{Map$<$ S, Double $>$}]{m1,  }\item[{Map$<$ S, Double $>$}]{m2 }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a1c7c6355fd584c6e8c3b5e7dedbcffb4}\label{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain_a1c7c6355fd584c6e8c3b5e7dedbcffb4}} 
+\index{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}!sumOfRow@{sumOfRow}}
+\index{sumOfRow@{sumOfRow}!quasylab.sibilla.core.markov.MarkovChain$<$ S $>$@{quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}}
+\doxysubsubsection{\texorpdfstring{sumOfRow()}{sumOfRow()}}
+{\footnotesize\ttfamily double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1markov_1_1MarkovChain}{quasylab.\+sibilla.\+core.\+markov.\+Markov\+Chain}}$<$ S $>$.sum\+Of\+Row (\begin{DoxyParamCaption}\item[{S}]{s }\end{DoxyParamCaption})}
+

@@ -1,0 +1,85 @@
+\hypertarget{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule}{}\doxysection{quasylab.\+sibilla.\+core.\+models.\+pm.\+Broadcast\+Rule Class Reference}
+\label{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule}\index{quasylab.sibilla.core.models.pm.BroadcastRule@{quasylab.sibilla.core.models.pm.BroadcastRule}}
+Inheritance diagram for quasylab.\+sibilla.\+core.\+models.\+pm.\+Broadcast\+Rule\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{d8/d1c/classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule}
+\end{center}
+\end{figure}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule_1_1BroadcastReceiver}{Broadcast\+Receiver}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule_a7661f236b1c2bffe1c808557e4763e26}{Broadcast\+Rule}} (String name, Function$<$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1PopulationState}{Population\+State}}, Double $>$ rate\+Function, int sender\+Index, Function$<$ Random\+Generator, Integer $>$ step, Broadcast\+Receiver... receivers)
+\item 
+\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1PopulationTransition}{Population\+Transition}} \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule_a34d0ebb572f037efaf43c350b34717ec}{apply}} (Random\+Generator r, double now, \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1PopulationState}{Population\+State}} state)
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1Update}{Update}} \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule_aef7ba8763de3d2895ab7b12bcbf0eb2d}{get\+Drift}} (String name, Random\+Generator r, int sender, \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1PopulationState}{Population\+State}} state, Function$<$ Random\+Generator, Integer $>$ step, \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule_1_1BroadcastReceiver}{Broadcast\+Receiver}}\mbox{[}$\,$\mbox{]} receivers)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This kind of rule is used to describe a one-\/to-\/many interaction. An element of the population is sending a message that can be received, with a given probabilities, by a group of elements of other species. 
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule_a7661f236b1c2bffe1c808557e4763e26}\label{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule_a7661f236b1c2bffe1c808557e4763e26}} 
+\index{quasylab.sibilla.core.models.pm.BroadcastRule@{quasylab.sibilla.core.models.pm.BroadcastRule}!BroadcastRule@{BroadcastRule}}
+\index{BroadcastRule@{BroadcastRule}!quasylab.sibilla.core.models.pm.BroadcastRule@{quasylab.sibilla.core.models.pm.BroadcastRule}}
+\doxysubsubsection{\texorpdfstring{BroadcastRule()}{BroadcastRule()}}
+{\footnotesize\ttfamily quasylab.\+sibilla.\+core.\+models.\+pm.\+Broadcast\+Rule.\+Broadcast\+Rule (\begin{DoxyParamCaption}\item[{String}]{name,  }\item[{Function$<$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1PopulationState}{Population\+State}}, Double $>$}]{rate\+Function,  }\item[{int}]{sender\+Index,  }\item[{Function$<$ Random\+Generator, Integer $>$}]{step,  }\item[{Broadcast\+Receiver...}]{receivers }\end{DoxyParamCaption})}
+
+Creates a new rule.
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & rule name. \\
+\hline
+{\em rate\+Function} & rate function. \\
+\hline
+{\em sender\+Index} & index of sender. \\
+\hline
+{\em step} & sender next state. \\
+\hline
+{\em receivers} & message receivers. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule_a34d0ebb572f037efaf43c350b34717ec}\label{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule_a34d0ebb572f037efaf43c350b34717ec}} 
+\index{quasylab.sibilla.core.models.pm.BroadcastRule@{quasylab.sibilla.core.models.pm.BroadcastRule}!apply@{apply}}
+\index{apply@{apply}!quasylab.sibilla.core.models.pm.BroadcastRule@{quasylab.sibilla.core.models.pm.BroadcastRule}}
+\doxysubsubsection{\texorpdfstring{apply()}{apply()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1PopulationTransition}{Population\+Transition}} quasylab.\+sibilla.\+core.\+models.\+pm.\+Broadcast\+Rule.\+apply (\begin{DoxyParamCaption}\item[{Random\+Generator}]{r,  }\item[{double}]{now,  }\item[{\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1PopulationState}{Population\+State}}}]{state }\end{DoxyParamCaption})}
+
+Apply the rule to a state at a given time.
+
+
+\begin{DoxyParams}{Parameters}
+{\em r} & randome \\
+\hline
+{\em now} & \\
+\hline
+{\em state} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1PopulationRule_a2eef6272639a79cb53ab62480a362f9c}{quasylab.\+sibilla.\+core.\+models.\+pm.\+Population\+Rule}}.
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule_aef7ba8763de3d2895ab7b12bcbf0eb2d}\label{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule_aef7ba8763de3d2895ab7b12bcbf0eb2d}} 
+\index{quasylab.sibilla.core.models.pm.BroadcastRule@{quasylab.sibilla.core.models.pm.BroadcastRule}!getDrift@{getDrift}}
+\index{getDrift@{getDrift}!quasylab.sibilla.core.models.pm.BroadcastRule@{quasylab.sibilla.core.models.pm.BroadcastRule}}
+\doxysubsubsection{\texorpdfstring{getDrift()}{getDrift()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1Update}{Update}} quasylab.\+sibilla.\+core.\+models.\+pm.\+Broadcast\+Rule.\+get\+Drift (\begin{DoxyParamCaption}\item[{String}]{name,  }\item[{Random\+Generator}]{r,  }\item[{int}]{sender,  }\item[{\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1PopulationState}{Population\+State}}}]{state,  }\item[{Function$<$ Random\+Generator, Integer $>$}]{step,  }\item[{\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1models_1_1pm_1_1BroadcastRule_1_1BroadcastReceiver}{Broadcast\+Receiver}}\mbox{[}$\,$\mbox{]}}]{receivers }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+

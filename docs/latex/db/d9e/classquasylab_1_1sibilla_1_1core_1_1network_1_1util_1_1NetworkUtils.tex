@@ -1,0 +1,54 @@
+\hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1util_1_1NetworkUtils}{}\doxysection{quasylab.\+sibilla.\+core.\+network.\+util.\+Network\+Utils Class Reference}
+\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1util_1_1NetworkUtils}\index{quasylab.sibilla.core.network.util.NetworkUtils@{quasylab.sibilla.core.network.util.NetworkUtils}}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static Inet\+Address \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1util_1_1NetworkUtils_ac05a3ca0987db48237c79a2db58ae838}{get\+Local\+Address}} ()  throws Socket\+Exception 
+\item 
+static List$<$ Inet\+Address $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1util_1_1NetworkUtils_ad60735252292c8e71e2a1f36b83285e2}{get\+Broadcast\+Addresses}} ()  throws Socket\+Exception 
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Utility class used to manage and find the local ip of the host and its interfaces in an easy way
+
+\begin{DoxyAuthor}{Author}
+Stelluti Francesco Pio 
+
+Zamponi Marco 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1util_1_1NetworkUtils_ad60735252292c8e71e2a1f36b83285e2}\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1util_1_1NetworkUtils_ad60735252292c8e71e2a1f36b83285e2}} 
+\index{quasylab.sibilla.core.network.util.NetworkUtils@{quasylab.sibilla.core.network.util.NetworkUtils}!getBroadcastAddresses@{getBroadcastAddresses}}
+\index{getBroadcastAddresses@{getBroadcastAddresses}!quasylab.sibilla.core.network.util.NetworkUtils@{quasylab.sibilla.core.network.util.NetworkUtils}}
+\doxysubsubsection{\texorpdfstring{getBroadcastAddresses()}{getBroadcastAddresses()}}
+{\footnotesize\ttfamily static List$<$Inet\+Address$>$ quasylab.\+sibilla.\+core.\+network.\+util.\+Network\+Utils.\+get\+Broadcast\+Addresses (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) throws Socket\+Exception\hspace{0.3cm}{\ttfamily [static]}}
+
+Returns a list of the broadcast addresses linked to each network interface on the host.
+
+\begin{DoxyReturn}{Returns}
+list of broadcast addresses linked to the network interfaces of the host 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em Socket\+Exception} & if the host has no network interfaces configured or if an I/O exception happens \\
+\hline
+\end{DoxyExceptions}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1util_1_1NetworkUtils_ac05a3ca0987db48237c79a2db58ae838}\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1util_1_1NetworkUtils_ac05a3ca0987db48237c79a2db58ae838}} 
+\index{quasylab.sibilla.core.network.util.NetworkUtils@{quasylab.sibilla.core.network.util.NetworkUtils}!getLocalAddress@{getLocalAddress}}
+\index{getLocalAddress@{getLocalAddress}!quasylab.sibilla.core.network.util.NetworkUtils@{quasylab.sibilla.core.network.util.NetworkUtils}}
+\doxysubsubsection{\texorpdfstring{getLocalAddress()}{getLocalAddress()}}
+{\footnotesize\ttfamily static Inet\+Address quasylab.\+sibilla.\+core.\+network.\+util.\+Network\+Utils.\+get\+Local\+Address (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) throws Socket\+Exception\hspace{0.3cm}{\ttfamily [static]}}
+
+Returns the local I\+P\+V4 address of the machine.
+
+\begin{DoxyReturn}{Returns}
+local I\+P\+V4 address of the machine. 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em Socket\+Exception} & if the host has no network interfaces configured or if an I/O exception happens \\
+\hline
+\end{DoxyExceptions}

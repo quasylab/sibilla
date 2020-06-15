@@ -1,0 +1,141 @@
+\hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager}{}\doxysection{quasylab.\+sibilla.\+core.\+network.\+communication.\+U\+D\+P\+Network\+Manager Interface Reference}
+\label{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager}\index{quasylab.sibilla.core.network.communication.UDPNetworkManager@{quasylab.sibilla.core.network.communication.UDPNetworkManager}}
+Inheritance diagram for quasylab.\+sibilla.\+core.\+network.\+communication.\+U\+D\+P\+Network\+Manager\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{d7/d7e/interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+byte\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_a1c07888e0f147b89d4a81ce4786a7c6a}{read\+Object}} ()  throws I\+O\+Exception
+\item 
+void \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_a363320a46cdd4c611469cd8c9bb6ad49}{write\+Object}} (byte\mbox{[}$\,$\mbox{]} to\+Write, Inet\+Address address, int port)  throws I\+O\+Exception
+\item 
+void \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_abaf8c723b832594967e8037e4e8d4e47}{close\+Connection}} ()  throws I\+O\+Exception
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager}{U\+D\+P\+Network\+Manager}} \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_a7684199b3865ec4ea501ca0c655318ec}{create\+Network\+Manager}} (\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkInfo}{Network\+Info}} info, boolean to\+Broadcast)  throws Socket\+Exception 
+\item 
+static \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager}{U\+D\+P\+Network\+Manager}} \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_a31972e4851ec306b745631b52b13c846}{create\+Network\+Manager}} (\mbox{\hyperlink{enumquasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManagerType}{U\+D\+P\+Network\+Manager\+Type}} network\+Type, Datagram\+Socket datagram\+Socket)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Interface that needs to be extended from all of the communication related classes that are based upon the U\+DP transport protocol.
+
+\begin{DoxyAuthor}{Author}
+Stelluti Francesco Pio 
+
+Zamponi Marco 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_abaf8c723b832594967e8037e4e8d4e47}\label{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_abaf8c723b832594967e8037e4e8d4e47}} 
+\index{quasylab.sibilla.core.network.communication.UDPNetworkManager@{quasylab.sibilla.core.network.communication.UDPNetworkManager}!closeConnection@{closeConnection}}
+\index{closeConnection@{closeConnection}!quasylab.sibilla.core.network.communication.UDPNetworkManager@{quasylab.sibilla.core.network.communication.UDPNetworkManager}}
+\doxysubsubsection{\texorpdfstring{closeConnection()}{closeConnection()}}
+{\footnotesize\ttfamily void quasylab.\+sibilla.\+core.\+network.\+communication.\+U\+D\+P\+Network\+Manager.\+close\+Connection (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) throws I\+O\+Exception}
+
+Closes the network communication.
+
+
+\begin{DoxyExceptions}{Exceptions}
+{\em I\+O\+Exception} & \\
+\hline
+\end{DoxyExceptions}
+
+
+Implemented in \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPDefaultNetworkManager_a56b7b773d4990dbfdbd67ada3e21c875}{quasylab.\+sibilla.\+core.\+network.\+communication.\+U\+D\+P\+Default\+Network\+Manager}}.
+
+\mbox{\Hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_a7684199b3865ec4ea501ca0c655318ec}\label{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_a7684199b3865ec4ea501ca0c655318ec}} 
+\index{quasylab.sibilla.core.network.communication.UDPNetworkManager@{quasylab.sibilla.core.network.communication.UDPNetworkManager}!createNetworkManager@{createNetworkManager}}
+\index{createNetworkManager@{createNetworkManager}!quasylab.sibilla.core.network.communication.UDPNetworkManager@{quasylab.sibilla.core.network.communication.UDPNetworkManager}}
+\doxysubsubsection{\texorpdfstring{createNetworkManager()}{createNetworkManager()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager}{U\+D\+P\+Network\+Manager}} quasylab.\+sibilla.\+core.\+network.\+communication.\+U\+D\+P\+Network\+Manager.\+create\+Network\+Manager (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkInfo}{Network\+Info}}}]{info,  }\item[{boolean}]{to\+Broadcast }\end{DoxyParamCaption}) throws Socket\+Exception\hspace{0.3cm}{\ttfamily [static]}}
+
+Factory method used to obtain \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1TCPNetworkManager}{quasylab.\+sibilla.\+core.\+network.\+communication.\+T\+C\+P\+Network\+Manager}} implementations\textquotesingle{} instances. Used in classes that want to initiate a network communication.
+
+
+\begin{DoxyParams}{Parameters}
+{\em info} & The network related infos about the connection that the manager will manage \\
+\hline
+{\em to\+Broadcast} & to mark if the manager will have to send broadcast messages \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+network.\+communication.\+U\+D\+P\+Network\+Manager}} that will manage the requested connection 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em Socket\+Exception} & \\
+\hline
+\end{DoxyExceptions}
+\mbox{\Hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_a31972e4851ec306b745631b52b13c846}\label{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_a31972e4851ec306b745631b52b13c846}} 
+\index{quasylab.sibilla.core.network.communication.UDPNetworkManager@{quasylab.sibilla.core.network.communication.UDPNetworkManager}!createNetworkManager@{createNetworkManager}}
+\index{createNetworkManager@{createNetworkManager}!quasylab.sibilla.core.network.communication.UDPNetworkManager@{quasylab.sibilla.core.network.communication.UDPNetworkManager}}
+\doxysubsubsection{\texorpdfstring{createNetworkManager()}{createNetworkManager()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager}{U\+D\+P\+Network\+Manager}} quasylab.\+sibilla.\+core.\+network.\+communication.\+U\+D\+P\+Network\+Manager.\+create\+Network\+Manager (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{enumquasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManagerType}{U\+D\+P\+Network\+Manager\+Type}}}]{network\+Type,  }\item[{Datagram\+Socket}]{datagram\+Socket }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Factory method used to obtain \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1TCPNetworkManager}{quasylab.\+sibilla.\+core.\+network.\+communication.\+T\+C\+P\+Network\+Manager}} implementations\textquotesingle{} instances. Used in classes that want to initiate a network communication.
+
+
+\begin{DoxyParams}{Parameters}
+{\em network\+Type} & the type associated with the implementation of \mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+network.\+communication.\+U\+D\+P\+Network\+Manager}} that will be instantiated \\
+\hline
+{\em datagram\+Socket} & upon which the network communication will be based \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+network.\+communication.\+U\+D\+P\+Network\+Manager}} that will manage the requested connection 
+\end{DoxyReturn}
+\mbox{\Hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_a1c07888e0f147b89d4a81ce4786a7c6a}\label{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_a1c07888e0f147b89d4a81ce4786a7c6a}} 
+\index{quasylab.sibilla.core.network.communication.UDPNetworkManager@{quasylab.sibilla.core.network.communication.UDPNetworkManager}!readObject@{readObject}}
+\index{readObject@{readObject}!quasylab.sibilla.core.network.communication.UDPNetworkManager@{quasylab.sibilla.core.network.communication.UDPNetworkManager}}
+\doxysubsubsection{\texorpdfstring{readObject()}{readObject()}}
+{\footnotesize\ttfamily byte \mbox{[}$\,$\mbox{]} quasylab.\+sibilla.\+core.\+network.\+communication.\+U\+D\+P\+Network\+Manager.\+read\+Object (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) throws I\+O\+Exception}
+
+Reads incoming data from the network.
+
+\begin{DoxyReturn}{Returns}
+byte array of the data read from the network 
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em I\+O\+Exception} & \\
+\hline
+\end{DoxyExceptions}
+
+
+Implemented in \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPDefaultNetworkManager_a0afa3446822766e0333b77e7ab4b6763}{quasylab.\+sibilla.\+core.\+network.\+communication.\+U\+D\+P\+Default\+Network\+Manager}}.
+
+\mbox{\Hypertarget{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_a363320a46cdd4c611469cd8c9bb6ad49}\label{interfacequasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManager_a363320a46cdd4c611469cd8c9bb6ad49}} 
+\index{quasylab.sibilla.core.network.communication.UDPNetworkManager@{quasylab.sibilla.core.network.communication.UDPNetworkManager}!writeObject@{writeObject}}
+\index{writeObject@{writeObject}!quasylab.sibilla.core.network.communication.UDPNetworkManager@{quasylab.sibilla.core.network.communication.UDPNetworkManager}}
+\doxysubsubsection{\texorpdfstring{writeObject()}{writeObject()}}
+{\footnotesize\ttfamily void quasylab.\+sibilla.\+core.\+network.\+communication.\+U\+D\+P\+Network\+Manager.\+write\+Object (\begin{DoxyParamCaption}\item[{byte\mbox{[}$\,$\mbox{]}}]{to\+Write,  }\item[{Inet\+Address}]{address,  }\item[{int}]{port }\end{DoxyParamCaption}) throws I\+O\+Exception}
+
+Sends data through the network.
+
+
+\begin{DoxyParams}{Parameters}
+{\em to\+Write} & byte array of data that will be sent over \\
+\hline
+{\em address} & used as destination of the data \\
+\hline
+{\em port} & used as destination of the data \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em I\+O\+Exception} & \\
+\hline
+\end{DoxyExceptions}
+
+
+Implemented in \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPDefaultNetworkManager_ab7e6d57e14236bb94d64bde25b7b8702}{quasylab.\+sibilla.\+core.\+network.\+communication.\+U\+D\+P\+Default\+Network\+Manager}}.
+
