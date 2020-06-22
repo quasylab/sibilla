@@ -1,0 +1,114 @@
+.root{
+    -fx-background-color: #6c757d;
+    -fx-font-family: "SansSerif";
+}
+
+.labels{
+    -fx-font-family: "SansSerif";
+    -fx-font-weight: bold;
+}
+
+.jfx-tab-pane .headers-region {
+    -fx-alignment: CENTER;
+    -fx-background-color: #6c757d;
+}
+
+.jfx-tab-pane .tab-header-background {
+    -fx-alignment: CENTER;
+    -fx-background-color: #6c757d;
+}
+
+.jfx-tab-pane .tab-header-area .jfx-rippler{
+    -jfx-rippler-fill :rgba(6, 214, 160);
+}
+
+.jfx-tab-pane .tab:selected .tab-label {
+    -fx-text-fill: rgba(6, 214, 160);
+}
+
+
+.jfx-tab-pane .tab-selected-line {
+    -fx-background-color: rgba(6, 214, 160);
+}
+
+
+.jfx-tab-pane .tab .tab-label {
+    -fx-alignment: CENTER;
+    -fx-text-fill: lightgrey;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-transform: uppercase;
+    -fx-wrap-text: true;
+    -fx-cursor:hand;
+}
+
+.anchorPaneCharts{
+    -fx-background-color: #adb5bd;
+}
+
+.btnInput{
+    -fx-background-color:  #adb5bd;
+    -fx-text-fill: white;
+    -fx-background-radius: 20 20 20 20;
+    -fx-border-radius: 40px;
+    -fx-border-width: 1px;
+    -fx-cursor:hand;
+    -fx-font-family: "SansSerif";
+    -fx-font-weight: bold;
+}
+
+.btnInput:hover{
+    -fx-background-color: rgba(6, 214, 160);
+    -fx-text-fill: #6c757d;
+    -fx-cursor:hand;
+    -fx-font-weight: bold;
+}
+
+
+.btnAdvancedCommands {
+  -fx-graphic: url('../assets/settings-icon-white-24p.png');
+  -fx-background-color:transparent;
+  -fx-opacity: 0.9;
+}
+
+.btnAdvancedCommands:hover {
+  -fx-graphic: url('../assets/settings-icon-color-24p.png');
+  -fx-background-color:transparent;
+  -fx-cursor:hand;
+  -fx-opacity: 1;
+}
+
+.textField {
+ -fx-background-color: #adb5bd;
+ -fx-font-family: "SansSerif";
+ -fx-text-fill: white;
+ -fx-font-weight: bold;
+ -fx-font-size: 16px;
+}
+
+.textField:selected {
+ -fx-background-color: #adb5bd;
+ -fx-font-family: "SansSerif";
+ -fx-text-fill: white;
+ -fx-font-weight: bold;
+}
+
+.consoleField{
+    -fx-font-family: "SansSerif";
+    -fx-font-weight: bold;
+}
+
+.progressBar{
+    -fx-background-color: trasparent;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+}
+
+.progressBar > .track, .jfx-progress-bar > .bar {
+    -fx-background-radius: 10px;
+    -fx-background-insets: 0;
+}
+
+.progressBar > .bar {
+    -fx-background-color: #05C793;
+}

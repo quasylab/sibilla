@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXProgressBar?>
+<?import com.jfoenix.controls.JFXTabPane?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.AreaChart?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1080.0" styleClass="root" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="quasylab.sibilla.gui.controllers.InteractiveController">
+    <center>
+        <AnchorPane BorderPane.alignment="CENTER">
+            <children>
+                <JFXTabPane tabMaxWidth="200.0" tabMinHeight="50.0" tabMinWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <tabs>
+                        <Tab fx:id="tableviewTab" styleClass="tableview" text="TABLE VIEW">
+                            <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" styleClass="anchorPaneCharts">
+                                    <children>
+                                        <TableView fx:id="tableView" layoutX="216.0" layoutY="54.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <columns>
+                                                <TableColumn prefWidth="75.0" text="C1" />
+                                                <TableColumn prefWidth="75.0" text="C2" />
+                                            </columns>
+                                            <columnResizePolicy>
+                                                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                            </columnResizePolicy>
+                                        </TableView>
+                                    </children></AnchorPane>
+                            </content>
+                        </Tab>
+                        <Tab fx:id="areachartTab" text="AREA CHART">
+                            <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" styleClass="anchorPaneCharts">
+                                    <children>
+                                        <AreaChart fx:id="areachartView" layoutX="92.0" layoutY="14.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <xAxis>
+                                                <CategoryAxis side="BOTTOM" tickLabelFill="WHITE">
+                                       <tickLabelFont>
+                                          <Font name="System Bold" size="12.0" />
+                                       </tickLabelFont></CategoryAxis>
+                                            </xAxis>
+                                            <yAxis>
+                                                <NumberAxis side="LEFT" tickLabelFill="WHITE">
+                                       <tickLabelFont>
+                                          <Font name="System Bold" size="12.0" />
+                                       </tickLabelFont></NumberAxis>
+                                            </yAxis>
+                                        </AreaChart>
+                                    </children></AnchorPane>
+                            </content>
+                        </Tab>
+                        <Tab fx:id="linechartTab" text="LINE CHART">
+                            <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" styleClass="anchorPaneCharts">
+                                    <children>
+                                        <LineChart fx:id="linechartView" layoutX="45.0" layoutY="-25.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <xAxis>
+                                                <CategoryAxis side="BOTTOM" />
+                                            </xAxis>
+                                            <yAxis>
+                                                <NumberAxis side="LEFT" />
+                                            </yAxis>
+                                        </LineChart>
+                                    </children></AnchorPane>
+                            </content>
+                        </Tab>
+                        <Tab fx:id="barChartView" text="BAR CHART">
+                            <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" styleClass="anchorPaneCharts">
+                                    <children>
+                                        <BarChart fx:id="barchartView" layoutX="71.0" layoutY="43.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <xAxis>
+                                                <CategoryAxis side="BOTTOM" />
+                                            </xAxis>
+                                            <yAxis>
+                                                <NumberAxis side="LEFT" />
+                                            </yAxis>
+                                        </BarChart>
+                                    </children></AnchorPane>
+                            </content>
+                        </Tab>
+                        <Tab fx:id="piechartTab" text="PIE CHART">
+                            <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" styleClass="anchorPaneCharts">
+                                    <children>
+                                        <PieChart fx:id="piechartView" layoutX="180.0" layoutY="84.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    </children></AnchorPane>
+                            </content>
+                        </Tab>
+                    </tabs>
+                </JFXTabPane>
+            </children>
+            <BorderPane.margin>
+                <Insets left="20.0" />
+            </BorderPane.margin>
+        </AnchorPane>
+    </center>
+    <bottom>
+        <AnchorPane BorderPane.alignment="CENTER">
+            <children>
+                <JFXProgressBar fx:id="progressBar" layoutX="181.0" layoutY="38.0" prefHeight="15.0" prefWidth="780.0" progress="0.12" styleClass="progressBar" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="50.0" AnchorPane.rightAnchor="50.0" AnchorPane.topAnchor="38.0" />
+                <Label layoutX="50.0" layoutY="14.0" styleClass="labels" text="STATUS PROGRESS" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="14.0" />
+                    </font>
+                </Label>
+            </children>
+            <BorderPane.margin>
+                <Insets right="220.0" />
+            </BorderPane.margin>
+        </AnchorPane>
+    </bottom>
+    <top>
+      <VBox BorderPane.alignment="TOP_LEFT">
+         <BorderPane.margin>
+            <Insets right="200.0" />
+         </BorderPane.margin>
+         <children>
+            <AnchorPane prefHeight="50.0">
+               <children>
+                  <ImageView fitHeight="32.0" fitWidth="337.0" layoutX="22.0" layoutY="9.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="9.0" AnchorPane.leftAnchor="22.0" AnchorPane.rightAnchor="521.0" AnchorPane.topAnchor="9.0">
+                     <image>
+                        <Image url="@../assets/sybilla_logo.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </AnchorPane>
+              <HBox alignment="CENTER" prefHeight="50.0">
+                  <children>
+                      <Label styleClass="labels" text="MODEL" textFill="WHITE">
+                          <font>
+                              <Font size="14.0" />
+                          </font>
+                          <HBox.margin>
+                              <Insets />
+                          </HBox.margin>
+                      </Label>
+                      <TextField fx:id="modelTypeField" editable="false" styleClass="textField">
+                          <HBox.margin>
+                              <Insets left="5.0" right="20.0" />
+                          </HBox.margin>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                      </TextField>
+                  <Label styleClass="labels" text="TIME UNITS " textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </Label>
+                  <TextField fx:id="timeunitsField" editable="false" styleClass="textField">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <HBox.margin>
+                        <Insets right="20.0" />
+                     </HBox.margin>
+                  </TextField>
+                  <Label layoutX="330.0" layoutY="25.0" styleClass="labels" text="STEPS" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="stepsField" editable="false" layoutX="422.0" layoutY="23.0" prefWidth="50.0" styleClass="textField">
+                     <HBox.margin>
+                        <Insets left="5.0" />
+                     </HBox.margin>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </TextField>
+                  </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+              </HBox>
+         </children>
+      </VBox>
+    </top>
+    <right>
+        <VBox alignment="TOP_CENTER" prefWidth="220.0" spacing="20.0" BorderPane.alignment="TOP_CENTER">
+            <children>
+            <HBox alignment="CENTER_RIGHT">
+               <children>
+                      <JFXButton fx:id="stepBtn" onMouseClicked="#step" prefHeight="40.0" prefWidth="100.0" ripplerFill="WHITE" styleClass="btnInput" text="STEP" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                          <font>
+                              <Font name="System Bold" size="12.0" />
+                          </font>
+                     <HBox.margin>
+                        <Insets right="20.0" />
+                     </HBox.margin>
+                      </JFXButton>
+                  <ToggleButton fx:id="advanceCommands" minHeight="20.0" minWidth="20.0" mnemonicParsing="false" onMouseClicked="#openAdvanceSettings" prefHeight="20.0" prefWidth="20.0" styleClass="btnAdvancedCommands">
+                     <HBox.margin>
+                        <Insets right="20.0" />
+                     </HBox.margin>
+                  </ToggleButton>
+               </children>
+               <VBox.margin>
+                  <Insets top="15.0" />
+               </VBox.margin>
+            </HBox>
+                <JFXButton fx:id="previousBtn" onMouseClicked="#previous" prefHeight="40.0" prefWidth="100.0" ripplerFill="WHITE" styleClass="btnInput" text="PREVIOUS" textAlignment="CENTER" textFill="WHITE" textOverrun="CLIP" wrapText="true">
+                    <font>
+                        <Font name="System Bold" size="12.0" />
+                    </font>
+                </JFXButton>
+            <JFXButton fx:id="restartBtn" onMouseClicked="#restart" prefHeight="40.0" prefWidth="100.0" ripplerFill="WHITE" styleClass="btnInput" text="RESTART" textAlignment="CENTER" textFill="WHITE" textOverrun="CLIP" wrapText="true">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </JFXButton>
+                <VBox alignment="TOP_CENTER" VBox.vgrow="ALWAYS">
+                    <children>
+                        <Label styleClass="labels" text="CONSOLE" textFill="WHITE">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
+                        <TextArea fx:id="consoleArea" editable="false" styleClass="consoleField" VBox.vgrow="ALWAYS">
+                            <VBox.margin>
+                                <Insets bottom="30.0" left="10.0" right="10.0" top="5.0" />
+                            </VBox.margin>
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                        </TextArea>
+                    </children>
+                </VBox>
+            </children>
+            <BorderPane.margin>
+                <Insets bottom="-83.0" top="-90.0" />
+            </BorderPane.margin>
+        </VBox>
+    </right>
+</BorderPane>
