@@ -9,7 +9,7 @@ Inheritance diagram for quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+
 \doxysubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_a4647ca4e95efca32df55f15b2262787a}{Simulation\+Data\+Set}} (Random\+Generator random, \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1ModelDefinition}{Model\+Definition}}$<$ S $>$ model\+Definition, \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Model}{Model}}$<$ S $>$ model, S initial\+State, \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1simulator_1_1sampling_1_1SamplingFunction}{Sampling\+Function}}$<$ S $>$ sampling\+\_\+function, int replica, double deadline)
+\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_a4647ca4e95efca32df55f15b2262787a}{Simulation\+Data\+Set}} (Random\+Generator random, Model\+Definition$<$ S $>$ model\+Definition, Model$<$ S $>$ model, S initial\+State, Sampling\+Function$<$ S $>$ sampling\+\_\+function, int replica, double deadline)
 \item 
 int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_af0014793a5269858505126c040ea2f94}{hash\+Code}} ()
 \item 
@@ -17,13 +17,13 @@ boolean \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1Simulati
 \item 
 Random\+Generator \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_aa77b44349f76653b3d8b5d6c10926eb3}{get\+Random\+Generator}} ()
 \item 
-\mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1ModelDefinition}{Model\+Definition}}$<$ S $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_a80214afa6a59826ec0835a3d3136ed56}{get\+Model\+Definition}} ()
+Model\+Definition$<$ S $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_a80214afa6a59826ec0835a3d3136ed56}{get\+Model\+Definition}} ()
 \item 
-\mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Model}{Model}}$<$ S $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_a4b60ece18d6686c5ab6bca570c7287ea}{get\+Model}} ()
+Model$<$ S $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_a4b60ece18d6686c5ab6bca570c7287ea}{get\+Model}} ()
 \item 
 S \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_a64037ae304ac23884b9e22195edcc9cf}{get\+Model\+Initial\+State}} ()
 \item 
-\mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1simulator_1_1sampling_1_1SamplingFunction}{Sampling\+Function}}$<$ S $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_a6de08236f614b7fcb05d598b5c0025c5}{get\+Model\+Sampling\+Function}} ()
+Sampling\+Function$<$ S $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_a6de08236f614b7fcb05d598b5c0025c5}{get\+Model\+Sampling\+Function}} ()
 \item 
 int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_a613204a9b15bea529d472dfad621a6e2}{get\+Replica}} ()
 \item 
@@ -38,7 +38,7 @@ Class that stores info about the simulation that is executed by slaves.
 
 
 \begin{DoxyParams}{Parameters}
-{\em $<$\+S$>$} & The \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{quasylab.\+sibilla.\+core.\+past.\+State}} of the simulation model. \\
+{\em $<$\+S$>$} & The \mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+past.\+State}} of the simulation model. \\
 \hline
 \end{DoxyParams}
 \begin{DoxyAuthor}{Author}
@@ -53,7 +53,7 @@ Zamponi Marco
 \index{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}!SimulationDataSet@{SimulationDataSet}}
 \index{SimulationDataSet@{SimulationDataSet}!quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}}
 \doxysubsubsection{\texorpdfstring{SimulationDataSet()}{SimulationDataSet()}}
-{\footnotesize\ttfamily \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{Simulation\+Data\+Set}} (\begin{DoxyParamCaption}\item[{Random\+Generator}]{random,  }\item[{\mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1ModelDefinition}{Model\+Definition}}$<$ S $>$}]{model\+Definition,  }\item[{\mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Model}{Model}}$<$ S $>$}]{model,  }\item[{S}]{initial\+State,  }\item[{\mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1simulator_1_1sampling_1_1SamplingFunction}{Sampling\+Function}}$<$ S $>$}]{sampling\+\_\+function,  }\item[{int}]{replica,  }\item[{double}]{deadline }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends State $>$.\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{Simulation\+Data\+Set}} (\begin{DoxyParamCaption}\item[{Random\+Generator}]{random,  }\item[{Model\+Definition$<$ S $>$}]{model\+Definition,  }\item[{Model$<$ S $>$}]{model,  }\item[{S}]{initial\+State,  }\item[{Sampling\+Function$<$ S $>$}]{sampling\+\_\+function,  }\item[{int}]{replica,  }\item[{double}]{deadline }\end{DoxyParamCaption})}
 
 Creates a \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{Simulation\+Data\+Set}} object with the parameters given in input.
 
@@ -61,13 +61,13 @@ Creates a \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1Simula
 \begin{DoxyParams}{Parameters}
 {\em random} & Random\+Generator used by the simulation \\
 \hline
-{\em model\+Definition} & \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1ModelDefinition}{quasylab.\+sibilla.\+core.\+models.\+Model\+Definition}} that represent the Model used in the simulation \\
+{\em model\+Definition} & \mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+models.\+Model\+Definition}} that represent the Model used in the simulation \\
 \hline
-{\em model} & \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Model}{quasylab.\+sibilla.\+core.\+models.\+Model}} used in the simulation \\
+{\em model} & \mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+models.\+Model}} used in the simulation \\
 \hline
 {\em initial\+State} & Initial state of the model \\
 \hline
-{\em sampling\+\_\+function} & \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1simulator_1_1sampling_1_1SamplingFunction}{quasylab.\+sibilla.\+core.\+simulator.\+sampling.\+Sampling\+Function}} used to sample the model \\
+{\em sampling\+\_\+function} & \mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+simulator.\+sampling.\+Sampling\+Function}} used to sample the model \\
 \hline
 {\em replica} & Number of times the simulation is executed \\
 \hline
@@ -81,13 +81,13 @@ Creates a \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1Simula
 \index{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}!equals@{equals}}
 \index{equals@{equals}!quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}}
 \doxysubsubsection{\texorpdfstring{equals()}{equals()}}
-{\footnotesize\ttfamily boolean \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.equals (\begin{DoxyParamCaption}\item[{Object}]{obj }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily boolean \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends State $>$.equals (\begin{DoxyParamCaption}\item[{Object}]{obj }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_a6ad5634ac73a987b285a34e1d5580719}\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_a6ad5634ac73a987b285a34e1d5580719}} 
 \index{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}!getDeadline@{getDeadline}}
 \index{getDeadline@{getDeadline}!quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}}
 \doxysubsubsection{\texorpdfstring{getDeadline()}{getDeadline()}}
-{\footnotesize\ttfamily double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.get\+Deadline (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily double \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends State $>$.get\+Deadline (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
 Returns the deadline of the simulation.
 
@@ -98,9 +98,9 @@ deadline of the simulation
 \index{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}!getModel@{getModel}}
 \index{getModel@{getModel}!quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}}
 \doxysubsubsection{\texorpdfstring{getModel()}{getModel()}}
-{\footnotesize\ttfamily \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Model}{Model}}$<$S$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.get\+Model (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily Model$<$S$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends State $>$.get\+Model (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
-\mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1Model}{quasylab.\+sibilla.\+core.\+models.\+Model}} used in the simulation.
+\mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+models.\+Model}} used in the simulation.
 
 \begin{DoxyReturn}{Returns}
 Model used in the simulation 
@@ -109,9 +109,9 @@ Model used in the simulation
 \index{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}!getModelDefinition@{getModelDefinition}}
 \index{getModelDefinition@{getModelDefinition}!quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}}
 \doxysubsubsection{\texorpdfstring{getModelDefinition()}{getModelDefinition()}}
-{\footnotesize\ttfamily \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1ModelDefinition}{Model\+Definition}}$<$S$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.get\+Model\+Definition (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily Model\+Definition$<$S$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends State $>$.get\+Model\+Definition (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
-Returns the \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1models_1_1ModelDefinition}{quasylab.\+sibilla.\+core.\+models.\+Model\+Definition}} that represent the Model used in the simulation.
+Returns the \mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+models.\+Model\+Definition}} that represent the Model used in the simulation.
 
 \begin{DoxyReturn}{Returns}
 Model\+Definition that represent the Model used in the simulation 
@@ -120,7 +120,7 @@ Model\+Definition that represent the Model used in the simulation
 \index{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}!getModelInitialState@{getModelInitialState}}
 \index{getModelInitialState@{getModelInitialState}!quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}}
 \doxysubsubsection{\texorpdfstring{getModelInitialState()}{getModelInitialState()}}
-{\footnotesize\ttfamily S \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.get\+Model\+Initial\+State (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily S \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends State $>$.get\+Model\+Initial\+State (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
 Returns the initial state of the model.
 
@@ -131,9 +131,9 @@ initial state of the model
 \index{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}!getModelSamplingFunction@{getModelSamplingFunction}}
 \index{getModelSamplingFunction@{getModelSamplingFunction}!quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}}
 \doxysubsubsection{\texorpdfstring{getModelSamplingFunction()}{getModelSamplingFunction()}}
-{\footnotesize\ttfamily \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1simulator_1_1sampling_1_1SamplingFunction}{Sampling\+Function}}$<$S$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.get\+Model\+Sampling\+Function (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily Sampling\+Function$<$S$>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends State $>$.get\+Model\+Sampling\+Function (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
-Returns the \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1simulator_1_1sampling_1_1SamplingFunction}{quasylab.\+sibilla.\+core.\+simulator.\+sampling.\+Sampling\+Function}} used to sample the model.
+Returns the \mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+simulator.\+sampling.\+Sampling\+Function}} used to sample the model.
 
 \begin{DoxyReturn}{Returns}
 Sampling\+Function used to sample the model 
@@ -142,7 +142,7 @@ Sampling\+Function used to sample the model
 \index{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}!getRandomGenerator@{getRandomGenerator}}
 \index{getRandomGenerator@{getRandomGenerator}!quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}}
 \doxysubsubsection{\texorpdfstring{getRandomGenerator()}{getRandomGenerator()}}
-{\footnotesize\ttfamily Random\+Generator \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.get\+Random\+Generator (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily Random\+Generator \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends State $>$.get\+Random\+Generator (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
 Returns the Random\+Generator used in the simulation.
 
@@ -153,7 +153,7 @@ Random\+Generator used in the simulation
 \index{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}!getReplica@{getReplica}}
 \index{getReplica@{getReplica}!quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}}
 \doxysubsubsection{\texorpdfstring{getReplica()}{getReplica()}}
-{\footnotesize\ttfamily int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.get\+Replica (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends State $>$.get\+Replica (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
 Return the number of times the simulation is executed.
 
@@ -164,11 +164,11 @@ number of times the simulation is executed
 \index{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}!hashCode@{hashCode}}
 \index{hashCode@{hashCode}!quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}}
 \doxysubsubsection{\texorpdfstring{hashCode()}{hashCode()}}
-{\footnotesize\ttfamily int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.hash\+Code (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily int \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends State $>$.hash\+Code (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
 \mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_a0918b8e718d5db0f3411a3f643b74ca7}\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet_a0918b8e718d5db0f3411a3f643b74ca7}} 
 \index{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}!toString@{toString}}
 \index{toString@{toString}!quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$@{quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}}
 \doxysubsubsection{\texorpdfstring{toString()}{toString()}}
-{\footnotesize\ttfamily String \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.to\+String (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily String \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1SimulationDataSet}{quasylab.\+sibilla.\+core.\+network.\+Simulation\+Data\+Set}}$<$ S extends State $>$.to\+String (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 

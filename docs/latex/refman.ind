@@ -1,2624 +1,771 @@
 \begin{theindex}
 
-  \item {A\_POSITIVE\_VALUE\_IS\_EXPECTED}
-    \subitem {quasylab.sibilla.core.util.SibillaMessages}, 
-		\hyperpage{135}
-  \item {AbstractSimulationManager}
-    \subitem {quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{21}
-  \item {actionOfMarkovStepFunction}
-    \subitem {quasylab.sibilla.core.models.Action$<$ S $>$}, 
-		\hyperpage{24}
-  \item {actions}
-    \subitem {quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$}, 
-		\hyperpage{71}
-    \subitem {quasylab.sibilla.core.models.Model$<$ S extends State $>$}, 
-		\hyperpage{83}
-  \item {ActualTemplateField}
-    \subitem {quasylab.sibilla.core.past.ds.ActualTemplateField}, 
-		\hyperpage{27}
-  \item {add}
-    \subitem {quasylab.sibilla.core.markov.ContinuousTimeMarkovChain$<$ S $>$}, 
-		\hyperpage{44}
-    \subitem {quasylab.sibilla.core.markov.DiscreteTimeMarkovChain$<$ S $>$}, 
-		\hyperpage{48}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{66}
-    \subitem {quasylab.sibilla.core.models.pm.Update}, \hyperpage{221}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingCollection$<$ S extends State $>$}, 
-		\hyperpage{124}
-    \subitem {quasylab.sibilla.core.simulator.Trajectory$<$ S extends State $>$}, 
-		\hyperpage{204}
-    \subitem {quasylab.sibilla.core.simulator.util.ComposedWeightedStructure$<$ S $>$}, 
-		\hyperpage{39}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedElement$<$ S $>$}, 
-		\hyperpage{224}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedLinkedList$<$ S $>$}, 
-		\hyperpage{226, 227}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedStructure$<$ S $>$}, 
-		\hyperpage{228}
   \item {addPropertyChangeListener}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{77}
+		\hyperpage{27}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{148}
+		\hyperpage{45}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{164}
-  \item {addRule}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationModel}, 
-		\hyperpage{99}
-  \item {addRules}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationModel}, 
-		\hyperpage{99}
+		\hyperpage{53}
   \item {addSimulation}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{77}
+		\hyperpage{27}
   \item {addSlaveServer}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{77}
-  \item {addTo}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{66}
-  \item {addToRow}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{67}
-  \item {AI\_INDEX}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{60}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipUnicast}, 
-		\hyperpage{63}
-  \item {aPositiveValueIsExpected}
-    \subitem {quasylab.sibilla.core.util.SibillaMessages}, 
-		\hyperpage{134}
-  \item {apply}
-    \subitem {quasylab.sibilla.core.markov.VectorState$<$ S $>$}, 
-		\hyperpage{222}
-    \subitem {quasylab.sibilla.core.models.MeasureFunction$<$ S extends State $>$}, 
-		\hyperpage{82}
-    \subitem {quasylab.sibilla.core.models.pm.BroadcastRule}, 
-		\hyperpage{34}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationRule}, 
-		\hyperpage{102}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{104}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationTransition}, 
-		\hyperpage{107}
-    \subitem {quasylab.sibilla.core.models.pm.RatePopulationFunction}, 
-		\hyperpage{115}
-    \subitem {quasylab.sibilla.core.models.pm.ReactionRule}, 
-		\hyperpage{120}
-    \subitem {quasylab.sibilla.core.models.pm.UnicastRule}, 
-		\hyperpage{219}
-    \subitem {quasylab.sibilla.core.util.Pair$<$ K, V $>$}, 
-		\hyperpage{96}
-  \item {AS\_INDEX}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{60}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipUnicast}, 
-		\hyperpage{63}
-  \item {AU\_INDEX}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{60}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipUnicast}, 
-		\hyperpage{63}
-  \item {average}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{104}
-  \item {averageExecutionTime}
-    \subitem {quasylab.sibilla.core.past.SimulationSession}, 
-		\hyperpage{146}
-    \subitem {quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{22}
+		\hyperpage{27}
 
   \indexspace
 
-  \item {B\_INDEX}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModel}, 
-		\hyperpage{116}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModelFactory}, 
-		\hyperpage{118}
-  \item {backward}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{67}
   \item {BasicSimulationServer}
     \subitem {quasylab.sibilla.core.network.slave.BasicSimulationServer}, 
-		\hyperpage{29}
-  \item {BETA}
-    \subitem {quasylab.sibilla.core.markov.TaxiScenarioMC}, 
-		\hyperpage{181}
-  \item {BoundedReachabilityContinuousSolver}
-    \subitem {quasylab.sibilla.core.markov.BoundedReachabilityContinuousSolver$<$ S $>$}, 
-		\hyperpage{31}
-  \item {BoundedReachabilityDiscreteSolver}
-    \subitem {quasylab.sibilla.core.markov.BoundedReachabilityDiscreteSolver$<$ S $>$}, 
-		\hyperpage{32}
-  \item {BroadcastReceiver}
-    \subitem {quasylab.sibilla.core.models.pm.BroadcastRule.BroadcastReceiver}, 
-		\hyperpage{33}
-  \item {BroadcastRule}
-    \subitem {quasylab.sibilla.core.models.pm.BroadcastRule}, 
-		\hyperpage{34}
-  \item {BT\_INDEX}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModel}, 
-		\hyperpage{116}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModelFactory}, 
-		\hyperpage{118}
-  \item {buildClass}
-    \subitem {quasylab.sibilla.core.simulator.util.ModelPublisher}, 
-		\hyperpage{87}
+		\hyperpage{12}
 
   \indexspace
 
-  \item {C\_RATE}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{60}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipUnicast}, 
-		\hyperpage{63}
-  \item {cancel}
-    \subitem {quasylab.sibilla.core.simulator.SimulationTask$<$ S extends State $>$}, 
-		\hyperpage{156}
-  \item {CANCELLED}
-    \subitem {quasylab.sibilla.core.simulator.SimulationMonitor}, 
-		\hyperpage{144}
-    \subitem {quasylab.sibilla.core.simulator.SimulationStatus}, 
-		\hyperpage{154}
   \item {canCompleteTask}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{164}
-  \item {CHANGE\_RATE}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModel}, 
-		\hyperpage{117}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModelFactory}, 
-		\hyperpage{118}
-  \item {check}
-    \subitem {quasylab.sibilla.core.models.StatePredicate$<$ T $>$}, 
-		\hyperpage{173}
-  \item {clazz}
-    \subitem {quasylab.sibilla.core.past.ds.FormalTemplateField}, 
 		\hyperpage{53}
   \item {clientConnection}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{148}
+		\hyperpage{45}
   \item {ClientSimulationEnvironment}
     \subitem {quasylab.sibilla.core.network.client.ClientSimulationEnvironment$<$ S extends State $>$}, 
-		\hyperpage{38}
+		\hyperpage{15}
   \item {clone}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{78}
+		\hyperpage{28}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{149}
+		\hyperpage{45}
     \subitem {quasylab.sibilla.core.network.NetworkInfo}, 
-		\hyperpage{88}
+		\hyperpage{32}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{164}
+		\hyperpage{54}
   \item {CLOSE\_CONNECTION}
     \subitem {quasylab.sibilla.core.network.client.ClientCommand}, 
-		\hyperpage{36}
+		\hyperpage{14}
     \subitem {quasylab.sibilla.core.network.master.MasterCommand}, 
-		\hyperpage{73}
+		\hyperpage{23}
     \subitem {quasylab.sibilla.core.network.slave.SlaveCommand}, 
-		\hyperpage{162}
+		\hyperpage{51}
   \item {closeConnection}
     \subitem {quasylab.sibilla.core.network.communication.TCPDefaultNetworkManager}, 
-		\hyperpage{184}
+		\hyperpage{61}
     \subitem {quasylab.sibilla.core.network.communication.TCPNetworkManager}, 
-		\hyperpage{186}
+		\hyperpage{64}
     \subitem {quasylab.sibilla.core.network.communication.TCPSecureNetworkManager}, 
-		\hyperpage{192}
+		\hyperpage{70}
     \subitem {quasylab.sibilla.core.network.communication.UDPDefaultNetworkManager}, 
-		\hyperpage{211}
+		\hyperpage{72}
     \subitem {quasylab.sibilla.core.network.communication.UDPNetworkManager}, 
-		\hyperpage{213}
+		\hyperpage{74}
   \item {compareTo}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{78}
+		\hyperpage{28}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{149}
-  \item {COMPLETED}
-    \subitem {quasylab.sibilla.core.simulator.SimulationStatus}, 
-		\hyperpage{154}
-  \item {ComposedWeightedStructure}
-    \subitem {quasylab.sibilla.core.simulator.util.ComposedWeightedStructure$<$ S $>$}, 
-		\hyperpage{39}
+		\hyperpage{46}
   \item {compress}
     \subitem {quasylab.sibilla.core.network.compression.Compressor}, 
-		\hyperpage{41}
+		\hyperpage{16}
   \item {ComputationResult}
     \subitem {quasylab.sibilla.core.network.ComputationResult$<$ S extends State $>$}, 
-		\hyperpage{42}
-  \item {compute}
-    \subitem {quasylab.sibilla.core.markov.BoundedReachabilityContinuousSolver$<$ S $>$}, 
-		\hyperpage{31}
-    \subitem {quasylab.sibilla.core.markov.BoundedReachabilityDiscreteSolver$<$ S $>$}, 
-		\hyperpage{32}
-    \subitem {quasylab.sibilla.core.markov.FoxGlynn}, \hyperpage{54}
-    \subitem {quasylab.sibilla.core.markov.TransientProbabilityContinuousSolver$<$ S $>$}, 
-		\hyperpage{207}
-    \subitem {quasylab.sibilla.core.markov.UnboundedReachabilitySolver$<$ S $>$}, 
-		\hyperpage{217}
-  \item {computeBSCC}
-    \subitem {quasylab.sibilla.core.markov.SteadyStateSolver$<$ S $>$}, 
-		\hyperpage{179}
-  \item {computedTrajectories}
-    \subitem {quasylab.sibilla.core.past.SimulationSession}, 
-		\hyperpage{146}
-    \subitem {quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{22}
-  \item {computeReduced}
-    \subitem {quasylab.sibilla.core.markov.FoxGlynn}, \hyperpage{55}
-  \item {consume}
-    \subitem {quasylab.sibilla.core.models.pm.Update}, \hyperpage{221}
-  \item {contains}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{67}
-  \item {copiesOf}
-    \subitem {quasylab.sibilla.core.past.ds.TupleSpace}, 
-		\hyperpage{209}
-  \item {copy}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{105}
-  \item {count}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{105}
-  \item {createdTimeStepWithNonPositiveTime}
-    \subitem {quasylab.sibilla.core.util.SibillaMessages}, 
-		\hyperpage{135}
-  \item {createIfNotExists}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{67}
-  \item {createModel}
-    \subitem {quasylab.sibilla.core.models.ModelDefinition$<$ S extends State $>$}, 
-		\hyperpage{85}
+		\hyperpage{17}
   \item {createNetworkManager}
     \subitem {quasylab.sibilla.core.network.communication.TCPNetworkManager}, 
-		\hyperpage{186, 187}
+		\hyperpage{64, 65}
     \subitem {quasylab.sibilla.core.network.communication.UDPNetworkManager}, 
-		\hyperpage{214}
-  \item {createPopulation}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationModel}, 
-		\hyperpage{99}
-  \item {createPopulationState}
-    \subitem {quasylab.sibilla.core.models.pm.util.PopulationRegistry}, 
-		\hyperpage{101}
+		\hyperpage{74, 75}
   \item {createServerSocket}
     \subitem {quasylab.sibilla.core.network.communication.TCPNetworkManager}, 
-		\hyperpage{188}
+		\hyperpage{65}
   \item {createSSLContext}
     \subitem {quasylab.sibilla.core.network.util.SSLUtils}, 
-		\hyperpage{168}
-  \item {currentState}
-    \subitem {quasilab.sibilla.core.ExecutionEnvironment$<$ S extends State $>$}, 
-		\hyperpage{50}
-  \item {currentTime}
-    \subitem {quasilab.sibilla.core.ExecutionEnvironment$<$ S extends State $>$}, 
-		\hyperpage{50}
+		\hyperpage{57}
 
   \indexspace
 
-  \item {D1}
-    \subitem {quasylab.sibilla.core.markov.TestKnutYaoAlgorithm.STATES}, 
-		\hyperpage{174}
-  \item {D2}
-    \subitem {quasylab.sibilla.core.markov.TestKnutYaoAlgorithm.STATES}, 
-		\hyperpage{174}
-  \item {D3}
-    \subitem {quasylab.sibilla.core.markov.TestKnutYaoAlgorithm.STATES}, 
-		\hyperpage{174}
-  \item {D4}
-    \subitem {quasylab.sibilla.core.markov.TestKnutYaoAlgorithm.STATES}, 
-		\hyperpage{175}
-  \item {D5}
-    \subitem {quasylab.sibilla.core.markov.TestKnutYaoAlgorithm.STATES}, 
-		\hyperpage{175}
-  \item {D6}
-    \subitem {quasylab.sibilla.core.markov.TestKnutYaoAlgorithm.STATES}, 
-		\hyperpage{175}
   \item {DATA}
     \subitem {quasylab.sibilla.core.network.client.ClientCommand}, 
-		\hyperpage{37}
+		\hyperpage{14}
   \item {DATA\_RESPONSE}
     \subitem {quasylab.sibilla.core.network.master.MasterCommand}, 
-		\hyperpage{73}
-  \item {DEADLINE}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{198}
+		\hyperpage{23}
   \item {decompress}
     \subitem {quasylab.sibilla.core.network.compression.Compressor}, 
-		\hyperpage{41}
+		\hyperpage{16}
   \item {decreaseRunningServers}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{149}
+		\hyperpage{46}
   \item {DEFAULT}
     \subitem {quasylab.sibilla.core.network.communication.TCPNetworkManagerType}, 
-		\hyperpage{190}
+		\hyperpage{68}
     \subitem {quasylab.sibilla.core.network.communication.UDPNetworkManagerType}, 
-		\hyperpage{216}
-  \item {DEFAULT\_FACTORY}
-    \subitem {quasylab.sibilla.core.simulator.SimulationEnvironment}, 
-		\hyperpage{140}
+		\hyperpage{77}
   \item {defClass}
     \subitem {quasylab.sibilla.core.network.serialization.CustomClassLoader}, 
-		\hyperpage{45}
+		\hyperpage{20}
   \item {deserialize}
     \subitem {quasylab.sibilla.core.network.serialization.Serializer}, 
-		\hyperpage{133}
+		\hyperpage{38}
   \item {devRTT}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{167}
+		\hyperpage{56}
   \item {DiscoverableBasicSimulationServer}
     \subitem {quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer}, 
-		\hyperpage{48}
+		\hyperpage{21}
 
   \indexspace
 
-  \item {E}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{198}
-  \item {end}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingCollection$<$ S extends State $>$}, 
-		\hyperpage{124}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingFunction$<$ S extends State $>$}, 
-		\hyperpage{126}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingLog$<$ S extends State $>$}, 
-		\hyperpage{129}
-    \subitem {quasylab.sibilla.core.simulator.sampling.StatisticSampling$<$ S extends State $>$}, 
-		\hyperpage{177}
-  \item {endIteration}
-    \subitem {quasylab.sibilla.core.simulator.SimulationMonitor}, 
-		\hyperpage{143}
-  \item {endSimulation}
-    \subitem {quasylab.sibilla.core.simulator.SimulationMonitor}, 
-		\hyperpage{143}
   \item {equals}
-    \subitem {quasylab.sibilla.core.markov.State}, \hyperpage{171}
-    \subitem {quasylab.sibilla.core.markov.VectorState$<$ S $>$}, 
-		\hyperpage{222}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{78}
+		\hyperpage{28}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{149}
+		\hyperpage{46}
     \subitem {quasylab.sibilla.core.network.NetworkInfo}, 
-		\hyperpage{88}
+		\hyperpage{32}
     \subitem {quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}, 
-		\hyperpage{137}
+		\hyperpage{40}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{164}
-    \subitem {quasylab.sibilla.core.past.ds.ActualTemplateField}, 
-		\hyperpage{27}
-    \subitem {quasylab.sibilla.core.past.ds.FormalTemplateField}, 
-		\hyperpage{52}
-    \subitem {quasylab.sibilla.core.past.ds.Template}, \hyperpage{194}
-    \subitem {quasylab.sibilla.core.past.ds.Tuple}, \hyperpage{208}
-    \subitem {quasylab.sibilla.core.simulator.sampling.Sample$<$ T $>$}, 
-		\hyperpage{121}
-    \subitem {quasylab.sibilla.core.util.Pair$<$ K, V $>$}, 
-		\hyperpage{96}
+		\hyperpage{54}
   \item {estimatedRTT}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{167}
-  \item {execute}
-    \subitem {quasylab.sibilla.core.models.Action$<$ S $>$}, 
-		\hyperpage{25}
-    \subitem {quasylab.sibilla.core.past.Activity}, \hyperpage{26}
-    \subitem {quasylab.sibilla.core.past.ds.GetActivity}, 
-		\hyperpage{58}
-    \subitem {quasylab.sibilla.core.past.SequenceOfActivities}, 
-		\hyperpage{131}
-  \item {ExecutionEnvironment}
-    \subitem {quasilab.sibilla.core.ExecutionEnvironment$<$ S extends State $>$}, 
-		\hyperpage{49}
+		\hyperpage{56}
 
   \indexspace
 
-  \item {fillState}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{105}
   \item {forceExpiredTimeLimit}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{165}
-  \item {FormalTemplateField}
-    \subitem {quasylab.sibilla.core.past.ds.FormalTemplateField}, 
-		\hyperpage{52}
-  \item {forward}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{67, 68}
-  \item {FoxGlinnException}
-    \subitem {quasylab.sibilla.core.markov.FoxGlinnException}, 
 		\hyperpage{54}
-  \item {fraction}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{105}
 
   \indexspace
 
-  \item {generateCTMC}
-    \subitem {quasylab.sibilla.core.markov.TaxiScenarioMC}, 
-		\hyperpage{181}
-  \item {generateMarkovChain}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{68}
-  \item {generateMatrix}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{68}
-  \item {generateVector}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{68}
-  \item {get}
-    \subitem {quasylab.sibilla.core.markov.VectorState$<$ S $>$}, 
-		\hyperpage{223}
-    \subitem {quasylab.sibilla.core.models.pm.Update}, \hyperpage{221}
-    \subitem {quasylab.sibilla.core.past.ds.Template}, \hyperpage{195}
-    \subitem {quasylab.sibilla.core.past.ds.Tuple}, \hyperpage{208}
-    \subitem {quasylab.sibilla.core.past.ds.TupleSpace}, 
-		\hyperpage{210}
-    \subitem {quasylab.sibilla.core.past.ds.TupleSpace.Node}, 
-		\hyperpage{94, 95}
-    \subitem {quasylab.sibilla.core.past.RandomGeneratorRegistry}, 
-		\hyperpage{112}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingCollection$<$ S extends State $>$}, 
-		\hyperpage{124}
-    \subitem {quasylab.sibilla.core.simulator.SimulationTask$<$ S extends State $>$}, 
-		\hyperpage{156}
-  \item {GetActivity}
-    \subitem {quasylab.sibilla.core.past.ds.GetActivity}, 
-		\hyperpage{58}
   \item {getAddress}
     \subitem {quasylab.sibilla.core.network.NetworkInfo}, 
-		\hyperpage{88}
-  \item {getAll}
-    \subitem {quasylab.sibilla.core.simulator.util.ComposedWeightedStructure$<$ S $>$}, 
-		\hyperpage{40}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedElement$<$ S $>$}, 
-		\hyperpage{224}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedLinkedList$<$ S $>$}, 
-		\hyperpage{227}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedStructure$<$ S $>$}, 
-		\hyperpage{228}
+		\hyperpage{32}
   \item {getBroadcastAddresses}
     \subitem {quasylab.sibilla.core.network.util.NetworkUtils}, 
-		\hyperpage{93}
-  \item {getCachedThreadSimulationManagerFactory}
-    \subitem {quasylab.sibilla.core.simulator.ThreadSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{201}
+		\hyperpage{37}
   \item {getClientNetworkInfo}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{149}
-  \item {getConfidenceInterval}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries}, 
-		\hyperpage{158}
+		\hyperpage{46}
   \item {getConnectedSlaveServers}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{78}
-  \item {getData}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries}, 
-		\hyperpage{158}
+		\hyperpage{28}
   \item {getDeadline}
     \subitem {quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}, 
-		\hyperpage{137}
-  \item {getDrift}
-    \subitem {quasylab.sibilla.core.models.pm.BroadcastRule}, 
-		\hyperpage{35}
-    \subitem {quasylab.sibilla.core.models.pm.UnicastRule}, 
-		\hyperpage{219}
-  \item {getElapsedTime}
-    \subitem {quasylab.sibilla.core.simulator.SimulationTask$<$ S extends State $>$}, 
-		\hyperpage{156}
-  \item {getElement}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedElement$<$ S $>$}, 
-		\hyperpage{225}
-  \item {getEnd}
-    \subitem {quasylab.sibilla.core.simulator.Trajectory$<$ S extends State $>$}, 
-		\hyperpage{204}
+		\hyperpage{41}
   \item {getExecutedSimulations}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{78}
+		\hyperpage{28}
   \item {getExpectedTasks}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{165}
-  \item {getFixedThreadSimulationManagerFactory}
-    \subitem {quasylab.sibilla.core.simulator.ThreadSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{201}
-  \item {getFraction}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{105}
-  \item {getGenerationTime}
-    \subitem {quasylab.sibilla.core.simulator.Trajectory$<$ S extends State $>$}, 
-		\hyperpage{205}
-  \item {getIndex}
-    \subitem {quasylab.sibilla.core.models.pm.Population}, 
-		\hyperpage{98}
-    \subitem {quasylab.sibilla.core.simulator.SimulationTask$<$ S extends State $>$}, 
-		\hyperpage{156}
+		\hyperpage{54}
   \item {getInstance}
     \subitem {quasylab.sibilla.core.network.HostLoggerSupplier}, 
-		\hyperpage{65}
+		\hyperpage{22}
     \subitem {quasylab.sibilla.core.network.util.SSLUtils}, 
-		\hyperpage{168}
-    \subitem {quasylab.sibilla.core.past.RandomGeneratorRegistry}, 
-		\hyperpage{112}
-  \item {getKey}
-    \subitem {quasylab.sibilla.core.util.Pair$<$ K, V $>$}, 
-		\hyperpage{96}
+		\hyperpage{58}
   \item {getLastUpdate}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{150}
+		\hyperpage{46}
   \item {getLocalAddress}
     \subitem {quasylab.sibilla.core.network.util.NetworkUtils}, 
-		\hyperpage{94}
+		\hyperpage{38}
   \item {getLogger}
     \subitem {quasylab.sibilla.core.network.HostLoggerSupplier}, 
-		\hyperpage{65}
+		\hyperpage{22}
   \item {getMasterNetworkInfo}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{79}
+		\hyperpage{29}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{150}
+		\hyperpage{47}
   \item {getMasterServerStartDate}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{79}
-  \item {getMaxRate}
-    \subitem {quasylab.sibilla.core.markov.ContinuousTimeMarkovChain$<$ S $>$}, 
-		\hyperpage{44}
-  \item {getMean}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries}, 
-		\hyperpage{158}
+		\hyperpage{29}
   \item {getModel}
     \subitem {quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}, 
-		\hyperpage{137}
-    \subitem {quasylab.sibilla.core.simulator.SimulationUnit$<$ S extends State $>$}, 
-		\hyperpage{161}
+		\hyperpage{41}
   \item {getModelDefinition}
-    \subitem {quasylab.sibilla.core.models.Model$<$ S extends State $>$}, 
-		\hyperpage{83}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationModel}, 
-		\hyperpage{100}
     \subitem {quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}, 
-		\hyperpage{137}
+		\hyperpage{41}
   \item {getModelInitialState}
     \subitem {quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}, 
-		\hyperpage{138}
+		\hyperpage{41}
   \item {getModelSamplingFunction}
     \subitem {quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}, 
-		\hyperpage{138}
-  \item {getMonitor}
-    \subitem {quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{22}
-  \item {getName}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationTransition}, 
-		\hyperpage{108}
-    \subitem {quasylab.sibilla.core.past.Activity}, \hyperpage{26}
-    \subitem {quasylab.sibilla.core.past.ds.GetActivity}, 
-		\hyperpage{58}
-    \subitem {quasylab.sibilla.core.past.SequenceOfActivities}, 
-		\hyperpage{131}
-    \subitem {quasylab.sibilla.core.simulator.sampling.Measure$<$ S extends State $>$}, 
-		\hyperpage{81}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries}, 
-		\hyperpage{159}
-    \subitem {quasylab.sibilla.core.simulator.sampling.StatisticSampling$<$ S extends State $>$}, 
-		\hyperpage{177}
+		\hyperpage{41}
   \item {getNetworkInfo}
     \subitem {quasylab.sibilla.core.network.communication.TCPNetworkManager}, 
-		\hyperpage{188}
+		\hyperpage{66}
   \item {getNetworkSimulationManagerFactory}
     \subitem {quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{91}
-  \item {getOccupancy}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{105, 106}
+		\hyperpage{35}
   \item {getPendingTasks}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{150}
+		\hyperpage{47}
   \item {getPort}
     \subitem {quasylab.sibilla.core.network.NetworkInfo}, 
-		\hyperpage{88}
+		\hyperpage{32}
   \item {getRandomGenerator}
     \subitem {quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}, 
-		\hyperpage{138}
-  \item {getRate}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationTransition}, 
-		\hyperpage{108}
-  \item {getReachPredicate}
-    \subitem {quasylab.sibilla.core.simulator.SimulationUnit$<$ S extends State $>$}, 
-		\hyperpage{161}
-  \item {getReceiver}
-    \subitem {quasylab.sibilla.core.models.pm.BroadcastRule.BroadcastReceiver}, 
-		\hyperpage{33}
-    \subitem {quasylab.sibilla.core.models.pm.UnicastRule.UnicastReceiver}, 
-		\hyperpage{218}
-  \item {getReceivingProbability}
-    \subitem {quasylab.sibilla.core.models.pm.BroadcastRule.BroadcastReceiver}, 
-		\hyperpage{33}
+		\hyperpage{42}
   \item {getRegisteredSlaveServers}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{150}
+		\hyperpage{47}
   \item {getReplica}
     \subitem {quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}, 
-		\hyperpage{138}
+		\hyperpage{42}
   \item {getResults}
     \subitem {quasylab.sibilla.core.network.ComputationResult$<$ S extends State $>$}, 
-		\hyperpage{43}
-  \item {getRow}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{68}
+		\hyperpage{19}
   \item {getRunningSlaveServers}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{150}
-  \item {getRunningTasks}
-    \subitem {quasylab.sibilla.core.simulator.QueuedSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{109}
-  \item {getSessionId}
-    \subitem {quasylab.sibilla.core.past.SimulationSession}, 
-		\hyperpage{146}
-  \item {getSimulationManager}
-    \subitem {quasylab.sibilla.core.simulator.SimulationManagerFactory}, 
-		\hyperpage{142}
+		\hyperpage{47}
   \item {getSimulationModelName}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{151}
+		\hyperpage{47}
   \item {getSimulationStartDate}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{151}
+		\hyperpage{48}
   \item {getSimulationStates}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{79}
-  \item {getSimulationTimeSeries}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingCollection$<$ S extends State $>$}, 
-		\hyperpage{125}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingFunction$<$ S extends State $>$}, 
-		\hyperpage{126}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingLog$<$ S extends State $>$}, 
-		\hyperpage{129}
-    \subitem {quasylab.sibilla.core.simulator.sampling.StatisticSampling$<$ S extends State $>$}, 
-		\hyperpage{177}
-  \item {getSize}
-    \subitem {quasylab.sibilla.core.models.pm.Population}, 
-		\hyperpage{98}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries}, 
-		\hyperpage{159}
-    \subitem {quasylab.sibilla.core.simulator.sampling.StatisticSampling$<$ S extends State $>$}, 
-		\hyperpage{177}
+		\hyperpage{29}
   \item {getSlaveInfo}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{165}
+		\hyperpage{54}
   \item {getSlaveServersNetworkInfos}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{79}
+		\hyperpage{29}
   \item {getSlaveServersStates}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{151}
+		\hyperpage{48}
   \item {getSlaveStateByServerInfo}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{151}
+		\hyperpage{48}
   \item {getSocket}
     \subitem {quasylab.sibilla.core.network.communication.TCPDefaultNetworkManager}, 
-		\hyperpage{184}
+		\hyperpage{62}
     \subitem {quasylab.sibilla.core.network.communication.TCPNetworkManager}, 
-		\hyperpage{188}
+		\hyperpage{66}
     \subitem {quasylab.sibilla.core.network.communication.TCPSecureNetworkManager}, 
-		\hyperpage{192}
-  \item {getStandardDeviation}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries}, 
-		\hyperpage{159}
-  \item {getStart}
-    \subitem {quasylab.sibilla.core.simulator.Trajectory$<$ S extends State $>$}, 
-		\hyperpage{205}
-  \item {getState}
-    \subitem {quasylab.sibilla.core.markov.State}, \hyperpage{172}
-    \subitem {quasylab.sibilla.core.simulator.SimulationUnit$<$ S extends State $>$}, 
-		\hyperpage{161}
-  \item {getStates}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{68}
-  \item {getStoppingPredicate}
-    \subitem {quasylab.sibilla.core.simulator.SimulationUnit$<$ S extends State $>$}, 
-		\hyperpage{161}
-  \item {getTask}
-    \subitem {quasylab.sibilla.core.past.SimulationSession}, 
-		\hyperpage{146}
-    \subitem {quasylab.sibilla.core.simulator.QueuedSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{109, 110}
+		\hyperpage{70}
   \item {getTasks}
     \subitem {quasylab.sibilla.core.network.NetworkTask$<$ S extends State $>$}, 
-		\hyperpage{93}
-  \item {getThreadSimulationManagerFacotry}
-    \subitem {quasylab.sibilla.core.simulator.ThreadSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{201}
-  \item {getTime}
-    \subitem {quasylab.sibilla.core.models.TimeStep$<$ S $>$}, 
-		\hyperpage{203}
-    \subitem {quasylab.sibilla.core.simulator.sampling.Sample$<$ T $>$}, 
-		\hyperpage{121}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries}, 
-		\hyperpage{159}
+		\hyperpage{37}
   \item {getTimeLimit}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{165}
+		\hyperpage{54}
   \item {getTimeout}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{165}
+		\hyperpage{55}
   \item {getTotalSimulationTasks}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{152}
-  \item {getTotalWeight}
-    \subitem {quasylab.sibilla.core.simulator.util.ComposedWeightedStructure$<$ S $>$}, 
-		\hyperpage{40}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedElement$<$ S $>$}, 
-		\hyperpage{225}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedLinkedList$<$ S $>$}, 
-		\hyperpage{227}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedStructure$<$ S $>$}, 
-		\hyperpage{228}
-  \item {getTrajectory}
-    \subitem {quasylab.sibilla.core.simulator.SimulationTask$<$ S extends State $>$}, 
-		\hyperpage{156}
-  \item {getTransitions}
-    \subitem {quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$}, 
-		\hyperpage{72}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationModel}, 
-		\hyperpage{100}
-  \item {getTuple}
-    \subitem {quasylab.sibilla.core.past.ds.GetActivity}, 
-		\hyperpage{58}
+		\hyperpage{49}
   \item {getType}
     \subitem {quasylab.sibilla.core.network.communication.TCPDefaultNetworkManager}, 
-		\hyperpage{184}
-    \subitem {quasylab.sibilla.core.network.communication.TCPNetworkManager}, 
-		\hyperpage{188}
-    \subitem {quasylab.sibilla.core.network.communication.TCPSecureNetworkManager}, 
-		\hyperpage{193}
-    \subitem {quasylab.sibilla.core.network.NetworkInfo}, 
-		\hyperpage{88}
-  \item {getUpdate}
-    \subitem {quasylab.sibilla.core.models.pm.Update}, \hyperpage{221}
-  \item {getValue}
-    \subitem {quasylab.sibilla.core.models.TimeStep$<$ S $>$}, 
-		\hyperpage{203}
-    \subitem {quasylab.sibilla.core.simulator.sampling.Sample$<$ T $>$}, 
-		\hyperpage{121}
-    \subitem {quasylab.sibilla.core.util.Pair$<$ K, V $>$}, 
-		\hyperpage{96}
-  \item {getWeight}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedElement$<$ S $>$}, 
-		\hyperpage{225}
-  \item {getWorkStealingPoolSimulationManagerFactory}
-    \subitem {quasylab.sibilla.core.simulator.ThreadSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{202}
-  \item {GossipBroadcast}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{59}
-  \item {GossipUnicast}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipUnicast}, 
 		\hyperpage{62}
-
-  \indexspace
-
-  \item {handleTask}
-    \subitem {quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{22}
-    \subitem {quasylab.sibilla.core.simulator.QueuedSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{110}
-    \subitem {quasylab.sibilla.core.simulator.SequentialSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{132}
-    \subitem {quasylab.sibilla.core.simulator.ThreadSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{202}
-  \item {handleTrajectory}
-    \subitem {quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{22}
-  \item {hashCode}
-    \subitem {quasylab.sibilla.core.markov.State}, \hyperpage{172}
-    \subitem {quasylab.sibilla.core.markov.VectorState$<$ S $>$}, 
-		\hyperpage{223}
-    \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{80}
-    \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{152}
+    \subitem {quasylab.sibilla.core.network.communication.TCPNetworkManager}, 
+		\hyperpage{66}
+    \subitem {quasylab.sibilla.core.network.communication.TCPSecureNetworkManager}, 
+		\hyperpage{70}
     \subitem {quasylab.sibilla.core.network.NetworkInfo}, 
-		\hyperpage{89}
-    \subitem {quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}, 
-		\hyperpage{139}
-    \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{166}
-    \subitem {quasylab.sibilla.core.past.ds.ActualTemplateField}, 
-		\hyperpage{27}
-    \subitem {quasylab.sibilla.core.past.ds.FormalTemplateField}, 
-		\hyperpage{52}
-    \subitem {quasylab.sibilla.core.past.ds.Template}, \hyperpage{195}
-    \subitem {quasylab.sibilla.core.past.ds.Tuple}, \hyperpage{208}
-    \subitem {quasylab.sibilla.core.simulator.sampling.Sample$<$ T $>$}, 
-		\hyperpage{121}
-    \subitem {quasylab.sibilla.core.util.Pair$<$ K, V $>$}, 
-		\hyperpage{97}
-  \item {hasTasks}
-    \subitem {quasylab.sibilla.core.simulator.QueuedSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{110}
+		\hyperpage{33}
 
   \indexspace
 
-  \item {I}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{198}
-  \item {ILLEGAL\_TIME\_IN\_TIMESTEP}
-    \subitem {quasylab.sibilla.core.util.SibillaMessages}, 
-		\hyperpage{135}
-  \item {implies}
-    \subitem {quasylab.sibilla.core.past.ds.ActualTemplateField}, 
-		\hyperpage{28}
-    \subitem {quasylab.sibilla.core.past.ds.FormalTemplateField}, 
-		\hyperpage{52}
-    \subitem {quasylab.sibilla.core.past.ds.Template}, \hyperpage{195}
-    \subitem {quasylab.sibilla.core.past.ds.TemplateField}, 
-		\hyperpage{196}
+  \item {hashCode}
+    \subitem {quasylab.sibilla.core.network.master.MasterState}, 
+		\hyperpage{30}
+    \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
+		\hyperpage{49}
+    \subitem {quasylab.sibilla.core.network.NetworkInfo}, 
+		\hyperpage{33}
+    \subitem {quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}, 
+		\hyperpage{42}
+    \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
+		\hyperpage{55}
+
+  \indexspace
+
   \item {increaseExecutedSimulations}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{80}
+		\hyperpage{30}
   \item {increaseRunningServers}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{152}
-  \item {indexOf}
-    \subitem {quasylab.sibilla.core.models.pm.util.PopulationRegistry}, 
-		\hyperpage{101}
+		\hyperpage{49}
   \item {INIT}
     \subitem {quasylab.sibilla.core.network.client.ClientCommand}, 
-		\hyperpage{37}
+		\hyperpage{14}
     \subitem {quasylab.sibilla.core.network.master.MasterCommand}, 
-		\hyperpage{73}
-    \subitem {quasylab.sibilla.core.simulator.SimulationStatus}, 
-		\hyperpage{154}
-  \item {INIT\_E}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{198}
-  \item {INIT\_I}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{199}
-  \item {INIT\_R}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{199}
+		\hyperpage{23}
   \item {INIT\_RESPONSE}
     \subitem {quasylab.sibilla.core.network.master.MasterCommand}, 
-		\hyperpage{74}
+		\hyperpage{23}
     \subitem {quasylab.sibilla.core.network.slave.SlaveCommand}, 
-		\hyperpage{162}
-  \item {INIT\_S}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{199}
-  \item {initialState}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{198}
-  \item {isCancelled}
-    \subitem {quasylab.sibilla.core.simulator.SimulationMonitor}, 
-		\hyperpage{143}
-    \subitem {quasylab.sibilla.core.simulator.SimulationTask$<$ S extends State $>$}, 
-		\hyperpage{157}
-  \item {isCompleted}
-    \subitem {quasylab.sibilla.core.simulator.SimulationTask$<$ S extends State $>$}, 
-		\hyperpage{157}
+		\hyperpage{51}
   \item {isConcluded}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{152}
-  \item {isEnabled}
-    \subitem {quasylab.sibilla.core.models.pm.UnicastRule}, 
-		\hyperpage{220}
-  \item {isInstance}
-    \subitem {quasylab.sibilla.core.past.ds.Tuple}, \hyperpage{208}
+		\hyperpage{49}
   \item {isRemoved}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{166}
-  \item {isRunning}
-    \subitem {quasylab.sibilla.core.past.SimulationSession}, 
-		\hyperpage{146}
-    \subitem {quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{23}
-    \subitem {quasylab.sibilla.core.simulator.SimulationManager$<$ S extends State $>$}, 
-		\hyperpage{141}
-    \subitem {quasylab.sibilla.core.simulator.SimulationTask$<$ S extends State $>$}, 
-		\hyperpage{157}
-  \item {isSuccesfull}
-    \subitem {quasylab.sibilla.core.simulator.Trajectory$<$ S extends State $>$}, 
-		\hyperpage{205}
+		\hyperpage{55}
   \item {isTimeout}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{166}
+		\hyperpage{55}
 
   \indexspace
 
   \item {join}
     \subitem {quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{91}
-    \subitem {quasylab.sibilla.core.past.SimulationSession}, 
-		\hyperpage{146}
-    \subitem {quasylab.sibilla.core.simulator.SequentialSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{132}
-    \subitem {quasylab.sibilla.core.simulator.SimulationManager$<$ S extends State $>$}, 
-		\hyperpage{141}
-    \subitem {quasylab.sibilla.core.simulator.ThreadSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{202}
+		\hyperpage{35}
 
   \indexspace
 
-  \item {K}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{60}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModel}, 
-		\hyperpage{117}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModelFactory}, 
-		\hyperpage{118}
-
-  \indexspace
-
-  \item {LAMBDA}
-    \subitem {quasylab.sibilla.core.markov.TaxiScenarioMC}, 
-		\hyperpage{181}
-  \item {LAMBDA\_E}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{199}
-  \item {LAMBDA\_I}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{199}
-  \item {LAMBDA\_R}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{199}
-  \item {leftPoint}
-    \subitem {quasylab.sibilla.core.markov.FoxGlynn}, \hyperpage{55}
   \item {loadClassBytes}
     \subitem {quasylab.sibilla.core.network.serialization.ClassBytesLoader}, 
-		\hyperpage{36}
+		\hyperpage{13}
     \subitem {quasylab.sibilla.core.network.serialization.CustomClassLoader}, 
-		\hyperpage{45}
+		\hyperpage{20}
   \item {localServerInfo}
     \subitem {quasylab.sibilla.core.network.slave.BasicSimulationServer}, 
-		\hyperpage{30}
+		\hyperpage{12}
   \item {LOGGER}
     \subitem {quasylab.sibilla.core.network.slave.BasicSimulationServer}, 
-		\hyperpage{30}
+		\hyperpage{12}
 
   \indexspace
 
-  \item {main}
-    \subitem {quasylab.sibilla.core.markov.TaxiScenarioMC}, 
-		\hyperpage{181}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{59}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipUnicast}, 
-		\hyperpage{62}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModel}, 
-		\hyperpage{116}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestMain}, 
-		\hyperpage{197}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{198}
-  \item {MarkovChain}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{66}
   \item {MasterServerSimulationEnvironment}
     \subitem {quasylab.sibilla.core.network.master.MasterServerSimulationEnvironment}, 
-		\hyperpage{75}
+		\hyperpage{25}
   \item {MasterState}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{77}
-  \item {match}
-    \subitem {quasylab.sibilla.core.past.ds.ActualTemplateField}, 
-		\hyperpage{28}
-    \subitem {quasylab.sibilla.core.past.ds.FormalTemplateField}, 
-		\hyperpage{53}
-    \subitem {quasylab.sibilla.core.past.ds.Template}, \hyperpage{195}
-    \subitem {quasylab.sibilla.core.past.ds.TemplateField}, 
-		\hyperpage{196}
-  \item {max}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{106}
-  \item {MAX\_USERS}
-    \subitem {quasylab.sibilla.core.markov.TaxiScenarioMC}, 
-		\hyperpage{182}
-  \item {measure}
-    \subitem {quasylab.sibilla.core.simulator.sampling.Measure$<$ S extends State $>$}, 
-		\hyperpage{81}
-    \subitem {quasylab.sibilla.core.simulator.sampling.StatisticSampling$<$ S extends State $>$}, 
-		\hyperpage{178}
+		\hyperpage{27}
   \item {migrate}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{166}
-  \item {min}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{106}
-  \item {modelArity}
-    \subitem {quasylab.sibilla.core.models.ModelDefinition$<$ S extends State $>$}, 
-		\hyperpage{85}
-  \item {ModelPublisher}
-    \subitem {quasylab.sibilla.core.simulator.util.ModelPublisher}, 
-		\hyperpage{86}
-  \item {move}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{69}
-  \item {MU\_LONG}
-    \subitem {quasylab.sibilla.core.markov.TaxiScenarioMC}, 
-		\hyperpage{182}
-  \item {MU\_SHORT}
-    \subitem {quasylab.sibilla.core.markov.TaxiScenarioMC}, 
-		\hyperpage{182}
+		\hyperpage{55}
 
   \indexspace
 
-  \item {N}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{199}
   \item {NetworkInfo}
     \subitem {quasylab.sibilla.core.network.NetworkInfo}, 
-		\hyperpage{87}
+		\hyperpage{31}
   \item {NetworkSimulationManager}
     \subitem {quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{90}
+		\hyperpage{35}
   \item {NetworkTask}
     \subitem {quasylab.sibilla.core.network.NetworkTask$<$ S extends State $>$}, 
-		\hyperpage{92}
-  \item {next}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{69}
-    \subitem {quasylab.sibilla.core.markov.MarkovProcess$<$ S $>$}, 
-		\hyperpage{71}
-    \subitem {quasylab.sibilla.core.markov.TaxiScenarioMC}, 
-		\hyperpage{181}
-    \subitem {quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$}, 
-		\hyperpage{72}
-    \subitem {quasylab.sibilla.core.models.Model$<$ S extends State $>$}, 
-		\hyperpage{84}
-  \item {nextDouble}
-    \subitem {quasylab.sibilla.core.simulator.DefaultRandomGenerator}, 
-		\hyperpage{47}
-  \item {nextTask}
-    \subitem {quasylab.sibilla.core.past.SimulationSession}, 
-		\hyperpage{147}
-    \subitem {quasylab.sibilla.core.simulator.QueuedSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{110, 111}
-  \item {Node}
-    \subitem {quasylab.sibilla.core.past.ds.TupleSpace.Node}, 
-		\hyperpage{94}
-  \item {normal}
-    \subitem {quasylab.sibilla.core.past.RandomGeneratorRegistry}, 
-		\hyperpage{113}
-  \item {notifyMonitorEndInteration}
-    \subitem {quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{23}
-  \item {notifyMonitorStartInteration}
-    \subitem {quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{23}
-  \item {NUMBER\_OF\_TAXIS}
-    \subitem {quasylab.sibilla.core.markov.TaxiScenarioMC}, 
-		\hyperpage{182}
-  \item {numberOfStates}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{69}
+		\hyperpage{36}
 
   \indexspace
 
-  \item {P\_RATE}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{60}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipUnicast}, 
-		\hyperpage{63}
-  \item {P\_SHORT}
-    \subitem {quasylab.sibilla.core.markov.TaxiScenarioMC}, 
-		\hyperpage{182}
-  \item {Pair}
-    \subitem {quasylab.sibilla.core.util.Pair$<$ K, V $>$}, 
-		\hyperpage{95, 96}
   \item {parseOptions}
     \subitem {quasylab.sibilla.core.network.util.StartupUtils}, 
-		\hyperpage{170}
-  \item {pendingTasks}
-    \subitem {quasylab.sibilla.core.simulator.QueuedSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{111}
-    \subitem {quasylab.sibilla.core.simulator.SequentialSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{132}
-    \subitem {quasylab.sibilla.core.simulator.SimulationManager$<$ S extends State $>$}, 
-		\hyperpage{141}
-    \subitem {quasylab.sibilla.core.simulator.ThreadSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{202}
-  \item {PI\_INDEX}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{61}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipUnicast}, 
-		\hyperpage{63}
+		\hyperpage{59}
   \item {PING}
     \subitem {quasylab.sibilla.core.network.client.ClientCommand}, 
-		\hyperpage{37}
+		\hyperpage{14}
     \subitem {quasylab.sibilla.core.network.master.MasterCommand}, 
-		\hyperpage{74}
-  \item {poissonProb}
-    \subitem {quasylab.sibilla.core.markov.FoxGlynn}, \hyperpage{56}
+		\hyperpage{24}
   \item {PONG}
     \subitem {quasylab.sibilla.core.network.master.MasterCommand}, 
-		\hyperpage{74}
+		\hyperpage{24}
     \subitem {quasylab.sibilla.core.network.slave.SlaveCommand}, 
-		\hyperpage{162}
-  \item {Population}
-    \subitem {quasylab.sibilla.core.models.pm.Population}, 
-		\hyperpage{97, 98}
-  \item {population}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{106}
-  \item {PopulationModel}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationModel}, 
-		\hyperpage{99}
-  \item {PopulationRegistry}
-    \subitem {quasylab.sibilla.core.models.pm.util.PopulationRegistry}, 
-		\hyperpage{101}
-  \item {PopulationState}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{103, 104}
-  \item {PopulationTransition}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationTransition}, 
-		\hyperpage{107}
-  \item {previous}
-    \subitem {quasilab.sibilla.core.ExecutionEnvironment$<$ S extends State $>$}, 
-		\hyperpage{50}
-  \item {printTimeSeries}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingCollection$<$ S extends State $>$}, 
-		\hyperpage{125}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingFunction$<$ S extends State $>$}, 
-		\hyperpage{127, 128}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingLog$<$ S extends State $>$}, 
-		\hyperpage{129}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries}, 
-		\hyperpage{159}
-    \subitem {quasylab.sibilla.core.simulator.sampling.StatisticSampling$<$ S extends State $>$}, 
-		\hyperpage{178}
-  \item {probability}
-    \subitem {quasylab.sibilla.core.models.Action$<$ S $>$}, 
-		\hyperpage{25}
-  \item {probabilityMatrixRow}
-    \subitem {quasylab.sibilla.core.markov.ContinuousTimeMarkovChain$<$ S $>$}, 
-		\hyperpage{44}
-    \subitem {quasylab.sibilla.core.markov.DiscreteTimeMarkovChain$<$ S $>$}, 
-		\hyperpage{48}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{69}
-  \item {produce}
-    \subitem {quasylab.sibilla.core.models.pm.Update}, \hyperpage{221}
+		\hyperpage{52}
   \item {propertyChange}
     \subitem {quasylab.sibilla.core.network.master.MasterServerSimulationEnvironment}, 
-		\hyperpage{76}
+		\hyperpage{26}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{80}
-    \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{152}
-  \item {PS\_INDEX}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{61}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipUnicast}, 
-		\hyperpage{64}
-  \item {PU\_INDEX}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{61}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipUnicast}, 
-		\hyperpage{64}
-  \item {put}
-    \subitem {quasylab.sibilla.core.past.ds.TupleSpace}, 
-		\hyperpage{210}
-
-  \indexspace
-
-  \item {quasilab}, \hyperpage{11}
-  \item {quasilab.sibilla}, \hyperpage{11}
-  \item {quasilab.sibilla.core}, \hyperpage{11}
-  \item {quasilab.sibilla.core.ExecutionEnvironment$<$ S extends State $>$}, 
-		\hyperpage{49}
-    \subitem {currentState}, \hyperpage{50}
-    \subitem {currentTime}, \hyperpage{50}
-    \subitem {ExecutionEnvironment}, \hyperpage{49}
-    \subitem {previous}, \hyperpage{50}
-    \subitem {restart}, \hyperpage{50}
-    \subitem {step}, \hyperpage{50, 51}
-    \subitem {steps}, \hyperpage{51}
-  \item {quasylab}, \hyperpage{11}
-  \item {quasylab.sibilla}, \hyperpage{11}
-  \item {quasylab.sibilla.core}, \hyperpage{12}
-  \item {quasylab.sibilla.core.markov}, \hyperpage{12}
-  \item {quasylab.sibilla.core.markov.BoundedReachabilityContinuousSolver$<$ S $>$}, 
 		\hyperpage{30}
-    \subitem {BoundedReachabilityContinuousSolver}, \hyperpage{31}
-    \subitem {compute}, \hyperpage{31}
-  \item {quasylab.sibilla.core.markov.BoundedReachabilityDiscreteSolver$<$ S $>$}, 
-		\hyperpage{31}
-    \subitem {BoundedReachabilityDiscreteSolver}, \hyperpage{32}
-    \subitem {compute}, \hyperpage{32}
-  \item {quasylab.sibilla.core.markov.ContinuousTimeMarkovChain$<$ S $>$}, 
-		\hyperpage{43}
-    \subitem {add}, \hyperpage{44}
-    \subitem {getMaxRate}, \hyperpage{44}
-    \subitem {probabilityMatrixRow}, \hyperpage{44}
-    \subitem {rateMatrixRow}, \hyperpage{44}
-    \subitem {uniformisedMatrixRow}, \hyperpage{44}
-  \item {quasylab.sibilla.core.markov.DiscreteTimeMarkovChain$<$ S $>$}, 
-		\hyperpage{48}
-    \subitem {add}, \hyperpage{48}
-    \subitem {probabilityMatrixRow}, \hyperpage{48}
-  \item {quasylab.sibilla.core.markov.FoxGlinnException}, 
-		\hyperpage{53}
-    \subitem {FoxGlinnException}, \hyperpage{54}
-  \item {quasylab.sibilla.core.markov.FoxGlynn}, \hyperpage{54}
-    \subitem {compute}, \hyperpage{54}
-    \subitem {computeReduced}, \hyperpage{55}
-    \subitem {leftPoint}, \hyperpage{55}
-    \subitem {poissonProb}, \hyperpage{56}
-    \subitem {rightPoint}, \hyperpage{56}
-    \subitem {totalWeight}, \hyperpage{56}
-    \subitem {weight}, \hyperpage{56}
-  \item {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{65}
-    \subitem {add}, \hyperpage{66}
-    \subitem {addTo}, \hyperpage{66}
-    \subitem {addToRow}, \hyperpage{67}
-    \subitem {backward}, \hyperpage{67}
-    \subitem {contains}, \hyperpage{67}
-    \subitem {createIfNotExists}, \hyperpage{67}
-    \subitem {forward}, \hyperpage{67, 68}
-    \subitem {generateMarkovChain}, \hyperpage{68}
-    \subitem {generateMatrix}, \hyperpage{68}
-    \subitem {generateVector}, \hyperpage{68}
-    \subitem {getRow}, \hyperpage{68}
-    \subitem {getStates}, \hyperpage{68}
-    \subitem {MarkovChain}, \hyperpage{66}
-    \subitem {move}, \hyperpage{69}
-    \subitem {next}, \hyperpage{69}
-    \subitem {numberOfStates}, \hyperpage{69}
-    \subitem {probabilityMatrixRow}, \hyperpage{69}
-    \subitem {rate}, \hyperpage{69}
-    \subitem {reachSet}, \hyperpage{70}
-    \subitem {select}, \hyperpage{70}
-    \subitem {sum}, \hyperpage{70}
-    \subitem {sumOfRow}, \hyperpage{70}
-  \item {quasylab.sibilla.core.markov.MarkovProcess$<$ S $>$}, 
-		\hyperpage{70}
-    \subitem {next}, \hyperpage{71}
-  \item {quasylab.sibilla.core.markov.RateFunction$<$ S $>$}, 
-		\hyperpage{114}
-    \subitem {valueOf}, \hyperpage{114}
-  \item {quasylab.sibilla.core.markov.State}, \hyperpage{171}
-    \subitem {equals}, \hyperpage{171}
-    \subitem {getState}, \hyperpage{172}
-    \subitem {hashCode}, \hyperpage{172}
-    \subitem {retrieve}, \hyperpage{172}
-    \subitem {State}, \hyperpage{171}
-    \subitem {toString}, \hyperpage{172}
-  \item {quasylab.sibilla.core.markov.SteadyStateSolver$<$ S $>$}, 
-		\hyperpage{179}
-    \subitem {computeBSCC}, \hyperpage{179}
-    \subitem {SteadyStateSolver}, \hyperpage{179}
-  \item {quasylab.sibilla.core.markov.TaxiScenarioMC}, \hyperpage{180}
-    \subitem {BETA}, \hyperpage{181}
-    \subitem {generateCTMC}, \hyperpage{181}
-    \subitem {LAMBDA}, \hyperpage{181}
-    \subitem {main}, \hyperpage{181}
-    \subitem {MAX\_USERS}, \hyperpage{182}
-    \subitem {MU\_LONG}, \hyperpage{182}
-    \subitem {MU\_SHORT}, \hyperpage{182}
-    \subitem {next}, \hyperpage{181}
-    \subitem {NUMBER\_OF\_TAXIS}, \hyperpage{182}
-    \subitem {P\_SHORT}, \hyperpage{182}
-    \subitem {T}, \hyperpage{182}
-    \subitem {TL}, \hyperpage{182}
-    \subitem {TS}, \hyperpage{182}
-    \subitem {U}, \hyperpage{183}
-  \item {quasylab.sibilla.core.markov.TestKnutYaoAlgorithm.STATES}, 
-		\hyperpage{174}
-    \subitem {D1}, \hyperpage{174}
-    \subitem {D2}, \hyperpage{174}
-    \subitem {D3}, \hyperpage{174}
-    \subitem {D4}, \hyperpage{175}
-    \subitem {D5}, \hyperpage{175}
-    \subitem {D6}, \hyperpage{175}
-    \subitem {S1}, \hyperpage{175}
-    \subitem {S2}, \hyperpage{175}
-    \subitem {S3}, \hyperpage{175}
-    \subitem {S4}, \hyperpage{175}
-    \subitem {S5}, \hyperpage{175}
-    \subitem {S6}, \hyperpage{176}
-    \subitem {S7}, \hyperpage{176}
-  \item {quasylab.sibilla.core.markov.TransientProbabilityContinuousSolver$<$ S $>$}, 
-		\hyperpage{206}
-    \subitem {compute}, \hyperpage{207}
-    \subitem {TransientProbabilityContinuousSolver}, \hyperpage{206}
-  \item {quasylab.sibilla.core.markov.UnboundedReachabilitySolver$<$ S $>$}, 
-		\hyperpage{216}
-    \subitem {compute}, \hyperpage{217}
-    \subitem {UnboundedReachabilitySolver}, \hyperpage{217}
-  \item {quasylab.sibilla.core.markov.VectorState$<$ S $>$}, 
-		\hyperpage{222}
-    \subitem {apply}, \hyperpage{222}
-    \subitem {equals}, \hyperpage{222}
-    \subitem {get}, \hyperpage{223}
-    \subitem {hashCode}, \hyperpage{223}
-    \subitem {size}, \hyperpage{223}
-    \subitem {toString}, \hyperpage{223}
-    \subitem {VectorState}, \hyperpage{222}
-  \item {quasylab.sibilla.core.models}, \hyperpage{12}
-  \item {quasylab.sibilla.core.models.Action$<$ S $>$}, \hyperpage{24}
-    \subitem {actionOfMarkovStepFunction}, \hyperpage{24}
-    \subitem {execute}, \hyperpage{25}
-    \subitem {probability}, \hyperpage{25}
-    \subitem {revert}, \hyperpage{25}
-  \item {quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$}, 
-		\hyperpage{71}
-    \subitem {actions}, \hyperpage{71}
-    \subitem {getTransitions}, \hyperpage{72}
-    \subitem {next}, \hyperpage{72}
-    \subitem {sampleExponentialDistribution}, \hyperpage{72}
-  \item {quasylab.sibilla.core.models.MeasureFunction$<$ S extends State $>$}, 
-		\hyperpage{82}
-    \subitem {apply}, \hyperpage{82}
-  \item {quasylab.sibilla.core.models.Model$<$ S extends State $>$}, 
-		\hyperpage{83}
-    \subitem {actions}, \hyperpage{83}
-    \subitem {getModelDefinition}, \hyperpage{83}
-    \subitem {next}, \hyperpage{84}
-  \item {quasylab.sibilla.core.models.ModelDefinition$<$ S extends State $>$}, 
-		\hyperpage{84}
-    \subitem {createModel}, \hyperpage{85}
-    \subitem {modelArity}, \hyperpage{85}
-    \subitem {state}, \hyperpage{85}
-    \subitem {stateArity}, \hyperpage{86}
-  \item {quasylab.sibilla.core.models.pm}, \hyperpage{13}
-  \item {quasylab.sibilla.core.models.pm.BroadcastRule}, \hyperpage{33}
-    \subitem {apply}, \hyperpage{34}
-    \subitem {BroadcastRule}, \hyperpage{34}
-    \subitem {getDrift}, \hyperpage{35}
-  \item {quasylab.sibilla.core.models.pm.BroadcastRule.BroadcastReceiver}, 
-		\hyperpage{32}
-    \subitem {BroadcastReceiver}, \hyperpage{33}
-    \subitem {getReceiver}, \hyperpage{33}
-    \subitem {getReceivingProbability}, \hyperpage{33}
-  \item {quasylab.sibilla.core.models.pm.Population}, \hyperpage{97}
-    \subitem {getIndex}, \hyperpage{98}
-    \subitem {getSize}, \hyperpage{98}
-    \subitem {Population}, \hyperpage{97, 98}
-  \item {quasylab.sibilla.core.models.pm.PopulationModel}, 
-		\hyperpage{98}
-    \subitem {addRule}, \hyperpage{99}
-    \subitem {addRules}, \hyperpage{99}
-    \subitem {createPopulation}, \hyperpage{99}
-    \subitem {getModelDefinition}, \hyperpage{100}
-    \subitem {getTransitions}, \hyperpage{100}
-    \subitem {PopulationModel}, \hyperpage{99}
-    \subitem {vectorOf}, \hyperpage{100}
-  \item {quasylab.sibilla.core.models.pm.PopulationModelDefinition}, 
-		\hyperpage{100}
-  \item {quasylab.sibilla.core.models.pm.PopulationRule}, 
-		\hyperpage{102}
-    \subitem {apply}, \hyperpage{102}
-  \item {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{102}
-    \subitem {apply}, \hyperpage{104}
-    \subitem {average}, \hyperpage{104}
-    \subitem {copy}, \hyperpage{105}
-    \subitem {count}, \hyperpage{105}
-    \subitem {fillState}, \hyperpage{105}
-    \subitem {fraction}, \hyperpage{105}
-    \subitem {getFraction}, \hyperpage{105}
-    \subitem {getOccupancy}, \hyperpage{105, 106}
-    \subitem {max}, \hyperpage{106}
-    \subitem {min}, \hyperpage{106}
-    \subitem {population}, \hyperpage{106}
-    \subitem {PopulationState}, \hyperpage{103, 104}
-    \subitem {size}, \hyperpage{106}
-    \subitem {toString}, \hyperpage{107}
-  \item {quasylab.sibilla.core.models.pm.PopulationTransition}, 
-		\hyperpage{107}
-    \subitem {apply}, \hyperpage{107}
-    \subitem {getName}, \hyperpage{108}
-    \subitem {getRate}, \hyperpage{108}
-    \subitem {PopulationTransition}, \hyperpage{107}
-  \item {quasylab.sibilla.core.models.pm.RatePopulationFunction}, 
-		\hyperpage{114}
-    \subitem {apply}, \hyperpage{115}
-  \item {quasylab.sibilla.core.models.pm.ReactionRule}, \hyperpage{119}
-    \subitem {apply}, \hyperpage{120}
-    \subitem {ReactionRule}, \hyperpage{119}
-  \item {quasylab.sibilla.core.models.pm.UnicastRule}, \hyperpage{218}
-    \subitem {apply}, \hyperpage{219}
-    \subitem {getDrift}, \hyperpage{219}
-    \subitem {isEnabled}, \hyperpage{220}
-    \subitem {UnicastRule}, \hyperpage{219}
-  \item {quasylab.sibilla.core.models.pm.UnicastRule.UnicastReceiver}, 
-		\hyperpage{217}
-    \subitem {getReceiver}, \hyperpage{218}
-    \subitem {UnicastReceiver}, \hyperpage{217}
-  \item {quasylab.sibilla.core.models.pm.Update}, \hyperpage{220}
-    \subitem {add}, \hyperpage{221}
-    \subitem {consume}, \hyperpage{221}
-    \subitem {get}, \hyperpage{221}
-    \subitem {getUpdate}, \hyperpage{221}
-    \subitem {produce}, \hyperpage{221}
-    \subitem {toString}, \hyperpage{221}
-    \subitem {Update}, \hyperpage{220}
-  \item {quasylab.sibilla.core.models.pm.util}, \hyperpage{13}
-  \item {quasylab.sibilla.core.models.pm.util.PopulationRegistry}, 
-		\hyperpage{100}
-    \subitem {createPopulationState}, \hyperpage{101}
-    \subitem {indexOf}, \hyperpage{101}
-    \subitem {PopulationRegistry}, \hyperpage{101}
-    \subitem {register}, \hyperpage{101}
-    \subitem {size}, \hyperpage{101}
-  \item {quasylab.sibilla.core.models.StatePredicate$<$ T $>$}, 
-		\hyperpage{173}
-    \subitem {check}, \hyperpage{173}
-    \subitem {TRUE}, \hyperpage{174}
-  \item {quasylab.sibilla.core.models.StepFunction$<$ S $>$}, 
-		\hyperpage{180}
-    \subitem {step}, \hyperpage{180}
-  \item {quasylab.sibilla.core.models.TimeStep$<$ S $>$}, 
-		\hyperpage{202}
-    \subitem {getTime}, \hyperpage{203}
-    \subitem {getValue}, \hyperpage{203}
-    \subitem {TimeStep}, \hyperpage{203}
-  \item {quasylab.sibilla.core.network}, \hyperpage{13}
-  \item {quasylab.sibilla.core.network.client}, \hyperpage{14}
-  \item {quasylab.sibilla.core.network.client.ClientCommand}, 
-		\hyperpage{36}
-    \subitem {CLOSE\_CONNECTION}, \hyperpage{36}
-    \subitem {DATA}, \hyperpage{37}
-    \subitem {INIT}, \hyperpage{37}
-    \subitem {PING}, \hyperpage{37}
-  \item {quasylab.sibilla.core.network.client.ClientSimulationEnvironment$<$ S extends State $>$}, 
-		\hyperpage{37}
-    \subitem {ClientSimulationEnvironment}, \hyperpage{38}
-  \item {quasylab.sibilla.core.network.communication}, \hyperpage{14}
-  \item {quasylab.sibilla.core.network.communication.NetworkManagerType}, 
-		\hyperpage{89}
-  \item {quasylab.sibilla.core.network.communication.TCPDefaultNetworkManager}, 
-		\hyperpage{183}
-    \subitem {closeConnection}, \hyperpage{184}
-    \subitem {getSocket}, \hyperpage{184}
-    \subitem {getType}, \hyperpage{184}
-    \subitem {readObject}, \hyperpage{184}
-    \subitem {TCPDefaultNetworkManager}, \hyperpage{183}
-    \subitem {writeObject}, \hyperpage{185}
-  \item {quasylab.sibilla.core.network.communication.TCPNetworkManager}, 
-		\hyperpage{185}
-    \subitem {closeConnection}, \hyperpage{186}
-    \subitem {createNetworkManager}, \hyperpage{186, 187}
-    \subitem {createServerSocket}, \hyperpage{188}
-    \subitem {getNetworkInfo}, \hyperpage{188}
-    \subitem {getSocket}, \hyperpage{188}
-    \subitem {getType}, \hyperpage{188}
-    \subitem {readObject}, \hyperpage{189}
-    \subitem {writeObject}, \hyperpage{189}
-  \item {quasylab.sibilla.core.network.communication.TCPNetworkManagerType}, 
-		\hyperpage{190}
-    \subitem {DEFAULT}, \hyperpage{190}
-    \subitem {SECURE}, \hyperpage{190}
-  \item {quasylab.sibilla.core.network.communication.TCPSecureNetworkManager}, 
-		\hyperpage{191}
-    \subitem {closeConnection}, \hyperpage{192}
-    \subitem {getSocket}, \hyperpage{192}
-    \subitem {getType}, \hyperpage{193}
-    \subitem {readObject}, \hyperpage{193}
-    \subitem {TCPSecureNetworkManager}, \hyperpage{191, 192}
-    \subitem {writeObject}, \hyperpage{193}
-  \item {quasylab.sibilla.core.network.communication.UDPDefaultNetworkManager}, 
-		\hyperpage{210}
-    \subitem {closeConnection}, \hyperpage{211}
-    \subitem {readObject}, \hyperpage{212}
-    \subitem {UDPDefaultNetworkManager}, \hyperpage{211}
-    \subitem {writeObject}, \hyperpage{212}
-  \item {quasylab.sibilla.core.network.communication.UDPNetworkManager}, 
-		\hyperpage{213}
-    \subitem {closeConnection}, \hyperpage{213}
-    \subitem {createNetworkManager}, \hyperpage{214}
-    \subitem {readObject}, \hyperpage{215}
-    \subitem {writeObject}, \hyperpage{215}
-  \item {quasylab.sibilla.core.network.communication.UDPNetworkManagerType}, 
-		\hyperpage{216}
-    \subitem {DEFAULT}, \hyperpage{216}
-  \item {quasylab.sibilla.core.network.compression}, \hyperpage{15}
-  \item {quasylab.sibilla.core.network.compression.Compressor}, 
-		\hyperpage{40}
-    \subitem {compress}, \hyperpage{41}
-    \subitem {decompress}, \hyperpage{41}
-  \item {quasylab.sibilla.core.network.ComputationResult$<$ S extends State $>$}, 
-		\hyperpage{42}
-    \subitem {ComputationResult}, \hyperpage{42}
-    \subitem {getResults}, \hyperpage{43}
-  \item {quasylab.sibilla.core.network.HostLoggerSupplier}, 
-		\hyperpage{64}
-    \subitem {getInstance}, \hyperpage{65}
-    \subitem {getLogger}, \hyperpage{65}
-  \item {quasylab.sibilla.core.network.master}, \hyperpage{15}
-  \item {quasylab.sibilla.core.network.master.MasterCommand}, 
-		\hyperpage{73}
-    \subitem {CLOSE\_CONNECTION}, \hyperpage{73}
-    \subitem {DATA\_RESPONSE}, \hyperpage{73}
-    \subitem {INIT}, \hyperpage{73}
-    \subitem {INIT\_RESPONSE}, \hyperpage{74}
-    \subitem {PING}, \hyperpage{74}
-    \subitem {PONG}, \hyperpage{74}
-    \subitem {RESULTS}, \hyperpage{74}
-    \subitem {TASK}, \hyperpage{74}
-  \item {quasylab.sibilla.core.network.master.MasterServerSimulationEnvironment}, 
-		\hyperpage{74}
-    \subitem {MasterServerSimulationEnvironment}, \hyperpage{75}
-    \subitem {propertyChange}, \hyperpage{76}
-  \item {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{76}
-    \subitem {addPropertyChangeListener}, \hyperpage{77}
-    \subitem {addSimulation}, \hyperpage{77}
-    \subitem {addSlaveServer}, \hyperpage{77}
-    \subitem {clone}, \hyperpage{78}
-    \subitem {compareTo}, \hyperpage{78}
-    \subitem {equals}, \hyperpage{78}
-    \subitem {getConnectedSlaveServers}, \hyperpage{78}
-    \subitem {getExecutedSimulations}, \hyperpage{78}
-    \subitem {getMasterNetworkInfo}, \hyperpage{79}
-    \subitem {getMasterServerStartDate}, \hyperpage{79}
-    \subitem {getSimulationStates}, \hyperpage{79}
-    \subitem {getSlaveServersNetworkInfos}, \hyperpage{79}
-    \subitem {hashCode}, \hyperpage{80}
-    \subitem {increaseExecutedSimulations}, \hyperpage{80}
-    \subitem {MasterState}, \hyperpage{77}
-    \subitem {propertyChange}, \hyperpage{80}
-    \subitem {removeSimulation}, \hyperpage{80}
-    \subitem {removeSlaveServer}, \hyperpage{80}
-  \item {quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{90}
-    \subitem {getNetworkSimulationManagerFactory}, \hyperpage{91}
-    \subitem {join}, \hyperpage{91}
-    \subitem {NetworkSimulationManager}, \hyperpage{90}
-    \subitem {startTasksHandling}, \hyperpage{91}
-  \item {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{147}
-    \subitem {addPropertyChangeListener}, \hyperpage{148}
-    \subitem {clientConnection}, \hyperpage{148}
-    \subitem {clone}, \hyperpage{149}
-    \subitem {compareTo}, \hyperpage{149}
-    \subitem {decreaseRunningServers}, \hyperpage{149}
-    \subitem {equals}, \hyperpage{149}
-    \subitem {getClientNetworkInfo}, \hyperpage{149}
-    \subitem {getLastUpdate}, \hyperpage{150}
-    \subitem {getMasterNetworkInfo}, \hyperpage{150}
-    \subitem {getPendingTasks}, \hyperpage{150}
-    \subitem {getRegisteredSlaveServers}, \hyperpage{150}
-    \subitem {getRunningSlaveServers}, \hyperpage{150}
-    \subitem {getSimulationModelName}, \hyperpage{151}
-    \subitem {getSimulationStartDate}, \hyperpage{151}
-    \subitem {getSlaveServersStates}, \hyperpage{151}
-    \subitem {getSlaveStateByServerInfo}, \hyperpage{151}
-    \subitem {getTotalSimulationTasks}, \hyperpage{152}
-    \subitem {hashCode}, \hyperpage{152}
-    \subitem {increaseRunningServers}, \hyperpage{152}
-    \subitem {isConcluded}, \hyperpage{152}
-    \subitem {propertyChange}, \hyperpage{152}
-    \subitem {setClientConnection}, \hyperpage{152}
-    \subitem {setConcluded}, \hyperpage{153}
-    \subitem {setPendingTasks}, \hyperpage{153}
-    \subitem {setSimulationDataSet}, \hyperpage{153}
-    \subitem {setSimulationModelName}, \hyperpage{153}
-    \subitem {simulationDataSet}, \hyperpage{154}
-    \subitem {SimulationState}, \hyperpage{148}
-  \item {quasylab.sibilla.core.network.NetworkInfo}, \hyperpage{87}
-    \subitem {clone}, \hyperpage{88}
-    \subitem {equals}, \hyperpage{88}
-    \subitem {getAddress}, \hyperpage{88}
-    \subitem {getPort}, \hyperpage{88}
-    \subitem {getType}, \hyperpage{88}
-    \subitem {hashCode}, \hyperpage{89}
-    \subitem {NetworkInfo}, \hyperpage{87}
-    \subitem {toString}, \hyperpage{89}
-  \item {quasylab.sibilla.core.network.NetworkTask$<$ S extends State $>$}, 
-		\hyperpage{92}
-    \subitem {getTasks}, \hyperpage{93}
-    \subitem {NetworkTask}, \hyperpage{92}
-  \item {quasylab.sibilla.core.network.serialization}, \hyperpage{16}
-  \item {quasylab.sibilla.core.network.serialization.ClassBytesLoader}, 
-		\hyperpage{35}
-    \subitem {loadClassBytes}, \hyperpage{36}
-  \item {quasylab.sibilla.core.network.serialization.CustomClassLoader}, 
-		\hyperpage{45}
-    \subitem {defClass}, \hyperpage{45}
-    \subitem {loadClassBytes}, \hyperpage{45}
-    \subitem {removeClassBytes}, \hyperpage{46}
-  \item {quasylab.sibilla.core.network.serialization.Serializer}, 
-		\hyperpage{133}
-    \subitem {deserialize}, \hyperpage{133}
-    \subitem {serialize}, \hyperpage{133}
-  \item {quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}, 
-		\hyperpage{136}
-    \subitem {equals}, \hyperpage{137}
-    \subitem {getDeadline}, \hyperpage{137}
-    \subitem {getModel}, \hyperpage{137}
-    \subitem {getModelDefinition}, \hyperpage{137}
-    \subitem {getModelInitialState}, \hyperpage{138}
-    \subitem {getModelSamplingFunction}, \hyperpage{138}
-    \subitem {getRandomGenerator}, \hyperpage{138}
-    \subitem {getReplica}, \hyperpage{138}
-    \subitem {hashCode}, \hyperpage{139}
-    \subitem {SimulationDataSet}, \hyperpage{136}
-    \subitem {toString}, \hyperpage{139}
-  \item {quasylab.sibilla.core.network.slave}, \hyperpage{16}
-  \item {quasylab.sibilla.core.network.slave.BasicSimulationServer}, 
-		\hyperpage{28}
-    \subitem {BasicSimulationServer}, \hyperpage{29}
-    \subitem {localServerInfo}, \hyperpage{30}
-    \subitem {LOGGER}, \hyperpage{30}
-    \subitem {start}, \hyperpage{29}
-  \item {quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer}, 
-		\hyperpage{47}
-    \subitem {DiscoverableBasicSimulationServer}, \hyperpage{48}
-  \item {quasylab.sibilla.core.network.slave.SimulationServer}, 
-		\hyperpage{144}
-    \subitem {start}, \hyperpage{145}
-  \item {quasylab.sibilla.core.network.slave.SlaveCommand}, 
-		\hyperpage{162}
-    \subitem {CLOSE\_CONNECTION}, \hyperpage{162}
-    \subitem {INIT\_RESPONSE}, \hyperpage{162}
-    \subitem {PONG}, \hyperpage{162}
-  \item {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{163}
-    \subitem {addPropertyChangeListener}, \hyperpage{164}
-    \subitem {canCompleteTask}, \hyperpage{164}
-    \subitem {clone}, \hyperpage{164}
-    \subitem {devRTT}, \hyperpage{167}
-    \subitem {equals}, \hyperpage{164}
-    \subitem {estimatedRTT}, \hyperpage{167}
-    \subitem {forceExpiredTimeLimit}, \hyperpage{165}
-    \subitem {getExpectedTasks}, \hyperpage{165}
-    \subitem {getSlaveInfo}, \hyperpage{165}
-    \subitem {getTimeLimit}, \hyperpage{165}
-    \subitem {getTimeout}, \hyperpage{165}
-    \subitem {hashCode}, \hyperpage{166}
-    \subitem {isRemoved}, \hyperpage{166}
-    \subitem {isTimeout}, \hyperpage{166}
-    \subitem {migrate}, \hyperpage{166}
-    \subitem {setRemoved}, \hyperpage{166}
-    \subitem {SlaveState}, \hyperpage{164}
-    \subitem {timedOut}, \hyperpage{167}
-    \subitem {toString}, \hyperpage{167}
-    \subitem {update}, \hyperpage{167}
-  \item {quasylab.sibilla.core.network.util}, \hyperpage{16}
-  \item {quasylab.sibilla.core.network.util.NetworkUtils}, 
-		\hyperpage{93}
-    \subitem {getBroadcastAddresses}, \hyperpage{93}
-    \subitem {getLocalAddress}, \hyperpage{94}
-  \item {quasylab.sibilla.core.network.util.SSLUtils}, \hyperpage{168}
-    \subitem {createSSLContext}, \hyperpage{168}
-    \subitem {getInstance}, \hyperpage{168}
-    \subitem {setKeyStorePass}, \hyperpage{169}
-    \subitem {setKeyStorePath}, \hyperpage{169}
-    \subitem {setKeyStoreType}, \hyperpage{169}
-    \subitem {setTrustStorePass}, \hyperpage{169}
-    \subitem {setTrustStorePath}, \hyperpage{169}
-    \subitem {setTrustStoreType}, \hyperpage{169}
-  \item {quasylab.sibilla.core.network.util.StartupUtils}, 
-		\hyperpage{170}
-    \subitem {parseOptions}, \hyperpage{170}
-    \subitem {TCPNetworkManagerParser}, \hyperpage{170}
-    \subitem {UDPNetworkManagerParser}, \hyperpage{171}
-  \item {quasylab.sibilla.core.past}, \hyperpage{17}
-  \item {quasylab.sibilla.core.past.Activity}, \hyperpage{26}
-    \subitem {execute}, \hyperpage{26}
-    \subitem {getName}, \hyperpage{26}
-  \item {quasylab.sibilla.core.past.ds}, \hyperpage{17}
-  \item {quasylab.sibilla.core.past.ds.ActualTemplateField}, 
-		\hyperpage{27}
-    \subitem {ActualTemplateField}, \hyperpage{27}
-    \subitem {equals}, \hyperpage{27}
-    \subitem {hashCode}, \hyperpage{27}
-    \subitem {implies}, \hyperpage{28}
-    \subitem {match}, \hyperpage{28}
-    \subitem {toString}, \hyperpage{28}
-  \item {quasylab.sibilla.core.past.ds.FormalTemplateField}, 
-		\hyperpage{51}
-    \subitem {clazz}, \hyperpage{53}
-    \subitem {equals}, \hyperpage{52}
-    \subitem {FormalTemplateField}, \hyperpage{52}
-    \subitem {hashCode}, \hyperpage{52}
-    \subitem {implies}, \hyperpage{52}
-    \subitem {match}, \hyperpage{53}
-    \subitem {toString}, \hyperpage{53}
-  \item {quasylab.sibilla.core.past.ds.GetActivity}, \hyperpage{57}
-    \subitem {execute}, \hyperpage{58}
-    \subitem {GetActivity}, \hyperpage{58}
-    \subitem {getName}, \hyperpage{58}
-    \subitem {getTuple}, \hyperpage{58}
-  \item {quasylab.sibilla.core.past.ds.Template}, \hyperpage{194}
-    \subitem {equals}, \hyperpage{194}
-    \subitem {get}, \hyperpage{195}
-    \subitem {hashCode}, \hyperpage{195}
-    \subitem {implies}, \hyperpage{195}
-    \subitem {match}, \hyperpage{195}
-    \subitem {size}, \hyperpage{195}
-    \subitem {Template}, \hyperpage{194}
-    \subitem {toString}, \hyperpage{195}
-  \item {quasylab.sibilla.core.past.ds.TemplateField}, \hyperpage{196}
-    \subitem {implies}, \hyperpage{196}
-    \subitem {match}, \hyperpage{196}
-  \item {quasylab.sibilla.core.past.ds.Tuple}, \hyperpage{207}
-    \subitem {equals}, \hyperpage{208}
-    \subitem {get}, \hyperpage{208}
-    \subitem {hashCode}, \hyperpage{208}
-    \subitem {isInstance}, \hyperpage{208}
-    \subitem {size}, \hyperpage{208}
-    \subitem {toString}, \hyperpage{208}
-    \subitem {Tuple}, \hyperpage{207}
-  \item {quasylab.sibilla.core.past.ds.TupleSpace}, \hyperpage{209}
-    \subitem {copiesOf}, \hyperpage{209}
-    \subitem {get}, \hyperpage{210}
-    \subitem {put}, \hyperpage{210}
-    \subitem {query}, \hyperpage{210}
-    \subitem {TupleSpace}, \hyperpage{209}
-    \subitem {weightOf}, \hyperpage{210}
-  \item {quasylab.sibilla.core.past.ds.TupleSpace.Node}, \hyperpage{94}
-    \subitem {get}, \hyperpage{94, 95}
-    \subitem {Node}, \hyperpage{94}
-  \item {quasylab.sibilla.core.past.RandomGeneratorRegistry}, 
-		\hyperpage{112}
-    \subitem {get}, \hyperpage{112}
-    \subitem {getInstance}, \hyperpage{112}
-    \subitem {normal}, \hyperpage{113}
-    \subitem {register}, \hyperpage{113}
-    \subitem {rnd}, \hyperpage{113}
-    \subitem {select}, \hyperpage{113}
-    \subitem {uniform}, \hyperpage{113}
-    \subitem {uniformSelect}, \hyperpage{113}
-    \subitem {unregister}, \hyperpage{113}
-    \subitem {weightedSelect}, \hyperpage{114}
-  \item {quasylab.sibilla.core.past.SequenceOfActivities}, 
-		\hyperpage{130}
-    \subitem {execute}, \hyperpage{131}
-    \subitem {getName}, \hyperpage{131}
-    \subitem {SequenceOfActivities}, \hyperpage{130}
-    \subitem {toString}, \hyperpage{131}
-  \item {quasylab.sibilla.core.past.SimulationSession}, \hyperpage{145}
-    \subitem {averageExecutionTime}, \hyperpage{146}
-    \subitem {computedTrajectories}, \hyperpage{146}
-    \subitem {getSessionId}, \hyperpage{146}
-    \subitem {getTask}, \hyperpage{146}
-    \subitem {isRunning}, \hyperpage{146}
-    \subitem {join}, \hyperpage{146}
-    \subitem {nextTask}, \hyperpage{147}
-    \subitem {shutdown}, \hyperpage{147}
-  \item {quasylab.sibilla.core.past.State}, \hyperpage{172}
-  \item {quasylab.sibilla.core.simulator}, \hyperpage{17}
-  \item {quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{21}
-    \subitem {AbstractSimulationManager}, \hyperpage{21}
-    \subitem {averageExecutionTime}, \hyperpage{22}
-    \subitem {computedTrajectories}, \hyperpage{22}
-    \subitem {getMonitor}, \hyperpage{22}
-    \subitem {handleTask}, \hyperpage{22}
-    \subitem {handleTrajectory}, \hyperpage{22}
-    \subitem {isRunning}, \hyperpage{23}
-    \subitem {notifyMonitorEndInteration}, \hyperpage{23}
-    \subitem {notifyMonitorStartInteration}, \hyperpage{23}
-    \subitem {setRunning}, \hyperpage{23}
-    \subitem {shutdown}, \hyperpage{23}
-    \subitem {simulate}, \hyperpage{23}
-  \item {quasylab.sibilla.core.simulator.DefaultRandomGenerator}, 
-		\hyperpage{46}
-    \subitem {nextDouble}, \hyperpage{47}
-    \subitem {setSeed}, \hyperpage{47}
-  \item {quasylab.sibilla.core.simulator.QueuedSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{108}
-    \subitem {getRunningTasks}, \hyperpage{109}
-    \subitem {getTask}, \hyperpage{109, 110}
-    \subitem {handleTask}, \hyperpage{110}
-    \subitem {hasTasks}, \hyperpage{110}
-    \subitem {nextTask}, \hyperpage{110, 111}
-    \subitem {pendingTasks}, \hyperpage{111}
-    \subitem {QueuedSimulationManager}, \hyperpage{109}
-    \subitem {rescheduleAll}, \hyperpage{111}
-    \subitem {startTasksHandling}, \hyperpage{112}
-  \item {quasylab.sibilla.core.simulator.sampling}, \hyperpage{18}
-  \item {quasylab.sibilla.core.simulator.sampling.Measure$<$ S extends State $>$}, 
-		\hyperpage{81}
-    \subitem {getName}, \hyperpage{81}
-    \subitem {measure}, \hyperpage{81}
-  \item {quasylab.sibilla.core.simulator.sampling.Sample$<$ T $>$}, 
-		\hyperpage{120}
-    \subitem {equals}, \hyperpage{121}
-    \subitem {getTime}, \hyperpage{121}
-    \subitem {getValue}, \hyperpage{121}
-    \subitem {hashCode}, \hyperpage{121}
-    \subitem {Sample}, \hyperpage{121}
-    \subitem {toString}, \hyperpage{121}
-  \item {quasylab.sibilla.core.simulator.sampling.SamplePredicate$<$ S extends State $>$}, 
-		\hyperpage{122}
-    \subitem {samplePredicate}, \hyperpage{122}
-    \subitem {test}, \hyperpage{123}
-    \subitem {timeDeadlinePredicate}, \hyperpage{123}
-  \item {quasylab.sibilla.core.simulator.sampling.SamplingCollection$<$ S extends State $>$}, 
-		\hyperpage{123}
-    \subitem {add}, \hyperpage{124}
-    \subitem {end}, \hyperpage{124}
-    \subitem {get}, \hyperpage{124}
-    \subitem {getSimulationTimeSeries}, \hyperpage{125}
-    \subitem {printTimeSeries}, \hyperpage{125}
-    \subitem {sample}, \hyperpage{125}
-    \subitem {SamplingCollection}, \hyperpage{124}
-    \subitem {size}, \hyperpage{125}
-    \subitem {start}, \hyperpage{125}
-  \item {quasylab.sibilla.core.simulator.sampling.SamplingFunction$<$ S extends State $>$}, 
-		\hyperpage{126}
-    \subitem {end}, \hyperpage{126}
-    \subitem {getSimulationTimeSeries}, \hyperpage{126}
-    \subitem {printTimeSeries}, \hyperpage{127, 128}
-    \subitem {sample}, \hyperpage{128}
-    \subitem {start}, \hyperpage{128}
-  \item {quasylab.sibilla.core.simulator.sampling.SamplingLog$<$ S extends State $>$}, 
-		\hyperpage{128}
-    \subitem {end}, \hyperpage{129}
-    \subitem {getSimulationTimeSeries}, \hyperpage{129}
-    \subitem {printTimeSeries}, \hyperpage{129}
-    \subitem {sample}, \hyperpage{130}
-    \subitem {SamplingLog}, \hyperpage{129}
-    \subitem {start}, \hyperpage{130}
-  \item {quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries}, 
-		\hyperpage{157}
-    \subitem {getConfidenceInterval}, \hyperpage{158}
-    \subitem {getData}, \hyperpage{158}
-    \subitem {getMean}, \hyperpage{158}
-    \subitem {getName}, \hyperpage{159}
-    \subitem {getSize}, \hyperpage{159}
-    \subitem {getStandardDeviation}, \hyperpage{159}
-    \subitem {getTime}, \hyperpage{159}
-    \subitem {printTimeSeries}, \hyperpage{159}
-    \subitem {saveTo}, \hyperpage{159}
-    \subitem {SimulationTimeSeries}, \hyperpage{158}
-    \subitem {writeToCSV}, \hyperpage{159, 160}
-  \item {quasylab.sibilla.core.simulator.sampling.StatisticSampling$<$ S extends State $>$}, 
-		\hyperpage{176}
-    \subitem {end}, \hyperpage{177}
-    \subitem {getName}, \hyperpage{177}
-    \subitem {getSimulationTimeSeries}, \hyperpage{177}
-    \subitem {getSize}, \hyperpage{177}
-    \subitem {measure}, \hyperpage{178}
-    \subitem {printTimeSeries}, \hyperpage{178}
-    \subitem {sample}, \hyperpage{178}
-    \subitem {start}, \hyperpage{178}
-    \subitem {StatisticSampling}, \hyperpage{177}
-  \item {quasylab.sibilla.core.simulator.SequentialSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{131}
-    \subitem {handleTask}, \hyperpage{132}
-    \subitem {join}, \hyperpage{132}
-    \subitem {pendingTasks}, \hyperpage{132}
-    \subitem {SequentialSimulationManager}, \hyperpage{132}
-  \item {quasylab.sibilla.core.simulator.SimulationEnvironment}, 
-		\hyperpage{139}
-    \subitem {DEFAULT\_FACTORY}, \hyperpage{140}
-    \subitem {silent}, \hyperpage{140}
-    \subitem {SimulationEnvironment}, \hyperpage{140}
-  \item {quasylab.sibilla.core.simulator.SimulationManager$<$ S extends State $>$}, 
-		\hyperpage{141}
-    \subitem {isRunning}, \hyperpage{141}
-    \subitem {join}, \hyperpage{141}
-    \subitem {pendingTasks}, \hyperpage{141}
-    \subitem {shutdown}, \hyperpage{142}
-    \subitem {simulate}, \hyperpage{142}
-  \item {quasylab.sibilla.core.simulator.SimulationManagerFactory}, 
-		\hyperpage{142}
-    \subitem {getSimulationManager}, \hyperpage{142}
-  \item {quasylab.sibilla.core.simulator.SimulationMonitor}, 
-		\hyperpage{143}
-    \subitem {CANCELLED}, \hyperpage{144}
-    \subitem {endIteration}, \hyperpage{143}
-    \subitem {endSimulation}, \hyperpage{143}
-    \subitem {isCancelled}, \hyperpage{143}
-    \subitem {registerPropertyChangeListener}, \hyperpage{144}
-    \subitem {startIteration}, \hyperpage{144}
-    \subitem {update}, \hyperpage{144}
-  \item {quasylab.sibilla.core.simulator.SimulationStatus}, 
-		\hyperpage{154}
-    \subitem {CANCELLED}, \hyperpage{154}
-    \subitem {COMPLETED}, \hyperpage{154}
-    \subitem {INIT}, \hyperpage{154}
-    \subitem {RUNNING}, \hyperpage{155}
-  \item {quasylab.sibilla.core.simulator.SimulationTask$<$ S extends State $>$}, 
-		\hyperpage{155}
-    \subitem {cancel}, \hyperpage{156}
-    \subitem {get}, \hyperpage{156}
-    \subitem {getElapsedTime}, \hyperpage{156}
-    \subitem {getIndex}, \hyperpage{156}
-    \subitem {getTrajectory}, \hyperpage{156}
-    \subitem {isCancelled}, \hyperpage{157}
-    \subitem {isCompleted}, \hyperpage{157}
-    \subitem {isRunning}, \hyperpage{157}
-    \subitem {reset}, \hyperpage{157}
-    \subitem {SimulationTask}, \hyperpage{155, 156}
-  \item {quasylab.sibilla.core.simulator.SimulationUnit$<$ S extends State $>$}, 
-		\hyperpage{160}
-    \subitem {getModel}, \hyperpage{161}
-    \subitem {getReachPredicate}, \hyperpage{161}
-    \subitem {getState}, \hyperpage{161}
-    \subitem {getStoppingPredicate}, \hyperpage{161}
-    \subitem {SimulationUnit}, \hyperpage{160, 161}
-  \item {quasylab.sibilla.core.simulator.tests}, \hyperpage{18}
-  \item {quasylab.sibilla.core.simulator.tests.pm}, \hyperpage{18}
-  \item {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{58}
-    \subitem {AI\_INDEX}, \hyperpage{60}
-    \subitem {AS\_INDEX}, \hyperpage{60}
-    \subitem {AU\_INDEX}, \hyperpage{60}
-    \subitem {C\_RATE}, \hyperpage{60}
-    \subitem {GossipBroadcast}, \hyperpage{59}
-    \subitem {K}, \hyperpage{60}
-    \subitem {main}, \hyperpage{59}
-    \subitem {P\_RATE}, \hyperpage{60}
-    \subitem {PI\_INDEX}, \hyperpage{61}
-    \subitem {PS\_INDEX}, \hyperpage{61}
-    \subitem {PU\_INDEX}, \hyperpage{61}
-    \subitem {REC\_PROB}, \hyperpage{61}
-    \subitem {run}, \hyperpage{59}
-    \subitem {SIZE}, \hyperpage{61}
-  \item {quasylab.sibilla.core.simulator.tests.pm.GossipUnicast}, 
-		\hyperpage{61}
-    \subitem {AI\_INDEX}, \hyperpage{63}
-    \subitem {AS\_INDEX}, \hyperpage{63}
-    \subitem {AU\_INDEX}, \hyperpage{63}
-    \subitem {C\_RATE}, \hyperpage{63}
-    \subitem {GossipUnicast}, \hyperpage{62}
-    \subitem {main}, \hyperpage{62}
-    \subitem {P\_RATE}, \hyperpage{63}
-    \subitem {PI\_INDEX}, \hyperpage{63}
-    \subitem {PS\_INDEX}, \hyperpage{64}
-    \subitem {PU\_INDEX}, \hyperpage{64}
-    \subitem {REC\_PROB}, \hyperpage{64}
-    \subitem {run}, \hyperpage{62}
-    \subitem {SIZE}, \hyperpage{64}
-  \item {quasylab.sibilla.core.simulator.tests.pm.RBModel}, 
-		\hyperpage{115}
-    \subitem {B\_INDEX}, \hyperpage{116}
-    \subitem {BT\_INDEX}, \hyperpage{116}
-    \subitem {CHANGE\_RATE}, \hyperpage{117}
-    \subitem {K}, \hyperpage{117}
-    \subitem {main}, \hyperpage{116}
-    \subitem {R\_INDEX}, \hyperpage{117}
-    \subitem {RBModel}, \hyperpage{116}
-    \subitem {RT\_INDEX}, \hyperpage{117}
-    \subitem {run}, \hyperpage{116}
-    \subitem {SIZE}, \hyperpage{117}
-    \subitem {SPREAD\_RATE}, \hyperpage{117}
-  \item {quasylab.sibilla.core.simulator.tests.pm.RBModelFactory}, 
-		\hyperpage{118}
-    \subitem {B\_INDEX}, \hyperpage{118}
-    \subitem {BT\_INDEX}, \hyperpage{118}
-    \subitem {CHANGE\_RATE}, \hyperpage{118}
-    \subitem {K}, \hyperpage{118}
-    \subitem {R\_INDEX}, \hyperpage{118}
-    \subitem {RT\_INDEX}, \hyperpage{119}
-    \subitem {SIZE}, \hyperpage{119}
-    \subitem {SPREAD\_RATE}, \hyperpage{119}
-  \item {quasylab.sibilla.core.simulator.tests.TestMain}, 
-		\hyperpage{197}
-    \subitem {main}, \hyperpage{197}
-  \item {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{197}
-    \subitem {DEADLINE}, \hyperpage{198}
-    \subitem {E}, \hyperpage{198}
-    \subitem {I}, \hyperpage{198}
-    \subitem {INIT\_E}, \hyperpage{198}
-    \subitem {INIT\_I}, \hyperpage{199}
-    \subitem {INIT\_R}, \hyperpage{199}
-    \subitem {INIT\_S}, \hyperpage{199}
-    \subitem {initialState}, \hyperpage{198}
-    \subitem {LAMBDA\_E}, \hyperpage{199}
-    \subitem {LAMBDA\_I}, \hyperpage{199}
-    \subitem {LAMBDA\_R}, \hyperpage{199}
-    \subitem {main}, \hyperpage{198}
-    \subitem {N}, \hyperpage{199}
-    \subitem {R}, \hyperpage{199}
-    \subitem {S}, \hyperpage{200}
-    \subitem {SAMPLINGS}, \hyperpage{200}
-  \item {quasylab.sibilla.core.simulator.ThreadSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{200}
-    \subitem {getCachedThreadSimulationManagerFactory}, \hyperpage{201}
-    \subitem {getFixedThreadSimulationManagerFactory}, \hyperpage{201}
-    \subitem {getThreadSimulationManagerFacotry}, \hyperpage{201}
-    \subitem {getWorkStealingPoolSimulationManagerFactory}, 
-		\hyperpage{202}
-    \subitem {handleTask}, \hyperpage{202}
-    \subitem {join}, \hyperpage{202}
-    \subitem {pendingTasks}, \hyperpage{202}
-    \subitem {shutdown}, \hyperpage{202}
-    \subitem {ThreadSimulationManager}, \hyperpage{201}
-  \item {quasylab.sibilla.core.simulator.Trajectory$<$ S extends State $>$}, 
-		\hyperpage{204}
-    \subitem {add}, \hyperpage{204}
-    \subitem {getEnd}, \hyperpage{204}
-    \subitem {getGenerationTime}, \hyperpage{205}
-    \subitem {getStart}, \hyperpage{205}
-    \subitem {isSuccesfull}, \hyperpage{205}
-    \subitem {sample}, \hyperpage{205}
-    \subitem {setGenerationTime}, \hyperpage{205}
-    \subitem {setSuccesfull}, \hyperpage{206}
-    \subitem {size}, \hyperpage{206}
-    \subitem {Trajectory}, \hyperpage{204}
-  \item {quasylab.sibilla.core.simulator.util}, \hyperpage{19}
-  \item {quasylab.sibilla.core.simulator.util.ComposedWeightedStructure$<$ S $>$}, 
-		\hyperpage{38}
-    \subitem {add}, \hyperpage{39}
-    \subitem {ComposedWeightedStructure}, \hyperpage{39}
-    \subitem {getAll}, \hyperpage{40}
-    \subitem {getTotalWeight}, \hyperpage{40}
-    \subitem {select}, \hyperpage{40}
-    \subitem {toString}, \hyperpage{40}
-  \item {quasylab.sibilla.core.simulator.util.ModelCompiler}, 
-		\hyperpage{84}
-  \item {quasylab.sibilla.core.simulator.util.ModelPublisher}, 
-		\hyperpage{86}
-    \subitem {buildClass}, \hyperpage{87}
-    \subitem {ModelPublisher}, \hyperpage{86}
-  \item {quasylab.sibilla.core.simulator.util.WeightedElement$<$ S $>$}, 
-		\hyperpage{223}
-    \subitem {add}, \hyperpage{224}
-    \subitem {getAll}, \hyperpage{224}
-    \subitem {getElement}, \hyperpage{225}
-    \subitem {getTotalWeight}, \hyperpage{225}
-    \subitem {getWeight}, \hyperpage{225}
-    \subitem {residual}, \hyperpage{225}
-    \subitem {select}, \hyperpage{225}
-    \subitem {toString}, \hyperpage{225}
-    \subitem {WeightedElement}, \hyperpage{224}
-  \item {quasylab.sibilla.core.simulator.util.WeightedLinkedList$<$ S $>$}, 
-		\hyperpage{226}
-    \subitem {add}, \hyperpage{226, 227}
-    \subitem {getAll}, \hyperpage{227}
-    \subitem {getTotalWeight}, \hyperpage{227}
-    \subitem {select}, \hyperpage{227}
-    \subitem {WeightedLinkedList}, \hyperpage{226}
-  \item {quasylab.sibilla.core.simulator.util.WeightedStructure$<$ S $>$}, 
-		\hyperpage{227}
-    \subitem {add}, \hyperpage{228}
-    \subitem {getAll}, \hyperpage{228}
-    \subitem {getTotalWeight}, \hyperpage{228}
-    \subitem {select}, \hyperpage{229}
-  \item {quasylab.sibilla.core.simulator.util.Weighter$<$ T $>$}, 
-		\hyperpage{229}
-    \subitem {weight}, \hyperpage{229}
-  \item {quasylab.sibilla.core.util}, \hyperpage{19}
-  \item {quasylab.sibilla.core.util.Pair$<$ K, V $>$}, \hyperpage{95}
-    \subitem {apply}, \hyperpage{96}
-    \subitem {equals}, \hyperpage{96}
-    \subitem {getKey}, \hyperpage{96}
-    \subitem {getValue}, \hyperpage{96}
-    \subitem {hashCode}, \hyperpage{97}
-    \subitem {Pair}, \hyperpage{95, 96}
-    \subitem {setValue}, \hyperpage{97}
-    \subitem {toString}, \hyperpage{97}
-  \item {quasylab.sibilla.core.util.SibillaMessages}, \hyperpage{134}
-    \subitem {A\_POSITIVE\_VALUE\_IS\_EXPECTED}, \hyperpage{135}
-    \subitem {aPositiveValueIsExpected}, \hyperpage{134}
-    \subitem {createdTimeStepWithNonPositiveTime}, \hyperpage{135}
-    \subitem {ILLEGAL\_TIME\_IN\_TIMESTEP}, \hyperpage{135}
-    \subitem {wrongNumberOfParameters}, \hyperpage{135}
-  \item {query}
-    \subitem {quasylab.sibilla.core.past.ds.TupleSpace}, 
-		\hyperpage{210}
-  \item {QueuedSimulationManager}
-    \subitem {quasylab.sibilla.core.simulator.QueuedSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{109}
+    \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
+		\hyperpage{49}
 
   \indexspace
 
-  \item {R}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{199}
-  \item {R\_INDEX}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModel}, 
-		\hyperpage{117}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModelFactory}, 
-		\hyperpage{118}
-  \item {rate}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{69}
-  \item {rateMatrixRow}
-    \subitem {quasylab.sibilla.core.markov.ContinuousTimeMarkovChain$<$ S $>$}, 
+  \item {quasylab}, \hyperpage{7}
+  \item {quasylab.sibilla}, \hyperpage{7}
+  \item {quasylab.sibilla.core}, \hyperpage{7}
+  \item {quasylab.sibilla.core.network}, \hyperpage{7}
+  \item {quasylab.sibilla.core.network.client}, \hyperpage{8}
+  \item {quasylab.sibilla.core.network.client.ClientCommand}, 
+		\hyperpage{14}
+    \subitem {CLOSE\_CONNECTION}, \hyperpage{14}
+    \subitem {DATA}, \hyperpage{14}
+    \subitem {INIT}, \hyperpage{14}
+    \subitem {PING}, \hyperpage{14}
+  \item {quasylab.sibilla.core.network.client.ClientSimulationEnvironment$<$ S extends State $>$}, 
+		\hyperpage{15}
+    \subitem {ClientSimulationEnvironment}, \hyperpage{15}
+  \item {quasylab.sibilla.core.network.communication}, \hyperpage{8}
+  \item {quasylab.sibilla.core.network.communication.NetworkManagerType}, 
+		\hyperpage{33}
+  \item {quasylab.sibilla.core.network.communication.TCPDefaultNetworkManager}, 
+		\hyperpage{60}
+    \subitem {closeConnection}, \hyperpage{61}
+    \subitem {getSocket}, \hyperpage{62}
+    \subitem {getType}, \hyperpage{62}
+    \subitem {readObject}, \hyperpage{62}
+    \subitem {TCPDefaultNetworkManager}, \hyperpage{61}
+    \subitem {writeObject}, \hyperpage{62}
+  \item {quasylab.sibilla.core.network.communication.TCPNetworkManager}, 
+		\hyperpage{63}
+    \subitem {closeConnection}, \hyperpage{64}
+    \subitem {createNetworkManager}, \hyperpage{64, 65}
+    \subitem {createServerSocket}, \hyperpage{65}
+    \subitem {getNetworkInfo}, \hyperpage{66}
+    \subitem {getSocket}, \hyperpage{66}
+    \subitem {getType}, \hyperpage{66}
+    \subitem {readObject}, \hyperpage{66}
+    \subitem {writeObject}, \hyperpage{67}
+  \item {quasylab.sibilla.core.network.communication.TCPNetworkManagerType}, 
+		\hyperpage{67}
+    \subitem {DEFAULT}, \hyperpage{68}
+    \subitem {SECURE}, \hyperpage{68}
+  \item {quasylab.sibilla.core.network.communication.TCPSecureNetworkManager}, 
+		\hyperpage{68}
+    \subitem {closeConnection}, \hyperpage{70}
+    \subitem {getSocket}, \hyperpage{70}
+    \subitem {getType}, \hyperpage{70}
+    \subitem {readObject}, \hyperpage{70}
+    \subitem {TCPSecureNetworkManager}, \hyperpage{69}
+    \subitem {writeObject}, \hyperpage{71}
+  \item {quasylab.sibilla.core.network.communication.UDPDefaultNetworkManager}, 
+		\hyperpage{71}
+    \subitem {closeConnection}, \hyperpage{72}
+    \subitem {readObject}, \hyperpage{72}
+    \subitem {UDPDefaultNetworkManager}, \hyperpage{72}
+    \subitem {writeObject}, \hyperpage{73}
+  \item {quasylab.sibilla.core.network.communication.UDPNetworkManager}, 
+		\hyperpage{73}
+    \subitem {closeConnection}, \hyperpage{74}
+    \subitem {createNetworkManager}, \hyperpage{74, 75}
+    \subitem {readObject}, \hyperpage{75}
+    \subitem {writeObject}, \hyperpage{76}
+  \item {quasylab.sibilla.core.network.communication.UDPNetworkManagerType}, 
+		\hyperpage{76}
+    \subitem {DEFAULT}, \hyperpage{77}
+  \item {quasylab.sibilla.core.network.compression}, \hyperpage{9}
+  \item {quasylab.sibilla.core.network.compression.Compressor}, 
+		\hyperpage{16}
+    \subitem {compress}, \hyperpage{16}
+    \subitem {decompress}, \hyperpage{16}
+  \item {quasylab.sibilla.core.network.ComputationResult$<$ S extends State $>$}, 
+		\hyperpage{17}
+    \subitem {ComputationResult}, \hyperpage{17}
+    \subitem {getResults}, \hyperpage{19}
+  \item {quasylab.sibilla.core.network.HostLoggerSupplier}, 
+		\hyperpage{22}
+    \subitem {getInstance}, \hyperpage{22}
+    \subitem {getLogger}, \hyperpage{22}
+  \item {quasylab.sibilla.core.network.master}, \hyperpage{9}
+  \item {quasylab.sibilla.core.network.master.MasterCommand}, 
+		\hyperpage{23}
+    \subitem {CLOSE\_CONNECTION}, \hyperpage{23}
+    \subitem {DATA\_RESPONSE}, \hyperpage{23}
+    \subitem {INIT}, \hyperpage{23}
+    \subitem {INIT\_RESPONSE}, \hyperpage{23}
+    \subitem {PING}, \hyperpage{24}
+    \subitem {PONG}, \hyperpage{24}
+    \subitem {RESULTS}, \hyperpage{24}
+    \subitem {TASK}, \hyperpage{24}
+  \item {quasylab.sibilla.core.network.master.MasterServerSimulationEnvironment}, 
+		\hyperpage{24}
+    \subitem {MasterServerSimulationEnvironment}, \hyperpage{25}
+    \subitem {propertyChange}, \hyperpage{26}
+  \item {quasylab.sibilla.core.network.master.MasterState}, 
+		\hyperpage{26}
+    \subitem {addPropertyChangeListener}, \hyperpage{27}
+    \subitem {addSimulation}, \hyperpage{27}
+    \subitem {addSlaveServer}, \hyperpage{27}
+    \subitem {clone}, \hyperpage{28}
+    \subitem {compareTo}, \hyperpage{28}
+    \subitem {equals}, \hyperpage{28}
+    \subitem {getConnectedSlaveServers}, \hyperpage{28}
+    \subitem {getExecutedSimulations}, \hyperpage{28}
+    \subitem {getMasterNetworkInfo}, \hyperpage{29}
+    \subitem {getMasterServerStartDate}, \hyperpage{29}
+    \subitem {getSimulationStates}, \hyperpage{29}
+    \subitem {getSlaveServersNetworkInfos}, \hyperpage{29}
+    \subitem {hashCode}, \hyperpage{30}
+    \subitem {increaseExecutedSimulations}, \hyperpage{30}
+    \subitem {MasterState}, \hyperpage{27}
+    \subitem {propertyChange}, \hyperpage{30}
+    \subitem {removeSimulation}, \hyperpage{30}
+    \subitem {removeSlaveServer}, \hyperpage{30}
+  \item {quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}, 
+		\hyperpage{34}
+    \subitem {getNetworkSimulationManagerFactory}, \hyperpage{35}
+    \subitem {join}, \hyperpage{35}
+    \subitem {NetworkSimulationManager}, \hyperpage{35}
+    \subitem {startTasksHandling}, \hyperpage{35}
+  \item {quasylab.sibilla.core.network.master.SimulationState}, 
 		\hyperpage{44}
-  \item {RBModel}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModel}, 
-		\hyperpage{116}
-  \item {reachSet}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{70}
-  \item {ReactionRule}
-    \subitem {quasylab.sibilla.core.models.pm.ReactionRule}, 
-		\hyperpage{119}
+    \subitem {addPropertyChangeListener}, \hyperpage{45}
+    \subitem {clientConnection}, \hyperpage{45}
+    \subitem {clone}, \hyperpage{45}
+    \subitem {compareTo}, \hyperpage{46}
+    \subitem {decreaseRunningServers}, \hyperpage{46}
+    \subitem {equals}, \hyperpage{46}
+    \subitem {getClientNetworkInfo}, \hyperpage{46}
+    \subitem {getLastUpdate}, \hyperpage{46}
+    \subitem {getMasterNetworkInfo}, \hyperpage{47}
+    \subitem {getPendingTasks}, \hyperpage{47}
+    \subitem {getRegisteredSlaveServers}, \hyperpage{47}
+    \subitem {getRunningSlaveServers}, \hyperpage{47}
+    \subitem {getSimulationModelName}, \hyperpage{47}
+    \subitem {getSimulationStartDate}, \hyperpage{48}
+    \subitem {getSlaveServersStates}, \hyperpage{48}
+    \subitem {getSlaveStateByServerInfo}, \hyperpage{48}
+    \subitem {getTotalSimulationTasks}, \hyperpage{49}
+    \subitem {hashCode}, \hyperpage{49}
+    \subitem {increaseRunningServers}, \hyperpage{49}
+    \subitem {isConcluded}, \hyperpage{49}
+    \subitem {propertyChange}, \hyperpage{49}
+    \subitem {setClientConnection}, \hyperpage{49}
+    \subitem {setConcluded}, \hyperpage{50}
+    \subitem {setPendingTasks}, \hyperpage{50}
+    \subitem {setSimulationDataSet}, \hyperpage{50}
+    \subitem {setSimulationModelName}, \hyperpage{50}
+    \subitem {simulationDataSet}, \hyperpage{51}
+    \subitem {SimulationState}, \hyperpage{45}
+  \item {quasylab.sibilla.core.network.NetworkInfo}, \hyperpage{31}
+    \subitem {clone}, \hyperpage{32}
+    \subitem {equals}, \hyperpage{32}
+    \subitem {getAddress}, \hyperpage{32}
+    \subitem {getPort}, \hyperpage{32}
+    \subitem {getType}, \hyperpage{33}
+    \subitem {hashCode}, \hyperpage{33}
+    \subitem {NetworkInfo}, \hyperpage{31}
+    \subitem {toString}, \hyperpage{33}
+  \item {quasylab.sibilla.core.network.NetworkTask$<$ S extends State $>$}, 
+		\hyperpage{36}
+    \subitem {getTasks}, \hyperpage{37}
+    \subitem {NetworkTask}, \hyperpage{36}
+  \item {quasylab.sibilla.core.network.serialization}, \hyperpage{10}
+  \item {quasylab.sibilla.core.network.serialization.ClassBytesLoader}, 
+		\hyperpage{13}
+    \subitem {loadClassBytes}, \hyperpage{13}
+  \item {quasylab.sibilla.core.network.serialization.CustomClassLoader}, 
+		\hyperpage{19}
+    \subitem {defClass}, \hyperpage{20}
+    \subitem {loadClassBytes}, \hyperpage{20}
+    \subitem {removeClassBytes}, \hyperpage{20}
+  \item {quasylab.sibilla.core.network.serialization.Serializer}, 
+		\hyperpage{38}
+    \subitem {deserialize}, \hyperpage{38}
+    \subitem {serialize}, \hyperpage{39}
+  \item {quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}, 
+		\hyperpage{39}
+    \subitem {equals}, \hyperpage{40}
+    \subitem {getDeadline}, \hyperpage{41}
+    \subitem {getModel}, \hyperpage{41}
+    \subitem {getModelDefinition}, \hyperpage{41}
+    \subitem {getModelInitialState}, \hyperpage{41}
+    \subitem {getModelSamplingFunction}, \hyperpage{41}
+    \subitem {getRandomGenerator}, \hyperpage{42}
+    \subitem {getReplica}, \hyperpage{42}
+    \subitem {hashCode}, \hyperpage{42}
+    \subitem {SimulationDataSet}, \hyperpage{40}
+    \subitem {toString}, \hyperpage{42}
+  \item {quasylab.sibilla.core.network.slave}, \hyperpage{10}
+  \item {quasylab.sibilla.core.network.slave.BasicSimulationServer}, 
+		\hyperpage{11}
+    \subitem {BasicSimulationServer}, \hyperpage{12}
+    \subitem {localServerInfo}, \hyperpage{12}
+    \subitem {LOGGER}, \hyperpage{12}
+    \subitem {start}, \hyperpage{12}
+  \item {quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer}, 
+		\hyperpage{21}
+    \subitem {DiscoverableBasicSimulationServer}, \hyperpage{21}
+  \item {quasylab.sibilla.core.network.slave.SimulationServer}, 
+		\hyperpage{43}
+    \subitem {start}, \hyperpage{43}
+  \item {quasylab.sibilla.core.network.slave.SlaveCommand}, 
+		\hyperpage{51}
+    \subitem {CLOSE\_CONNECTION}, \hyperpage{51}
+    \subitem {INIT\_RESPONSE}, \hyperpage{51}
+    \subitem {PONG}, \hyperpage{52}
+  \item {quasylab.sibilla.core.network.slave.SlaveState}, 
+		\hyperpage{52}
+    \subitem {addPropertyChangeListener}, \hyperpage{53}
+    \subitem {canCompleteTask}, \hyperpage{53}
+    \subitem {clone}, \hyperpage{54}
+    \subitem {devRTT}, \hyperpage{56}
+    \subitem {equals}, \hyperpage{54}
+    \subitem {estimatedRTT}, \hyperpage{56}
+    \subitem {forceExpiredTimeLimit}, \hyperpage{54}
+    \subitem {getExpectedTasks}, \hyperpage{54}
+    \subitem {getSlaveInfo}, \hyperpage{54}
+    \subitem {getTimeLimit}, \hyperpage{54}
+    \subitem {getTimeout}, \hyperpage{55}
+    \subitem {hashCode}, \hyperpage{55}
+    \subitem {isRemoved}, \hyperpage{55}
+    \subitem {isTimeout}, \hyperpage{55}
+    \subitem {migrate}, \hyperpage{55}
+    \subitem {setRemoved}, \hyperpage{56}
+    \subitem {SlaveState}, \hyperpage{53}
+    \subitem {timedOut}, \hyperpage{56}
+    \subitem {toString}, \hyperpage{56}
+    \subitem {update}, \hyperpage{56}
+  \item {quasylab.sibilla.core.network.util}, \hyperpage{10}
+  \item {quasylab.sibilla.core.network.util.NetworkUtils}, 
+		\hyperpage{37}
+    \subitem {getBroadcastAddresses}, \hyperpage{37}
+    \subitem {getLocalAddress}, \hyperpage{38}
+  \item {quasylab.sibilla.core.network.util.SSLUtils}, \hyperpage{57}
+    \subitem {createSSLContext}, \hyperpage{57}
+    \subitem {getInstance}, \hyperpage{58}
+    \subitem {setKeyStorePass}, \hyperpage{58}
+    \subitem {setKeyStorePath}, \hyperpage{58}
+    \subitem {setKeyStoreType}, \hyperpage{58}
+    \subitem {setTrustStorePass}, \hyperpage{58}
+    \subitem {setTrustStorePath}, \hyperpage{58}
+    \subitem {setTrustStoreType}, \hyperpage{58}
+  \item {quasylab.sibilla.core.network.util.StartupUtils}, 
+		\hyperpage{59}
+    \subitem {parseOptions}, \hyperpage{59}
+    \subitem {TCPNetworkManagerParser}, \hyperpage{59}
+    \subitem {UDPNetworkManagerParser}, \hyperpage{60}
+
+  \indexspace
+
   \item {readObject}
     \subitem {quasylab.sibilla.core.network.communication.TCPDefaultNetworkManager}, 
-		\hyperpage{184}
+		\hyperpage{62}
     \subitem {quasylab.sibilla.core.network.communication.TCPNetworkManager}, 
-		\hyperpage{189}
+		\hyperpage{66}
     \subitem {quasylab.sibilla.core.network.communication.TCPSecureNetworkManager}, 
-		\hyperpage{193}
+		\hyperpage{70}
     \subitem {quasylab.sibilla.core.network.communication.UDPDefaultNetworkManager}, 
-		\hyperpage{212}
+		\hyperpage{72}
     \subitem {quasylab.sibilla.core.network.communication.UDPNetworkManager}, 
-		\hyperpage{215}
-  \item {REC\_PROB}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{61}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipUnicast}, 
-		\hyperpage{64}
-  \item {register}
-    \subitem {quasylab.sibilla.core.models.pm.util.PopulationRegistry}, 
-		\hyperpage{101}
-    \subitem {quasylab.sibilla.core.past.RandomGeneratorRegistry}, 
-		\hyperpage{113}
-  \item {registerPropertyChangeListener}
-    \subitem {quasylab.sibilla.core.simulator.SimulationMonitor}, 
-		\hyperpage{144}
+		\hyperpage{75}
   \item {removeClassBytes}
     \subitem {quasylab.sibilla.core.network.serialization.CustomClassLoader}, 
-		\hyperpage{46}
+		\hyperpage{20}
   \item {removeSimulation}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{80}
+		\hyperpage{30}
   \item {removeSlaveServer}
     \subitem {quasylab.sibilla.core.network.master.MasterState}, 
-		\hyperpage{80}
-  \item {rescheduleAll}
-    \subitem {quasylab.sibilla.core.simulator.QueuedSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{111}
-  \item {reset}
-    \subitem {quasylab.sibilla.core.simulator.SimulationTask$<$ S extends State $>$}, 
-		\hyperpage{157}
-  \item {residual}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedElement$<$ S $>$}, 
-		\hyperpage{225}
-  \item {restart}
-    \subitem {quasilab.sibilla.core.ExecutionEnvironment$<$ S extends State $>$}, 
-		\hyperpage{50}
+		\hyperpage{30}
   \item {RESULTS}
     \subitem {quasylab.sibilla.core.network.master.MasterCommand}, 
-		\hyperpage{74}
-  \item {retrieve}
-    \subitem {quasylab.sibilla.core.markov.State}, \hyperpage{172}
-  \item {revert}
-    \subitem {quasylab.sibilla.core.models.Action$<$ S $>$}, 
-		\hyperpage{25}
-  \item {rightPoint}
-    \subitem {quasylab.sibilla.core.markov.FoxGlynn}, \hyperpage{56}
-  \item {rnd}
-    \subitem {quasylab.sibilla.core.past.RandomGeneratorRegistry}, 
-		\hyperpage{113}
-  \item {RT\_INDEX}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModel}, 
-		\hyperpage{117}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModelFactory}, 
-		\hyperpage{119}
-  \item {run}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{59}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipUnicast}, 
-		\hyperpage{62}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModel}, 
-		\hyperpage{116}
-  \item {RUNNING}
-    \subitem {quasylab.sibilla.core.simulator.SimulationStatus}, 
-		\hyperpage{155}
+		\hyperpage{24}
 
   \indexspace
 
-  \item {S}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{200}
-  \item {S1}
-    \subitem {quasylab.sibilla.core.markov.TestKnutYaoAlgorithm.STATES}, 
-		\hyperpage{175}
-  \item {S2}
-    \subitem {quasylab.sibilla.core.markov.TestKnutYaoAlgorithm.STATES}, 
-		\hyperpage{175}
-  \item {S3}
-    \subitem {quasylab.sibilla.core.markov.TestKnutYaoAlgorithm.STATES}, 
-		\hyperpage{175}
-  \item {S4}
-    \subitem {quasylab.sibilla.core.markov.TestKnutYaoAlgorithm.STATES}, 
-		\hyperpage{175}
-  \item {S5}
-    \subitem {quasylab.sibilla.core.markov.TestKnutYaoAlgorithm.STATES}, 
-		\hyperpage{175}
-  \item {S6}
-    \subitem {quasylab.sibilla.core.markov.TestKnutYaoAlgorithm.STATES}, 
-		\hyperpage{176}
-  \item {S7}
-    \subitem {quasylab.sibilla.core.markov.TestKnutYaoAlgorithm.STATES}, 
-		\hyperpage{176}
-  \item {Sample}
-    \subitem {quasylab.sibilla.core.simulator.sampling.Sample$<$ T $>$}, 
-		\hyperpage{121}
-  \item {sample}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingCollection$<$ S extends State $>$}, 
-		\hyperpage{125}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingFunction$<$ S extends State $>$}, 
-		\hyperpage{128}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingLog$<$ S extends State $>$}, 
-		\hyperpage{130}
-    \subitem {quasylab.sibilla.core.simulator.sampling.StatisticSampling$<$ S extends State $>$}, 
-		\hyperpage{178}
-    \subitem {quasylab.sibilla.core.simulator.Trajectory$<$ S extends State $>$}, 
-		\hyperpage{205}
-  \item {sampleExponentialDistribution}
-    \subitem {quasylab.sibilla.core.models.MarkovProcess$<$ S extends State $>$}, 
-		\hyperpage{72}
-  \item {samplePredicate}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplePredicate$<$ S extends State $>$}, 
-		\hyperpage{122}
-  \item {SamplingCollection}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingCollection$<$ S extends State $>$}, 
-		\hyperpage{124}
-  \item {SamplingLog}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingLog$<$ S extends State $>$}, 
-		\hyperpage{129}
-  \item {SAMPLINGS}
-    \subitem {quasylab.sibilla.core.simulator.tests.TestTime}, 
-		\hyperpage{200}
-  \item {saveTo}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries}, 
-		\hyperpage{159}
   \item {SECURE}
     \subitem {quasylab.sibilla.core.network.communication.TCPNetworkManagerType}, 
-		\hyperpage{190}
-  \item {select}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{70}
-    \subitem {quasylab.sibilla.core.past.RandomGeneratorRegistry}, 
-		\hyperpage{113}
-    \subitem {quasylab.sibilla.core.simulator.util.ComposedWeightedStructure$<$ S $>$}, 
-		\hyperpage{40}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedElement$<$ S $>$}, 
-		\hyperpage{225}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedLinkedList$<$ S $>$}, 
-		\hyperpage{227}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedStructure$<$ S $>$}, 
-		\hyperpage{229}
-  \item {SequenceOfActivities}
-    \subitem {quasylab.sibilla.core.past.SequenceOfActivities}, 
-		\hyperpage{130}
-  \item {SequentialSimulationManager}
-    \subitem {quasylab.sibilla.core.simulator.SequentialSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{132}
+		\hyperpage{68}
   \item {serialize}
     \subitem {quasylab.sibilla.core.network.serialization.Serializer}, 
-		\hyperpage{133}
+		\hyperpage{39}
   \item {setClientConnection}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{152}
+		\hyperpage{49}
   \item {setConcluded}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{153}
-  \item {setGenerationTime}
-    \subitem {quasylab.sibilla.core.simulator.Trajectory$<$ S extends State $>$}, 
-		\hyperpage{205}
+		\hyperpage{50}
   \item {setKeyStorePass}
     \subitem {quasylab.sibilla.core.network.util.SSLUtils}, 
-		\hyperpage{169}
+		\hyperpage{58}
   \item {setKeyStorePath}
     \subitem {quasylab.sibilla.core.network.util.SSLUtils}, 
-		\hyperpage{169}
+		\hyperpage{58}
   \item {setKeyStoreType}
     \subitem {quasylab.sibilla.core.network.util.SSLUtils}, 
-		\hyperpage{169}
+		\hyperpage{58}
   \item {setPendingTasks}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{153}
+		\hyperpage{50}
   \item {setRemoved}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{166}
-  \item {setRunning}
-    \subitem {quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{23}
-  \item {setSeed}
-    \subitem {quasylab.sibilla.core.simulator.DefaultRandomGenerator}, 
-		\hyperpage{47}
+		\hyperpage{56}
   \item {setSimulationDataSet}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{153}
+		\hyperpage{50}
   \item {setSimulationModelName}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{153}
-  \item {setSuccesfull}
-    \subitem {quasylab.sibilla.core.simulator.Trajectory$<$ S extends State $>$}, 
-		\hyperpage{206}
+		\hyperpage{50}
   \item {setTrustStorePass}
     \subitem {quasylab.sibilla.core.network.util.SSLUtils}, 
-		\hyperpage{169}
+		\hyperpage{58}
   \item {setTrustStorePath}
     \subitem {quasylab.sibilla.core.network.util.SSLUtils}, 
-		\hyperpage{169}
+		\hyperpage{58}
   \item {setTrustStoreType}
     \subitem {quasylab.sibilla.core.network.util.SSLUtils}, 
-		\hyperpage{169}
-  \item {setValue}
-    \subitem {quasylab.sibilla.core.util.Pair$<$ K, V $>$}, 
-		\hyperpage{97}
-  \item {shutdown}
-    \subitem {quasylab.sibilla.core.past.SimulationSession}, 
-		\hyperpage{147}
-    \subitem {quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{23}
-    \subitem {quasylab.sibilla.core.simulator.SimulationManager$<$ S extends State $>$}, 
-		\hyperpage{142}
-    \subitem {quasylab.sibilla.core.simulator.ThreadSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{202}
-  \item {silent}
-    \subitem {quasylab.sibilla.core.simulator.SimulationEnvironment}, 
-		\hyperpage{140}
-  \item {simulate}
-    \subitem {quasylab.sibilla.core.simulator.AbstractSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{23}
-    \subitem {quasylab.sibilla.core.simulator.SimulationManager$<$ S extends State $>$}, 
-		\hyperpage{142}
+		\hyperpage{58}
   \item {SimulationDataSet}
     \subitem {quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}, 
-		\hyperpage{136}
+		\hyperpage{40}
   \item {simulationDataSet}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{154}
-  \item {SimulationEnvironment}
-    \subitem {quasylab.sibilla.core.simulator.SimulationEnvironment}, 
-		\hyperpage{140}
+		\hyperpage{51}
   \item {SimulationState}
     \subitem {quasylab.sibilla.core.network.master.SimulationState}, 
-		\hyperpage{148}
-  \item {SimulationTask}
-    \subitem {quasylab.sibilla.core.simulator.SimulationTask$<$ S extends State $>$}, 
-		\hyperpage{155, 156}
-  \item {SimulationTimeSeries}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries}, 
-		\hyperpage{158}
-  \item {SimulationUnit}
-    \subitem {quasylab.sibilla.core.simulator.SimulationUnit$<$ S extends State $>$}, 
-		\hyperpage{160, 161}
-  \item {SIZE}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast}, 
-		\hyperpage{61}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.GossipUnicast}, 
-		\hyperpage{64}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModel}, 
-		\hyperpage{117}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModelFactory}, 
-		\hyperpage{119}
-  \item {size}
-    \subitem {quasylab.sibilla.core.markov.VectorState$<$ S $>$}, 
-		\hyperpage{223}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{106}
-    \subitem {quasylab.sibilla.core.models.pm.util.PopulationRegistry}, 
-		\hyperpage{101}
-    \subitem {quasylab.sibilla.core.past.ds.Template}, \hyperpage{195}
-    \subitem {quasylab.sibilla.core.past.ds.Tuple}, \hyperpage{208}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingCollection$<$ S extends State $>$}, 
-		\hyperpage{125}
-    \subitem {quasylab.sibilla.core.simulator.Trajectory$<$ S extends State $>$}, 
-		\hyperpage{206}
+		\hyperpage{45}
   \item {SlaveState}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{164}
-  \item {SPREAD\_RATE}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModel}, 
-		\hyperpage{117}
-    \subitem {quasylab.sibilla.core.simulator.tests.pm.RBModelFactory}, 
-		\hyperpage{119}
+		\hyperpage{53}
   \item {start}
     \subitem {quasylab.sibilla.core.network.slave.BasicSimulationServer}, 
-		\hyperpage{29}
+		\hyperpage{12}
     \subitem {quasylab.sibilla.core.network.slave.SimulationServer}, 
-		\hyperpage{145}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingCollection$<$ S extends State $>$}, 
-		\hyperpage{125}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingFunction$<$ S extends State $>$}, 
-		\hyperpage{128}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplingLog$<$ S extends State $>$}, 
-		\hyperpage{130}
-    \subitem {quasylab.sibilla.core.simulator.sampling.StatisticSampling$<$ S extends State $>$}, 
-		\hyperpage{178}
-  \item {startIteration}
-    \subitem {quasylab.sibilla.core.simulator.SimulationMonitor}, 
-		\hyperpage{144}
+		\hyperpage{43}
   \item {startTasksHandling}
     \subitem {quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{91}
-    \subitem {quasylab.sibilla.core.simulator.QueuedSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{112}
-  \item {State}
-    \subitem {quasylab.sibilla.core.markov.State}, \hyperpage{171}
-  \item {state}
-    \subitem {quasylab.sibilla.core.models.ModelDefinition$<$ S extends State $>$}, 
-		\hyperpage{85}
-  \item {stateArity}
-    \subitem {quasylab.sibilla.core.models.ModelDefinition$<$ S extends State $>$}, 
-		\hyperpage{86}
-  \item {StatisticSampling}
-    \subitem {quasylab.sibilla.core.simulator.sampling.StatisticSampling$<$ S extends State $>$}, 
-		\hyperpage{177}
-  \item {SteadyStateSolver}
-    \subitem {quasylab.sibilla.core.markov.SteadyStateSolver$<$ S $>$}, 
-		\hyperpage{179}
-  \item {step}
-    \subitem {quasilab.sibilla.core.ExecutionEnvironment$<$ S extends State $>$}, 
-		\hyperpage{50, 51}
-    \subitem {quasylab.sibilla.core.models.StepFunction$<$ S $>$}, 
-		\hyperpage{180}
-  \item {steps}
-    \subitem {quasilab.sibilla.core.ExecutionEnvironment$<$ S extends State $>$}, 
-		\hyperpage{51}
-  \item {sum}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{70}
-  \item {sumOfRow}
-    \subitem {quasylab.sibilla.core.markov.MarkovChain$<$ S $>$}, 
-		\hyperpage{70}
+		\hyperpage{35}
 
   \indexspace
 
-  \item {T}
-    \subitem {quasylab.sibilla.core.markov.TaxiScenarioMC}, 
-		\hyperpage{182}
   \item {TASK}
     \subitem {quasylab.sibilla.core.network.master.MasterCommand}, 
-		\hyperpage{74}
+		\hyperpage{24}
   \item {TCPDefaultNetworkManager}
     \subitem {quasylab.sibilla.core.network.communication.TCPDefaultNetworkManager}, 
-		\hyperpage{183}
+		\hyperpage{61}
   \item {TCPNetworkManagerParser}
     \subitem {quasylab.sibilla.core.network.util.StartupUtils}, 
-		\hyperpage{170}
+		\hyperpage{59}
   \item {TCPSecureNetworkManager}
     \subitem {quasylab.sibilla.core.network.communication.TCPSecureNetworkManager}, 
-		\hyperpage{191, 192}
-  \item {Template}
-    \subitem {quasylab.sibilla.core.past.ds.Template}, \hyperpage{194}
-  \item {test}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplePredicate$<$ S extends State $>$}, 
-		\hyperpage{123}
-  \item {ThreadSimulationManager}
-    \subitem {quasylab.sibilla.core.simulator.ThreadSimulationManager$<$ S extends State $>$}, 
-		\hyperpage{201}
-  \item {timeDeadlinePredicate}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SamplePredicate$<$ S extends State $>$}, 
-		\hyperpage{123}
+		\hyperpage{69}
   \item {timedOut}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{167}
-  \item {TimeStep}
-    \subitem {quasylab.sibilla.core.models.TimeStep$<$ S $>$}, 
-		\hyperpage{203}
-  \item {TL}
-    \subitem {quasylab.sibilla.core.markov.TaxiScenarioMC}, 
-		\hyperpage{182}
+		\hyperpage{56}
   \item {toString}
-    \subitem {quasylab.sibilla.core.markov.State}, \hyperpage{172}
-    \subitem {quasylab.sibilla.core.markov.VectorState$<$ S $>$}, 
-		\hyperpage{223}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationState}, 
-		\hyperpage{107}
-    \subitem {quasylab.sibilla.core.models.pm.Update}, \hyperpage{221}
     \subitem {quasylab.sibilla.core.network.NetworkInfo}, 
-		\hyperpage{89}
+		\hyperpage{33}
     \subitem {quasylab.sibilla.core.network.SimulationDataSet$<$ S extends State $>$}, 
-		\hyperpage{139}
+		\hyperpage{42}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{167}
-    \subitem {quasylab.sibilla.core.past.ds.ActualTemplateField}, 
-		\hyperpage{28}
-    \subitem {quasylab.sibilla.core.past.ds.FormalTemplateField}, 
-		\hyperpage{53}
-    \subitem {quasylab.sibilla.core.past.ds.Template}, \hyperpage{195}
-    \subitem {quasylab.sibilla.core.past.ds.Tuple}, \hyperpage{208}
-    \subitem {quasylab.sibilla.core.past.SequenceOfActivities}, 
-		\hyperpage{131}
-    \subitem {quasylab.sibilla.core.simulator.sampling.Sample$<$ T $>$}, 
-		\hyperpage{121}
-    \subitem {quasylab.sibilla.core.simulator.util.ComposedWeightedStructure$<$ S $>$}, 
-		\hyperpage{40}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedElement$<$ S $>$}, 
-		\hyperpage{225}
-    \subitem {quasylab.sibilla.core.util.Pair$<$ K, V $>$}, 
-		\hyperpage{97}
-  \item {totalWeight}
-    \subitem {quasylab.sibilla.core.markov.FoxGlynn}, \hyperpage{56}
-  \item {Trajectory}
-    \subitem {quasylab.sibilla.core.simulator.Trajectory$<$ S extends State $>$}, 
-		\hyperpage{204}
-  \item {TransientProbabilityContinuousSolver}
-    \subitem {quasylab.sibilla.core.markov.TransientProbabilityContinuousSolver$<$ S $>$}, 
-		\hyperpage{206}
-  \item {TRUE}
-    \subitem {quasylab.sibilla.core.models.StatePredicate$<$ T $>$}, 
-		\hyperpage{174}
-  \item {TS}
-    \subitem {quasylab.sibilla.core.markov.TaxiScenarioMC}, 
-		\hyperpage{182}
-  \item {Tuple}
-    \subitem {quasylab.sibilla.core.past.ds.Tuple}, \hyperpage{207}
-  \item {TupleSpace}
-    \subitem {quasylab.sibilla.core.past.ds.TupleSpace}, 
-		\hyperpage{209}
+		\hyperpage{56}
 
   \indexspace
 
-  \item {U}
-    \subitem {quasylab.sibilla.core.markov.TaxiScenarioMC}, 
-		\hyperpage{183}
   \item {UDPDefaultNetworkManager}
     \subitem {quasylab.sibilla.core.network.communication.UDPDefaultNetworkManager}, 
-		\hyperpage{211}
+		\hyperpage{72}
   \item {UDPNetworkManagerParser}
     \subitem {quasylab.sibilla.core.network.util.StartupUtils}, 
-		\hyperpage{171}
-  \item {UnboundedReachabilitySolver}
-    \subitem {quasylab.sibilla.core.markov.UnboundedReachabilitySolver$<$ S $>$}, 
-		\hyperpage{217}
-  \item {UnicastReceiver}
-    \subitem {quasylab.sibilla.core.models.pm.UnicastRule.UnicastReceiver}, 
-		\hyperpage{217}
-  \item {UnicastRule}
-    \subitem {quasylab.sibilla.core.models.pm.UnicastRule}, 
-		\hyperpage{219}
-  \item {uniform}
-    \subitem {quasylab.sibilla.core.past.RandomGeneratorRegistry}, 
-		\hyperpage{113}
-  \item {uniformisedMatrixRow}
-    \subitem {quasylab.sibilla.core.markov.ContinuousTimeMarkovChain$<$ S $>$}, 
-		\hyperpage{44}
-  \item {uniformSelect}
-    \subitem {quasylab.sibilla.core.past.RandomGeneratorRegistry}, 
-		\hyperpage{113}
-  \item {unregister}
-    \subitem {quasylab.sibilla.core.past.RandomGeneratorRegistry}, 
-		\hyperpage{113}
-  \item {Update}
-    \subitem {quasylab.sibilla.core.models.pm.Update}, \hyperpage{220}
+		\hyperpage{60}
   \item {update}
     \subitem {quasylab.sibilla.core.network.slave.SlaveState}, 
-		\hyperpage{167}
-    \subitem {quasylab.sibilla.core.simulator.SimulationMonitor}, 
-		\hyperpage{144}
+		\hyperpage{56}
 
   \indexspace
 
-  \item {valueOf}
-    \subitem {quasylab.sibilla.core.markov.RateFunction$<$ S $>$}, 
-		\hyperpage{114}
-  \item {vectorOf}
-    \subitem {quasylab.sibilla.core.models.pm.PopulationModel}, 
-		\hyperpage{100}
-  \item {VectorState}
-    \subitem {quasylab.sibilla.core.markov.VectorState$<$ S $>$}, 
-		\hyperpage{222}
-
-  \indexspace
-
-  \item {weight}
-    \subitem {quasylab.sibilla.core.markov.FoxGlynn}, \hyperpage{56}
-    \subitem {quasylab.sibilla.core.simulator.util.Weighter$<$ T $>$}, 
-		\hyperpage{229}
-  \item {WeightedElement}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedElement$<$ S $>$}, 
-		\hyperpage{224}
-  \item {WeightedLinkedList}
-    \subitem {quasylab.sibilla.core.simulator.util.WeightedLinkedList$<$ S $>$}, 
-		\hyperpage{226}
-  \item {weightedSelect}
-    \subitem {quasylab.sibilla.core.past.RandomGeneratorRegistry}, 
-		\hyperpage{114}
-  \item {weightOf}
-    \subitem {quasylab.sibilla.core.past.ds.TupleSpace}, 
-		\hyperpage{210}
   \item {writeObject}
     \subitem {quasylab.sibilla.core.network.communication.TCPDefaultNetworkManager}, 
-		\hyperpage{185}
+		\hyperpage{62}
     \subitem {quasylab.sibilla.core.network.communication.TCPNetworkManager}, 
-		\hyperpage{189}
+		\hyperpage{67}
     \subitem {quasylab.sibilla.core.network.communication.TCPSecureNetworkManager}, 
-		\hyperpage{193}
+		\hyperpage{71}
     \subitem {quasylab.sibilla.core.network.communication.UDPDefaultNetworkManager}, 
-		\hyperpage{212}
+		\hyperpage{73}
     \subitem {quasylab.sibilla.core.network.communication.UDPNetworkManager}, 
-		\hyperpage{215}
-  \item {writeToCSV}
-    \subitem {quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries}, 
-		\hyperpage{159, 160}
-  \item {wrongNumberOfParameters}
-    \subitem {quasylab.sibilla.core.util.SibillaMessages}, 
-		\hyperpage{135}
+		\hyperpage{76}
 
 \end{theindex}

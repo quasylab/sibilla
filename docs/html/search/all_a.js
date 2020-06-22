@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['k_227',['K',['../d7/df7/classquasylab_1_1sibilla_1_1core_1_1simulator_1_1tests_1_1pm_1_1GossipBroadcast.html#af56f703fdbc3415c03496c7f186e0cc5',1,'quasylab.sibilla.core.simulator.tests.pm.GossipBroadcast.K()'],['../d3/dd7/classquasylab_1_1sibilla_1_1core_1_1simulator_1_1tests_1_1pm_1_1RBModel.html#aa3edb14e53c1a23ec537f5d7f67b0fdb',1,'quasylab.sibilla.core.simulator.tests.pm.RBModel.K()'],['../d7/d98/classquasylab_1_1sibilla_1_1core_1_1simulator_1_1tests_1_1pm_1_1RBModelFactory.html#ae6fb1cfc3bf0fde7135f38e0a63dc479',1,'quasylab.sibilla.core.simulator.tests.pm.RBModelFactory.K()']]]
+  ['loadclassbytes_81',['loadClassBytes',['../d6/de0/classquasylab_1_1sibilla_1_1core_1_1network_1_1serialization_1_1ClassBytesLoader.html#a3ad07740fa7afe81c11de4cc9b3e22ec',1,'quasylab.sibilla.core.network.serialization.ClassBytesLoader.loadClassBytes()'],['../de/d69/classquasylab_1_1sibilla_1_1core_1_1network_1_1serialization_1_1CustomClassLoader.html#aa4f7fdf3d9199e43e90835e1a415c9dd',1,'quasylab.sibilla.core.network.serialization.CustomClassLoader.loadClassBytes()']]],
+  ['localserverinfo_82',['localServerInfo',['../dd/dad/classquasylab_1_1sibilla_1_1core_1_1network_1_1slave_1_1BasicSimulationServer.html#a1c639d88628aba2d1c4959e0e66b22a9',1,'quasylab::sibilla::core::network::slave::BasicSimulationServer']]],
+  ['logger_83',['LOGGER',['../dd/dad/classquasylab_1_1sibilla_1_1core_1_1network_1_1slave_1_1BasicSimulationServer.html#ac140b6b727293f4de07df0902da1f909',1,'quasylab::sibilla::core::network::slave::BasicSimulationServer']]]
 ];

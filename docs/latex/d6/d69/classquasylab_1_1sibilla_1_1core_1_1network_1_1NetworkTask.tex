@@ -9,9 +9,9 @@ Inheritance diagram for quasylab.\+sibilla.\+core.\+network.\+Network\+Task$<$ S
 \doxysubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkTask_ad88fc6145b46e431286fc0fee83b3916}{Network\+Task}} (List$<$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1SimulationTask}{Simulation\+Task}}$<$ S $>$$>$ tasks)
+\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkTask_ad88fc6145b46e431286fc0fee83b3916}{Network\+Task}} (List$<$ Simulation\+Task$<$ S $>$$>$ tasks)
 \item 
-List$<$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1SimulationTask}{Simulation\+Task}}$<$ S $>$ $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkTask_ae8a752075468fa70941f060f7f502f32}{get\+Tasks}} ()
+List$<$ Simulation\+Task$<$ S $>$ $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkTask_ae8a752075468fa70941f060f7f502f32}{get\+Tasks}} ()
 \end{DoxyCompactItemize}
 
 
@@ -20,7 +20,7 @@ Class that stores a list of tasks sent through network.
 
 
 \begin{DoxyParams}{Parameters}
-{\em $<$\+S$>$} & The \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{quasylab.\+sibilla.\+core.\+past.\+State}} of the simulation model. \\
+{\em $<$\+S$>$} & The \mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+past.\+State}} of the simulation model. \\
 \hline
 \end{DoxyParams}
 \begin{DoxyAuthor}{Author}
@@ -37,7 +37,7 @@ Zamponi Marco
 \index{quasylab.sibilla.core.network.NetworkTask$<$ S extends State $>$@{quasylab.sibilla.core.network.NetworkTask$<$ S extends State $>$}!NetworkTask@{NetworkTask}}
 \index{NetworkTask@{NetworkTask}!quasylab.sibilla.core.network.NetworkTask$<$ S extends State $>$@{quasylab.sibilla.core.network.NetworkTask$<$ S extends State $>$}}
 \doxysubsubsection{\texorpdfstring{NetworkTask()}{NetworkTask()}}
-{\footnotesize\ttfamily \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkTask}{quasylab.\+sibilla.\+core.\+network.\+Network\+Task}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkTask}{Network\+Task}} (\begin{DoxyParamCaption}\item[{List$<$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1SimulationTask}{Simulation\+Task}}$<$ S $>$$>$}]{tasks }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkTask}{quasylab.\+sibilla.\+core.\+network.\+Network\+Task}}$<$ S extends State $>$.\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkTask}{Network\+Task}} (\begin{DoxyParamCaption}\item[{List$<$ Simulation\+Task$<$ S $>$$>$}]{tasks }\end{DoxyParamCaption})}
 
 Creates a \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkTask}{Network\+Task}} object from a list of tasks
 
@@ -53,7 +53,7 @@ Creates a \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1Networ
 \index{quasylab.sibilla.core.network.NetworkTask$<$ S extends State $>$@{quasylab.sibilla.core.network.NetworkTask$<$ S extends State $>$}!getTasks@{getTasks}}
 \index{getTasks@{getTasks}!quasylab.sibilla.core.network.NetworkTask$<$ S extends State $>$@{quasylab.sibilla.core.network.NetworkTask$<$ S extends State $>$}}
 \doxysubsubsection{\texorpdfstring{getTasks()}{getTasks()}}
-{\footnotesize\ttfamily List$<$\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1simulator_1_1SimulationTask}{Simulation\+Task}}$<$S$>$ $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkTask}{quasylab.\+sibilla.\+core.\+network.\+Network\+Task}}$<$ S extends \mbox{\hyperlink{interfacequasylab_1_1sibilla_1_1core_1_1past_1_1State}{State}} $>$.get\+Tasks (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily List$<$Simulation\+Task$<$S$>$ $>$ \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkTask}{quasylab.\+sibilla.\+core.\+network.\+Network\+Task}}$<$ S extends State $>$.get\+Tasks (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
 Returns the list of tasks to be executed by a slave server
 

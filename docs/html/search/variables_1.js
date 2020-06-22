@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['b_5findex_978',['B_INDEX',['../d3/dd7/classquasylab_1_1sibilla_1_1core_1_1simulator_1_1tests_1_1pm_1_1RBModel.html#aec74904b8e22c20bc5d4bf6b6b86b669',1,'quasylab.sibilla.core.simulator.tests.pm.RBModel.B_INDEX()'],['../d7/d98/classquasylab_1_1sibilla_1_1core_1_1simulator_1_1tests_1_1pm_1_1RBModelFactory.html#afd5d8eb97b400615bace226d19444f6b',1,'quasylab.sibilla.core.simulator.tests.pm.RBModelFactory.B_INDEX()']]],
-  ['beta_979',['BETA',['../d7/d10/classquasylab_1_1sibilla_1_1core_1_1markov_1_1TaxiScenarioMC.html#a8d56cc455f04a00d501ed4bd0b35ef33',1,'quasylab::sibilla::core::markov::TaxiScenarioMC']]],
-  ['bt_5findex_980',['BT_INDEX',['../d3/dd7/classquasylab_1_1sibilla_1_1core_1_1simulator_1_1tests_1_1pm_1_1RBModel.html#a302d3eeff581120f358226dfd9c065ef',1,'quasylab.sibilla.core.simulator.tests.pm.RBModel.BT_INDEX()'],['../d7/d98/classquasylab_1_1sibilla_1_1core_1_1simulator_1_1tests_1_1pm_1_1RBModelFactory.html#a595b26289e61ee8a85fda24f209cd6a7',1,'quasylab.sibilla.core.simulator.tests.pm.RBModelFactory.BT_INDEX()']]]
+  ['data_307',['DATA',['../d9/df6/enumquasylab_1_1sibilla_1_1core_1_1network_1_1client_1_1ClientCommand.html#ac0ff418cfee845700bef59b00389b939',1,'quasylab::sibilla::core::network::client::ClientCommand']]],
+  ['data_5fresponse_308',['DATA_RESPONSE',['../d3/d58/enumquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1MasterCommand.html#a975793304338fce31ff818289c40dbf4',1,'quasylab::sibilla::core::network::master::MasterCommand']]],
+  ['default_309',['DEFAULT',['../d0/db3/enumquasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1TCPNetworkManagerType.html#a78e8b0681c58187b0ea61856ab5f80c8',1,'quasylab.sibilla.core.network.communication.TCPNetworkManagerType.DEFAULT()'],['../dd/d19/enumquasylab_1_1sibilla_1_1core_1_1network_1_1communication_1_1UDPNetworkManagerType.html#abd3c3d06632be955be5feed9dde687b6',1,'quasylab.sibilla.core.network.communication.UDPNetworkManagerType.DEFAULT()']]],
+  ['devrtt_310',['devRTT',['../db/d34/classquasylab_1_1sibilla_1_1core_1_1network_1_1slave_1_1SlaveState.html#af9c083a9769b624ddfdc50553d5c62e1',1,'quasylab::sibilla::core::network::slave::SlaveState']]]
 ];

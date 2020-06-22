@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['e_999',['E',['../d1/d67/classquasylab_1_1sibilla_1_1core_1_1simulator_1_1tests_1_1TestTime.html#aa82bd430d26242a4b990b2dc95b9c049',1,'quasylab::sibilla::core::simulator::tests::TestTime']]],
-  ['estimatedrtt_1000',['estimatedRTT',['../db/d34/classquasylab_1_1sibilla_1_1core_1_1network_1_1slave_1_1SlaveState.html#a979745bb24a9afddee6ee989bf17b2f2',1,'quasylab::sibilla::core::network::slave::SlaveState']]]
+  ['localserverinfo_314',['localServerInfo',['../dd/dad/classquasylab_1_1sibilla_1_1core_1_1network_1_1slave_1_1BasicSimulationServer.html#a1c639d88628aba2d1c4959e0e66b22a9',1,'quasylab::sibilla::core::network::slave::BasicSimulationServer']]],
+  ['logger_315',['LOGGER',['../dd/dad/classquasylab_1_1sibilla_1_1core_1_1network_1_1slave_1_1BasicSimulationServer.html#ac140b6b727293f4de07df0902da1f909',1,'quasylab::sibilla::core::network::slave::BasicSimulationServer']]]
 ];
