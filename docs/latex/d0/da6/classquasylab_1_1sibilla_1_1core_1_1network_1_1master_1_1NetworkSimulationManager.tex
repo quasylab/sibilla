@@ -1,0 +1,87 @@
+\hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager}{}\doxysection{quasylab.\+sibilla.\+core.\+network.\+master.\+Network\+Simulation\+Manager$<$ S extends State $>$ Class Template Reference}
+\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager}\index{quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}}
+Inheritance diagram for quasylab.\+sibilla.\+core.\+network.\+master.\+Network\+Simulation\+Manager$<$ S extends State $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{d0/da6/classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager_a90b9f48093f4e6a259cf5339de8e99fd}{Network\+Simulation\+Manager}} (Random\+Generator random, Consumer$<$ Trajectory$<$ S $>$$>$ consumer, Simulation\+Monitor monitor, Model\+Definition$<$ S $>$ model\+Definition, \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1SimulationState}{Simulation\+State}} simulation\+State)
+\item 
+synchronized void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager_adb365bb0fda282deea0530e3dbc45749}{join}} ()  throws Interrupted\+Exception 
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static Simulation\+Manager\+Factory \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager_a7ff099a7c160d692494bd19fabb5b0de}{get\+Network\+Simulation\+Manager\+Factory}} (\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1SimulationState}{Simulation\+State}} simulation\+State)
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager_a5eed3bfeb5fb98384d5320350a55b733}{start\+Tasks\+Handling}} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Handles and coordinates a simulation between the slave servers
+
+
+\begin{DoxyParams}{Parameters}
+{\em $<$\+S$>$} & The \mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+past.\+State}} of the simulation model. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyAuthor}{Author}
+Belenchia Matteo 
+
+Stelluti Francesco Pio 
+
+Zamponi Marco 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager_a90b9f48093f4e6a259cf5339de8e99fd}\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager_a90b9f48093f4e6a259cf5339de8e99fd}} 
+\index{quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}!NetworkSimulationManager@{NetworkSimulationManager}}
+\index{NetworkSimulationManager@{NetworkSimulationManager}!quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{NetworkSimulationManager()}{NetworkSimulationManager()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager}{quasylab.\+sibilla.\+core.\+network.\+master.\+Network\+Simulation\+Manager}}$<$ S extends State $>$.\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager}{Network\+Simulation\+Manager}} (\begin{DoxyParamCaption}\item[{Random\+Generator}]{random,  }\item[{Consumer$<$ Trajectory$<$ S $>$$>$}]{consumer,  }\item[{Simulation\+Monitor}]{monitor,  }\item[{Model\+Definition$<$ S $>$}]{model\+Definition,  }\item[{\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1SimulationState}{Simulation\+State}}}]{simulation\+State }\end{DoxyParamCaption})}
+
+Creates a \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager}{Network\+Simulation\+Manager}} with the parameters given in input
+
+
+\begin{DoxyParams}{Parameters}
+{\em random} & Random\+Generator used in the simulation \\
+\hline
+{\em consumer} & \\
+\hline
+{\em monitor} & T\+O\+DO \\
+\hline
+{\em model\+Definition} & model definition that represent the Model used in the simulation \\
+\hline
+{\em simulation\+State} & state of the simulation that is being executed \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager_a7ff099a7c160d692494bd19fabb5b0de}\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager_a7ff099a7c160d692494bd19fabb5b0de}} 
+\index{quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}!getNetworkSimulationManagerFactory@{getNetworkSimulationManagerFactory}}
+\index{getNetworkSimulationManagerFactory@{getNetworkSimulationManagerFactory}!quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{getNetworkSimulationManagerFactory()}{getNetworkSimulationManagerFactory()}}
+{\footnotesize\ttfamily static Simulation\+Manager\+Factory \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager}{quasylab.\+sibilla.\+core.\+network.\+master.\+Network\+Simulation\+Manager}}$<$ S extends State $>$.get\+Network\+Simulation\+Manager\+Factory (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1SimulationState}{Simulation\+State}}}]{simulation\+State }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager_adb365bb0fda282deea0530e3dbc45749}\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager_adb365bb0fda282deea0530e3dbc45749}} 
+\index{quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}!join@{join}}
+\index{join@{join}!quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{join()}{join()}}
+{\footnotesize\ttfamily synchronized void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager}{quasylab.\+sibilla.\+core.\+network.\+master.\+Network\+Simulation\+Manager}}$<$ S extends State $>$.join (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) throws Interrupted\+Exception}
+
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager_a5eed3bfeb5fb98384d5320350a55b733}\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager_a5eed3bfeb5fb98384d5320350a55b733}} 
+\index{quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}!startTasksHandling@{startTasksHandling}}
+\index{startTasksHandling@{startTasksHandling}!quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$@{quasylab.sibilla.core.network.master.NetworkSimulationManager$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{startTasksHandling()}{startTasksHandling()}}
+{\footnotesize\ttfamily void \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1master_1_1NetworkSimulationManager}{quasylab.\+sibilla.\+core.\+network.\+master.\+Network\+Simulation\+Manager}}$<$ S extends State $>$.start\+Tasks\+Handling (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+

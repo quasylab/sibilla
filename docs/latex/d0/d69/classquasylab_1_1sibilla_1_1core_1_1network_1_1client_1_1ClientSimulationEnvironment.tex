@@ -1,0 +1,52 @@
+\hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1client_1_1ClientSimulationEnvironment}{}\doxysection{quasylab.\+sibilla.\+core.\+network.\+client.\+Client\+Simulation\+Environment$<$ S extends State $>$ Class Template Reference}
+\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1client_1_1ClientSimulationEnvironment}\index{quasylab.sibilla.core.network.client.ClientSimulationEnvironment$<$ S extends State $>$@{quasylab.sibilla.core.network.client.ClientSimulationEnvironment$<$ S extends State $>$}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1client_1_1ClientSimulationEnvironment_a4273db09d8b3f951e8cf1900d404b284}{Client\+Simulation\+Environment}} (Random\+Generator random, Model\+Definition$<$ S $>$ model\+Definition, Model$<$ S $>$ model, S initial\+State, Sampling\+Function$<$ S $>$ sampling\+\_\+function, int replica, double deadline, \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkInfo}{Network\+Info}} master\+Network\+Info)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Manages the connection with a master server to submit simulations and retrieve related results.
+
+
+\begin{DoxyParams}{Parameters}
+{\em $<$\+S$>$} & The \mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+past.\+State}} of the simulation model. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyAuthor}{Author}
+Stelluti Francesco Pio 
+
+Zamponi Marco 
+\end{DoxyAuthor}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classquasylab_1_1sibilla_1_1core_1_1network_1_1client_1_1ClientSimulationEnvironment_a4273db09d8b3f951e8cf1900d404b284}\label{classquasylab_1_1sibilla_1_1core_1_1network_1_1client_1_1ClientSimulationEnvironment_a4273db09d8b3f951e8cf1900d404b284}} 
+\index{quasylab.sibilla.core.network.client.ClientSimulationEnvironment$<$ S extends State $>$@{quasylab.sibilla.core.network.client.ClientSimulationEnvironment$<$ S extends State $>$}!ClientSimulationEnvironment@{ClientSimulationEnvironment}}
+\index{ClientSimulationEnvironment@{ClientSimulationEnvironment}!quasylab.sibilla.core.network.client.ClientSimulationEnvironment$<$ S extends State $>$@{quasylab.sibilla.core.network.client.ClientSimulationEnvironment$<$ S extends State $>$}}
+\doxysubsubsection{\texorpdfstring{ClientSimulationEnvironment()}{ClientSimulationEnvironment()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1client_1_1ClientSimulationEnvironment}{quasylab.\+sibilla.\+core.\+network.\+client.\+Client\+Simulation\+Environment}}$<$ S extends State $>$.\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1client_1_1ClientSimulationEnvironment}{Client\+Simulation\+Environment}} (\begin{DoxyParamCaption}\item[{Random\+Generator}]{random,  }\item[{Model\+Definition$<$ S $>$}]{model\+Definition,  }\item[{Model$<$ S $>$}]{model,  }\item[{S}]{initial\+State,  }\item[{Sampling\+Function$<$ S $>$}]{sampling\+\_\+function,  }\item[{int}]{replica,  }\item[{double}]{deadline,  }\item[{\mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkInfo}{Network\+Info}}}]{master\+Network\+Info }\end{DoxyParamCaption})}
+
+Initiates a new client that submits simulations using the parameters of the simulation to execute and the network related data of the master server that will manage such simulation.
+
+
+\begin{DoxyParams}{Parameters}
+{\em random} & \mbox{\hyperlink{}{org.\+apache.\+commons.\+math3.\+random.\+Random\+Generator}} of the simulation. \\
+\hline
+{\em model\+Definition} & \mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+models.\+Model\+Definition}} that defines the simulation model to be sent. \\
+\hline
+{\em model} & The \mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+models.\+Model}} of the simulation. \\
+\hline
+{\em initial\+State} & The initial \mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+past.\+State}} of the model. \\
+\hline
+{\em sampling\+\_\+function} & The \mbox{\hyperlink{}{quasylab.\+sibilla.\+core.\+simulator.\+sampling.\+Sampling\+Function}} that will be used to collect data. \\
+\hline
+{\em replica} & Repetitions of the simulation. \\
+\hline
+{\em deadline} & Time interval between two samplings. \\
+\hline
+{\em master\+Network\+Info} & \mbox{\hyperlink{classquasylab_1_1sibilla_1_1core_1_1network_1_1NetworkInfo}{quasylab.\+sibilla.\+core.\+network.\+Network\+Info}} of the master to be reached. \\
+\hline
+\end{DoxyParams}
