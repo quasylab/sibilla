@@ -24,5 +24,55 @@
 
 package quasylab.sibilla.examples.pm.taxis;
 
+import quasylab.sibilla.core.models.Model;
+import quasylab.sibilla.core.models.pm.PopulationState;
+import quasylab.sibilla.core.simulator.SimulationEnvironment;
+
+
 public class Main {
+
+    public static void main (String[] args) throws InterruptedException {
+
+
+        TaxiDefinition def = new TaxiDefinition();
+        SimulationEnvironment simulator = new SimulationEnvironment();
+        SimulationEnvironment.silent = false;
+
+        System.out.println("");
+
+        int size = 100;
+        while (size == 100) {
+            size++;
+            int users = 100;
+            int taxis = 60;
+
+            PopulationState state = def.state(taxis, 0, 0, 0, users,0,0,0);
+            Model<PopulationState> model = def.createModel();
+            double probability = simulator.reachability(0.01, 0.01, 720, model,
+                    state , s -> (fractionOfAngryUsers(s) > 0.1));
+            // def.state(0,0,0,0,2000,100)
+            System.out.println("");
+            System.out.println("===================================================================");
+            System.out.println("");
+
+
+            System.out.println("User = " + users);
+            System.out.println("Taxi = " + taxis);
+
+            System.out.println("");
+            System.out.println("Probability = " + probability);
+            System.out.println("");
+            System.out.println("===================================================================");
+            System.out.println("");
+
+
+        }
+    }
+
+    public static double fractionOfAngryUsers(PopulationState s) {
+        double totalUsers = s.getOccupancy(TaxiDefinition.S,TaxiDefinition.L,TaxiDefinition.A,TaxiDefinition.W,TaxiDefinition.I);
+        double fraction = s.getOccupancy(TaxiDefinition.A)/(totalUsers);
+        return fraction;
+    }
+
 }
