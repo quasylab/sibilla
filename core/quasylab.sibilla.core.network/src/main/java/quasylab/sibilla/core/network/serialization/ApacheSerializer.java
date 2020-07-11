@@ -26,6 +26,8 @@
 
 package quasylab.sibilla.core.network.serialization;
 
+import org.apache.commons.lang3.SerializationUtils;
+
 import java.io.Serializable;
 
 /**
@@ -35,15 +37,7 @@ import java.io.Serializable;
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */
-public interface Serializer {
-
-    public static Serializer getSerializer(SerializerType type) {
-        switch (type) {
-            case APACHE:
-            default:
-                return new ApacheSerializer();
-        }
-    }
+public class ApacheSerializer implements Serializer {
 
     /**
      * Serializes a Serializable instance.
@@ -51,7 +45,9 @@ public interface Serializer {
      * @param toSerialize instance to be compressed
      * @return serialized byte array
      */
-    public byte[] serialize(Serializable toSerialize);
+    public byte[] serialize(Serializable toSerialize) {
+        return SerializationUtils.serialize(toSerialize);
+    }
 
     /**
      * Deserializes a byte array.
@@ -59,7 +55,12 @@ public interface Serializer {
      * @param toDeserialize byte array to be deserialized
      * @return deserialized Serializable instance
      */
-    public Serializable deserialize(byte[] toDeserialize);
+    public Serializable deserialize(byte[] toDeserialize) {
+        return SerializationUtils.deserialize(toDeserialize);
+    }
 
-    public SerializerType getType();
+    @Override
+    public SerializerType getType() {
+        return SerializerType.APACHE;
+    }
 }

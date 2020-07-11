@@ -28,6 +28,7 @@ package quasylab.sibilla.examples.servers.slave;
 
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
+import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.util.NetworkUtils;
@@ -88,7 +89,7 @@ public class SlaveApplication {
                 masterSimulationNetworkManagerType));
 
 
-        new DiscoverableBasicSimulationServer(localDiscoveryPort, masterSimulationNetworkManagerType, masterDiscoveryNetworkManagerType).start(localSimulationPort);
+        new DiscoverableBasicSimulationServer(localDiscoveryPort, masterSimulationNetworkManagerType, masterDiscoveryNetworkManagerType, SerializerType.APACHE).start(localSimulationPort);
     }
 
 

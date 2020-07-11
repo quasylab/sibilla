@@ -1,5 +1,6 @@
 package quasylab.sibilla.core.network;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -34,7 +35,11 @@ public class HostLoggerSupplier {
 
             loggerInstance = Logger.getLogger(String.format("%sLog_%s", hostName, strDate));
             try {
-                FileHandler fh = new FileHandler(String.format("./%s_%s.log", hostName, strDate));
+                File dir = new File("./logs");
+                if (!dir.exists()) {
+                    dir.mkdir();
+                }
+                FileHandler fh = new FileHandler(String.format("./logs/%s_%s.log", hostName, strDate));
                 loggerInstance.addHandler(fh);
                 SimpleFormatter formatter = new SimpleFormatter();
                 fh.setFormatter(formatter);

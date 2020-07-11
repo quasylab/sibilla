@@ -34,8 +34,9 @@ import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.communication.UDPNetworkManager;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
-import quasylab.sibilla.core.network.serialization.CustomClassLoader;
+import quasylab.sibilla.core.network.loaders.CustomClassLoader;
 import quasylab.sibilla.core.network.serialization.Serializer;
+import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
@@ -114,6 +115,8 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
      */
     private int remoteDiscoveryPort;
 
+    private Serializer serializer;
+
     /**
      * Creates and starts up a master server with the given parameters.
      *
@@ -136,11 +139,12 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
 
     public MasterServerSimulationEnvironment(int localDiscoveryPort, int remoteDiscoveryPort,
                                              UDPNetworkManagerType discoveryNetworkManager, int localSimulationPort,
-                                             TCPNetworkManagerType simulationNetworkManager, PropertyChangeListener... listeners) {
+                                             TCPNetworkManagerType simulationNetworkManager, SerializerType serializerType, PropertyChangeListener... listeners) {
 
         this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
 
         try {
+            this.serializer = Serializer.getSerializer(serializerType);
             localDiscoveryInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), localDiscoveryPort, discoveryNetworkManager);
             localSimulationInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), localSimulationPort,
                     simulationNetworkManager);
@@ -193,7 +197,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
      */
     private void broadcastToSingleInterface(InetAddress address) {
         try {
-            discoveryNetworkManager.writeObject(Serializer.serialize(localDiscoveryInfo), address,
+            discoveryNetworkManager.writeObject(serializer.serialize(localDiscoveryInfo), address,
                     remoteDiscoveryPort);
             LOGGER.info(String.format("Sent the discovery broadcast packet to the port: [%d]", remoteDiscoveryPort));
         } catch (IOException e) {
@@ -207,7 +211,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     private void startDiscoveryServer() {
         try {
             while (true) {
-                NetworkInfo slaveSimulationServer = (NetworkInfo) Serializer
+                NetworkInfo slaveSimulationServer = (NetworkInfo) serializer
                         .deserialize(discoveryNetworkManager.readObject());
                 slaveDiscoveryConnectionExecutor.execute(() -> manageServers(slaveSimulationServer));
             }
@@ -268,7 +272,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
                     ClientCommand.CLOSE_CONNECTION,
                     () -> this.closeConnectionWithClient(simulationNetworkManager, clientIsActive));
             while (clientIsActive.get()) {
-                ClientCommand command = (ClientCommand) Serializer
+                ClientCommand command = (ClientCommand) serializer
                         .deserialize(simulationNetworkManager.readObject());
                 LOGGER.info(String.format("[%s] command received by client - %s", command,
                         simulationNetworkManager.getNetworkInfo().toString()));
@@ -286,18 +290,18 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     /**
      * Closes a client related network communication, removes the received simulation model from the master memory and signals that the client is no longer communicating with the master server.
      *
-     * @param client          client related {@link quasylab.sibilla.core.network.communication.TCPNetworkManager} which connection has to be closed.
-     * @param clientActive    whether the client is active or not.
+     * @param client       client related {@link quasylab.sibilla.core.network.communication.TCPNetworkManager} which connection has to be closed.
+     * @param clientActive whether the client is active or not.
      */
     private void closeConnectionWithClient(TCPNetworkManager client, AtomicBoolean clientActive) {
         try {
-            String modelName = (String) Serializer.deserialize(client.readObject());
+            String modelName = (String) serializer.deserialize(client.readObject());
             LOGGER.info(String.format("[%s] Model name to be deleted read by client: %s", modelName,
                     client.getNetworkInfo().toString()));
             clientActive.set(false);
             CustomClassLoader.removeClassBytes(modelName);
             LOGGER.info(String.format("[%s] Model deleted off the class loader", modelName));
-            client.writeObject(Serializer.serialize(MasterCommand.CLOSE_CONNECTION));
+            client.writeObject(serializer.serialize(MasterCommand.CLOSE_CONNECTION));
             LOGGER.info(String.format("[%s] command sent to the client: %s", MasterCommand.CLOSE_CONNECTION,
                     client.getNetworkInfo().toString()));
 
@@ -318,13 +322,13 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
      */
     private void handleSimulationDataSet(TCPNetworkManager client, SimulationState simulationState) {
         try {
-            SimulationDataSet<State> dataSet = (SimulationDataSet<State>) Serializer
+            SimulationDataSet<State> dataSet = (SimulationDataSet<State>) serializer
                     .deserialize(client.readObject());
             simulationState.setSimulationDataSet(dataSet);
             simulationState.setClientConnection(client);
             LOGGER.info(
                     String.format("Simulation data received by the client: %s", client.getNetworkInfo().toString()));
-            client.writeObject(Serializer.serialize(MasterCommand.DATA_RESPONSE));
+            client.writeObject(serializer.serialize(MasterCommand.DATA_RESPONSE));
             LOGGER.info(String.format("[%s] command sent to the client: %s", MasterCommand.DATA_RESPONSE,
                     client.getNetworkInfo().toString()));
             this.submitSimulations(client, dataSet, simulationState);
@@ -341,7 +345,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     private void submitSimulations(TCPNetworkManager client, SimulationDataSet dataSet, SimulationState simulationState) {
         try {
             SimulationEnvironment sim = new SimulationEnvironment(
-                    NetworkSimulationManager.getNetworkSimulationManagerFactory(simulationState));
+                    NetworkSimulationManager.getNetworkSimulationManagerFactory(simulationState, serializer.getType()));
             sim.simulate(dataSet.getRandomGenerator(), dataSet.getModel(), dataSet.getModelInitialState(),
                     dataSet.getModelSamplingFunction(), dataSet.getReplica(), dataSet.getDeadline());
             this.state.increaseExecutedSimulations();
@@ -358,7 +362,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
      */
     private void loadModelClass(TCPNetworkManager client, SimulationState simulationState) {
         try {
-            String modelName = (String) Serializer.deserialize(client.readObject());
+            String modelName = (String) serializer.deserialize(client.readObject());
             LOGGER.info(String.format("[%s] Model name read by client: %s", modelName,
                     client.getNetworkInfo().toString()));
             byte[] modelBytes = client.readObject();
@@ -366,7 +370,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
             String classLoadedName = Class.forName(modelName).getName();
             simulationState.setSimulationModelName(classLoadedName);
             LOGGER.info(String.format("[%s] Class loaded with success", classLoadedName));
-            client.writeObject(Serializer.serialize(MasterCommand.INIT_RESPONSE));
+            client.writeObject(serializer.serialize(MasterCommand.INIT_RESPONSE));
             LOGGER.info(String.format("[%s] command sent to the client: %s", MasterCommand.INIT_RESPONSE,
                     client.getNetworkInfo().toString()));
         } catch (ClassCastException e) {
@@ -388,7 +392,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
      */
     private void respondPingRequest(TCPNetworkManager client) {
         try {
-            client.writeObject(Serializer.serialize(MasterCommand.PONG));
+            client.writeObject(serializer.serialize(MasterCommand.PONG));
             LOGGER.info(String.format("[%s] command sent to the client: %s", MasterCommand.PONG,
                     client.getNetworkInfo().toString()));
         } catch (IOException e) {
@@ -403,10 +407,10 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
             SimulationState state = (SimulationState) evt.getNewValue();
             if (state.isConcluded()) {
                 try {
-                    state.clientConnection().writeObject(Serializer.serialize(MasterCommand.RESULTS));
+                    state.clientConnection().writeObject(serializer.serialize(MasterCommand.RESULTS));
                     LOGGER.info(String.format("[%s] command sent to the client: %s", MasterCommand.RESULTS,
                             state.clientConnection().getNetworkInfo().toString()));
-                    state.clientConnection().writeObject(Serializer.serialize(state.simulationDataSet().getModelSamplingFunction()));
+                    state.clientConnection().writeObject(serializer.serialize(state.simulationDataSet().getModelSamplingFunction()));
                     LOGGER.info(String.format("Results have been sent to the client: %s",
                             state.clientConnection().getNetworkInfo().toString()));
                 } catch (IOException e) {
