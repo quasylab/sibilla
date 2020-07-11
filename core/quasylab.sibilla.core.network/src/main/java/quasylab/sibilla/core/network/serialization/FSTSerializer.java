@@ -7,8 +7,9 @@ import java.io.Serializable;
 public class FSTSerializer implements Serializer {
 
     private FSTConfiguration conf;
-    public FSTSerializer(){
-        conf = FSTConfiguration.createDefaultConfiguration();
+
+    public FSTSerializer(FSTConfiguration conf) {
+        this.conf = conf;
     }
 
     @Override
