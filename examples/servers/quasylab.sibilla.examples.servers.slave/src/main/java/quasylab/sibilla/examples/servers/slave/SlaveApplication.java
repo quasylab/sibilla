@@ -89,7 +89,7 @@ public class SlaveApplication {
                 masterSimulationNetworkManagerType));
 
 
-        new DiscoverableBasicSimulationServer(localDiscoveryPort, masterSimulationNetworkManagerType, masterDiscoveryNetworkManagerType, SerializerType.APACHE).start(localSimulationPort);
+        new DiscoverableBasicSimulationServer(localDiscoveryPort, masterSimulationNetworkManagerType, masterDiscoveryNetworkManagerType, SerializerType.FST).start(localSimulationPort);
     }
 
 

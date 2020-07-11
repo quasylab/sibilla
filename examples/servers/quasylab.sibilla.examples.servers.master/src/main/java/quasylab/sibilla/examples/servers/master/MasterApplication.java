@@ -105,7 +105,7 @@ public class MasterApplication implements CommandLineRunner {
 
         new MasterServerSimulationEnvironment(localDiscoveryPort,
                 remoteDiscoveryPort, slaveDiscoveryNetworkManagerType, localSimulationPort,
-                clientSimulationNetworkManagerType, SerializerType.APACHE, monitoringServerComponent);
+                clientSimulationNetworkManagerType, SerializerType.FST, monitoringServerComponent);
     }
 
 }

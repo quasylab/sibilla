@@ -39,6 +39,8 @@ public interface Serializer {
 
     public static Serializer getSerializer(SerializerType type) {
         switch (type) {
+            case FST:
+                return new FSTSerializer();
             case APACHE:
             default:
                 return new ApacheSerializer();

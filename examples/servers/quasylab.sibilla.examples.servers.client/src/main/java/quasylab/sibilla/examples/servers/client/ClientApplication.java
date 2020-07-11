@@ -101,7 +101,7 @@ public class ClientApplication implements Serializable {
 
         new ClientSimulationEnvironment(
                 RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), SEIRModelDefinition.getCollection(SAMPLINGS, DEADLINE),
-                REPLICA, DEADLINE, masterServerInfo, SerializerType.APACHE);
+                REPLICA, DEADLINE, masterServerInfo, SerializerType.FST);
 
     }
 
