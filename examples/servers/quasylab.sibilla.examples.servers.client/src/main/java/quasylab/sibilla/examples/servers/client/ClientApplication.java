@@ -29,6 +29,8 @@ package quasylab.sibilla.examples.servers.client;
 import org.apache.commons.math3.random.AbstractRandomGenerator;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
+import quasylab.sibilla.core.network.benchmark.Benchmark;
+import quasylab.sibilla.core.network.benchmark.NewBenchmark;
 import quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.serialization.SerializerType;
@@ -39,6 +41,7 @@ import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -99,9 +102,17 @@ public class ClientApplication implements Serializable {
 
         SEIRModelDefinition modelDefinition = new SEIRModelDefinition();
 
-        new ClientSimulationEnvironment(
-                RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), SEIRModelDefinition.getCollection(SAMPLINGS, DEADLINE),
-                REPLICA, DEADLINE, masterServerInfo, SerializerType.FST);
+        NewBenchmark executionBenchmark = new NewBenchmark("./benchmarks/client", "Client Example", "csv");
+
+        for (int i = 1; i <= 3; i++) {
+            executionBenchmark.run(() -> {
+                new ClientSimulationEnvironment(
+                        RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), SEIRModelDefinition.getCollection(SAMPLINGS, DEADLINE),
+                        REPLICA, DEADLINE, masterServerInfo, SerializerType.FST);
+                return List.of(0.0);
+            });
+        }
+
 
     }
 
