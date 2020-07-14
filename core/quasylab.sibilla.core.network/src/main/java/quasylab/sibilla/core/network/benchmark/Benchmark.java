@@ -26,7 +26,7 @@ public class Benchmark {
 
             for (int i = 0; i < replica; i++) {
                 fileWriter.write(String.valueOf(i));
-                fileWriter.write(";");
+                fileWriter.write(",");
                 StopWatch watch = new StopWatch();
                 watch.start();
                 List<Double> otherData = e.call();
@@ -35,7 +35,7 @@ public class Benchmark {
                 double secValue = nanoValue / (Math.pow(10, 9));
                 fileWriter.write(String.valueOf(secValue));
                 for (Double n : otherData) {
-                    fileWriter.write(";");
+                    fileWriter.write(",");
                     fileWriter.write(String.valueOf(n));
                 }
                 fileWriter.newLine();

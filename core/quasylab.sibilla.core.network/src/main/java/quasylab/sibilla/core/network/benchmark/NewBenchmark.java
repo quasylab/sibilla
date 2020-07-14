@@ -38,7 +38,7 @@ public class NewBenchmark {
             }
             BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file, true));
             fileWriter.write(String.valueOf(executedRuns++));
-            fileWriter.write(";");
+            fileWriter.write(",");
             StopWatch watch = new StopWatch();
             watch.start();
             List<Double> otherData = e.call();
@@ -47,7 +47,7 @@ public class NewBenchmark {
             double secValue = nanoValue / (Math.pow(10, 9));
             fileWriter.write(String.valueOf(secValue));
             for (Double n : otherData) {
-                fileWriter.write(";");
+                fileWriter.write(",");
                 fileWriter.write(String.valueOf(n));
             }
             fileWriter.newLine();
