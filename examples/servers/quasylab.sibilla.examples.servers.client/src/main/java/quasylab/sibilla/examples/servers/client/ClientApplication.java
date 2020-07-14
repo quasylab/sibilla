@@ -51,7 +51,7 @@ public class ClientApplication implements Serializable {
     public final static double DEADLINE = 600;
     private static Logger LOGGER;
     private static final long serialVersionUID = 1L;
-    private static final int REPLICA = 100;
+    private static final int REPLICA = 10000;
 
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
 
@@ -104,7 +104,7 @@ public class ClientApplication implements Serializable {
 
         NewBenchmark executionBenchmark = new NewBenchmark("./benchmarks/client", "Client Example", "csv");
 
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= 10; i++) {
             executionBenchmark.run(() -> {
                 new ClientSimulationEnvironment(
                         RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), SEIRModelDefinition.getCollection(SAMPLINGS, DEADLINE),
