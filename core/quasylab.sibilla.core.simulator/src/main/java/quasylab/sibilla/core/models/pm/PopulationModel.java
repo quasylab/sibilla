@@ -35,7 +35,11 @@ import quasylab.sibilla.core.simulator.util.WeightedElement;
 import quasylab.sibilla.core.simulator.util.WeightedLinkedList;
 import quasylab.sibilla.core.simulator.util.WeightedStructure;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -112,13 +116,28 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
 	}
 
 	@Override
-	public byte[] toByteArray(Sample<? extends State> sample) {
-		return new byte[0];
+	public byte[] toByteArray(Sample<? extends State> sample) throws IOException {
+		PopulationState state = (PopulationState) sample.getValue();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		baos.write(ByteBuffer.allocate(8).putDouble(sample.getTime()).array());
+		baos.write(ByteBuffer.allocate(4).putInt(state.getPopulationVector().length).array());
+		for(int popVec : state.getPopulationVector()){
+			baos.write(ByteBuffer.allocate(4).putInt(popVec).array());
+		}
+		return baos.toByteArray();
 	}
 
 	@Override
-	public Sample<PopulationState> fromByteArray(byte[] bytes) {
-		return null;
+	public Sample<PopulationState> fromByteArray(byte[] bytes)throws IOException {
+		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+		double time = ByteBuffer.wrap(bais.readNBytes(8)).getDouble();
+		int length = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
+		int[] vector = new int[length];
+		for(int i = 0; i<length; i++){
+			System.out.println("Available "+bais.available());
+			vector[i] = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
+		}
+		return new Sample(time, new PopulationState(vector));
 	}
 
 	@Override

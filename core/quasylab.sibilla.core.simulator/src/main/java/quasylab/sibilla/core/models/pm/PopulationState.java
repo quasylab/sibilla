@@ -93,7 +93,11 @@ public class PopulationState implements State {
 	public double population( ) {
 		return population;
 	}
-	
+
+	public int[] getPopulationVector() {
+		return populationVector;
+	}
+
 	public double getOccupancy( int i ) {
 		try {
 			return populationVector[i];

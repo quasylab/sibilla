@@ -40,7 +40,7 @@ public class ComputationResultSerializer {
         return baos.toByteArray();
     }
 
-    private static byte[] serializeSample(Sample<? extends State> sample, Model<? extends State> model) {
+    private static byte[] serializeSample(Sample<? extends State> sample, Model<? extends State> model) throws IOException {
         return model.toByteArray(sample);
     }
 
@@ -49,7 +49,8 @@ public class ComputationResultSerializer {
         LinkedList<Trajectory> trajectories = new LinkedList<>();
         while (bais.available() > 0) {
             int samples = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
-            trajectories.add(deserializeTrajectory(bais.readNBytes(samples * model.sampleByteArraySize()), model, samples));
+            Trajectory<?> trajectory = deserializeTrajectory(bais.readNBytes(28 + samples * model.sampleByteArraySize()), model, samples);
+            trajectories.add(trajectory);
         }
         return new ComputationResult(trajectories);
     }
@@ -67,7 +68,7 @@ public class ComputationResultSerializer {
         return t;
     }
 
-    private static Sample deserializeSample(byte[] toDeserialize, Model<? extends State> model) {
+    private static Sample deserializeSample(byte[] toDeserialize, Model<? extends State> model) throws IOException{
         return model.fromByteArray(toDeserialize);
     }
 }

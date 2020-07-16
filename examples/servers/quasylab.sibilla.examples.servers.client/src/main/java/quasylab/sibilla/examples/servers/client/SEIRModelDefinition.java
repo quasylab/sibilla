@@ -56,7 +56,7 @@ public class SEIRModelDefinition implements PopulationModelDefinition, Serializa
 
     @Override
     public int stateArity() {
-        return 0;
+        return 4;
     }
 
     @Override

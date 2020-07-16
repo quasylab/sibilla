@@ -30,6 +30,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.sampling.Sample;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -64,9 +65,9 @@ public interface Model<S extends State> {
 
     ModelDefinition<S> getModelDefinition();
 
-    byte[] toByteArray(Sample<? extends State> sample);
+    byte[] toByteArray(Sample<? extends State> sample) throws IOException;
 
-    Sample<S> fromByteArray(byte[] bytes);
+    Sample<S> fromByteArray(byte[] bytes) throws IOException;
 
     int sampleByteArraySize();
 

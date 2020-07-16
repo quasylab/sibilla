@@ -26,13 +26,15 @@
 
 package quasylab.sibilla.core.simulator.sampling;
 
+import quasylab.sibilla.core.past.State;
+
 import java.io.Serializable;
 
 /**
  * @author loreti
  *
  */
-public class Sample<T> implements Serializable{
+public class Sample<T extends State> implements Serializable{
 	
 	private static final long serialVersionUID = -2981890753216588999L;
 

@@ -409,7 +409,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
                 return List.of();
             });
             elapsedTime = System.nanoTime() - elapsedTime;
-            System.out.println(obj.results.getResults().size());
+
 
             state.update(elapsedTime, obj.results.getResults().size());
             LOGGER.info(String.format("The results from the computation have been received from the server - %s",
