@@ -146,4 +146,7 @@ public class SimulationTask<S extends State> implements Supplier<Trajectory<S>>,
 		return elapsedTime;
 	}
 
+	public SimulationUnit<S> getUnit() {
+		return unit;
+	}
 }

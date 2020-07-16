@@ -36,6 +36,7 @@ import quasylab.sibilla.core.network.benchmark.NewBenchmark;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.loaders.ClassBytesLoader;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializer;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.SlaveCommand;
@@ -403,10 +404,12 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             });
 
             benchmarkDeserialization.run(() -> {
-                obj.results = (ComputationResult<S>) serializer.deserialize(obj.toReceive);
+                obj.results = (ComputationResult<S>) ComputationResultSerializer.deserialize(obj.toReceive,
+                        simulationState.simulationDataSet().getModel());
                 return List.of();
             });
             elapsedTime = System.nanoTime() - elapsedTime;
+            System.out.println(obj.results.getResults().size());
 
             state.update(elapsedTime, obj.results.getResults().size());
             LOGGER.info(String.format("The results from the computation have been received from the server - %s",

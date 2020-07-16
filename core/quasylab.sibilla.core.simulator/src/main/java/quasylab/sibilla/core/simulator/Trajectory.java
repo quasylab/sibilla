@@ -39,18 +39,18 @@ import java.util.List;
  *
  */
 public class Trajectory<S extends State> implements Serializable {
-	
+
 	private static final long serialVersionUID = -9039722623650234376L;
 	private List<Sample<S>> data;
 	private double start = Double.NaN;
 	private double end = Double.NaN;
-	private boolean succesfull; 
+	private boolean succesfull;
 	private long generationTime = -1;
 
 	public Trajectory() {
 		this.data = new LinkedList<Sample<S>>();
 	}
-	
+
 	public void add( double time , S value ) {
 		if (!Double.isFinite(start)) {
 			this.start = time;
@@ -60,7 +60,7 @@ public class Trajectory<S extends State> implements Serializable {
 		}
 		this.data.add( new Sample<S>(time,value));
 	}
-	
+
 	public void sample(SamplingFunction<S> f) {
 		if (!Double.isFinite(start)) {
 			throw new IllegalArgumentException();
@@ -70,6 +70,8 @@ public class Trajectory<S extends State> implements Serializable {
 		f.end(end);
 	}
 
+	public List<Sample<S>> getData() { return data; }
+
 	public double getStart() {
 		return start;
 	}
@@ -77,7 +79,7 @@ public class Trajectory<S extends State> implements Serializable {
 	public double getEnd() {
 		return end;
 	}
-	
+
 	public int size() {
 		return data.size();
 	}
@@ -109,6 +111,14 @@ public class Trajectory<S extends State> implements Serializable {
 	public void setGenerationTime(long generationTime) {
 		this.generationTime = generationTime;
 	}
-	
+
+
+	public void setStart(double start) {
+		this.start = start;
+	}
+
+	public void setEnd(double end) {
+		this.end = end;
+	}
 
 }

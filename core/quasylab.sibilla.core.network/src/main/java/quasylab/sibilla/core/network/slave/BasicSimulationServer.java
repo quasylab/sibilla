@@ -26,6 +26,7 @@
 
 package quasylab.sibilla.core.network.slave;
 
+import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
@@ -36,6 +37,7 @@ import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.loaders.CustomClassLoader;
 import quasylab.sibilla.core.network.master.MasterCommand;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializer;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.util.NetworkUtils;
@@ -237,6 +239,8 @@ public class BasicSimulationServer implements SimulationServer {
             LinkedList<Trajectory<?>> results = new LinkedList<>();
             CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
 
+            Model model = networkTask.getTasks().get(0).getUnit().getModel();
+
             final var obj = new Object() {
                 private byte[] toSend;
             };
@@ -253,7 +257,7 @@ public class BasicSimulationServer implements SimulationServer {
             });
 
             benchmarkSerialization.run(() -> {
-                obj.toSend = serializer.serialize(new ComputationResult(results));
+                obj.toSend = ComputationResultSerializer.serialize(new ComputationResult(results), model);
                 return List.of((double) obj.toSend.length);
             });
 

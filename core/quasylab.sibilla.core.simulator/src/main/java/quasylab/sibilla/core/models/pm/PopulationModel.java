@@ -29,6 +29,8 @@ package quasylab.sibilla.core.models.pm;
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.MarkovProcess;
 import quasylab.sibilla.core.models.StepFunction;
+import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.simulator.sampling.Sample;
 import quasylab.sibilla.core.simulator.util.WeightedElement;
 import quasylab.sibilla.core.simulator.util.WeightedLinkedList;
 import quasylab.sibilla.core.simulator.util.WeightedStructure;
@@ -38,16 +40,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 
 /**
- * 
+ *
  * This class implements a population model. This class is parametrised with
  * respect to types <code>S</code> and and <code>T</code>. The former is the
  * data type used to identify population species in the population vector.
  * Parameter <code>T</code> identifies environment
- * 
+ *
  * @author loreti
  *
  */
@@ -70,7 +71,7 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
 
 	@Override
 	public WeightedStructure<StepFunction<PopulationState>> getTransitions(RandomGenerator r, double now, PopulationState state ) {
-		WeightedLinkedList<StepFunction<PopulationState>> activities = 
+		WeightedLinkedList<StepFunction<PopulationState>> activities =
 				new WeightedLinkedList<>();
 		for (PopulationRule rule : rules) {
 			PopulationTransition tra = rule.apply(r, now, state);
@@ -108,5 +109,20 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
 	@Override
 	public PopulationModelDefinition getModelDefinition() {
 		return modelDefinition;
+	}
+
+	@Override
+	public byte[] toByteArray(Sample<? extends State> sample) {
+		return new byte[0];
+	}
+
+	@Override
+	public Sample<PopulationState> fromByteArray(byte[] bytes) {
+		return null;
+	}
+
+	@Override
+	public int sampleByteArraySize() {
+		return 8 + 4 + modelDefinition.stateArity() * 4;
 	}
 }
