@@ -134,7 +134,6 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
 		int length = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
 		int[] vector = new int[length];
 		for(int i = 0; i<length; i++){
-			System.out.println("Available "+bais.available());
 			vector[i] = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
 		}
 		return new Sample(time, new PopulationState(vector));

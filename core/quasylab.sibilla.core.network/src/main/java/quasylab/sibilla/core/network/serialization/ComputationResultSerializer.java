@@ -68,7 +68,7 @@ public class ComputationResultSerializer {
         return t;
     }
 
-    private static Sample deserializeSample(byte[] toDeserialize, Model<? extends State> model) throws IOException{
+    private static Sample deserializeSample(byte[] toDeserialize, Model<? extends State> model) throws IOException {
         return model.fromByteArray(toDeserialize);
     }
 }
