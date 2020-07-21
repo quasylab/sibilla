@@ -29,7 +29,6 @@ package quasylab.sibilla.core.network.master;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.SimulationDataSet;
-import quasylab.sibilla.core.network.benchmark.Benchmark;
 import quasylab.sibilla.core.network.benchmark.NewBenchmark;
 import quasylab.sibilla.core.network.client.ClientCommand;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
@@ -56,7 +55,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 /**

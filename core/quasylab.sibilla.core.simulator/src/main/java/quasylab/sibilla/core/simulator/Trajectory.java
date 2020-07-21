@@ -70,6 +70,10 @@ public class Trajectory<S extends State> implements Serializable {
 		f.end(end);
 	}
 
+	public void addSample(Sample<S> sample){
+		this.data.add(sample);
+	}
+
 	public List<Sample<S>> getData() { return data; }
 
 	public double getStart() {
@@ -120,5 +124,10 @@ public class Trajectory<S extends State> implements Serializable {
 	public void setEnd(double end) {
 		this.end = end;
 	}
+
+	public int getByteSize() {
+		return 8 + 8 + 8 + 4 + 4 + 4 + (data.size() * data.get(0).getByteSize());
+	}
+
 
 }

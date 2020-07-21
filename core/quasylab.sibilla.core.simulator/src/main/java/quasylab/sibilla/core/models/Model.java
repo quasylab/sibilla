@@ -65,10 +65,5 @@ public interface Model<S extends State> {
 
     ModelDefinition<S> getModelDefinition();
 
-    byte[] toByteArray(Sample<? extends State> sample) throws IOException;
-
-    Sample<S> fromByteArray(byte[] bytes) throws IOException;
-
-    int sampleByteArraySize();
 
 }

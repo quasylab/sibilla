@@ -257,7 +257,7 @@ public class BasicSimulationServer implements SimulationServer {
             });
 
             benchmarkSerialization.run(() -> {
-                obj.toSend = ComputationResultSerializer.serialize(new ComputationResult(results), model);
+                obj.toSend = ComputationResultSerializer.serialize(new ComputationResult(results));
                 return List.of((double) obj.toSend.length);
             });
 

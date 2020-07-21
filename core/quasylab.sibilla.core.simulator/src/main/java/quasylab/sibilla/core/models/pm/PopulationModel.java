@@ -47,100 +47,71 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 /**
- *
  * This class implements a population model. This class is parametrised with
  * respect to types <code>S</code> and and <code>T</code>. The former is the
  * data type used to identify population species in the population vector.
  * Parameter <code>T</code> identifies environment
  *
  * @author loreti
- *
  */
 public class PopulationModel implements MarkovProcess<PopulationState>, Serializable {
 
-	private static final long serialVersionUID = 6871037109869821108L;
+    private static final long serialVersionUID = 6871037109869821108L;
 
-	private final PopulationModelDefinition modelDefinition;
+    private final PopulationModelDefinition modelDefinition;
 
-	private LinkedList<PopulationRule> rules;
+    private LinkedList<PopulationRule> rules;
 
-	public PopulationModel( ) {
-		this( null );
-	}
+    public PopulationModel() {
+        this(null);
+    }
 
-	public PopulationModel( PopulationModelDefinition modelDefinition ) {
-		this.rules = new LinkedList<PopulationRule>();
-		this.modelDefinition = modelDefinition;
-	}
+    public PopulationModel(PopulationModelDefinition modelDefinition) {
+        this.rules = new LinkedList<PopulationRule>();
+        this.modelDefinition = modelDefinition;
+    }
 
-	@Override
-	public WeightedStructure<StepFunction<PopulationState>> getTransitions(RandomGenerator r, double now, PopulationState state ) {
-		WeightedLinkedList<StepFunction<PopulationState>> activities =
-				new WeightedLinkedList<>();
-		for (PopulationRule rule : rules) {
-			PopulationTransition tra = rule.apply(r, now, state);
-			if (tra != null) {
-				activities.add(
-						new WeightedElement<>(
-								tra.getRate(),
-								(rnd, t, dt) -> state.apply(tra.apply(rnd))
-						)
-				);
-			}
-		}
-		return activities;
-	}
+    @Override
+    public WeightedStructure<StepFunction<PopulationState>> getTransitions(RandomGenerator r, double now, PopulationState state) {
+        WeightedLinkedList<StepFunction<PopulationState>> activities =
+                new WeightedLinkedList<>();
+        for (PopulationRule rule : rules) {
+            PopulationTransition tra = rule.apply(r, now, state);
+            if (tra != null) {
+                activities.add(
+                        new WeightedElement<>(
+                                tra.getRate(),
+                                (rnd, t, dt) -> state.apply(tra.apply(rnd))
+                        )
+                );
+            }
+        }
+        return activities;
+    }
 
-	public static Map<String,Integer> createPopulation( String ... species ) {
-		HashMap<String, Integer> map = new HashMap<>();
-		IntStream.range(0, species.length).forEach(i -> map.put(species[i],i));
-		return map;
-	}
+    public static Map<String, Integer> createPopulation(String... species) {
+        HashMap<String, Integer> map = new HashMap<>();
+        IntStream.range(0, species.length).forEach(i -> map.put(species[i], i));
+        return map;
+    }
 
-	public static PopulationState vectorOf( int ... species ) {
-		return new PopulationState(species);
-	}
+    public static PopulationState vectorOf(int... species) {
+        return new PopulationState(species);
+    }
 
 
-	public void addRule( PopulationRule rule ) {
-		this.rules.add(rule);
-	}
+    public void addRule(PopulationRule rule) {
+        this.rules.add(rule);
+    }
 
-	public void addRules(Collection<PopulationRule> rules) {
-		this.rules.addAll(rules);
-	}
+    public void addRules(Collection<PopulationRule> rules) {
+        this.rules.addAll(rules);
+    }
 
-	@Override
-	public PopulationModelDefinition getModelDefinition() {
-		return modelDefinition;
-	}
+    @Override
+    public PopulationModelDefinition getModelDefinition() {
+        return modelDefinition;
+    }
 
-	@Override
-	public byte[] toByteArray(Sample<? extends State> sample) throws IOException {
-		PopulationState state = (PopulationState) sample.getValue();
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		baos.write(ByteBuffer.allocate(8).putDouble(sample.getTime()).array());
-		baos.write(ByteBuffer.allocate(4).putInt(state.getPopulationVector().length).array());
-		for(int popVec : state.getPopulationVector()){
-			baos.write(ByteBuffer.allocate(4).putInt(popVec).array());
-		}
-		return baos.toByteArray();
-	}
 
-	@Override
-	public Sample<PopulationState> fromByteArray(byte[] bytes)throws IOException {
-		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		double time = ByteBuffer.wrap(bais.readNBytes(8)).getDouble();
-		int length = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
-		int[] vector = new int[length];
-		for(int i = 0; i<length; i++){
-			vector[i] = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
-		}
-		return new Sample(time, new PopulationState(vector));
-	}
-
-	@Override
-	public int sampleByteArraySize() {
-		return 8 + 4 + modelDefinition.stateArity() * 4;
-	}
 }
