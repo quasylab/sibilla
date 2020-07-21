@@ -93,7 +93,7 @@ public class Sample<S extends State> implements Serializable {
     }
 
     public int getByteSize() {
-        return 8 + value.getByteSize();
+        return 8 + 4 + value.getByteSize();
     }
 
 }

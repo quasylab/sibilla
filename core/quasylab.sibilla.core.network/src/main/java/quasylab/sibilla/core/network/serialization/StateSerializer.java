@@ -20,8 +20,11 @@ public class StateSerializer {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         if (state instanceof PopulationState) {
             PopulationState popState = (PopulationState) state;
-            baos.write(ByteBuffer.allocate(8).putDouble(popState.population()).array());
-            baos.write(ByteBuffer.allocate(4).putInt(popState.size()).array());
+            double population = popState.population();
+            int populationVectorLength = popState.size();
+            // System.out.println(String.format("Population:%f - Population vector length:%d", population, populationVectorLength));
+            baos.write(ByteBuffer.allocate(8).putDouble(population).array());
+            baos.write(ByteBuffer.allocate(4).putInt(populationVectorLength).array());
             for (int vectorValue : popState.getPopulationVector()) {
                 baos.write(ByteBuffer.allocate(4).putInt(vectorValue).array());
             }
@@ -30,15 +33,18 @@ public class StateSerializer {
             throw new IOException("State class error");
         }
         byte[] toReturn = baos.toByteArray();
+        //System.out.println(String.format("state To send:%d", toReturn.length));
         baos.close();
         return toReturn;
     }
 
     public static State deserialize(byte[] toDeserialize, Model<? extends State> model) throws IOException {
+        // System.out.println(String.format("state To deserialize:%d", toDeserialize.length));
         ByteArrayInputStream bais = new ByteArrayInputStream(toDeserialize);
         if (model instanceof PopulationModel) {
             double population = ByteBuffer.wrap(bais.readNBytes(8)).getDouble();
             int populationVectorLength = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
+            //  System.out.println(String.format("Population:%f - Population vector length:%d", population, populationVectorLength));
             int[] populationVector = new int[populationVectorLength];
             for (int i = 0; i < populationVectorLength; i++) {
                 populationVector[i] = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
