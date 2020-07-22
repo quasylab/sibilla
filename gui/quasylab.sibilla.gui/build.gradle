@@ -32,6 +32,7 @@ plugins {
 
 dependencies {
     compile project(':core:quasylab.sibilla.core.simulator')
+    compile group: 'com.jfoenix', name: 'jfoenix', version: '8.0.5'
 }
 
 javafx {
