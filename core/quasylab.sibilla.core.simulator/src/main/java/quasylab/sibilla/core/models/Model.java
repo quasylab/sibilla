@@ -65,5 +65,11 @@ public interface Model<S extends State> {
 
     ModelDefinition<S> getModelDefinition();
 
+    int sampleByteArraySize();
 
+    int stateByteArraySize();
+
+    byte[] serializeSample(Sample<? extends State> sample) throws IOException;
+
+    Sample<S> deserializeSample(byte[] bytes) throws IOException;
 }

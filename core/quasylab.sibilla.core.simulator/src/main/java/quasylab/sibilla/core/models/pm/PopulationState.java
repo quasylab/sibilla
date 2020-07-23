@@ -215,10 +215,4 @@ public class PopulationState implements State {
     }
 
 
-    @Override
-    public int getByteSize() {
-        return 8 + 4 + (size() * 4);
-    }
-
-
 }

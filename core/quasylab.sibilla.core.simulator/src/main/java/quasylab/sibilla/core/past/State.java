@@ -29,7 +29,4 @@ package quasylab.sibilla.core.past;
 import java.io.Serializable;
 
 public interface State extends Serializable {
-
-    public int getByteSize();
-
 }

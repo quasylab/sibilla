@@ -126,9 +126,4 @@ public class Trajectory<S extends State> implements Serializable {
         this.end = end;
     }
 
-    public int getByteSize() {
-        return 8 + 8 + 8 + 4 + 4 + 4 + (data.size() * data.get(0).getByteSize());
-    }
-
-
 }

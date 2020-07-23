@@ -113,5 +113,44 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
         return modelDefinition;
     }
 
+    @Override
+    public int sampleByteArraySize() {
+        return 8 + stateByteArraySize();
+    }
+
+    @Override
+    public int stateByteArraySize() {
+        return 4 + modelDefinition.stateArity() * 4;
+    }
+
+    @Override
+    public byte[] serializeSample(Sample<? extends State> sample) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PopulationState state = (PopulationState) sample.getValue();
+        double time = sample.getTime();
+        int populationVectorLength = state.size();
+        baos.write(ByteBuffer.allocate(8).putDouble(time).array());
+        baos.write(ByteBuffer.allocate(4).putInt(populationVectorLength).array());
+        for (int popVec : state.getPopulationVector()) {
+            baos.write(ByteBuffer.allocate(4).putInt(popVec).array());
+        }
+        byte[] toReturn = baos.toByteArray();
+        baos.close();
+        return toReturn;
+    }
+
+    @Override
+    public Sample<PopulationState> deserializeSample(byte[] bytes) throws IOException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        double time = ByteBuffer.wrap(bais.readNBytes(8)).getDouble();
+        int length = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
+        int[] vector = new int[length];
+        for (int i = 0; i < length; i++) {
+            vector[i] = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
+        }
+        bais.close();
+        return new Sample(time, new PopulationState(vector));
+    }
+
 
 }
