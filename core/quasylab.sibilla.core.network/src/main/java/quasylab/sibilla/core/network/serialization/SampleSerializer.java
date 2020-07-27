@@ -8,11 +8,11 @@ import java.io.IOException;
 
 public class SampleSerializer {
 
-    public static byte[] serialize(Sample<? extends State> sample, Model<? extends State> model) throws IOException {
+    public static <S extends State> byte[] serialize(Sample<S> sample, Model<S> model) throws IOException {
         return model.serializeSample(sample);
     }
 
-    public static Sample deserialize(byte[] toDeserialize, Model<? extends State> model) throws IOException {
+    public static <S extends State> Sample<S> deserialize(byte[] toDeserialize, Model<S> model) throws IOException {
         return model.deserializeSample(toDeserialize);
     }
 

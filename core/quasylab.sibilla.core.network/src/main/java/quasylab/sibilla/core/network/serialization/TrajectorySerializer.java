@@ -17,7 +17,7 @@ public class TrajectorySerializer {
     //generationtime - 8
     //successfull - 4
     //samples
-    public static byte[] serialize(Trajectory<? extends State> t, Model<? extends State> model) throws IOException {
+    public static <S extends State> byte[] serialize(Trajectory<S> t, Model<S> model) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         double start = t.getStart();
         double end = t.getEnd();
@@ -29,7 +29,7 @@ public class TrajectorySerializer {
         baos.write(ByteBuffer.allocate(8).putDouble(end).array());
         baos.write(ByteBuffer.allocate(8).putLong(generationTime).array());
         baos.write(ByteBuffer.allocate(4).putInt(isSuccessfull).array());
-        for (Sample sample : t.getData()) {
+        for (Sample<S> sample : t.getData()) {
             baos.write(SampleSerializer.serialize(sample, model));
         }
         byte[] toReturn = baos.toByteArray();
@@ -38,10 +38,10 @@ public class TrajectorySerializer {
         return toReturn;
     }
 
-    public static Trajectory deserialize(byte[] toDeserialize, Model<? extends State> model, int numberOfSamples) throws IOException {
+    public static <S extends State> Trajectory<S> deserialize(byte[] toDeserialize, Model<S> model, int numberOfSamples) throws IOException {
         //  System.out.println(String.format("Trajectory To deserialize:%d", toDeserialize.length));
         ByteArrayInputStream bais = new ByteArrayInputStream(toDeserialize);
-        Trajectory t = new Trajectory();
+        Trajectory<S> t = new Trajectory<S>();
 
         double start = ByteBuffer.wrap(bais.readNBytes(8)).getDouble();
         double end = ByteBuffer.wrap(bais.readNBytes(8)).getDouble();
@@ -55,7 +55,7 @@ public class TrajectorySerializer {
         t.setSuccesfull(isSuccessfull);
 
         for (int i = 0; i < numberOfSamples; i++) {
-            Sample<?> newSample = SampleSerializer.deserialize(bais.readNBytes(SampleSerializer.getByteSize(model)), model);
+            Sample<S> newSample = SampleSerializer.deserialize(bais.readNBytes(SampleSerializer.getByteSize(model)), model);
             t.addSample(newSample);
         }
         bais.close();
