@@ -13,12 +13,16 @@ public class SampleSerializer {
 
     public static <S extends State> byte[] serialize(Sample<S> sample, Model<S> model) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        double time = sample.getTime();
-        baos.write(ByteBuffer.allocate(8).putDouble(time).array());
-        baos.write(model.serializeState(sample.getValue()));
+        serialize(baos, sample, model);
         byte[] toReturn = baos.toByteArray();
         baos.close();
         return toReturn;
+    }
+
+    public static <S extends State> void serialize(ByteArrayOutputStream toSerializeInto, Sample<S> sample, Model<S> model) throws IOException {
+        double time = sample.getTime();
+        toSerializeInto.write(ByteBuffer.allocate(8).putDouble(time).array());
+        toSerializeInto.write(model.serializeState(sample.getValue()));
     }
 
     public static <S extends State> Sample<S> deserialize(byte[] toDeserialize, Model<S> model) throws IOException {

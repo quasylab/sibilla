@@ -20,24 +20,28 @@ public class TrajectorySerializer {
     //samples
     public static <S extends State> byte[] serialize(Trajectory<S> t, Model<S> model) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serialize(baos, t, model);
+        byte[] toReturn = baos.toByteArray();
+        //System.out.println(String.format("Trajectory To send:%d", toReturn.length));
+        baos.close();
+        return toReturn;
+    }
+
+    public static <S extends State> void serialize(ByteArrayOutputStream toSerializeInto, Trajectory<S> t, Model<S> model) throws IOException {
         int numberOfSamples = t.size();
         double start = t.getStart();
         double end = t.getEnd();
         long generationTime = t.getGenerationTime();
         int isSuccessfull = t.isSuccesfull() ? 1 : 0;
         //  System.out.println(String.format("Start:%f - End:%f - Generation Time:%f - Is successfull:%d - Number of samples:%d - Size of samples:%d", start, end, (double) generationTime, isSuccessfull, numberOfSamples, sizeOfSamples));
-        baos.write(ByteBuffer.allocate(4).putInt(numberOfSamples).array());
-        baos.write(ByteBuffer.allocate(8).putDouble(start).array());
-        baos.write(ByteBuffer.allocate(8).putDouble(end).array());
-        baos.write(ByteBuffer.allocate(8).putLong(generationTime).array());
-        baos.write(ByteBuffer.allocate(4).putInt(isSuccessfull).array());
+        toSerializeInto.write(ByteBuffer.allocate(4).putInt(numberOfSamples).array());
+        toSerializeInto.write(ByteBuffer.allocate(8).putDouble(start).array());
+        toSerializeInto.write(ByteBuffer.allocate(8).putDouble(end).array());
+        toSerializeInto.write(ByteBuffer.allocate(8).putLong(generationTime).array());
+        toSerializeInto.write(ByteBuffer.allocate(4).putInt(isSuccessfull).array());
         for (Sample<S> sample : t.getData()) {
-            baos.write(SampleSerializer.serialize(sample, model));
+            SampleSerializer.serialize(toSerializeInto, sample, model);
         }
-        byte[] toReturn = baos.toByteArray();
-        //System.out.println(String.format("Trajectory To send:%d", toReturn.length));
-        baos.close();
-        return toReturn;
     }
 
     public static <S extends State> Trajectory<S> deserialize(byte[] toDeserialize, Model<S> model, int numberOfSamples) throws IOException {

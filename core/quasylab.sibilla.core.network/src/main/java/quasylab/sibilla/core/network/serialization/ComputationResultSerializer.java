@@ -20,12 +20,16 @@ public class ComputationResultSerializer {
     //traiettoria
     public static <S extends State> byte[] serialize(ComputationResult<S> toSerialize, Model<S> model) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        for (Trajectory<S> trajectory : toSerialize.getResults()) {
-            baos.write(TrajectorySerializer.serialize(trajectory, model));
-        }
+        serialize(baos, toSerialize, model);
         byte[] toReturn = baos.toByteArray();
         baos.close();
         return toReturn;
+    }
+
+    public static <S extends State> void serialize(ByteArrayOutputStream toSerializeInto, ComputationResult<S> toSerialize, Model<S> model) throws IOException {
+        for (Trajectory<S> trajectory : toSerialize.getResults()) {
+            TrajectorySerializer.serialize(toSerializeInto, trajectory, model);
+        }
     }
 
     public static <S extends State> ComputationResult<S> deserialize(byte[] toDeserialize, Model<S> model) throws IOException {
