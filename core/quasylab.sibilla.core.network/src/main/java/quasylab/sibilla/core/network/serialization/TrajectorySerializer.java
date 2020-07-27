@@ -1,6 +1,7 @@
 package quasylab.sibilla.core.network.serialization;
 
 import quasylab.sibilla.core.models.Model;
+import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.Trajectory;
 import quasylab.sibilla.core.simulator.sampling.Sample;
@@ -19,12 +20,13 @@ public class TrajectorySerializer {
     //samples
     public static <S extends State> byte[] serialize(Trajectory<S> t, Model<S> model) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int numberOfSamples = t.size();
         double start = t.getStart();
         double end = t.getEnd();
         long generationTime = t.getGenerationTime();
         int isSuccessfull = t.isSuccesfull() ? 1 : 0;
         //  System.out.println(String.format("Start:%f - End:%f - Generation Time:%f - Is successfull:%d - Number of samples:%d - Size of samples:%d", start, end, (double) generationTime, isSuccessfull, numberOfSamples, sizeOfSamples));
-
+        baos.write(ByteBuffer.allocate(4).putInt(numberOfSamples).array());
         baos.write(ByteBuffer.allocate(8).putDouble(start).array());
         baos.write(ByteBuffer.allocate(8).putDouble(end).array());
         baos.write(ByteBuffer.allocate(8).putLong(generationTime).array());
@@ -61,6 +63,12 @@ public class TrajectorySerializer {
         bais.close();
         return t;
     }
+
+    public static <S extends State> Trajectory<S> deserialize(ByteArrayInputStream toDeserializeFrom, Model<S> model) throws IOException {
+        //TODO
+        return null;
+    }
+
 
     public static int getByteSize(Model<? extends State> model, int numberOfSamples) {
         return 8 + 8 + 8 + 4 + (numberOfSamples * SampleSerializer.getByteSize(model));

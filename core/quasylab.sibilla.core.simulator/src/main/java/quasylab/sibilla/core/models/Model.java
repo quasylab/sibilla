@@ -30,6 +30,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.sampling.Sample;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
 
@@ -65,11 +66,11 @@ public interface Model<S extends State> {
 
     ModelDefinition<S> getModelDefinition();
 
-    int sampleByteArraySize();
-
     int stateByteArraySize();
 
-    byte[] serializeSample(Sample<? extends State> sample) throws IOException;
+    byte[] serializeState(S state) throws IOException;
 
-    Sample<S> deserializeSample(byte[] bytes) throws IOException;
+    S deserializeState(byte[] bytes) throws IOException;
+
+    S deserializeState(ByteArrayInputStream toDeserializeFrom) throws IOException;
 }

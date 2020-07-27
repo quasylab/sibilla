@@ -21,7 +21,6 @@ public class ComputationResultSerializer {
     public static <S extends State> byte[] serialize(ComputationResult<S> toSerialize, Model<S> model) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         for (Trajectory<S> trajectory : toSerialize.getResults()) {
-            baos.write(ByteBuffer.allocate(4).putInt(trajectory.size()).array());
             baos.write(TrajectorySerializer.serialize(trajectory, model));
         }
         byte[] toReturn = baos.toByteArray();
@@ -41,6 +40,11 @@ public class ComputationResultSerializer {
         }
         bais.close();
         return new ComputationResult<>(trajectories);
+    }
+
+    public static <S extends State> ComputationResult<S> deserialize(ByteArrayInputStream toDeserializeFrom, Model<S> model) throws IOException {
+        //TODO
+        return null;
     }
 
 

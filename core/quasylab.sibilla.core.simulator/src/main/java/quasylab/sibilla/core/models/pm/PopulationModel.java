@@ -113,26 +113,17 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
         return modelDefinition;
     }
 
-    @Override
-    public int sampleByteArraySize() {
-        return 8 + stateByteArraySize();
-    }
 
     @Override
     public int stateByteArraySize() {
-        return 4 + modelDefinition.stateArity() * 4;
+        return modelDefinition.stateArity() * 4;
     }
 
     @Override
-    public byte[] serializeSample(Sample<? extends State> sample) throws IOException {
+    public byte[] serializeState(PopulationState state) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        PopulationState state = (PopulationState) sample.getValue();
-        double time = sample.getTime();
-        int populationVectorLength = state.size();
-        baos.write(ByteBuffer.allocate(8).putDouble(time).array());
-        baos.write(ByteBuffer.allocate(4).putInt(populationVectorLength).array());
-        for (int popVec : state.getPopulationVector()) {
-            baos.write(ByteBuffer.allocate(4).putInt(popVec).array());
+        for (int vectorSingleValue : state.getPopulationVector()) {
+            baos.write(ByteBuffer.allocate(4).putInt(vectorSingleValue).array());
         }
         byte[] toReturn = baos.toByteArray();
         baos.close();
@@ -140,16 +131,21 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
     }
 
     @Override
-    public Sample<PopulationState> deserializeSample(byte[] bytes) throws IOException {
+    public PopulationState deserializeState(byte[] bytes) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        double time = ByteBuffer.wrap(bais.readNBytes(8)).getDouble();
-        int length = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
+        int length = modelDefinition.stateArity();
         int[] vector = new int[length];
         for (int i = 0; i < length; i++) {
             vector[i] = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
         }
         bais.close();
-        return new Sample(time, new PopulationState(vector));
+        return new PopulationState(vector);
+    }
+
+    @Override
+    public PopulationState deserializeState(ByteArrayInputStream toDeserializeFrom) throws IOException {
+        //TODO
+        return null;
     }
 
 
