@@ -4,6 +4,7 @@
 ###Doxygen###
 xtend-gen/*
 xtext-gen/*
+docs/*
 
 ### Eclipse ###
 .metadata
