@@ -28,14 +28,15 @@ public class SampleSerializer {
     public static <S extends State> Sample<S> deserialize(byte[] toDeserialize, Model<S> model) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(toDeserialize);
         double time = ByteBuffer.wrap(bais.readNBytes(8)).getDouble();
-        State state = model.deserializeState(bais.readNBytes(model.stateByteArraySize()));
+        S state = model.deserializeState(bais.readNBytes(model.stateByteArraySize()));
         bais.close();
-        return new Sample(time, state);
+        return new Sample<S>(time, state);
     }
 
     public static <S extends State> Sample<S> deserialize(ByteArrayInputStream toDeserializeFrom, Model<S> model) throws IOException {
-        //TODO
-        return null;
+        double time = ByteBuffer.wrap(toDeserializeFrom.readNBytes(8)).getDouble();
+        S state = model.deserializeState(toDeserializeFrom.readNBytes(model.stateByteArraySize()));
+        return new Sample<>(time, state);
     }
 
     public static int getByteSize(Model<? extends State> model) {

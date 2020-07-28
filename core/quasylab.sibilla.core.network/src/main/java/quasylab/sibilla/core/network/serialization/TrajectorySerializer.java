@@ -69,8 +69,24 @@ public class TrajectorySerializer {
     }
 
     public static <S extends State> Trajectory<S> deserialize(ByteArrayInputStream toDeserializeFrom, Model<S> model) throws IOException {
-        //TODO
-        return null;
+        Trajectory<S> t = new Trajectory<S>();
+
+        int numberOfSamples = ByteBuffer.wrap(toDeserializeFrom.readNBytes(4)).getInt();
+        double start = ByteBuffer.wrap(toDeserializeFrom.readNBytes(8)).getDouble();
+        double end = ByteBuffer.wrap(toDeserializeFrom.readNBytes(8)).getDouble();
+        long generationTime = ByteBuffer.wrap(toDeserializeFrom.readNBytes(8)).getLong();
+        boolean isSuccessfull = ByteBuffer.wrap(toDeserializeFrom.readNBytes(4)).getInt() != 0;
+
+        t.setStart(start);
+        t.setEnd(end);
+        t.setGenerationTime(generationTime);
+        t.setSuccesfull(isSuccessfull);
+
+        for (int i = 0; i < numberOfSamples; i++) {
+            Sample<S> newSample = SampleSerializer.deserialize(toDeserializeFrom, model);
+            t.addSample(newSample);
+        }
+        return t;
     }
 
 

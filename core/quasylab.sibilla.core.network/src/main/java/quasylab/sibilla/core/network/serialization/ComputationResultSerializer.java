@@ -47,8 +47,12 @@ public class ComputationResultSerializer {
     }
 
     public static <S extends State> ComputationResult<S> deserialize(ByteArrayInputStream toDeserializeFrom, Model<S> model) throws IOException {
-        //TODO
-        return null;
+        LinkedList<Trajectory<S>> trajectories = new LinkedList<>();
+        while (toDeserializeFrom.available() > 0) {
+            Trajectory<S> trajectory = TrajectorySerializer.deserialize(toDeserializeFrom, model);
+            trajectories.add(trajectory);
+        }
+        return new ComputationResult<>(trajectories);
     }
 
 
