@@ -31,6 +31,7 @@ import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.NetworkTask;
+import quasylab.sibilla.core.network.benchmark.NewBenchmark;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.compression.Compressor;
@@ -226,6 +227,11 @@ public class BasicSimulationServer implements SimulationServer {
      * @param master server of the master
      */
 
+    static NewBenchmark benchmarkComputation = new NewBenchmark("benchmarks/slave", "Slave Results Computation", "csv");
+    static NewBenchmark benchmarkSerialization = new NewBenchmark("benchmarks/slave", "Slave Results Serialization", "csv");
+    static NewBenchmark benchmarkCompression = new NewBenchmark("benchmarks/slave", "Slave Results Compression", "csv");
+    static NewBenchmark benchmarkSend = new NewBenchmark("benchmarks/slave", "Slave Results Send", "csv");
+
     private void handleTaskExecution(TCPNetworkManager master) {
         try {
             NetworkTask<?> networkTask = (NetworkTask<?>) serializer.deserialize(master.readObject());
@@ -235,14 +241,36 @@ public class BasicSimulationServer implements SimulationServer {
 
             Model model = networkTask.getTasks().get(0).getUnit().getModel();
 
-            for (int i = 0; i < tasks.size(); i++) {
-                futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
-            }
-            CompletableFuture.allOf(futures).join();
-            for (SimulationTask<?> task : tasks) {
-                results.add(task.getTrajectory());
-            }
-            master.writeObject(Compressor.compress(ComputationResultSerializer.serialize(new ComputationResult(results), model)));
+            final var obj = new Object() {
+                private byte[] toSend;
+            };
+
+            benchmarkComputation.run(() -> {
+                for (int i = 0; i < tasks.size(); i++) {
+                    futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
+                }
+                CompletableFuture.allOf(futures).join();
+                for (SimulationTask<?> task : tasks) {
+                    results.add(task.getTrajectory());
+                }
+                return List.of((double) tasks.size());
+            });
+
+            benchmarkSerialization.run(() -> {
+                obj.toSend = ComputationResultSerializer.serialize(new ComputationResult(results), model);
+                return List.of((double) obj.toSend.length);
+            });
+
+            benchmarkCompression.run(() -> {
+                obj.toSend = Compressor.compress(obj.toSend);
+                return List.of((double) obj.toSend.length);
+            });
+
+            benchmarkSend.run(() -> {
+                master.writeObject(obj.toSend);
+                return List.of();
+            });
+
             LOGGER.info(String.format("Computation's results have been sent to the server - %s",
                     master.getNetworkInfo().toString()));
         } catch (IOException e) {

@@ -29,6 +29,7 @@ package quasylab.sibilla.core.network.master;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.SimulationDataSet;
+import quasylab.sibilla.core.network.benchmark.NewBenchmark;
 import quasylab.sibilla.core.network.client.ClientCommand;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
@@ -49,6 +50,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -117,6 +119,8 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
 
     private Serializer serializer;
 
+    private NewBenchmark resultSerializationBenchmark;
+
     /**
      * Creates and starts up a master server with the given parameters.
      *
@@ -145,6 +149,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
 
         try {
             this.serializer = Serializer.getSerializer(serializerType);
+            this.resultSerializationBenchmark = new NewBenchmark("./benchmarks/master", String.format("Master Results Serialization - %s", serializer.getType().toString()), "csv");
             localDiscoveryInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), localDiscoveryPort, discoveryNetworkManager);
             localSimulationInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), localSimulationPort,
                     simulationNetworkManager);
@@ -410,9 +415,17 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
                     state.clientConnection().writeObject(serializer.serialize(MasterCommand.RESULTS));
                     LOGGER.info(String.format("[%s] command sent to the client: %s", MasterCommand.RESULTS,
                             state.clientConnection().getNetworkInfo().toString()));
+                    //state.clientConnection().writeObject(serializer.serialize(state.simulationDataSet().getModelSamplingFunction()));
+                    var wrapper = new Object() {
+                        byte[] toWrite;
+                    };
 
-                    state.clientConnection().writeObject(serializer.serialize(state.simulationDataSet().
-                            getModelSamplingFunction()));
+                    resultSerializationBenchmark.run(() -> {
+                        wrapper.toWrite = serializer.serialize(state.simulationDataSet().getModelSamplingFunction());
+                        return List.of((double) wrapper.toWrite.length);
+                    });
+
+                    state.clientConnection().writeObject(wrapper.toWrite);
 
                     LOGGER.info(String.format("Results have been sent to the client: %s",
                             state.clientConnection().getNetworkInfo().toString()));
