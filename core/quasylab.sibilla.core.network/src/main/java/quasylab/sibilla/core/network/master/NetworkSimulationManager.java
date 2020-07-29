@@ -32,7 +32,6 @@ import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.NetworkTask;
-import quasylab.sibilla.core.network.benchmark.NewBenchmark;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.loaders.ClassBytesLoader;
@@ -374,18 +373,11 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      * @return result of the computation
      */
 
-    static NewBenchmark benchmarkDeserialization = new NewBenchmark("benchmarks/master", "Master Results Deserialization", "csv");
-    static NewBenchmark benchmarkDecompression = new NewBenchmark("benchmarks/master", "Master Results Decompression", "csv");
-
     private ComputationResult<S> send(NetworkTask<S> networkTask, TCPNetworkManager server) {
 
 
         SlaveState state = this.simulationState.getSlaveStateByServerInfo(server.getNetworkInfo());
-        ComputationResult<S> result;
-        final var obj = new Object() {
-            byte[] toReceive;
-            ComputationResult<S> results;
-        };
+        ComputationResult<S> results;
         long elapsedTime;
         try {
             server.writeObject(serializer.serialize(MasterCommand.TASK));
@@ -396,22 +388,12 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             LOGGER.info(String.format("A group of tasks has been sent to the server - %s",
                     server.getNetworkInfo().toString()));
 
-            obj.toReceive = server.readObject();
-
-            benchmarkDecompression.run(() -> {
-                obj.toReceive = Compressor.decompress(obj.toReceive);
-                return List.of();
-            });
-
-            benchmarkDeserialization.run(() -> {
-                obj.results = (ComputationResult<S>) ComputationResultSerializer.deserialize(obj.toReceive,
-                        simulationState.simulationDataSet().getModel());
-                return List.of();
-            });
+            results = (ComputationResult<S>) ComputationResultSerializer.deserialize(Compressor.
+                    decompress(server.readObject()), simulationState.simulationDataSet().getModel());
             elapsedTime = System.nanoTime() - elapsedTime;
 
 
-            state.update(elapsedTime, obj.results.getResults().size());
+            state.update(elapsedTime, results.getResults().size());
             LOGGER.info(String.format("The results from the computation have been received from the server - %s",
                     server.getNetworkInfo().toString()));
         } catch (Exception e) {
@@ -421,7 +403,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         }
 
 
-        return obj.results;
+        return results;
     }
 
 }
