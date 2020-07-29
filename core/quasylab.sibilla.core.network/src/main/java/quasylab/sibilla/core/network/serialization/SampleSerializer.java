@@ -27,10 +27,9 @@ public class SampleSerializer {
 
     public static <S extends State> Sample<S> deserialize(byte[] toDeserialize, Model<S> model) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(toDeserialize);
-        double time = ByteBuffer.wrap(bais.readNBytes(8)).getDouble();
-        S state = model.deserializeState(bais.readNBytes(model.stateByteArraySize()));
+        Sample<S> sample = deserialize(bais, model);
         bais.close();
-        return new Sample<S>(time, state);
+        return sample;
     }
 
     public static <S extends State> Sample<S> deserialize(ByteArrayInputStream toDeserializeFrom, Model<S> model) throws IOException {
@@ -39,7 +38,4 @@ public class SampleSerializer {
         return new Sample<>(time, state);
     }
 
-    public static int getByteSize(Model<? extends State> model) {
-        return 8 + model.stateByteArraySize();
-    }
 }

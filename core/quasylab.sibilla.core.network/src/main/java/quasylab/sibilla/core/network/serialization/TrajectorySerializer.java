@@ -44,26 +44,9 @@ public class TrajectorySerializer {
         }
     }
 
-    public static <S extends State> Trajectory<S> deserialize(byte[] toDeserialize, Model<S> model, int numberOfSamples) throws IOException {
-        //  System.out.println(String.format("Trajectory To deserialize:%d", toDeserialize.length));
+    public static <S extends State> Trajectory<S> deserialize(byte[] toDeserialize, Model<S> model) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(toDeserialize);
-        Trajectory<S> t = new Trajectory<S>();
-
-        double start = ByteBuffer.wrap(bais.readNBytes(8)).getDouble();
-        double end = ByteBuffer.wrap(bais.readNBytes(8)).getDouble();
-        long generationTime = ByteBuffer.wrap(bais.readNBytes(8)).getLong();
-        boolean isSuccessfull = ByteBuffer.wrap(bais.readNBytes(4)).getInt() != 0;
-
-        // System.out.println(String.format("Start:%f - End:%f - Generation Time:%f - Is successfull:%d - Number of samples:%d - Size of samples:%d", start, end, (double) generationTime, isSuccessfull ? 1 : 0, numberOfSamples, sizeOfSamples));
-        t.setStart(start);
-        t.setEnd(end);
-        t.setGenerationTime(generationTime);
-        t.setSuccesfull(isSuccessfull);
-
-        for (int i = 0; i < numberOfSamples; i++) {
-            Sample<S> newSample = SampleSerializer.deserialize(bais.readNBytes(SampleSerializer.getByteSize(model)), model);
-            t.addSample(newSample);
-        }
+        Trajectory<S> t = deserialize(bais, model);
         bais.close();
         return t;
     }
@@ -89,9 +72,5 @@ public class TrajectorySerializer {
         return t;
     }
 
-
-    public static int getByteSize(Model<? extends State> model, int numberOfSamples) {
-        return 8 + 8 + 8 + 4 + (numberOfSamples * SampleSerializer.getByteSize(model));
-    }
 
 }

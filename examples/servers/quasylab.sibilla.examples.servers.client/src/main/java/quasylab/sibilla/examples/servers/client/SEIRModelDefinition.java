@@ -103,7 +103,7 @@ public class SEIRModelDefinition implements PopulationModelDefinition, Serializa
         f.addRule(rule_S_E);
         f.addRule(rule_E_I);
         f.addRule(rule_I_R);
-        f.addRule(rule_R_S);
+        // f.addRule(rule_R_S);
         return f;
     }
 

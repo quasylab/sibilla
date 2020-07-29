@@ -33,17 +33,10 @@ public class ComputationResultSerializer {
     }
 
     public static <S extends State> ComputationResult<S> deserialize(byte[] toDeserialize, Model<S> model) throws IOException {
-        //System.out.println(String.format("Computation To deserialize:%d", toDeserialize.length));
         ByteArrayInputStream bais = new ByteArrayInputStream(toDeserialize);
-        //System.out.println(String.format("Number of trajectories:%d - Size of trajectories:%d", numberOfTrajectories, sizeOfTrajectories));
-        LinkedList<Trajectory<S>> trajectories = new LinkedList<>();
-        while (bais.available() > 0) {
-            int numberOfSamples = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
-            Trajectory<S> trajectory = TrajectorySerializer.deserialize(bais.readNBytes(TrajectorySerializer.getByteSize(model, numberOfSamples)), model, numberOfSamples);
-            trajectories.add(trajectory);
-        }
+        ComputationResult<S> result = deserialize(bais, model);
         bais.close();
-        return new ComputationResult<>(trajectories);
+        return result;
     }
 
     public static <S extends State> ComputationResult<S> deserialize(ByteArrayInputStream toDeserializeFrom, Model<S> model) throws IOException {
