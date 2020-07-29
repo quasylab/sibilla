@@ -34,6 +34,7 @@ import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.master.MasterServerSimulationEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
+import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.network.util.StartupUtils;
@@ -102,7 +103,9 @@ public class MasterApplication implements CommandLineRunner {
                 slaveDiscoveryNetworkManagerType,
                 clientSimulationNetworkManagerType));
 
-        new MasterServerSimulationEnvironment(localDiscoveryPort, remoteDiscoveryPort, slaveDiscoveryNetworkManagerType, localSimulationPort, clientSimulationNetworkManagerType, monitoringServerComponent);
+        new MasterServerSimulationEnvironment(localDiscoveryPort,
+                remoteDiscoveryPort, slaveDiscoveryNetworkManagerType, localSimulationPort,
+                clientSimulationNetworkManagerType, SerializerType.FST, monitoringServerComponent);
     }
 
 }

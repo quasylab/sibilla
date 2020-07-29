@@ -34,8 +34,10 @@ import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.NetworkTask;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
-import quasylab.sibilla.core.network.serialization.ClassBytesLoader;
+import quasylab.sibilla.core.network.loaders.ClassBytesLoader;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializer;
 import quasylab.sibilla.core.network.serialization.Serializer;
+import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.SlaveCommand;
 import quasylab.sibilla.core.network.slave.SlaveState;
 import quasylab.sibilla.core.past.State;
@@ -90,6 +92,8 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      */
     private final Set<TCPNetworkManager> networkManagers;
 
+    private Serializer serializer;
+
     /**
      * Creates a NetworkSimulationManager with the parameters given in input
      *
@@ -100,11 +104,11 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      * @param simulationState state of the simulation that is being executed
      */
     public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationMonitor monitor,
-                                    ModelDefinition<S> modelDefinition, SimulationState simulationState) {
+                                    ModelDefinition<S> modelDefinition, SimulationState simulationState, SerializerType serializerType) {
         super(random, monitor, consumer);// TODO: Gestire parametro Monitor
 
         this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
-
+        this.serializer = Serializer.getSerializer(serializerType);
         List<NetworkInfo> slaveNetworkInfos = simulationState.getSlaveServersStates().stream()
                 .map(SlaveState::getSlaveInfo).collect(Collectors.toList());
         LOGGER.info(String.format("Creating a new NetworkSimulationManager to contact the slaves: [%s]",
@@ -130,12 +134,12 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         this.startTasksHandling();
     }
 
-    public static SimulationManagerFactory getNetworkSimulationManagerFactory(SimulationState simulationState) {
+    public static SimulationManagerFactory getNetworkSimulationManagerFactory(SimulationState simulationState, SerializerType serializerType) {
         return new SimulationManagerFactory() {
             @Override
             public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
                                                                                SimulationMonitor monitor, ModelDefinition<S> modelDefinition, Consumer<Trajectory<S>> consumer) {
-                return new NetworkSimulationManager<>(random, consumer, monitor, modelDefinition, simulationState);
+                return new NetworkSimulationManager<>(random, consumer, monitor, modelDefinition, simulationState, serializerType);
             }
         };
 
@@ -148,15 +152,15 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      */
     private void initConnection(TCPNetworkManager slave) throws IOException {
         try {
-            slave.writeObject(Serializer.serialize(MasterCommand.INIT));
+            slave.writeObject(serializer.serialize(MasterCommand.INIT));
             LOGGER.info(String.format("[%s] command sent to the slave: %s", MasterCommand.INIT,
                     slave.getNetworkInfo().toString()));
-            slave.writeObject(Serializer.serialize(modelDefinition.getClass().getName()));
+            slave.writeObject(serializer.serialize(modelDefinition.getClass().getName()));
             LOGGER.info(String.format("[%s] Model name has been sent to the slave: %s", modelDefinition.getClass().getName(), slave.getNetworkInfo().toString()));
             slave.writeObject(ClassBytesLoader.loadClassBytes(modelDefinition.getClass().getName()));
             LOGGER.info(String.format("Class bytes have been sent to the slave: %s", slave.getNetworkInfo().toString()));
 
-            SlaveCommand answer = (SlaveCommand) Serializer.deserialize(slave.readObject());
+            SlaveCommand answer = (SlaveCommand) serializer.deserialize(slave.readObject());
             if (answer.equals(SlaveCommand.INIT_RESPONSE)) {
                 LOGGER.info(String.format("Answer received: [%s] - Slave: %s", answer, slave.getNetworkInfo().toString()));
             } else {
@@ -291,11 +295,11 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             oldState.timedOut(); // mark server as timed out
 
             initConnection(pingServer); // initialize connection sending model data
-            pingServer.writeObject(Serializer.serialize(MasterCommand.PING));
+            pingServer.writeObject(serializer.serialize(MasterCommand.PING));
             LOGGER.info(String.format("Ping request sent to slave: %s", pingServer.getNetworkInfo().toString())); // send
             // ping
             // request
-            SlaveCommand response = (SlaveCommand) Serializer.deserialize(pingServer.readObject()); // wait
+            SlaveCommand response = (SlaveCommand) serializer.deserialize(pingServer.readObject()); // wait
             // for
             // response
             if (!response.equals(SlaveCommand.PONG)) {
@@ -340,12 +344,12 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     private void closeStreams() {
         try {
             for (TCPNetworkManager server : this.networkManagers) {
-                server.writeObject(Serializer.serialize(MasterCommand.CLOSE_CONNECTION));
+                server.writeObject(serializer.serialize(MasterCommand.CLOSE_CONNECTION));
                 LOGGER.info(String.format("[%s] command sent to the slave: %s", MasterCommand.CLOSE_CONNECTION,
                         server.getNetworkInfo().toString()));
-                server.writeObject(Serializer.serialize(this.modelDefinition.getClass().getName()));
+                server.writeObject(serializer.serialize(this.modelDefinition.getClass().getName()));
 
-                SlaveCommand answer = (SlaveCommand) Serializer.deserialize(server.readObject());
+                SlaveCommand answer = (SlaveCommand) serializer.deserialize(server.readObject());
                 if (answer.equals(SlaveCommand.CLOSE_CONNECTION)) {
                     LOGGER.info(String.format("Answer received: [%s] - Slave: %s", answer, server.getNetworkInfo().toString()));
                 } else {
@@ -368,24 +372,28 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      * @param server      server to send the tasks to
      * @return result of the computation
      */
+
     private ComputationResult<S> send(NetworkTask<S> networkTask, TCPNetworkManager server) {
+
+
         SlaveState state = this.simulationState.getSlaveStateByServerInfo(server.getNetworkInfo());
-        ComputationResult<S> result;
+        ComputationResult<S> results;
         long elapsedTime;
         try {
-            server.writeObject(Serializer.serialize(MasterCommand.TASK));
-            server.writeObject(Serializer.serialize(networkTask));
+            server.writeObject(serializer.serialize(MasterCommand.TASK));
+            server.writeObject(serializer.serialize(networkTask));
             elapsedTime = System.nanoTime();
 
             server.getSocket().setSoTimeout((int) (state.getTimeout() / 1000000));
             LOGGER.info(String.format("A group of tasks has been sent to the server - %s",
                     server.getNetworkInfo().toString()));
 
-            result = (ComputationResult<S>) Serializer.deserialize(Compressor.decompress(server.readObject()));
-
+            results = (ComputationResult<S>) ComputationResultSerializer.deserialize(Compressor.
+                    decompress(server.readObject()), simulationState.simulationDataSet().getModel());
             elapsedTime = System.nanoTime() - elapsedTime;
 
-            state.update(elapsedTime, result.getResults().size());
+
+            state.update(elapsedTime, results.getResults().size());
             LOGGER.info(String.format("The results from the computation have been received from the server - %s",
                     server.getNetworkInfo().toString()));
         } catch (Exception e) {
@@ -393,7 +401,9 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             e.printStackTrace();
             throw new RuntimeException();
         }
-        return result;
+
+
+        return results;
     }
 
 }

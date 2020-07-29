@@ -36,79 +36,94 @@ import java.util.List;
 
 /**
  * @author loreti
- *
  */
 public class Trajectory<S extends State> implements Serializable {
-	
-	private static final long serialVersionUID = -9039722623650234376L;
-	private List<Sample<S>> data;
-	private double start = Double.NaN;
-	private double end = Double.NaN;
-	private boolean succesfull; 
-	private long generationTime = -1;
 
-	public Trajectory() {
-		this.data = new LinkedList<Sample<S>>();
-	}
-	
-	public void add( double time , S value ) {
-		if (!Double.isFinite(start)) {
-			this.start = time;
-		}
-		if (!Double.isFinite( this.end )&&(this.end>=time)) {
-			throw new IllegalArgumentException();//TODO: Add message!
-		}
-		this.data.add( new Sample<S>(time,value));
-	}
-	
-	public void sample(SamplingFunction<S> f) {
-		if (!Double.isFinite(start)) {
-			throw new IllegalArgumentException();
-		}
-		f.start();
-		this.data.stream().forEach(s -> f.sample(s.getTime(), s.getValue()));
-		f.end(end);
-	}
+    private static final long serialVersionUID = -9039722623650234376L;
+    private List<Sample<S>> data;
+    private double start = Double.NaN;
+    private double end = Double.NaN;
+    private boolean succesfull;
+    private long generationTime = -1;
 
-	public double getStart() {
-		return start;
-	}
+    public Trajectory() {
+        this.data = new LinkedList<Sample<S>>();
+    }
 
-	public double getEnd() {
-		return end;
-	}
-	
-	public int size() {
-		return data.size();
-	}
+    public void add(double time, S value) {
+        if (!Double.isFinite(start)) {
+            this.start = time;
+        }
+        if (!Double.isFinite(this.end) && (this.end >= time)) {
+            throw new IllegalArgumentException();//TODO: Add message!
+        }
+        this.data.add(new Sample<S>(time, value));
+    }
 
-	/**
-	 * @return the succesfull
-	 */
-	public boolean isSuccesfull() {
-		return succesfull;
-	}
+    public void sample(SamplingFunction<S> f) {
+        if (!Double.isFinite(start)) {
+            throw new IllegalArgumentException();
+        }
+        f.start();
+        this.data.stream().forEach(s -> f.sample(s.getTime(), s.getValue()));
+        f.end(end);
+    }
 
-	/**
-	 * @param succesfull the succesfull to set
-	 */
-	public void setSuccesfull(boolean succesfull) {
-		this.succesfull = succesfull;
-	}
+    public void addSample(Sample<S> sample) {
+        this.data.add(sample);
+    }
 
-	/**
-	 * @return the generationTime
-	 */
-	public long getGenerationTime() {
-		return generationTime;
-	}
+    public List<Sample<S>> getData() {
+        return data;
+    }
 
-	/**
-	 * @param generationTime the generationTime to set
-	 */
-	public void setGenerationTime(long generationTime) {
-		this.generationTime = generationTime;
-	}
-	
+    public double getStart() {
+        return start;
+    }
+
+    public double getEnd() {
+        return end;
+    }
+
+    public int size() {
+        return data.size();
+    }
+
+    /**
+     * @return the succesfull
+     */
+    public boolean isSuccesfull() {
+        return succesfull;
+    }
+
+    /**
+     * @param succesfull the succesfull to set
+     */
+    public void setSuccesfull(boolean succesfull) {
+        this.succesfull = succesfull;
+    }
+
+    /**
+     * @return the generationTime
+     */
+    public long getGenerationTime() {
+        return generationTime;
+    }
+
+    /**
+     * @param generationTime the generationTime to set
+     */
+    public void setGenerationTime(long generationTime) {
+        this.generationTime = generationTime;
+    }
+
+
+    public void setStart(double start) {
+        this.start = start;
+    }
+
+    public void setEnd(double end) {
+        this.end = end;
+    }
 
 }

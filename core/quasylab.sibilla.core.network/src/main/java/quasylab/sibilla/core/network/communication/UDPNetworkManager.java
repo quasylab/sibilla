@@ -32,7 +32,6 @@ import quasylab.sibilla.core.network.NetworkInfo;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.SocketException;
 
 /**

@@ -4,6 +4,7 @@
 ###Doxygen###
 xtend-gen/*
 xtext-gen/*
+docs/*
 
 ### Eclipse ###
 .metadata
@@ -214,3 +215,9 @@ core/quasylab.sibilla.core.simulator/src/main/main.iml
 /langs/quasylab.sibilla.lang.pm.parent/quasylab.sibilla.lang.pm/src/main/xtend-gen/quasylab/sibilla/lang/pm/
 /langs/quasylab.sibilla.lang.pm.parent/quasylab.sibilla.lang.pm/src/main/xtext-gen/quasylab/sibilla/lang/pm/
 /data/
+
+# Sibilla logs
+logs
+
+# Sibilla benchmarks
+benchmarks
