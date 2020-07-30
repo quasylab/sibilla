@@ -31,6 +31,7 @@ import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.network.util.StartupUtils;
@@ -47,7 +48,7 @@ public class ClientApplication implements Serializable {
     public final static double DEADLINE = 600;
     private static Logger LOGGER;
     private static final long serialVersionUID = 1L;
-    private static final int REPLICA = 100;
+    private static final int REPLICA = 10000;
 
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
 
@@ -100,7 +101,8 @@ public class ClientApplication implements Serializable {
 
         new ClientSimulationEnvironment(
                 RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), SEIRModelDefinition.getCollection(SAMPLINGS, DEADLINE),
-                REPLICA, DEADLINE, masterServerInfo);
+                REPLICA, DEADLINE, masterServerInfo, SerializerType.FST);
+
 
     }
 
