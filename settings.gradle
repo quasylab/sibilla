@@ -19,6 +19,8 @@ include 'core:quasylab.sibilla.core.simulator',
 		'examples:populations:quasylab.sibilla.examples.pm.seir',
         'examples:populations:quasylab.sibilla.examples.pm.le',
 		'examples:populations:quasylab.sibilla.examples.pm.covid',
+		'examples:populations:quasylab.sibilla.examples.pm.molecule',
 		'examples:servers:quasylab.sibilla.examples.servers.client',
 		'examples:servers:quasylab.sibilla.examples.servers.master',
 		'examples:servers:quasylab.sibilla.examples.servers.slave'
+
