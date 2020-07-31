@@ -22,5 +22,6 @@ include 'core:quasylab.sibilla.core.simulator',
 		'examples:populations:quasylab.sibilla.examples.pm.molecule',
 		'examples:servers:quasylab.sibilla.examples.servers.client',
 		'examples:servers:quasylab.sibilla.examples.servers.master',
-		'examples:servers:quasylab.sibilla.examples.servers.slave'
+		'examples:servers:quasylab.sibilla.examples.servers.slave',
+		'examples:populations:quasylab.sibilla.examples.pm.taxis'
 

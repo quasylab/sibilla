@@ -26,28 +26,71 @@
 
 package quasylab.sibilla.examples.servers.slave;
 
+import quasylab.sibilla.core.network.HostLoggerSupplier;
+import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
+import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
+import quasylab.sibilla.core.network.util.StartupUtils;
 
-import java.io.IOException;
+import java.net.SocketException;
+import java.util.Map;
+import java.util.logging.Logger;
 
 
 public class SlaveApplication {
-    private static final int LOCAL_DISCOVERY_PORT = 59119;
-    private static final int LOCAL_SIMULATION_PORT = 8082;
-    private static final TCPNetworkManagerType SIMULATION_TCP_NETWORK_MANAGER = TCPNetworkManagerType.SECURE;
+
+    private static Logger LOGGER;
+
+    public static void main(String[] args) throws SocketException {
+
+        LOGGER = HostLoggerSupplier.getInstance(String.format("SlaveServer")).getLogger();
+
+        final Map<String, String> options = StartupUtils.parseOptions(args);
+
+        final int localDiscoveryPort = Integer.parseInt(options.getOrDefault("slaveDiscoveryPort", "59119"));
+        final int localSimulationPort = Integer.parseInt(options.getOrDefault("slaveSimulationPort", "8082"));
+
+        final UDPNetworkManagerType masterDiscoveryNetworkManagerType = StartupUtils.UDPNetworkManagerParser(options.getOrDefault("masterDiscoveryCommunicationType", "DEFAULT"));
+        final TCPNetworkManagerType masterSimulationNetworkManagerType = StartupUtils.TCPNetworkManagerParser(options.getOrDefault("masterSimulationCommunicationType", "SECURE"));
+
+        final String keyStoreType = options.getOrDefault("keyStoreType", "JKS");
+        final String keyStorePath = options.getOrDefault("keyStorePath", "slaveKeyStore.jks");
+        final String keyStorePass = options.getOrDefault("keyStorePass", "slavePass");
+        final String trustStoreType = options.getOrDefault("trustStoreType", "JKS");
+        final String trustStorePath = options.getOrDefault("trustStorePath", "slaveTrustStore.jks");
+        final String trustStorePass = options.getOrDefault("trustStorePass", "slavePass");
+
+        SSLUtils.getInstance().setKeyStoreType(keyStoreType);
+        SSLUtils.getInstance().setKeyStorePath(keyStorePath);
+        SSLUtils.getInstance().setKeyStorePass(keyStorePass);
+        SSLUtils.getInstance().setTrustStoreType(trustStoreType);
+        SSLUtils.getInstance().setTrustStorePath(trustStorePath);
+        SSLUtils.getInstance().setTrustStorePass(trustStorePass);
+        LOGGER.info(String.format("Local address: [%s]", NetworkUtils.getLocalAddress()));
+        LOGGER.info(String.format("Starting the Master Server with the params:\n" +
+                        "-keyStoreType: [%s]\n" +
+                        "-keyStorePath: [%s]\n" +
+                        "-trustStoreType: [%s]\n" +
+                        "-trustStorePath: [%s]\n" +
+                        "-slaveDiscoveryPort: [%d]\n" +
+                        "-slaveSimulationPort: [%d]\n" +
+                        "-masterDiscoveryCommunicationType: [%s]\n" +
+                        "-masterSimulationCommunicationType: [%s]",
+                keyStoreType,
+                keyStorePath,
+                trustStoreType,
+                trustStorePath,
+                localDiscoveryPort,
+                localSimulationPort,
+                masterDiscoveryNetworkManagerType,
+                masterSimulationNetworkManagerType));
 
 
-    public static void main(String[] args) throws IOException {
-        SSLUtils.getInstance().setKeyStoreType("JKS");
-        SSLUtils.getInstance().setKeyStorePath("slaveKeyStore.jks");
-        SSLUtils.getInstance().setKeyStorePass("slavePass");
-        SSLUtils.getInstance().setTrustStoreType("JKS");
-        SSLUtils.getInstance().setTrustStorePath("slaveTrustStore.jks");
-        SSLUtils.getInstance().setTrustStorePass("slavePass");
-
-        new DiscoverableBasicSimulationServer(LOCAL_DISCOVERY_PORT, SIMULATION_TCP_NETWORK_MANAGER).start(LOCAL_SIMULATION_PORT);
-
+        new DiscoverableBasicSimulationServer(localDiscoveryPort, masterSimulationNetworkManagerType, masterDiscoveryNetworkManagerType, SerializerType.FST).start(localSimulationPort);
     }
+
+
 }

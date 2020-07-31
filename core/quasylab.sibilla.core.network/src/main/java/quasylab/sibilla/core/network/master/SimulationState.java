@@ -65,7 +65,7 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
     /**
      * Collection that contains the state of every connected slave server.
      */
-    private Set<SlaveState> slaveServers;
+    private volatile Set<SlaveState> slaveServers;
 
     /**
      * Network related infos about the master server that initiated the simulation.
@@ -100,7 +100,7 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
     /**
      * Signals if the simulation is concluded.
      */
-    private boolean concluded;
+    private volatile boolean concluded;
 
     /**
      * The wrapper related to the simulation datas.
@@ -208,12 +208,16 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
      * Returns the state associated with a specific slave server.
      *
      * @param slaveNetworkInfo related to the slave.
-     * @return {@link quasylab.sibilla.core.network.slave.SlaveState} associated with the slave.
+     * @return {@link quasylab.sibilla.core.network.slave.SlaveState} associated with the slave, null if the slave requested was not present.
      */
     public synchronized SlaveState getSlaveStateByServerInfo(NetworkInfo slaveNetworkInfo) {
-        return this.slaveServers.stream().filter(slaveState -> {
-            return slaveState.getSlaveInfo().equals(slaveNetworkInfo);
-        }).findFirst().get();
+        try {
+            return this.slaveServers.stream().filter(slaveState -> {
+                return slaveState.getSlaveInfo().equals(slaveNetworkInfo);
+            }).findFirst().get();
+        } catch (NoSuchElementException e) {
+            return null;
+        }
     }
 
     /**
@@ -299,7 +303,7 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
     /**
      * Marks the simulation related to this state as concluded.
      */
-    public void setConcluded() {
+    public synchronized void setConcluded() {
         this.concluded = true;
         this.updateListeners();
     }
@@ -350,8 +354,8 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
+        assert clone != null;
         clone.simulationStartDate = (Date) this.simulationStartDate.clone();
-        final Map<SlaveState, Integer> tempMapCopy = new HashMap<>();
         clone.slaveServers = this.slaveServers.stream().map(SlaveState::clone).collect(Collectors.toSet());
         clone.masterNetworkInfo = this.masterNetworkInfo.clone();
         clone.clientNetworkInfo = this.clientNetworkInfo.clone();

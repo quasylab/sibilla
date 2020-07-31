@@ -61,6 +61,22 @@ public interface UDPNetworkManager {
     }
 
     /**
+     * Factory method used to obtain {@link quasylab.sibilla.core.network.communication.TCPNetworkManager} implementations' instances.
+     * Used in classes that want to initiate a network communication.
+     *
+     * @param networkType    the type associated with the implementation of {@link quasylab.sibilla.core.network.communication.UDPNetworkManager} that will be instantiated
+     * @param datagramSocket upon which the network communication will be based
+     * @return {@link quasylab.sibilla.core.network.communication.UDPNetworkManager} that will manage the requested connection
+     */
+    static UDPNetworkManager createNetworkManager(UDPNetworkManagerType networkType, DatagramSocket datagramSocket) {
+        switch (networkType) {
+            case DEFAULT:
+            default:
+                return new UDPDefaultNetworkManager(datagramSocket);
+        }
+    }
+
+    /**
      * Reads incoming data from the network.
      *
      * @return byte array of the data read from the network
@@ -77,5 +93,12 @@ public interface UDPNetworkManager {
      * @throws IOException
      */
     void writeObject(byte[] toWrite, InetAddress address, int port) throws IOException;
+
+    /**
+     * Closes the network communication.
+     *
+     * @throws IOException
+     */
+    void closeConnection() throws IOException;
 
 }

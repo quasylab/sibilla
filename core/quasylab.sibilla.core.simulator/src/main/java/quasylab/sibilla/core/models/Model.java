@@ -28,7 +28,10 @@ package quasylab.sibilla.core.models;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.simulator.sampling.Sample;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -43,8 +46,8 @@ public interface Model<S extends State> {
      * a given time. A random generator is passed to sample random values when
      * needed.
      *
-     * @param r random generator used to sample needed random values.
-     * @param time current time.
+     * @param r     random generator used to sample needed random values.
+     * @param time  current time.
      * @param state current state.
      * @return process time step.
      */
@@ -54,8 +57,8 @@ public interface Model<S extends State> {
      * Returns the list of actions that are enabled when the process a a given
      * time is in a given state.
      *
-     * @param r random generator used to sample needed random values.
-     * @param time current time.
+     * @param r     random generator used to sample needed random values.
+     * @param time  current time.
      * @param state current state.
      * @return list of enabled actions.
      */
@@ -63,4 +66,11 @@ public interface Model<S extends State> {
 
     ModelDefinition<S> getModelDefinition();
 
+    int stateByteArraySize();
+
+    byte[] serializeState(S state) throws IOException;
+
+    S deserializeState(byte[] bytes) throws IOException;
+
+    S deserializeState(ByteArrayInputStream toDeserializeFrom) throws IOException;
 }

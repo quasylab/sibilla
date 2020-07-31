@@ -23,14 +23,14 @@
  *
  *
  */
-/**
- * 
- */
 package quasylab.sibilla.core.models.pm;
 
 import quasylab.sibilla.core.past.State;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -41,8 +41,8 @@ import java.util.stream.IntStream;
 
 /**
  * The instances of this class represent a generic population state having species of type <code>S</code>. 
- * 
- * 
+ *
+ *
  * @author loreti
  *
  */

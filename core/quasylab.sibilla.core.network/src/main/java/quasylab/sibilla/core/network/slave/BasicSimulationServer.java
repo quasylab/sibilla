@@ -26,15 +26,19 @@
 
 package quasylab.sibilla.core.network.slave;
 
+import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.network.ComputationResult;
+import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.NetworkTask;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.compression.Compressor;
+import quasylab.sibilla.core.network.loaders.CustomClassLoader;
 import quasylab.sibilla.core.network.master.MasterCommand;
-import quasylab.sibilla.core.network.serialization.CustomClassLoader;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializer;
 import quasylab.sibilla.core.network.serialization.Serializer;
+import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
@@ -64,7 +68,7 @@ public class BasicSimulationServer implements SimulationServer {
     /**
      * Class logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(BasicSimulationServer.class.getName());
+    protected Logger LOGGER;
 
     /**
      * Slave server related network manager type
@@ -91,12 +95,17 @@ public class BasicSimulationServer implements SimulationServer {
      */
     protected NetworkInfo localServerInfo;
 
+    protected Serializer serializer;
+
+
     /**
      * Creates a simulation server with the given network manager type
      *
      * @param networkManagerType type of the network manager
      */
-    public BasicSimulationServer(TCPNetworkManagerType networkManagerType) {
+    public BasicSimulationServer(TCPNetworkManagerType networkManagerType, SerializerType serializerType) {
+        this.serializer = Serializer.getSerializer(serializerType);
+        this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         this.networkManagerType = networkManagerType;
         LOGGER.info(String.format("Creating a new BasicSimulationServer that uses: [%s - %s]",
                 this.networkManagerType.getClass(), this.networkManagerType.name()));
@@ -123,9 +132,7 @@ public class BasicSimulationServer implements SimulationServer {
             LOGGER.info(String.format("The BasicSimulationServer is now listening for servers on port: [%d]", simulationPort));
             while (true) {
                 Socket socket = serverSocket.accept();
-                connectionExecutor.execute(() -> {
-                    manageNewMaster(socket);
-                });
+                connectionExecutor.execute(() -> manageNewMaster(socket));
             }
         } catch (IOException e) {
             LOGGER.severe(String.format("[%s] Network communication failure during the server socket startup", e.getMessage()));
@@ -150,7 +157,7 @@ public class BasicSimulationServer implements SimulationServer {
                     MasterCommand.TASK, () -> handleTaskExecution(master),
                     MasterCommand.CLOSE_CONNECTION, () -> closeConnectionWithMaster(masterIsActive, master));
             while (masterIsActive.get()) {
-                MasterCommand request = (MasterCommand) Serializer.deserialize(master.readObject());
+                MasterCommand request = (MasterCommand) serializer.deserialize(master.readObject());
                 LOGGER.info(String.format("[%s] command received by master: %s", request, master.getNetworkInfo().toString()));
                 map.getOrDefault(request, () -> {
                     throw new ClassCastException("Command received from master server wasn't expected.");
@@ -171,13 +178,13 @@ public class BasicSimulationServer implements SimulationServer {
      */
     private void closeConnectionWithMaster(AtomicBoolean masterActive, TCPNetworkManager master) {
         try {
-            String modelName = (String) Serializer.deserialize(master.readObject());
+            String modelName = (String) serializer.deserialize(master.readObject());
             LOGGER.info(String.format("[%s] Model name read to be deleted by master: %s", modelName, master.getNetworkInfo().toString()));
             masterActive.set(false);
             CustomClassLoader.removeClassBytes(modelName);
             LOGGER.info(String.format("[%s] Model deleted off the class loader", modelName));
 
-            master.writeObject(Serializer.serialize(SlaveCommand.CLOSE_CONNECTION));
+            master.writeObject(serializer.serialize(SlaveCommand.CLOSE_CONNECTION));
             LOGGER.info(String.format("[%s] command sent to the master: %s", SlaveCommand.CLOSE_CONNECTION,
                     master.getNetworkInfo().toString()));
 
@@ -197,13 +204,13 @@ public class BasicSimulationServer implements SimulationServer {
      */
     private void loadModelClass(TCPNetworkManager master) {
         try {
-            String modelName = (String) Serializer.deserialize(master.readObject());
+            String modelName = (String) serializer.deserialize(master.readObject());
             LOGGER.info(String.format("[%s] Model name read by master: %s", modelName, master.getNetworkInfo().toString()));
             byte[] myClass = master.readObject();
             CustomClassLoader.defClass(modelName, myClass);
             String classLoadedName = Class.forName(modelName).getName();
             LOGGER.info(String.format("[%s] Class loaded with success", classLoadedName));
-            master.writeObject(Serializer.serialize(SlaveCommand.INIT_RESPONSE));
+            master.writeObject(serializer.serialize(SlaveCommand.INIT_RESPONSE));
             LOGGER.info(String.format("[%s] command sent to the master: %s", SlaveCommand.INIT_RESPONSE,
                     master.getNetworkInfo().toString()));
         } catch (ClassNotFoundException e) {
@@ -218,12 +225,16 @@ public class BasicSimulationServer implements SimulationServer {
      *
      * @param master server of the master
      */
+
     private void handleTaskExecution(TCPNetworkManager master) {
         try {
-            NetworkTask<?> networkTask = (NetworkTask<?>) Serializer.deserialize(master.readObject());
+            NetworkTask<?> networkTask = (NetworkTask<?>) serializer.deserialize(master.readObject());
             List<? extends SimulationTask<?>> tasks = networkTask.getTasks();
             LinkedList<Trajectory<?>> results = new LinkedList<>();
             CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
+
+            Model model = networkTask.getTasks().get(0).getUnit().getModel();
+
             for (int i = 0; i < tasks.size(); i++) {
                 futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
             }
@@ -231,7 +242,7 @@ public class BasicSimulationServer implements SimulationServer {
             for (SimulationTask<?> task : tasks) {
                 results.add(task.getTrajectory());
             }
-            master.writeObject(Compressor.compress(Serializer.serialize(new ComputationResult(results))));
+            master.writeObject(Compressor.compress(ComputationResultSerializer.serialize(new ComputationResult(results), model)));
             LOGGER.info(String.format("Computation's results have been sent to the server - %s",
                     master.getNetworkInfo().toString()));
         } catch (IOException e) {
@@ -246,7 +257,7 @@ public class BasicSimulationServer implements SimulationServer {
      */
     private void respondPingRequest(TCPNetworkManager master) {
         try {
-            master.writeObject(Serializer.serialize(SlaveCommand.PONG));
+            master.writeObject(serializer.serialize(SlaveCommand.PONG));
             LOGGER.info(String.format("Ping request answered, it was sent by the master: %s",
                     master.getNetworkInfo().toString()));
         } catch (IOException e) {

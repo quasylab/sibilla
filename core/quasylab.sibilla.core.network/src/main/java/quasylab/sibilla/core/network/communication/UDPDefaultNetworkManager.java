@@ -64,4 +64,9 @@ public class UDPDefaultNetworkManager implements UDPNetworkManager {
         socket.send(p);
     }
 
+    @Override
+    public void closeConnection() throws IOException {
+        socket.close();
+    }
+
 }
