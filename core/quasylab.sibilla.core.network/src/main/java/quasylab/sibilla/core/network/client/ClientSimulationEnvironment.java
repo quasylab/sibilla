@@ -29,12 +29,14 @@ package quasylab.sibilla.core.network.client;
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
+import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.SimulationDataSet;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
+import quasylab.sibilla.core.network.loaders.ClassBytesLoader;
 import quasylab.sibilla.core.network.master.MasterCommand;
-import quasylab.sibilla.core.network.serialization.ClassBytesLoader;
 import quasylab.sibilla.core.network.serialization.Serializer;
+import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
@@ -53,7 +55,7 @@ public class ClientSimulationEnvironment<S extends State> {
     /**
      * Class logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(ClientSimulationEnvironment.class.getName());
+    private final Logger LOGGER;
 
     /**
      * The {@link quasylab.sibilla.core.network.SimulationDataSet} object to be sent to the master server.
@@ -65,6 +67,8 @@ public class ClientSimulationEnvironment<S extends State> {
      */
     private TCPNetworkManager masterServerNetworkManager;
 
+
+    private Serializer serializer;
     /**
      * Initiates a new client that submits simulations using the parameters of
      * the simulation to execute and the network related data of the
@@ -82,7 +86,12 @@ public class ClientSimulationEnvironment<S extends State> {
      */
     public ClientSimulationEnvironment(RandomGenerator random, ModelDefinition<S> modelDefinition, Model<S> model,
                                        S initialState, SamplingFunction<S> sampling_function, int replica, double deadline,
-                                       NetworkInfo masterNetworkInfo) {
+                                       NetworkInfo masterNetworkInfo, SerializerType serializerType) {
+
+        LOGGER = HostLoggerSupplier.getInstance().getLogger();
+
+        serializer = Serializer.getSerializer(serializerType);
+
         this.data = new SimulationDataSet<>(random, modelDefinition, model, initialState, sampling_function, replica,
                 deadline);
         try {
@@ -106,12 +115,12 @@ public class ClientSimulationEnvironment<S extends State> {
      */
     private void closeConnection(TCPNetworkManager targetMaster) throws IOException {
         try {
-            targetMaster.writeObject(Serializer.serialize(ClientCommand.CLOSE_CONNECTION));
+            targetMaster.writeObject(serializer.serialize(ClientCommand.CLOSE_CONNECTION));
             LOGGER.info(String.format("[%s] command sent to the master: %s", ClientCommand.CLOSE_CONNECTION,
                     targetMaster.getNetworkInfo().toString()));
-            targetMaster.writeObject(Serializer.serialize(this.data.getModelDefinition().getClass().getName()));
+            targetMaster.writeObject(serializer.serialize(this.data.getModelDefinition().getClass().getName()));
 
-            MasterCommand answer = (MasterCommand) Serializer.deserialize(targetMaster.readObject());
+            MasterCommand answer = (MasterCommand) serializer.deserialize(targetMaster.readObject());
             if (answer.equals(MasterCommand.CLOSE_CONNECTION)) {
                 LOGGER.info(String.format("Answer received: [%s] - Master: %s", answer, targetMaster.getNetworkInfo().toString()));
             } else {
@@ -140,16 +149,16 @@ public class ClientSimulationEnvironment<S extends State> {
             LOGGER.info(String.format("Loading [%s] class bytes to be transmitted over network", data.getModelDefinition().getClass().getName()));
             byte[] classBytes = ClassBytesLoader.loadClassBytes(data.getModelDefinition().getClass().getName());
 
-            targetMaster.writeObject(Serializer.serialize(ClientCommand.INIT));
+            targetMaster.writeObject(serializer.serialize(ClientCommand.INIT));
             LOGGER.info(String.format("[%s] command sent to the master: %s", ClientCommand.INIT,
                     targetMaster.getNetworkInfo().toString()));
-            targetMaster.writeObject(Serializer.serialize(data.getModelDefinition().getClass().getName()));
+            targetMaster.writeObject(serializer.serialize(data.getModelDefinition().getClass().getName()));
             LOGGER.info(String.format("[%s] Model name has been sent to the master: %s", this.data.getModelDefinition().getClass().getName(),
                     targetMaster.getNetworkInfo().toString()));
             targetMaster.writeObject(classBytes);
             LOGGER.info(String.format("Class bytes have been sent to the master: %s", targetMaster.getNetworkInfo().toString()));
 
-            MasterCommand answer = (MasterCommand) Serializer.deserialize(targetMaster.readObject());
+            MasterCommand answer = (MasterCommand) serializer.deserialize(targetMaster.readObject());
             if (answer.equals(MasterCommand.INIT_RESPONSE)) {
                 LOGGER.info(String.format("Answer received: [%s] - Master: %s", answer, targetMaster.getNetworkInfo().toString()));
             } else {
@@ -172,26 +181,26 @@ public class ClientSimulationEnvironment<S extends State> {
      */
     private void sendSimulationInfo(TCPNetworkManager targetMaster) throws IOException {
         try {
-            targetMaster.writeObject(Serializer.serialize(ClientCommand.DATA));
+            targetMaster.writeObject(serializer.serialize(ClientCommand.DATA));
             LOGGER.info(String.format("[%s] command sent to the master: %s", ClientCommand.DATA,
                     targetMaster.getNetworkInfo().toString()));
-            targetMaster.writeObject(Serializer.serialize(data));
+            targetMaster.writeObject(serializer.serialize(data));
             LOGGER.info(String.format("Simulation datas have been sent to the master: %s",
                     targetMaster.getNetworkInfo().toString()));
 
-            MasterCommand answer = (MasterCommand) Serializer.deserialize(targetMaster.readObject());
+            MasterCommand answer = (MasterCommand) serializer.deserialize(targetMaster.readObject());
             if (answer.equals(MasterCommand.DATA_RESPONSE)) {
                 LOGGER.info(String.format("Answer received: [%s] - Master: %s", answer, targetMaster.getNetworkInfo().toString()));
             } else {
                 throw new ClassCastException("Wrong answer after DATA command. Expected DATA_RESPONSE");
             }
-            MasterCommand command = (MasterCommand) Serializer.deserialize(targetMaster.readObject());
+            MasterCommand command = (MasterCommand) serializer.deserialize(targetMaster.readObject());
             LOGGER.info(String.format("[%s] command read by the master: %s", command,
                     targetMaster.getNetworkInfo().toString()));
             if (command.equals(MasterCommand.RESULTS)) {
-                SamplingFunction<?> samplingFunction = (SamplingFunction<?>) Serializer
+                SamplingFunction<?> samplingFunction = (SamplingFunction<?>) serializer
                         .deserialize(targetMaster.readObject());
-                LOGGER.severe("The simulation results have been received correctly");
+                LOGGER.info("The simulation results have been received correctly");
             } else {
                 throw new ClassCastException("Wrong command from master. Expected RESULTS");
             }
@@ -211,12 +220,12 @@ public class ClientSimulationEnvironment<S extends State> {
      */
     private void sendPing(TCPNetworkManager targetMaster) throws IOException {
         try {
-            targetMaster.writeObject(Serializer.serialize(ClientCommand.PING));
+            targetMaster.writeObject(serializer.serialize(ClientCommand.PING));
             LOGGER.info(String.format("[%s] command sent to the master: %s", ClientCommand.PING,
                     targetMaster.getNetworkInfo().toString()));
             LOGGER.info("Ping has been sent to the master");
 
-            MasterCommand answer = (MasterCommand) Serializer.deserialize(targetMaster.readObject());
+            MasterCommand answer = (MasterCommand) serializer.deserialize(targetMaster.readObject());
             if (answer.equals(MasterCommand.PONG)) {
                 LOGGER.info(String.format("Answer received: [%s] - Master: %s", answer, targetMaster.getNetworkInfo().toString()));
             } else {

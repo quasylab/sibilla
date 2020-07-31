@@ -127,7 +127,7 @@ public abstract class QueuedSimulationManager<S extends State> extends AbstractS
     }
 
     /**
-     * * Gets the next n tasks to execute
+     * Gets the next n tasks to execute
      *
      * @param n        number of tasks to be returned
      * @param blocking whether the operation is blocking or not

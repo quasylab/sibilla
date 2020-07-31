@@ -2,9 +2,9 @@
 # Edit at https://www.gitignore.io/?templates=java,gradle,eclipse,intellij
 
 ###Doxygen###
-docs/
 xtend-gen/*
 xtext-gen/*
+docs/*
 
 ### Eclipse ###
 .metadata
@@ -217,3 +217,9 @@ core/quasylab.sibilla.core.simulator/src/main/main.iml
 /data/
 
 .DS_Store
+
+# Sibilla logs
+logs
+
+# Sibilla benchmarks
+benchmarks

@@ -24,7 +24,7 @@
  *
  */
 
-package quasylab.sibilla.core.network.serialization;
+package quasylab.sibilla.core.network.loaders;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

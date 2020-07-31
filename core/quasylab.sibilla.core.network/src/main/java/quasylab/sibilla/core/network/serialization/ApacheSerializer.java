@@ -26,7 +26,7 @@
 
 package quasylab.sibilla.core.network.serialization;
 
-import org.nustaq.serialization.FSTConfiguration;
+import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.Serializable;
 
@@ -37,23 +37,7 @@ import java.io.Serializable;
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */
-public interface Serializer {
-
-    /**
-     * This class defines the encoders/decoders used during FST serialization.
-     * Usually you just create one global singleton (instantiation of this class is very expensive).
-     */
-    FSTConfiguration defaultFSTConfiguration = FSTConfiguration.createDefaultConfiguration();
-
-    static Serializer getSerializer(SerializerType type) {
-        switch (type) {
-            case FST:
-                return new FSTSerializer(defaultFSTConfiguration);
-            case APACHE:
-            default:
-                return new ApacheSerializer();
-        }
-    }
+public class ApacheSerializer implements Serializer {
 
     /**
      * Serializes a Serializable instance.
@@ -61,7 +45,9 @@ public interface Serializer {
      * @param toSerialize instance to be compressed
      * @return serialized byte array
      */
-    byte[] serialize(Serializable toSerialize);
+    public byte[] serialize(Serializable toSerialize) {
+        return SerializationUtils.serialize(toSerialize);
+    }
 
     /**
      * Deserializes a byte array.
@@ -69,7 +55,12 @@ public interface Serializer {
      * @param toDeserialize byte array to be deserialized
      * @return deserialized Serializable instance
      */
-    Serializable deserialize(byte[] toDeserialize);
+    public Serializable deserialize(byte[] toDeserialize) {
+        return SerializationUtils.deserialize(toDeserialize);
+    }
 
-    SerializerType getType();
+    @Override
+    public SerializerType getType() {
+        return SerializerType.APACHE;
+    }
 }

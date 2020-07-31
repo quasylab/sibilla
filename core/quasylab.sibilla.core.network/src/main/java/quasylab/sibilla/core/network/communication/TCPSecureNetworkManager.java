@@ -26,6 +26,7 @@
 
 package quasylab.sibilla.core.network.communication;
 
+import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.util.SSLUtils;
 
@@ -38,14 +39,14 @@ import java.net.Socket;
 import java.util.logging.Logger;
 
 /**
- * TCP based communication class that relies on SSL protocol.
+ * TCP based communication class that relies on TLS protocol.
  *
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */
 public class TCPSecureNetworkManager implements TCPNetworkManager {
 
-    private static final Logger LOGGER = Logger.getLogger(TCPSecureNetworkManager.class.getName());
+    private Logger LOGGER;
 
     private Socket socket;
     private DataInputStream dataInputStream;
@@ -60,6 +61,7 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
      * @throws IOException
      */
     public TCPSecureNetworkManager(NetworkInfo networkInfo) throws IOException {
+        this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         if (networkInfo.getType().equals(TCPNetworkManagerType.SECURE)) {
             SSLContext sslContext = SSLUtils.getInstance().createSSLContext();
             SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
@@ -80,6 +82,7 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
      * @throws IOException
      */
     public TCPSecureNetworkManager(Socket socket) throws IOException {
+        this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         if (socket instanceof SSLSocket) {
             this.buildWithSocket((SSLSocket) socket);
         } else {
@@ -88,7 +91,7 @@ public class TCPSecureNetworkManager implements TCPNetworkManager {
     }
 
     /**
-     * Configures and manages the SSL connection.
+     * Configures and manages the TLS connection.
      *
      * @param sslSocket upon which the network communication will be based
      * @throws IOException

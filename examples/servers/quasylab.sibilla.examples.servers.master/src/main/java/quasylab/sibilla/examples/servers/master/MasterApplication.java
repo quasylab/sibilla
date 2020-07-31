@@ -30,19 +30,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.master.MasterServerSimulationEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
+import quasylab.sibilla.core.network.serialization.SerializerType;
+import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
+import quasylab.sibilla.core.network.util.StartupUtils;
+
+import java.net.SocketException;
+import java.util.Map;
+import java.util.logging.Logger;
 
 @SpringBootApplication
 public class MasterApplication implements CommandLineRunner {
 
-    private static final int LOCAL_DISCOVERY_PORT = 10000;
-    private static final int REMOTE_DISCOVERY_PORT = 59119;
-    private static final UDPNetworkManagerType DISCOVERY_NETWORK_MANAGER_TYPE = UDPNetworkManagerType.DEFAULT;
-    private static final int LOCAL_SIMULATION_PORT = 10001;
-    private static final TCPNetworkManagerType SIMULATION_NETWORK_MANAGER_TYPE = TCPNetworkManagerType.SECURE;
+    private static Logger LOGGER;
+
     @Autowired
     MonitoringServerComponent monitoringServerComponent;
 
@@ -51,14 +56,56 @@ public class MasterApplication implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
-        SSLUtils.getInstance().setKeyStoreType("JKS");
-        SSLUtils.getInstance().setKeyStorePath("masterKeyStore.jks");
-        SSLUtils.getInstance().setKeyStorePass("masterPass");
-        SSLUtils.getInstance().setTrustStoreType("JKS");
-        SSLUtils.getInstance().setTrustStorePath("masterTrustStore.jks");
-        SSLUtils.getInstance().setTrustStorePass("masterPass");
+    public void run(String... args) throws SocketException {
 
-        MasterServerSimulationEnvironment masterEnvironment = new MasterServerSimulationEnvironment(LOCAL_DISCOVERY_PORT, REMOTE_DISCOVERY_PORT, DISCOVERY_NETWORK_MANAGER_TYPE, LOCAL_SIMULATION_PORT, SIMULATION_NETWORK_MANAGER_TYPE, monitoringServerComponent);
+        LOGGER = HostLoggerSupplier.getInstance(String.format("MasterServer")).getLogger();
+
+        final Map<String, String> options = StartupUtils.parseOptions(args);
+
+        final int localDiscoveryPort = Integer.parseInt(options.getOrDefault("masterDiscoveryPort", "10000"));
+        final int remoteDiscoveryPort = Integer.parseInt(options.getOrDefault("slaveDiscoveryPort", "59119"));
+        final int localSimulationPort = Integer.parseInt(options.getOrDefault("masterSimulationPort", "10001"));
+
+        final UDPNetworkManagerType slaveDiscoveryNetworkManagerType = StartupUtils.UDPNetworkManagerParser(options.getOrDefault("slaveDiscoveryCommunicationType", "DEFAULT"));
+        final TCPNetworkManagerType clientSimulationNetworkManagerType = StartupUtils.TCPNetworkManagerParser(options.getOrDefault("clientSimulationCommunicationType", "SECURE"));
+
+        final String keyStoreType = options.getOrDefault("keyStoreType", "JKS");
+        final String keyStorePath = options.getOrDefault("keyStorePath", "masterKeyStore.jks");
+        final String keyStorePass = options.getOrDefault("keyStorePass", "masterPass");
+        final String trustStoreType = options.getOrDefault("trustStoreType", "JKS");
+        final String trustStorePath = options.getOrDefault("trustStorePath", "masterTrustStore.jks");
+        final String trustStorePass = options.getOrDefault("trustStorePass", "masterPass");
+
+        SSLUtils.getInstance().setKeyStoreType(keyStoreType);
+        SSLUtils.getInstance().setKeyStorePath(keyStorePath);
+        SSLUtils.getInstance().setKeyStorePass(keyStorePass);
+        SSLUtils.getInstance().setTrustStoreType(trustStoreType);
+        SSLUtils.getInstance().setTrustStorePath(trustStorePath);
+        SSLUtils.getInstance().setTrustStorePass(trustStorePass);
+        LOGGER.info(String.format("Local address: [%s]", NetworkUtils.getLocalAddress()));
+        LOGGER.info(String.format("Starting the Master Server with the params:\n" +
+                        "-keyStoreType: [%s]\n" +
+                        "-keyStorePath: [%s]\n" +
+                        "-trustStoreType: [%s]\n" +
+                        "-trustStorePath: [%s]\n" +
+                        "-masterDiscoveryPort: [%d]\n" +
+                        "-slaveDiscoveryPort: [%d]\n" +
+                        "-masterSimulationPort: [%d]\n" +
+                        "-slaveDiscoveryCommunicationType: [%s]\n" +
+                        "-clientSimulationCommunicationType: [%s]",
+                keyStoreType,
+                keyStorePath,
+                trustStoreType,
+                trustStorePath,
+                localDiscoveryPort,
+                remoteDiscoveryPort,
+                localSimulationPort,
+                slaveDiscoveryNetworkManagerType,
+                clientSimulationNetworkManagerType));
+
+        new MasterServerSimulationEnvironment(localDiscoveryPort,
+                remoteDiscoveryPort, slaveDiscoveryNetworkManagerType, localSimulationPort,
+                clientSimulationNetworkManagerType, SerializerType.FST, monitoringServerComponent);
     }
+
 }

@@ -26,72 +26,70 @@
 
 package quasylab.sibilla.core.simulator.sampling;
 
+import quasylab.sibilla.core.past.State;
+
 import java.io.Serializable;
 
 /**
  * @author loreti
- *
  */
-public class Sample<T> implements Serializable{
-	
-	private static final long serialVersionUID = -2981890753216588999L;
+public class Sample<S extends State> implements Serializable {
 
-	private double time;
-	
-	private T value;
-	
-	public Sample( double time, T value ) {
-		this.value = value;
-		this.time = time;
-	}
+    private static final long serialVersionUID = -2981890753216588999L;
 
-	
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		long temp;
-		temp = Double.doubleToLongBits(time);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + ((value == null) ? 0 : value.hashCode());
-		return result;
-	}
+    private double time;
+
+    private S value;
+
+    public Sample(double time, S value) {
+        this.value = value;
+        this.time = time;
+    }
 
 
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Sample<?> other = (Sample<?>) obj;
-		if (Double.doubleToLongBits(time) != Double.doubleToLongBits(other.time))
-			return false;
-		if (value == null) {
-			if (other.value != null)
-				return false;
-		} else if (!value.equals(other.value))
-			return false;
-		return true;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        long temp;
+        temp = Double.doubleToLongBits(time);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        return result;
+    }
 
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Sample<?> other = (Sample<?>) obj;
+        if (Double.doubleToLongBits(time) != Double.doubleToLongBits(other.time))
+            return false;
+        if (value == null) {
+            if (other.value != null)
+                return false;
+        } else if (!value.equals(other.value))
+            return false;
+        return true;
+    }
 
-	@Override
-	public String toString() {
-		return time+":"+value;
-	}
 
-	public double getTime() {
-		return time;
-	}
+    @Override
+    public String toString() {
+        return time + ":" + value;
+    }
 
-	public T getValue() {
-		return value;
-	}
+    public double getTime() {
+        return time;
+    }
+
+    public S getValue() {
+        return value;
+    }
 
 }
