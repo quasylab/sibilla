@@ -32,12 +32,24 @@ plugins {
 
 dependencies {
     compile project(':core:quasylab.sibilla.core.simulator')
-    compile group: 'com.jfoenix', name: 'jfoenix', version: '8.0.5'
+    compile project(':examples:populations:quasylab.sibilla.examples.pm.covid')
+    compile group: 'com.jfoenix', name: 'jfoenix', version: '9.0.8'
 }
 
 javafx {
-    version = "14"
+    version = "11.0.2"
     modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
+run {
+    jvmArgs = [
+            "--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED",
+            "--add-exports=javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED",
+            "--add-exports=javafx.base/com.sun.javafx.binding=ALL-UNNAMED",
+            "--add-exports=javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED",
+            "--add-exports=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED",
+            "--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED",
+    ]
 mainClassName = 'quasylab.sibilla.gui.InteractiveSimulation'
+
+}

@@ -52,7 +52,7 @@ public class CovidModelRun {
                 def.createModel(),
                 def.state()
         );
-        start(ee);
+        start2(ee);
     }
 
     private static void start(ExecutionEnvironment<PopulationState> ee) throws IOException {
@@ -67,6 +67,27 @@ public class CovidModelRun {
                 flag = execute(cmd.charAt(0),ee);
             }
         } while (flag);
+    }
+
+    private static void start2(ExecutionEnvironment<PopulationState> ee) throws IOException {
+        int i = 0;
+        while(i<100) {
+            System.out.println("STEPS: " + ee.steps());
+            System.out.println("TIME UNITS: " + ee.currentTime());
+            System.out.println(ee.currentState().toString());
+            ee.step();
+            i++;
+        }
+
+        System.out.println("\n");
+
+        while(i<201) {
+            System.out.println("STEPS: " + ee.steps());
+            System.out.println("TIME UNITS: " + ee.currentTime());
+            System.out.println(ee.currentState().toString());
+            ee.previous();
+            i++;
+        }
     }
 
     private static boolean execute(char c, ExecutionEnvironment<PopulationState> ee) {

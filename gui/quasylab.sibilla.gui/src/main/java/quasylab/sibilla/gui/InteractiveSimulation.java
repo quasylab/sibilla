@@ -25,16 +25,80 @@
 package quasylab.sibilla.gui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+
+import org.apache.commons.math3.random.RandomGenerator;
+import quasilab.sibilla.core.ExecutionEnvironment;
+import quasylab.sibilla.core.models.Action;
+import quasylab.sibilla.core.models.Model;
+import quasylab.sibilla.core.models.ModelDefinition;
+import quasylab.sibilla.core.models.TimeStep;
+import quasylab.sibilla.core.models.pm.PopulationState;
+import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+
+import quasylab.sibilla.examples.pm.seir.CovidDefinition;
+import quasylab.sibilla.gui.controllers.InteractiveController;
+
+import java.io.IOException;
+
 
 public class InteractiveSimulation extends Application {
+
+    @Override
+    public void start(Stage stage) throws IOException {
+
+        CovidDefinition def = new CovidDefinition();
+        ExecutionEnvironment<PopulationState> ee = new ExecutionEnvironment<>(
+                new DefaultRandomGenerator(),
+                def.createModel(),
+                def.state()
+        );
+
+
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(("/fxml/InteractiveView.fxml")));
+        Parent root = loader.load();
+        InteractiveController contr = loader.getController();
+
+        contr.setExecutionEnvironment(ee);
+
+
+        Scene scene = new Scene(root);
+
+        scene.getStylesheets().add("/css/style.css");
+        stage.setTitle("Debugger");
+        stage.setScene(scene);
+        stage.show();
+
+        stage.setOnCloseRequest(this::closeProgram);
+}
+
+    private void closeProgram(WindowEvent evt) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
+                "Do you really want to close this application?",
+                ButtonType.YES, ButtonType.NO);
+        alert.setTitle("Exit Confirmation");
+        alert.setHeaderText(null);
+        ButtonType result = alert.showAndWait().orElse(ButtonType.NO);
+
+        if (ButtonType.NO.equals(result)) {
+            evt.consume();
+        }
+        else {
+            Platform.exit();
+        }
+    }
 
     public static void main(String[] args) {
         launch(args);
     }
 
-    @Override
-    public void start(Stage primaryStage) {
-
-    }
 }
