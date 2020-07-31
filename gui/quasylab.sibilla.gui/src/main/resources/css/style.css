@@ -99,7 +99,6 @@
 }
 
 .progressBar{
-    -fx-background-color: trasparent;
     -fx-background-radius: 10px;
     -fx-border-radius: 10px;
 }

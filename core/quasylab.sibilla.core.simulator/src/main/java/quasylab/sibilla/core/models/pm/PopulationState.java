@@ -54,7 +54,8 @@ public class PopulationState implements State {
 	 */
 	private final int[] populationVector;
 	private final double population;
-	
+
+
 	public PopulationState( int size ) {
 		this(new int[size]);
 	}

@@ -10,19 +10,20 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import quasilab.sibilla.core.ExecutionEnvironment;
+import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.past.State;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class AdvanceSettingsController implements Initializable {
+public class AdvanceSettingsController  {
+
+    ExecutionEnvironment<?> ee;
 
 
     @FXML
     InteractiveController ic;
 
-
-    ExecutionEnvironment<?> ee;
     @FXML
     JFXButton stepToBtn;
     @FXML
@@ -32,12 +33,17 @@ public class AdvanceSettingsController implements Initializable {
     @FXML
     TextField previousToNumber;
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
+    @FXML
+    public void initialize() {
     }
 
-    public void setExecutionEnvironment(ExecutionEnvironment<? extends State> ee) {
+    public void setExecutionEnvironment(ExecutionEnvironment<PopulationState> ee) {
         this.ee = ee;
+    }
+
+    @FXML
+    public void setRootController(InteractiveController ic) {
+        this.ic = ic;
     }
 
     @FXML
@@ -51,15 +57,21 @@ public class AdvanceSettingsController implements Initializable {
             this.ee.step();
             i++;
         }
-        this.ic.updateFields();
+        this.ic.update();
     }
 
     @FXML
     public void previousTo (MouseEvent mouseEvent){
         if (previousToNumber.getText().equals(""))
             showAlert();
-
-        ee.previous();
+        int previousN = Integer.parseInt(previousToNumber.getText());
+        if (previousN == 0){}
+        int i=0;
+        while (i<previousN){
+            this.ee.previous();
+            i++;
+        }
+        this.ic.update();
     }
 
     @FXML
@@ -76,5 +88,6 @@ public class AdvanceSettingsController implements Initializable {
     private void checkEvent(MouseEvent me, MouseButton mb){
         if (me.getSource().equals(mb));
     }
+
 
 }

@@ -37,8 +37,8 @@
                                     <children>
                                         <TableView fx:id="tableView" layoutX="216.0" layoutY="54.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <columns>
-                                                <TableColumn prefWidth="75.0" text="C1" />
-                                                <TableColumn prefWidth="75.0" text="C2" />
+                                                <TableColumn fx:id="agentsCol" prefWidth="75.0" />
+                                                <TableColumn fx:id="occurrencesCol" prefWidth="75.0" />
                                             </columns>
                                             <columnResizePolicy>
                                                 <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -53,13 +53,13 @@
                                     <children>
                                         <AreaChart fx:id="areachartView" layoutX="92.0" layoutY="14.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <xAxis>
-                                                <CategoryAxis side="BOTTOM" tickLabelFill="WHITE">
+                                                <NumberAxis fx:id="areachartXaxis" side="BOTTOM" tickLabelFill="WHITE">
                                        <tickLabelFont>
                                           <Font name="System Bold" size="12.0" />
-                                       </tickLabelFont></CategoryAxis>
+                                       </tickLabelFont></NumberAxis>
                                             </xAxis>
                                             <yAxis>
-                                                <NumberAxis side="LEFT" tickLabelFill="WHITE">
+                                                <NumberAxis fx:id="areachartYaxis" side="LEFT" tickLabelFill="WHITE">
                                        <tickLabelFont>
                                           <Font name="System Bold" size="12.0" />
                                        </tickLabelFont></NumberAxis>
@@ -74,28 +74,28 @@
                                     <children>
                                         <LineChart fx:id="linechartView" layoutX="45.0" layoutY="-25.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <xAxis>
-                                                <CategoryAxis side="BOTTOM" />
+                                                <NumberAxis fx:id="linechartXaxis" side="BOTTOM" />
                                             </xAxis>
                                             <yAxis>
-                                                <NumberAxis side="LEFT" />
+                                                <NumberAxis fx:id="linechartYaxis" side="LEFT" />
                                             </yAxis>
                                         </LineChart>
                                     </children></AnchorPane>
                             </content>
                         </Tab>
-                        <Tab fx:id="barChartView" text="BAR CHART">
+                        <Tab fx:id="barchartTab" text="BAR CHART">
                             <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" styleClass="anchorPaneCharts">
-                                    <children>
-                                        <BarChart fx:id="barchartView" layoutX="71.0" layoutY="43.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                            <xAxis>
-                                                <CategoryAxis side="BOTTOM" />
-                                            </xAxis>
-                                            <yAxis>
-                                                <NumberAxis side="LEFT" />
-                                            </yAxis>
-                                        </BarChart>
-                                    </children></AnchorPane>
+                           <children>
+                              <BarChart fx:id="barchartView" layoutX="101.0" layoutY="34.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <xAxis>
+                                  <CategoryAxis fx:id="barchartXaxis" side="BOTTOM" />
+                                </xAxis>
+                                <yAxis>
+                                  <NumberAxis fx:id="barchartYaxis" side="LEFT" />
+                                </yAxis>
+                              </BarChart>
+                           </children></AnchorPane>
                             </content>
                         </Tab>
                         <Tab fx:id="piechartTab" text="PIE CHART">
@@ -186,7 +186,7 @@
                         <Font name="System Bold" size="14.0" />
                      </font>
                   </Label>
-                  <TextField fx:id="stepsField" editable="false" layoutX="422.0" layoutY="23.0" prefWidth="50.0" styleClass="textField">
+                  <TextField fx:id="stepsField" editable="false" layoutX="422.0" layoutY="23.0" prefHeight="32.0" prefWidth="68.0" styleClass="textField">
                      <HBox.margin>
                         <Insets left="5.0" />
                      </HBox.margin>
