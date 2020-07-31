@@ -32,7 +32,7 @@ import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.NetworkTask;
-import quasylab.sibilla.core.network.benchmark.NewBenchmark;
+import quasylab.sibilla.core.network.benchmark.Benchmark;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.loaders.ClassBytesLoader;
@@ -374,8 +374,8 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      * @return result of the computation
      */
 
-    static NewBenchmark benchmarkDeserialization = new NewBenchmark("benchmarks/master", "Master Results Deserialization", "csv");
-    static NewBenchmark benchmarkDecompression = new NewBenchmark("benchmarks/master", "Master Results Decompression", "csv");
+    static Benchmark benchmarkDeserialization = new Benchmark("benchmarks/master", "Master Results Deserialization", "csv");
+    static Benchmark benchmarkDecompression = new Benchmark("benchmarks/master", "Master Results Decompression", "csv");
 
     private ComputationResult<S> send(NetworkTask<S> networkTask, TCPNetworkManager server) {
 

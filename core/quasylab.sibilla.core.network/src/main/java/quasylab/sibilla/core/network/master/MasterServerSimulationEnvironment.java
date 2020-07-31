@@ -29,7 +29,7 @@ package quasylab.sibilla.core.network.master;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.SimulationDataSet;
-import quasylab.sibilla.core.network.benchmark.NewBenchmark;
+import quasylab.sibilla.core.network.benchmark.Benchmark;
 import quasylab.sibilla.core.network.client.ClientCommand;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
@@ -119,7 +119,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
 
     private Serializer serializer;
 
-    private NewBenchmark resultSerializationBenchmark;
+    private Benchmark resultSerializationBenchmark;
 
     /**
      * Creates and starts up a master server with the given parameters.
@@ -149,7 +149,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
 
         try {
             this.serializer = Serializer.getSerializer(serializerType);
-            this.resultSerializationBenchmark = new NewBenchmark("./benchmarks/master", String.format("Master Results Serialization - %s", serializer.getType().toString()), "csv");
+            this.resultSerializationBenchmark = new Benchmark("./benchmarks/master", String.format("Master Results Serialization - %s", serializer.getType().toString()), "csv");
             localDiscoveryInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), localDiscoveryPort, discoveryNetworkManager);
             localSimulationInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), localSimulationPort,
                     simulationNetworkManager);

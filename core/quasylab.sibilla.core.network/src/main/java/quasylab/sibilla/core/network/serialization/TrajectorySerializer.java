@@ -1,7 +1,6 @@
 package quasylab.sibilla.core.network.serialization;
 
 import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.Trajectory;
 import quasylab.sibilla.core.simulator.sampling.Sample;

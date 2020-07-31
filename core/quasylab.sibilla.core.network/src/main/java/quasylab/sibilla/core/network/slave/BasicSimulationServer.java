@@ -31,7 +31,7 @@ import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.NetworkTask;
-import quasylab.sibilla.core.network.benchmark.NewBenchmark;
+import quasylab.sibilla.core.network.benchmark.Benchmark;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.compression.Compressor;
@@ -227,10 +227,10 @@ public class BasicSimulationServer implements SimulationServer {
      * @param master server of the master
      */
 
-    static NewBenchmark benchmarkComputation = new NewBenchmark("benchmarks/slave", "Slave Results Computation", "csv");
-    static NewBenchmark benchmarkSerialization = new NewBenchmark("benchmarks/slave", "Slave Results Serialization", "csv");
-    static NewBenchmark benchmarkCompression = new NewBenchmark("benchmarks/slave", "Slave Results Compression", "csv");
-    static NewBenchmark benchmarkSend = new NewBenchmark("benchmarks/slave", "Slave Results Send", "csv");
+    static Benchmark benchmarkComputation = new Benchmark("benchmarks/slave", "Slave Results Computation", "csv");
+    static Benchmark benchmarkSerialization = new Benchmark("benchmarks/slave", "Slave Results Serialization", "csv");
+    static Benchmark benchmarkCompression = new Benchmark("benchmarks/slave", "Slave Results Compression", "csv");
+    static Benchmark benchmarkSend = new Benchmark("benchmarks/slave", "Slave Results Send", "csv");
 
     private void handleTaskExecution(TCPNetworkManager master) {
         try {
@@ -251,7 +251,9 @@ public class BasicSimulationServer implements SimulationServer {
                 }
                 CompletableFuture.allOf(futures).join();
                 for (SimulationTask<?> task : tasks) {
-                    results.add(task.getTrajectory());
+                    Trajectory trajectory = task.getTrajectory();
+                   // BytearrayToFile.toFile(serializer.serialize(trajectory), "trajectories", "3 rules trajectory " + serializer.getType());
+                    results.add(trajectory);
                 }
                 return List.of((double) tasks.size());
             });

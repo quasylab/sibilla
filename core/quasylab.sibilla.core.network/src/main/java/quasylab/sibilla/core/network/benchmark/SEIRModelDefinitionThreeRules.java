@@ -24,10 +24,9 @@
  *
  */
 
-package quasylab.sibilla.examples.servers.client;
+package quasylab.sibilla.core.network.benchmark;
 
 import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
@@ -35,7 +34,7 @@ import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.io.Serializable;
 
-public class SEIRModelDefinition implements PopulationModelDefinition, Serializable {
+public class SEIRModelDefinitionThreeRules implements PopulationModelDefinition, Serializable {
 
     public final static int S = 0;
     public final static int E = 1;
@@ -126,10 +125,10 @@ public class SEIRModelDefinition implements PopulationModelDefinition, Serializa
 
     public static SamplingFunction<PopulationState> getCollection(int SAMPLINGS, double DEADLINE) {
         SamplingCollection<PopulationState> collection = new SamplingCollection<>();
-        collection.add(StatisticSampling.measure("S", SAMPLINGS, DEADLINE, SEIRModelDefinition::fractionOfS));
-        collection.add(StatisticSampling.measure("E", SAMPLINGS, DEADLINE, SEIRModelDefinition::fractionOfE));
-        collection.add(StatisticSampling.measure("I", SAMPLINGS, DEADLINE, SEIRModelDefinition::fractionOfI));
-        collection.add(StatisticSampling.measure("R", SAMPLINGS, DEADLINE, SEIRModelDefinition::fractionOfR));
+        collection.add(StatisticSampling.measure("S", SAMPLINGS, DEADLINE, SEIRModelDefinitionThreeRules::fractionOfS));
+        collection.add(StatisticSampling.measure("E", SAMPLINGS, DEADLINE, SEIRModelDefinitionThreeRules::fractionOfE));
+        collection.add(StatisticSampling.measure("I", SAMPLINGS, DEADLINE, SEIRModelDefinitionThreeRules::fractionOfI));
+        collection.add(StatisticSampling.measure("R", SAMPLINGS, DEADLINE, SEIRModelDefinitionThreeRules::fractionOfR));
         return collection;
     }
 }
