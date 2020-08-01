@@ -119,7 +119,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
 
     private Serializer serializer;
 
-    private Benchmark resultSerializationBenchmark;
+    // private Benchmark resultSerializationBenchmark;
 
     /**
      * Creates and starts up a master server with the given parameters.
@@ -149,7 +149,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
 
         try {
             this.serializer = Serializer.getSerializer(serializerType);
-            this.resultSerializationBenchmark = new Benchmark("./benchmarks/master", String.format("Master Results Serialization - %s", serializer.getType().toString()), "csv");
+//            this.resultSerializationBenchmark = new Benchmark("./benchmarks/master", String.format("Master Results Serialization - %s", serializer.getType().toString()), "csv", );
             localDiscoveryInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), localDiscoveryPort, discoveryNetworkManager);
             localSimulationInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), localSimulationPort,
                     simulationNetworkManager);
@@ -420,10 +420,10 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
                         byte[] toWrite;
                     };
 
-                    resultSerializationBenchmark.run(() -> {
-                        wrapper.toWrite = serializer.serialize(state.simulationDataSet().getModelSamplingFunction());
-                        return List.of((double) wrapper.toWrite.length);
-                    });
+                    //  resultSerializationBenchmark.run(() -> {
+                    wrapper.toWrite = serializer.serialize(state.simulationDataSet().getModelSamplingFunction());
+                       /* return List.of((double) wrapper.toWrite.length);
+                    });*/
 
                     state.clientConnection().writeObject(wrapper.toWrite);
 

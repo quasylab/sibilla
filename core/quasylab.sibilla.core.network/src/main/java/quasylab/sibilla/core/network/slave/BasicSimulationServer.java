@@ -227,10 +227,10 @@ public class BasicSimulationServer implements SimulationServer {
      * @param master server of the master
      */
 
-    static Benchmark benchmarkComputation = new Benchmark("benchmarks/slave", "Slave Results Computation", "csv");
-    static Benchmark benchmarkSerialization = new Benchmark("benchmarks/slave", "Slave Results Serialization", "csv");
-    static Benchmark benchmarkCompression = new Benchmark("benchmarks/slave", "Slave Results Compression", "csv");
-    static Benchmark benchmarkSend = new Benchmark("benchmarks/slave", "Slave Results Send", "csv");
+    Benchmark benchmarkComputation = new Benchmark("benchmarks/slave", "Slave Results Computation", "csv", "o", "exec", "tasks");
+    Benchmark benchmarkSerialization = new Benchmark("benchmarks/slave", "Slave Results Serialization", "csv", "o", "ser", "serbytes");
+    Benchmark benchmarkCompression = new Benchmark("benchmarks/slave", "Slave Results Compression", "csv", "o", "comp", "compbytes");
+    Benchmark benchmarkSend = new Benchmark("benchmarks/slave", "Slave Results Send", "csv", "o", "send");
 
     private void handleTaskExecution(TCPNetworkManager master) {
         try {
@@ -252,7 +252,7 @@ public class BasicSimulationServer implements SimulationServer {
                 CompletableFuture.allOf(futures).join();
                 for (SimulationTask<?> task : tasks) {
                     Trajectory trajectory = task.getTrajectory();
-                   // BytearrayToFile.toFile(serializer.serialize(trajectory), "trajectories", "3 rules trajectory " + serializer.getType());
+                    // BytearrayToFile.toFile(serializer.serialize(trajectory), "trajectories", "3 rules trajectory " + serializer.getType());
                     results.add(trajectory);
                 }
                 return List.of((double) tasks.size());

@@ -101,14 +101,14 @@ public class ClientApplication implements Serializable {
 
         SEIRModelDefinition modelDefinition = new SEIRModelDefinition();
 
-        Benchmark executionBenchmark = new Benchmark("./benchmarks/client", "Client Example", "csv");
+        Benchmark executionBenchmark = new Benchmark("./benchmarks/client", "Client Example", "csv", "client", "bench");
 
         for (int i = 1; i <= 10; i++) {
             executionBenchmark.run(() -> {
                 new ClientSimulationEnvironment(
                         RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), SEIRModelDefinition.getCollection(SAMPLINGS, DEADLINE),
                         REPLICA, DEADLINE, masterServerInfo, SerializerType.FST);
-                return List.of(0.0);
+                return List.of();
             });
         }
 
