@@ -252,7 +252,6 @@ public class BasicSimulationServer implements SimulationServer {
                 CompletableFuture.allOf(futures).join();
                 for (SimulationTask<?> task : tasks) {
                     Trajectory trajectory = task.getTrajectory();
-                    // BytearrayToFile.toFile(serializer.serialize(trajectory), "trajectories", "3 rules trajectory " + serializer.getType());
                     results.add(trajectory);
                 }
                 return List.of((double) tasks.size());

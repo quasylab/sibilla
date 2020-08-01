@@ -408,6 +408,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
                         simulationState.simulationDataSet().getModel());
                 return List.of();
             });
+
             elapsedTime = System.nanoTime() - elapsedTime;
 
 
