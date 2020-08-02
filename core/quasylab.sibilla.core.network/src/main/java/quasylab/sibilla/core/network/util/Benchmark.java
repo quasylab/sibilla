@@ -36,7 +36,7 @@ public class Benchmark {
                 file.createNewFile();
             }
             BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file, true));
-            fileWriter.write(String.format("repetition", mainLabel));
+            fileWriter.write(String.format("repetition_%s", mainLabel));
             fileWriter.write(String.format(",%stime_%s", timeLabel, mainLabel));
             for (String label : otherLabels) {
                 fileWriter.write(String.format(",%s_%s", label, mainLabel));
@@ -58,16 +58,8 @@ public class Benchmark {
         this.fileName = String.format("%s [%s].%s", fileName, strDate, extension);
 
         try {
-            File dir = new File(this.dirName);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-            File file = new File(dir, this.fileName);
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file, true));
-            fileWriter.write(String.format("repetition", mainLabel));
+            BufferedWriter fileWriter = getFileWriter();
+            fileWriter.write(String.format("repetition_%s", mainLabel));
             for (String label : labels) {
                 fileWriter.write(String.format(",%s_%s", label, mainLabel));
             }
@@ -108,7 +100,7 @@ public class Benchmark {
     private BufferedWriter getFileWriter() throws IOException {
         File dir = new File(dirName);
         if (!dir.exists()) {
-            dir.mkdir();
+            dir.mkdirs();
         }
         File file = new File(dir, fileName);
         if (!file.exists()) {
