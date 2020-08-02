@@ -1,7 +1,6 @@
 package quasylab.sibilla.examples.benchmarks.slave;
 
 
-
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.network.ComputationResult;
@@ -219,10 +218,8 @@ public class SlaveBenchmarkEnvironment<S extends State> {
             "tasks"
     );
 
-
-    public SlaveBenchmarkEnvironment(Model modelFourRules, Model modelThreeRules, int step, int threshold, int repetitions) throws IOException {
-        masterInfo = new NetworkInfo(InetAddress.getByName(""), 10000,
-                TCPNetworkManagerType.DEFAULT);
+    public SlaveBenchmarkEnvironment(NetworkInfo masterInfo, Model modelFourRules, Model modelThreeRules, int step, int threshold, int repetitions) throws IOException {
+        this.masterInfo = masterInfo;
         netManager = TCPNetworkManager.createNetworkManager(masterInfo);
         apacheSerializer = Serializer.getSerializer(SerializerType.APACHE);
         fstSerializer = Serializer.getSerializer(SerializerType.FST);
@@ -391,7 +388,8 @@ public class SlaveBenchmarkEnvironment<S extends State> {
 
 
     public static void main(String[] args) throws IOException {
-        SlaveBenchmarkEnvironment<PopulationState> env = new SlaveBenchmarkEnvironment(new SEIRModelDefinitionFourRules().createModel(), new SEIRModelDefinitionThreeRules().createModel(), 30, 900, 10);
+        SlaveBenchmarkEnvironment<PopulationState> env = new SlaveBenchmarkEnvironment(new NetworkInfo(InetAddress.getByName(""), 10000,
+                TCPNetworkManagerType.DEFAULT), new SEIRModelDefinitionFourRules().createModel(), new SEIRModelDefinitionThreeRules().createModel(), 30, 900, 10);
         env.run();
     }
 }

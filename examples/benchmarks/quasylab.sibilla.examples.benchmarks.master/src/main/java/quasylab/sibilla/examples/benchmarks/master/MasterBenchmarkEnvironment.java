@@ -132,9 +132,8 @@ public class MasterBenchmarkEnvironment<S extends State> {
     );
 
 
-    public MasterBenchmarkEnvironment(Model modelFourRules, Model modelThreeRules) throws IOException {
-        localInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), 10000,
-                TCPNetworkManagerType.DEFAULT);
+    public MasterBenchmarkEnvironment(NetworkInfo localInfo, Model modelFourRules, Model modelThreeRules) throws IOException {
+        this.localInfo = localInfo;
 
         serverSocket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) localInfo.getType(), localInfo.getPort());
         apacheSerializer = Serializer.getSerializer(SerializerType.APACHE);
@@ -281,7 +280,8 @@ public class MasterBenchmarkEnvironment<S extends State> {
     }
 
     public static void main(String[] args) throws IOException {
-        MasterBenchmarkEnvironment<PopulationState> env = new MasterBenchmarkEnvironment(new SEIRModelDefinitionFourRules().createModel(), new SEIRModelDefinitionThreeRules().createModel());
+        MasterBenchmarkEnvironment<PopulationState> env = new MasterBenchmarkEnvironment(new NetworkInfo(NetworkUtils.getLocalAddress(), 10000,
+                TCPNetworkManagerType.DEFAULT), new SEIRModelDefinitionFourRules().createModel(), new SEIRModelDefinitionThreeRules().createModel());
         env.run();
 
     }
