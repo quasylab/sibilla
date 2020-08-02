@@ -29,7 +29,7 @@ package quasylab.sibilla.examples.servers.client;
 import org.apache.commons.math3.random.AbstractRandomGenerator;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
-import quasylab.sibilla.core.network.benchmark.Benchmark;
+import quasylab.sibilla.core.network.util.Benchmark;
 import quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.serialization.SerializerType;

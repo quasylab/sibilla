@@ -1,10 +1,13 @@
-package quasylab.sibilla.core.network.benchmark;
+package quasylab.sibilla.examples.benchmarks.slave;
+
+
 
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
+import quasylab.sibilla.core.network.util.Benchmark;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.compression.Compressor;

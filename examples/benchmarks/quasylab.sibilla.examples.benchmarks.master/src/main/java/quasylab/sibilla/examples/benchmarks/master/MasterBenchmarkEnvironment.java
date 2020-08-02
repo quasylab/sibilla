@@ -1,10 +1,11 @@
-package quasylab.sibilla.core.network.benchmark;
+package quasylab.sibilla.examples.benchmarks.master;
 
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
+import quasylab.sibilla.core.network.util.Benchmark;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.compression.Compressor;
@@ -17,7 +18,6 @@ import quasylab.sibilla.core.past.State;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;

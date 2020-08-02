@@ -24,7 +24,7 @@
  *
  */
 
-package quasylab.sibilla.core.network.benchmark;
+package quasylab.sibilla.examples.benchmarks.master;
 
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.pm.*;
@@ -34,7 +34,7 @@ import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.io.Serializable;
 
-public class SEIRModelDefinitionFourRules implements PopulationModelDefinition, Serializable {
+public class SEIRModelDefinitionThreeRules implements PopulationModelDefinition, Serializable {
 
     public final static int S = 0;
     public final static int E = 1;
@@ -102,7 +102,7 @@ public class SEIRModelDefinitionFourRules implements PopulationModelDefinition, 
         f.addRule(rule_S_E);
         f.addRule(rule_E_I);
         f.addRule(rule_I_R);
-        f.addRule(rule_R_S);
+        //f.addRule(rule_R_S);
         return f;
     }
 
@@ -125,10 +125,10 @@ public class SEIRModelDefinitionFourRules implements PopulationModelDefinition, 
 
     public static SamplingFunction<PopulationState> getCollection(int SAMPLINGS, double DEADLINE) {
         SamplingCollection<PopulationState> collection = new SamplingCollection<>();
-        collection.add(StatisticSampling.measure("S", SAMPLINGS, DEADLINE, SEIRModelDefinitionFourRules::fractionOfS));
-        collection.add(StatisticSampling.measure("E", SAMPLINGS, DEADLINE, SEIRModelDefinitionFourRules::fractionOfE));
-        collection.add(StatisticSampling.measure("I", SAMPLINGS, DEADLINE, SEIRModelDefinitionFourRules::fractionOfI));
-        collection.add(StatisticSampling.measure("R", SAMPLINGS, DEADLINE, SEIRModelDefinitionFourRules::fractionOfR));
+        collection.add(StatisticSampling.measure("S", SAMPLINGS, DEADLINE, SEIRModelDefinitionThreeRules::fractionOfS));
+        collection.add(StatisticSampling.measure("E", SAMPLINGS, DEADLINE, SEIRModelDefinitionThreeRules::fractionOfE));
+        collection.add(StatisticSampling.measure("I", SAMPLINGS, DEADLINE, SEIRModelDefinitionThreeRules::fractionOfI));
+        collection.add(StatisticSampling.measure("R", SAMPLINGS, DEADLINE, SEIRModelDefinitionThreeRules::fractionOfR));
         return collection;
     }
 }

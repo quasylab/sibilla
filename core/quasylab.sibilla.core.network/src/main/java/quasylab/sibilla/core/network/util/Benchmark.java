@@ -1,11 +1,10 @@
-package quasylab.sibilla.core.network.benchmark;
+package quasylab.sibilla.core.network.util;
 
 import org.apache.commons.lang3.time.StopWatch;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;

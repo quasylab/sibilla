@@ -32,15 +32,14 @@ import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.NetworkTask;
-import quasylab.sibilla.core.network.benchmark.Benchmark;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.loaders.ClassBytesLoader;
-import quasylab.sibilla.core.network.serialization.ComputationResultSerializer;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.SlaveCommand;
 import quasylab.sibilla.core.network.slave.SlaveState;
+import quasylab.sibilla.core.network.util.Benchmark;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.*;
 

@@ -21,3 +21,8 @@ include 'core:quasylab.sibilla.core.simulator',
 		'examples:servers:quasylab.sibilla.examples.servers.client',
 		'examples:servers:quasylab.sibilla.examples.servers.master',
 		'examples:servers:quasylab.sibilla.examples.servers.slave'
+include 'examples:benchmarks:quasylab.sibilla.examples.benchmarks.slave'
+findProject(':examples:benchmarks:quasylab.sibilla.examples.benchmarks.slave')?.name = 'slave'
+include 'examples:benchmarks:quasylab.sibilla.examples.benchmarks.master'
+findProject(':examples:benchmarks:quasylab.sibilla.examples.benchmarks.master')?.name = 'master'
+
