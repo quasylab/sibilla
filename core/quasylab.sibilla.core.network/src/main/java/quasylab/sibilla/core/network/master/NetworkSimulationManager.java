@@ -374,8 +374,8 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      * @return result of the computation
      */
 
-    Benchmark benchmarkDeserialization = new Benchmark("benchmarks/master", "Master Results Deserialization", "csv", "o", "deser");
-    Benchmark benchmarkDecompression = new Benchmark("benchmarks/master", "Master Results Decompression", "csv", "o", "decomp", "tasks");
+    Benchmark benchmarkDeserialization = new Benchmark("benchmarks/master", "Master Results Deserialization", "csv", "o", "deser", "tasks");
+    Benchmark benchmarkDecompression = new Benchmark("benchmarks/master", "Master Results Decompression", "csv", "o", "decomp");
 
     private ComputationResult<S> send(NetworkTask<S> networkTask, TCPNetworkManager server) {
 
