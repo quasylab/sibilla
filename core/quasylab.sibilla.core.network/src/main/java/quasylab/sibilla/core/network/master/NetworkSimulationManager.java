@@ -95,6 +95,10 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
 
     private Serializer serializer;
 
+
+    private Benchmark benchmarkDeserialization;
+    private Benchmark benchmarkDecompression;
+
     /**
      * Creates a NetworkSimulationManager with the parameters given in input
      *
@@ -110,6 +114,10 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
 
         this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         this.serializer = Serializer.getSerializer(serializerType);
+
+        benchmarkDeserialization = new Benchmark("benchmarks/master", "Master Results Deserialization", "csv", serializer.getType().toString(), "deser", "tasks");
+        benchmarkDecompression = new Benchmark("benchmarks/master", "Master Results Decompression", "csv", serializer.getType().toString(), "decomp");
+
         List<NetworkInfo> slaveNetworkInfos = simulationState.getSlaveServersStates().stream()
                 .map(SlaveState::getSlaveInfo).collect(Collectors.toList());
         LOGGER.info(String.format("Creating a new NetworkSimulationManager to contact the slaves: [%s]",
@@ -374,8 +382,6 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      * @return result of the computation
      */
 
-    Benchmark benchmarkDeserialization = new Benchmark("benchmarks/master", "Master Results Deserialization", "csv", "o", "deser", "tasks");
-    Benchmark benchmarkDecompression = new Benchmark("benchmarks/master", "Master Results Decompression", "csv", "o", "decomp");
 
     private ComputationResult<S> send(NetworkTask<S> networkTask, TCPNetworkManager server) {
 
@@ -404,8 +410,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             });
 
             benchmarkDeserialization.run(() -> {
-                obj.results = (ComputationResult<S>) ComputationResultSerializer.deserialize(obj.toReceive,
-                        simulationState.simulationDataSet().getModel());
+                obj.results = (ComputationResult<S>) serializer.deserialize(obj.toReceive);
                 return List.of((double) obj.results.getResults().size());
             });
 

@@ -98,6 +98,10 @@ public class BasicSimulationServer implements SimulationServer {
 
     protected Serializer serializer;
 
+    private Benchmark benchmarkComputation;
+    private Benchmark benchmarkSerialization;
+    private Benchmark benchmarkCompression;
+    private Benchmark benchmarkSend;
 
     /**
      * Creates a simulation server with the given network manager type
@@ -110,6 +114,12 @@ public class BasicSimulationServer implements SimulationServer {
         this.networkManagerType = networkManagerType;
         LOGGER.info(String.format("Creating a new BasicSimulationServer that uses: [%s - %s]",
                 this.networkManagerType.getClass(), this.networkManagerType.name()));
+
+        benchmarkComputation = new Benchmark("benchmarks/slave", "Slave Results Computation", "csv", serializer.getType().toString(), "exec", "tasks");
+        benchmarkSerialization = new Benchmark("benchmarks/slave", "Slave Results Serialization", "csv", serializer.getType().toString(), "ser", "serbytes");
+        benchmarkCompression = new Benchmark("benchmarks/slave", "Slave Results Compression", "csv", serializer.getType().toString(), "comp", "compbytes");
+        benchmarkSend = new Benchmark("benchmarks/slave", "Slave Results Send", "csv", serializer.getType().toString(), "send");
+
     }
 
     @Override
@@ -227,12 +237,10 @@ public class BasicSimulationServer implements SimulationServer {
      * @param master server of the master
      */
 
-    Benchmark benchmarkComputation = new Benchmark("benchmarks/slave", "Slave Results Computation", "csv", "o", "exec", "tasks");
-    Benchmark benchmarkSerialization = new Benchmark("benchmarks/slave", "Slave Results Serialization", "csv", "o", "ser", "serbytes");
-    Benchmark benchmarkCompression = new Benchmark("benchmarks/slave", "Slave Results Compression", "csv", "o", "comp", "compbytes");
-    Benchmark benchmarkSend = new Benchmark("benchmarks/slave", "Slave Results Send", "csv", "o", "send");
 
     private void handleTaskExecution(TCPNetworkManager master) {
+
+
         try {
             NetworkTask<?> networkTask = (NetworkTask<?>) serializer.deserialize(master.readObject());
             List<? extends SimulationTask<?>> tasks = networkTask.getTasks();
@@ -258,7 +266,7 @@ public class BasicSimulationServer implements SimulationServer {
             });
 
             benchmarkSerialization.run(() -> {
-                obj.toSend = ComputationResultSerializer.serialize(new ComputationResult(results), model);
+                obj.toSend = serializer.serialize(new ComputationResult(results));
                 return List.of((double) obj.toSend.length);
             });
 
