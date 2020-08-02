@@ -204,9 +204,9 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
         try {
             discoveryNetworkManager.writeObject(serializer.serialize(localDiscoveryInfo), address,
                     remoteDiscoveryPort);
-            LOGGER.info(String.format("Sent the discovery broadcast packet to the port: [%d]", remoteDiscoveryPort));
+            LOGGER.info(String.format("Sent the discovery broadcast packet to the port: [%d] [%s]", remoteDiscoveryPort, address.toString()));
         } catch (IOException e) {
-            LOGGER.severe(String.format("[%s] Network communication failure during the broadcast", e.getMessage()));
+            LOGGER.severe(String.format("[%s] [%s] Network communication failure during the broadcast", e.getMessage(), address.toString()));
         }
     }
 

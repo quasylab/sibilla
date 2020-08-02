@@ -103,7 +103,7 @@ public class ClientApplication implements Serializable {
 
         Benchmark executionBenchmark = new Benchmark("./benchmarks/client", "Client Example", "csv", "client", "bench");
 
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 1; i++) {
             executionBenchmark.run(() -> {
                 new ClientSimulationEnvironment(
                         RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), SEIRModelDefinition.getCollection(SAMPLINGS, DEADLINE),

@@ -375,7 +375,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      */
 
     Benchmark benchmarkDeserialization = new Benchmark("benchmarks/master", "Master Results Deserialization", "csv", "o", "deser");
-    Benchmark benchmarkDecompression = new Benchmark("benchmarks/master", "Master Results Decompression", "csv", "o", "decomp");
+    Benchmark benchmarkDecompression = new Benchmark("benchmarks/master", "Master Results Decompression", "csv", "o", "decomp", "tasks");
 
     private ComputationResult<S> send(NetworkTask<S> networkTask, TCPNetworkManager server) {
 
@@ -406,7 +406,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             benchmarkDeserialization.run(() -> {
                 obj.results = (ComputationResult<S>) ComputationResultSerializer.deserialize(obj.toReceive,
                         simulationState.simulationDataSet().getModel());
-                return List.of();
+                return List.of((double) obj.results.getResults().size());
             });
 
             elapsedTime = System.nanoTime() - elapsedTime;

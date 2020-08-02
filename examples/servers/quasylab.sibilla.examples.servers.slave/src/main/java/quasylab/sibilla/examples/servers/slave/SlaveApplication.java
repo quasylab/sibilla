@@ -70,7 +70,7 @@ public class SlaveApplication {
         SSLUtils.getInstance().setTrustStorePath(trustStorePath);
         SSLUtils.getInstance().setTrustStorePass(trustStorePass);
         LOGGER.info(String.format("Local address: [%s]", NetworkUtils.getLocalAddress()));
-        LOGGER.info(String.format("Starting the Master Server with the params:\n" +
+        LOGGER.info(String.format("Starting the Slave Server with the params:\n" +
                         "-keyStoreType: [%s]\n" +
                         "-keyStorePath: [%s]\n" +
                         "-trustStoreType: [%s]\n" +
