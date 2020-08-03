@@ -262,6 +262,10 @@ public class MasterBenchmarkEnvironment<S extends State> {
                 new NetworkInfo(NetworkUtils.getLocalAddress(), 10000, TCPNetworkManagerType.DEFAULT),
                 new SEIRModelDefinitionFourRules().createModel(),
                 new SEIRModelDefinitionThreeRules().createModel(),
-                MasterBenchmarkType.FSTTHREERULES);
+                getType(args[0]));
+    }
+
+    private static MasterBenchmarkType getType(String arg) {
+        return MasterBenchmarkType.valueOf(arg);
     }
 }

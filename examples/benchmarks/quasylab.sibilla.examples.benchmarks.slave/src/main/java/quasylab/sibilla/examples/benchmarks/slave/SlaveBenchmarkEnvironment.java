@@ -304,6 +304,7 @@ public class SlaveBenchmarkEnvironment<S extends State> {
                 break;
         }
     }
+
     public static void main(String[] args) throws IOException {
         SlaveBenchmarkEnvironment<PopulationState> env = new SlaveBenchmarkEnvironment(
                 new NetworkInfo(InetAddress.getByName(""), 10000, TCPNetworkManagerType.DEFAULT),
@@ -312,7 +313,11 @@ public class SlaveBenchmarkEnvironment<S extends State> {
                 30,
                 900,
                 10,
-                SlaveBenchmarkType.FSTTHREERULES);
+                getType(args[0]));
         env.run();
+    }
+
+    private static SlaveBenchmarkType getType(String arg) {
+        return SlaveBenchmarkType.valueOf(arg);
     }
 }
