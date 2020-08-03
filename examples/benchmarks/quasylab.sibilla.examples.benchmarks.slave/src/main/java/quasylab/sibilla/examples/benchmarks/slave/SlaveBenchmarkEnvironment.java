@@ -212,7 +212,7 @@ public class SlaveBenchmarkEnvironment<S extends State> {
                         () -> {
                             fourRulesWrapper.toSendOptimized = ComputationResultSerializer.serialize(fourRulesComputationResult, modelFourRules);
                             LOGGER.info(String.format("[%d] Optimized Serialization Four Rules - Size: %d - Bytes: %d", currentRepetition.get(), fourRulesComputationResult.getResults().size(), fourRulesWrapper.toSendOptimized.length));
-                            return List.of((double) fourRulesWrapper.toSendOptimized.length);
+                            return List.of((double) fourRulesComputationResult.getResults().size(), (double) fourRulesWrapper.toSendOptimized.length);
                         },
                         () -> {
                             fourRulesWrapper.toSendOptimized = Compressor.compress(fourRulesWrapper.toSendOptimized);
@@ -245,7 +245,7 @@ public class SlaveBenchmarkEnvironment<S extends State> {
                 benchmarkFSTThreeRules.run(() -> {
                             threeRulesWrapper.toSendFst = fstSerializer.serialize(threeRulesComputationResult);
                             LOGGER.info(String.format("[%d] FST Serialization three Rules - Size: %d - Bytes: %d", currentRepetition.get(), threeRulesComputationResult.getResults().size(), threeRulesWrapper.toSendFst.length));
-                            return List.of((double) threeRulesWrapper.toSendFst.length);
+                            return List.of((double) threeRulesComputationResult.getResults().size(), (double) threeRulesWrapper.toSendFst.length);
                         },
                         () -> {
                             threeRulesWrapper.toSendFst = Compressor.compress(threeRulesWrapper.toSendFst);
