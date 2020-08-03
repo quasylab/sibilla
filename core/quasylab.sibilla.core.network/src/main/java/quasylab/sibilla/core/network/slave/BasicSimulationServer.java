@@ -97,10 +97,7 @@ public class BasicSimulationServer implements SimulationServer {
 
     protected Serializer serializer;
 
-    private Benchmark benchmarkComputation;
-    private Benchmark benchmarkSerialization;
-    private Benchmark benchmarkCompression;
-    private Benchmark benchmarkSend;
+    private Benchmark benchmark;
 
     /**
      * Creates a simulation server with the given network manager type
@@ -114,10 +111,18 @@ public class BasicSimulationServer implements SimulationServer {
         LOGGER.info(String.format("Creating a new BasicSimulationServer that uses: [%s - %s]",
                 this.networkManagerType.getClass(), this.networkManagerType.name()));
 
-        benchmarkComputation = new Benchmark("benchmarks/slave", "Slave Results Computation", "csv", serializer.getType().toString(), "exec", "tasks");
-        benchmarkSerialization = new Benchmark("benchmarks/slave", "Slave Results Serialization", "csv", serializer.getType().toString(), "ser", "serbytes");
-        benchmarkCompression = new Benchmark("benchmarks/slave", "Slave Results Compression", "csv", serializer.getType().toString(), "comp", "compbytes");
-        benchmarkSend = new Benchmark("benchmarks/slave", "Slave Results Send", "csv", serializer.getType().toString(), "send");
+        benchmark = new Benchmark("benchmarks",
+                "slave",
+                "csv",
+                "o",
+                List.of("exectime",
+                        "tasks",
+                        "sertime",
+                        "serbytes",
+                        "comprtime",
+                        "comprbytes",
+                        "sendtime"
+                ));
 
     }
 
@@ -252,32 +257,27 @@ public class BasicSimulationServer implements SimulationServer {
                 private byte[] toSend;
             };
 
-            benchmarkComputation.run(() -> {
-                for (int i = 0; i < tasks.size(); i++) {
-                    futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
-                }
-                CompletableFuture.allOf(futures).join();
-                for (SimulationTask<?> task : tasks) {
-                    Trajectory trajectory = task.getTrajectory();
-                    results.add(trajectory);
-                }
-                return List.of((double) tasks.size());
-            });
-
-            benchmarkSerialization.run(() -> {
-                obj.toSend = serializer.serialize(new ComputationResult(results));
-                return List.of((double) obj.toSend.length);
-            });
-
-            benchmarkCompression.run(() -> {
-                obj.toSend = Compressor.compress(obj.toSend);
-                return List.of((double) obj.toSend.length);
-            });
-
-            benchmarkSend.run(() -> {
-                master.writeObject(obj.toSend);
-                return List.of();
-            });
+            benchmark.run(() -> {
+                        for (int i = 0; i < tasks.size(); i++) {
+                            futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
+                        }
+                        CompletableFuture.allOf(futures).join();
+                        for (SimulationTask<?> task : tasks) {
+                            Trajectory trajectory = task.getTrajectory();
+                            results.add(trajectory);
+                        }
+                        return List.of((double) tasks.size());
+                    }, () -> {
+                        obj.toSend = serializer.serialize(new ComputationResult(results));
+                        return List.of((double) obj.toSend.length);
+                    }, () -> {
+                        obj.toSend = Compressor.compress(obj.toSend);
+                        return List.of((double) obj.toSend.length);
+                    }, () -> {
+                        master.writeObject(obj.toSend);
+                        return List.of();
+                    }
+            );
 
             LOGGER.info(String.format("Computation's results have been sent to the server - %s",
                     master.getNetworkInfo().toString()));

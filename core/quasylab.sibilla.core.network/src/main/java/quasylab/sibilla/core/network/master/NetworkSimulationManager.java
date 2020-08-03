@@ -95,8 +95,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     private Serializer serializer;
 
 
-    private Benchmark benchmarkDeserialization;
-    private Benchmark benchmarkDecompression;
+    private Benchmark benchmark;
 
     /**
      * Creates a NetworkSimulationManager with the parameters given in input
@@ -113,9 +112,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
 
         this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         this.serializer = Serializer.getSerializer(serializerType);
-
-        benchmarkDeserialization = new Benchmark("benchmarks/master", "Master Results Deserialization", "csv", serializer.getType().toString(), "deser", "tasks");
-        benchmarkDecompression = new Benchmark("benchmarks/master", "Master Results Decompression", "csv", serializer.getType().toString(), "decomp");
+        benchmark = new Benchmark("benchmarks", "master", "csv", "o", List.of("decomprtime", "desertime", "tasks"));
 
         List<NetworkInfo> slaveNetworkInfos = simulationState.getSlaveServersStates().stream()
                 .map(SlaveState::getSlaveInfo).collect(Collectors.toList());
@@ -403,12 +400,10 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
 
             obj.toReceive = server.readObject();
 
-            benchmarkDecompression.run(() -> {
+            benchmark.run(() -> {
                 obj.toReceive = Compressor.decompress(obj.toReceive);
                 return List.of();
-            });
-
-            benchmarkDeserialization.run(() -> {
+            }, () -> {
                 obj.results = (ComputationResult<S>) serializer.deserialize(obj.toReceive);
                 return List.of((double) obj.results.getResults().size());
             });

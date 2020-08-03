@@ -27,15 +27,7 @@ public class Benchmark {
         this.fileName = String.format("%s [%s].%s", fileName, strDate, extension);
 
         try {
-            File dir = new File(this.dirName);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-            File file = new File(dir, this.fileName);
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file, true));
+            BufferedWriter fileWriter = getFileWriter();
             fileWriter.write(String.format("repetition_%s", mainLabel));
             fileWriter.write(String.format(",%stime_%s", timeLabel, mainLabel));
             for (String label : otherLabels) {
@@ -49,7 +41,7 @@ public class Benchmark {
         }
     }
 
-    public Benchmark(String dirName, String fileName, String extension, String mainLabel, int muda, String... labels) {
+    public Benchmark(String dirName, String fileName, String extension, String mainLabel, List<String> labels) {
         Date date = new Date();
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss_a");
         String strDate = dateFormat.format(date);
@@ -98,11 +90,11 @@ public class Benchmark {
     }
 
     private BufferedWriter getFileWriter() throws IOException {
-        File dir = new File(dirName);
+        File dir = new File(this.dirName);
         if (!dir.exists()) {
             dir.mkdirs();
         }
-        File file = new File(dir, fileName);
+        File file = new File(dir, this.fileName);
         if (!file.exists()) {
             file.createNewFile();
         }

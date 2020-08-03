@@ -49,13 +49,12 @@ public class SlaveBenchmarkEnvironment<S extends State> {
             "apache",
             "csv",
             "a",
-            0,
-            "sertime",
-            "tasks",
-            "serbytes",
-            "comprtime",
-            "comprbytes",
-            "sendtime"
+            List.of("sertime",
+                    "tasks",
+                    "serbytes",
+                    "comprtime",
+                    "comprbytes",
+                    "sendtime")
     );
 
     private Benchmark benchmarkFSTFourRules = new Benchmark(
@@ -63,13 +62,12 @@ public class SlaveBenchmarkEnvironment<S extends State> {
             "fst",
             "csv",
             "f",
-            0,
-            "sertime",
-            "tasks",
-            "serbytes",
-            "comprtime",
-            "comprbytes",
-            "sendtime"
+            List.of("sertime",
+                    "tasks",
+                    "serbytes",
+                    "comprtime",
+                    "comprbytes",
+                    "sendtime")
     );
 
     private Benchmark benchmarkOptimizedFourRules = new Benchmark(
@@ -77,13 +75,12 @@ public class SlaveBenchmarkEnvironment<S extends State> {
             "optimized",
             "csv",
             "o",
-            0,
-            "sertime",
-            "tasks",
-            "serbytes",
-            "comprtime",
-            "comprbytes",
-            "sendtime"
+            List.of("sertime",
+                    "tasks",
+                    "serbytes",
+                    "comprtime",
+                    "comprbytes",
+                    "sendtime")
     );
 
     private Benchmark benchmarkApacheThreeRules = new Benchmark(
@@ -91,13 +88,12 @@ public class SlaveBenchmarkEnvironment<S extends State> {
             "apache",
             "csv",
             "a",
-            0,
-            "sertime",
-            "tasks",
-            "serbytes",
-            "comprtime",
-            "comprbytes",
-            "sendtime"
+            List.of("sertime",
+                    "tasks",
+                    "serbytes",
+                    "comprtime",
+                    "comprbytes",
+                    "sendtime")
     );
 
     private Benchmark benchmarkFSTThreeRules = new Benchmark(
@@ -105,13 +101,13 @@ public class SlaveBenchmarkEnvironment<S extends State> {
             "fst",
             "csv",
             "f",
-            0,
-            "sertime",
-            "tasks",
-            "serbytes",
-            "comprtime",
-            "comprbytes",
-            "sendtime"
+            List.of(
+                    "sertime",
+                    "tasks",
+                    "serbytes",
+                    "comprtime",
+                    "comprbytes",
+                    "sendtime")
     );
 
     private Benchmark benchmarkOptimizedThreeRules = new Benchmark(
@@ -119,18 +115,18 @@ public class SlaveBenchmarkEnvironment<S extends State> {
             "optimized",
             "csv",
             "o",
-            0,
-            "sertime",
-            "tasks",
-            "serbytes",
-            "comprtime",
-            "comprbytes",
-            "sendtime"
+            List.of(
+                    "sertime",
+                    "tasks",
+                    "serbytes",
+                    "comprtime",
+                    "comprbytes",
+                    "sendtime")
     );
 
     public SlaveBenchmarkEnvironment(NetworkInfo masterInfo, Model modelFourRules, Model modelThreeRules, int step, int threshold, int repetitions) throws IOException {
         this.masterInfo = masterInfo;
-        netManager = TCPNetworkManager.createNetworkManager(masterInfo);
+        netManager = TCPNetworkManager.createNetworkManager(this.masterInfo);
         apacheSerializer = Serializer.getSerializer(SerializerType.APACHE);
         fstSerializer = Serializer.getSerializer(SerializerType.FST);
         LOGGER = HostLoggerSupplier.getInstance("Slave Benchmark").getLogger();

@@ -36,106 +36,71 @@ public class MasterBenchmarkEnvironment<S extends State> {
 
     private Logger LOGGER;
 
-    private Benchmark benchmarkDeserializationApacheFourRules = new Benchmark(
-            "benchmarks/masterBenchmarking/fourRulesModel/apache",
-            "deserialization",
+    private Benchmark benchmarkApacheFourRules = new Benchmark(
+            "benchmarks/masterBenchmarking/fourRulesModel/",
+            "apache",
             "csv",
             "a",
-            "deser"
+            List.of("decomprtime",
+                    "desertime",
+                    "tasks")
     );
 
-    private Benchmark benchmarkDecompressionApacheFourRules = new Benchmark(
-            "benchmarks/masterBenchmarking/fourRulesModel/apache",
-            "decompression",
+    private Benchmark benchmarkFSTFourRules = new Benchmark(
+            "benchmarks/masterBenchmarking/fourRulesModel/",
+            "fst",
+            "csv",
+            "f",
+            List.of("decomprtime",
+                    "desertime",
+                    "tasks")
+    );
+
+    private Benchmark benchmarkOptimizedFourRules = new Benchmark(
+            "benchmarks/masterBenchmarking/fourRulesModel/",
+            "optimized",
+            "csv",
+            "o",
+            List.of("decomprtime",
+                    "desertime",
+                    "tasks")
+    );
+
+    private Benchmark benchmarkApacheThreeRules = new Benchmark(
+            "benchmarks/masterBenchmarking/threeRulesModel/",
+            "apache",
             "csv",
             "a",
-            "decomp"
+            List.of("decomprtime",
+                    "desertime",
+                    "tasks")
     );
 
-    private Benchmark benchmarkDeserializationFSTFourRules = new Benchmark(
-            "benchmarks/masterBenchmarking/fourRulesModel/fst",
-            "deserialization",
+    private Benchmark benchmarkFSTThreeRules = new Benchmark(
+            "benchmarks/masterBenchmarking/threeRulesModel/",
+            "fst",
             "csv",
             "f",
-            "deser"
+            List.of("decomprtime",
+                    "desertime",
+                    "tasks")
     );
 
-    private Benchmark benchmarkDecompressionFSTFourRules = new Benchmark(
-            "benchmarks/masterBenchmarking/fourRulesModel/fst",
-            "decompression",
-            "csv",
-            "f",
-            "decomp"
-    );
-
-    private Benchmark benchmarkDeserializationOptimizedFourRules = new Benchmark(
-            "benchmarks/masterBenchmarking/fourRulesModel/optimized",
-            "deserialization",
+    private Benchmark benchmarkOptimizedThreeRules = new Benchmark(
+            "benchmarks/masterBenchmarking/threeRulesModel/",
+            "optimized",
             "csv",
             "o",
-            "deser"
-    );
-
-    private Benchmark benchmarkDecompressionOptimizedFourRules = new Benchmark(
-            "benchmarks/masterBenchmarking/fourRulesModel/optimized",
-            "decompression",
-            "csv",
-            "o",
-            "decomp"
-    );
-
-    private Benchmark benchmarkDeserializationApacheThreeRules = new Benchmark(
-            "benchmarks/masterBenchmarking/threeRulesModel/apache",
-            "deserialization",
-            "csv",
-            "a",
-            "deser"
-    );
-    private Benchmark benchmarkDecompressionApacheThreeRules = new Benchmark(
-            "benchmarks/masterBenchmarking/threeRulesModel/apache",
-            "decompression",
-            "csv",
-            "a",
-            "decomp"
-    );
-
-    private Benchmark benchmarkDeserializationFSTThreeRules = new Benchmark(
-            "benchmarks/masterBenchmarking/threeRulesModel/fst",
-            "deserialization",
-            "csv",
-            "f",
-            "deser"
-    );
-
-    private Benchmark benchmarkDecompressionFSTThreeRules = new Benchmark(
-            "benchmarks/masterBenchmarking/threeRulesModel/fst",
-            "decompression",
-            "csv",
-            "f",
-            "decomp"
-    );
-
-    private Benchmark benchmarkDeserializationOptimizedThreeRules = new Benchmark(
-            "benchmarks/masterBenchmarking/threeRulesModel/optimized",
-            "deserialization",
-            "csv",
-            "o",
-            "deser"
-    );
-
-    private Benchmark benchmarkDecompressionOptimizedThreeRules = new Benchmark(
-            "benchmarks/masterBenchmarking/threeRulesModel/optimized",
-            "decompression",
-            "csv",
-            "o",
-            "decomp"
+            List.of("decomprtime",
+                    "desertime",
+                    "tasks")
     );
 
 
     public MasterBenchmarkEnvironment(NetworkInfo localInfo, Model modelFourRules, Model modelThreeRules) throws IOException {
         this.localInfo = localInfo;
 
-        serverSocket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) localInfo.getType(), localInfo.getPort());
+        serverSocket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) this.localInfo.getType(), this.localInfo.getPort());
         apacheSerializer = Serializer.getSerializer(SerializerType.APACHE);
         fstSerializer = Serializer.getSerializer(SerializerType.FST);
         LOGGER = HostLoggerSupplier.getInstance("Master Benchmark").getLogger();
@@ -194,81 +159,70 @@ public class MasterBenchmarkEnvironment<S extends State> {
                 threeRulesWrapper.receivedOptimized = netManager.readObject();
                 LOGGER.info(String.format("[%d] Optimized Three Rules compressed received - Bytes: %d", currentRepetition.get(), threeRulesWrapper.receivedOptimized.length));
 
-                //Decompressione
-                benchmarkDecompressionApacheFourRules.run(() -> {
-                    fourRulesWrapper.receivedApache = Compressor.decompress(fourRulesWrapper.receivedApache);
-                    LOGGER.info(String.format("[%d] Apache Four Rules decompressed (serialized) - Bytes: %d", currentRepetition.get(), fourRulesWrapper.receivedApache.length));
-                    return List.of();
-                });
 
-                benchmarkDecompressionFSTFourRules.run(() -> {
+                benchmarkApacheFourRules.run(() -> {
+                            fourRulesWrapper.receivedApache = Compressor.decompress(fourRulesWrapper.receivedApache);
+                            LOGGER.info(String.format("[%d] Apache Four Rules decompressed (serialized) - Bytes: %d", currentRepetition.get(), fourRulesWrapper.receivedApache.length));
+                            return List.of();
+                        }, () -> {
+                            fourRulesWrapper.resultsApache = (ComputationResult<S>) apacheSerializer.deserialize(fourRulesWrapper.receivedApache);
+                            LOGGER.info(String.format("[%d] Apache Four Rules deserialized - Size: %d - Bytes: %d", currentRepetition.get(), fourRulesWrapper.resultsApache.getResults().size(), fourRulesWrapper.receivedApache.length));
+                            return List.of((double) fourRulesWrapper.resultsApache.getResults().size());
+                        }
+                );
+
+                benchmarkFSTFourRules.run(() -> {
                     fourRulesWrapper.receivedFst = Compressor.decompress(fourRulesWrapper.receivedFst);
                     LOGGER.info(String.format("[%d] FST Four Rules decompressed (serialized) - Bytes: %d", currentRepetition.get(), fourRulesWrapper.receivedFst.length));
                     return List.of();
+                }, () -> {
+                    fourRulesWrapper.resultsFST = (ComputationResult<S>) fstSerializer.deserialize(fourRulesWrapper.receivedFst);
+                    LOGGER.info(String.format("[%d] FST Four Rules deserialized - Size: %d - Bytes: %d", currentRepetition.get(), fourRulesWrapper.resultsFST.getResults().size(), fourRulesWrapper.receivedFst.length));
+                    return List.of((double) fourRulesWrapper.resultsFST.getResults().size());
                 });
 
-                benchmarkDecompressionOptimizedFourRules.run(() -> {
+                benchmarkOptimizedFourRules.run(() -> {
                     fourRulesWrapper.receivedOptimized = Compressor.decompress(fourRulesWrapper.receivedOptimized);
                     LOGGER.info(String.format("[%d] Optimized Four Rules decompressed (serialized) - Bytes: %d", currentRepetition.get(), fourRulesWrapper.receivedOptimized.length));
                     return List.of();
-                });
-
-                benchmarkDecompressionApacheThreeRules.run(() -> {
-                    threeRulesWrapper.receivedApache = Compressor.decompress(threeRulesWrapper.receivedApache);
-                    LOGGER.info(String.format("[%d] Apache Three Rules decompressed (serialized) - Bytes: %d", currentRepetition.get(), threeRulesWrapper.receivedApache.length));
-                    return List.of();
-                });
-
-                benchmarkDecompressionFSTThreeRules.run(() -> {
-                    threeRulesWrapper.receivedFst = Compressor.decompress(threeRulesWrapper.receivedFst);
-                    LOGGER.info(String.format("[%d] FST Three Rules decompressed (serialized) - Bytes: %d", currentRepetition.get(), threeRulesWrapper.receivedFst.length));
-                    return List.of();
-                });
-
-                benchmarkDecompressionOptimizedThreeRules.run(() -> {
-                    threeRulesWrapper.receivedOptimized = Compressor.decompress(threeRulesWrapper.receivedOptimized);
-                    LOGGER.info(String.format("[%d] Optimized Three Rules decompressed (serialized) - Bytes: %d", currentRepetition.get(), threeRulesWrapper.receivedOptimized.length));
-                    return List.of();
-                });
-
-                //Deserializzazione
-                benchmarkDeserializationApacheFourRules.run(() -> {
-                    fourRulesWrapper.resultsApache = (ComputationResult<S>) apacheSerializer.deserialize(fourRulesWrapper.receivedApache);
-                    LOGGER.info(String.format("[%d] Apache Four Rules deserialized - Size: %d - Bytes: %d", currentRepetition.get(), fourRulesWrapper.resultsApache.getResults().size(), fourRulesWrapper.receivedApache.length));
-                    return List.of();
-                });
-
-                benchmarkDeserializationFSTFourRules.run(() -> {
-                    fourRulesWrapper.resultsFST = (ComputationResult<S>) fstSerializer.deserialize(fourRulesWrapper.receivedFst);
-                    LOGGER.info(String.format("[%d] FST Four Rules deserialized - Size: %d - Bytes: %d", currentRepetition.get(), fourRulesWrapper.resultsFST.getResults().size(), fourRulesWrapper.receivedFst.length));
-                    return List.of();
-                });
-
-                benchmarkDeserializationOptimizedFourRules.run(() -> {
+                }, () -> {
                     fourRulesWrapper.resultsOptimized = ComputationResultSerializer.deserialize(fourRulesWrapper.receivedOptimized,
                             modelFourRules);
                     LOGGER.info(String.format("[%d] Optimized Four Rules deserialized - Size: %d - Bytes: %d", currentRepetition.get(), fourRulesWrapper.resultsOptimized.getResults().size(), fourRulesWrapper.receivedOptimized.length));
-                    return List.of();
+                    return List.of((double) fourRulesWrapper.resultsOptimized.getResults().size());
                 });
 
-                benchmarkDeserializationApacheThreeRules.run(() -> {
+                benchmarkApacheThreeRules.run(() -> {
+                    threeRulesWrapper.receivedApache = Compressor.decompress(threeRulesWrapper.receivedApache);
+                    LOGGER.info(String.format("[%d] Apache Three Rules decompressed (serialized) - Bytes: %d", currentRepetition.get(), threeRulesWrapper.receivedApache.length));
+                    return List.of();
+                }, () -> {
                     threeRulesWrapper.resultsApache = (ComputationResult<S>) apacheSerializer.deserialize(threeRulesWrapper.receivedApache);
                     LOGGER.info(String.format("[%d] Apache Three Rules deserialized - Size: %d - Bytes: %d", currentRepetition.get(), threeRulesWrapper.resultsApache.getResults().size(), threeRulesWrapper.receivedApache.length));
-                    return List.of();
+                    return List.of((double) threeRulesWrapper.resultsApache.getResults().size());
                 });
 
-                benchmarkDeserializationFSTThreeRules.run(() -> {
+                benchmarkFSTThreeRules.run(() -> {
+                    threeRulesWrapper.receivedFst = Compressor.decompress(threeRulesWrapper.receivedFst);
+                    LOGGER.info(String.format("[%d] FST Three Rules decompressed (serialized) - Bytes: %d", currentRepetition.get(), threeRulesWrapper.receivedFst.length));
+                    return List.of();
+                }, () -> {
                     threeRulesWrapper.resultsFST = (ComputationResult<S>) fstSerializer.deserialize(threeRulesWrapper.receivedFst);
                     LOGGER.info(String.format("[%d] FST Three Rules deserialized - Size: %d - Bytes: %d", currentRepetition.get(), threeRulesWrapper.resultsFST.getResults().size(), threeRulesWrapper.receivedFst.length));
-                    return List.of();
+                    return List.of((double) threeRulesWrapper.resultsFST.getResults().size());
                 });
 
-                benchmarkDeserializationOptimizedThreeRules.run(() -> {
-                    threeRulesWrapper.resultsOptimized = ComputationResultSerializer.deserialize(threeRulesWrapper.receivedOptimized,
-                            modelFourRules);
-                    LOGGER.info(String.format("[%d] Optimized Three Rules deserialized - Size: %d - Bytes: %d", currentRepetition.get(), threeRulesWrapper.resultsOptimized.getResults().size(), threeRulesWrapper.receivedOptimized.length));
-                    return List.of();
-                });
+                benchmarkOptimizedThreeRules.run(() -> {
+                            threeRulesWrapper.receivedOptimized = Compressor.decompress(threeRulesWrapper.receivedOptimized);
+                            LOGGER.info(String.format("[%d] Optimized Three Rules decompressed (serialized) - Bytes: %d", currentRepetition.get(), threeRulesWrapper.receivedOptimized.length));
+                            return List.of();
+                        }, () -> {
+                            threeRulesWrapper.resultsOptimized = ComputationResultSerializer.deserialize(threeRulesWrapper.receivedOptimized,
+                                    modelThreeRules);
+                            LOGGER.info(String.format("[%d] Optimized Three Rules deserialized - Size: %d - Bytes: %d", currentRepetition.get(), threeRulesWrapper.resultsOptimized.getResults().size(), threeRulesWrapper.receivedOptimized.length));
+                            return List.of((double) threeRulesWrapper.resultsOptimized.getResults().size());
+                        }
+                );
 
                 trajectoriesReceived = threeRulesWrapper.resultsOptimized.getResults().size();
             }
