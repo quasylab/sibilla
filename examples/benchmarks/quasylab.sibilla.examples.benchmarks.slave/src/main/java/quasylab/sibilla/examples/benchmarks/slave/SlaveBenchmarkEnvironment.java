@@ -65,7 +65,7 @@ public class SlaveBenchmarkEnvironment<S extends State> {
 
         this.setBenchmark();
         this.run();
-
+        netManager.closeConnection();
     }
 
     private void setBenchmark() {
@@ -171,7 +171,7 @@ public class SlaveBenchmarkEnvironment<S extends State> {
                 this.serializeCompressAndSend(computationResult, currentRepetition.get());
             }
         }
-        netManager.closeConnection();
+
     }
 
     private ComputationResult getComputationResult(LinkedList<Trajectory<S>> trajectories, int step) throws IOException {
@@ -307,12 +307,12 @@ public class SlaveBenchmarkEnvironment<S extends State> {
 
     public static void main(String[] args) throws IOException {
         SlaveBenchmarkEnvironment<PopulationState> env = new SlaveBenchmarkEnvironment(
-                new NetworkInfo(InetAddress.getByName(""), 10000, TCPNetworkManagerType.DEFAULT),
+                new NetworkInfo(InetAddress.getByName("192.168.42.202"), 10000, TCPNetworkManagerType.DEFAULT),
                 new SEIRModelDefinitionFourRules().createModel(),
                 new SEIRModelDefinitionThreeRules().createModel(),
                 30,
                 900,
-                10,
+                1,
                 getType(args[0]));
         env.run();
     }

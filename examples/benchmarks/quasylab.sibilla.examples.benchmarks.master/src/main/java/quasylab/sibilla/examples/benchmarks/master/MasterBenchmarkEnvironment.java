@@ -50,6 +50,7 @@ public class MasterBenchmarkEnvironment<S extends State> {
         LOGGER.info(String.format("STARTING MASTER %s BENCHMARK", this.benchmarkType.toString()));
         this.setBenchmark();
         this.run();
+        netManager.closeConnection();
     }
 
     private void run() throws IOException {
@@ -68,7 +69,7 @@ public class MasterBenchmarkEnvironment<S extends State> {
                 trajectoriesReceived = results.getResults().size();
             }
         }
-        netManager.closeConnection();
+
     }
 
     private void setBenchmark() {
