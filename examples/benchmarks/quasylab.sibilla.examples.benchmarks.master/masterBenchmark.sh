@@ -1,3 +1,5 @@
+gradle clean
+gradle build
 gradle run --args="FSTTHREERULES"
 gradle run --args="FSTFOURRULES"
 gradle run --args="APACHETHREERULES"
