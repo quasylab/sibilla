@@ -35,8 +35,8 @@ public class SlaveBenchmarkEnvironment<S extends State> {
     private Serializer fstSerializer;
     private Logger LOGGER;
 
-    private final String fourRulesTrajectoryFileDir = "trajectories";
-    private final String threeRulesTrajectoryFileDir = "trajectories";
+    private final String fourRulesTrajectoryFileDir = "src/main/resources";
+    private final String threeRulesTrajectoryFileDir = "src/main/resources";
     private final String fourRulesTrajectoryFileName = "SEIR 4 rules trajectory FST";
     private final String threeRulesTrajectoryFileName = "SEIR 3 rules trajectory FST";
 
