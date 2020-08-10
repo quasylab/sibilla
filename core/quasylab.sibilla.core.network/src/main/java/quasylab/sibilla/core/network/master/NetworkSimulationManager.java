@@ -44,6 +44,7 @@ import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.*;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -381,47 +382,48 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
 
     private ComputationResult<S> send(NetworkTask<S> networkTask, TCPNetworkManager server) {
 
-
         SlaveState state = this.simulationState.getSlaveStateByServerInfo(server.getNetworkInfo());
         ComputationResult<S> result;
-        final var obj = new Object() {
-            byte[] toReceive;
-            ComputationResult<S> results;
-        };
-        long elapsedTime;
         try {
             server.writeObject(serializer.serialize(MasterCommand.TASK));
             server.writeObject(serializer.serialize(networkTask));
-            elapsedTime = System.nanoTime();
-
-            server.getSocket().setSoTimeout((int) (state.getTimeout() / 1000000));
-            LOGGER.info(String.format("A group of tasks has been sent to the server - %s",
-                    server.getNetworkInfo().toString()));
-
-            obj.toReceive = server.readObject();
-
-            benchmark.run(() -> {
-                obj.toReceive = Compressor.decompress(obj.toReceive);
-                return List.of();
-            }, () -> {
-                obj.results = (ComputationResult<S>) serializer.deserialize(obj.toReceive);
-                return List.of((double) obj.results.getResults().size());
-            });
-
-            elapsedTime = System.nanoTime() - elapsedTime;
-
-
-            state.update(elapsedTime, obj.results.getResults().size());
-            LOGGER.info(String.format("The results from the computation have been received from the server - %s",
-                    server.getNetworkInfo().toString()));
+            state.setSentTasks(networkTask.getTasks().size());
+            state.setReceivedTasks(0);
+            result = awaitingResults(server, state, networkTask);
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             e.printStackTrace();
             throw new RuntimeException();
         }
+        return result;
+    }
 
+    private ComputationResult<S> awaitingResults(TCPNetworkManager server, SlaveState state, NetworkTask tasks) throws IOException {
+        ComputationResult<S> results = new ComputationResult<S>(new LinkedList<>());
+        long elapsedTime = System.nanoTime();
 
-        return obj.results;
+        server.getSocket().setSoTimeout((int) (state.getTimeout() / 1000000));
+        LOGGER.info(String.format("A group of tasks has been sent to the server - %s",
+                server.getNetworkInfo().toString()));
+
+        while (state.getReceivedTasks() < state.getSentTasks()) {
+            ComputationResult<S> receivedResults =
+                    (ComputationResult<S>) serializer.deserialize(Compressor.decompress(server.readObject()));
+            results.add(receivedResults);
+            //LOGGER.info(String.format("\nReceived results: %d\nTotal results: %d", receivedResults.getResults().size(),
+            //        results.getResults().size()));
+            state.setReceivedTasks(state.getReceivedTasks() + receivedResults.getResults().size());
+        }
+
+        elapsedTime = System.nanoTime() - elapsedTime;
+
+        LOGGER.info(String.format("\nSent tasks size: %d\nReceived tasks size: %d", tasks.getTasks().size(),
+                results.getResults().size()));
+        state.update(elapsedTime);
+        LOGGER.info(String.format("The results from the computation have been received from the server - %s",
+                server.getNetworkInfo().toString()));
+
+        return results;
     }
 
 }

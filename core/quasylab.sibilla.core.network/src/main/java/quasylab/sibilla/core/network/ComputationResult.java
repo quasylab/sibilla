@@ -67,4 +67,8 @@ public class ComputationResult<S extends State> implements Serializable {
         return results;
     }
 
+    public void add(ComputationResult<S> otherResults) {
+        this.results.addAll(otherResults.results);
+    }
+
 }

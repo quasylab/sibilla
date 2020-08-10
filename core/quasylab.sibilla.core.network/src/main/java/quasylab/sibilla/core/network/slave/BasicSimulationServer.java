@@ -257,6 +257,14 @@ public class BasicSimulationServer implements SimulationServer {
                 private byte[] toSend;
             };
 
+            /*
+            for (int i = 0; i < tasks.size(); i++) {
+                LinkedList<Trajectory> trajectories = new LinkedList<>();
+                trajectories.add(tasks.get(i).get());
+                master.writeObject(Compressor.compress(serializer.serialize(new ComputationResult(trajectories))));
+            }
+            */
+
             benchmark.run(() -> {
                         for (int i = 0; i < tasks.size(); i++) {
                             futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
