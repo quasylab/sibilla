@@ -113,7 +113,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
 
         this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         this.serializer = Serializer.getSerializer(serializerType);
-        benchmark = new Benchmark("benchmarks", "master", "csv", "o", List.of("decomprtime", "desertime", "tasks"));
+        benchmark = new Benchmark("benchmarks/master", "master", "csv", "o", List.of("decomprtime", "desertime", "tasks"));
 
         List<NetworkInfo> slaveNetworkInfos = simulationState.getSlaveServersStates().stream()
                 .map(SlaveState::getSlaveInfo).collect(Collectors.toList());

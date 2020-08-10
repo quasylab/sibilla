@@ -60,8 +60,8 @@ public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
      */
     private UDPNetworkManager discoveryNetworkManager;
 
-    public DiscoverableBasicSimulationServer(int localDiscoveryPort, TCPNetworkManagerType simulationNetworkManager, UDPNetworkManagerType discoveryNetworkManager, SerializerType serializerType) {
-        super(simulationNetworkManager, serializerType);
+    public DiscoverableBasicSimulationServer(int localDiscoveryPort, TCPNetworkManagerType simulationNetworkManager, UDPNetworkManagerType discoveryNetworkManager, SerializerType serializerType, boolean multiThreading) {
+        super(simulationNetworkManager, serializerType, multiThreading);
         try {
             LOCAL_DISCOVERY_INFO = new NetworkInfo(NetworkUtils.getLocalAddress(), localDiscoveryPort, discoveryNetworkManager);
             this.knownMasters = new HashSet<>();

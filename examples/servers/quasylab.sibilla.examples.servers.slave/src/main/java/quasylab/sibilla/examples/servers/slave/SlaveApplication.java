@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 public class SlaveApplication {
 
     private static Logger LOGGER;
-
+    private static boolean multiThreading = true;
     public static void main(String[] args) throws SocketException {
 
         LOGGER = HostLoggerSupplier.getInstance(String.format("SlaveServer")).getLogger();
@@ -89,7 +89,7 @@ public class SlaveApplication {
                 masterSimulationNetworkManagerType));
 
 
-        new DiscoverableBasicSimulationServer(localDiscoveryPort, masterSimulationNetworkManagerType, masterDiscoveryNetworkManagerType, SerializerType.FST).start(localSimulationPort);
+        new DiscoverableBasicSimulationServer(localDiscoveryPort, masterSimulationNetworkManagerType, masterDiscoveryNetworkManagerType, SerializerType.FST, multiThreading).start(localSimulationPort);
     }
 
 

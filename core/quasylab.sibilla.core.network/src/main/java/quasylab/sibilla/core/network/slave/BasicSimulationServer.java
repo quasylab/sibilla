@@ -99,19 +99,23 @@ public class BasicSimulationServer implements SimulationServer {
 
     private Benchmark benchmark;
 
+    private boolean multiThreading;
+
+
     /**
      * Creates a simulation server with the given network manager type
      *
      * @param networkManagerType type of the network manager
      */
-    public BasicSimulationServer(TCPNetworkManagerType networkManagerType, SerializerType serializerType) {
+    public BasicSimulationServer(TCPNetworkManagerType networkManagerType, SerializerType serializerType, boolean multiThreading) {
         this.serializer = Serializer.getSerializer(serializerType);
         this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         this.networkManagerType = networkManagerType;
-        LOGGER.info(String.format("Creating a new BasicSimulationServer that uses: [%s - %s]",
-                this.networkManagerType.getClass(), this.networkManagerType.name()));
+        this.multiThreading = multiThreading;
+        LOGGER.info(String.format("Creating a new BasicSimulationServer that uses: [%s - %s]. Multithreading: %s",
+                this.networkManagerType.getClass(), this.networkManagerType.name(), this.multiThreading ? "true" : "false"));
 
-        benchmark = new Benchmark("benchmarks",
+        benchmark = new Benchmark("benchmarks/slave",
                 "slave",
                 "csv",
                 "o",
@@ -266,13 +270,20 @@ public class BasicSimulationServer implements SimulationServer {
             */
 
             benchmark.run(() -> {
-                        for (int i = 0; i < tasks.size(); i++) {
-                            futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
-                        }
-                        CompletableFuture.allOf(futures).join();
-                        for (SimulationTask<?> task : tasks) {
-                            Trajectory trajectory = task.getTrajectory();
-                            results.add(trajectory);
+                        if (multiThreading) {
+                            for (int i = 0; i < tasks.size(); i++) {
+                                futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
+                            }
+                            CompletableFuture.allOf(futures).join();
+                            for (SimulationTask<?> task : tasks) {
+                                Trajectory trajectory = task.getTrajectory();
+                                results.add(trajectory);
+                            }
+                        } else {
+                            for (int i = 0; i < tasks.size(); i++) {
+                                Trajectory trajectory = tasks.get(i).get();
+                                results.add(trajectory);
+                            }
                         }
                         return List.of((double) tasks.size());
                     }, () -> {
