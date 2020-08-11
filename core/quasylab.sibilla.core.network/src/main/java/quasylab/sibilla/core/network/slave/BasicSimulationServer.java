@@ -26,31 +26,25 @@
 
 package quasylab.sibilla.core.network.slave;
 
-import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.NetworkTask;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
-import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.loaders.CustomClassLoader;
 import quasylab.sibilla.core.network.master.MasterCommand;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
+import quasylab.sibilla.core.network.slave.executor.SimulationExecutor;
 import quasylab.sibilla.core.network.util.Benchmark;
 import quasylab.sibilla.core.network.util.NetworkUtils;
-import quasylab.sibilla.core.simulator.SimulationTask;
-import quasylab.sibilla.core.simulator.Trajectory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -66,40 +60,29 @@ import java.util.logging.Logger;
 public class BasicSimulationServer implements SimulationServer {
 
     /**
-     * Class logger.
-     */
-    protected Logger LOGGER;
-
-    /**
      * Slave server related network manager type
      */
     private final TCPNetworkManagerType networkManagerType;
-
-    /**
-     * Tasks execution related thread executor.
-     */
-    private final ExecutorService taskExecutor = Executors.newCachedThreadPool();
-
     /**
      * Master communications related thread executor.
      */
     private final ExecutorService connectionExecutor = Executors.newCachedThreadPool();
-
     /**
-     * Used by the slave server to manage incoming simulations.
+     * Class logger.
      */
-    private int simulationPort;
-
+    protected Logger LOGGER;
     /**
      * Slave server network communication related info.
      */
     protected NetworkInfo localServerInfo;
-
     protected Serializer serializer;
-
+    /**
+     * Used by the slave server to manage incoming simulations.
+     */
+    private int simulationPort;
     private Benchmark benchmark;
 
-    private boolean multiThreading;
+    private SimulationExecutor simulationExecutor;
 
 
     /**
@@ -107,13 +90,13 @@ public class BasicSimulationServer implements SimulationServer {
      *
      * @param networkManagerType type of the network manager
      */
-    public BasicSimulationServer(TCPNetworkManagerType networkManagerType, SerializerType serializerType, boolean multiThreading) {
+    public BasicSimulationServer(TCPNetworkManagerType networkManagerType, SerializerType serializerType, SimulationExecutor simulationExecutor) {
         this.serializer = Serializer.getSerializer(serializerType);
         this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         this.networkManagerType = networkManagerType;
-        this.multiThreading = multiThreading;
-        LOGGER.info(String.format("Creating a new BasicSimulationServer that uses: [%s - %s]. Multithreading: %s",
-                this.networkManagerType.getClass(), this.networkManagerType.name(), this.multiThreading ? "true" : "false"));
+        this.simulationExecutor = simulationExecutor;
+        LOGGER.info(String.format("Creating a new BasicSimulationServer that uses: [%s - %s].",
+                this.networkManagerType.getClass(), this.networkManagerType.name()));
 
         benchmark = new Benchmark("benchmarks/slave",
                 "slave",
@@ -247,57 +230,9 @@ public class BasicSimulationServer implements SimulationServer {
 
 
     private void handleTaskExecution(TCPNetworkManager master) {
-
-
         try {
             NetworkTask<?> networkTask = (NetworkTask<?>) serializer.deserialize(master.readObject());
-            List<? extends SimulationTask<?>> tasks = networkTask.getTasks();
-            LinkedList<Trajectory<?>> results = new LinkedList<>();
-            CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
-
-            Model model = networkTask.getTasks().get(0).getUnit().getModel();
-
-            final var obj = new Object() {
-                private byte[] toSend;
-            };
-
-            /*
-            for (int i = 0; i < tasks.size(); i++) {
-                LinkedList<Trajectory> trajectories = new LinkedList<>();
-                trajectories.add(tasks.get(i).get());
-                master.writeObject(Compressor.compress(serializer.serialize(new ComputationResult(trajectories))));
-            }
-            */
-
-            benchmark.run(() -> {
-                        if (multiThreading) {
-                            for (int i = 0; i < tasks.size(); i++) {
-                                futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
-                            }
-                            CompletableFuture.allOf(futures).join();
-                            for (SimulationTask<?> task : tasks) {
-                                Trajectory trajectory = task.getTrajectory();
-                                results.add(trajectory);
-                            }
-                        } else {
-                            for (int i = 0; i < tasks.size(); i++) {
-                                Trajectory trajectory = tasks.get(i).get();
-                                results.add(trajectory);
-                            }
-                        }
-                        return List.of((double) tasks.size());
-                    }, () -> {
-                        obj.toSend = serializer.serialize(new ComputationResult(results));
-                        return List.of((double) obj.toSend.length);
-                    }, () -> {
-                        obj.toSend = Compressor.compress(obj.toSend);
-                        return List.of((double) obj.toSend.length);
-                    }, () -> {
-                        master.writeObject(obj.toSend);
-                        return List.of();
-                    }
-            );
-
+            simulationExecutor.simulate(networkTask, master);
             LOGGER.info(String.format("Computation's results have been sent to the server - %s",
                     master.getNetworkInfo().toString()));
         } catch (IOException e) {
