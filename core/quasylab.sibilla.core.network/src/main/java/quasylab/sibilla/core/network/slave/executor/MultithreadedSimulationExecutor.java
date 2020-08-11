@@ -17,6 +17,10 @@ public class MultithreadedSimulationExecutor extends SimulationExecutor {
 
     private final ExecutorService taskExecutor = Executors.newCachedThreadPool();
 
+    public MultithreadedSimulationExecutor(SimulationExecutorType exType) {
+        super(exType);
+    }
+
     @Override
     public void simulate(NetworkTask networkTask, TCPNetworkManager master) {
         List<? extends SimulationTask<?>> tasks = networkTask.getTasks();

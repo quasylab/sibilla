@@ -11,6 +11,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class SequentialSimulationExecutor extends SimulationExecutor {
+    public SequentialSimulationExecutor(SimulationExecutorType exType) {
+        super(exType);
+    }
+
     @Override
     public void simulate(NetworkTask networkTask, TCPNetworkManager master) {
         List<? extends SimulationTask<?>> tasks = networkTask.getTasks();

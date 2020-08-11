@@ -27,6 +27,7 @@
 package quasylab.sibilla.core.network.master;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
@@ -35,6 +36,7 @@ import quasylab.sibilla.core.network.NetworkTask;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.loaders.ClassBytesLoader;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializer;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.SlaveCommand;
@@ -405,10 +407,10 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         server.getSocket().setSoTimeout((int) (state.getTimeout() / 1000000));
         LOGGER.info(String.format("A group of tasks has been sent to the server - %s",
                 server.getNetworkInfo().toString()));
-
+        List<SimulationTask> simTasks = tasks.getTasks();
+        Model model = simTasks.get(0).getUnit().getModel();
         while (state.getReceivedTasks() < state.getSentTasks()) {
-            ComputationResult<S> receivedResults =
-                    (ComputationResult<S>) serializer.deserialize(Compressor.decompress(server.readObject()));
+            ComputationResult<S> receivedResults = ComputationResultSerializer.deserialize(Compressor.decompress(server.readObject()), model);
             results.add(receivedResults);
             //LOGGER.info(String.format("\nReceived results: %d\nTotal results: %d", receivedResults.getResults().size(),
             //        results.getResults().size()));

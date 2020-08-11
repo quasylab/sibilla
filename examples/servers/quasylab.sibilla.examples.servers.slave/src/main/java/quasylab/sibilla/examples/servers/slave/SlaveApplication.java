@@ -32,6 +32,7 @@ import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer;
 import quasylab.sibilla.core.network.slave.executor.SimulationExecutor;
+import quasylab.sibilla.core.network.slave.executor.SimulationExecutorType;
 import quasylab.sibilla.core.network.slave.executor.SingleTrajectorySequentialSimulationExecutor;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
@@ -45,7 +46,6 @@ import java.util.logging.Logger;
 public class SlaveApplication {
 
     private static Logger LOGGER;
-    private static SimulationExecutor simulationExecutor = new SingleTrajectorySequentialSimulationExecutor();
 
     public static void main(String[] args) throws SocketException {
 
@@ -93,7 +93,7 @@ public class SlaveApplication {
 
 
         new DiscoverableBasicSimulationServer(localDiscoveryPort, masterSimulationNetworkManagerType,
-                masterDiscoveryNetworkManagerType, SerializerType.FST, simulationExecutor).start(localSimulationPort);
+                masterDiscoveryNetworkManagerType, SerializerType.FST, SimulationExecutorType.MULTITHREADED).start(localSimulationPort);
     }
 
 

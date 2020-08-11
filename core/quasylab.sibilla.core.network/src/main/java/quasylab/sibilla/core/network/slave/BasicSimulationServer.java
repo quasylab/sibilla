@@ -36,6 +36,7 @@ import quasylab.sibilla.core.network.master.MasterCommand;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.executor.SimulationExecutor;
+import quasylab.sibilla.core.network.slave.executor.SimulationExecutorType;
 import quasylab.sibilla.core.network.util.Benchmark;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 
@@ -90,11 +91,11 @@ public class BasicSimulationServer implements SimulationServer {
      *
      * @param networkManagerType type of the network manager
      */
-    public BasicSimulationServer(TCPNetworkManagerType networkManagerType, SerializerType serializerType, SimulationExecutor simulationExecutor) {
+    public BasicSimulationServer(TCPNetworkManagerType networkManagerType, SerializerType serializerType, SimulationExecutorType simulationExecutorType) {
         this.serializer = Serializer.getSerializer(serializerType);
         this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         this.networkManagerType = networkManagerType;
-        this.simulationExecutor = simulationExecutor;
+        this.simulationExecutor = SimulationExecutor.getExecutor(simulationExecutorType);
         LOGGER.info(String.format("Creating a new BasicSimulationServer that uses: [%s - %s].",
                 this.networkManagerType.getClass(), this.networkManagerType.name()));
 
@@ -232,7 +233,7 @@ public class BasicSimulationServer implements SimulationServer {
     private void handleTaskExecution(TCPNetworkManager master) {
         try {
             NetworkTask<?> networkTask = (NetworkTask<?>) serializer.deserialize(master.readObject());
-            simulationExecutor.simulate(networkTask, master);
+            simulationExecutor.simulateWithBenchmark(networkTask, master);
             LOGGER.info(String.format("Computation's results have been sent to the server - %s",
                     master.getNetworkInfo().toString()));
         } catch (IOException e) {
