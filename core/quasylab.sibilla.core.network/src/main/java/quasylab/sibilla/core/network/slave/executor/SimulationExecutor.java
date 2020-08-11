@@ -14,6 +14,7 @@ import java.util.List;
 public abstract class SimulationExecutor {
 
     private final SimulationExecutorType type;
+    private final Benchmark benchmark;
 
     public static SimulationExecutor getExecutor(SimulationExecutorType exType) {
         switch (exType) {
@@ -31,18 +32,19 @@ public abstract class SimulationExecutor {
 
     public SimulationExecutor(SimulationExecutorType exType) {
         this.type = exType;
-    }
-
-    public abstract void simulate(NetworkTask networkTask, TCPNetworkManager master);
-
-    public void simulateWithBenchmark(NetworkTask networkTask, TCPNetworkManager master) {
-        Benchmark benchmark = new Benchmark("benchmarks/slave",
+        this.benchmark = new Benchmark("benchmarks/slave",
                 String.format("slave_%s", this.type),
                 "csv",
                 "o",
                 List.of("exectime",
                         "tasks"
                 ));
+    }
+
+    public abstract void simulate(NetworkTask networkTask, TCPNetworkManager master);
+
+    public void simulateWithBenchmark(NetworkTask networkTask, TCPNetworkManager master) {
+
         benchmark.run(() -> {
             simulate(networkTask, master);
             return List.of((double) networkTask.getTasks().size());
