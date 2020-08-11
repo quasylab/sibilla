@@ -14,11 +14,14 @@ import quasylab.sibilla.core.network.serialization.ComputationResultSerializer;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.util.BytearrayToFile;
+import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.Trajectory;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,8 +32,10 @@ public class SlaveBenchmarkEnvironment<S extends State> {
     private Model<S> modelFourRules;
     private Model<S> modelThreeRules;
 
-    private NetworkInfo masterInfo;
+    private NetworkInfo localInfo;
+    private ServerSocket serverSocket;
     private TCPNetworkManager netManager;
+
 
     private Serializer apacheSerializer;
     private Serializer fstSerializer;
@@ -41,25 +46,30 @@ public class SlaveBenchmarkEnvironment<S extends State> {
     private final String fourRulesTrajectoryFileName = "SEIR 4 rules trajectory FST";
     private final String threeRulesTrajectoryFileName = "SEIR 3 rules trajectory FST";
 
-    private final int step;
-    private final int threshold;
-    private final int repetitions;
 
     private SlaveBenchmarkType benchmarkType;
     private Benchmark benchmark;
 
-    public SlaveBenchmarkEnvironment(NetworkInfo masterInfo, Model modelFourRules, Model modelThreeRules, int step, int threshold, int repetitions, SlaveBenchmarkType type) throws IOException {
-        this.masterInfo = masterInfo;
-        netManager = TCPNetworkManager.createNetworkManager(this.masterInfo);
+    private int repetitions;
+    private int threshold;
+    private int resultsSize;
+
+    private int currentTasksCount;
+
+    public SlaveBenchmarkEnvironment(NetworkInfo localInfo, Model modelFourRules, Model modelThreeRules, SlaveBenchmarkType type) throws IOException {
+        this.localInfo = localInfo;
+
+        serverSocket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) this.localInfo.getType(), this.localInfo.getPort());
+
         apacheSerializer = Serializer.getSerializer(SerializerType.APACHE);
         fstSerializer = Serializer.getSerializer(SerializerType.FST);
         LOGGER = HostLoggerSupplier.getInstance("Slave Benchmark").getLogger();
 
         this.modelFourRules = modelFourRules;
         this.modelThreeRules = modelThreeRules;
-        this.step = step;
-        this.threshold = threshold;
-        this.repetitions = repetitions;
+
+        this.currentTasksCount = 0;
+
         this.benchmarkType = type;
         LOGGER.info(String.format("STARTING SLAVE %s BENCHMARK", this.benchmarkType.toString()));
 
@@ -160,18 +170,30 @@ public class SlaveBenchmarkEnvironment<S extends State> {
     }
 
     private void run() throws IOException {
-        netManager.writeObject(fstSerializer.serialize(repetitions));
-        netManager.writeObject(fstSerializer.serialize(threshold));
+        Socket socket = serverSocket.accept();
+        netManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) localInfo.getType(), socket);
+
+        String firstMessage = (String) fstSerializer.deserialize(netManager.readObject());
+        LOGGER.info(firstMessage);
+
+        this.repetitions = (int) fstSerializer.deserialize(netManager.readObject());
+        this.threshold = (int) fstSerializer.deserialize(netManager.readObject());
 
         for (int j = 1; j <= repetitions; j++) {
             AtomicInteger currentRepetition = new AtomicInteger(j);
-            LinkedList<Trajectory<S>> trajectories = new LinkedList<>();
-            while (trajectories.size() < threshold) {
-                ComputationResult<S> computationResult = getComputationResult(trajectories, step);
-                this.serializeCompressAndSend(computationResult, currentRepetition.get());
+            while (currentTasksCount < threshold) {
+                this.currentTasksCount = (int) fstSerializer.deserialize(netManager.readObject());
+                this.resultsSize = (int) fstSerializer.deserialize(netManager.readObject());
+                LOGGER.info("-----------------------------------------------");
+                LOGGER.info(String.format("[%d] Received [%d] tasks. Groups of [%d] trajectories", currentRepetition.get(), currentTasksCount, resultsSize));
+
+                ComputationResult<S> computationResult = getComputationResult(new LinkedList<>(), resultsSize);
+                for (int i = resultsSize; i <= currentTasksCount; i += resultsSize) {
+                    this.serializeCompressAndSend(computationResult, currentRepetition.get());
+                    LOGGER.info(String.format("[%d] Trajectories sent [%d/%d]", currentRepetition.get(), i, currentTasksCount));
+                }
             }
         }
-
     }
 
     private ComputationResult getComputationResult(LinkedList<Trajectory<S>> trajectories, int step) throws IOException {
@@ -307,13 +329,10 @@ public class SlaveBenchmarkEnvironment<S extends State> {
 
     public static void main(String[] args) throws IOException {
         SlaveBenchmarkEnvironment<PopulationState> env = new SlaveBenchmarkEnvironment(
-                new NetworkInfo(InetAddress.getByName("192.168.42.202"), 10000, TCPNetworkManagerType.DEFAULT),
+                new NetworkInfo(NetworkUtils.getLocalAddress(), 10000, TCPNetworkManagerType.DEFAULT),
                 new SEIRModelDefinitionFourRules().createModel(),
                 new SEIRModelDefinitionThreeRules().createModel(),
-                30,
-                900,
-                1,
-                getType(args[0]));
+                getType("OPTIMIZEDFOURRULES"));
         env.run();
     }
 

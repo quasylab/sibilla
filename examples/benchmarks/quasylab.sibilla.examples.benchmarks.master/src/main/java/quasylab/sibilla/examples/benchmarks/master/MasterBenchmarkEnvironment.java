@@ -10,12 +10,11 @@ import quasylab.sibilla.core.network.util.Benchmark;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.compression.Compressor;
-import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.past.State;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.InetAddress;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -25,8 +24,7 @@ public class MasterBenchmarkEnvironment<S extends State> {
     private Model<S> modelFourRules;
     private Model<S> modelThreeRules;
 
-    private NetworkInfo localInfo;
-    private ServerSocket serverSocket;
+    private NetworkInfo slaveInfo;
     private TCPNetworkManager netManager;
 
     private Serializer fstSerializer;
@@ -35,17 +33,32 @@ public class MasterBenchmarkEnvironment<S extends State> {
     private MasterBenchmarkType benchmarkType;
     private Logger LOGGER;
     private Benchmark benchmark;
+    private Benchmark sendBenchmark;
 
-    public MasterBenchmarkEnvironment(NetworkInfo localInfo, Model modelFourRules, Model modelThreeRules, MasterBenchmarkType type) throws IOException {
-        this.localInfo = localInfo;
+    private final int step;
+    private final int threshold;
+    private final int repetitions;
+    private int resultsSize;
+    private int sentTasksCount;
 
-        serverSocket = TCPNetworkManager.createServerSocket((TCPNetworkManagerType) this.localInfo.getType(), this.localInfo.getPort());
+    public MasterBenchmarkEnvironment(NetworkInfo slaveInfo, Model modelFourRules, Model modelThreeRules, int step, int threshold, int repetitions, int resultsSize, MasterBenchmarkType type) throws IOException {
+        this.slaveInfo = slaveInfo;
+
+        netManager = TCPNetworkManager.createNetworkManager(this.slaveInfo);
         fstSerializer = Serializer.getSerializer(SerializerType.FST);
         apacheSerializer = Serializer.getSerializer(SerializerType.APACHE);
         LOGGER = HostLoggerSupplier.getInstance("Master Benchmark").getLogger();
 
         this.modelFourRules = modelFourRules;
         this.modelThreeRules = modelThreeRules;
+
+        this.step = step;
+        this.threshold = threshold;
+        this.repetitions = repetitions;
+        this.resultsSize = Math.max(1, resultsSize);
+
+        this.sentTasksCount = 0;
+
         this.benchmarkType = type;
         LOGGER.info(String.format("STARTING MASTER %s BENCHMARK", this.benchmarkType.toString()));
         this.setBenchmark();
@@ -54,22 +67,41 @@ public class MasterBenchmarkEnvironment<S extends State> {
     }
 
     private void run() throws IOException {
-        Socket socket = serverSocket.accept();
-        netManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) localInfo.getType(), socket);
+        netManager.writeObject(fstSerializer.serialize("Start"));
+        netManager.writeObject(fstSerializer.serialize(repetitions));
+        netManager.writeObject(fstSerializer.serialize(threshold));
 
-        int repetitions = (int) fstSerializer.deserialize(netManager.readObject());
-        int threshold = (int) fstSerializer.deserialize(netManager.readObject());
 
         for (int j = 1; j <= repetitions; j++) {
             AtomicInteger currentRepetition = new AtomicInteger(j);
-            int trajectoriesReceived = 0;
-            while (trajectoriesReceived < threshold) {
-                byte[] received = read(currentRepetition.get());
-                ComputationResult<S> results = deserializeAndDecompress(received, currentRepetition.get());
-                trajectoriesReceived = results.getResults().size();
+            while (sentTasksCount < threshold) {
+                sentTasksCount += step;
+
+                sendBenchmark.run(() -> {
+                    LOGGER.info("-----------------------------------------------");
+                    LOGGER.info(String.format("[%d] Sending [%d] tasks", currentRepetition.get(), sentTasksCount));
+                    netManager.writeObject(fstSerializer.serialize(sentTasksCount));
+                    int currentResultSize = Math.min(resultsSize, sentTasksCount);
+                    netManager.writeObject(fstSerializer.serialize(currentResultSize));
+                    int receivedTrajectoriesCount = 0;
+                    ComputationResult<S> results = new ComputationResult<S>(new LinkedList<>());
+
+                    while (receivedTrajectoriesCount < this.sentTasksCount) {
+                        byte[] receivedBytes = read(currentRepetition.get());
+                        ComputationResult<S> receivedResults = deserializeAndDecompress(receivedBytes, currentRepetition.get());
+                        results.add(receivedResults);
+                        receivedTrajectoriesCount = results.getResults().size();
+                        LOGGER.info(String.format("[%d] Trajectories received [%d] Total trajectories received [%d/%d]", currentRepetition.get(), receivedResults.getResults().size(), receivedTrajectoriesCount, this.sentTasksCount));
+
+                    }
+
+                    return List.of((double) sentTasksCount, (double) currentResultSize);
+                });
+
+
+                // LOGGER.info(String.format("[%d] Trajectories received: [%d]", currentRepetition.get(), results.getResults().size()));
             }
         }
-
     }
 
     private void setBenchmark() {
@@ -84,6 +116,15 @@ public class MasterBenchmarkEnvironment<S extends State> {
                                 "desertime",
                                 "tasks")
                 );
+                this.sendBenchmark = new Benchmark(
+                        "benchmarks/masterBenchmarking/fourRulesModel/",
+                        "fst_sendAndReceive",
+                        "csv",
+                        "f",
+                        List.of("sendAndReceiveTime",
+                                "tasks",
+                                "resultsSize")
+                );
                 break;
             case FSTTHREERULES:
                 this.benchmark = new Benchmark(
@@ -95,6 +136,15 @@ public class MasterBenchmarkEnvironment<S extends State> {
                                 "desertime",
                                 "tasks")
                 );
+                this.sendBenchmark = new Benchmark(
+                        "benchmarks/masterBenchmarking/threeRulesModel/",
+                        "fst_sendAndReceive",
+                        "csv",
+                        "f",
+                        List.of("sendAndReceiveTime",
+                                "tasks",
+                                "resultsSize")
+                );
                 break;
             case APACHEFOURRULES:
                 this.benchmark = new Benchmark(
@@ -105,6 +155,15 @@ public class MasterBenchmarkEnvironment<S extends State> {
                         List.of("decomprtime",
                                 "desertime",
                                 "tasks")
+                );
+                this.sendBenchmark = new Benchmark(
+                        "benchmarks/masterBenchmarking/fourRulesModel/",
+                        "apache_sendAndReceive",
+                        "csv",
+                        "a",
+                        List.of("sendAndReceiveTime",
+                                "tasks",
+                                "resultsSize")
                 );
                 break;
             case APACHETHREERULES:
@@ -117,6 +176,15 @@ public class MasterBenchmarkEnvironment<S extends State> {
                                 "desertime",
                                 "tasks")
                 );
+                this.sendBenchmark = new Benchmark(
+                        "benchmarks/masterBenchmarking/threeRulesModel/",
+                        "apache_sendAndReceive",
+                        "csv",
+                        "a",
+                        List.of("sendAndReceiveTime",
+                                "tasks",
+                                "resultsSize")
+                );
                 break;
             case OPTIMIZEDFOURRULES:
                 this.benchmark = new Benchmark(
@@ -128,6 +196,15 @@ public class MasterBenchmarkEnvironment<S extends State> {
                                 "desertime",
                                 "tasks")
                 );
+                this.sendBenchmark = new Benchmark(
+                        "benchmarks/masterBenchmarking/fourRulesModel/",
+                        "optimized_sendAndReceive",
+                        "csv",
+                        "o",
+                        List.of("sendAndReceiveTime",
+                                "tasks",
+                                "resultsSize")
+                );
                 break;
             case OPTIMIZEDTHREERULES:
                 this.benchmark = new Benchmark(
@@ -138,39 +215,23 @@ public class MasterBenchmarkEnvironment<S extends State> {
                         List.of("decomprtime",
                                 "desertime",
                                 "tasks")
+                );
+                this.sendBenchmark = new Benchmark(
+                        "benchmarks/masterBenchmarking/threeRulesModel/",
+                        "optimized_sendAndReceive",
+                        "csv",
+                        "o",
+                        List.of("sendAndReceiveTime",
+                                "tasks",
+                                "resultsSize")
                 );
                 break;
         }
     }
 
     private byte[] read(int currentRepetition) throws IOException {
-        byte[] toReturn = new byte[0];
-        switch (this.benchmarkType) {
-            case FSTFOURRULES:
-                toReturn = netManager.readObject();
-                LOGGER.info(String.format("[%d] FST Four Rules compressed received - Bytes: %d", currentRepetition, toReturn.length));
-                break;
-            case FSTTHREERULES:
-                toReturn = netManager.readObject();
-                LOGGER.info(String.format("[%d] FST Three Rules compressed received - Bytes: %d", currentRepetition, toReturn.length));
-                break;
-            case APACHEFOURRULES:
-                toReturn = netManager.readObject();
-                LOGGER.info(String.format("[%d] Apache Four Rules compressed received - Bytes: %d", currentRepetition, toReturn.length));
-                break;
-            case APACHETHREERULES:
-                toReturn = netManager.readObject();
-                LOGGER.info(String.format("[%d] Apache Three Rules compressed received - Bytes: %d", currentRepetition, toReturn.length));
-                break;
-            case OPTIMIZEDFOURRULES:
-                toReturn = netManager.readObject();
-                LOGGER.info(String.format("[%d] Optimized Four Rules compressed received - Bytes: %d", currentRepetition, toReturn.length));
-                break;
-            case OPTIMIZEDTHREERULES:
-                toReturn = netManager.readObject();
-                LOGGER.info(String.format("[%d] Optimized Three Rules compressed received - Bytes: %d", currentRepetition, toReturn.length));
-                break;
-        }
+        byte[] toReturn = netManager.readObject();
+        LOGGER.info(String.format("[%d] %s compressed received - Bytes: %d", currentRepetition, this.benchmarkType.toString(), toReturn.length));
         return toReturn;
     }
 
@@ -260,10 +321,14 @@ public class MasterBenchmarkEnvironment<S extends State> {
 
     public static void main(String[] args) throws IOException {
         MasterBenchmarkEnvironment<PopulationState> env = new MasterBenchmarkEnvironment(
-                new NetworkInfo(NetworkUtils.getLocalAddress(), 10000, TCPNetworkManagerType.DEFAULT),
+                new NetworkInfo(InetAddress.getByName("localhost"), 10000, TCPNetworkManagerType.DEFAULT),
                 new SEIRModelDefinitionFourRules().createModel(),
                 new SEIRModelDefinitionThreeRules().createModel(),
-                getType(args[0]));
+                20,
+                900,
+                1,
+                1,
+                getType("OPTIMIZEDFOURRULES"));
     }
 
     private static MasterBenchmarkType getType(String arg) {
