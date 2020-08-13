@@ -207,6 +207,9 @@ public class PopulationState implements State {
 	public PopulationState copy() {
 		return new PopulationState(population,populationVector);
 	}
-	
 
+
+	public int[] getPopulationVector() {
+		return this.populationVector;
+	}
 }
