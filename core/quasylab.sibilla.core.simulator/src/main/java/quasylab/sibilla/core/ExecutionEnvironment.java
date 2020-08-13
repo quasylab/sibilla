@@ -22,7 +22,7 @@
  *
  */
 
-package quasilab.sibilla.core;
+package quasylab.sibilla.core;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.Action;
