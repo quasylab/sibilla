@@ -35,7 +35,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import quasilab.sibilla.core.ExecutionEnvironment;
+import quasylab.sibilla.core.ExecutionEnvironment;
 import quasylab.sibilla.core.models.Action;
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;

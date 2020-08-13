@@ -20,7 +20,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import quasilab.sibilla.core.ExecutionEnvironment;
+import quasylab.sibilla.core.ExecutionEnvironment;
 import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.past.State;
 

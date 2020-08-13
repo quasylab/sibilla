@@ -11,6 +11,7 @@ rootProject.name = 'quasylab.sibilla'
 
 include 'core:quasylab.sibilla.core.simulator',
 		'core:quasylab.sibilla.core.network',
+		'langs:pm',
 		'gui:quasylab.sibilla.gui',
         'examples:populations:quasylab.sibilla.examples.pm.crowds',
 		'examples:populations:quasylab.sibilla.examples.pm.seir',

@@ -23,7 +23,7 @@
  */
 package quasylab.sibilla.examples.pm.seir;
 
-import quasilab.sibilla.core.ExecutionEnvironment;
+import quasylab.sibilla.core.ExecutionEnvironment;
 import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
