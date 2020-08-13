@@ -35,7 +35,7 @@ import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.io.Serializable;
 
-public class SEIRModelDefinition implements PopulationModelDefinition, Serializable {
+public class SEIRModelDefinition extends PopulationModelDefinition implements Serializable {
 
     public final static int S = 0;
     public final static int E = 1;
@@ -52,6 +52,10 @@ public class SEIRModelDefinition implements PopulationModelDefinition, Serializa
     public final static double LAMBDA_I = 1 / 3.0;
     public final static double LAMBDA_R = 1 / 7.0;
     public final static double LAMBDA_DECAY = 1 / 30.0;
+
+    public SEIRModelDefinition() {
+        super( new String[] {"S","E","I","R" });
+    }
 
 
     @Override

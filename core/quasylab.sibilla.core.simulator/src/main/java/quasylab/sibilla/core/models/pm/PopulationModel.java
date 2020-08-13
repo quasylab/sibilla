@@ -30,6 +30,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.MarkovProcess;
 import quasylab.sibilla.core.models.StepFunction;
 import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.simulator.sampling.Measure;
 import quasylab.sibilla.core.simulator.sampling.Sample;
 import quasylab.sibilla.core.simulator.util.WeightedElement;
 import quasylab.sibilla.core.simulator.util.WeightedLinkedList;
@@ -146,6 +147,41 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
     public PopulationState deserializeState(ByteArrayInputStream toDeserializeFrom) throws IOException {
         //TODO
         return null;
+    }
+
+
+    @Override
+    public String[] measures() {
+        return modelDefinition.getSpecies();
+    }
+
+    @Override
+    public double measure(String m, PopulationState state) {
+        int idx = modelDefinition.indexOf(m);
+        if (idx<0) {
+            throw new IllegalArgumentException("Species "+m+" is unknown!");
+        }
+        return state.getFraction(idx);
+    }
+
+    @Override
+    public Measure<PopulationState> getMeasure(String m) {
+        int idx = modelDefinition.indexOf(m);
+        if (idx<0) {
+            throw new IllegalArgumentException("Species "+m+" is unknown!");
+        }
+
+        return new Measure<PopulationState>() {
+            @Override
+            public double measure(PopulationState t) {
+                return t.getFraction(idx);
+            }
+
+            @Override
+            public String getName() {
+                return m;
+            }
+        };
     }
 
 
