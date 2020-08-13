@@ -31,6 +31,7 @@ import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.NetworkTask;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.loaders.CustomClassLoader;
 import quasylab.sibilla.core.network.master.MasterCommand;
 import quasylab.sibilla.core.network.serialization.Serializer;
@@ -231,7 +232,7 @@ public class BasicSimulationServer implements SimulationServer {
 
     private void handleTaskExecution(TCPNetworkManager master) {
         try {
-            NetworkTask<?> networkTask = (NetworkTask<?>) serializer.deserialize(master.readObject());
+            NetworkTask<?> networkTask = (NetworkTask<?>) serializer.deserialize(Compressor.decompress(master.readObject()));
             simulationExecutor.simulateWithBenchmark(networkTask, master);
             LOGGER.info(String.format("Computation's results have been sent to the server - %s",
                     master.getNetworkInfo().toString()));

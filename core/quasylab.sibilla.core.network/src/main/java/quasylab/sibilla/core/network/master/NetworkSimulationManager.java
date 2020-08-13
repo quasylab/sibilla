@@ -388,7 +388,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         ComputationResult<S> result;
         try {
             server.writeObject(serializer.serialize(MasterCommand.TASK));
-            server.writeObject(serializer.serialize(networkTask));
+            server.writeObject(Compressor.compress(serializer.serialize(networkTask)));
             state.setSentTasks(networkTask.getTasks().size());
             state.setReceivedTasks(0);
             result = awaitingResults(server, state, networkTask);

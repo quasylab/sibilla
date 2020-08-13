@@ -18,7 +18,6 @@ public class SingleTrajectorySequentialSimulationExecutor extends SimulationExec
     @Override
     public void simulate(NetworkTask networkTask, TCPNetworkManager master) {
         List<? extends SimulationTask<?>> tasks = networkTask.getTasks();
-        tasks.forEach(task -> System.out.println(task.getIndex()));
         Model model = tasks.get(0).getUnit().getModel();
         for (int i = 0; i < tasks.size(); i++) {
             LinkedList<Trajectory> trajectories = new LinkedList<>();
