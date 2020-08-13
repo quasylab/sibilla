@@ -32,8 +32,6 @@ import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer;
 import quasylab.sibilla.core.network.slave.executor.SimulationExecutor;
-import quasylab.sibilla.core.network.slave.executor.SimulationExecutorType;
-import quasylab.sibilla.core.network.slave.executor.SingleTrajectorySequentialSimulationExecutor;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.network.util.StartupUtils;
@@ -93,7 +91,7 @@ public class SlaveApplication {
 
 
         new DiscoverableBasicSimulationServer(localDiscoveryPort, masterSimulationNetworkManagerType,
-                masterDiscoveryNetworkManagerType, SerializerType.FST, SimulationExecutorType.SEQUENTIAL).start(localSimulationPort);
+                masterDiscoveryNetworkManagerType, SerializerType.FST, SimulationExecutor.Type.SINGLE_TRAJECTORY_SEQUENTIAL).start(localSimulationPort);
     }
 
 

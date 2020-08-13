@@ -17,7 +17,7 @@ public class SingleTrajectoryMultithreadedSimulationExecutor extends SimulationE
 
     private final ExecutorService taskExecutor = Executors.newCachedThreadPool();
 
-    public SingleTrajectoryMultithreadedSimulationExecutor(SimulationExecutorType exType) {
+    public SingleTrajectoryMultithreadedSimulationExecutor(Type exType) {
         super(exType);
     }
 

@@ -13,24 +13,10 @@ import java.util.List;
 
 public abstract class SimulationExecutor {
 
-    private final SimulationExecutorType type;
+    private final Type type;
     private final Benchmark benchmark;
 
-    public static SimulationExecutor getExecutor(SimulationExecutorType exType) {
-        switch (exType) {
-            case MULTITHREADED:
-                return new MultithreadedSimulationExecutor(exType);
-            case SEQUENTIAL:
-                return new SequentialSimulationExecutor(exType);
-            case SINGLETRAJECTORYSEQUENTIAL:
-                return new SingleTrajectorySequentialSimulationExecutor(exType);
-            case SINGLETRAJECTORYMULTITHREADED:
-            default:
-                return new SingleTrajectoryMultithreadedSimulationExecutor(exType);
-        }
-    }
-
-    public SimulationExecutor(SimulationExecutorType exType) {
+    public SimulationExecutor(Type exType) {
         this.type = exType;
         this.benchmark = new Benchmark("benchmarks/slave",
                 String.format("slave_%s", this.type),
@@ -39,6 +25,22 @@ public abstract class SimulationExecutor {
                 List.of("exectime",
                         "tasks"
                 ));
+    }
+
+    public static SimulationExecutor getExecutor(Type exType) {
+        switch (exType) {
+            case PC:
+                return new ProducerConsumerSimulationExecutor(exType);
+            case MULTITHREADED:
+                return new MultithreadedSimulationExecutor(exType);
+            case SEQUENTIAL:
+                return new SequentialSimulationExecutor(exType);
+            case SINGLE_TRAJECTORY_SEQUENTIAL:
+                return new SingleTrajectorySequentialSimulationExecutor(exType);
+            case SINGLE_TRAJECTORY_MULTITHREADED:
+            default:
+                return new SingleTrajectoryMultithreadedSimulationExecutor(exType);
+        }
     }
 
     public abstract void simulate(NetworkTask networkTask, TCPNetworkManager master);
@@ -59,4 +61,7 @@ public abstract class SimulationExecutor {
         }
     }
 
+    public enum Type {
+        SEQUENTIAL, SINGLE_TRAJECTORY_SEQUENTIAL, MULTITHREADED, SINGLE_TRAJECTORY_MULTITHREADED, PC
+    }
 }

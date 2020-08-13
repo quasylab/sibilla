@@ -36,7 +36,6 @@ import quasylab.sibilla.core.network.master.MasterCommand;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.executor.SimulationExecutor;
-import quasylab.sibilla.core.network.slave.executor.SimulationExecutorType;
 import quasylab.sibilla.core.network.util.Benchmark;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 
@@ -91,11 +90,11 @@ public class BasicSimulationServer implements SimulationServer {
      *
      * @param networkManagerType type of the network manager
      */
-    public BasicSimulationServer(TCPNetworkManagerType networkManagerType, SerializerType serializerType, SimulationExecutorType simulationExecutorType) {
+    public BasicSimulationServer(TCPNetworkManagerType networkManagerType, SerializerType serializerType, SimulationExecutor.Type type) {
         this.serializer = Serializer.getSerializer(serializerType);
         this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         this.networkManagerType = networkManagerType;
-        this.simulationExecutor = SimulationExecutor.getExecutor(simulationExecutorType);
+        this.simulationExecutor = SimulationExecutor.getExecutor(type);
         LOGGER.info(String.format("Creating a new BasicSimulationServer that uses: [%s - %s].",
                 this.networkManagerType.getClass(), this.networkManagerType.name()));
 

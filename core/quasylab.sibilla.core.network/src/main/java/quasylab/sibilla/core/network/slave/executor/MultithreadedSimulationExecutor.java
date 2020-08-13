@@ -17,7 +17,7 @@ public class MultithreadedSimulationExecutor extends SimulationExecutor {
 
     private final ExecutorService taskExecutor = Executors.newCachedThreadPool();
 
-    public MultithreadedSimulationExecutor(SimulationExecutorType exType) {
+    public MultithreadedSimulationExecutor(Type exType) {
         super(exType);
     }
 

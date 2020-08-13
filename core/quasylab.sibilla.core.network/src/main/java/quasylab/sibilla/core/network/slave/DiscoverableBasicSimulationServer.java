@@ -32,7 +32,6 @@ import quasylab.sibilla.core.network.communication.UDPNetworkManager;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.executor.SimulationExecutor;
-import quasylab.sibilla.core.network.slave.executor.SimulationExecutorType;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 
 import java.io.IOException;
@@ -64,8 +63,8 @@ public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
 
     public DiscoverableBasicSimulationServer(int localDiscoveryPort, TCPNetworkManagerType simulationNetworkManager,
                                              UDPNetworkManagerType discoveryNetworkManager, SerializerType serializerType,
-                                             SimulationExecutorType simulationExecutorType) {
-        super(simulationNetworkManager, serializerType, simulationExecutorType);
+                                             SimulationExecutor.Type type) {
+        super(simulationNetworkManager, serializerType, type);
         try {
             LOCAL_DISCOVERY_INFO = new NetworkInfo(NetworkUtils.getLocalAddress(), localDiscoveryPort, discoveryNetworkManager);
             this.knownMasters = new HashSet<>();

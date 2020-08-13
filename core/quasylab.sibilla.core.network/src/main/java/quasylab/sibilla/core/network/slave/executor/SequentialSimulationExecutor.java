@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class SequentialSimulationExecutor extends SimulationExecutor {
-    public SequentialSimulationExecutor(SimulationExecutorType exType) {
+    public SequentialSimulationExecutor(Type exType) {
         super(exType);
     }
 
