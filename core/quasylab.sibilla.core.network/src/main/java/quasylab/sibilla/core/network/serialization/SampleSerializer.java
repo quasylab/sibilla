@@ -34,6 +34,7 @@ public class SampleSerializer {
 
     public static <S extends State> Sample<S> deserialize(ByteArrayInputStream toDeserializeFrom, Model<S> model) throws IOException {
         double time = ByteBuffer.wrap(toDeserializeFrom.readNBytes(8)).getDouble();
+       // System.out.println("Model" + model);
         S state = model.deserializeState(toDeserializeFrom.readNBytes(model.stateByteArraySize()));
         return new Sample<>(time, state);
     }

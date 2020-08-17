@@ -6,7 +6,7 @@ import quasylab.sibilla.core.network.NetworkTask;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.serialization.ComputationResultSerializer;
-import quasylab.sibilla.core.network.util.Benchmark;
+import quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,11 +14,11 @@ import java.util.List;
 public abstract class SimulationExecutor {
 
     private final Type type;
-    private final Benchmark benchmark;
+    private final BenchmarkUnit benchmark;
 
     public SimulationExecutor(Type exType) {
         this.type = exType;
-        this.benchmark = new Benchmark("benchmarks/slave",
+        this.benchmark = new BenchmarkUnit("benchmarks/slave",
                 String.format("slave_%s", this.type),
                 "csv",
                 "o",

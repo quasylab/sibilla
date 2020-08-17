@@ -29,7 +29,7 @@ package quasylab.sibilla.examples.servers.client;
 import org.apache.commons.math3.random.AbstractRandomGenerator;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
-import quasylab.sibilla.core.network.util.Benchmark;
+import quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
 import quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.serialization.SerializerType;
@@ -101,7 +101,7 @@ public class ClientApplication implements Serializable {
 
         SEIRModelDefinition modelDefinition = new SEIRModelDefinition();
 
-        Benchmark executionBenchmark = new Benchmark("./benchmarks/client", "Client Example", "csv", "client", "bench");
+        BenchmarkUnit executionBenchmark = new BenchmarkUnit("./benchmarks/client", "Client Example", "csv", "client", "bench");
 
         for (int i = 1; i <= submitRepetitions; i++) {
             executionBenchmark.run(() -> {

@@ -37,7 +37,7 @@ import quasylab.sibilla.core.network.master.MasterCommand;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.executor.SimulationExecutor;
-import quasylab.sibilla.core.network.util.Benchmark;
+import quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 
 import java.io.IOException;
@@ -81,7 +81,7 @@ public class BasicSimulationServer implements SimulationServer {
      * Used by the slave server to manage incoming simulations.
      */
     private int simulationPort;
-    private Benchmark benchmark;
+    private BenchmarkUnit benchmark;
 
     private SimulationExecutor simulationExecutor;
 
@@ -99,7 +99,7 @@ public class BasicSimulationServer implements SimulationServer {
         LOGGER.info(String.format("Creating a new BasicSimulationServer that uses: [%s - %s].",
                 this.networkManagerType.getClass(), this.networkManagerType.name()));
 
-        benchmark = new Benchmark("benchmarks/slave",
+        benchmark = new BenchmarkUnit("benchmarks/slave",
                 "slave",
                 "csv",
                 "o",

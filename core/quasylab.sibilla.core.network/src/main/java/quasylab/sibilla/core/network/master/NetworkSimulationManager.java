@@ -41,7 +41,7 @@ import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.SlaveCommand;
 import quasylab.sibilla.core.network.slave.SlaveState;
-import quasylab.sibilla.core.network.util.Benchmark;
+import quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.*;
 
@@ -98,7 +98,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     private Serializer serializer;
 
 
-    private Benchmark benchmark;
+    private BenchmarkUnit benchmark;
 
     /**
      * Creates a NetworkSimulationManager with the parameters given in input
@@ -115,7 +115,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
 
         this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         this.serializer = Serializer.getSerializer(serializerType);
-        benchmark = new Benchmark("benchmarks/master", "master", "csv", "o", List.of("decomprtime", "desertime", "tasks"));
+        benchmark = new BenchmarkUnit("benchmarks/master", "master", "csv", "o", List.of("decomprtime", "desertime", "tasks"));
 
         List<NetworkInfo> slaveNetworkInfos = simulationState.getSlaveServersStates().stream()
                 .map(SlaveState::getSlaveInfo).collect(Collectors.toList());
