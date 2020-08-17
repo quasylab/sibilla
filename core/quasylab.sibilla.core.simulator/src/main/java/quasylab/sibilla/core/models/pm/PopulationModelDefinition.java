@@ -26,7 +26,34 @@
 
 package quasylab.sibilla.core.models.pm;
 
+import com.sun.source.tree.Tree;
 import quasylab.sibilla.core.models.ModelDefinition;
 
-public interface PopulationModelDefinition extends ModelDefinition<PopulationState> {
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.IntStream;
+
+/**
+ * Instances of this class represent the definition of a population model.
+ */
+public abstract class PopulationModelDefinition implements ModelDefinition<PopulationState> {
+
+    private final TreeMap<String,Integer> speciesIndex;
+
+    public PopulationModelDefinition(String[] species) {
+        speciesIndex = new TreeMap<>();
+        initIndex(species);
+    }
+
+    private void initIndex(String[] species) {
+        IntStream.range(0,species.length).forEach(i->speciesIndex.put(species[i],i));
+    }
+
+    public String[] getSpecies() {
+        return speciesIndex.keySet().toArray(new String[speciesIndex.size()]);
+    }
+
+    public int indexOf(String m) {
+        return speciesIndex.getOrDefault(m,-1);
+    }
 }

@@ -28,6 +28,7 @@ package quasylab.sibilla.core.models;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.simulator.sampling.Measure;
 import quasylab.sibilla.core.simulator.sampling.Sample;
 
 import java.io.ByteArrayInputStream;
@@ -73,4 +74,28 @@ public interface Model<S extends State> {
     S deserializeState(byte[] bytes) throws IOException;
 
     S deserializeState(ByteArrayInputStream toDeserializeFrom) throws IOException;
+
+    /**
+     * Each model is associated with a set of measures. This method returns the array of measure
+     * names identified by strings.
+     *
+     * @return the array of measure names.
+     */
+    String[] measures();
+
+    /**
+     * Compute the measure <code>m</code> on the state <code>state</code>.
+     *
+     * @param m name of the measure to compute.
+     * @param state state to measure.
+     * @return the value of measure <code>m</code> on state <code>state</code>.
+     */
+    double measure(String m, S state);
+
+    /**
+     * Returns the measure with name <code>m</code>.
+     * @param m measure name.
+     * @return the measure with name <code>m</code>.
+     */
+    Measure<S> getMeasure(String m);
 }

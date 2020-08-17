@@ -25,11 +25,17 @@
 package quasilab.sibilla.core;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.models.Action;
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.TimeStep;
+import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.past.State;
 
+
+
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -44,6 +50,8 @@ public class ExecutionEnvironment<S extends State> {
     private boolean completed = false;
     private double time;
     private S currentState;
+
+
 
     /**
      * Create a new ExecutionEnvironment that can be used to execute a given model
@@ -135,7 +143,7 @@ public class ExecutionEnvironment<S extends State> {
      * @return current simulation time.
      */
     public double currentTime() {
-        return time;
+        return this.time;
     }
 
     /**
@@ -145,4 +153,9 @@ public class ExecutionEnvironment<S extends State> {
     public int steps() {
         return this.history.size();
     }
+
+    public Model<S> getModel(){
+        return this.model;
+    }
+
 }

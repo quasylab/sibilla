@@ -11,16 +11,16 @@ rootProject.name = 'quasylab.sibilla'
 
 include 'core:quasylab.sibilla.core.simulator',
 		'core:quasylab.sibilla.core.network',
-        'langs:quasylab.sibilla.lang.pm.parent',
-        'langs:quasylab.sibilla.lang.pm.parent:quasylab.sibilla.lang.pm',
-        'langs:quasylab.sibilla.lang.pm.parent:quasylab.sibilla.lang.ide',
+		'gui:quasylab.sibilla.gui',
         'examples:populations:quasylab.sibilla.examples.pm.crowds',
 		'examples:populations:quasylab.sibilla.examples.pm.seir',
         'examples:populations:quasylab.sibilla.examples.pm.le',
 		'examples:populations:quasylab.sibilla.examples.pm.covid',
+		'examples:populations:quasylab.sibilla.examples.pm.molecule',
 		'examples:servers:quasylab.sibilla.examples.servers.client',
 		'examples:servers:quasylab.sibilla.examples.servers.master',
-		'examples:servers:quasylab.sibilla.examples.servers.slave'
+		'examples:servers:quasylab.sibilla.examples.servers.slave',
+		'examples:populations:quasylab.sibilla.examples.pm.taxis'
 include 'examples:benchmarks:quasylab.sibilla.examples.benchmarks.slave'
 findProject(':examples:benchmarks:quasylab.sibilla.examples.benchmarks.slave')?.name = 'slave'
 include 'examples:benchmarks:quasylab.sibilla.examples.benchmarks.master'

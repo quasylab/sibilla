@@ -29,7 +29,7 @@ package quasylab.sibilla.core.models;
 import quasylab.sibilla.core.past.State;
 
 /**
- * This interface implements a factory that can be used to build a model that according
+ * This interface implements a factory that can be used to build a model according
  * to some parameters.
  *
  * @param <S>
