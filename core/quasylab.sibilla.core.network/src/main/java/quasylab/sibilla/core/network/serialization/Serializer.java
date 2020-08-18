@@ -39,16 +39,10 @@ import java.io.Serializable;
  */
 public interface Serializer {
 
-    /**
-     * This class defines the encoders/decoders used during FST serialization.
-     * Usually you just create one global singleton (instantiation of this class is very expensive).
-     */
-    FSTConfiguration defaultFSTConfiguration = FSTConfiguration.createDefaultConfiguration();
-
     static Serializer getSerializer(SerializerType type) {
         switch (type) {
             case FST:
-                return new FSTSerializer(defaultFSTConfiguration);
+                return new FSTSerializer();
             case APACHE:
             default:
                 return new ApacheSerializer();
