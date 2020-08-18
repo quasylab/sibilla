@@ -24,10 +24,12 @@
  *
  */
 
-package quasylab.sibilla.core.network.benchmark;
+package quasylab.sibilla.core.network.benchmark.master;
 
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.NetworkInfo;
+import quasylab.sibilla.core.network.benchmark.BenchmarkType;
+import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
@@ -36,12 +38,22 @@ import quasylab.sibilla.core.past.State;
 import java.io.IOException;
 import java.util.List;
 
-public class FstMasterBenchmarkEnvironment<S extends State> extends MasterBenchmarkEnvironment {
-    private Serializer fstSerializer;
+/**
+ * Extension of the MasterBenchmarkEnvironment class. It is related to the
+ *
+ * @param <S>
+ */
+public class ApacheMasterBenchmarkEnvironment<S extends State> extends MasterBenchmarkEnvironment {
+    private Serializer apacheSerializer;
 
-    FstMasterBenchmarkEnvironment(String benchmarkName, NetworkInfo slaveInfo, MasterBenchmarkType type, int step, int threshold, int repetitions, int resultsSize) throws IOException {
+    public ApacheMasterBenchmarkEnvironment(String benchmarkName, NetworkInfo slaveInfo, BenchmarkType type, int step, int threshold, int repetitions, int resultsSize) throws IOException {
         super(benchmarkName, slaveInfo, type, step, threshold, repetitions, resultsSize);
-        this.fstSerializer = Serializer.getSerializer(SerializerType.FST);
+        this.apacheSerializer = Serializer.getSerializer(SerializerType.APACHE);
+    }
+
+    public ApacheMasterBenchmarkEnvironment(TCPNetworkManager networkManager, String benchmarkName, BenchmarkType type, int step, int threshold, int repetitions, int resultsSize) throws IOException {
+        super(networkManager, benchmarkName, type, step, threshold, repetitions, resultsSize);
+        this.apacheSerializer = Serializer.getSerializer(SerializerType.APACHE);
     }
 
 
@@ -56,11 +68,11 @@ public class FstMasterBenchmarkEnvironment<S extends State> extends MasterBenchm
 
         this.mainBenchmarkUnit.run(() -> {
             wrapper.received = Compressor.decompress(wrapper.received);
-            LOGGER.info(String.format("[%d] FST %s decompressed (serialized) - Bytes: %d", currentRepetition, this.benchmarkName, wrapper.received.length));
+            LOGGER.info(String.format("[%d] Apache %s decompressed (serialized) - Bytes: %d", currentRepetition, this.benchmarkName, wrapper.received.length));
             return List.of();
         }, () -> {
-            wrapper.results = (ComputationResult<S>) this.fstSerializer.deserialize(wrapper.received);
-            LOGGER.info(String.format("[%d] FST %s deserialized - Size: %d - Bytes: %d", currentRepetition, this.benchmarkName, wrapper.results.getResults().size(), wrapper.received.length));
+            wrapper.results = (ComputationResult<S>) this.apacheSerializer.deserialize(wrapper.received);
+            LOGGER.info(String.format("[%d] Apache %s deserialized - Size: %d - Bytes: %d", currentRepetition, this.benchmarkName, wrapper.results.getResults().size(), wrapper.received.length));
             return List.of((double) wrapper.results.getResults().size());
         });
 
@@ -69,11 +81,11 @@ public class FstMasterBenchmarkEnvironment<S extends State> extends MasterBenchm
 
     @Override
     protected String getSerializerName() {
-        return "fst";
+        return "apache";
     }
 
     @Override
     protected String getMainLabel() {
-        return "o";
+        return "a";
     }
 }

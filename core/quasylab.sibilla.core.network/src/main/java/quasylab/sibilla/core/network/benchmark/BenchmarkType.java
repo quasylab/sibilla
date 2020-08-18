@@ -26,6 +26,6 @@
 
 package quasylab.sibilla.core.network.benchmark;
 
-public enum SendType {
-    ALLTRAJECTORIES, SINGLETRAJECTORY
+public enum BenchmarkType {
+    FST, APACHE, OPTIMIZED
 }

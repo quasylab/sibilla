@@ -24,12 +24,14 @@
  *
  */
 
-package quasylab.sibilla.core.network.benchmark;
+package quasylab.sibilla.core.network.benchmark.master;
 
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
+import quasylab.sibilla.core.network.benchmark.BenchmarkType;
+import quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
@@ -48,12 +50,11 @@ import java.util.logging.Logger;
  */
 public abstract class MasterBenchmarkEnvironment<S extends State> {
 
-    protected MasterBenchmarkType type;
+    protected BenchmarkType type;
     protected BenchmarkUnit mainBenchmarkUnit;
     protected BenchmarkUnit sendBenchmarkUnit;
     private Serializer serializer;
     protected Logger LOGGER;
-    private NetworkInfo slaveInfo;
     private TCPNetworkManager netManager;
     protected final String benchmarkName;
     private final int step;
@@ -62,21 +63,12 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
     private int resultsSize;
     private int sentTasksCount;
 
-    /**
-     * Initiate the Master Server benchmark.
-     *
-     * @param benchmarkName name given to the to be initiated benchmark session.
-     * @param slaveInfo     used to communicate with a Slave Server that is executing its own benchmark.
-     * @param type          type of the benchmark to be executed.
-     * @param step          difference in terms of number of tasks between a batch of tasks sent to a Slave Server that is executing its own benchmark and the next one to be sent.
-     * @param threshold     maximum number of tasks contained in a single batch of tasks sent to a Slave Server that is executing its own benchmark.
-     * @param repetitions   number of times the benchmark needs to be repeated.
-     * @param resultsSize   number of trajectories contained in the ComputationResult objects received from a Slave Server that is executing its own benchmark.
-     * @throws IOException
-     */
-    protected MasterBenchmarkEnvironment(String benchmarkName, NetworkInfo slaveInfo, MasterBenchmarkType type, int step, int threshold, int repetitions, int resultsSize) throws IOException {
-        this.slaveInfo = slaveInfo;
-        netManager = TCPNetworkManager.createNetworkManager(this.slaveInfo);
+    protected MasterBenchmarkEnvironment(String benchmarkName, NetworkInfo slaveInfo, BenchmarkType type, int step, int threshold, int repetitions, int resultsSize) throws IOException {
+        this(TCPNetworkManager.createNetworkManager(slaveInfo), benchmarkName, type, step, threshold, repetitions, resultsSize);
+    }
+
+    protected MasterBenchmarkEnvironment(TCPNetworkManager netManager, String benchmarkName, BenchmarkType type, int step, int threshold, int repetitions, int resultsSize) throws IOException {
+        this.netManager = netManager;
         LOGGER = HostLoggerSupplier.getInstance("Master Benchmark").getLogger();
 
         this.benchmarkName = benchmarkName;
@@ -90,6 +82,7 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
         this.sendBenchmarkUnit = this.getSendBenchmarkUnit();
         serializer = Serializer.getSerializer(SerializerType.FST);
     }
+
 
     /**
      * Factory method.
@@ -106,7 +99,7 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
      * @return MasterBenchmarkEnvironment related to the MasterBenchmarkType value passed as parameter.
      * @throws IOException
      */
-    public static <S extends State> MasterBenchmarkEnvironment getMasterBenchmark(String benchmarkName, NetworkInfo slaveInfo, MasterBenchmarkType type, Model model, int step, int threshold, int repetitions, int resultsSize) throws IOException {
+    public static <S extends State> MasterBenchmarkEnvironment getMasterBenchmark(String benchmarkName, NetworkInfo slaveInfo, BenchmarkType type, Model model, int step, int threshold, int repetitions, int resultsSize) throws IOException {
         switch (type) {
             case FST:
                 return new FstMasterBenchmarkEnvironment<S>(benchmarkName, slaveInfo, type, step, threshold, repetitions, resultsSize);
@@ -117,6 +110,19 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
         }
         return null;
     }
+
+    public static <S extends State> MasterBenchmarkEnvironment getMasterBenchmark(TCPNetworkManager networkManager, String benchmarkName, BenchmarkType type, Model model, int step, int threshold, int repetitions, int resultsSize) throws IOException {
+        switch (type) {
+            case FST:
+                return new FstMasterBenchmarkEnvironment<S>(networkManager, benchmarkName, type, step, threshold, repetitions, resultsSize);
+            case APACHE:
+                return new ApacheMasterBenchmarkEnvironment<S>(networkManager, benchmarkName, type, step, threshold, repetitions, resultsSize);
+            case OPTIMIZED:
+                return new OptimizedMasterBenchmarkEnvironment<S>(networkManager, benchmarkName, type, model, step, threshold, repetitions, resultsSize);
+        }
+        return null;
+    }
+
 
     private BenchmarkUnit getMainBenchmarkUnit() {
         return new BenchmarkUnit(
@@ -145,7 +151,6 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
      */
     public void run() throws IOException {
         LOGGER.info(String.format("STARTING MASTER %s BENCHMARK", this.type.toString()));
-        netManager.writeObject(serializer.serialize("Start"));
         netManager.writeObject(serializer.serialize(repetitions));
         netManager.writeObject(serializer.serialize(threshold));
 
@@ -220,7 +225,7 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
     /**
      * @return MasterBenchmarkType associated with the given benchmark.
      */
-    public MasterBenchmarkType getType() {
+    public BenchmarkType getType() {
         return this.type;
     }
 
