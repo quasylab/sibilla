@@ -10,10 +10,9 @@ public class FSTSerializer implements Serializer {
      * This class defines the encoders/decoders used during FST serialization.
      * Usually you just create one global singleton (instantiation of this class is very expensive).
      */
-    private FSTConfiguration conf;
+    private static FSTConfiguration conf = FSTConfiguration.createDefaultConfiguration();
 
     public FSTSerializer() {
-        this.conf = FSTConfiguration.createDefaultConfiguration();
     }
 
     @Override
