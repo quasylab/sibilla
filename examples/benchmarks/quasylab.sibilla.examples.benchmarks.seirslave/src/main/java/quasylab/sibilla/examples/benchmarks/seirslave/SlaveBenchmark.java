@@ -16,17 +16,18 @@ public class SlaveBenchmark {
 
     public static void main(String[] args) throws IOException {
         Serializer fstSerializer = Serializer.getSerializer(SerializerType.FST);
+        String benchmarkName = "testOldOptimized4Rules";
         NetworkInfo localInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), 10000, TCPNetworkManagerType.DEFAULT);
         TCPNetworkManager networkManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) localInfo.getType(), TCPNetworkManager.createServerSocket((TCPNetworkManagerType) localInfo.getType(), localInfo.getPort()).accept());
 
         BenchmarkType type = (BenchmarkType) fstSerializer.deserialize(networkManager.readObject());
-        String benchmarkName = (String) fstSerializer.deserialize(networkManager.readObject());
+        networkManager.writeObject(fstSerializer.serialize(benchmarkName));
 
         SlaveBenchmarkEnvironment<PopulationState> env = SlaveBenchmarkEnvironment.getSlaveBenchmark(
                 networkManager,
                 benchmarkName,
                 "src/main/resources",
-                "SEIR 3 rules trajectory FST",
+                "SEIR_4_Rules_Trajectory_Apache",
                 new SEIRModelDefinitionThreeRules().createModel(),
                 type);
 

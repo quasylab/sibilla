@@ -17,13 +17,14 @@ public class MasterBenchmark {
 
     public static void main(String[] args) throws IOException {
         Serializer fstSerializer = Serializer.getSerializer(SerializerType.FST);
-        String benchmarkName = "testApache";
-        BenchmarkType type = BenchmarkType.APACHE;
+
+        BenchmarkType type = BenchmarkType.OPTIMIZED;
         NetworkInfo slaveInfo = new NetworkInfo(InetAddress.getByName("localhost"), 10000, TCPNetworkManagerType.DEFAULT);
         TCPNetworkManager networkManager = TCPNetworkManager.createNetworkManager(slaveInfo);
 
         networkManager.writeObject(fstSerializer.serialize(type));
-        networkManager.writeObject(fstSerializer.serialize(benchmarkName));
+        String benchmarkName = (String) fstSerializer.deserialize(networkManager.readObject());
+
 
         MasterBenchmarkEnvironment<PopulationState> env = MasterBenchmarkEnvironment.getMasterBenchmark(
                 networkManager,
@@ -31,9 +32,9 @@ public class MasterBenchmark {
                 type,
                 new SEIRModelDefinitionThreeRules().createModel(),
                 20,
-                80,
+                900,
                 1,
-                80);
+                900);
 
         env.run();
     }
