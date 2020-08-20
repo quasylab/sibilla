@@ -14,33 +14,26 @@ import java.net.InetAddress;
 
 public class MasterBenchmark {
 
+        public static void main(String[] args) throws IOException {
+                Serializer fstSerializer = Serializer.getSerializer(SerializerType.FST);
 
-    public static void main(String[] args) throws IOException {
-        Serializer fstSerializer = Serializer.getSerializer(SerializerType.FST);
+                BenchmarkType type = BenchmarkType.FST;
+                NetworkInfo slaveInfo = new NetworkInfo(InetAddress.getByName("localhost"), 10000,
+                                TCPNetworkManagerType.DEFAULT);
+                TCPNetworkManager networkManager = TCPNetworkManager.createNetworkManager(slaveInfo);
 
-        BenchmarkType type = BenchmarkType.OPTIMIZED;
-        NetworkInfo slaveInfo = new NetworkInfo(InetAddress.getByName("localhost"), 10000, TCPNetworkManagerType.DEFAULT);
-        TCPNetworkManager networkManager = TCPNetworkManager.createNetworkManager(slaveInfo);
+                networkManager.writeObject(fstSerializer.serialize(type));
+                String benchmarkName = (String) fstSerializer.deserialize(networkManager.readObject());
 
-        networkManager.writeObject(fstSerializer.serialize(type));
-        String benchmarkName = (String) fstSerializer.deserialize(networkManager.readObject());
+                MasterBenchmarkEnvironment<PopulationState> env = MasterBenchmarkEnvironment.getMasterBenchmark(
+                                networkManager, benchmarkName, type, new SEIRModelDefinitionThreeRules().createModel(),
+                                20, 900, 1, 900);
 
+                env.run();
+        }
 
-        MasterBenchmarkEnvironment<PopulationState> env = MasterBenchmarkEnvironment.getMasterBenchmark(
-                networkManager,
-                benchmarkName,
-                type,
-                new SEIRModelDefinitionThreeRules().createModel(),
-                1,
-                2,
-                1,
-                1);
-
-        env.run();
-    }
-
-    private static BenchmarkType getType(String arg) {
-        return BenchmarkType.valueOf(arg);
-    }
+        private static BenchmarkType getType(String arg) {
+                return BenchmarkType.valueOf(arg);
+        }
 
 }
