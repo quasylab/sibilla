@@ -66,8 +66,7 @@ public class OptimizedMasterBenchmarkEnvironment<S extends State> extends Master
                     LOGGER.info(String.format("[%d] Optimized %s decompressed (serialized) - Bytes: %d", currentRepetition, this.benchmarkName, wrapper.received.length));
                     return List.of();
                 }, () -> {
-                    wrapper.results = ComputationResultSerializer.deserialize(wrapper.received,
-                            this.model);
+                    wrapper.results = ComputationResultSerializer.deserialize(wrapper.received);
                     LOGGER.info(String.format("[%d] Optimized %s deserialized - Size: %d - Bytes: %d", currentRepetition, this.benchmarkName, wrapper.results.getResults().size(), wrapper.received.length));
                     return List.of((double) wrapper.results.getResults().size());
                 }

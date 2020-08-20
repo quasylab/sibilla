@@ -26,7 +26,11 @@
 
 package quasylab.sibilla.core.past;
 
+import java.io.Externalizable;
 import java.io.Serializable;
 
-public interface State extends Serializable {
+public abstract class State implements Externalizable {
+    public State() {
+        //System.out.println("Chiamato costruttore default State");
+    }
 }

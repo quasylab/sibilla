@@ -29,7 +29,7 @@ package quasylab.sibilla.core.network;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.Trajectory;
 
-import java.io.Serializable;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,13 +41,17 @@ import java.util.List;
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */
-public class ComputationResult<S extends State> implements Serializable {
+public class ComputationResult<S extends State> implements Externalizable {
     private static final long serialVersionUID = -545122842766553412L;
 
     /**
      * List of trajectory that contains the results of a simulation.
      */
-    private final LinkedList<Trajectory<S>> results;
+    private LinkedList<Trajectory<S>> results;
+
+    public ComputationResult() {
+        //System.out.println("Chiamato costruttore default ComputationResult");
+    }
 
     /**
      * Creates a new ComputationResult object with the list of trajectories passed in input
@@ -71,4 +75,23 @@ public class ComputationResult<S extends State> implements Serializable {
         this.results.addAll(otherResults.results);
     }
 
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        System.out.println("Chiamato writeExternal ComputationResult");
+        out.writeInt(results.size());
+        for (Trajectory trajectoryToWrite : results) {
+            out.writeObject(trajectoryToWrite);
+        }
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        System.out.println("Chiamato readExternal ComputationResult");
+        LinkedList<Trajectory<S>> trajectories = new LinkedList<>();
+        int numberOfTrajectories = in.readInt();
+        for (int i = 0; i < numberOfTrajectories; i++) {
+            trajectories.add((Trajectory) in.readObject());
+        }
+        this.results = trajectories;
+    }
 }

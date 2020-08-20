@@ -26,7 +26,7 @@ public class SlaveBenchmark {
                 networkManager,
                 benchmarkName,
                 "src/main/resources",
-                "SEIR 3 rules trajectory FST",
+                "SEIR 4 rules trajectory NEW FST",
                 new SEIRModelDefinitionThreeRules().createModel(),
                 type);
 

@@ -34,7 +34,7 @@ public class OptimizedSlaveBenchmarkEnvironment<S extends State> extends SlaveBe
         };
 
         this.mainBenchmarkUnit.run(() -> {
-                    wrapper.toSend = ComputationResultSerializer.serialize(computationResult, model);
+                    wrapper.toSend = ComputationResultSerializer.serialize(computationResult);
                     LOGGER.info(String.format("[%d] Optimized Serialization %s - Size: %d - Bytes: %d", currentRepetition, this.benchmarkName, computationResult.getResults().size(), wrapper.toSend.length));
                     return List.of((double) computationResult.getResults().size(), (double) wrapper.toSend.length);
                 },

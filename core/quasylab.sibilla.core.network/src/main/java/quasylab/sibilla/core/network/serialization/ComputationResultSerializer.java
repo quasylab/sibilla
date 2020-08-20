@@ -5,9 +5,7 @@ import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.Trajectory;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.LinkedList;
 
 /**
@@ -35,6 +33,7 @@ public class ComputationResultSerializer {
         baos.close();
         return toReturn;
     }
+
 
     /**
      * Serialize a ComputationResult and put its results inside a ByteArrayOutputStream
@@ -86,4 +85,23 @@ public class ComputationResultSerializer {
     }
 
 
+    public static <S extends State> byte[] serialize(ComputationResult<S> toSerialize) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(baos);
+        objectOutputStream.writeObject(toSerialize);
+        objectOutputStream.flush();
+        objectOutputStream.close();
+        byte[] toReturn = baos.toByteArray();
+        baos.close();
+        return toReturn;
+    }
+
+    public static <S extends State> ComputationResult<S> deserialize(byte[] toDeserialize) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream bais = new ByteArrayInputStream(toDeserialize);
+        ObjectInputStream objectInputStream = new ObjectInputStream(bais);
+        ComputationResult<S> result = (ComputationResult<S>) objectInputStream.readObject();
+        objectInputStream.close();
+        bais.close();
+        return result;
+    }
 }
