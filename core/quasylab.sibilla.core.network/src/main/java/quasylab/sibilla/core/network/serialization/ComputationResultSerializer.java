@@ -85,7 +85,7 @@ public class ComputationResultSerializer {
     }
 
 
-    public static <S extends State> byte[] serialize(ComputationResult<S> toSerialize) throws IOException {
+    /*public static <S extends State> byte[] serialize(ComputationResult<S> toSerialize) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(baos);
         objectOutputStream.writeObject(toSerialize);
@@ -103,5 +103,5 @@ public class ComputationResultSerializer {
         objectInputStream.close();
         bais.close();
         return result;
-    }
+    }*/
 }
