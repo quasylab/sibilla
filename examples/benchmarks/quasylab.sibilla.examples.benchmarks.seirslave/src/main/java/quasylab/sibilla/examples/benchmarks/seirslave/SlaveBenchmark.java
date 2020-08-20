@@ -18,9 +18,10 @@ public class SlaveBenchmark {
         Serializer fstSerializer = Serializer.getSerializer(SerializerType.FST);
         NetworkInfo localInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), 10000, TCPNetworkManagerType.DEFAULT);
         TCPNetworkManager networkManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) localInfo.getType(), TCPNetworkManager.createServerSocket((TCPNetworkManagerType) localInfo.getType(), localInfo.getPort()).accept());
+        String benchmarkName = "testOptimized4Rules";
 
         BenchmarkType type = (BenchmarkType) fstSerializer.deserialize(networkManager.readObject());
-        String benchmarkName = (String) fstSerializer.deserialize(networkManager.readObject());
+        networkManager.writeObject(fstSerializer.serialize(benchmarkName));
 
         SlaveBenchmarkEnvironment<PopulationState> env = SlaveBenchmarkEnvironment.getSlaveBenchmark(
                 networkManager,

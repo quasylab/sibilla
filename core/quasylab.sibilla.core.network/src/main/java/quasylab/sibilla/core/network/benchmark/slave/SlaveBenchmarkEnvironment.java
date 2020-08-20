@@ -81,7 +81,9 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
     private ComputationResult getComputationResult(LinkedList<Trajectory<S>> trajectories, int resultSize) throws IOException {
         byte[] trajectoryBytes = BytearrayToFile.fromFile(trajectoryFileDir, trajectoryFileName);
         for (int i = 1; i <= resultSize; i++) {
-            trajectories.add((Trajectory<S>) serializer.deserialize(trajectoryBytes));
+            Trajectory<S> toAdd = (Trajectory<S>) serializer.deserialize(trajectoryBytes);
+            System.out.println("Samples: " + toAdd.getData().size());
+            trajectories.add(toAdd);
         }
         return new ComputationResult(trajectories);
     }
