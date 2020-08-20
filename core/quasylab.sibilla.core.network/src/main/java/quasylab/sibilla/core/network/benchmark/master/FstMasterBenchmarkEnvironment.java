@@ -81,6 +81,6 @@ public class FstMasterBenchmarkEnvironment<S extends State> extends MasterBenchm
 
     @Override
     protected String getMainLabel() {
-        return "o";
+        return "f";
     }
 }

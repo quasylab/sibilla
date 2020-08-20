@@ -16,12 +16,11 @@ public class SlaveBenchmark {
 
     public static void main(String[] args) throws IOException {
         Serializer fstSerializer = Serializer.getSerializer(SerializerType.FST);
-        String benchmarkName = "testOldFst4Rules";
+        String benchmarkName = "testNewOpti4Rules";
         NetworkInfo localInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), 10000, TCPNetworkManagerType.DEFAULT);
         TCPNetworkManager networkManager = TCPNetworkManager
                 .createNetworkManager((TCPNetworkManagerType) localInfo.getType(), TCPNetworkManager
                         .createServerSocket((TCPNetworkManagerType) localInfo.getType(), localInfo.getPort()).accept());
-        String benchmarkName = "testOptimized4Rules";
 
         BenchmarkType type = (BenchmarkType) fstSerializer.deserialize(networkManager.readObject());
         networkManager.writeObject(fstSerializer.serialize(benchmarkName));
