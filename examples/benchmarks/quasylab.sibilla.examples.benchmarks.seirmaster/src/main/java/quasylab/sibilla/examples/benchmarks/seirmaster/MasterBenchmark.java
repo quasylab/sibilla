@@ -18,7 +18,7 @@ public class MasterBenchmark {
     public static void main(String[] args) throws IOException {
         Serializer fstSerializer = Serializer.getSerializer(SerializerType.FST);
 
-        BenchmarkType type = BenchmarkType.OPTIMIZED;
+        BenchmarkType type = BenchmarkType.FST;
         NetworkInfo slaveInfo = new NetworkInfo(InetAddress.getByName("localhost"), 10000, TCPNetworkManagerType.DEFAULT);
         TCPNetworkManager networkManager = TCPNetworkManager.createNetworkManager(slaveInfo);
 

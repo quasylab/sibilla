@@ -14,16 +14,13 @@ import java.util.List;
 
 public class OptimizedSlaveBenchmarkEnvironment<S extends State> extends SlaveBenchmarkEnvironment {
 
-    private Model<S> model;
 
-    public OptimizedSlaveBenchmarkEnvironment(String benchmarkName, String trajectoryFileDir, String trajectoryFileName, NetworkInfo localInfo, Model model, BenchmarkType type) throws IOException {
-        super(benchmarkName, trajectoryFileDir, trajectoryFileName, localInfo, type);
-        this.model = model;
+    public OptimizedSlaveBenchmarkEnvironment(String benchmarkName, String trajectoryFileDir, String trajectoryFileName, NetworkInfo localInfo, Model<S> model, BenchmarkType type) throws IOException {
+        super(benchmarkName, trajectoryFileDir, trajectoryFileName, localInfo, type, model);
     }
 
-    public OptimizedSlaveBenchmarkEnvironment(TCPNetworkManager networkManager, String benchmarkName, String trajectoryFileDir, String trajectoryFileName, Model model, BenchmarkType type) throws IOException {
-        super(networkManager, benchmarkName, trajectoryFileDir, trajectoryFileName, type);
-        this.model = model;
+    public OptimizedSlaveBenchmarkEnvironment(TCPNetworkManager networkManager, String benchmarkName, String trajectoryFileDir, String trajectoryFileName, Model<S> model, BenchmarkType type) throws IOException {
+        super(networkManager, benchmarkName, trajectoryFileDir, trajectoryFileName, type, model);
     }
 
 

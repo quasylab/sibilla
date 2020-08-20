@@ -1,5 +1,6 @@
 package quasylab.sibilla.core.network.benchmark.slave;
 
+import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.benchmark.BenchmarkType;
@@ -7,21 +8,22 @@ import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
+import quasylab.sibilla.core.past.State;
 
 import java.io.IOException;
 import java.util.List;
 
-public class ApacheSlaveBenchmarkEnvironment extends SlaveBenchmarkEnvironment {
+public class ApacheSlaveBenchmarkEnvironment<S extends State> extends SlaveBenchmarkEnvironment {
 
     private Serializer apacheSerializer;
 
-    public ApacheSlaveBenchmarkEnvironment(String benchmarkName, String trajectoryFileDir, String trajectoryFileName, NetworkInfo localInfo, BenchmarkType type) throws IOException {
-        super(benchmarkName, trajectoryFileDir, trajectoryFileName, localInfo, type);
+    public ApacheSlaveBenchmarkEnvironment(String benchmarkName, String trajectoryFileDir, String trajectoryFileName, NetworkInfo localInfo, BenchmarkType type, Model<S> model) throws IOException {
+        super(benchmarkName, trajectoryFileDir, trajectoryFileName, localInfo, type, model);
         this.apacheSerializer = Serializer.getSerializer(SerializerType.APACHE);
     }
 
-    public ApacheSlaveBenchmarkEnvironment(TCPNetworkManager networkManager, String benchmarkName, String trajectoryFileDir, String trajectoryFileName, BenchmarkType type) throws IOException {
-        super(networkManager, benchmarkName, trajectoryFileDir, trajectoryFileName, type);
+    public ApacheSlaveBenchmarkEnvironment(TCPNetworkManager networkManager, String benchmarkName, String trajectoryFileDir, String trajectoryFileName, BenchmarkType type, Model<S> model) throws IOException {
+        super(networkManager, benchmarkName, trajectoryFileDir, trajectoryFileName, type, model);
         this.apacheSerializer = Serializer.getSerializer(SerializerType.APACHE);
     }
 

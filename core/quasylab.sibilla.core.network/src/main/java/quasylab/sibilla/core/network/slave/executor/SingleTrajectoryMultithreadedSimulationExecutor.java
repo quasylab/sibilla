@@ -4,6 +4,8 @@ import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.NetworkTask;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
+import quasylab.sibilla.core.network.serialization.TrajectorySerializer;
+import quasylab.sibilla.core.network.util.BytearrayToFile;
 import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.Trajectory;
 
@@ -32,7 +34,14 @@ public class SingleTrajectoryMultithreadedSimulationExecutor extends SimulationE
         CompletableFuture.allOf(futures).join();
         for (SimulationTask<?> task : tasks) {
             LinkedList<Trajectory> trajectories = new LinkedList<>();
-            trajectories.add(task.getTrajectory());
+            Trajectory toAdd = task.getTrajectory();
+            /*try {
+                BytearrayToFile.toFile(TrajectorySerializer.serialize(toAdd, model), "optTrajectories", String.format("SEIR_4_Rules_Trajectory_Custom_%d", toAdd.getData().size()));
+           System.out.println("Trajectory on file");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }*/
+            trajectories.add(toAdd);
             sendResult(new ComputationResult(trajectories), master, model);
         }
 

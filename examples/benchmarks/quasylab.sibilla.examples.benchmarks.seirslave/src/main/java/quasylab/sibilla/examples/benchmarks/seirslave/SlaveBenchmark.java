@@ -16,7 +16,7 @@ public class SlaveBenchmark {
 
     public static void main(String[] args) throws IOException {
         Serializer fstSerializer = Serializer.getSerializer(SerializerType.FST);
-        String benchmarkName = "testOldOptimized4Rules";
+        String benchmarkName = "testOldFst4Rules";
         NetworkInfo localInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), 10000, TCPNetworkManagerType.DEFAULT);
         TCPNetworkManager networkManager = TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) localInfo.getType(), TCPNetworkManager.createServerSocket((TCPNetworkManagerType) localInfo.getType(), localInfo.getPort()).accept());
 
@@ -27,7 +27,7 @@ public class SlaveBenchmark {
                 networkManager,
                 benchmarkName,
                 "src/main/resources",
-                "SEIR_4_Rules_Trajectory_Apache",
+                "SEIR_4_Rules_Trajectory_Custom_5128",
                 new SEIRModelDefinitionThreeRules().createModel(),
                 type);
 
