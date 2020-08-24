@@ -29,8 +29,6 @@ public abstract class SimulationExecutor {
 
     public static SimulationExecutor getExecutor(Type exType) {
         switch (exType) {
-            case PC:
-                return new ProducerConsumerSimulationExecutor(exType);
             case MULTITHREADED:
                 return new MultithreadedSimulationExecutor(exType);
             case SEQUENTIAL:
@@ -62,6 +60,6 @@ public abstract class SimulationExecutor {
     }
 
     public enum Type {
-        SEQUENTIAL, SINGLE_TRAJECTORY_SEQUENTIAL, MULTITHREADED, SINGLE_TRAJECTORY_MULTITHREADED, PC
+        SEQUENTIAL, SINGLE_TRAJECTORY_SEQUENTIAL, MULTITHREADED, SINGLE_TRAJECTORY_MULTITHREADED
     }
 }
