@@ -31,6 +31,5 @@ import java.io.Serializable;
 
 public abstract class State implements Externalizable {
     public State() {
-        //System.out.println("Chiamato costruttore default State");
     }
 }

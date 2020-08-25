@@ -54,7 +54,6 @@ public class PopulationState extends State {
 
     public PopulationState() {
         super();
-		//System.out.println("Chiamato costruttore default PopulationState");
     }
 
     public PopulationState(int size) {
@@ -212,7 +211,6 @@ public class PopulationState extends State {
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-		//System.out.println("Chiamato writeExternal PopulationState");
         out.writeInt(populationVector.length);
         for (int pop : populationVector) {
             out.writeInt(pop);
@@ -221,8 +219,7 @@ public class PopulationState extends State {
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-		//System.out.println("Chiamato readExternal PopulationState");
+    public void readExternal(ObjectInput in) throws IOException {
         int popVecLength = in.readInt();
         int[] newPopVec = new int[popVecLength];
         for (int i = 0; i < popVecLength; i++) {

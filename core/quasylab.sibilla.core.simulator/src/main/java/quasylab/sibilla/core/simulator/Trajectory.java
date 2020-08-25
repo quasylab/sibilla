@@ -47,7 +47,6 @@ public class Trajectory<S extends State> implements Externalizable {
     private long generationTime = -1;
 
     public Trajectory() {
-      //  System.out.println("Chiamato costruttore default Trajectory");
         this.data = new LinkedList<Sample<S>>();
     }
 
@@ -129,7 +128,6 @@ public class Trajectory<S extends State> implements Externalizable {
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-       // System.out.println("Chiamato writeExternal Trajectory");
         out.writeDouble(start);
         out.writeDouble(end);
         out.writeBoolean(succesfull);
@@ -142,7 +140,6 @@ public class Trajectory<S extends State> implements Externalizable {
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-       // System.out.println("Chiamato readExternal Trajectory");
         this.start = in.readDouble();
         this.end = in.readDouble();
         this.succesfull = in.readBoolean();

@@ -50,7 +50,6 @@ public class ComputationResult<S extends State> implements Externalizable {
     private LinkedList<Trajectory<S>> results;
 
     public ComputationResult() {
-        //System.out.println("Chiamato costruttore default ComputationResult");
     }
 
     /**
@@ -77,7 +76,6 @@ public class ComputationResult<S extends State> implements Externalizable {
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-        System.out.println("Chiamato writeExternal ComputationResult");
         out.writeInt(results.size());
         for (Trajectory trajectoryToWrite : results) {
             out.writeObject(trajectoryToWrite);
@@ -86,7 +84,6 @@ public class ComputationResult<S extends State> implements Externalizable {
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        System.out.println("Chiamato readExternal ComputationResult");
         LinkedList<Trajectory<S>> trajectories = new LinkedList<>();
         int numberOfTrajectories = in.readInt();
         for (int i = 0; i < numberOfTrajectories; i++) {

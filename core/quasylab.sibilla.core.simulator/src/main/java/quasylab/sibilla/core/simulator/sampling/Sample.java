@@ -42,7 +42,6 @@ public class Sample<S extends State> implements Externalizable {
     private S value;
 
     public Sample() {
-      //  System.out.println("Chiamato costruttore default Sample");
     }
 
     public Sample(double time, S value) {
@@ -98,14 +97,12 @@ public class Sample<S extends State> implements Externalizable {
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
-       // System.out.println("Chiamato writeExternal Sample");
         out.writeDouble(time);
         out.writeObject(value);
     }
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-      //  System.out.println("Chiamato readExternal Sample");
         this.time = in.readDouble();
         this.value = (S) in.readObject();
     }
