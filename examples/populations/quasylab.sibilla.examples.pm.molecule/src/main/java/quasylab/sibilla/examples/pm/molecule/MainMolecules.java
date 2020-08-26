@@ -51,7 +51,8 @@ public class MainMolecules {
         for (int i = 5; i <= 10 ; i++) {
             final double percentage = increment;
             int occupancy = i;
-            double p = simulator.reachability(0.01,0.01,0.005,def.createModel(lambda),
+            def.setParameter("lambda",lambda);
+            double p = simulator.reachability(0.01,0.01,0.005,def.createModel(),
                     def.state(10,10,0,0),
                     s ->(s.getOccupancy(MoleculeDefiniton.NaPositive))>=occupancy);
             increment = increment + 0.0001;

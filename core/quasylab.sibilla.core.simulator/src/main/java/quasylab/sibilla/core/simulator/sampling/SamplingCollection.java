@@ -26,12 +26,11 @@
 
 package quasylab.sibilla.core.simulator.sampling;
 
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.models.State;
 
 import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.function.Function;
 
 /**

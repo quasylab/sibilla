@@ -60,8 +60,13 @@ public class LeaderElectionDefinition implements ModelDefinition<PopulationState
     }
 
     @Override
-    public int modelArity() {
-        return 0;
+    public String[] states() {
+        return new String[0];
+    }
+
+    @Override
+    public PopulationState state(String name, double... parameters) {
+        return null;
     }
 
     @Override
@@ -70,7 +75,7 @@ public class LeaderElectionDefinition implements ModelDefinition<PopulationState
     }
 
     @Override
-    public Model<PopulationState> createModel(double... args) {
+    public Model<PopulationState> createModel() {
         PopulationRule rule_C_S0 = new ReactionRule(
                 "C->S0",
                 new Population[] { new Population(C) } ,

@@ -65,8 +65,26 @@ public class CovidGDefinition implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public int modelArity() {
-        return 0;
+    public String[] getModelParameters() {
+        return new String[0];
+    }
+
+    @Override
+    public void setParameter(String name, double value) {
+        throw new IllegalArgumentException(String.format("Species %s is unknown!",name));
+    }
+
+    @Override
+    public String[] states() {
+        return new String[] { "init" } ;
+    }
+
+    @Override
+    public PopulationState state(String name, double... parameters) {
+        if (name.equals("init")) {
+            return state(parameters);
+        }
+        throw new IllegalArgumentException(String.format("Species %s is unknown!",name));
     }
 
     @Override
@@ -75,7 +93,7 @@ public class CovidGDefinition implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public Model<PopulationState> createModel(double... args) {
+    public Model<PopulationState> createModel() {
         PopulationRule rule_S_A_A = new ReactionRule(
                 "S->A",
                 new Population[] { new Population(S), new Population(A)} ,

@@ -47,7 +47,8 @@ public class CovidReachability {
         SimulationEnvironment simulator = new SimulationEnvironment();
         SimulationEnvironment.silent = false;
         double lambda = 3.75;
-        double p = simulator.reachability(0.01,0.01,200,def.createModel(lambda),
+        def.setParameter("lambdaMeet",lambda);
+        double p = simulator.reachability(0.01,0.01,200,def.createModel(),
                 def.state(),
                 s ->(s.getFraction(CovidDefinition.A)+s.getFraction(CovidDefinition.G))>0.5);
         System.out.println("\n\n***"+lambda+"->"+p+"****\n\n");

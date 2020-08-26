@@ -40,7 +40,7 @@ import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.SlaveCommand;
 import quasylab.sibilla.core.network.slave.SlaveState;
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.simulator.*;
 
 import java.io.IOException;
@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
 /**
  * Handles and coordinates a simulation between the slave servers
  *
- * @param <S> The {@link quasylab.sibilla.core.past.State} of the simulation model.
+ * @param <S> The {@link State} of the simulation model.
  * @author Belenchia Matteo
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco

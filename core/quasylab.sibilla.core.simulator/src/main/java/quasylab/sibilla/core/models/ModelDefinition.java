@@ -26,8 +26,6 @@
 
 package quasylab.sibilla.core.models;
 
-import quasylab.sibilla.core.past.State;
-
 /**
  * This interface implements a factory that can be used to build a model according
  * to some parameters.
@@ -48,10 +46,38 @@ public interface ModelDefinition<S extends State> {
      *
      * @return the number of parameters needed to build a model.
      */
-    int modelArity();
+    default String[] getModelParameters() {
+        return new String[0];
+    }
 
     /**
-     * Create the default state (that is the first one defined in the factory) with
+     * Sets the value of parameter <code>name</code>. An {@link IllegalArgumentException} is
+     * thrown if the parameter is unknowns.
+     *
+     * @param name name of parameter to set.
+     * @param value value of parameter.
+     */
+    default void setParameter(String name, double value) {
+        throw new IllegalArgumentException(String.format("Species %s is unknown!",name));
+    }
+
+    /**
+     * Returns the array of initial states defined in the model.
+     *
+     * @return the array of initial states defined in the model.
+     */
+    String[] states();
+
+    /**
+     * Create the state with the given name by using the given parameters.
+     *
+     * @param parameters parameters to use in state creation.
+     * @return the default state associated the given parameters.
+     */
+    S state(String name, double ... parameters);
+
+    /**
+     * Create the default state (that is the first one in the array) with
      * the given parameters.
      *
      * @param parameters parameters to use in state creation.
@@ -59,13 +85,13 @@ public interface ModelDefinition<S extends State> {
      */
     S state(double ... parameters);
 
+
     /**
-     * Creates a new {@link Model} from a given set of parameters.
+     * Creates a new {@link Model}.
      *
-     * @param args model arguments
      * @return a model built from a given set of parameters.
      */
-    Model<S> createModel(double ... args);
+    Model<S> createModel();
 
 
 }

@@ -25,12 +25,8 @@
  */
 package quasylab.sibilla.core.models.pm;
 
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.models.State;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Map.Entry;
 import java.util.Set;

@@ -27,7 +27,7 @@
 package quasylab.sibilla.core.simulator;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.models.State;
 
 import java.util.Collection;
 import java.util.LinkedList;

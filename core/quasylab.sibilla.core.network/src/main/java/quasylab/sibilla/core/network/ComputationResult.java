@@ -26,7 +26,7 @@
 
 package quasylab.sibilla.core.network;
 
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.simulator.Trajectory;
 
 import java.io.Serializable;
@@ -36,7 +36,7 @@ import java.util.List;
 /**
  * Class that stores the results of a simulation executed by a slave.
  *
- * @param <S> The {@link quasylab.sibilla.core.past.State} of the simulation model.
+ * @param <S> The {@link State} of the simulation model.
  * @author Belenchia Matteo
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco

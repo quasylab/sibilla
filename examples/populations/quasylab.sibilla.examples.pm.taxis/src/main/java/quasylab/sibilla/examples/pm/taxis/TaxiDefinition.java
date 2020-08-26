@@ -88,8 +88,13 @@ public class TaxiDefinition implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public int modelArity() {
-        return 0;
+    public String[] states() {
+        return new String[0];
+    }
+
+    @Override
+    public PopulationState state(String name, double... parameters) {
+        return null;
     }
 
     @Override
@@ -110,7 +115,7 @@ public class TaxiDefinition implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public Model<PopulationState> createModel(double... args) {
+    public Model<PopulationState> createModel() {
 
         double lambda_a;
         double lambda_s;
@@ -122,7 +127,6 @@ public class TaxiDefinition implements ModelDefinition<PopulationState> {
         double lambda_boring;
         double weight = WEIGHT;
 
-        if (args.length != 6) {
             lambda_a = LAMBDA_A;
             lambda_s = LAMBDA_S;
             lambda_short_end = LAMBDA_S_END;
@@ -131,16 +135,6 @@ public class TaxiDefinition implements ModelDefinition<PopulationState> {
             lambda_d = LAMBDA_D;
             lambda_angry = LAMBDA_ANGRY;
             lambda_boring = LAMBDA_BORING;
-        } else {
-            lambda_a = args[0];
-            lambda_s = args[1];
-            lambda_short_end = args[2];
-            lambda_long_end = args[3];
-            p_s = args[4];
-            lambda_d = args[5];
-            lambda_angry = args[6];
-            lambda_boring = args[7];
-        }
 
 
         PopulationRule rule_user_arrival = new ReactionRule(

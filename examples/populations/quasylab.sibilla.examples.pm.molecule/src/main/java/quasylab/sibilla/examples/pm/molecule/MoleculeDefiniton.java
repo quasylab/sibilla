@@ -28,7 +28,7 @@ import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.pm.*;
 
-public class MoleculeDefiniton implements ModelDefinition<PopulationState> {
+public class MoleculeDefiniton extends AbstractModelDefinition<PopulationState> {
 
 
     public final static int Na = 0;
@@ -56,8 +56,13 @@ public class MoleculeDefiniton implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public int modelArity() {
-        return 0;
+    public String[] states() {
+        return new String[0];
+    }
+
+    @Override
+    public PopulationState state(String name, double... parameters) {
+        return null;
     }
 
     @Override
@@ -74,9 +79,9 @@ public class MoleculeDefiniton implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public Model<PopulationState> createModel(double... args) {
+    public Model<PopulationState> createModel() {
 
-        double lambda = (args.length>0?args[0]:LAMBDA);
+        double lambda = getParameter("lambda");
 
 
         // Na + Cl -> Na+ + Cl-

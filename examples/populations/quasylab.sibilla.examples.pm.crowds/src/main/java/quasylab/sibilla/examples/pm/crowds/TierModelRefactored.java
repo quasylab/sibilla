@@ -32,8 +32,13 @@ public class TierModelRefactored implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public int modelArity() {
-        return 0;
+    public String[] states() {
+        return new String[0];
+    }
+
+    @Override
+    public PopulationState state(String name, double... parameters) {
+        return null;
     }
 
     @Override
@@ -48,7 +53,7 @@ public class TierModelRefactored implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public Model<PopulationState> createModel(double... args) {
+    public Model<PopulationState> createModel() {
 
         reg.register("M1");
         reg.register("M2");

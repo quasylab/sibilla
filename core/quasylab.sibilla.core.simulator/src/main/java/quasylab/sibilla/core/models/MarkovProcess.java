@@ -26,7 +26,6 @@
 package quasylab.sibilla.core.models;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.util.SibillaMessages;
 import quasylab.sibilla.core.simulator.util.WeightedElement;
 import quasylab.sibilla.core.simulator.util.WeightedStructure;

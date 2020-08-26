@@ -56,8 +56,22 @@ public class SIRModelDefinition implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public int modelArity() {
-        return 0;
+    public String[] getModelParameters() {
+        return new String[0];
+    }
+
+
+    @Override
+    public String[] states() {
+        return new String[] { "init" };
+    }
+
+    @Override
+    public PopulationState state(String name, double... parameters) {
+        if (name.equals("init")) {
+            return state(parameters);
+        }
+        throw new IllegalArgumentException(String.format("State %s is unknown!",name));
     }
 
     @Override
@@ -66,7 +80,7 @@ public class SIRModelDefinition implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public Model<PopulationState> createModel(double... args) {
+    public Model<PopulationState> createModel() {
         PopulationRule rule_S_I = new ReactionRule(
                 "S->I",
                 new Population[] { new Population(S), new Population(I)} ,

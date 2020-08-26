@@ -61,12 +61,17 @@ public class CrowdDefinition implements ModelDefinition<PopulationState> {
         return 0;
     }
 
-    @Override
-    public int modelArity() {
-        return 0;
-    }
+	@Override
+	public String[] states() {
+		return new String[0];
+	}
 
-    @Override
+	@Override
+	public PopulationState state(String name, double... parameters) {
+		return null;
+	}
+
+	@Override
     public PopulationState state(double... parameters) {
 		Population[] population = new Population[N+1];
 		for( int i=0 ; i<N ; i++ ) {
@@ -77,7 +82,7 @@ public class CrowdDefinition implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public Model<PopulationState> createModel(double... args) {
+    public Model<PopulationState> createModel() {
 		List<PopulationRule> rules = new LinkedList<PopulationRule>();
 
 		for( int i=0 ; i<N ; i++ ) {

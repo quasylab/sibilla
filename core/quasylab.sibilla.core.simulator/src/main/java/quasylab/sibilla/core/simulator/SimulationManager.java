@@ -26,9 +26,7 @@
 
 package quasylab.sibilla.core.simulator;
 
-import quasylab.sibilla.core.past.State;
-
-import java.util.concurrent.CompletableFuture;
+import quasylab.sibilla.core.models.State;
 
 /**
  * A simulation manager has the responsibility to execute a number of simulation

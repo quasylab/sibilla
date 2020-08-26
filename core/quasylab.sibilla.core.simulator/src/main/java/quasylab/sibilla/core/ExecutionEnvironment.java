@@ -25,17 +25,12 @@
 package quasylab.sibilla.core;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.models.Action;
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.TimeStep;
-import quasylab.sibilla.core.models.pm.PopulationState;
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.models.State;
 
 
-
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.function.Predicate;
 
 /**
