@@ -31,9 +31,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
-import quasylab.sibilla.core.network.master.MasterServerSimulationEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
+import quasylab.sibilla.core.network.master.MasterServerSimulationEnvironment;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
@@ -105,7 +106,7 @@ public class MasterApplication implements CommandLineRunner {
 
         new MasterServerSimulationEnvironment(localDiscoveryPort,
                 remoteDiscoveryPort, slaveDiscoveryNetworkManagerType, localSimulationPort,
-                clientSimulationNetworkManagerType, SerializerType.FST, monitoringServerComponent);
+                clientSimulationNetworkManagerType, SerializerType.FST, ComputationResultSerializerType.CUSTOM, monitoringServerComponent);
     }
 
 }

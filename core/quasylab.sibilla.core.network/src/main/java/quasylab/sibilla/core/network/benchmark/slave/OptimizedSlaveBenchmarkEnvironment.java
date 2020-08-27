@@ -1,13 +1,13 @@
 package quasylab.sibilla.core.network.benchmark.slave;
 
 import quasylab.sibilla.core.models.Model;
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.NetworkInfo;
-import quasylab.sibilla.core.network.benchmark.BenchmarkType;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.serialization.ComputationResultSerializer;
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,11 +15,11 @@ import java.util.List;
 public class OptimizedSlaveBenchmarkEnvironment<S extends State> extends SlaveBenchmarkEnvironment {
 
 
-    public OptimizedSlaveBenchmarkEnvironment(String benchmarkName, String trajectoryFileDir, String trajectoryFileName, NetworkInfo localInfo, Model<S> model, BenchmarkType type) throws IOException {
+    public OptimizedSlaveBenchmarkEnvironment(String benchmarkName, String trajectoryFileDir, String trajectoryFileName, NetworkInfo localInfo, Model<S> model, ComputationResultSerializerType type) throws IOException {
         super(benchmarkName, trajectoryFileDir, trajectoryFileName, localInfo, type, model);
     }
 
-    public OptimizedSlaveBenchmarkEnvironment(TCPNetworkManager networkManager, String benchmarkName, String trajectoryFileDir, String trajectoryFileName, Model<S> model, BenchmarkType type) throws IOException {
+    public OptimizedSlaveBenchmarkEnvironment(TCPNetworkManager networkManager, String benchmarkName, String trajectoryFileDir, String trajectoryFileName, Model<S> model, ComputationResultSerializerType type) throws IOException {
         super(networkManager, benchmarkName, trajectoryFileDir, trajectoryFileName, type, model);
     }
 
@@ -47,13 +47,4 @@ public class OptimizedSlaveBenchmarkEnvironment<S extends State> extends SlaveBe
                 });
     }
 
-    @Override
-    protected String getSerializerName() {
-        return "optimized";
-    }
-
-    @Override
-    protected String getMainLabel() {
-        return "o";
-    }
 }

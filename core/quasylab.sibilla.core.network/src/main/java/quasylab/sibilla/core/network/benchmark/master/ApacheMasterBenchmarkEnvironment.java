@@ -26,14 +26,14 @@
 
 package quasylab.sibilla.core.network.benchmark.master;
 
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.NetworkInfo;
-import quasylab.sibilla.core.network.benchmark.BenchmarkType;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
-import quasylab.sibilla.core.past.State;
 
 import java.io.IOException;
 import java.util.List;
@@ -46,12 +46,12 @@ import java.util.List;
 public class ApacheMasterBenchmarkEnvironment<S extends State> extends MasterBenchmarkEnvironment {
     private Serializer apacheSerializer;
 
-    public ApacheMasterBenchmarkEnvironment(String benchmarkName, NetworkInfo slaveInfo, BenchmarkType type, int step, int threshold, int repetitions, int resultsSize) throws IOException {
+    public ApacheMasterBenchmarkEnvironment(String benchmarkName, NetworkInfo slaveInfo, ComputationResultSerializerType type, int step, int threshold, int repetitions, int resultsSize) throws IOException {
         super(benchmarkName, slaveInfo, type, step, threshold, repetitions, resultsSize);
         this.apacheSerializer = Serializer.getSerializer(SerializerType.APACHE);
     }
 
-    public ApacheMasterBenchmarkEnvironment(TCPNetworkManager networkManager, String benchmarkName, BenchmarkType type, int step, int threshold, int repetitions, int resultsSize) throws IOException {
+    public ApacheMasterBenchmarkEnvironment(TCPNetworkManager networkManager, String benchmarkName, ComputationResultSerializerType type, int step, int threshold, int repetitions, int resultsSize) throws IOException {
         super(networkManager, benchmarkName, type, step, threshold, repetitions, resultsSize);
         this.apacheSerializer = Serializer.getSerializer(SerializerType.APACHE);
     }
@@ -79,13 +79,4 @@ public class ApacheMasterBenchmarkEnvironment<S extends State> extends MasterBen
         return wrapper.results;
     }
 
-    @Override
-    protected String getSerializerName() {
-        return "apache";
-    }
-
-    @Override
-    protected String getMainLabel() {
-        return "a";
-    }
 }

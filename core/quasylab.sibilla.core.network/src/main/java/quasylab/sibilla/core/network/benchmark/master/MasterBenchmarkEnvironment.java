@@ -27,15 +27,15 @@
 package quasylab.sibilla.core.network.benchmark.master;
 
 import quasylab.sibilla.core.models.Model;
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
-import quasylab.sibilla.core.network.benchmark.BenchmarkType;
 import quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
-import quasylab.sibilla.core.past.State;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -46,11 +46,11 @@ import java.util.logging.Logger;
 /**
  * Executes a benchmark from the point of view of a Master Server in order to measure all the implemented optimizations.
  *
- * @param <S> The {@link quasylab.sibilla.core.past.State} of the simulation model.
+ * @param <S> The {@link State} of the simulation model.
  */
 public abstract class MasterBenchmarkEnvironment<S extends State> {
 
-    protected BenchmarkType type;
+    protected ComputationResultSerializerType benchmarkType;
     protected BenchmarkUnit mainBenchmarkUnit;
     protected BenchmarkUnit sendBenchmarkUnit;
     private Serializer serializer;
@@ -63,11 +63,11 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
     private int resultsSize;
     private int sentTasksCount;
 
-    protected MasterBenchmarkEnvironment(String benchmarkName, NetworkInfo slaveInfo, BenchmarkType type, int step, int threshold, int repetitions, int resultsSize) throws IOException {
-        this(TCPNetworkManager.createNetworkManager(slaveInfo), benchmarkName, type, step, threshold, repetitions, resultsSize);
+    protected MasterBenchmarkEnvironment(String benchmarkName, NetworkInfo slaveInfo, ComputationResultSerializerType benchmarkType, int step, int threshold, int repetitions, int resultsSize) throws IOException {
+        this(TCPNetworkManager.createNetworkManager(slaveInfo), benchmarkName, benchmarkType, step, threshold, repetitions, resultsSize);
     }
 
-    protected MasterBenchmarkEnvironment(TCPNetworkManager netManager, String benchmarkName, BenchmarkType type, int step, int threshold, int repetitions, int resultsSize) throws IOException {
+    protected MasterBenchmarkEnvironment(TCPNetworkManager netManager, String benchmarkName, ComputationResultSerializerType benchmarkType, int step, int threshold, int repetitions, int resultsSize) throws IOException {
         this.netManager = netManager;
         LOGGER = HostLoggerSupplier.getInstance("Master Benchmark").getLogger();
 
@@ -77,7 +77,7 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
         this.repetitions = repetitions;
         this.resultsSize = Math.max(1, resultsSize);
         this.sentTasksCount = 0;
-        this.type = type;
+        this.benchmarkType = benchmarkType;
         this.mainBenchmarkUnit = this.getMainBenchmarkUnit();
         this.sendBenchmarkUnit = this.getSendBenchmarkUnit();
         serializer = Serializer.getSerializer(SerializerType.FST);
@@ -99,26 +99,26 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
      * @return MasterBenchmarkEnvironment related to the MasterBenchmarkType value passed as parameter.
      * @throws IOException
      */
-    public static <S extends State> MasterBenchmarkEnvironment getMasterBenchmark(String benchmarkName, NetworkInfo slaveInfo, BenchmarkType type, Model model, int step, int threshold, int repetitions, int resultsSize) throws IOException {
+    public static <S extends State> MasterBenchmarkEnvironment getMasterBenchmark(String benchmarkName, NetworkInfo slaveInfo, ComputationResultSerializerType type, Model model, int step, int threshold, int repetitions, int resultsSize) throws IOException {
         switch (type) {
             case FST:
-                return new FstMasterBenchmarkEnvironment<S>(benchmarkName, slaveInfo, type, step, threshold, repetitions, resultsSize);
+                return new FstMasterBenchmarkEnvironment<>(benchmarkName, slaveInfo, type, step, threshold, repetitions, resultsSize);
             case APACHE:
-                return new ApacheMasterBenchmarkEnvironment<S>(benchmarkName, slaveInfo, type, step, threshold, repetitions, resultsSize);
-            case OPTIMIZED:
-                return new OptimizedMasterBenchmarkEnvironment<S>(benchmarkName, slaveInfo, type, model, step, threshold, repetitions, resultsSize);
+                return new ApacheMasterBenchmarkEnvironment<>(benchmarkName, slaveInfo, type, step, threshold, repetitions, resultsSize);
+            case CUSTOM:
+                return new CustomMasterBenchmarkEnvironment<>(benchmarkName, slaveInfo, type, model, step, threshold, repetitions, resultsSize);
         }
         return null;
     }
 
-    public static <S extends State> MasterBenchmarkEnvironment getMasterBenchmark(TCPNetworkManager networkManager, String benchmarkName, BenchmarkType type, Model model, int step, int threshold, int repetitions, int resultsSize) throws IOException {
+    public static <S extends State> MasterBenchmarkEnvironment getMasterBenchmark(TCPNetworkManager networkManager, String benchmarkName, ComputationResultSerializerType type, Model model, int step, int threshold, int repetitions, int resultsSize) throws IOException {
         switch (type) {
             case FST:
-                return new FstMasterBenchmarkEnvironment<S>(networkManager, benchmarkName, type, step, threshold, repetitions, resultsSize);
+                return new FstMasterBenchmarkEnvironment<>(networkManager, benchmarkName, type, step, threshold, repetitions, resultsSize);
             case APACHE:
-                return new ApacheMasterBenchmarkEnvironment<S>(networkManager, benchmarkName, type, step, threshold, repetitions, resultsSize);
-            case OPTIMIZED:
-                return new OptimizedMasterBenchmarkEnvironment<S>(networkManager, benchmarkName, type, model, step, threshold, repetitions, resultsSize);
+                return new ApacheMasterBenchmarkEnvironment<>(networkManager, benchmarkName, type, step, threshold, repetitions, resultsSize);
+            case CUSTOM:
+                return new CustomMasterBenchmarkEnvironment<>(networkManager, benchmarkName, type, model, step, threshold, repetitions, resultsSize);
         }
         return null;
     }
@@ -150,7 +150,7 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
      * @throws IOException
      */
     public void run() throws IOException {
-        LOGGER.info(String.format("STARTING MASTER %s BENCHMARK", this.type.toString()));
+        LOGGER.info(String.format("STARTING MASTER %s BENCHMARK", this.benchmarkType.toString()));
         netManager.writeObject(serializer.serialize(repetitions));
         netManager.writeObject(serializer.serialize(threshold));
 
@@ -190,27 +190,31 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
 
     private byte[] read(int currentRepetition) throws IOException {
         byte[] toReturn = netManager.readObject();
-        LOGGER.info(String.format("[%d] %s compressed received - Bytes: %d", currentRepetition, this.type.toString(), toReturn.length));
+        LOGGER.info(String.format("[%d] %s compressed received - Bytes: %d", currentRepetition, this.benchmarkType.toString(), toReturn.length));
         return toReturn;
     }
 
 
     protected abstract ComputationResult<S> deserializeAndDecompress(byte[] bytes, int currentRepetition);
 
-    protected abstract String getSerializerName();
+    private String getSerializerName() {
+        return this.benchmarkType.getFullName();
+    }
 
-    protected abstract String getMainLabel();
+    private String getMainLabel() {
+        return this.benchmarkType.getLabel();
+    }
 
     private List<String> getMainBenchmarkLabels() {
         return List.of("decomprtime",
                 "desertime",
-                "tasks");
+                "trajectories");
     }
 
     private List<String> getSendBenchmarkLabels() {
-        return List.of("sendAndReceiveTime",
+        return List.of("sendandreceivetime",
                 "tasks",
-                "resultsSize");
+                "trajectories");
     }
 
     private String getDirectory() {
@@ -225,8 +229,8 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
     /**
      * @return MasterBenchmarkType associated with the given benchmark.
      */
-    public BenchmarkType getType() {
-        return this.type;
+    public ComputationResultSerializerType getBenchmarkType() {
+        return this.benchmarkType;
     }
 
 }

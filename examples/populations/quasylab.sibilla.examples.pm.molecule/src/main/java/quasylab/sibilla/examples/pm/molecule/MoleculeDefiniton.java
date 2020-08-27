@@ -25,7 +25,6 @@
 package quasylab.sibilla.examples.pm.molecule;
 
 import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.pm.*;
 
 public class MoleculeDefiniton extends AbstractModelDefinition<PopulationState> {

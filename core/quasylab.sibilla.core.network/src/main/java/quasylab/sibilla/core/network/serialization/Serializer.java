@@ -26,8 +26,6 @@
 
 package quasylab.sibilla.core.network.serialization;
 
-import org.nustaq.serialization.FSTConfiguration;
-
 import java.io.Serializable;
 
 /**

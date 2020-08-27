@@ -1,7 +1,6 @@
 package quasylab.sibilla.core.network.util;
 
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
-import quasylab.sibilla.core.network.communication.UDPNetworkManager;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
 
 import java.util.HashMap;

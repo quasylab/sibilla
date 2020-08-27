@@ -26,9 +26,8 @@ package quasylab.sibilla.core;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.TimeStep;
 import quasylab.sibilla.core.models.State;
-
+import quasylab.sibilla.core.models.TimeStep;
 
 import java.util.LinkedList;
 import java.util.function.Predicate;

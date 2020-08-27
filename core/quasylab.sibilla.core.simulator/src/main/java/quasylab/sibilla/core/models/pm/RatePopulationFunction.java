@@ -27,7 +27,6 @@
 package quasylab.sibilla.core.models.pm;
 
 import java.io.Serializable;
-import java.util.function.Function;
 
 /**
  * @author loreti

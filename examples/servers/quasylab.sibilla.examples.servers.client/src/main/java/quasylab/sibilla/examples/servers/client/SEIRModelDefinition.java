@@ -27,7 +27,6 @@
 package quasylab.sibilla.examples.servers.client;
 
 import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;

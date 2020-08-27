@@ -1,18 +1,18 @@
 package quasylab.sibilla.core.network.benchmark.slave;
 
 import quasylab.sibilla.core.models.Model;
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
-import quasylab.sibilla.core.network.benchmark.BenchmarkType;
 import quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.serialization.TrajectorySerializer;
 import quasylab.sibilla.core.network.util.BytearrayToFile;
-import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.Trajectory;
 
 import java.io.IOException;
@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 public abstract class SlaveBenchmarkEnvironment<S extends State> {
-    protected BenchmarkType type;
+    protected ComputationResultSerializerType computationResultSerializerType;
     protected BenchmarkUnit mainBenchmarkUnit;
     protected String benchmarkName;
     private Serializer serializer;
@@ -39,15 +39,14 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
     private final String trajectoryFileName;
 
     protected SlaveBenchmarkEnvironment(String benchmarkName, String trajectoryFileDir, String trajectoryFileName,
-            NetworkInfo localInfo, BenchmarkType type, Model<S> model) throws IOException {
+                                        NetworkInfo localInfo, ComputationResultSerializerType computationResultSerializerType, Model<S> model) throws IOException {
         this(TCPNetworkManager.createNetworkManager((TCPNetworkManagerType) localInfo.getType(), TCPNetworkManager
-                .createServerSocket((TCPNetworkManagerType) localInfo.getType(), localInfo.getPort()).accept()),
-                benchmarkName, trajectoryFileDir, trajectoryFileName, type, model);
+                        .createServerSocket((TCPNetworkManagerType) localInfo.getType(), localInfo.getPort()).accept()),
+                benchmarkName, trajectoryFileDir, trajectoryFileName, computationResultSerializerType, model);
     }
 
     protected SlaveBenchmarkEnvironment(TCPNetworkManager networkManager, String benchmarkName,
-            String trajectoryFileDir, String trajectoryFileName, BenchmarkType type, Model<S> model)
-            throws IOException {
+                                        String trajectoryFileDir, String trajectoryFileName, ComputationResultSerializerType computationResultSerializerType, Model<S> model){
         this.benchmarkName = benchmarkName;
         this.model = model;
         this.trajectoryFileDir = trajectoryFileDir;
@@ -56,13 +55,13 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
         serializer = Serializer.getSerializer(SerializerType.FST);
         this.LOGGER = HostLoggerSupplier.getInstance("Slave Benchmark").getLogger();
         this.currentTasksCount = 0;
-        this.type = type;
+        this.computationResultSerializerType = computationResultSerializerType;
         netManager = networkManager;
     }
 
     public static <S extends State> SlaveBenchmarkEnvironment getSlaveBenchmark(String benchmarkName,
-            String trajectoryFileDir, String trajectoryFileName, NetworkInfo localInfo, Model<S> model,
-            BenchmarkType type) throws IOException {
+                                                                                String trajectoryFileDir, String trajectoryFileName, NetworkInfo localInfo, Model<S> model,
+                                                                                ComputationResultSerializerType type) throws IOException {
         switch (type) {
             case APACHE:
                 return new ApacheSlaveBenchmarkEnvironment<>(benchmarkName, trajectoryFileDir, trajectoryFileName,
@@ -70,7 +69,7 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
             case FST:
                 return new FstSlaveBenchmarkEnvironment<>(benchmarkName, trajectoryFileDir, trajectoryFileName,
                         localInfo, type, model);
-            case OPTIMIZED:
+            case CUSTOM:
                 return new OptimizedSlaveBenchmarkEnvironment<>(benchmarkName, trajectoryFileDir, trajectoryFileName,
                         localInfo, model, type);
         }
@@ -78,8 +77,8 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
     }
 
     public static <S extends State> SlaveBenchmarkEnvironment getSlaveBenchmark(TCPNetworkManager networkManager,
-            String benchmarkName, String trajectoryFileDir, String trajectoryFileName, Model<S> model,
-            BenchmarkType type) throws IOException {
+                                                                                String benchmarkName, String trajectoryFileDir, String trajectoryFileName, Model<S> model,
+                                                                                ComputationResultSerializerType type) throws IOException {
         switch (type) {
             case APACHE:
                 return new ApacheSlaveBenchmarkEnvironment<>(networkManager, benchmarkName, trajectoryFileDir,
@@ -87,7 +86,7 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
             case FST:
                 return new FstSlaveBenchmarkEnvironment<>(networkManager, benchmarkName, trajectoryFileDir,
                         trajectoryFileName, type, model);
-            case OPTIMIZED:
+            case CUSTOM:
                 return new OptimizedSlaveBenchmarkEnvironment<>(networkManager, benchmarkName, trajectoryFileDir,
                         trajectoryFileName, model, type);
         }
@@ -107,12 +106,16 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
 
     protected abstract void serializeCompressAndSend(ComputationResult<S> computationResult, int currentRepetition);
 
-    protected abstract String getSerializerName();
+    private String getSerializerName() {
+        return this.computationResultSerializerType.getFullName();
+    }
 
-    protected abstract String getMainLabel();
+    private String getMainLabel() {
+        return this.computationResultSerializerType.getLabel();
+    }
 
     private List<String> getMainBenchmarkLabels() {
-        return List.of("sertime", "tasks", "serbytes", "comprtime", "comprbytes", "sendtime");
+        return List.of("sertime", "trajectories", "serbytes", "comprtime", "comprbytes", "sendtime");
     }
 
     private String getDirectory() {
@@ -130,7 +133,7 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
     }
 
     public void run() throws IOException {
-        LOGGER.info(String.format("STARTING SLAVE %s BENCHMARK", this.type.toString()));
+        LOGGER.info(String.format("STARTING SLAVE %s BENCHMARK", this.computationResultSerializerType.toString()));
 
         this.repetitions = (int) serializer.deserialize(netManager.readObject());
         this.threshold = (int) serializer.deserialize(netManager.readObject());

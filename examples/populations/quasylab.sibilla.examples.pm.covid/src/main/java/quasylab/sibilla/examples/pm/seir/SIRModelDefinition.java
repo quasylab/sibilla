@@ -24,14 +24,9 @@
 
 package quasylab.sibilla.examples.pm.seir;
 
-import org.apache.commons.lang3.ObjectUtils;
-import quasylab.sibilla.core.models.MeasureFunction;
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
-import quasylab.sibilla.core.models.StatePredicate;
 import quasylab.sibilla.core.models.pm.*;
-
-import java.util.Objects;
 
 public class SIRModelDefinition implements ModelDefinition<PopulationState> {
 

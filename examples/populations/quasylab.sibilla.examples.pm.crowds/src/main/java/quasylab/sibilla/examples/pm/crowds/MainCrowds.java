@@ -1,18 +1,6 @@
 package quasylab.sibilla.examples.pm.crowds;
 
-import quasylab.sibilla.core.models.pm.PopulationModel;
-import quasylab.sibilla.core.models.pm.PopulationState;
-import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
-import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.ThreadSimulationManager;
-import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
-import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
-
 import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.Function;
 
 public class MainCrowds {
 

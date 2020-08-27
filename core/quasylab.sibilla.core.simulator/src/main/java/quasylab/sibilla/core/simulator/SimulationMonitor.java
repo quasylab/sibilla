@@ -26,7 +26,6 @@
 
 package quasylab.sibilla.core.simulator;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**

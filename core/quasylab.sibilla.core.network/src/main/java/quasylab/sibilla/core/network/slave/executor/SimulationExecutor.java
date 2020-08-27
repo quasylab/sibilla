@@ -7,83 +7,86 @@ import quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.serialization.ComputationResultSerializer;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
+import quasylab.sibilla.core.network.serialization.Serializer;
+import quasylab.sibilla.core.network.serialization.SerializerType;
 
 import java.io.IOException;
 import java.util.List;
 
-
 /**
- * Represents an executor of simulations that manages the computation and
- * the sending of simulation results to a master server
+ * Represents an executor of simulations that manages the computation and the
+ * sending of simulation results to a master server
  *
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */
 public abstract class SimulationExecutor {
 
+    private final ExecutorType executorType;
     /**
-     * The BenchmarkUnit associated to the SimulationExecutor to measure performances.
+     * The BenchmarkUnit associated to the SimulationExecutor to measure computation performances.
      */
-    private final BenchmarkUnit benchmark;
+    protected final BenchmarkUnit computationBenchmark;
+    /**
+     * The BenchmarkUnit associated to the SimulationExecutor to measure serialization, compression and sending performances.
+     */
+    private final BenchmarkUnit sendBenchmark;
+    //TODO
+    private final ComputationResultSerializerType crSerializerType;
+
 
     /**
      * Creates a new SimulationExecutor, starting the BenchmarkUnit associated to it to measure performances.
      *
-     * @param exType the type of SimulationExecutor to create
+     * @param exType           the type of SimulationExecutor to create
+     * @param crSerializerType //TODO
      */
-    public SimulationExecutor(Type exType) {
-        this.benchmark = new BenchmarkUnit("benchmarks/slave",
-                String.format("slave_%s", exType),
-                "csv",
-                "o",
-                List.of("exectime",
-                        "tasks"
-                ));
+    public SimulationExecutor(ExecutorType exType, ComputationResultSerializerType crSerializerType) {
+        this.executorType = exType;
+        this.crSerializerType = crSerializerType;
+
+        this.computationBenchmark = new BenchmarkUnit("sibillaBenchmarks/slaveBenchmarking/",
+                String.format("%s_computation", this.executorType), "csv", "o", List.of("comptime", "tasks"));
+
+        this.sendBenchmark = new BenchmarkUnit("sibillaBenchmarks/slaveBenchmarking/",
+                String.format("%s_resultsCompressSerializeAndSend", this.crSerializerType.toString()), "csv",
+                this.crSerializerType.getLabel(),
+                List.of("sertime", "trajectories", "serbytes", "comprtime", "comprbytes", "sendtime"));
     }
 
     /**
      * Factory method for SimulationExecutor creation. Creates a SimulationExecutor based on the type
      * passed in input.
      *
-     * @param exType the type of SimulationExecutor to create
+     * @param exType           the type of SimulationExecutor to create
+     * @param crSerializerType // TODO
      * @return the created SimulationExecutor
      */
-    public static SimulationExecutor getExecutor(Type exType) {
+    public static SimulationExecutor getExecutor(ExecutorType exType,
+                                                 ComputationResultSerializerType crSerializerType) {
         switch (exType) {
             case MULTITHREADED:
-                return new MultithreadedSimulationExecutor(exType);
+                return new MultithreadedSimulationExecutor(exType, crSerializerType);
             case SEQUENTIAL:
-                return new SequentialSimulationExecutor(exType);
+                return new SequentialSimulationExecutor(exType, crSerializerType);
             case SINGLE_TRAJECTORY_SEQUENTIAL:
-                return new SingleTrajectorySequentialSimulationExecutor(exType);
+                return new SingleTrajectorySequentialSimulationExecutor(exType, crSerializerType);
             case SINGLE_TRAJECTORY_MULTITHREADED:
             default:
-                return new SingleTrajectoryMultithreadedSimulationExecutor(exType);
+                return new SingleTrajectoryMultithreadedSimulationExecutor(exType, crSerializerType);
         }
     }
 
     /**
-     * Executes the simulation of the given NetworkTask and sends the results to the master server.
+     * Executes the simulation of the given NetworkTask and sends the results to the
+     * master server.
      *
      * @param networkTask the network task to simulate
-     * @param master      the NetworkManager of the master server the results will be sent to
+     * @param master      the NetworkManager of the master server the results will
+     *                    be sent to
      */
     public abstract void simulate(NetworkTask networkTask, TCPNetworkManager master);
-
-    /**
-     * Executes the simulation of the given NetworkTask and sends the results to the master server.
-     * Meanwhile measures the performances of the code
-     *
-     * @param networkTask the network task to simulate
-     * @param master      the NetworkManager of the master server the results will be sent to
-     */
-    public void simulateWithBenchmark(NetworkTask networkTask, TCPNetworkManager master) {
-
-        benchmark.run(() -> {
-            simulate(networkTask, master);
-            return List.of((double) networkTask.getTasks().size());
-        });
-    }
 
     /**
      * Serializes, compresses and sends the simulation results to a master server.
@@ -93,17 +96,39 @@ public abstract class SimulationExecutor {
      * @param model   the Model of the executed simulation
      */
     protected void sendResult(ComputationResult results, TCPNetworkManager master, Model model) {
-        try {
-            master.writeObject(Compressor.compress(ComputationResultSerializer.serialize(results, model)));
-        } catch (IOException e) {
-            e.printStackTrace();
+        final var wrapper = new Object() {
+            private byte[] toSend;
+        };
+
+        this.sendBenchmark.run(() -> {
+            wrapper.toSend = this.serializeComputationResult(results, model);
+            return List.of((double) results.getResults().size(), (double) wrapper.toSend.length);
+        }, () -> {
+            wrapper.toSend = Compressor.compress(wrapper.toSend);
+            return List.of((double) wrapper.toSend.length);
+        }, () -> {
+            master.writeObject(wrapper.toSend);
+            return List.of();
+        });
+    }
+
+    //TODO
+    private byte[] serializeComputationResult(ComputationResult results, Model model) throws IOException {
+        switch (this.crSerializerType) {
+            case FST:
+                return Serializer.getSerializer(SerializerType.FST).serialize(results);
+            case APACHE:
+                return Serializer.getSerializer(SerializerType.APACHE).serialize(results);
+            default:
+            case CUSTOM:
+                return ComputationResultSerializer.serialize(results, model);
         }
     }
 
     /**
      * Represent the type of SimulationExecutor
      */
-    public enum Type {
+    public enum ExecutorType {
         SEQUENTIAL, SINGLE_TRAJECTORY_SEQUENTIAL, MULTITHREADED, SINGLE_TRAJECTORY_MULTITHREADED
     }
 }

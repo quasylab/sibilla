@@ -26,16 +26,10 @@ package quasylab.sibilla.examples.pm.seir;
 import quasylab.sibilla.core.ExecutionEnvironment;
 import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
-import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
-import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.UnknownHostException;
-import java.util.Scanner;
 
 /**
  * @author loreti

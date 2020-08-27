@@ -2,10 +2,10 @@ package quasylab.sibilla.examples.benchmarks.seirslave;
 
 import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.network.NetworkInfo;
-import quasylab.sibilla.core.network.benchmark.BenchmarkType;
 import quasylab.sibilla.core.network.benchmark.slave.SlaveBenchmarkEnvironment;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.util.NetworkUtils;
@@ -22,7 +22,7 @@ public class SlaveBenchmark {
                 .createNetworkManager((TCPNetworkManagerType) localInfo.getType(), TCPNetworkManager
                         .createServerSocket((TCPNetworkManagerType) localInfo.getType(), localInfo.getPort()).accept());
 
-        BenchmarkType type = (BenchmarkType) fstSerializer.deserialize(networkManager.readObject());
+        ComputationResultSerializerType type = (ComputationResultSerializerType) fstSerializer.deserialize(networkManager.readObject());
         networkManager.writeObject(fstSerializer.serialize(benchmarkName));
 
         SlaveBenchmarkEnvironment<PopulationState> env = SlaveBenchmarkEnvironment.getSlaveBenchmark(networkManager,
@@ -32,8 +32,8 @@ public class SlaveBenchmark {
         env.run();
     }
 
-    private static BenchmarkType getType(String arg) {
-        return BenchmarkType.valueOf(arg);
+    private static ComputationResultSerializerType getType(String arg) {
+        return ComputationResultSerializerType.valueOf(arg);
     }
 
 }

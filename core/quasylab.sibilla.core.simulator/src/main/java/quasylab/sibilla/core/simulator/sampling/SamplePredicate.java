@@ -26,8 +26,8 @@
 
 package quasylab.sibilla.core.simulator.sampling;
 
-import quasylab.sibilla.core.models.StatePredicate;
 import quasylab.sibilla.core.models.State;
+import quasylab.sibilla.core.models.StatePredicate;
 
 import java.io.Serializable;
 

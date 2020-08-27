@@ -27,26 +27,26 @@
 package quasylab.sibilla.core.network.benchmark.master;
 
 import quasylab.sibilla.core.models.Model;
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.NetworkInfo;
-import quasylab.sibilla.core.network.benchmark.BenchmarkType;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.serialization.ComputationResultSerializer;
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 
 import java.io.IOException;
 import java.util.List;
 
-public class OptimizedMasterBenchmarkEnvironment<S extends State> extends MasterBenchmarkEnvironment {
+public class CustomMasterBenchmarkEnvironment<S extends State> extends MasterBenchmarkEnvironment {
     private Model<S> model;
 
-    public OptimizedMasterBenchmarkEnvironment(String benchmarkName, NetworkInfo slaveInfo, BenchmarkType type, Model model, int step, int threshold, int repetitions, int resultsSize) throws IOException {
+    public CustomMasterBenchmarkEnvironment(String benchmarkName, NetworkInfo slaveInfo, ComputationResultSerializerType type, Model model, int step, int threshold, int repetitions, int resultsSize) throws IOException {
         super(benchmarkName, slaveInfo, type, step, threshold, repetitions, resultsSize);
         this.model = model;
     }
 
-    public OptimizedMasterBenchmarkEnvironment(TCPNetworkManager networkManager, String benchmarkName, BenchmarkType type, Model model, int step, int threshold, int repetitions, int resultsSize) throws IOException {
+    public CustomMasterBenchmarkEnvironment(TCPNetworkManager networkManager, String benchmarkName, ComputationResultSerializerType type, Model model, int step, int threshold, int repetitions, int resultsSize) throws IOException {
         super(networkManager, benchmarkName, type, step, threshold, repetitions, resultsSize);
         this.model = model;
     }
@@ -75,13 +75,4 @@ public class OptimizedMasterBenchmarkEnvironment<S extends State> extends Master
         return wrapper.results;
     }
 
-    @Override
-    protected String getSerializerName() {
-        return "optimized";
-    }
-
-    @Override
-    protected String getMainLabel() {
-        return "o";
-    }
 }

@@ -29,18 +29,20 @@ package quasylab.sibilla.core.network.client;
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.SimulationDataSet;
+import quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.loaders.ClassBytesLoader;
 import quasylab.sibilla.core.network.master.MasterCommand;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
-import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -69,6 +71,10 @@ public class ClientSimulationEnvironment<S extends State> {
 
 
     private Serializer serializer;
+
+    private int submitRepetitions;
+    private BenchmarkUnit clientBenchmark;
+
     /**
      * Initiates a new client that submits simulations using the parameters of
      * the simulation to execute and the network related data of the
@@ -86,25 +92,37 @@ public class ClientSimulationEnvironment<S extends State> {
      */
     public ClientSimulationEnvironment(RandomGenerator random, ModelDefinition<S> modelDefinition, Model<S> model,
                                        S initialState, SamplingFunction<S> sampling_function, int replica, double deadline,
-                                       NetworkInfo masterNetworkInfo, SerializerType serializerType) {
+                                       NetworkInfo masterNetworkInfo, SerializerType serializerType, int submitRepetitions) {
 
         LOGGER = HostLoggerSupplier.getInstance().getLogger();
 
         serializer = Serializer.getSerializer(serializerType);
+        this.submitRepetitions = submitRepetitions;
+        this.clientBenchmark = new BenchmarkUnit(
+                "sibillaBenchmarks/clientBenchmarking/",
+                "submitReceiveAndClose",
+                "csv",
+                "client",
+                List.of("submitreceiveandclosetime"));
 
         this.data = new SimulationDataSet<>(random, modelDefinition, model, initialState, sampling_function, replica,
                 deadline);
-        try {
-            this.masterServerNetworkManager = TCPNetworkManager.createNetworkManager(masterNetworkInfo);
-            LOGGER.info(String.format("Starting a new client that will submit the simulation to the master: %s",
-                    masterNetworkInfo.toString()));
 
-            this.initConnection(masterServerNetworkManager);
-            this.sendSimulationInfo(masterServerNetworkManager);
-            this.closeConnection(masterServerNetworkManager);
-        } catch (IOException e) {
-            LOGGER.severe(String.format("[%s] Master communication error", e.getMessage()));
+        for (int i = 1; i <= this.submitRepetitions; i++) {
+            this.clientBenchmark.run(() -> {
+
+                this.masterServerNetworkManager = TCPNetworkManager.createNetworkManager(masterNetworkInfo);
+                LOGGER.info(String.format("Starting a new client that will submit the simulation to the master: %s",
+                        masterNetworkInfo.toString()));
+
+                this.initConnection(masterServerNetworkManager);
+                this.sendSimulationInfo(masterServerNetworkManager);
+                this.closeConnection(masterServerNetworkManager);
+
+                return List.of();
+            });
         }
+
 
     }
 
