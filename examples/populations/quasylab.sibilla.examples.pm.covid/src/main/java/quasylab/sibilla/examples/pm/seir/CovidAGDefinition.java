@@ -30,7 +30,7 @@ import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.StatePredicate;
 import quasylab.sibilla.core.models.pm.*;
 
-public class CovidAGDefinition implements ModelDefinition<PopulationState> {
+public class CovidAGDefinition extends PopulationModelDefinition {
 
     public final static int S = 0;
     public final static int A = 1;
@@ -65,6 +65,10 @@ public class CovidAGDefinition implements ModelDefinition<PopulationState> {
     private final static double PROB_A_G = 0.5;
     private final static double PROB_DEATH = 0.02;
 
+    public CovidAGDefinition() {
+        super(new String[] {"S", "A", "G", "R", "D", "IG", "IA"} );
+    }
+
 
     @Override
     public int stateArity() {
@@ -72,8 +76,16 @@ public class CovidAGDefinition implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public int modelArity() {
-        return 0;
+    public String[] states() {
+        return new String[] { "init" };
+    }
+
+    @Override
+    public PopulationState state(String name, double... parameters) {
+        if (name.equals("init")) {
+            return state(parameters);
+        }
+        throw new IllegalArgumentException(String.format("State %s is unknown!",name));
     }
 
     @Override
@@ -82,7 +94,7 @@ public class CovidAGDefinition implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public Model<PopulationState> createModel(double... args) {
+    public Model<PopulationState> createModel() {
         PopulationRule rule_S_A_A = new ReactionRule(
                 "S->A",
                 new Population[] { new Population(S), new Population(A)} ,
@@ -178,7 +190,7 @@ public class CovidAGDefinition implements ModelDefinition<PopulationState> {
                 (t,s) -> s.getOccupancy(IG)*LAMBDA_R_G*PROB_DEATH
         );
 
-        PopulationModel f = new PopulationModel();
+        PopulationModel f = new PopulationModel(this);
         f.addRule(rule_S_A_A);
         f.addRule(rule_S_G_A);
         f.addRule(rule_S_A_G);

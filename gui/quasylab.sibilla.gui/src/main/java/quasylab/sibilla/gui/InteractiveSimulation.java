@@ -34,14 +34,8 @@ import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import org.apache.commons.math3.random.RandomGenerator;
-import quasilab.sibilla.core.ExecutionEnvironment;
-import quasylab.sibilla.core.models.Action;
-import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.ModelDefinition;
-import quasylab.sibilla.core.models.TimeStep;
+import quasylab.sibilla.core.ExecutionEnvironment;
 import quasylab.sibilla.core.models.pm.PopulationState;
-import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 
 import quasylab.sibilla.examples.pm.seir.CovidDefinition;

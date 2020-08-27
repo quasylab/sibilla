@@ -52,7 +52,8 @@ public class CovidModel {
         collection.add(StatisticSampling.measure("AG",SAMPLINGS,DEADLINE,s -> s.getFraction(CovidDefinition.G)+s.getFraction(CovidDefinition.A)));
         collection.add(StatisticSampling.measure("R",SAMPLINGS,DEADLINE,s -> s.getFraction(CovidDefinition.R)));
         collection.add(StatisticSampling.measure("D",SAMPLINGS,DEADLINE,s -> s.getFraction(CovidDefinition.D)));
-        simulator.simulate(def.createModel(4),def.state(),collection,REPLICA,DEADLINE);
+        def.setParameter("lambdaMeet",4);
+        simulator.simulate(def.createModel(),def.state(),collection,REPLICA,DEADLINE);
         collection.printTimeSeries("data","covid_",".data");
     }
 

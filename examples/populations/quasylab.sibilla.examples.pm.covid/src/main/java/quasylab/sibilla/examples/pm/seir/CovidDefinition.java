@@ -31,7 +31,7 @@ import quasylab.sibilla.core.models.StatePredicate;
 import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
-public class CovidDefinition implements ModelDefinition<PopulationState> {
+public class CovidDefinition extends PopulationModelDefinition {
 
     public final static int S = 0;
     public final static int A = 1;
@@ -56,6 +56,10 @@ public class CovidDefinition implements ModelDefinition<PopulationState> {
     private final static double PROB_A_G = 0.5;
     private final static double PROB_DEATH = 0.02;
 
+    public CovidDefinition() {
+        super(new String[] {"S","A","G","R","D"});
+    }
+
 
     @Override
     public int stateArity() {
@@ -63,8 +67,16 @@ public class CovidDefinition implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public int modelArity() {
-        return 0;
+    public String[] states() {
+        return new String[] { "init" };
+    }
+
+    @Override
+    public PopulationState state(String name, double... parameters) {
+        if (name.equals("init")) {
+            return state(parameters);
+        }
+        throw new IllegalArgumentException(String.format("State %s is unknown!",name));
     }
 
     @Override
@@ -82,8 +94,8 @@ public class CovidDefinition implements ModelDefinition<PopulationState> {
     }
 
     @Override
-    public Model<PopulationState> createModel(double... args) {
-        double lambda = (args.length>0?args[0]:LAMBDA_MEET);
+    public Model<PopulationState> createModel() {
+        double lambda = getParameter("lambdaMeet");
         PopulationRule rule_S_A_A = new ReactionRule(
                 "S->A",
                 new Population[] { new Population(S), new Population(A)} ,
@@ -136,7 +148,7 @@ public class CovidDefinition implements ModelDefinition<PopulationState> {
                 (t,s) -> s.getOccupancy(G)*LAMBDA_R_G*PROB_DEATH
         );
 
-        PopulationModel f = new PopulationModel();
+        PopulationModel f = new PopulationModel(this);
         f.addRule(rule_S_A_A);
         f.addRule(rule_S_G_A);
         f.addRule(rule_S_A_G);

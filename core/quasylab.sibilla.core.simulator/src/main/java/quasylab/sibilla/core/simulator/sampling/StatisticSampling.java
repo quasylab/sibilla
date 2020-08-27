@@ -29,7 +29,7 @@ package quasylab.sibilla.core.simulator.sampling;
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import quasylab.sibilla.core.models.MeasureFunction;
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.models.State;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;

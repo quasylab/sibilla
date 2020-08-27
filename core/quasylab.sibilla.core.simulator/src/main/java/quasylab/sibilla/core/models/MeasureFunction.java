@@ -26,8 +26,6 @@
 
 package quasylab.sibilla.core.models;
 
-import quasylab.sibilla.core.past.State;
-
 import java.io.Serializable;
 
 /**

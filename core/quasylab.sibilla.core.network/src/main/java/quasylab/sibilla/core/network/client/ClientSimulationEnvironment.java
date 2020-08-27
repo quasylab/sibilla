@@ -37,7 +37,7 @@ import quasylab.sibilla.core.network.loaders.ClassBytesLoader;
 import quasylab.sibilla.core.network.master.MasterCommand;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 import java.io.IOException;
@@ -46,7 +46,7 @@ import java.util.logging.Logger;
 /**
  * Manages the connection with a master server to submit simulations and retrieve related results.
  *
- * @param <S> The {@link quasylab.sibilla.core.past.State} of the simulation model.
+ * @param <S> The {@link State} of the simulation model.
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */
@@ -77,7 +77,7 @@ public class ClientSimulationEnvironment<S extends State> {
      * @param random            {@link org.apache.commons.math3.random.RandomGenerator} of the simulation.
      * @param modelDefinition   {@link quasylab.sibilla.core.models.ModelDefinition} that defines the simulation model to be sent.
      * @param model             The {@link quasylab.sibilla.core.models.Model} of the simulation.
-     * @param initialState      The initial {@link quasylab.sibilla.core.past.State} of the model.
+     * @param initialState      The initial {@link State} of the model.
      * @param sampling_function The {@link quasylab.sibilla.core.simulator.sampling.SamplingFunction} that will be used to collect
      *                          data.
      * @param replica           Repetitions of the simulation.

@@ -27,9 +27,7 @@
 package quasylab.sibilla.core.models;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.sampling.Measure;
-import quasylab.sibilla.core.simulator.sampling.Sample;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

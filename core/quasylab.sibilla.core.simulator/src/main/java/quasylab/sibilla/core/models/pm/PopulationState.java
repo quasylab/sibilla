@@ -25,7 +25,7 @@
  */
 package quasylab.sibilla.core.models.pm;
 
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.models.State;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -38,7 +38,8 @@ import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 /**
- * The instances of this class represent a generic population state having species of type <code>S</code>.
+ * The instances of this class represent a generic population state having
+ * species of type <code>S</code>.
  *
  * @author loreti
  */
@@ -50,7 +51,6 @@ public class PopulationState extends State {
      */
     private int[] populationVector;
     private double population;
-
 
     public PopulationState() {
         super();
@@ -122,7 +122,9 @@ public class PopulationState extends State {
                 newState[idx] = newValue;
                 population += u.getValue();
             } else {
-                throw new IllegalArgumentException("Population Vector: " + this + " newState: " + Arrays.toString(newState) + " Update: " + update + " idx: " + idx + " newValue: " + newValue + " u: " + u);
+                throw new IllegalArgumentException(
+                        "Population Vector: " + this + " newState: " + Arrays.toString(newState) + " Update: " + update
+                                + " idx: " + idx + " newValue: " + newValue + " u: " + u);
             }
         }
         return new PopulationState(population, newState);
@@ -188,7 +190,9 @@ public class PopulationState extends State {
         return result;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
@@ -203,7 +207,6 @@ public class PopulationState extends State {
     public PopulationState copy() {
         return new PopulationState(population, populationVector);
     }
-
 
     public int[] getPopulationVector() {
         return this.populationVector;

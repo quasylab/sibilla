@@ -26,17 +26,24 @@ public class ChordModelRefactored implements ModelDefinition<PopulationState>  {
     }
 
     @Override
-    public int modelArity() {
-        return 0;
+    public String[] states() {
+        return new String[0];
     }
+
+    @Override
+    public PopulationState state(String name, double... parameters) {
+        return null;
+    }
+
 
     @Override
     public PopulationState state(double... parameters) {
         return null;
     }
 
+
     @Override
-    public Model<PopulationState> createModel(double... args) {
+    public Model<PopulationState> createModel() {
 
         //Inserimento degli agenti all'interno del registro
 

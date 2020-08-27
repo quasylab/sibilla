@@ -1,7 +1,7 @@
 package quasylab.sibilla.core.network.serialization;
 
 import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.simulator.Trajectory;
 import quasylab.sibilla.core.simulator.sampling.Sample;
 
@@ -39,13 +39,15 @@ public class TrajectorySerializer {
     /**
      * Serialize a Trajectory into an array of bytes.
      *
-     * @param toSerializeInto the output stream where the serialized data will be put
+     * @param toSerializeInto the output stream where the serialized data will be
+     *                        put
      * @param t               the trajectory to serialize
      * @param model           the model of the simulation
      * @param <S>             the state class
      * @throws IOException
      */
-    public static <S extends State> void serialize(ByteArrayOutputStream toSerializeInto, Trajectory<S> t, Model<S> model) throws IOException {
+    public static <S extends State> void serialize(ByteArrayOutputStream toSerializeInto, Trajectory<S> t,
+            Model<S> model) throws IOException {
         int numberOfSamples = t.size();
         double start = t.getStart();
         double end = t.getEnd();
@@ -65,8 +67,8 @@ public class TrajectorySerializer {
      * Deserialize a byte array into a Trajectory
      *
      * @param toDeserialize the byte array that contains serialized data
-     * @param model the model of the simulation
-     * @param <S> the state class
+     * @param model         the model of the simulation
+     * @param <S>           the state class
      * @return the deserialized trajectory
      * @throws IOException
      */
@@ -81,12 +83,13 @@ public class TrajectorySerializer {
      * Deserialize data from an InputStream into a Trajectory
      *
      * @param toDeserializeFrom the input stream that contains serialized data
-     * @param model the model of the simulation
-     * @param <S> the state class
+     * @param model             the model of the simulation
+     * @param <S>               the state class
      * @return the deserialized trajectory
      * @throws IOException
      */
-    public static <S extends State> Trajectory<S> deserialize(ByteArrayInputStream toDeserializeFrom, Model<S> model) throws IOException {
+    public static <S extends State> Trajectory<S> deserialize(ByteArrayInputStream toDeserializeFrom, Model<S> model)
+            throws IOException {
         Trajectory<S> t = new Trajectory<S>();
 
         int numberOfSamples = ByteBuffer.wrap(toDeserializeFrom.readNBytes(4)).getInt();
@@ -106,6 +109,5 @@ public class TrajectorySerializer {
         }
         return t;
     }
-
 
 }

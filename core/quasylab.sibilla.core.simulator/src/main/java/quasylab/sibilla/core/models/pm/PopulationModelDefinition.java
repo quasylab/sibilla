@@ -29,6 +29,7 @@ package quasylab.sibilla.core.models.pm;
 import com.sun.source.tree.Tree;
 import quasylab.sibilla.core.models.ModelDefinition;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.IntStream;
@@ -36,24 +37,35 @@ import java.util.stream.IntStream;
 /**
  * Instances of this class represent the definition of a population model.
  */
-public abstract class PopulationModelDefinition implements ModelDefinition<PopulationState> {
+public abstract class PopulationModelDefinition extends AbstractModelDefinition<PopulationState> {
 
-    private final TreeMap<String,Integer> speciesIndex;
+    private final PopulationIndex speciesIndex;
 
     public PopulationModelDefinition(String[] species) {
-        speciesIndex = new TreeMap<>();
-        initIndex(species);
+        speciesIndex = new PopulationIndex(species);
     }
 
-    private void initIndex(String[] species) {
-        IntStream.range(0,species.length).forEach(i->speciesIndex.put(species[i],i));
+    public int register(String name,int ... args) {
+        return speciesIndex.registerSpecies(getAgentId(name,args));
+    }
+
+    public String getAgentId(String name, int[] args) {
+        return name+(args.length==0?"": Arrays.toString(args));
     }
 
     public String[] getSpecies() {
-        return speciesIndex.keySet().toArray(new String[speciesIndex.size()]);
+        return speciesIndex.getSpecies();
     }
 
-    public int indexOf(String m) {
-        return speciesIndex.getOrDefault(m,-1);
+    public int indexOf(String name, int ... args) {
+        return speciesIndex.indexOf(getAgentId(name,args));
+    }
+
+    public static double fraction(double a, double b) {
+        if (b==0.0) {
+            return 0.0;
+        } else {
+            return a/b;
+        }
     }
 }

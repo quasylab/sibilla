@@ -27,10 +27,9 @@
 package quasylab.sibilla.core.simulator.sampling;
 
 import quasylab.sibilla.core.models.StatePredicate;
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.models.State;
 
 import java.io.Serializable;
-import java.util.function.Predicate;
 
 /**
  * This functional interface is used to declare the stopping predicate of a simulation.

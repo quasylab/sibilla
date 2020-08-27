@@ -20,16 +20,34 @@
  *
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- *
  */
 
-package quasylab.sibilla.core.past;
+package quasylab.sibilla.langs.pm;
 
-import java.io.Externalizable;
-import java.io.Serializable;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.junit.jupiter.api.Test;
+import org.stringtemplate.v4.ST;
 
-public abstract class State implements Externalizable {
-    public State() {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class TestParser {
+
+    public final String CODE1 = "const TEST = 10;";
+
+
+    @Test
+    public void testParsingSEIR() {
+        PopulationModelLexer lexer = new PopulationModelLexer(CharStreams.fromString(CODE1));
+        CommonTokenStream tokens =  new CommonTokenStream(lexer);
+        PopulationModelParser parser = new PopulationModelParser(tokens);
+        ParseTree tree = parser.model();
+        assertEquals(0,parser.getNumberOfSyntaxErrors());
+    }
+
+
+    @Test
+    public void testTemplate() {
+        ST st = new ST("for");
     }
 }

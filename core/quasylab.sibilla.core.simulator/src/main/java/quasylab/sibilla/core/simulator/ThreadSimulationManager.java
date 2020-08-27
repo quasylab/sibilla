@@ -28,10 +28,8 @@ package quasylab.sibilla.core.simulator;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.ModelDefinition;
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.models.State;
 
-import java.beans.PropertyChangeEvent;
-import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

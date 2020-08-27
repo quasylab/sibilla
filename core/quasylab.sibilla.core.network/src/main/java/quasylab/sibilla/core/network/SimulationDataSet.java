@@ -29,7 +29,7 @@ package quasylab.sibilla.core.network;
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 import java.io.Serializable;
@@ -37,7 +37,7 @@ import java.io.Serializable;
 /**
  * Class that stores info about the simulation that is executed by slaves.
  *
- * @param <S> The {@link quasylab.sibilla.core.past.State} of the simulation model.
+ * @param <S> The {@link State} of the simulation model.
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */

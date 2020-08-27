@@ -29,9 +29,7 @@ package quasylab.sibilla.core.models.pm;
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.MarkovProcess;
 import quasylab.sibilla.core.models.StepFunction;
-import quasylab.sibilla.core.past.State;
 import quasylab.sibilla.core.simulator.sampling.Measure;
-import quasylab.sibilla.core.simulator.sampling.Sample;
 import quasylab.sibilla.core.simulator.util.WeightedElement;
 import quasylab.sibilla.core.simulator.util.WeightedLinkedList;
 import quasylab.sibilla.core.simulator.util.WeightedStructure;
@@ -134,6 +132,11 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
     @Override
     public PopulationState deserializeState(byte[] bytes) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+        return deserializeState(bais);
+    }
+
+    @Override
+    public PopulationState deserializeState(ByteArrayInputStream bais) throws IOException {
         int length = modelDefinition.stateArity();
         int[] vector = new int[length];
         for (int i = 0; i < length; i++) {
@@ -143,16 +146,10 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
         return new PopulationState(vector);
     }
 
-    @Override
-    public PopulationState deserializeState(ByteArrayInputStream toDeserializeFrom) throws IOException {
-        //TODO
-        return null;
-    }
-
 
     @Override
     public String[] measures() {
-        return modelDefinition.getSpecies();
+        return (modelDefinition==null?new String[0]:modelDefinition.getSpecies());
     }
 
     @Override

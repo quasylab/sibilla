@@ -28,11 +28,10 @@ package quasylab.sibilla.core.simulator;
 
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.StatePredicate;
-import quasylab.sibilla.core.past.State;
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 
 import java.io.Serializable;
-import java.util.function.Predicate;
 
 /**
  * @author loreti

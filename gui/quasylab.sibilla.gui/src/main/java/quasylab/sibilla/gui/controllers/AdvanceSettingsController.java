@@ -1,20 +1,14 @@
 package quasylab.sibilla.gui.controllers;
 
 import com.jfoenix.controls.JFXButton;
-import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import quasilab.sibilla.core.ExecutionEnvironment;
+import quasylab.sibilla.core.ExecutionEnvironment;
 import quasylab.sibilla.core.models.pm.PopulationState;
-import quasylab.sibilla.core.past.State;
-
-import java.net.URL;
-import java.util.ResourceBundle;
 
 public class AdvanceSettingsController  {
 
