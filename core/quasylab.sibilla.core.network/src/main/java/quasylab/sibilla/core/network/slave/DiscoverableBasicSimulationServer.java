@@ -54,6 +54,10 @@ public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
      * Discovery's network communication related infos.
      */
     private NetworkInfo LOCAL_DISCOVERY_INFO;
+
+    /**
+     * The set of NetworkInfo associated to the known master servers.
+     */
     private Set<NetworkInfo> knownMasters;
 
     /**

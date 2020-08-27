@@ -37,14 +37,12 @@ import quasylab.sibilla.core.network.master.MasterCommand;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.executor.SimulationExecutor;
-import quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -76,13 +74,20 @@ public class BasicSimulationServer implements SimulationServer {
      * Slave server network communication related info.
      */
     protected NetworkInfo localServerInfo;
+
+    /**
+     * The serializer used by the slave server.
+     */
     protected Serializer serializer;
+
     /**
      * Used by the slave server to manage incoming simulations.
      */
     private int simulationPort;
-    private BenchmarkUnit benchmark;
 
+    /**
+     * The SimulationExecutor used to execute simulations by the server.
+     */
     private SimulationExecutor simulationExecutor;
 
 
@@ -99,7 +104,8 @@ public class BasicSimulationServer implements SimulationServer {
         LOGGER.info(String.format("Creating a new BasicSimulationServer that uses: [%s - %s].",
                 this.networkManagerType.getClass(), this.networkManagerType.name()));
 
-        benchmark = new BenchmarkUnit("benchmarks/slave",
+        /* TODO remove?
+        BenchmarkUnit benchmark = new BenchmarkUnit("benchmarks/slave",
                 "slave",
                 "csv",
                 "o",
@@ -111,7 +117,7 @@ public class BasicSimulationServer implements SimulationServer {
                         "comprbytes",
                         "sendtime"
                 ));
-
+         */
     }
 
     @Override
@@ -228,8 +234,6 @@ public class BasicSimulationServer implements SimulationServer {
      *
      * @param master server of the master
      */
-
-
     private void handleTaskExecution(TCPNetworkManager master) {
         try {
             NetworkTask<?> networkTask = (NetworkTask<?>) serializer.deserialize(Compressor.decompress(master.readObject()));
