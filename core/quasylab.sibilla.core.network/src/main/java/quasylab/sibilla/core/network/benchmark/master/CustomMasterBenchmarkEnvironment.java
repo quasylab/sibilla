@@ -38,6 +38,13 @@ import quasylab.sibilla.core.network.serialization.ComputationResultSerializerTy
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Extension of {@link MasterBenchmarkEnvironment} based upon custom {@link ComputationResultSerializer}
+ *
+ * @param <S> {@link State} related to the {@link ComputationResult} objects received from the Slave.
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class CustomMasterBenchmarkEnvironment<S extends State> extends MasterBenchmarkEnvironment {
     private Model<S> model;
 

@@ -38,35 +38,27 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+/**
+ * Benchmarks callable activities defined by the user writing all the results on a file.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class BenchmarkUnit {
 
     private int executedRuns = 0;
     private String fileName;
     private String dirName;
 
-    public BenchmarkUnit(String dirName, String fileName, String extension, String mainLabel, String timeLabel, String... otherLabels) {
-        Date date = new Date();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss_a");
-        String strDate = dateFormat.format(date);
-
-        this.dirName = dirName;
-        this.fileName = String.format("%s [%s].%s", fileName, strDate, extension);
-
-        try {
-            BufferedWriter fileWriter = getFileWriter();
-            fileWriter.write(String.format("repetition_%s", mainLabel));
-            fileWriter.write(String.format(",%stime_%s", timeLabel, mainLabel));
-            for (String label : otherLabels) {
-                fileWriter.write(String.format(",%s_%s", label, mainLabel));
-            }
-            fileWriter.newLine();
-            fileWriter.close();
-        } catch (
-                Exception ioException) {
-            ioException.printStackTrace();
-        }
-    }
-
+    /**
+     * Initializes a new unit
+     *
+     * @param dirName   name of the directory in which the benchmark file will be located
+     * @param fileName  name of the benchmark file
+     * @param extension extension of the benchmark file
+     * @param mainLabel label associated with the benchmark that this unit has to run
+     * @param labels    associated with the data written into the file
+     */
     public BenchmarkUnit(String dirName, String fileName, String extension, String mainLabel, List<String> labels) {
         Date date = new Date();
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss_a");
@@ -89,6 +81,11 @@ public class BenchmarkUnit {
         }
     }
 
+    /**
+     * Benchmarks a single callable activity. The Double values returned by the activity will be written into the benchmark file.
+     *
+     * @param e Callable activity to be benchmarked
+     */
     public synchronized void run(Callable<List<Double>> e) {
         try {
             BufferedWriter fileWriter = getFileWriter();
@@ -101,6 +98,11 @@ public class BenchmarkUnit {
         }
     }
 
+    /**
+     * Benchmarks a group of callable activities. The Double values returned by the activities will be written into the benchmark file.
+     *
+     * @param e Callable activities to be benchmarked
+     */
     public synchronized void run(Callable<List<Double>>... e) {
         try {
             BufferedWriter fileWriter = getFileWriter();

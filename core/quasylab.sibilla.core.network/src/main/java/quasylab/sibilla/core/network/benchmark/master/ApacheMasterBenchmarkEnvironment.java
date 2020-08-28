@@ -39,9 +39,11 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Extension of the MasterBenchmarkEnvironment class. It is related to the
+ * Extension of {@link MasterBenchmarkEnvironment} based upon custom {@link quasylab.sibilla.core.network.serialization.ApacheSerializer}
  *
- * @param <S>
+ * @param <S> {@link State} related to the {@link ComputationResult} objects received from the Slave.
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
  */
 public class ApacheMasterBenchmarkEnvironment<S extends State> extends MasterBenchmarkEnvironment {
     private Serializer apacheSerializer;

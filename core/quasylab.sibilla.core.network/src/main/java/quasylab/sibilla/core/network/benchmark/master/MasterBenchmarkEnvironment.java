@@ -44,9 +44,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 /**
- * Executes a benchmark from the point of view of a Master Server in order to measure all the implemented optimizations.
+ * Environment designed to test a single interaction of a Master Server with a Slave Server to benchmark activities such as reception, deserialization and decompression of {@link ComputationResult} objects.
+ * To be extended by all the classes associated with a particular type of {@link ComputationResult} serialization.
  *
- * @param <S> The {@link State} of the simulation model.
+ * @param <S> {@link State} related to the {@link ComputationResult} objects to send to the Master.
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
  */
 public abstract class MasterBenchmarkEnvironment<S extends State> {
 
@@ -85,18 +88,18 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
 
 
     /**
-     * Factory method.
+     * Factory method that returns the requested {@link MasterBenchmarkEnvironment} instance
      *
-     * @param benchmarkName name given to the to be initiated benchmark session.
-     * @param slaveInfo     used to communicate with a Slave Server that is executing its own benchmark.
-     * @param type          type of the benchmark to be executed.
-     * @param model         simulation model withing all the MasterBenchmarkEnvironment classes that need it
-     * @param step          difference in terms of number of tasks between a batch of tasks sent to a Slave Server that is executing its own benchmark and the next one to be sent.
-     * @param threshold     maximum number of tasks contained in a single batch of tasks sent to a Slave Server that is executing its own benchmark.
-     * @param repetitions   number of times the benchmark needs to be repeated.
-     * @param resultsSize   number of trajectories contained in the ComputationResult objects received from a Slave Server that is executing its own benchmark.
-     * @param <S>           State upon which the simulation is based.
-     * @return MasterBenchmarkEnvironment related to the MasterBenchmarkType value passed as parameter.
+     * @param benchmarkName name associated with the requested benchmark
+     * @param slaveInfo     used to identify the Slave Server benchmark environment to communicate with
+     * @param type          type of the {@link ComputationResult} serialier requested, related to a particular class extension of {@link MasterBenchmarkEnvironment}
+     * @param model         associated with the trajectories to be received
+     * @param step          difference in terms of number of tasks between a batch of tasks sent to the Slave Server benchmark environment and the next one to be sent.
+     * @param threshold     maximum number of tasks contained in a single batch of tasks sent to the Slave Server benchmark environment
+     * @param repetitions   number of times the benchmark needs to be repeated
+     * @param resultsSize   number of times the benchmark needs to be repeated
+     * @param <S>           {@link State} related to the model and to the {@link ComputationResult} objects to receive
+     * @return {@link MasterBenchmarkEnvironment} instance requested
      * @throws IOException
      */
     public static <S extends State> MasterBenchmarkEnvironment getMasterBenchmark(String benchmarkName, NetworkInfo slaveInfo, ComputationResultSerializerType type, Model model, int step, int threshold, int repetitions, int resultsSize) throws IOException {
@@ -111,6 +114,21 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
         return null;
     }
 
+    /**
+     * Factory method that returns the requested {@link MasterBenchmarkEnvironment} instance
+     *
+     * @param networkManager used to communicate with the Slave Server benchmark environment
+     * @param benchmarkName  name associated with the requested benchmark
+     * @param type           type of the {@link ComputationResult} serialier requested, related to a particular class extension of {@link MasterBenchmarkEnvironment}
+     * @param model          associated with the trajectories to be received
+     * @param step           difference in terms of number of tasks between a batch of tasks sent to the Slave Server benchmark environment and the next one to be sent.
+     * @param threshold      maximum number of tasks contained in a single batch of tasks sent to the Slave Server benchmark environment
+     * @param repetitions    number of times the benchmark needs to be repeated
+     * @param resultsSize    number of times the benchmark needs to be repeated
+     * @param <S>            {@link State} related to the model and to the {@link ComputationResult} objects to receive
+     * @return {@link MasterBenchmarkEnvironment} instance requested
+     * @throws IOException
+     */
     public static <S extends State> MasterBenchmarkEnvironment getMasterBenchmark(TCPNetworkManager networkManager, String benchmarkName, ComputationResultSerializerType type, Model model, int step, int threshold, int repetitions, int resultsSize) throws IOException {
         switch (type) {
             case FST:
@@ -145,7 +163,7 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
     }
 
     /**
-     * Initiates the benchmark.
+     * Initiates and manages  the communication with a Slave Server related benchmark environment.
      *
      * @throws IOException
      */
@@ -195,6 +213,14 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
     }
 
 
+    /**
+     * Method to define into the classes that extend {@link MasterBenchmarkEnvironment}.
+     * It is associated with a particular type of serialization of {@link ComputationResult} objects
+     * Deserializes and decompresses a {@link ComputationResult} object received from a Slave Server benchmark environment.
+     *
+     * @param bytes             associated with a {@link ComputationResult} object to deserialize
+     * @param currentRepetition
+     */
     protected abstract ComputationResult<S> deserializeAndDecompress(byte[] bytes, int currentRepetition);
 
     private String getSerializerName() {
@@ -226,11 +252,5 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
         return "csv";
     }
 
-    /**
-     * @return MasterBenchmarkType associated with the given benchmark.
-     */
-    public ComputationResultSerializerType getBenchmarkType() {
-        return this.benchmarkType;
-    }
 
 }
