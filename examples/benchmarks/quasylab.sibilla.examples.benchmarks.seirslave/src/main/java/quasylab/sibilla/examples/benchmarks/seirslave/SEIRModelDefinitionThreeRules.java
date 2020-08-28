@@ -62,8 +62,13 @@ public class SEIRModelDefinitionThreeRules extends PopulationModelDefinition imp
     }
 
     @Override
-    public int modelArity() {
-        return 0;
+    public String[] states() {
+        return new String[0];
+    }
+
+    @Override
+    public PopulationState state(String name, double... parameters) {
+        return null;
     }
 
     @Override
@@ -71,8 +76,9 @@ public class SEIRModelDefinitionThreeRules extends PopulationModelDefinition imp
         return new PopulationState(new int[]{INIT_S, INIT_E, INIT_I, INIT_R});
     }
 
+
     @Override
-    public Model<PopulationState> createModel(double... args) {
+    public Model<PopulationState> createModel() {
         PopulationRule rule_S_E = new ReactionRule(
                 "S->E",
                 new Population[]{new Population(S), new Population(I)},

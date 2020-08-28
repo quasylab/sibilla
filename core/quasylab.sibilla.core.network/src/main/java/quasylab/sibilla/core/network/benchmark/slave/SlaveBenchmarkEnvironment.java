@@ -87,11 +87,12 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
         this.model = model;
         this.trajectoryFileDir = trajectoryFileDir;
         this.trajectoryFileName = trajectoryFileName;
+        this.computationResultSerializerType = computationResultSerializerType;
         this.mainBenchmarkUnit = getMainBenchmarkUnit();
         serializer = Serializer.getSerializer(SerializerType.FST);
         this.LOGGER = HostLoggerSupplier.getInstance("Slave Benchmark").getLogger();
         this.currentTasksCount = 0;
-        this.computationResultSerializerType = computationResultSerializerType;
+
         netManager = networkManager;
     }
 
