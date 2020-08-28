@@ -48,7 +48,7 @@ public class ClientApplication implements Serializable {
     public final static double DEADLINE = 600;
     private static Logger LOGGER;
     private static final long serialVersionUID = 1L;
-    private static final int REPLICA = 10000;
+    private static final int REPLICA = 1000;
     private static final int submitRepetitions = 1;
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
 

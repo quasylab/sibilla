@@ -23,10 +23,11 @@
 
 package quasylab.sibilla.core.models.pm;
 
+import java.io.Serializable;
 import java.util.TreeMap;
 import java.util.stream.IntStream;
 
-public class PopulationIndex {
+public class PopulationIndex implements Serializable {
 
     private int counter;
     private final TreeMap<String,Integer> speciesIndex;

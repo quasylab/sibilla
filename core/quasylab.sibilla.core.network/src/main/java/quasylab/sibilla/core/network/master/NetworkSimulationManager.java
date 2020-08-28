@@ -47,10 +47,7 @@ import quasylab.sibilla.core.network.slave.SlaveState;
 import quasylab.sibilla.core.simulator.*;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
@@ -101,6 +98,8 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
 
     private BenchmarkUnit decDesBenchmark;
     private ComputationResultSerializerType crSerializerType;
+    private Map<NetworkInfo, BenchmarkUnit> slaveBenchmarks;
+    private NetworkInfo clientInfo;
 
     /**
      * Creates a NetworkSimulationManager with the parameters given in input
@@ -113,15 +112,16 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      * @param simulationState state of the simulation that is being executed
      */
     public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationMonitor monitor,
-            ModelDefinition<S> modelDefinition, SimulationState simulationState, SerializerType serializerType,
-            ComputationResultSerializerType crSerializerType) {
+                                    ModelDefinition<S> modelDefinition, SimulationState simulationState, SerializerType serializerType,
+                                    ComputationResultSerializerType crSerializerType, NetworkInfo clientInfo) {
         super(random, monitor, consumer);// TODO: Gestire parametro Monitor
-
+        this.clientInfo = clientInfo;
         this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         this.serializer = Serializer.getSerializer(serializerType);
+        this.slaveBenchmarks = new ConcurrentHashMap<NetworkInfo, BenchmarkUnit>();
         this.crSerializerType = crSerializerType;
         this.decDesBenchmark = new BenchmarkUnit(
-                String.format("sibillaBenchmarks/masterBenchmarking/%s/", this.crSerializerType.getFullName()),
+                String.format("sibillaBenchmarks/masterBenchmarking/ComputationResultSerializer_%s/", this.crSerializerType.getFullName()),
                 String.format("%s_resultsDecompressAndDeserialize", this.crSerializerType.toString()), "csv",
                 this.crSerializerType.getLabel(), List.of("decomprtime", "desertime", "trajectories"));
 
@@ -140,6 +140,12 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
                 initConnection(server);
                 LOGGER.info(String.format("All the model informations have been sent to the slave: %s",
                         server.getNetworkInfo().toString()));
+                BenchmarkUnit newSlaveBenchmark = new BenchmarkUnit(
+                        String.format("sibillaBenchmarks/masterBenchmarking/Client_%s/Slave_%s/ComputationResultSerializer_%s/",
+                                this.clientInfo.getAddress().toString().split("/")[0], serverInfo.getAddress().toString().split("/")[0], this.crSerializerType.getFullName()),
+                        String.format("%s_sendAndReceive", this.crSerializerType.toString()), "csv",
+                        this.crSerializerType.getLabel(), List.of("sendandreceivetime", "tasks", "results"));
+                this.slaveBenchmarks.put(serverInfo, newSlaveBenchmark);
                 return server;
             } catch (IOException e) {
                 LOGGER.severe(String.format("[%s] Error during server initialization, removing slave", e.getMessage()));
@@ -151,13 +157,13 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     }
 
     public static SimulationManagerFactory getNetworkSimulationManagerFactory(SimulationState simulationState,
-            SerializerType serializerType, ComputationResultSerializerType crSerializerType) {
+                                                                              SerializerType serializerType, ComputationResultSerializerType crSerializerType, NetworkInfo clientInfo) {
         return new SimulationManagerFactory() {
             @Override
             public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
-                    SimulationMonitor monitor, ModelDefinition<S> modelDefinition, Consumer<Trajectory<S>> consumer) {
+                                                                               SimulationMonitor monitor, ModelDefinition<S> modelDefinition, Consumer<Trajectory<S>> consumer) {
                 return new NetworkSimulationManager<>(random, consumer, monitor, modelDefinition, simulationState,
-                        serializerType, crSerializerType);
+                        serializerType, crSerializerType, clientInfo);
             }
         };
 
@@ -273,7 +279,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      * @param server server which has been used for the simulation
      */
     private void manageResult(ComputationResult<S> value, Throwable error, List<SimulationTask<S>> tasks,
-            TCPNetworkManager server) {
+                              TCPNetworkManager server) {
         LOGGER.info(String.format("Managing results by the slave: %s", server.getNetworkInfo().toString()));
         if (error != null) {
             error.printStackTrace();
@@ -403,11 +409,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     private ComputationResult<S> send(NetworkTask<S> networkTask, TCPNetworkManager server) {
 
         SlaveState state = this.simulationState.getSlaveStateByServerInfo(server.getNetworkInfo());
-        BenchmarkUnit sendRecBenchmark = new BenchmarkUnit(
-                String.format("sibillaBenchmarks/masterBenchmarking/Slave_%s/%s/",
-                        server.getNetworkInfo().getAddress().toString(), this.crSerializerType.getFullName()),
-                String.format("%s_sendAndReceive", this.crSerializerType.toString()), "csv",
-                this.crSerializerType.getLabel(), List.of("sendandreceivetime", "tasks", "results"));
+        BenchmarkUnit sendRecBenchmark = this.slaveBenchmarks.get(server.getNetworkInfo());
 
         final var wrapper = new Object() {
             private ComputationResult<S> result;
@@ -441,7 +443,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      * @param state  the SlaveState associated to the slave server
      * @param tasks  the NetworkTask that contains the simulations to execute
      * @return the ComputationResult that contains all the result for the given
-     *         NetworkTask
+     * NetworkTask
      * @throws IOException if communication error between servers occur
      */
     private ComputationResult<S> awaitingResults(TCPNetworkManager server, SlaveState state, NetworkTask<?> tasks)
