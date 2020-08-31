@@ -84,14 +84,14 @@ public class ClientSimulationEnvironment<S extends State> {
      * @param modelDefinition   {@link quasylab.sibilla.core.models.ModelDefinition} that defines the simulation model to be sent.
      * @param model             The {@link quasylab.sibilla.core.models.Model} of the simulation.
      * @param initialState      The initial {@link State} of the model.
-     * @param sampling_function The {@link quasylab.sibilla.core.simulator.sampling.SamplingFunction} that will be used to collect
+     * @param samplingFunction The {@link quasylab.sibilla.core.simulator.sampling.SamplingFunction} that will be used to collect
      *                          data.
      * @param replica           Repetitions of the simulation.
      * @param deadline          Time interval between two samplings.
      * @param masterNetworkInfo {@link quasylab.sibilla.core.network.NetworkInfo} of the master to be reached.
      */
     public ClientSimulationEnvironment(RandomGenerator random, ModelDefinition<S> modelDefinition, Model<S> model,
-                                       S initialState, SamplingFunction<S> sampling_function, int replica, double deadline,
+                                       S initialState, SamplingFunction<S> samplingFunction, int replica, double deadline,
                                        NetworkInfo masterNetworkInfo, SerializerType serializerType, int submitRepetitions) {
 
         LOGGER = HostLoggerSupplier.getInstance().getLogger();
@@ -105,7 +105,7 @@ public class ClientSimulationEnvironment<S extends State> {
                 "client",
                 List.of("submitreceiveandclosetime"));
 
-        this.data = new SimulationDataSet<>(random, modelDefinition, model, initialState, sampling_function, replica,
+        this.data = new SimulationDataSet<>(random, modelDefinition, model, initialState, samplingFunction, replica,
                 deadline);
 
         for (int i = 1; i <= this.submitRepetitions; i++) {
