@@ -1,8 +1,10 @@
-package quasylab.sibilla.examples.pm.crowds;
+package quasylab.sibilla.examples.servers.client;
 
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.util.LinkedList;
@@ -34,15 +36,17 @@ public class ChordModelRefactored extends PopulationModelDefinition {
         return null;
     }
 
+
     @Override
     public PopulationState state(double... parameters) {
         return null;
     }
 
+
     @Override
     public Model<PopulationState> createModel() {
 
-        // Inserimento degli agenti all'interno del registro
+        //Inserimento degli agenti all'interno del registro
 
         for (int i = 0; i < N; i++) {
             reg.register("A", i);
@@ -55,39 +59,53 @@ public class ChordModelRefactored extends PopulationModelDefinition {
         reg.register("M1");
         reg.register("M2");
 
-        // inizio regole chord
+        //inizio regole chord
 
         List<PopulationRule> rules = new LinkedList<PopulationRule>();
 
-        // regole inserimento nel crowd
+        //regole inserimento nel crowd
 
         for (int i = 0; i < N; i++) {
-            rules.add(new ReactionRule("M1->A" + i,
-                    new Population[] { new Population(reg.indexOf("A", i)), new Population(reg.indexOf("M1")) },
-                    new Population[] { new Population(reg.indexOf("AM", i)) }, (s, t) -> LAMBDA_S / N));
+            rules.add(new ReactionRule(
+                    "M1->A" + i,
+                    new Population[]{new Population(reg.indexOf("A", i)), new Population(reg.indexOf("M1"))},
+                    new Population[]{new Population(reg.indexOf("AM", i))},
+                    (s, t) -> LAMBDA_S / N
+            ));
         }
 
         for (int i = 0; i < N; i++) {
-            rules.add(new ReactionRule("M2->A" + i,
-                    new Population[] { new Population(reg.indexOf("A", i)), new Population(reg.indexOf("M2")) },
-                    new Population[] { new Population(reg.indexOf("AM", i)) }, (s, t) -> LAMBDA_S / N));
+            rules.add(new ReactionRule(
+                    "M2->A" + i,
+                    new Population[]{new Population(reg.indexOf("A", i)), new Population(reg.indexOf("M2"))},
+                    new Population[]{new Population(reg.indexOf("AM", i))},
+                    (s, t) -> LAMBDA_S / N
+            ));
         }
 
-        // regole movimento nel crowd
+        //regole movimento nel crowd
 
         for (int i = 0; i < N; i++) {
             int j = (i + 1) % N;
-            rules.add(new ReactionRule("A" + i + "->A" + j,
-                    new Population[] { new Population(reg.indexOf("AM", i)), new Population(reg.indexOf("A", j)) },
-                    new Population[] { new Population(reg.indexOf("A", i)), new Population(reg.indexOf("AM", j)) },
-                    (s, t) -> P_F * LAMBDA_S));
+            rules.add(new ReactionRule(
+                            "A" + i + "->A" + j,
+                            new Population[]{new Population(reg.indexOf("AM", i)), new Population(reg.indexOf("A", j))},
+                            new Population[]{new Population(reg.indexOf("A", i)), new Population(reg.indexOf("AM", j))},
+                            (s, t) -> P_F * LAMBDA_S
+                    )
+            );
         }
 
-        // regola arrivo a destinazione
+        //regola arrivo a destinazione
 
         for (int i = 0; i < N; i++) {
-            rules.add(new ReactionRule("A" + i + "->D", new Population[] { new Population(reg.indexOf("AM", i)) },
-                    new Population[] { new Population(reg.indexOf("A", i)) }, (s, t) -> (1 - P_F) * LAMBDA_S));
+            rules.add(new ReactionRule(
+                    "A" + i + "->D",
+                    new Population[]{new Population(reg.indexOf("AM", i))},
+                    new Population[]{new Population(reg.indexOf("A", i))},
+                    (s, t) -> (1 - P_F) * LAMBDA_S
+            ));
+
 
         }
 
@@ -98,19 +116,38 @@ public class ChordModelRefactored extends PopulationModelDefinition {
         return pModel;
     }
 
+
     public static List<StatisticSampling<PopulationState>> getSamplingList() {
 
         List<StatisticSampling<PopulationState>> samplings = new LinkedList<>();
 
         for (int i = 0; i < N; i++) {
             int idx = i;
-            samplings.add(StatisticSampling.measure("AM" + i, SAMPLINGS, DEADLINE,
-                    s -> s.getOccupancy(reg.indexOf("AM", idx))));
+            samplings.add(
+                    StatisticSampling.measure(
+                            "AM" + i,
+                            SAMPLINGS, DEADLINE,
+                            s -> s.getOccupancy(reg.indexOf("AM", idx))
+                    )
+            );
         }
-        samplings
-                .add(StatisticSampling.measure("MESSAGES", SAMPLINGS, DEADLINE, ChordModelRefactored::runningMessages));
+        samplings.add(
+                StatisticSampling.measure(
+                        "MESSAGES",
+                        SAMPLINGS, DEADLINE,
+                        ChordModelRefactored::runningMessages
+                )
+        );
 
         return samplings;
+    }
+
+    public static SamplingFunction<PopulationState> getCollection() {
+        SamplingCollection<PopulationState> collection = new SamplingCollection<>();
+        for (StatisticSampling<PopulationState> sampling : getSamplingList()) {
+            collection.add(sampling);
+        }
+        return collection;
     }
 
     public static double runningMessages(PopulationState s) {

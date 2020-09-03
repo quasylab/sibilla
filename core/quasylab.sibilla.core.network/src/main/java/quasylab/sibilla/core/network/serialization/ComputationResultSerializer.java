@@ -92,20 +92,4 @@ public class ComputationResultSerializer {
         return new ComputationResult<>(trajectories);
     }
 
-    /*
-     * public static <S extends State> byte[] serialize(ComputationResult<S>
-     * toSerialize) throws IOException { ByteArrayOutputStream baos = new
-     * ByteArrayOutputStream(); ObjectOutputStream objectOutputStream = new
-     * ObjectOutputStream(baos); objectOutputStream.writeObject(toSerialize);
-     * objectOutputStream.flush(); objectOutputStream.close(); byte[] toReturn =
-     * baos.toByteArray(); baos.close(); return toReturn; }
-     * 
-     * public static <S extends State> ComputationResult<S> deserialize(byte[]
-     * toDeserialize) throws IOException, ClassNotFoundException {
-     * ByteArrayInputStream bais = new ByteArrayInputStream(toDeserialize);
-     * ObjectInputStream objectInputStream = new ObjectInputStream(bais);
-     * ComputationResult<S> result = (ComputationResult<S>)
-     * objectInputStream.readObject(); objectInputStream.close(); bais.close();
-     * return result; }
-     */
 }

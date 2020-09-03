@@ -1,8 +1,10 @@
-package quasylab.sibilla.examples.pm.crowds;
+package quasylab.sibilla.examples.servers.client;
 
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.util.LinkedList;
@@ -275,6 +277,14 @@ public class MeshModelRefactored extends PopulationModelDefinition {
                                 MeshModelRefactored::runningMessages));
 
                 return samplings;
+        }
+
+        public static SamplingFunction<PopulationState> getCollection() {
+                SamplingCollection<PopulationState> collection = new SamplingCollection<>();
+                for (StatisticSampling<PopulationState> sampling : getSamplingList()) {
+                        collection.add(sampling);
+                }
+                return collection;
         }
 
         public static double runningMessages(PopulationState s) {

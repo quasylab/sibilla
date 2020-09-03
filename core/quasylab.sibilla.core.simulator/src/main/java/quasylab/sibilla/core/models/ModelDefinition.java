@@ -26,13 +26,15 @@
 
 package quasylab.sibilla.core.models;
 
+import java.io.Serializable;
+
 /**
  * This interface implements a factory that can be used to build a model according
  * to some parameters.
  *
  * @param <S>
  */
-public interface ModelDefinition<S extends State> {
+public interface ModelDefinition<S extends State> extends Serializable {
 
     /**
      * Returns the number of parameters needed to build a state.

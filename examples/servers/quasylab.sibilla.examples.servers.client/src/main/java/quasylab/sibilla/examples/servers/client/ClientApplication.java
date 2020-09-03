@@ -96,11 +96,10 @@ public class ClientApplication implements Serializable {
                 masterAddress,
                 masterPort,
                 masterNetworkManagerType));
-
-        SEIRModelDefinition modelDefinition = new SEIRModelDefinition();
+        MeshModelRefactored modelDefinition = new MeshModelRefactored();
 
         new ClientSimulationEnvironment(
-                RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), SEIRModelDefinition.getCollection(SAMPLINGS, DEADLINE),
+                RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), MeshModelRefactored.getCollection(),
                 REPLICA, DEADLINE, masterServerInfo, SerializerType.FST, submitRepetitions);
 
 

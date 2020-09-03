@@ -25,7 +25,6 @@
 package quasylab.sibilla.examples.pm.crowds;
 
 import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 
@@ -34,8 +33,7 @@ import java.util.List;
 
 public class CrowdDefinition extends PopulationModelDefinition {
 
-
-    public static double LAMBDA_S = 1.0;
+	public static double LAMBDA_S = 1.0;
 	public static double P_F = 1.0;
 	public static int N = 10;
 	public PopulationRegistry r = new PopulationRegistry();
@@ -45,21 +43,21 @@ public class CrowdDefinition extends PopulationModelDefinition {
 	private static final int REPLICA = 1000;
 
 	public CrowdDefinition() {
-        for ( int i=0 ; i<N ; i++ ) {
-            r.register("A" , i );
-        }
-        for ( int i=0 ; i<N ; i++ ) {
-            r.register("AM" , i );
-        }
+		for (int i = 0; i < N; i++) {
+			r.register("A", i);
+		}
+		for (int i = 0; i < N; i++) {
+			r.register("AM", i);
+		}
 
-        r.register("M1");
-        r.register("M2");
-    }
+		r.register("M1");
+		r.register("M2");
+	}
 
-    @Override
-    public int stateArity() {
-        return 0;
-    }
+	@Override
+	public int stateArity() {
+		return 0;
+	}
 
 	@Override
 	public String[] states() {
@@ -72,63 +70,47 @@ public class CrowdDefinition extends PopulationModelDefinition {
 	}
 
 	@Override
-    public PopulationState state(double... parameters) {
-		Population[] population = new Population[N+1];
-		for( int i=0 ; i<N ; i++ ) {
-			population[i] = new Population( r.indexOf("A",i ),1);
+	public PopulationState state(double... parameters) {
+		Population[] population = new Population[N + 1];
+		for (int i = 0; i < N; i++) {
+			population[i] = new Population(r.indexOf("A", i), 1);
 		}
-		population[N] = new Population( r.indexOf("M1"),1);
-		return new PopulationState(r.size(),population);
-    }
+		population[N] = new Population(r.indexOf("M1"), 1);
+		return new PopulationState(r.size(), population);
+	}
 
-    @Override
-    public Model<PopulationState> createModel() {
+	@Override
+	public Model<PopulationState> createModel() {
 		List<PopulationRule> rules = new LinkedList<PopulationRule>();
 
-		for( int i=0 ; i<N ; i++ ) {
-			rules.add( new ReactionRule(
-				"M1->A"+i,
-				new Population[] { new Population(r.indexOf("A",i)) , new Population(r.indexOf("M1"))} ,
-				new Population[] { new Population(r.indexOf("AM",i)) } ,
-                    (t,s) -> LAMBDA_S/N
-			));
+		for (int i = 0; i < N; i++) {
+			rules.add(new ReactionRule("M1->A" + i,
+					new Population[] { new Population(r.indexOf("A", i)), new Population(r.indexOf("M1")) },
+					new Population[] { new Population(r.indexOf("AM", i)) }, (t, s) -> LAMBDA_S / N));
 		}
 
-		for( int i=0 ; i<N ; i++ ) {
-			rules.add( new ReactionRule(
-				"M2->A"+i,
-				new Population[] { new Population(r.indexOf("A",i)) , new Population(r.indexOf("M2"))} ,
-				new Population[] { new Population(r.indexOf("AM",i)) } ,
-                    (t,s) -> LAMBDA_S/N
-			));
+		for (int i = 0; i < N; i++) {
+			rules.add(new ReactionRule("M2->A" + i,
+					new Population[] { new Population(r.indexOf("A", i)), new Population(r.indexOf("M2")) },
+					new Population[] { new Population(r.indexOf("AM", i)) }, (t, s) -> LAMBDA_S / N));
 		}
-		for( int i=0 ; i<N ; i++ ) {
-			for( int j=0; j<N ; j++ ) {
-				if (i!=j) {
-					rules.add(
-						new ReactionRule(
-							"A"+i+"->A"+j,
-							new Population[] { new Population(r.indexOf("AM",i)) , new Population(r.indexOf("A",j))} ,
-							new Population[] { new Population(r.indexOf("A",i)) , new Population(r.indexOf("AM",j))} ,
-                                (t,s) -> P_F*LAMBDA_S/N
-						)
-					);
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				if (i != j) {
+					rules.add(new ReactionRule("A" + i + "->A" + j,
+							new Population[] { new Population(r.indexOf("AM", i)), new Population(r.indexOf("A", j)) },
+							new Population[] { new Population(r.indexOf("A", i)), new Population(r.indexOf("AM", j)) },
+							(t, s) -> P_F * LAMBDA_S / N));
 				}
 			}
 		}
-		for( int i=0 ; i<N ; i++ ) {
-			rules.add( new ReactionRule(
-				"A"+i+"->D",
-				new Population[] { new Population(r.indexOf("AM",i)) } ,
-				new Population[] { new Population(r.indexOf("A",i)) } ,
-                    (t,s) -> (1-P_F)*LAMBDA_S
-			));
+		for (int i = 0; i < N; i++) {
+			rules.add(new ReactionRule("A" + i + "->D", new Population[] { new Population(r.indexOf("AM", i)) },
+					new Population[] { new Population(r.indexOf("A", i)) }, (t, s) -> (1 - P_F) * LAMBDA_S));
 		}
 
-
-
-		PopulationModel f = new PopulationModel(r.size());
-		//f.addState("init",initialState(1));//2 per M2
+		PopulationModel f = new PopulationModel(r.size(), this);
+		// f.addState("init",initialState(1));//2 per M2
 		f.addRules(rules);
 		return f;
 	}

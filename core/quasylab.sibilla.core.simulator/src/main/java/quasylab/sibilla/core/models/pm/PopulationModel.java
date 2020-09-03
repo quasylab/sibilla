@@ -64,7 +64,7 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
     private LinkedList<PopulationRule> rules;
 
     public PopulationModel(int species) {
-        this(species,null);
+        this(species, null);
     }
 
     public PopulationModel(int species, PopulationModelDefinition modelDefinition) {
@@ -135,31 +135,31 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
     @Override
     public PopulationState deserializeState(byte[] bytes) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        return deserializeState(bais);
+        PopulationState deserialized = deserializeState(bais);
+        bais.close();
+        return deserialized;
     }
 
     @Override
     public PopulationState deserializeState(ByteArrayInputStream bais) throws IOException {
-        int length = species;
-        int[] vector = new int[length];
-        for (int i = 0; i < length; i++) {
+        int[] vector = new int[species];
+        for (int i = 0; i < species; i++) {
             vector[i] = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
         }
-        bais.close();
         return new PopulationState(vector);
     }
 
 
     @Override
     public String[] measures() {
-        return (modelDefinition==null?new String[0]:modelDefinition.getSpecies());
+        return (modelDefinition == null ? new String[0] : modelDefinition.getSpecies());
     }
 
     @Override
     public double measure(String m, PopulationState state) {
         int idx = modelDefinition.indexOf(m);
-        if (idx<0) {
-            throw new IllegalArgumentException("Species "+m+" is unknown!");
+        if (idx < 0) {
+            throw new IllegalArgumentException("Species " + m + " is unknown!");
         }
         return state.getFraction(idx);
     }
@@ -167,8 +167,8 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
     @Override
     public Measure<PopulationState> getMeasure(String m) {
         int idx = modelDefinition.indexOf(m);
-        if (idx<0) {
-            throw new IllegalArgumentException("Species "+m+" is unknown!");
+        if (idx < 0) {
+            throw new IllegalArgumentException("Species " + m + " is unknown!");
         }
 
         return new Measure<PopulationState>() {

@@ -29,7 +29,6 @@ import quasylab.sibilla.core.models.pm.*;
 
 public class MoleculeDefiniton extends AbstractModelDefinition<PopulationState> {
 
-
     public final static int Na = 0;
     public final static int Cl = 1;
     public final static int NaPositive = 2;
@@ -37,10 +36,10 @@ public class MoleculeDefiniton extends AbstractModelDefinition<PopulationState> 
 
     public final static int SCALE = 100;
 
-    public final static int INIT_Na = 99*SCALE;
-    public final static int INIT_Cl = 1*SCALE;
-    public final static int INIT_NaPositive = 0*SCALE;
-    public final static int INIT_ClNegative = 0*SCALE;
+    public final static int INIT_Na = 99 * SCALE;
+    public final static int INIT_Cl = 1 * SCALE;
+    public final static int INIT_NaPositive = 0 * SCALE;
+    public final static int INIT_ClNegative = 0 * SCALE;
 
     public final static double N = INIT_Na + INIT_Cl + INIT_NaPositive + INIT_ClNegative;
 
@@ -67,13 +66,10 @@ public class MoleculeDefiniton extends AbstractModelDefinition<PopulationState> 
     @Override
     public PopulationState state(double... parameters) {
         if (parameters.length != 4) {
-            return new PopulationState( new int[] { INIT_Na, INIT_Cl, INIT_NaPositive, INIT_ClNegative } );
+            return new PopulationState(new int[] { INIT_Na, INIT_Cl, INIT_NaPositive, INIT_ClNegative });
         } else {
-            return new PopulationState(new int[]{
-                    (int) parameters[Na],
-                    (int) parameters[Cl],
-                    (int) parameters[NaPositive],
-                    (int) parameters[ClNegative]});
+            return new PopulationState(new int[] { (int) parameters[Na], (int) parameters[Cl],
+                    (int) parameters[NaPositive], (int) parameters[ClNegative] });
         }
     }
 
@@ -82,25 +78,21 @@ public class MoleculeDefiniton extends AbstractModelDefinition<PopulationState> 
 
         double lambda = getParameter("lambda");
 
-
         // Na + Cl -> Na+ + Cl-
 
-        PopulationRule rule_Na_Cl__NaP_ClM = new ReactionRule(
-                "Na + Cl -> Na+ + Cl-",
-                new Population[] { new Population(Na), new Population(Cl)} ,
-                new Population[] { new Population(NaPositive), new Population(ClNegative)},
-                (t,s) ->s.getOccupancy(Na) * s.getOccupancy(Cl) * lambda * E1RATE);
-
+        PopulationRule rule_Na_Cl__NaP_ClM = new ReactionRule("Na + Cl -> Na+ + Cl-",
+                new Population[] { new Population(Na), new Population(Cl) },
+                new Population[] { new Population(NaPositive), new Population(ClNegative) },
+                (t, s) -> s.getOccupancy(Na) * s.getOccupancy(Cl) * lambda * E1RATE);
 
         // Na+ + Cl- -> Na + Cl
 
-        PopulationRule rule_NaP_ClM__Na_Cl = new ReactionRule(
-                "Na+ + Cl- -> Na + Cl",
-                new Population[] { new Population(NaPositive), new Population(ClNegative)},
-                new Population[] { new Population(Na), new Population(Cl)} ,
-                (t,s) -> s.getOccupancy(NaPositive) * s.getOccupancy(ClNegative) * lambda * E2RATE);
+        PopulationRule rule_NaP_ClM__Na_Cl = new ReactionRule("Na+ + Cl- -> Na + Cl",
+                new Population[] { new Population(NaPositive), new Population(ClNegative) },
+                new Population[] { new Population(Na), new Population(Cl) },
+                (t, s) -> s.getOccupancy(NaPositive) * s.getOccupancy(ClNegative) * lambda * E2RATE);
 
-        PopulationModel pModel = new PopulationModel(4);
+        PopulationModel pModel = new PopulationModel(4, this);
 
         pModel.addRule(rule_Na_Cl__NaP_ClM);
         pModel.addRule(rule_NaP_ClM__Na_Cl);

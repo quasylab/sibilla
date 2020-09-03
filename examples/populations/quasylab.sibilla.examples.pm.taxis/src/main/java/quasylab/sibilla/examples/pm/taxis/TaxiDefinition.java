@@ -191,7 +191,7 @@ public class TaxiDefinition implements ModelDefinition<PopulationState> {
                 new Population[] { new Population(T)},
                 (t,s) ->lambda_d*s.getOccupancy(D));
 
-        PopulationModel pModel = new PopulationModel(8);
+        PopulationModel pModel = new PopulationModel(8, this);
 
         pModel.addRule(rule_user_arrival);
         pModel.addRule(rule_user_angry);
