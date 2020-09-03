@@ -127,7 +127,7 @@ public class CrowdDefinition extends PopulationModelDefinition {
 
 
 
-		PopulationModel f = new PopulationModel();
+		PopulationModel f = new PopulationModel(r.size());
 		//f.addState("init",initialState(1));//2 per M2
 		f.addRules(rules);
 		return f;

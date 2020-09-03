@@ -252,7 +252,7 @@ public class MeshModelRefactored extends PopulationModelDefinition {
 
 
 
-        PopulationModel pModel = new PopulationModel();
+        PopulationModel pModel = new PopulationModel(r.size());
 
         pModel.addRules(rules);
 

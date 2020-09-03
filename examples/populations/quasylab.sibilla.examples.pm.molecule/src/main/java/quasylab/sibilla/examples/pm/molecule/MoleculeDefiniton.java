@@ -100,7 +100,7 @@ public class MoleculeDefiniton extends AbstractModelDefinition<PopulationState> 
                 new Population[] { new Population(Na), new Population(Cl)} ,
                 (t,s) -> s.getOccupancy(NaPositive) * s.getOccupancy(ClNegative) * lambda * E2RATE);
 
-        PopulationModel pModel = new PopulationModel();
+        PopulationModel pModel = new PopulationModel(4);
 
         pModel.addRule(rule_Na_Cl__NaP_ClM);
         pModel.addRule(rule_NaP_ClM__Na_Cl);

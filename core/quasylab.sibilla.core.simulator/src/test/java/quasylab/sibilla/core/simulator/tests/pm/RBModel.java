@@ -298,7 +298,7 @@ public class RBModel {
 	}
 	
 	private PopulationModel buildPopulationModel(int scale) {
-		PopulationModel m = new PopulationModel();
+		PopulationModel m = new PopulationModel(4);
 		m.addRules( buildRules() );
 		return m;
 	}

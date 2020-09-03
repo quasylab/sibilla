@@ -134,7 +134,7 @@ public class CovidDSDefinition extends PopulationModelDefinition {
                 (t,s) -> s.getOccupancy(G)*LAMBDA_R_G*PROB_DEATH
         );
 
-        PopulationModel f = new PopulationModel(this);
+        PopulationModel f = new PopulationModel(5,this);
         f.addRule(rule_S_A_A);
         f.addRule(rule_S_G_A);
         f.addRule(rule_S_A_G);

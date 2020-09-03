@@ -99,7 +99,7 @@ public class SEIRModelDefinition implements ModelDefinition<PopulationState> {
                 (t,s) -> s.getOccupancy(R)*LAMBDA_DECAY
         );
 
-        PopulationModel f = new PopulationModel();
+        PopulationModel f = new PopulationModel(4);
         f.addRule(rule_S_E);
         f.addRule(rule_E_I);
         f.addRule(rule_I_R);

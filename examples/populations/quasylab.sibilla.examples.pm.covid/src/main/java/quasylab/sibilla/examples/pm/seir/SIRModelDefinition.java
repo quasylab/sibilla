@@ -90,7 +90,7 @@ public class SIRModelDefinition implements ModelDefinition<PopulationState> {
         );
 
 
-        PopulationModel f = new PopulationModel();
+        PopulationModel f = new PopulationModel(3);
         f.addRule(rule_S_I);
         f.addRule(rule_I_R);
         return f;

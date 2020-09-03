@@ -108,7 +108,7 @@ public class ChordModelRefactored extends PopulationModelDefinition  {
 
         }
 
-        PopulationModel pModel = new PopulationModel();
+        PopulationModel pModel = new PopulationModel(reg.size());
 
         pModel.addRules(rules);
 

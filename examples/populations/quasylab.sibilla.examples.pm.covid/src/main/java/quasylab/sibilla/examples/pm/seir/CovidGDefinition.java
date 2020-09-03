@@ -166,7 +166,7 @@ public class CovidGDefinition implements ModelDefinition<PopulationState> {
                 (t,s) -> s.getOccupancy(IG)*LAMBDA_R_G*PROB_DEATH
         );
 
-        PopulationModel f = new PopulationModel();
+        PopulationModel f = new PopulationModel(6);
         f.addRule(rule_S_A_A);
         f.addRule(rule_S_G_A);
         f.addRule(rule_S_A_G);

@@ -269,7 +269,7 @@ public class GossipBroadcast {
 	}
 	
 	private PopulationModel buildPopulationModel(int scale) {
-		PopulationModel m = new PopulationModel();
+		PopulationModel m = new PopulationModel(6);
 		m.addRules( buildRules() );
 		return m;
 	}

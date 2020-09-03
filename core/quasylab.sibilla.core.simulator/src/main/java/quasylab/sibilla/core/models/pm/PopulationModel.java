@@ -59,15 +59,18 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
 
     private final PopulationModelDefinition modelDefinition;
 
+    private int species;
+
     private LinkedList<PopulationRule> rules;
 
-    public PopulationModel() {
-        this(null);
+    public PopulationModel(int species) {
+        this(species,null);
     }
 
-    public PopulationModel(PopulationModelDefinition modelDefinition) {
+    public PopulationModel(int species, PopulationModelDefinition modelDefinition) {
         this.rules = new LinkedList<PopulationRule>();
         this.modelDefinition = modelDefinition;
+        this.species = species;
     }
 
     @Override
@@ -115,7 +118,7 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
 
     @Override
     public int stateByteArraySize() {
-        return modelDefinition.stateArity() * 4;
+        return species * 4;
     }
 
     @Override
@@ -137,7 +140,7 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
 
     @Override
     public PopulationState deserializeState(ByteArrayInputStream bais) throws IOException {
-        int length = modelDefinition.stateArity();
+        int length = species;
         int[] vector = new int[length];
         for (int i = 0; i < length; i++) {
             vector[i] = ByteBuffer.wrap(bais.readNBytes(4)).getInt();

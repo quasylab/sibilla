@@ -146,7 +146,7 @@ public class LeaderElectionDefinition implements ModelDefinition<PopulationState
                 (t,s) -> s.getOccupancy(S0,S1,C)/N*s.getOccupancy(L)*COM_RATE);
 
 
-        PopulationModel f = new PopulationModel();
+        PopulationModel f = new PopulationModel(5);
         f.addRule(rule_C_S0);
         f.addRule(rule_C_S1);
         f.addRule(rule_S0_S1);

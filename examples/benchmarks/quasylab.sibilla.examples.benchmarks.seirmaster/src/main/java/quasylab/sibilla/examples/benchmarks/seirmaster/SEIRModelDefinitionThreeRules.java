@@ -107,7 +107,7 @@ public class SEIRModelDefinitionThreeRules extends PopulationModelDefinition imp
                 (t, s) -> s.getOccupancy(R) * LAMBDA_DECAY
         );
 
-        PopulationModel f = new PopulationModel(this);
+        PopulationModel f = new PopulationModel(4,this);
         f.addRule(rule_S_E);
         f.addRule(rule_E_I);
         f.addRule(rule_I_R);
