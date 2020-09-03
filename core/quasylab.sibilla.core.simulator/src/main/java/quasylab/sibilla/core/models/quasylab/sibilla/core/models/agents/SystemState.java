@@ -25,6 +25,9 @@ package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
 import quasylab.sibilla.core.models.State;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Arrays;
 
 public class SystemState implements State {
@@ -97,4 +100,13 @@ public class SystemState implements State {
         return agentInfo[a][i];
     }
 
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+
+    }
 }

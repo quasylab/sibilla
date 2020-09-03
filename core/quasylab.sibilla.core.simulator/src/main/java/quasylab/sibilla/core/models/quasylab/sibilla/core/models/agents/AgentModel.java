@@ -52,7 +52,7 @@ public abstract class AgentModel implements Model<SystemState> {
     public TimeStep<SystemState> next(RandomGenerator r, double now, SystemState state) {
         AgentAction[] actions = new AgentAction[agents.length];
         IntStream.range(0,agents.length).forEach(i -> actions[i] = getAgentAction(r,now,i,state));
-        return new TimeStep<SystemState>(now+1.0,environment.apply(state,actions));
+        return new TimeStep<SystemState>(now+1.0,environment.apply(r,state,actions));
     }
 
     private AgentAction getAgentAction(RandomGenerator r, double now, int i, SystemState state) {

@@ -44,7 +44,7 @@ import java.util.stream.IntStream;
  *
  * @author loreti
  */
-public class PopulationState extends State {
+public class PopulationState implements State {
 
     private static final long serialVersionUID = -4973919753621170006L;
     /**

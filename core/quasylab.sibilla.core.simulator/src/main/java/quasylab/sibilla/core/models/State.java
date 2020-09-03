@@ -25,7 +25,6 @@ package quasylab.sibilla.core.models;
 
 import java.io.Externalizable;
 
-public abstract class State implements Externalizable {
-    public State() {
-    }
+public interface State extends Externalizable {
+
 }
