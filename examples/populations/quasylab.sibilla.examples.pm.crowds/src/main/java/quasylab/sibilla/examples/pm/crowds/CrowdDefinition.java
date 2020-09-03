@@ -32,7 +32,7 @@ import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import java.util.LinkedList;
 import java.util.List;
 
-public class CrowdDefinition implements ModelDefinition<PopulationState> {
+public class CrowdDefinition extends PopulationModelDefinition {
 
 
     public static double LAMBDA_S = 1.0;

@@ -68,7 +68,7 @@ expr    :
     | left=expr op=('&'|'&&') right=expr                      # andExpression
     | left=expr op=('|'|'||') right=expr                      # orExpression
     | left=expr '^' right=expr                                # exponentExpression
-    | left=expr op=('*'|'\\'|'\\\\') right=expr               # mulDivExpression
+    | left=expr op=('*'|'/'|'//') right=expr               # mulDivExpression
     | left=expr op=('+'|'-'|'%') right=expr                   # addSubExpression
     | '!' arg=expr                                     # negationExpression
     | guard=expr '?' thenBranch=expr ':' elseBranch=expr             # ifThenElseExpression

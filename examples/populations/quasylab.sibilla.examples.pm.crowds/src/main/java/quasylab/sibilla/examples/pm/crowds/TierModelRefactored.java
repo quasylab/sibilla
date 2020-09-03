@@ -9,7 +9,7 @@ import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TierModelRefactored implements ModelDefinition<PopulationState> {
+public class TierModelRefactored extends PopulationModelDefinition {
 
     public static double LAMBDA_S = 10.0;
     public static int H = 5; //altezza del tier

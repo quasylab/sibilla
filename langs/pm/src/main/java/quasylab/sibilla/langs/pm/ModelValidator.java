@@ -26,40 +26,37 @@ package quasylab.sibilla.langs.pm;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class ModelValidator extends PopulationModelBaseVisitor<Boolean> {
 
     private final List<ModelBuildingError> errors;
     private SymbolTable table;
-    private final SpeciesTable species;
 
     public ModelValidator() {
         this.errors = new LinkedList<>();
         this.table = new BasicSymbolTable();
-        this.species = new SpeciesTable();
     }
 
     @Override
     public Boolean visitSystem_declaration(PopulationModelParser.System_declarationContext ctx) {
-        SymbolTable globalSymbolTable = this.table;
-        this.table = new NestedSymbolTable(this.table);
+        boolean flag = true;
         for(Token t: ctx.args) {
-            this.table.addSymbol(t.getText(),ctx,SymbolType.INT);
+            flag &= recordVariable(t.getText(),ctx,SymbolType.INT);
         }
-        boolean flag = ctx.species_pattern().accept(this);
-        this.table = globalSymbolTable;
+        flag &= ctx.species_pattern().accept(this);
+        for(Token t: ctx.args) {
+            this.table.deleteVariable(t.getText());
+        }
         return flag;
     }
 
-    @Override
-    public Boolean visitConst_declaration(PopulationModelParser.Const_declarationContext ctx) {
-        TypeExpressionChecker checker = new TypeExpressionChecker(table,species,errors);
-        String name = ctx.name.getText();
+    private boolean recordVariable(String name, ParserRuleContext ctx, SymbolType type) {
         try {
-            checkIfNameIsUsed(name,ctx);
-            table.addSymbol(ctx.name.getText(),ctx,checker.visit(ctx.expr()));
+            this.table.addVariable(name,ctx,type);
             return true;
         } catch (DuplicatedSymbolException e) {
             errors.add(new ModelBuildingError(e.getMessage()));
@@ -67,20 +64,22 @@ public class ModelValidator extends PopulationModelBaseVisitor<Boolean> {
         }
     }
 
-    private void checkIfNameIsUsed(String name, ParserRuleContext ctx) throws DuplicatedSymbolException {
-        if (table.isDefined(name)) {
-            throw new DuplicatedSymbolException(name,table.getContext(name),ctx);
-        }
-        if (species.isDefined(name)) {
-            throw new DuplicatedSymbolException(name,species.getContext(name),ctx);
+    @Override
+    public Boolean visitConst_declaration(PopulationModelParser.Const_declarationContext ctx) {
+        TypeExpressionChecker checker = new TypeExpressionChecker(table,errors);
+        try {
+            table.addConstant(ctx.name.getText(),ctx,checker.visit(ctx.expr()));
+            return true;
+        } catch (DuplicatedSymbolException e) {
+            errors.add(new ModelBuildingError(e.getMessage()));
+            return false;
         }
     }
 
     @Override
     public Boolean visitSpecies_declaration(PopulationModelParser.Species_declarationContext ctx) {
         try {
-            checkIfNameIsUsed(ctx.name.getText(),ctx);
-            species.addSpecies(ctx);
+            table.addSpecies(ctx.name.getText(), ctx);
             return true;
         } catch (DuplicatedSymbolException e) {
             errors.add(new ModelBuildingError(e.getMessage()));
@@ -90,11 +89,13 @@ public class ModelValidator extends PopulationModelBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitRule_declaration(PopulationModelParser.Rule_declarationContext ctx) {
-        SymbolTable globalSymbolTable = this.table;
-        this.table = new NestedSymbolTable(this.table);
-        boolean result = super.visitRule_declaration(ctx);
-        this.table = globalSymbolTable;
-        return result;
+        try {
+            this.table.addRule(ctx.name.getText(),ctx);
+            return ctx.rulestatement().accept(this);
+        } catch (DuplicatedSymbolException e) {
+            errors.add(new ModelBuildingError(e.getMessage()));
+            return false;
+        }
     }
 
     @Override
@@ -104,28 +105,29 @@ public class ModelValidator extends PopulationModelBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitFor_statement(PopulationModelParser.For_statementContext ctx) {
-        this.table.addSymbol(ctx.name.getText(),ctx,SymbolType.INT);
-        TypeExpressionChecker checker = new TypeExpressionChecker(table,species,errors);
-        return checker.isAnInteger(ctx.range().min)
+        boolean flag = recordVariable(ctx.name.getText(),ctx,SymbolType.INT);
+        TypeExpressionChecker checker = new TypeExpressionChecker(table,errors);
+        flag &= checker.isAnInteger(ctx.range().min)
                 & checker.isAnInteger(ctx.range().max)
                 & ctx.next.accept(this);
+        return flag;
     }
 
     @Override
     public Boolean visitWhen_statement(PopulationModelParser.When_statementContext ctx) {
-        TypeExpressionChecker checker = new TypeExpressionChecker(table,species,errors);
+        TypeExpressionChecker checker = new TypeExpressionChecker(table,errors);
         return checker.isABoolean(ctx.guard) & (ctx.arg.accept(this));
     }
 
     @Override
     public Boolean visitRule_body(PopulationModelParser.Rule_bodyContext ctx) {
-        TypeExpressionChecker checker = new TypeExpressionChecker(table,species,errors);
+        TypeExpressionChecker checker = new TypeExpressionChecker(table,errors);
         return checker.isABoolean(ctx.guard)&checker.isANumber(ctx.rate)&ctx.pre.accept(this)&ctx.post.accept(this);
     }
 
     @Override
     public Boolean visitSpecies_pattern(PopulationModelParser.Species_patternContext ctx) {
-        TypeExpressionChecker checker = new TypeExpressionChecker(table, this.species,errors);
+        TypeExpressionChecker checker = new TypeExpressionChecker(table, errors);
         boolean flag = true;
         for (PopulationModelParser.Species_pattern_elementContext species: ctx.species_pattern_element()) {
             flag &= validateSpeciesPatter(species.species_expression());
@@ -135,11 +137,11 @@ public class ModelValidator extends PopulationModelBaseVisitor<Boolean> {
     }
 
     private boolean validateSpeciesPatter(PopulationModelParser.Species_expressionContext species) {
-        boolean flag = this.species.isDefined(species.name.getText());
+        boolean flag = this.table.isASpecies(species.name.getText());
         if (flag) {
             checkInstanceArity(species);
         }
-        TypeExpressionChecker checker = new TypeExpressionChecker(table, this.species,errors);
+        TypeExpressionChecker checker = new TypeExpressionChecker(table, errors);
         for (PopulationModelParser.ExprContext e: species.expr()) {
             flag &= checker.isAnInteger(e);
         }
@@ -147,7 +149,7 @@ public class ModelValidator extends PopulationModelBaseVisitor<Boolean> {
     }
 
     private void checkInstanceArity(PopulationModelParser.Species_expressionContext species) {
-        int expected = this.species.getSpeciesArity(species.name.getText());
+        int expected = this.table.arity(species.name.getText());
         int actual = species.expr().size();
         if (expected != actual) {
             errors.add(ModelBuildingError.wrongNumberOfSpeciesParameters(expected,species));
@@ -156,6 +158,13 @@ public class ModelValidator extends PopulationModelBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitParam_declaration(PopulationModelParser.Param_declarationContext ctx) {
-        return super.visitParam_declaration(ctx);
+        TypeExpressionChecker checker = new TypeExpressionChecker(table,errors);
+        try {
+            table.addParameter(ctx.name.getText(),ctx,checker.visit(ctx.expr()));
+            return true;
+        } catch (DuplicatedSymbolException e) {
+            errors.add(new ModelBuildingError(e.getMessage()));
+            return false;
+        }
     }
 }

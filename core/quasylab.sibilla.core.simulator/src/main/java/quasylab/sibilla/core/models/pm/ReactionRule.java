@@ -31,6 +31,7 @@ package quasylab.sibilla.core.models.pm;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
+import java.util.function.Predicate;
 
 /**
  * @author loreti
@@ -39,6 +40,8 @@ import java.io.Serializable;
 public class ReactionRule implements PopulationRule, Serializable {
 	
 	private static final long serialVersionUID = 6508399289508390200L;
+
+	private final Predicate<PopulationState> guard;
 
 	private final Population[] reactants;
 	
@@ -56,7 +59,12 @@ public class ReactionRule implements PopulationRule, Serializable {
 	 * @param rateFunction
 	 */
 	public ReactionRule(String name, Population[] reactants, Population[] products, RatePopulationFunction rateFunction) {
+		this(name,null,reactants,products,rateFunction);
+	}
+
+	public ReactionRule(String name, Predicate<PopulationState> guard, Population[] reactants, Population[] products, RatePopulationFunction rateFunction) {
 		super();
+		this.guard = guard;
 		this.reactants = reactants;
 		this.products = products;
 		this.rateFunction = rateFunction;
@@ -64,6 +72,7 @@ public class ReactionRule implements PopulationRule, Serializable {
 		this.update = new Update(name);
 		initDrift();
 	}
+
 
 	private void initDrift() {
 		for( int i=0 ; i<reactants.length ; i++ ) {
@@ -90,6 +99,9 @@ public class ReactionRule implements PopulationRule, Serializable {
 	}
 	
 	private boolean isEnabled(PopulationState state) {
+		if ((guard != null)&&(!guard.test(state))) {
+			return false;
+		}
 		for( int i=0 ; i<reactants.length ; i++ ) {
 			if (state.getOccupancy(reactants[i].getIndex())<reactants[i].getSize()) {
 				return false;

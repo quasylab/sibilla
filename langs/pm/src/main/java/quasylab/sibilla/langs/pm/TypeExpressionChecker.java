@@ -35,23 +35,21 @@ import java.util.List;
 public class TypeExpressionChecker implements PopulationModelVisitor<SymbolType> {
 
     private SymbolTable table;
-    private SpeciesTable species;
     private boolean populationAllowed;
     private boolean timeDependent;
     private List<ModelBuildingError> errors;
 
-    public TypeExpressionChecker(SymbolTable table, SpeciesTable species) {
-        this(table, species, new LinkedList<>());
+    public TypeExpressionChecker(SymbolTable table) {
+        this(table, new LinkedList<>());
     }
 
-    public TypeExpressionChecker(SymbolTable table, SpeciesTable species, List<ModelBuildingError> errors) {
-        this(table,species,errors,false,false);
+    public TypeExpressionChecker(SymbolTable table, List<ModelBuildingError> errors) {
+        this(table,errors,false,false);
     }
 
-    public TypeExpressionChecker(SymbolTable table, SpeciesTable species, List<ModelBuildingError> errors, boolean populationAllowed, boolean timeDependent) {
+    public TypeExpressionChecker(SymbolTable table, List<ModelBuildingError> errors, boolean populationAllowed, boolean timeDependent) {
         this.table = table;
         this.errors = errors;
-        this.species = species;
         this.populationAllowed = populationAllowed;
         this.timeDependent = timeDependent;
     }
@@ -207,10 +205,10 @@ public class TypeExpressionChecker implements PopulationModelVisitor<SymbolType>
     @Override
     public SymbolType visitReferenceExpression(PopulationModelParser.ReferenceExpressionContext ctx) {
         String name = ctx.reference.getText();
-        if (table.isDefined(name)) {
+        if (table.isAReference(name)) {
             return table.getType(name);
         } else {
-            if (species.isDefined(name)) {
+            if (table.isASpecies(name)) {
                     errors.add(ModelBuildingError.illegalUseOfAgentIdentifier(ctx.reference));
             } else {
                 errors.add(ModelBuildingError.unknownSymbol(name,ctx.reference.getLine(),ctx.reference.getCharPositionInLine()));

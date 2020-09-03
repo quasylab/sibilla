@@ -46,8 +46,4 @@ public class TestParser {
     }
 
 
-    @Test
-    public void testTemplate() {
-        ST st = new ST("for");
-    }
 }
