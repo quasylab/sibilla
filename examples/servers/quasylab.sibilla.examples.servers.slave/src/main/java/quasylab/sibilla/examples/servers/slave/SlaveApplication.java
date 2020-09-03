@@ -27,10 +27,12 @@
 package quasylab.sibilla.examples.servers.slave;
 
 import quasylab.sibilla.core.network.HostLoggerSupplier;
+import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer;
-import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import quasylab.sibilla.core.network.slave.executor.SimulationExecutor;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.network.util.StartupUtils;
@@ -70,7 +72,7 @@ public class SlaveApplication {
         SSLUtils.getInstance().setTrustStorePath(trustStorePath);
         SSLUtils.getInstance().setTrustStorePass(trustStorePass);
         LOGGER.info(String.format("Local address: [%s]", NetworkUtils.getLocalAddress()));
-        LOGGER.info(String.format("Starting the Master Server with the params:\n" +
+        LOGGER.info(String.format("Starting the Slave Server with the params:\n" +
                         "-keyStoreType: [%s]\n" +
                         "-keyStorePath: [%s]\n" +
                         "-trustStoreType: [%s]\n" +
@@ -89,7 +91,8 @@ public class SlaveApplication {
                 masterSimulationNetworkManagerType));
 
 
-        new DiscoverableBasicSimulationServer(localDiscoveryPort, masterSimulationNetworkManagerType, masterDiscoveryNetworkManagerType, SerializerType.FST).start(localSimulationPort);
+        new DiscoverableBasicSimulationServer(localDiscoveryPort, masterSimulationNetworkManagerType,
+                masterDiscoveryNetworkManagerType, SerializerType.FST, SimulationExecutor.ExecutorType.SINGLE_TRAJECTORY_MULTITHREADED, ComputationResultSerializerType.CUSTOM).start(localSimulationPort);
     }
 
 

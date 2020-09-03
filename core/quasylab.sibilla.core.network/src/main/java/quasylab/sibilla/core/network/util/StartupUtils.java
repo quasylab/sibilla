@@ -42,16 +42,7 @@ public class StartupUtils {
      * @return {@link quasylab.sibilla.core.network.communication.TCPNetworkManagerType} related to the name passed as argument
      */
     public static TCPNetworkManagerType TCPNetworkManagerParser(String type) {
-        switch (type) {
-
-            case "SECURE":
-                return TCPNetworkManagerType.SECURE;
-
-
-            case "DEFAULT":
-            default:
-                return TCPNetworkManagerType.DEFAULT;
-        }
+        return TCPNetworkManagerType.valueOf(type);
     }
 
     /**
@@ -59,11 +50,7 @@ public class StartupUtils {
      * @return {@link quasylab.sibilla.core.network.communication.UDPNetworkManagerType} related to the name passed as argument
      */
     public static UDPNetworkManagerType UDPNetworkManagerParser(String type) {
-        switch (type) {
-            case "DEFAULT":
-            default:
-                return UDPNetworkManagerType.DEFAULT;
-        }
+        return UDPNetworkManagerType.valueOf(type);
     }
 
 }

@@ -28,18 +28,24 @@ package quasylab.sibilla.core.simulator.sampling;
 
 import quasylab.sibilla.core.models.State;
 
-import java.io.Serializable;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 /**
  * @author loreti
  */
-public class Sample<S extends State> implements Serializable {
+public class Sample<S extends State> implements Externalizable {
 
     private static final long serialVersionUID = -2981890753216588999L;
 
     private double time;
 
     private S value;
+
+    public Sample() {
+    }
 
     public Sample(double time, S value) {
         this.value = value;
@@ -92,4 +98,15 @@ public class Sample<S extends State> implements Serializable {
         return value;
     }
 
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeDouble(time);
+        out.writeObject(value);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        this.time = in.readDouble();
+        this.value = (S) in.readObject();
+    }
 }

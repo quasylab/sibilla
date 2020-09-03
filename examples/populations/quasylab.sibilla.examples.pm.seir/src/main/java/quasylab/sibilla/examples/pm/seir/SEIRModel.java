@@ -29,8 +29,6 @@
  */
 package quasylab.sibilla.examples.pm.seir;
 
-import quasylab.sibilla.core.models.ModelDefinition;
-import quasylab.sibilla.core.models.pm.PopulationModel;
 import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;

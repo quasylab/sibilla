@@ -10,29 +10,49 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+/**
+ * Utility class that handles serialization and deserialization of Trajectories.
+ * Data is serialized and deserialized directly into byte arrays to reduce time.
+ *
+ * @author Stelluti Francesco Pio
+ * @author Zamponi Marco
+ */
 public class TrajectorySerializer {
 
-    //start - 8
-    //end - 8
-    //generationtime - 8
-    //successfull - 4
-    //samples
+    /**
+     * Serialize a Trajectory into an array of bytes.
+     *
+     * @param t     the trajectory to serialize
+     * @param model the model of the simulation
+     * @param <S>   the state class
+     * @return byte array of serialized trajectory
+     * @throws IOException
+     */
     public static <S extends State> byte[] serialize(Trajectory<S> t, Model<S> model) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serialize(baos, t, model);
         byte[] toReturn = baos.toByteArray();
-        //System.out.println(String.format("Trajectory To send:%d", toReturn.length));
         baos.close();
         return toReturn;
     }
 
-    public static <S extends State> void serialize(ByteArrayOutputStream toSerializeInto, Trajectory<S> t, Model<S> model) throws IOException {
+    /**
+     * Serialize a Trajectory into an array of bytes.
+     *
+     * @param toSerializeInto the output stream where the serialized data will be
+     *                        put
+     * @param t               the trajectory to serialize
+     * @param model           the model of the simulation
+     * @param <S>             the state class
+     * @throws IOException
+     */
+    public static <S extends State> void serialize(ByteArrayOutputStream toSerializeInto, Trajectory<S> t,
+            Model<S> model) throws IOException {
         int numberOfSamples = t.size();
         double start = t.getStart();
         double end = t.getEnd();
         long generationTime = t.getGenerationTime();
         int isSuccessfull = t.isSuccesfull() ? 1 : 0;
-        //  System.out.println(String.format("Start:%f - End:%f - Generation Time:%f - Is successfull:%d - Number of samples:%d - Size of samples:%d", start, end, (double) generationTime, isSuccessfull, numberOfSamples, sizeOfSamples));
         toSerializeInto.write(ByteBuffer.allocate(4).putInt(numberOfSamples).array());
         toSerializeInto.write(ByteBuffer.allocate(8).putDouble(start).array());
         toSerializeInto.write(ByteBuffer.allocate(8).putDouble(end).array());
@@ -43,6 +63,15 @@ public class TrajectorySerializer {
         }
     }
 
+    /**
+     * Deserialize a byte array into a Trajectory
+     *
+     * @param toDeserialize the byte array that contains serialized data
+     * @param model         the model of the simulation
+     * @param <S>           the state class
+     * @return the deserialized trajectory
+     * @throws IOException
+     */
     public static <S extends State> Trajectory<S> deserialize(byte[] toDeserialize, Model<S> model) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(toDeserialize);
         Trajectory<S> t = deserialize(bais, model);
@@ -50,7 +79,17 @@ public class TrajectorySerializer {
         return t;
     }
 
-    public static <S extends State> Trajectory<S> deserialize(ByteArrayInputStream toDeserializeFrom, Model<S> model) throws IOException {
+    /**
+     * Deserialize data from an InputStream into a Trajectory
+     *
+     * @param toDeserializeFrom the input stream that contains serialized data
+     * @param model             the model of the simulation
+     * @param <S>               the state class
+     * @return the deserialized trajectory
+     * @throws IOException
+     */
+    public static <S extends State> Trajectory<S> deserialize(ByteArrayInputStream toDeserializeFrom, Model<S> model)
+            throws IOException {
         Trajectory<S> t = new Trajectory<S>();
 
         int numberOfSamples = ByteBuffer.wrap(toDeserializeFrom.readNBytes(4)).getInt();
@@ -70,6 +109,5 @@ public class TrajectorySerializer {
         }
         return t;
     }
-
 
 }

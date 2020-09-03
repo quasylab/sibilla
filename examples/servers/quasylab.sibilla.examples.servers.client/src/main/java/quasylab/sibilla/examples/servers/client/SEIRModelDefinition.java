@@ -27,7 +27,6 @@
 package quasylab.sibilla.examples.servers.client;
 
 import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
@@ -112,7 +111,7 @@ public class SEIRModelDefinition extends PopulationModelDefinition implements Se
         f.addRule(rule_S_E);
         f.addRule(rule_E_I);
         f.addRule(rule_I_R);
-        // f.addRule(rule_R_S);
+        f.addRule(rule_R_S);
         return f;
     }
 

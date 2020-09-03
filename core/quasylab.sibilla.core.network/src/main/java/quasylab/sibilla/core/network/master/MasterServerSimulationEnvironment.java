@@ -26,6 +26,7 @@
 
 package quasylab.sibilla.core.network.master;
 
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.SimulationDataSet;
@@ -35,10 +36,10 @@ import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.communication.UDPNetworkManager;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
 import quasylab.sibilla.core.network.loaders.CustomClassLoader;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.util.NetworkUtils;
-import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 
 import java.beans.PropertyChangeEvent;
@@ -117,6 +118,8 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
 
     private Serializer serializer;
 
+    private ComputationResultSerializerType crSerializerType;
+
     /**
      * Creates and starts up a master server with the given parameters.
      *
@@ -139,12 +142,14 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
 
     public MasterServerSimulationEnvironment(int localDiscoveryPort, int remoteDiscoveryPort,
                                              UDPNetworkManagerType discoveryNetworkManager, int localSimulationPort,
-                                             TCPNetworkManagerType simulationNetworkManager, SerializerType serializerType, PropertyChangeListener... listeners) {
+                                             TCPNetworkManagerType simulationNetworkManager, SerializerType serializerType, ComputationResultSerializerType crSerializerType, PropertyChangeListener... listeners) {
 
         this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
 
         try {
+            this.crSerializerType = crSerializerType;
             this.serializer = Serializer.getSerializer(serializerType);
+//            this.resultSerializationBenchmark = new Benchmark("./benchmarks/master", String.format("Master Results Serialization - %s", serializer.getType().toString()), "csv", );
             localDiscoveryInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), localDiscoveryPort, discoveryNetworkManager);
             localSimulationInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), localSimulationPort,
                     simulationNetworkManager);
@@ -199,9 +204,9 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
         try {
             discoveryNetworkManager.writeObject(serializer.serialize(localDiscoveryInfo), address,
                     remoteDiscoveryPort);
-            LOGGER.info(String.format("Sent the discovery broadcast packet to the port: [%d]", remoteDiscoveryPort));
+            LOGGER.info(String.format("Sent the discovery broadcast packet to the port: [%d] [%s]", remoteDiscoveryPort, address.toString()));
         } catch (IOException e) {
-            LOGGER.severe(String.format("[%s] Network communication failure during the broadcast", e.getMessage()));
+            LOGGER.severe(String.format("[%s] [%s] Network communication failure during the broadcast", e.getMessage(), address.toString()));
         }
     }
 
@@ -345,7 +350,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
     private void submitSimulations(TCPNetworkManager client, SimulationDataSet dataSet, SimulationState simulationState) {
         try {
             SimulationEnvironment sim = new SimulationEnvironment(
-                    NetworkSimulationManager.getNetworkSimulationManagerFactory(simulationState, serializer.getType()));
+                    NetworkSimulationManager.getNetworkSimulationManagerFactory(simulationState, serializer.getType(), this.crSerializerType, client.getNetworkInfo()));
             sim.simulate(dataSet.getRandomGenerator(), dataSet.getModel(), dataSet.getModelInitialState(),
                     dataSet.getModelSamplingFunction(), dataSet.getReplica(), dataSet.getDeadline());
             this.state.increaseExecutedSimulations();
@@ -410,9 +415,17 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
                     state.clientConnection().writeObject(serializer.serialize(MasterCommand.RESULTS));
                     LOGGER.info(String.format("[%s] command sent to the client: %s", MasterCommand.RESULTS,
                             state.clientConnection().getNetworkInfo().toString()));
+                    //state.clientConnection().writeObject(serializer.serialize(state.simulationDataSet().getModelSamplingFunction()));
+                    var wrapper = new Object() {
+                        byte[] toWrite;
+                    };
 
-                    state.clientConnection().writeObject(serializer.serialize(state.simulationDataSet().
-                            getModelSamplingFunction()));
+                    //  resultSerializationBenchmark.run(() -> {
+                    wrapper.toWrite = serializer.serialize(state.simulationDataSet().getModelSamplingFunction());
+                       /* return List.of((double) wrapper.toWrite.length);
+                    });*/
+
+                    state.clientConnection().writeObject(wrapper.toWrite);
 
                     LOGGER.info(String.format("Results have been sent to the client: %s",
                             state.clientConnection().getNetworkInfo().toString()));

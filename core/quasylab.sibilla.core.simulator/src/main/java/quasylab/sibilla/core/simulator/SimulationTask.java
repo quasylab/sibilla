@@ -27,8 +27,8 @@
 package quasylab.sibilla.core.simulator;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.models.TimeStep;
 import quasylab.sibilla.core.models.State;
+import quasylab.sibilla.core.models.TimeStep;
 
 import java.io.Serializable;
 import java.util.function.Supplier;

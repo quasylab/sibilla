@@ -26,13 +26,7 @@
 
 package quasylab.sibilla.core.models.pm;
 
-import com.sun.source.tree.Tree;
-import quasylab.sibilla.core.models.ModelDefinition;
-
 import java.util.Arrays;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.IntStream;
 
 /**
  * Instances of this class represent the definition of a population model.

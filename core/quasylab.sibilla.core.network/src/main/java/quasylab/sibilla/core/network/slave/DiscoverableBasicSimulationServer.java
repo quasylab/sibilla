@@ -30,7 +30,9 @@ import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import quasylab.sibilla.core.network.communication.UDPNetworkManager;
 import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import quasylab.sibilla.core.network.serialization.SerializerType;
+import quasylab.sibilla.core.network.slave.executor.SimulationExecutor;
 import quasylab.sibilla.core.network.util.NetworkUtils;
 
 import java.io.IOException;
@@ -53,6 +55,10 @@ public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
      * Discovery's network communication related infos.
      */
     private NetworkInfo LOCAL_DISCOVERY_INFO;
+
+    /**
+     * The set of NetworkInfo associated to the known master servers.
+     */
     private Set<NetworkInfo> knownMasters;
 
     /**
@@ -60,8 +66,10 @@ public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
      */
     private UDPNetworkManager discoveryNetworkManager;
 
-    public DiscoverableBasicSimulationServer(int localDiscoveryPort, TCPNetworkManagerType simulationNetworkManager, UDPNetworkManagerType discoveryNetworkManager, SerializerType serializerType) {
-        super(simulationNetworkManager, serializerType);
+    public DiscoverableBasicSimulationServer(int localDiscoveryPort, TCPNetworkManagerType simulationNetworkManager,
+                                             UDPNetworkManagerType discoveryNetworkManager, SerializerType serializerType,
+                                             SimulationExecutor.ExecutorType type, ComputationResultSerializerType crSerializerType) {
+        super(simulationNetworkManager, serializerType, type, crSerializerType);
         try {
             LOCAL_DISCOVERY_INFO = new NetworkInfo(NetworkUtils.getLocalAddress(), localDiscoveryPort, discoveryNetworkManager);
             this.knownMasters = new HashSet<>();

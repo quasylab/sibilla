@@ -29,24 +29,6 @@
  */
 package quasylab.sibilla.examples.pm.crowds;
 
-import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
-import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.models.pm.PopulationModel;
-import quasylab.sibilla.core.models.pm.PopulationRule;
-import quasylab.sibilla.core.models.pm.PopulationState;
-import quasylab.sibilla.core.models.pm.ReactionRule;
-import quasylab.sibilla.core.models.pm.Population;
-import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
-import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
-import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
-
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.net.UnknownHostException;
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * @author loreti
  *

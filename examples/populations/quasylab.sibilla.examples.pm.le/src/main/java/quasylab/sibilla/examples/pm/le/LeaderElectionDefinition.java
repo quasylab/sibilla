@@ -26,10 +26,8 @@
 
 package quasylab.sibilla.examples.pm.le;
 
-import quasylab.sibilla.core.models.MeasureFunction;
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
-import quasylab.sibilla.core.models.StatePredicate;
 import quasylab.sibilla.core.models.pm.*;
 
 public class LeaderElectionDefinition implements ModelDefinition<PopulationState> {

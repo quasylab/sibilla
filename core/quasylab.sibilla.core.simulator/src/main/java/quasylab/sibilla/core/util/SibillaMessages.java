@@ -26,8 +26,6 @@
 
 package quasylab.sibilla.core.util;
 
-import java.util.Locale;
-
 /**
  * Utility class used to build error and info messages.
  */

@@ -27,26 +27,27 @@
 package quasylab.sibilla.core.network.master;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.NetworkTask;
+import quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.loaders.ClassBytesLoader;
 import quasylab.sibilla.core.network.serialization.ComputationResultSerializer;
+import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.slave.SlaveCommand;
 import quasylab.sibilla.core.network.slave.SlaveState;
-import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.simulator.*;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
@@ -68,7 +69,8 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     private final Logger LOGGER;
 
     /**
-     * {@link quasylab.sibilla.core.models.ModelDefinition} that represent the Model used in the simulation.
+     * {@link quasylab.sibilla.core.models.ModelDefinition} that represent the Model
+     * used in the simulation.
      */
     private final ModelDefinition<S> modelDefinition;
 
@@ -94,21 +96,35 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
 
     private Serializer serializer;
 
+    private BenchmarkUnit decDesBenchmark;
+    private ComputationResultSerializerType crSerializerType;
+    private Map<NetworkInfo, BenchmarkUnit> slaveBenchmarks;
+    private NetworkInfo clientInfo;
+
     /**
      * Creates a NetworkSimulationManager with the parameters given in input
      *
      * @param random          RandomGenerator used in the simulation
      * @param consumer
      * @param monitor         TODO
-     * @param modelDefinition model definition that represent the Model used in the simulation
+     * @param modelDefinition model definition that represent the Model used in the
+     *                        simulation
      * @param simulationState state of the simulation that is being executed
      */
     public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationMonitor monitor,
-                                    ModelDefinition<S> modelDefinition, SimulationState simulationState, SerializerType serializerType) {
+                                    ModelDefinition<S> modelDefinition, SimulationState simulationState, SerializerType serializerType,
+                                    ComputationResultSerializerType crSerializerType, NetworkInfo clientInfo) {
         super(random, monitor, consumer);// TODO: Gestire parametro Monitor
-
+        this.clientInfo = clientInfo;
         this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         this.serializer = Serializer.getSerializer(serializerType);
+        this.slaveBenchmarks = new ConcurrentHashMap<NetworkInfo, BenchmarkUnit>();
+        this.crSerializerType = crSerializerType;
+        this.decDesBenchmark = new BenchmarkUnit(
+                String.format("sibillaBenchmarks/masterBenchmarking/ComputationResultSerializer_%s/", this.crSerializerType.getFullName()),
+                String.format("%s_resultsDecompressAndDeserialize", this.crSerializerType.toString()), "csv",
+                this.crSerializerType.getLabel(), List.of("decomprtime", "desertime", "trajectories"));
+
         List<NetworkInfo> slaveNetworkInfos = simulationState.getSlaveServersStates().stream()
                 .map(SlaveState::getSlaveInfo).collect(Collectors.toList());
         LOGGER.info(String.format("Creating a new NetworkSimulationManager to contact the slaves: [%s]",
@@ -124,6 +140,12 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
                 initConnection(server);
                 LOGGER.info(String.format("All the model informations have been sent to the slave: %s",
                         server.getNetworkInfo().toString()));
+                BenchmarkUnit newSlaveBenchmark = new BenchmarkUnit(
+                        String.format("sibillaBenchmarks/masterBenchmarking/Client_%s/Slave_%s/ComputationResultSerializer_%s/",
+                                this.clientInfo.getAddress().toString().split("/")[0], serverInfo.getAddress().toString().split("/")[0], this.crSerializerType.getFullName()),
+                        String.format("%s_sendAndReceive", this.crSerializerType.toString()), "csv",
+                        this.crSerializerType.getLabel(), List.of("sendandreceivetime", "tasks", "results"));
+                this.slaveBenchmarks.put(serverInfo, newSlaveBenchmark);
                 return server;
             } catch (IOException e) {
                 LOGGER.severe(String.format("[%s] Error during server initialization, removing slave", e.getMessage()));
@@ -134,12 +156,14 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         this.startTasksHandling();
     }
 
-    public static SimulationManagerFactory getNetworkSimulationManagerFactory(SimulationState simulationState, SerializerType serializerType) {
+    public static SimulationManagerFactory getNetworkSimulationManagerFactory(SimulationState simulationState,
+                                                                              SerializerType serializerType, ComputationResultSerializerType crSerializerType, NetworkInfo clientInfo) {
         return new SimulationManagerFactory() {
             @Override
             public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
                                                                                SimulationMonitor monitor, ModelDefinition<S> modelDefinition, Consumer<Trajectory<S>> consumer) {
-                return new NetworkSimulationManager<>(random, consumer, monitor, modelDefinition, simulationState, serializerType);
+                return new NetworkSimulationManager<>(random, consumer, monitor, modelDefinition, simulationState,
+                        serializerType, crSerializerType, clientInfo);
             }
         };
 
@@ -156,22 +180,28 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             LOGGER.info(String.format("[%s] command sent to the slave: %s", MasterCommand.INIT,
                     slave.getNetworkInfo().toString()));
             slave.writeObject(serializer.serialize(modelDefinition.getClass().getName()));
-            LOGGER.info(String.format("[%s] Model name has been sent to the slave: %s", modelDefinition.getClass().getName(), slave.getNetworkInfo().toString()));
+            LOGGER.info(String.format("[%s] Model name has been sent to the slave: %s",
+                    modelDefinition.getClass().getName(), slave.getNetworkInfo().toString()));
             slave.writeObject(ClassBytesLoader.loadClassBytes(modelDefinition.getClass().getName()));
-            LOGGER.info(String.format("Class bytes have been sent to the slave: %s", slave.getNetworkInfo().toString()));
+            LOGGER.info(
+                    String.format("Class bytes have been sent to the slave: %s", slave.getNetworkInfo().toString()));
 
             SlaveCommand answer = (SlaveCommand) serializer.deserialize(slave.readObject());
             if (answer.equals(SlaveCommand.INIT_RESPONSE)) {
-                LOGGER.info(String.format("Answer received: [%s] - Slave: %s", answer, slave.getNetworkInfo().toString()));
+                LOGGER.info(
+                        String.format("Answer received: [%s] - Slave: %s", answer, slave.getNetworkInfo().toString()));
             } else {
                 throw new ClassCastException("Wrong answer after INIT command. Expected INIT_RESPONSE");
             }
 
         } catch (ClassCastException e) {
-            LOGGER.severe(String.format("[%s] Message cast failure during the connection initialization - Slave: %s", e.getMessage(), slave.getNetworkInfo().toString()));
+            LOGGER.severe(String.format("[%s] Message cast failure during the connection initialization - Slave: %s",
+                    e.getMessage(), slave.getNetworkInfo().toString()));
             throw new IOException();
         } catch (IOException e) {
-            LOGGER.severe(String.format("[%s] Network communication failure during the connection initialization  - Slave: %s", e.getMessage(), slave.getNetworkInfo().toString()));
+            LOGGER.severe(String.format(
+                    "[%s] Network communication failure during the connection initialization  - Slave: %s",
+                    e.getMessage(), slave.getNetworkInfo().toString()));
             throw new IOException();
         }
     }
@@ -290,8 +320,8 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
                     server.getType());
             pingServer = TCPNetworkManager.createNetworkManager(pingNetworkInfo);
             pingServer.getSocket().setSoTimeout(5000); // set 5 seconds timeout on read operations
-            LOGGER.info(
-                    String.format("Creating a new NetworkManager to ping slave: %s", pingServer.getNetworkInfo().toString()));
+            LOGGER.info(String.format("Creating a new NetworkManager to ping slave: %s",
+                    pingServer.getNetworkInfo().toString()));
             oldState.timedOut(); // mark server as timed out
 
             initConnection(pingServer); // initialize connection sending model data
@@ -318,9 +348,9 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             this.networkManagers.remove(server);
         } catch (Exception e) {
             assert pingServer != null;
-            LOGGER.severe(String.format(
-                    "The response has been received after the time limit. The slave will be removed: %s",
-                    pingServer.getNetworkInfo().toString()));
+            LOGGER.severe(
+                    String.format("The response has been received after the time limit. The slave will be removed: %s",
+                            pingServer.getNetworkInfo().toString()));
             oldState.setRemoved(); // mark server as removed
             this.networkManagers.remove(server);
             return null;
@@ -351,17 +381,21 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
 
                 SlaveCommand answer = (SlaveCommand) serializer.deserialize(server.readObject());
                 if (answer.equals(SlaveCommand.CLOSE_CONNECTION)) {
-                    LOGGER.info(String.format("Answer received: [%s] - Slave: %s", answer, server.getNetworkInfo().toString()));
+                    LOGGER.info(String.format("Answer received: [%s] - Slave: %s", answer,
+                            server.getNetworkInfo().toString()));
                 } else {
-                    throw new ClassCastException(String.format("Wrong answer after CLOSE_CONNECTION command. Expected CLOSE_CONNECTION from slave: %s ", server.getNetworkInfo().toString()));
+                    throw new ClassCastException(String.format(
+                            "Wrong answer after CLOSE_CONNECTION command. Expected CLOSE_CONNECTION from slave: %s ",
+                            server.getNetworkInfo().toString()));
                 }
 
                 server.closeConnection();
-                LOGGER.info(String.format("Closed the connection with the slave: %s",
-                        server.getNetworkInfo().toString()));
+                LOGGER.info(
+                        String.format("Closed the connection with the slave: %s", server.getNetworkInfo().toString()));
             }
         } catch (IOException e) {
-            LOGGER.severe(String.format("[%s] Network communication failure during the connection closure", e.getMessage()));
+            LOGGER.severe(
+                    String.format("[%s] Network communication failure during the connection closure", e.getMessage()));
         }
     }
 
@@ -372,38 +406,90 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      * @param server      server to send the tasks to
      * @return result of the computation
      */
-
     private ComputationResult<S> send(NetworkTask<S> networkTask, TCPNetworkManager server) {
 
-
         SlaveState state = this.simulationState.getSlaveStateByServerInfo(server.getNetworkInfo());
-        ComputationResult<S> results;
-        long elapsedTime;
+        BenchmarkUnit sendRecBenchmark = this.slaveBenchmarks.get(server.getNetworkInfo());
+
+        final var wrapper = new Object() {
+            private ComputationResult<S> result;
+        };
         try {
-            server.writeObject(serializer.serialize(MasterCommand.TASK));
-            server.writeObject(serializer.serialize(networkTask));
-            elapsedTime = System.nanoTime();
+            sendRecBenchmark.run(() -> {
+                server.writeObject(serializer.serialize(MasterCommand.TASK));
+                server.writeObject(Compressor.compress(serializer.serialize(networkTask)));
+                state.setSentTasks(networkTask.getTasks().size());
+                state.setReceivedTasks(0);
+                wrapper.result = awaitingResults(server, state, networkTask);
 
-            server.getSocket().setSoTimeout((int) (state.getTimeout() / 1000000));
-            LOGGER.info(String.format("A group of tasks has been sent to the server - %s",
-                    server.getNetworkInfo().toString()));
+                return List.of((double) networkTask.getTasks().size(), (double) wrapper.result.getResults().size());
+            });
 
-            results = (ComputationResult<S>) ComputationResultSerializer.deserialize(Compressor.
-                    decompress(server.readObject()), simulationState.simulationDataSet().getModel());
-            elapsedTime = System.nanoTime() - elapsedTime;
-
-
-            state.update(elapsedTime, results.getResults().size());
-            LOGGER.info(String.format("The results from the computation have been received from the server - %s",
-                    server.getNetworkInfo().toString()));
         } catch (Exception e) {
             LOGGER.severe(e.getMessage());
             e.printStackTrace();
             throw new RuntimeException();
         }
+        return wrapper.result;
+    }
 
+    /**
+     * Puts the master server in a state where he listens for results until all the
+     * tasks sent to the slave server have been executed and their results are sent
+     * to the server.
+     *
+     * @param server the NetworkManager of the slave server that the master listens
+     *               to for results
+     * @param state  the SlaveState associated to the slave server
+     * @param tasks  the NetworkTask that contains the simulations to execute
+     * @return the ComputationResult that contains all the result for the given
+     * NetworkTask
+     * @throws IOException if communication error between servers occur
+     */
+    private ComputationResult<S> awaitingResults(TCPNetworkManager server, SlaveState state, NetworkTask<?> tasks)
+            throws IOException {
+        ComputationResult<S> results = new ComputationResult<>(new LinkedList<>());
+        long elapsedTime = System.nanoTime();
 
+        server.getSocket().setSoTimeout((int) (state.getTimeout() / 1000000));
+        LOGGER.info(
+                String.format("A group of tasks has been sent to the server - %s", server.getNetworkInfo().toString()));
+        Model model = tasks.getTasks().get(0).getUnit().getModel();
+        while (state.getReceivedTasks() < state.getSentTasks()) {
+            final var wrapper = new Object() {
+                private byte[] received;
+                private ComputationResult<S> results;
+            };
+
+            wrapper.received = server.readObject();
+            this.decDesBenchmark.run(() -> {
+                wrapper.received = Compressor.decompress(wrapper.received);
+                return List.of();
+            }, () -> {
+                wrapper.results = this.deserializeComputationResult(wrapper.received, model);
+                return List.of((double) wrapper.results.getResults().size());
+            });
+            results.add(wrapper.results);
+            state.setReceivedTasks(state.getReceivedTasks() + wrapper.results.getResults().size());
+        }
+        elapsedTime = System.nanoTime() - elapsedTime;
+        LOGGER.info(String.format("\nSent tasks size: %d\nReceived tasks size: %d", tasks.getTasks().size(),
+                results.getResults().size()));
+        state.update(elapsedTime);
+        LOGGER.info(String.format("The results from the computation have been received from the server - %s",
+                server.getNetworkInfo().toString()));
         return results;
     }
 
+    private ComputationResult deserializeComputationResult(byte[] toDeserialize, Model model) throws IOException {
+        switch (this.crSerializerType) {
+            case FST:
+                return (ComputationResult) Serializer.getSerializer(SerializerType.FST).deserialize(toDeserialize);
+            case APACHE:
+                return (ComputationResult) Serializer.getSerializer(SerializerType.APACHE).deserialize(toDeserialize);
+            default:
+            case CUSTOM:
+                return ComputationResultSerializer.deserialize(toDeserialize, model);
+        }
+    }
 }

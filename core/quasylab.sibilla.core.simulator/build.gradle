@@ -35,14 +35,14 @@ test {
 }
 
 dependencies {
-    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
-    compile group: 'de.ruedigermoeller',name:'fst',version:'2.56'
+
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
-
+    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
     implementation 'com.google.code.gson:gson:2.8.6'
-    compile 'org.apache.commons:commons-lang3:3.5'
+
+
 }
 sourceCompatibility = '11'
 targetCompatibility = '11'

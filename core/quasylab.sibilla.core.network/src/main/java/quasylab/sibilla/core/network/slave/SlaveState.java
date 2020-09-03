@@ -68,10 +68,9 @@ public class SlaveState implements Serializable, Cloneable {
      */
     private int expectedTasks;
 
-    /**
-     * Number of tasks actually to simulate actually received
-     */
-    private int actualTasks;
+    private int sentTasks;
+
+    private int receivedTasks;
 
     /**
      * Whether this slave server has been removed from the master server known slaves.
@@ -101,7 +100,8 @@ public class SlaveState implements Serializable, Cloneable {
     public SlaveState(SimulationState simulationState, NetworkInfo slaveInfo) {
         this.slaveInfo = slaveInfo;
         expectedTasks = 1;
-        actualTasks = 0;
+        sentTasks = 0;
+        receivedTasks = 0;
         isRemoved = false;
         isTimeout = false;
         runningTime = 0L;
@@ -129,11 +129,8 @@ public class SlaveState implements Serializable, Cloneable {
      * Updates the state of the slave server given the data about new executions
      *
      * @param elapsedTime time used to execute the tasks
-     * @param tasksSent   number of tasks executed
      */
-    public void update(long elapsedTime, int tasksSent) {
-
-        actualTasks = tasksSent;
+    public void update(long elapsedTime) {
         runningTime = elapsedTime;
 
         if (devRTT != 0.0) {
@@ -148,7 +145,7 @@ public class SlaveState implements Serializable, Cloneable {
             expectedTasks = 2;
         }
 
-        sampleRTT = runningTime / actualTasks;
+        sampleRTT = runningTime / sentTasks;
         estimatedRTT = alpha * sampleRTT + (1 - alpha) * estimatedRTT;
         devRTT = devRTT == 0.0 ? sampleRTT * 2 : beta * Math.abs(sampleRTT - estimatedRTT) + (1 - beta) * devRTT;
         this.updateListeners();
@@ -266,6 +263,23 @@ public class SlaveState implements Serializable, Cloneable {
         this.updateListeners();
     }
 
+
+    public int getSentTasks() {
+        return sentTasks;
+    }
+
+    public void setSentTasks(int sentTasks) {
+        this.sentTasks = sentTasks;
+    }
+
+    public int getReceivedTasks() {
+        return receivedTasks;
+    }
+
+    public void setReceivedTasks(int receivedTasks) {
+        this.receivedTasks = receivedTasks;
+    }
+
     @Override
     public String toString() {
         if (isRemoved()) {
@@ -275,7 +289,6 @@ public class SlaveState implements Serializable, Cloneable {
             return "Server has timed out, reconnecting...";
         }
         return this.slaveInfo +
-                "\n - Tasks received: " + actualTasks +
                 "\n - Window runtime: " + runningTime + "ns " +
                 "\n - sampleRTT: " + sampleRTT + "ns " +
                 "\n - estimatedRTT: " + estimatedRTT + "ns " +

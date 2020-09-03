@@ -30,14 +30,17 @@ import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.simulator.sampling.Sample;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
-import java.io.Serializable;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * @author loreti
  */
-public class Trajectory<S extends State> implements Serializable {
+public class Trajectory<S extends State> implements Externalizable {
 
     private static final long serialVersionUID = -9039722623650234376L;
     private List<Sample<S>> data;
@@ -126,4 +129,29 @@ public class Trajectory<S extends State> implements Serializable {
         this.end = end;
     }
 
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeDouble(start);
+        out.writeDouble(end);
+        out.writeBoolean(succesfull);
+        out.writeLong(generationTime);
+        out.writeInt(data.size());
+        for (Sample sampleToWrite : data) {
+            out.writeObject(sampleToWrite);
+        }
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        this.start = in.readDouble();
+        this.end = in.readDouble();
+        this.succesfull = in.readBoolean();
+        this.generationTime = in.readLong();
+        int numberOfSamples = in.readInt();
+        List<Sample<S>> samples = new LinkedList<Sample<S>>();
+        for (int i = 0; i < numberOfSamples; i++) {
+            samples.add((Sample) in.readObject());
+        }
+        this.data = samples;
+    }
 }
