@@ -26,11 +26,42 @@ package quasylab.sibilla.langs.pm;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 public interface SymbolTable {
-    SymbolInfo addSymbol(String name, ParserRuleContext context, SymbolType type);
 
-    SymbolInfo addSymbol(String name, SymbolInfo symbolInfo);
+    void addVariable(String name, ParserRuleContext context, SymbolType type) throws DuplicatedSymbolException;
 
-    boolean isDefined(String name);
+    void addConstant(String name, PopulationModelParser.Const_declarationContext context, SymbolType type) throws DuplicatedSymbolException;
+
+    void addParameter(String name, PopulationModelParser.Param_declarationContext context, SymbolType type) throws DuplicatedSymbolException;
+
+    void addMeasure(String name, PopulationModelParser.Measure_declarationContext context) throws DuplicatedSymbolException;
+
+    void addSpecies(String name, PopulationModelParser.Species_declarationContext context) throws DuplicatedSymbolException;
+
+    void addRule(String name, PopulationModelParser.Rule_declarationContext context) throws DuplicatedSymbolException;
+
+    void deleteVariable(String name);
+
+    void addSystem(String name, PopulationModelParser.System_declarationContext context) throws DuplicatedSymbolException;
+
+    String[] rules();
+
+    String[] constants();
+
+    String[] species();
+
+    String[] systems();
+
+    String[] measures();
+
+    int arity(String species);
+
+    boolean isAReference(String name);
+
+    boolean isAMeasure(String name);
+
+    boolean isASpecies(String name);
+
+    boolean isARule(String name);
 
     SymbolType getType(String name);
 

@@ -41,6 +41,8 @@ public abstract class PopulationModelDefinition extends AbstractModelDefinition<
 
     private final PopulationIndex speciesIndex;
 
+    public PopulationModelDefinition() { this(new String[0]); }
+
     public PopulationModelDefinition(String[] species) {
         speciesIndex = new PopulationIndex(species);
     }

@@ -22,5 +22,6 @@ include 'core:quasylab.sibilla.core.simulator',
 		'examples:servers:quasylab.sibilla.examples.servers.client',
 		'examples:servers:quasylab.sibilla.examples.servers.master',
 		'examples:servers:quasylab.sibilla.examples.servers.slave',
-		'examples:populations:quasylab.sibilla.examples.pm.taxis'
+		'examples:populations:quasylab.sibilla.examples.pm.taxis',
+		'examples:agents:quasylab.sibila.examples.agents.RobotAgents'
 

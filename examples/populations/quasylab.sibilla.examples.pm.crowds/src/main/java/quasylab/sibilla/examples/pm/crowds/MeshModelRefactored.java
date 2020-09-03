@@ -15,7 +15,7 @@ import java.util.List;
  *
  */
 
-public class MeshModelRefactored implements ModelDefinition<PopulationState> {
+public class MeshModelRefactored extends PopulationModelDefinition {
 
 
     public static double LAMBDA_S=5.0;

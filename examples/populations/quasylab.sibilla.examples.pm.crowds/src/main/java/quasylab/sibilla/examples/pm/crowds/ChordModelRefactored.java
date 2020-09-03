@@ -9,7 +9,7 @@ import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ChordModelRefactored implements ModelDefinition<PopulationState>  {
+public class ChordModelRefactored extends PopulationModelDefinition  {
 
     public static double LAMBDA_S = 5.0;
     public static double P_F = 0.75;

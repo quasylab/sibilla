@@ -23,25 +23,25 @@
 
 package quasylab.sibilla.langs.pm;
 
-import java.util.Locale;
-
 public class ElementDeclarationGenerator extends PopulationModelBaseVisitor<String> {
 
     private static final String CONSTANT_DECLARATION_CODE = "public final static %s %s = %s";
     private static final String MEASURE_DECLARATION_CODE = "public double %s( PopulationState "+ParseUtil.getStateName()+" ) { return %s; }";
-    private static final String RULE_DECLARATION_CODE = "public void %s(PopulationModel model) {\n%s\n}";
+    private static final String RULE_DECLARATION_CODE =
+            "public void %s(PopulationModel model) {\n " +
+            "    String ruleName = \"%s\";\n    %s\n}";
     private static final String FOR_RULE_DECLARATION_CODE = "for(int %1$s = %2$s;%1$s<%3$s; %1$s++) {\n%4$s\n}";
     private static final String WHEN_RULE_DECLARATION_CODE = "if (%s) {\n%s\n}";
     private static final String BODY_RULE_DECLARATION_CODE = "model.addRule(";
 
 
 
-    private final ExpressionToJava expressionToJava;
+    private final StringTemplateGenerator stringTemplateGenerator;
     private final SymbolTable symbolTable;
 
-    public ElementDeclarationGenerator(SymbolTable symbolTable, ExpressionToJava expressionToJava) {
+    public ElementDeclarationGenerator(SymbolTable symbolTable, StringTemplateGenerator stringTemplateGenerator) {
         this.symbolTable = symbolTable;
-        this.expressionToJava = expressionToJava;
+        this.stringTemplateGenerator = stringTemplateGenerator;
     }
 
     @Override
@@ -51,7 +51,7 @@ public class ElementDeclarationGenerator extends PopulationModelBaseVisitor<Stri
 
     @Override
     public String visitConst_declaration(PopulationModelParser.Const_declarationContext ctx) {
-        return String.format(CONSTANT_DECLARATION_CODE,symbolTable.getType(ctx.name.getText()).javaType(),ParseUtil.getSymbolName(ctx.name.getText()),ctx.expr().accept(expressionToJava));
+        return String.format(CONSTANT_DECLARATION_CODE,symbolTable.getType(ctx.name.getText()).javaType(),ParseUtil.getSymbolName(ctx.name.getText()),ctx.expr().accept(stringTemplateGenerator));
     }
 
     @Override
@@ -66,22 +66,34 @@ public class ElementDeclarationGenerator extends PopulationModelBaseVisitor<Stri
 
     @Override
     public String visitFor_statement(PopulationModelParser.For_statementContext ctx) {
-        return super.visitFor_statement(ctx);
+        return String.format(FOR_RULE_DECLARATION_CODE,
+                ctx.name.getText(),
+                ctx.range().min.accept(stringTemplateGenerator),
+                ctx.range().max.accept(stringTemplateGenerator),
+                ctx.next.accept(this));
     }
 
     @Override
     public String visitWhen_statement(PopulationModelParser.When_statementContext ctx) {
-        return super.visitWhen_statement(ctx);
+        return String.format(WHEN_RULE_DECLARATION_CODE,ctx.arg.accept(stringTemplateGenerator),ctx.arg.accept(this));
     }
 
     @Override
     public String visitRule_body(PopulationModelParser.Rule_bodyContext ctx) {
-        return super.visitRule_body(ctx);
+        String toReturn =  "model.addRule(\n";
+        toReturn        += "    ruleName,\n";
+        if (ctx.guard != null) {
+            toReturn        += "    "+ParseUtil.getStateName()+" -> "+ctx.guard.accept(stringTemplateGenerator)+",\n";
+        }
+        toReturn        += ")\n";
+        return toReturn;
     }
+
+
 
     @Override
     public String visitMeasure_declaration(PopulationModelParser.Measure_declarationContext ctx) {
-        return String.format(MEASURE_DECLARATION_CODE,ParseUtil.getMeasureName(ctx.name.getText()),ctx.expr().accept(expressionToJava));
+        return String.format(MEASURE_DECLARATION_CODE,ParseUtil.getMeasureName(ctx.name.getText()),ctx.expr().accept(stringTemplateGenerator));
     }
 
     @Override
