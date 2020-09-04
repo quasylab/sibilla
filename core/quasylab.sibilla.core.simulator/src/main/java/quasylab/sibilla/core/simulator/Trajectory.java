@@ -131,11 +131,12 @@ public class Trajectory<S extends State> implements Externalizable {
 
     @Override
     public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeInt(data.size());
         out.writeDouble(start);
         out.writeDouble(end);
         out.writeBoolean(successful);
         out.writeLong(generationTime);
-        out.writeInt(data.size());
+
         for (Sample sampleToWrite : data) {
             out.writeObject(sampleToWrite);
         }
@@ -143,11 +144,12 @@ public class Trajectory<S extends State> implements Externalizable {
 
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        int numberOfSamples = in.readInt();
         this.start = in.readDouble();
         this.end = in.readDouble();
         this.successful = in.readBoolean();
         this.generationTime = in.readLong();
-        int numberOfSamples = in.readInt();
+
         List<Sample<S>> samples = new LinkedList<Sample<S>>();
         for (int i = 0; i < numberOfSamples; i++) {
             samples.add((Sample) in.readObject());
