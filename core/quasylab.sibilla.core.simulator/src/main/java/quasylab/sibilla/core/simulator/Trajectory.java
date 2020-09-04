@@ -46,7 +46,7 @@ public class Trajectory<S extends State> implements Externalizable {
     private List<Sample<S>> data;
     private double start = Double.NaN;
     private double end = Double.NaN;
-    private boolean succesfull;
+    private boolean successful;
     private long generationTime = -1;
 
     public Trajectory() {
@@ -93,17 +93,17 @@ public class Trajectory<S extends State> implements Externalizable {
     }
 
     /**
-     * @return the succesfull
+     * @return the succesful
      */
-    public boolean isSuccesfull() {
-        return succesfull;
+    public boolean isSuccessful() {
+        return successful;
     }
 
     /**
-     * @param succesfull the succesfull to set
+     * @param successful the succesful to set
      */
-    public void setSuccesfull(boolean succesfull) {
-        this.succesfull = succesfull;
+    public void setSuccessful(boolean successful) {
+        this.successful = successful;
     }
 
     /**
@@ -133,7 +133,7 @@ public class Trajectory<S extends State> implements Externalizable {
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeDouble(start);
         out.writeDouble(end);
-        out.writeBoolean(succesfull);
+        out.writeBoolean(successful);
         out.writeLong(generationTime);
         out.writeInt(data.size());
         for (Sample sampleToWrite : data) {
@@ -145,7 +145,7 @@ public class Trajectory<S extends State> implements Externalizable {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         this.start = in.readDouble();
         this.end = in.readDouble();
-        this.succesfull = in.readBoolean();
+        this.successful = in.readBoolean();
         this.generationTime = in.readLong();
         int numberOfSamples = in.readInt();
         List<Sample<S>> samples = new LinkedList<Sample<S>>();

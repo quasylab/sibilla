@@ -52,12 +52,12 @@ public class TrajectorySerializer {
         double start = t.getStart();
         double end = t.getEnd();
         long generationTime = t.getGenerationTime();
-        int isSuccessfull = t.isSuccesfull() ? 1 : 0;
+        int isSuccessful = t.isSuccessful() ? 1 : 0;
         toSerializeInto.write(ByteBuffer.allocate(4).putInt(numberOfSamples).array());
         toSerializeInto.write(ByteBuffer.allocate(8).putDouble(start).array());
         toSerializeInto.write(ByteBuffer.allocate(8).putDouble(end).array());
         toSerializeInto.write(ByteBuffer.allocate(8).putLong(generationTime).array());
-        toSerializeInto.write(ByteBuffer.allocate(4).putInt(isSuccessfull).array());
+        toSerializeInto.write(ByteBuffer.allocate(4).putInt(isSuccessful).array());
         for (Sample<S> sample : t.getData()) {
             SampleSerializer.serialize(toSerializeInto, sample, model);
         }
@@ -101,7 +101,7 @@ public class TrajectorySerializer {
         t.setStart(start);
         t.setEnd(end);
         t.setGenerationTime(generationTime);
-        t.setSuccesfull(isSuccessfull);
+        t.setSuccessful(isSuccessfull);
 
         for (int i = 0; i < numberOfSamples; i++) {
             Sample<S> newSample = SampleSerializer.deserialize(toDeserializeFrom, model);

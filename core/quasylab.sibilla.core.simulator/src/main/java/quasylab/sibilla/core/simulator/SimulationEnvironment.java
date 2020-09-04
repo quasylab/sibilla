@@ -258,11 +258,11 @@ public class SimulationEnvironment implements Serializable {
 
 		@Override
 		public void accept(Trajectory<S> t) {
-			if (t.isSuccesfull()) {
+			if (t.isSuccessful()) {
 				counter++;
 			}
 			if (!silent) {
-				System.out.print(t.isSuccesfull() ? '+' : '-');
+				System.out.print(t.isSuccessful() ? '+' : '-');
 				System.out.flush();
 			}
 		}
