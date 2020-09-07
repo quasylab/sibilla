@@ -105,7 +105,7 @@ public class ClientSimulationEnvironment<S extends State> {
                 "client",
                 List.of("submitreceiveandclosetime"));
 
-        this.data = new SimulationDataSet<>(random, modelDefinition, model, initialState, samplingFunction, replica,
+        this.data = new SimulationDataSet<>(random, modelDefinition.getClass().getName(), model, initialState, samplingFunction, replica,
                 deadline);
 
         for (int i = 1; i <= this.submitRepetitions; i++) {
@@ -136,7 +136,7 @@ public class ClientSimulationEnvironment<S extends State> {
             targetMaster.writeObject(serializer.serialize(ClientCommand.CLOSE_CONNECTION));
             LOGGER.info(String.format("[%s] command sent to the master: %s", ClientCommand.CLOSE_CONNECTION,
                     targetMaster.getNetworkInfo().toString()));
-            targetMaster.writeObject(serializer.serialize(this.data.getModelDefinition().getClass().getName()));
+            targetMaster.writeObject(serializer.serialize(this.data.getModelDefinitionClassName()));
 
             MasterCommand answer = (MasterCommand) serializer.deserialize(targetMaster.readObject());
             if (answer.equals(MasterCommand.CLOSE_CONNECTION)) {
@@ -164,14 +164,14 @@ public class ClientSimulationEnvironment<S extends State> {
      */
     private void initConnection(TCPNetworkManager targetMaster) throws IOException {
         try {
-            LOGGER.info(String.format("Loading [%s] class bytes to be transmitted over network", data.getModelDefinition().getClass().getName()));
-            byte[] classBytes = ClassBytesLoader.loadClassBytes(data.getModelDefinition().getClass().getName());
+            LOGGER.info(String.format("Loading [%s] class bytes to be transmitted over network", data.getModelDefinitionClassName()));
+            byte[] classBytes = ClassBytesLoader.loadClassBytes(data.getModelDefinitionClassName());
 
             targetMaster.writeObject(serializer.serialize(ClientCommand.INIT));
             LOGGER.info(String.format("[%s] command sent to the master: %s", ClientCommand.INIT,
                     targetMaster.getNetworkInfo().toString()));
-            targetMaster.writeObject(serializer.serialize(data.getModelDefinition().getClass().getName()));
-            LOGGER.info(String.format("[%s] Model name has been sent to the master: %s", this.data.getModelDefinition().getClass().getName(),
+            targetMaster.writeObject(serializer.serialize(data.getModelDefinitionClassName()));
+            LOGGER.info(String.format("[%s] Model name has been sent to the master: %s", this.data.getModelDefinitionClassName(),
                     targetMaster.getNetworkInfo().toString()));
             targetMaster.writeObject(classBytes);
             LOGGER.info(String.format("Class bytes have been sent to the master: %s", targetMaster.getNetworkInfo().toString()));

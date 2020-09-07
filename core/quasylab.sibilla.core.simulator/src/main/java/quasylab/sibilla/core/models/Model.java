@@ -36,6 +36,7 @@ import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -45,7 +46,7 @@ import java.util.Objects;
  *
  * @param <S> data type for the state of the process.
  */
-public interface Model<S extends State> {
+public interface Model<S extends State> extends Serializable {
 
     /**
      * Samples possible next state when the process is in a given state at

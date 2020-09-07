@@ -45,55 +45,57 @@ import java.util.logging.Logger;
 
 public class ClientApplication implements Serializable {
 
-        public final static int SAMPLINGS = 100;
-        public final static double DEADLINE = 600;
-        private static Logger LOGGER;
-        private static final long serialVersionUID = 1L;
-        private static final int REPLICA = 1000;
-        private static final int submitRepetitions = 1;
-        private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
+    public final static int SAMPLINGS = 100;
+    public final static double DEADLINE = 600;
+    private static Logger LOGGER;
+    private static final long serialVersionUID = 1L;
+    private static final int REPLICA = 1000;
+    private static final int submitRepetitions = 1;
+    private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
 
-        public static void main(String... args) throws Exception {
+    public static void main(String... args) throws Exception {
 
-                LOGGER = HostLoggerSupplier.getInstance(String.format("Client")).getLogger();
+        LOGGER = HostLoggerSupplier.getInstance(String.format("Client")).getLogger();
 
-                final Map<String, String> options = StartupUtils.parseOptions(args);
+        final Map<String, String> options = StartupUtils.parseOptions(args);
 
-                final String keyStoreType = options.getOrDefault("keyStoreType", "JKS");
-                final String keyStorePath = options.getOrDefault("keyStorePath", "clientKeyStore.jks");
-                final String keyStorePass = options.getOrDefault("keyStorePass", "clientPass");
-                final String trustStoreType = options.getOrDefault("trustStoreType", "JKS");
-                final String trustStorePath = options.getOrDefault("trustStorePath", "clientTrustStore.jks");
-                final String trustStorePass = options.getOrDefault("trustStorePass", "clientPass");
+        final String keyStoreType = options.getOrDefault("keyStoreType", "JKS");
+        final String keyStorePath = options.getOrDefault("keyStorePath", "clientKeyStore.jks");
+        final String keyStorePass = options.getOrDefault("keyStorePass", "clientPass");
+        final String trustStoreType = options.getOrDefault("trustStoreType", "JKS");
+        final String trustStorePath = options.getOrDefault("trustStorePath", "clientTrustStore.jks");
+        final String trustStorePass = options.getOrDefault("trustStorePass", "clientPass");
 
-                SSLUtils.getInstance().setKeyStoreType(keyStoreType);
-                SSLUtils.getInstance().setKeyStorePath(keyStorePath);
-                SSLUtils.getInstance().setKeyStorePass(keyStorePass);
-                SSLUtils.getInstance().setTrustStoreType(trustStoreType);
-                SSLUtils.getInstance().setTrustStorePath(trustStorePath);
-                SSLUtils.getInstance().setTrustStorePass(trustStorePass);
+        SSLUtils.getInstance().setKeyStoreType(keyStoreType);
+        SSLUtils.getInstance().setKeyStorePath(keyStorePath);
+        SSLUtils.getInstance().setKeyStorePass(keyStorePass);
+        SSLUtils.getInstance().setTrustStoreType(trustStoreType);
+        SSLUtils.getInstance().setTrustStorePath(trustStorePath);
+        SSLUtils.getInstance().setTrustStorePass(trustStorePass);
 
-                final String masterAddress = options.getOrDefault("masterAddress", "");
-                final int masterPort = Integer.parseInt(options.getOrDefault("masterPort", "10001"));
-                final TCPNetworkManagerType masterNetworkManagerType = StartupUtils
-                                .TCPNetworkManagerParser(options.getOrDefault("masterCommunicationType", "SECURE"));
+        final String masterAddress = options.getOrDefault("masterAddress", "");
+        final int masterPort = Integer.parseInt(options.getOrDefault("masterPort", "10001"));
+        final TCPNetworkManagerType masterNetworkManagerType = StartupUtils
+                .TCPNetworkManagerParser(options.getOrDefault("masterCommunicationType", "SECURE"));
 
-                final NetworkInfo masterServerInfo = new NetworkInfo(InetAddress.getByName(masterAddress), masterPort,
-                                masterNetworkManagerType);
-                LOGGER.info(String.format("Local address: [%s]", NetworkUtils.getLocalAddress()));
-                LOGGER.info(String.format("Starting the Master Server with the params:\n" + "-keyStoreType: [%s]\n"
-                                + "-keyStorePath: [%s]\n" + "-trustStoreType: [%s]\n" + "-trustStorePath: [%s]\n"
-                                + "-masterAddress: [%s]\n" + "-masterPort: [%d]\n" + "-masterCommunicationType: [%s]",
-                                keyStoreType, keyStorePath, trustStoreType, trustStorePath, masterAddress, masterPort,
-                                masterNetworkManagerType));
-                MeshModelRefactored modelDefinition = new MeshModelRefactored();
+        final NetworkInfo masterServerInfo = new NetworkInfo(InetAddress.getByName(masterAddress), masterPort,
+                masterNetworkManagerType);
+        LOGGER.info(String.format("Local address: [%s]", NetworkUtils.getLocalAddress()));
+        LOGGER.info(String.format("Starting the Master Server with the params:\n" + "-keyStoreType: [%s]\n"
+                        + "-keyStorePath: [%s]\n" + "-trustStoreType: [%s]\n" + "-trustStorePath: [%s]\n"
+                        + "-masterAddress: [%s]\n" + "-masterPort: [%d]\n" + "-masterCommunicationType: [%s]",
+                keyStoreType, keyStorePath, trustStoreType, trustStorePath, masterAddress, masterPort,
+                masterNetworkManagerType));
 
-                PopulationModel model = modelDefinition.createModel();
+        SEIRModelDefinition modelDefinition = new SEIRModelDefinition();
 
-                new ClientSimulationEnvironment(RANDOM_GENERATOR, modelDefinition, model, modelDefinition.state(),
-                                model.getSamplingFunction(SAMPLINGS, DEADLINE / SAMPLINGS), REPLICA, DEADLINE,
-                                masterServerInfo, SerializerType.FST, submitRepetitions);
+        PopulationModel model = modelDefinition.createModel();
 
-        }
+
+        new ClientSimulationEnvironment(RANDOM_GENERATOR, modelDefinition, model, modelDefinition.state(),
+                model.getSamplingFunction(SAMPLINGS, DEADLINE / SAMPLINGS), REPLICA, DEADLINE,
+                masterServerInfo, SerializerType.FST, submitRepetitions);
+
+    }
 
 }

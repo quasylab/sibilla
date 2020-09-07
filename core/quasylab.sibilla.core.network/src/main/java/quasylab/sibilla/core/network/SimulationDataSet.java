@@ -50,10 +50,8 @@ public class SimulationDataSet<S extends State> implements Serializable {
      */
     private final RandomGenerator randomGenerator;
 
-    /**
-     * {@link quasylab.sibilla.core.models.ModelDefinition} that represent the Model used in the simulation.
-     */
-    private final ModelDefinition<S> modelDefinition;
+
+    private final String modelDefinitionClassName;
 
     /**
      * {@link quasylab.sibilla.core.models.Model} used in the simulation.
@@ -84,16 +82,15 @@ public class SimulationDataSet<S extends State> implements Serializable {
      * Creates a SimulationDataSet object with the parameters given in input.
      *
      * @param random            RandomGenerator used by the simulation
-     * @param modelDefinition   {@link quasylab.sibilla.core.models.ModelDefinition} that represent the Model used in the simulation
      * @param model             {@link quasylab.sibilla.core.models.Model} used in the simulation
      * @param initialState      Initial state of the model
      * @param sampling_function {@link quasylab.sibilla.core.simulator.sampling.SamplingFunction} used to sample the model
      * @param replica           Number of times the simulation is executed
      * @param deadline          The deadline of the simulation
      */
-    public SimulationDataSet(RandomGenerator random, ModelDefinition<S> modelDefinition, Model<S> model, S initialState,
+    public SimulationDataSet(RandomGenerator random, String modelDefinitionClassName, Model<S> model, S initialState,
                              SamplingFunction<S> sampling_function, int replica, double deadline) {
-        this.modelDefinition = modelDefinition;
+        this.modelDefinitionClassName = modelDefinitionClassName;
         this.randomGenerator = random;
         this.model = model;
         this.modelInitialState = initialState;
@@ -111,7 +108,7 @@ public class SimulationDataSet<S extends State> implements Serializable {
         result = prime * result + (int) (temp ^ (temp >>> 32));
         result = prime * result + ((model == null) ? 0 : model.hashCode());
         result = prime * result + ((modelInitialState == null) ? 0 : modelInitialState.hashCode());
-        result = prime * result + ((modelDefinition == null) ? 0 : modelDefinition.hashCode());
+        result = prime * result + ((modelDefinitionClassName == null) ? 0 : modelDefinitionClassName.hashCode());
         result = prime * result
                 + ((modelSamplingFunction == null) ? 0 : modelSamplingFunction.hashCode());
         result = prime * result + ((randomGenerator == null) ? 0 : randomGenerator.hashCode());
@@ -140,10 +137,10 @@ public class SimulationDataSet<S extends State> implements Serializable {
                 return false;
         } else if (!modelInitialState.equals(other.modelInitialState))
             return false;
-        if (modelDefinition == null) {
-            if (other.modelDefinition != null)
+        if (modelDefinitionClassName == null) {
+            if (other.modelDefinitionClassName != null)
                 return false;
-        } else if (!modelDefinition.equals(other.modelDefinition))
+        } else if (!modelDefinitionClassName.equals(other.modelDefinitionClassName))
             return false;
         if (modelSamplingFunction == null) {
             if (other.modelSamplingFunction != null)
@@ -167,13 +164,9 @@ public class SimulationDataSet<S extends State> implements Serializable {
         return randomGenerator;
     }
 
-    /**
-     * Returns the {@link quasylab.sibilla.core.models.ModelDefinition} that represent the Model used in the simulation.
-     *
-     * @return ModelDefinition that represent the Model used in the simulation
-     */
-    public ModelDefinition<S> getModelDefinition() {
-        return modelDefinition;
+
+    public String getModelDefinitionClassName() {
+        return modelDefinitionClassName;
     }
 
     /**
@@ -229,7 +222,7 @@ public class SimulationDataSet<S extends State> implements Serializable {
                         + " modelReferenceInitialState hashcode: %d \n" + " modelReferenceInitialState class: %s \n"
                         + " modelReferenceSamplingFunction hashcode: %d \n"
                         + " modelReferenceSamplingFunction class: %s \n" + " replica: %d \n deadline: %e \n",
-                randomGenerator.hashCode(), randomGenerator.getClass().getName(), modelDefinition,
+                randomGenerator.hashCode(), randomGenerator.getClass().getName(), modelDefinitionClassName,
                 model.hashCode(), model.getClass().getName(), modelInitialState.hashCode(),
                 modelInitialState.getClass().getName(), modelSamplingFunction.hashCode(),
                 modelSamplingFunction.getClass().getName(), replica, deadline);

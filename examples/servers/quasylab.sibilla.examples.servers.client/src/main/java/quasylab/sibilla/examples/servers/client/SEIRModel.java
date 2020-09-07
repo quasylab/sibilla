@@ -32,9 +32,7 @@ package quasylab.sibilla.examples.servers.client;
 import quasylab.sibilla.core.models.pm.PopulationModel;
 import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.io.FileNotFoundException;
 import java.net.UnknownHostException;
@@ -51,60 +49,12 @@ public class SEIRModel {
 
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
 		SEIRModelDefinition def = new SEIRModelDefinition();
-		SimulationEnvironment simulator = new SimulationEnvironment();
 		PopulationModel model = def.createModel();
+		SimulationEnvironment simulator = new SimulationEnvironment();
 		SamplingFunction<PopulationState> collection = model.getSamplingFunction(SAMPLINGS,DEADLINE/SAMPLINGS);
 		simulator.simulate(model,def.state(),collection,REPLICA,DEADLINE);
 		collection.printTimeSeries("data","seir_",".data");
 	}
 
-
-//	PopulationRule rule_S_I = new ReactionRule(
-//			"S->I",
-//			new Population[] { new Population(S), new Population(I)} ,
-//			new Population[] { new Population(I), new Population(I)},
-//			s -> s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(I)/N));
-//
-//	PopulationRule rule_I_R = new ReactionRule(
-//			"I->R",
-//			new Population[] { new Population(I) },
-//			new Population[] { new Population(R) },
-//			s -> s.getOccupancy(I)*LAMBDA_R
-//	);
-//
-//
-//	PopulationModel f = new PopulationModel();
-//		f.addState("initial", initialState());
-//		f.addRule(rule_S_I);
-//		f.addRule(rule_I_R);
-//
-//	StatisticSampling<PopulationState> fsSamp =
-//			StatisticSampling.measure("Fraction Infected",
-//					SAMPLINGS, DEADLINE,
-//					s -> s.getOccupancy(S)/N) ;
-//	StatisticSampling<PopulationState> fiSamp =
-//			StatisticSampling.measure("Fraction Infected",
-//					SAMPLINGS, DEADLINE,
-//					s -> s.getOccupancy(I)/N) ;
-//	StatisticSampling<PopulationState> frSamp =
-//			StatisticSampling.measure("Fraction Recovered",
-//					SAMPLINGS, DEADLINE,
-//					s -> s.getOccupancy(R)/N) ;
-//
-////		StatisticSampling<PopulationModel> eSamp = StatisticSampling.measure("#E", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(E)) ;
-////		StatisticSampling<PopulationModel> iSamp = StatisticSampling.measure("#I", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(I)) ;
-////		StatisticSampling<PopulationModel> rSamp = StatisticSampling.measure("#R", SAMPLINGS, DEADLINE, s -> s.getCurrentState().getOccupancy(R)) ;
-//
-//	// SimulationEnvironment<PopulationModel,PopulationState> sim = new SimulationEnvironment<>( f );
-//	SimulationEnvironment sim = new SimulationEnvironment( ThreadSimulationManager.getFixedThreadSimulationManagerFactory(TASKS) );
-//
-//	SamplingFunction<PopulationState> sf = new SamplingCollection<>(fsSamp,fiSamp,frSamp);
-//
-//		sim.simulate(new DefaultRandomGenerator(),f,initialState(),sf,REPLICA,DEADLINE, true);
-//
-//		fiSamp.printTimeSeries(new PrintStream("data/sir_I_.data"),';');
-//		frSamp.printTimeSeries(new PrintStream("data/sir_R_.data"),';');
-//		fsSamp.printTimeSeries(new PrintStream("data/sir_S_.data"),';');
-//		System.exit(0);
 
 }

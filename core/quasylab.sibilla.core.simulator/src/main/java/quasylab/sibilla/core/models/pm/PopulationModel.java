@@ -51,7 +51,7 @@ import java.util.stream.IntStream;
  *
  * @author loreti
  */
-public class PopulationModel implements MarkovProcess<PopulationState>, Serializable {
+public class PopulationModel implements MarkovProcess<PopulationState> {
 
     private static final long serialVersionUID = 6871037109869821108L;
 
