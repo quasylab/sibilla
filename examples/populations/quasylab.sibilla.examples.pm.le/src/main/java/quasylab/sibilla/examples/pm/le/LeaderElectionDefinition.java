@@ -28,109 +28,149 @@ package quasylab.sibilla.examples.pm.le;
 
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.models.pm.*;
+import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import quasylab.sibilla.core.simulator.sampling.Measure;
+import quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
 
-public class LeaderElectionDefinition implements ModelDefinition<PopulationState> {
+import java.util.LinkedList;
+import java.util.List;
 
-        public final static int C = 0;
-        public final static int S0 = 1;
-        public final static int S1 = 2;
-        public final static int F = 3;
-        public final static int L = 4;
+public class LeaderElectionDefinition extends PopulationModelDefinition {
 
-        public final static int INIT_C = 100;
-        public final static int INIT_S0 = 0;
-        public final static int INIT_S1 = 0;
-        public final static int INIT_F = 0;
-        public final static int INIT_L = 0;
-        public final static double N = INIT_C + INIT_F + INIT_L;
 
-        public final static double SELECT_RATE = 1.0;
-        public final static double COM_RATE = 1.0;
-        public final static double WAITING_RATE = 20.0;
-        public final static double MEET_PROB = 0.1;
+    public final static int INIT_C = 100;
+    public final static int INIT_S0 = 0;
+    public final static int INIT_S1 = 0;
+    public final static int INIT_F = 0;
+    public final static int INIT_L = 0;
+    public final static double N = INIT_C+INIT_F+INIT_L;
 
-        @Override
-        public int stateArity() {
-                return 0;
-        }
+    public final static double SELECT_RATE = 1.0;
+    public final static double COM_RATE = 1.0;
+    public final static double WAITING_RATE = 20.0;
+    public final static double MEET_PROB = 0.1;
 
-        @Override
-        public String[] states() {
-                return new String[0];
-        }
+    @Override
+    protected PopulationRegistry generatePopulationRegistry() {
+        return PopulationRegistry.createRegistry("C", "S0", "S1", "F", "L");
+    }
 
-        @Override
-        public PopulationState state(String name, double... parameters) {
-                return null;
-        }
+    @Override
+    protected List<PopulationRule> getRules() {
+        PopulationRegistry reg = getRegistry();
+        int C = reg.indexOf("C");
+        int S0 = reg.indexOf("S0");
+        int S1 = reg.indexOf("S1");
+        int F = reg.indexOf("F");
+        int L = reg.indexOf("L");
+        LinkedList<PopulationRule> rules = new LinkedList<>();
+        PopulationRule rule_C_S0 = new ReactionRule(
+                "C->S0",
+                new Population[] { new Population(C) } ,
+                new Population[] { new Population(S0) },
+                (t,s) -> s.getOccupancy(C)*0.5*SELECT_RATE
+        );
 
-        @Override
-        public PopulationState state(double... parameters) {
-                return new PopulationState(new int[] { INIT_C, INIT_S0, INIT_S1, INIT_F, INIT_L });
-        }
+        PopulationRule rule_C_S1 = new ReactionRule(
+                "C->S1",
+                new Population[] { new Population(C) } ,
+                new Population[] { new Population(S1) },
+                (t,s) -> s.getOccupancy(C)*0.5*SELECT_RATE);
 
-        @Override
-        public Model<PopulationState> createModel() {
-                PopulationRule rule_C_S0 = new ReactionRule("C->S0", new Population[] { new Population(C) },
-                                new Population[] { new Population(S0) },
-                                (t, s) -> s.getOccupancy(C) * 0.5 * SELECT_RATE);
 
-                PopulationRule rule_C_S1 = new ReactionRule("C->S1", new Population[] { new Population(C) },
-                                new Population[] { new Population(S1) },
-                                (t, s) -> s.getOccupancy(C) * 0.5 * SELECT_RATE);
 
-                PopulationRule rule_S0_S1 = new ReactionRule("S0*S1->F*C",
-                                new Population[] { new Population(S0), new Population(S1) },
-                                new Population[] { new Population(F), new Population(C) },
-                                (t, s) -> (s.getOccupancy(S0) * s.getOccupancy(S1)
-                                                / (s.getOccupancy(S0, S1) * (s.getOccupancy(S0, S1) - 1))
-                                                * s.getOccupancy(S0, S1) * COM_RATE));
+        PopulationRule rule_S0_S1 = new ReactionRule(
+                "S0*S1->F*C",
+                new Population[] { new Population(S0) , new Population(S1) } ,
+                new Population[] { new Population(F) , new Population(C) } ,
+                (t,s) -> (
+                        s.getOccupancy(S0)*s.getOccupancy(S1)/(s.getOccupancy(S0,S1)*(s.getOccupancy(S0,S1)-1) )
+                                *s.getOccupancy(S0,S1)
+                                *COM_RATE
+                )
+        ) ;
 
-                PopulationRule rule_S0_S0 = new ReactionRule("S0*S1->F*C", new Population[] { new Population(S0, 2) },
-                                new Population[] { new Population(C, 2) },
-                                (t, s) -> (s.getOccupancy(S0) * (s.getOccupancy(S0) - 1)
-                                                / (s.getOccupancy(S0, S1) * (s.getOccupancy(S0, S1) - 1))
-                                                * s.getOccupancy(S0, S1) / 2 * COM_RATE));
 
-                PopulationRule rule_S1_S1 = new ReactionRule("S0*S1->F*C", new Population[] { new Population(S1, 2) },
-                                new Population[] { new Population(C, 2) },
-                                (t, s) -> (s.getOccupancy(S1) * (s.getOccupancy(S1) - 1)
-                                                / (s.getOccupancy(S0, S1) * (s.getOccupancy(S0, S1) - 1))
-                                                * s.getOccupancy(S0, S1) / 2 * COM_RATE));
+        PopulationRule rule_S0_S0 = new ReactionRule(
+                "S0*S1->F*C",
+                new Population[] { new Population(S0,2)} ,
+                new Population[] { new Population(C,2)} ,
+                (t,s) -> (
+                        s.getOccupancy(S0)*(s.getOccupancy(S0)-1)/(s.getOccupancy(S0,S1)*(s.getOccupancy(S0,S1)-1) )
+                                *s.getOccupancy(S0,S1)/2
+                                *COM_RATE
+                )
+        ) ;
 
-                PopulationRule rule_S0_L = new ReactionRule("S0 ->F", new Population[] { new Population(S0) },
-                                new Population[] { new Population(L) }, (t, s) -> s.getOccupancy(S0) * WAITING_RATE);
 
-                PopulationRule rule_S1_L = new ReactionRule("S1 ->F", new Population[] { new Population(S1) },
-                                new Population[] { new Population(L) }, (t, s) -> s.getOccupancy(S1) * WAITING_RATE);
+        PopulationRule rule_S1_S1 = new ReactionRule(
+                "S0*S1->F*C",
+                new Population[] { new Population(S1,2) } ,
+                new Population[] { new Population(C,2) } ,
+                (t,s) -> (
+                        s.getOccupancy(S1)*(s.getOccupancy(S1)-1)/(s.getOccupancy(S0,S1)*(s.getOccupancy(S0,S1)-1) )
+                                *s.getOccupancy(S0,S1)/2
+                                *COM_RATE
+                )
+        ) ;
 
-                PopulationRule rule_L_C = new ReactionRule("L -> C", new Population[] { new Population(L) },
-                                new Population[] { new Population(C) },
-                                (t, s) -> s.getOccupancy(S0, S1, C) / N * s.getOccupancy(L) * COM_RATE);
 
-                PopulationModel f = new PopulationModel(5, this);
-                f.addRule(rule_C_S0);
-                f.addRule(rule_C_S1);
-                f.addRule(rule_S0_S1);
-                f.addRule(rule_S0_S0);
-                f.addRule(rule_S1_S1);
-                f.addRule(rule_L_C);
-                f.addRule(rule_S0_L);
-                f.addRule(rule_S1_L);
-                return f;
-        }
+        PopulationRule rule_S0_L = new ReactionRule(
+                "S0 ->F",
+                new Population[] { new Population(S0) } ,
+                new Population[] { new Population(L) } ,
+                (t,s) -> s.getOccupancy(S0)*WAITING_RATE);
 
-        public static double numberOfSupplicants(PopulationState s) {
-                return s.getOccupancy(C) + s.getOccupancy(S0) + s.getOccupancy(S1);
-        }
+        PopulationRule rule_S1_L = new ReactionRule(
+                "S1 ->F",
+                new Population[] { new Population(S1) } ,
+                new Population[] { new Population(L) } ,
+                (t,s) -> s.getOccupancy(S1)*WAITING_RATE);
 
-        public static double numberOfFollowers(PopulationState s) {
-                return s.getOccupancy(F);
-        }
 
-        public static double numberOfLeaders(PopulationState s) {
-                return s.getOccupancy(L);
-        }
+
+        PopulationRule rule_L_C = new ReactionRule(
+                "L -> C",
+                new Population[] { new Population(L) } ,
+                new Population[] { new Population(C) } ,
+                (t,s) -> s.getOccupancy(S0,S1,C)/N*s.getOccupancy(L)*COM_RATE);
+
+
+        rules.add(rule_C_S0);
+        rules.add(rule_C_S1);
+        rules.add(rule_S0_S1);
+        rules.add(rule_S0_S0);
+        rules.add(rule_S1_S1);
+        rules.add(rule_L_C);
+        rules.add(rule_S0_L);
+        rules.add(rule_S1_L);
+        return rules;
+    }
+
+    @Override
+    protected List<Measure<PopulationState>> getMeasures() {
+        PopulationRegistry reg = getRegistry();
+        int C = reg.indexOf("C");
+        int S0 = reg.indexOf("S0");
+        int S1 = reg.indexOf("S1");
+        int F = reg.indexOf("F");
+        int L = reg.indexOf("L");
+        LinkedList<Measure<PopulationState>> measures = new LinkedList<>();
+        measures.add(new SimpleMeasure<>("supplicants", s -> s.getOccupancy(C,S0,S1)));
+        return null;
+    }
+
+    @Override
+    protected void registerStates() {
+        setDefaultStateBuilder(new SimpleStateBuilder<>(this::initialState));
+    }
+
+    private PopulationState initialState(double[] doubles) {
+        return new PopulationState(getRegistry().size(), new Population(getRegistry().indexOf("C"),INIT_C));
+    }
+
+
 
 }

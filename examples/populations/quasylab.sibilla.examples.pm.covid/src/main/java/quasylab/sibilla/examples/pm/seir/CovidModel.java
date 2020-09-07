@@ -23,9 +23,11 @@
  */
 package quasylab.sibilla.examples.pm.seir;
 
+import quasylab.sibilla.core.models.pm.PopulationModel;
 import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.io.FileNotFoundException;
@@ -45,15 +47,10 @@ public class CovidModel {
     public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
         CovidDefinition def = new CovidDefinition();
         SimulationEnvironment simulator = new SimulationEnvironment();
-        SamplingCollection<PopulationState> collection = new SamplingCollection<>();
-        collection.add(StatisticSampling.measure("S",SAMPLINGS,DEADLINE, s -> s.getFraction(CovidDefinition.S)));
-        collection.add(StatisticSampling.measure("A",SAMPLINGS,DEADLINE,s -> s.getFraction(CovidDefinition.A)));
-        collection.add(StatisticSampling.measure("G",SAMPLINGS,DEADLINE,s -> s.getFraction(CovidDefinition.G)));
-        collection.add(StatisticSampling.measure("AG",SAMPLINGS,DEADLINE,s -> s.getFraction(CovidDefinition.G)+s.getFraction(CovidDefinition.A)));
-        collection.add(StatisticSampling.measure("R",SAMPLINGS,DEADLINE,s -> s.getFraction(CovidDefinition.R)));
-        collection.add(StatisticSampling.measure("D",SAMPLINGS,DEADLINE,s -> s.getFraction(CovidDefinition.D)));
         def.setParameter("lambdaMeet",4);
-        simulator.simulate(def.createModel(),def.state(),collection,REPLICA,DEADLINE);
+        PopulationModel model = def.createModel();
+        SamplingFunction<PopulationState> collection = model.getSamplingFunction(SAMPLINGS,DEADLINE/SAMPLINGS);
+        simulator.simulate(model,def.state(),collection,REPLICA,DEADLINE);
         collection.printTimeSeries("data","covid_",".data");
     }
 

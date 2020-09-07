@@ -23,6 +23,9 @@
  */
 package quasylab.sibilla.examples.pm.seir;
 
+import quasylab.sibilla.core.models.Model;
+import quasylab.sibilla.core.models.pm.PopulationModel;
+import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 
 import java.io.FileNotFoundException;
@@ -45,9 +48,12 @@ public class CovidReachability {
         SimulationEnvironment.silent = false;
         double lambda = 3.75;
         def.setParameter("lambdaMeet",lambda);
+        PopulationModel model = def.createModel();
+        int A = model.indexOf("A");
+        int G = model.indexOf("G");
         double p = simulator.reachability(0.01,0.01,200,def.createModel(),
                 def.state(),
-                s ->(s.getFraction(CovidDefinition.A)+s.getFraction(CovidDefinition.G))>0.5);
+                s ->(s.getFraction(A)+s.getFraction(G))>0.5);
         System.out.println("\n\n***"+lambda+"->"+p+"****\n\n");
     }
 

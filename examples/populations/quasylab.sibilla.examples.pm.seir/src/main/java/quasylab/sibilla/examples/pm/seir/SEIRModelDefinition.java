@@ -29,13 +29,14 @@ package quasylab.sibilla.examples.pm.seir;
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.pm.*;
+import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import quasylab.sibilla.core.simulator.sampling.Measure;
 
-public class SEIRModelDefinition implements ModelDefinition<PopulationState> {
+import java.util.LinkedList;
+import java.util.List;
 
-    public final static int S = 0;
-    public final static int E = 1;
-    public final static int I = 2;
-    public final static int R = 3;
+public class SEIRModelDefinition extends PopulationModelDefinition {
+
 
     public final static int INIT_S = 99;
     public final static int INIT_E = 0;
@@ -46,65 +47,72 @@ public class SEIRModelDefinition implements ModelDefinition<PopulationState> {
     public final static double LAMBDA_E = 1;
     public final static double LAMBDA_I = 1 / 3.0;
     public final static double LAMBDA_R = 1 / 7.0;
-    public final static double LAMBDA_DECAY = 1 / 30.0;
+    public final static double LAMBDA_DECAY = 1/30.0;
 
     @Override
-    public int stateArity() {
-        return 0;
+    protected PopulationRegistry generatePopulationRegistry() {
+        return PopulationRegistry.createRegistry("S", "E", "I", "R");
     }
 
     @Override
-    public String[] states() {
-        return new String[0];
+    protected List<PopulationRule> getRules() {
+        PopulationRegistry reg = getRegistry();
+        int S = reg.indexOf("S");
+        int E = reg.indexOf("E");
+        int I = reg.indexOf("I");
+        int R = reg.indexOf("R");
+
+        LinkedList<PopulationRule> rules = new LinkedList<>();
+        PopulationRule rule_S_E = new ReactionRule(
+                "S->E",
+                new Population[] { new Population(S), new Population(I)} ,
+                new Population[] { new Population(E), new Population(I)},
+                (t,s) -> s.getOccupancy(S)*LAMBDA_E*(s.getOccupancy(I)/N));
+
+        PopulationRule rule_E_I = new ReactionRule(
+                "E->I",
+                new Population[] { new Population(E) },
+                new Population[] { new Population(I) },
+                (t,s) -> s.getOccupancy(E)*LAMBDA_I
+        );
+
+        PopulationRule rule_I_R = new ReactionRule(
+                "I->R",
+                new Population[] { new Population(I) },
+                new Population[] { new Population(R) },
+                (t,s) -> s.getOccupancy(I)*LAMBDA_R
+        );
+
+
+        PopulationRule rule_R_S = new ReactionRule(
+                "R->S",
+                new Population[] { new Population(R) },
+                new Population[] { new Population(S) },
+                (t,s) -> s.getOccupancy(R)*LAMBDA_DECAY
+        );
+
+        rules.add(rule_S_E);
+        rules.add(rule_E_I);
+        rules.add(rule_I_R);
+        rules.add(rule_R_S);
+        return rules;
     }
 
     @Override
-    public PopulationState state(String name, double... parameters) {
+    protected List<Measure<PopulationState>> getMeasures() {
         return null;
     }
 
     @Override
-    public PopulationState state(double... parameters) {
-        return new PopulationState(new int[] { INIT_S, INIT_I, INIT_R });
+    protected void registerStates() {
+        setDefaultStateBuilder(new SimpleStateBuilder<>(this::initialState));
     }
 
-    @Override
-    public Model<PopulationState> createModel() {
-        PopulationRule rule_S_E = new ReactionRule("S->E", new Population[] { new Population(S), new Population(I) },
-                new Population[] { new Population(E), new Population(I) },
-                (t, s) -> s.getOccupancy(S) * LAMBDA_E * (s.getOccupancy(I) / N));
 
-        PopulationRule rule_E_I = new ReactionRule("E->I", new Population[] { new Population(E) },
-                new Population[] { new Population(I) }, (t, s) -> s.getOccupancy(E) * LAMBDA_I);
-
-        PopulationRule rule_I_R = new ReactionRule("I->R", new Population[] { new Population(I) },
-                new Population[] { new Population(R) }, (t, s) -> s.getOccupancy(I) * LAMBDA_R);
-
-        PopulationRule rule_R_S = new ReactionRule("R->S", new Population[] { new Population(R) },
-                new Population[] { new Population(S) }, (t, s) -> s.getOccupancy(R) * LAMBDA_DECAY);
-
-        PopulationModel f = new PopulationModel(4, this);
-        f.addRule(rule_S_E);
-        f.addRule(rule_E_I);
-        f.addRule(rule_I_R);
-        f.addRule(rule_R_S);
-        return f;
+    public PopulationState initialState(double... parameters) {
+        return new PopulationState( new int[] { INIT_S, INIT_I, INIT_R } );
     }
 
-    public static double fractionOfS(PopulationState s) {
-        return s.getFraction(S);
-    }
 
-    public static double fractionOfI(PopulationState s) {
-        return s.getFraction(I);
-    }
-
-    public static double fractionOfE(PopulationState s) {
-        return s.getFraction(E);
-    }
-
-    public static double fractionOfR(PopulationState s) {
-        return s.getFraction(R);
-    }
 
 }

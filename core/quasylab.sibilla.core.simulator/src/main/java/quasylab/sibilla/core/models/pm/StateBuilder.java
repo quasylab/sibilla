@@ -23,30 +23,14 @@
 
 package quasylab.sibilla.core.models.pm;
 
-import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.State;
 
-import java.util.TreeMap;
+public interface StateBuilder<S extends State> {
 
-public abstract class AbstractModelDefinition<T extends State> implements ModelDefinition<T> {
-
-    private TreeMap<String,Double> parameters;
-
-    public AbstractModelDefinition() {
-        this.parameters = new TreeMap<>();
+    default int arity() {
+        return 0;
     }
 
-    @Override
-    public String[] getModelParameters() {
-        return parameters.keySet().toArray(new String[0]);
-    }
+    S build(double ... args);
 
-    @Override
-    public void setParameter(String name, double value) {
-        parameters.put(name,value);
-    }
-
-    public double getParameter(String name) {
-        return parameters.getOrDefault(name,0.0);
-    }
 }

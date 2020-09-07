@@ -62,6 +62,32 @@ public class CovidGDefinition implements ModelDefinition<PopulationState> {
         }
 
         @Override
+        public int stateArity(String name) {
+                return 0;
+        }
+
+        @Override
+        public String[] getModelParameters() {
+                return new String[0];
+        }
+
+        @Override
+        public void setParameter(String name, double value) {
+                throw new IllegalArgumentException(String.format("Species %s is unknown!", name));
+        }
+
+        @Override
+        public String[] states() {
+                return new String[] { "init" };
+        }
+
+    @Override
+    public PopulationState state(String name, double... parameters) {
+        if (name.equals("init")) {
+            return state(parameters);
+        }
+
+        @Override
         public String[] getModelParameters() {
                 return new String[0];
         }

@@ -26,14 +26,14 @@ package quasylab.sibilla.examples.pm.seir;
 
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.pm.*;
+import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import quasylab.sibilla.core.simulator.sampling.Measure;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class CovidDefinition extends PopulationModelDefinition {
-
-    public final static int S = 0;
-    public final static int A = 1;
-    public final static int G = 2;
-    public final static int R = 3;
-    public final static int D = 4;
 
     public final static int SCALE = 100;
     public final static int INIT_S = 99*SCALE;
@@ -52,45 +52,23 @@ public class CovidDefinition extends PopulationModelDefinition {
     private final static double PROB_A_G = 0.5;
     private final static double PROB_DEATH = 0.02;
 
-    public CovidDefinition() {
-        super(new String[] {"S","A","G","R","D"});
-    }
 
 
     @Override
-    public int stateArity() {
-        return 0;
+    protected PopulationRegistry generatePopulationRegistry() {
+        return PopulationRegistry.createRegistry("S","A","G","R","D");
     }
 
     @Override
-    public String[] states() {
-        return new String[] { "init" };
-    }
+    protected List<PopulationRule> getRules() {
+        PopulationRegistry registry = getRegistry();
+        int S = registry.indexOf("S");
+        int A = registry.indexOf( "A");
+        int G = registry.indexOf("G");
+        int R = registry.indexOf("R");
+        int D = registry.indexOf("D");
 
-    @Override
-    public PopulationState state(String name, double... parameters) {
-        if (name.equals("init")) {
-            return state(parameters);
-        }
-        throw new IllegalArgumentException(String.format("State %s is unknown!",name));
-    }
-
-    @Override
-    public PopulationState state(double... parameters) {
-        if (parameters.length != 5) {
-            return new PopulationState( new int[] { INIT_S, INIT_A, INIT_G, INIT_R, INIT_D } );
-        } else {
-            return new PopulationState( new int[] {
-                    (int) parameters[S],
-                    (int) parameters[A],
-                    (int) parameters[G],
-                    (int) parameters[R],
-                    (int) parameters[D] });
-        }
-    }
-
-    @Override
-    public Model<PopulationState> createModel() {
+        LinkedList<PopulationRule> rules = new LinkedList<>();
         double lambda = getParameter("lambdaMeet");
         PopulationRule rule_S_A_A = new ReactionRule(
                 "S->A",
@@ -143,17 +121,56 @@ public class CovidDefinition extends PopulationModelDefinition {
                 new Population[] { new Population(D) },
                 (t,s) -> s.getOccupancy(G)*LAMBDA_R_G*PROB_DEATH
         );
+        rules.add(rule_S_A_A);
+        rules.add(rule_S_G_A);
+        rules.add(rule_S_A_G);
+        rules.add(rule_S_G_G);
+        rules.add(rule_A_G);
+        rules.add(rule_A_R);
+        rules.add(rule_G_R);
+        rules.add(rule_G_D);
+        return rules;
+    }
 
-        PopulationModel f = new PopulationModel(5,this);
-        f.addRule(rule_S_A_A);
-        f.addRule(rule_S_G_A);
-        f.addRule(rule_S_A_G);
-        f.addRule(rule_S_G_G);
-        f.addRule(rule_A_G);
-        f.addRule(rule_A_R);
-        f.addRule(rule_G_R);
-        f.addRule(rule_G_D);
-        return f;
+    @Override
+    protected List<Measure<PopulationState>> getMeasures() {
+        return null;
+    }
+
+    @Override
+    protected void registerStates() {
+        setDefaultStateBuilder(this::initialState);
+    }
+
+    public CovidDefinition() {
+    }
+
+
+    @Override
+    public PopulationState state(String name, double... parameters) {
+        if (name.equals("init")) {
+            return state(parameters);
+        }
+        throw new IllegalArgumentException(String.format("State %s is unknown!",name));
+    }
+
+    public PopulationState initialState(double... parameters) {
+        PopulationRegistry registry = getRegistry();
+        int S = registry.indexOf("S");
+        int A = registry.indexOf( "A");
+        int G = registry.indexOf("G");
+        int R = registry.indexOf("R");
+        int D = registry.indexOf("D");
+        if (parameters.length != 5) {
+            return new PopulationState( new int[] { INIT_S, INIT_A, INIT_G, INIT_R, INIT_D } );
+        } else {
+            return new PopulationState( new int[] {
+                    (int) parameters[S],
+                    (int) parameters[A],
+                    (int) parameters[G],
+                    (int) parameters[R],
+                    (int) parameters[D] });
+        }
     }
 
 

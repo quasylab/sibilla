@@ -30,11 +30,13 @@ package quasylab.sibilla.core.models.pm;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.io.Serializable;
+
 /**
  * @author loreti
  *
  */
-public interface PopulationRule {
+public interface PopulationRule extends Serializable {
 	/**
 	 * 
 	 * 

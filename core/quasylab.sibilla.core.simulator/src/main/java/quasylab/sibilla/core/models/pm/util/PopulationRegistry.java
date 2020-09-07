@@ -26,20 +26,23 @@
 
 package quasylab.sibilla.core.models.pm.util;
 
+import quasylab.sibilla.core.models.pm.FractionOfSpecies;
+import quasylab.sibilla.core.models.pm.NumberOfSpecies;
 import quasylab.sibilla.core.models.pm.PopulationState;
+import quasylab.sibilla.core.simulator.sampling.Measure;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.Serializable;
+import java.util.*;
 import java.util.function.Function;
 
 /**
  * @author loreti
  *
  */
-public class PopulationRegistry {
-	
+public class PopulationRegistry implements Serializable {
+
+	private static final String FRACTION_OF_SPECIES_MEASURE_LABEL = "%%s";
+	private static final String NUMBER_OF_SPECIES_MEASURE_LABEL = "#%s";
 	private int count;
 	
 	private final Map<Tuple,Integer> map; 
@@ -47,23 +50,42 @@ public class PopulationRegistry {
 
 	public PopulationRegistry() {
 		this.count = 0;
-		this.map = new HashMap<PopulationRegistry.Tuple, Integer>();
+		this.map = new HashMap<>();
 		this.elements = new ArrayList<>();
 	}
-	
-	public void register( Object ... values ) {
-		Tuple t = new Tuple(values);
+
+	public static PopulationRegistry createRegistry(int size) {
+		PopulationRegistry reg = new PopulationRegistry();
+		for(int i=0; i<size; i++) {
+			reg.register(""+i);
+		}
+		return reg;
+	}
+
+	public static PopulationRegistry createRegistry(String ... species) {
+		PopulationRegistry registry = new PopulationRegistry();
+		Arrays.stream(species).sequential().forEach(s -> registry.register(s));
+		return registry;
+	}
+
+	public void register( String label, Object ... values ) {
+		Tuple t = new Tuple(label,values);
 		if (!map.containsKey(t)) {
 			map.put(t, count++);
+			elements.add(t);
 		}
 	}
 	
-	public int indexOf( Object ... values ) {
-		return map.getOrDefault(new Tuple(values), -1);
+	public int indexOf( String label, Object ... values ) {
+		return map.getOrDefault(new Tuple(label,values), -1);
 	}
 	
 	private Tuple tupleOf( int idx ) {
 		return elements.get(idx);
+	}
+
+	public String stringOf(int idx) {
+		return tupleOf(idx).toString();
 	}
 	
 	public int size() {
@@ -74,19 +96,40 @@ public class PopulationRegistry {
 		PopulationState state = new PopulationState(count,i -> population.apply(tupleOf(i).values));
 		return state;
 	}
-	
+
+	public PopulationState createPopulationState() {
+		return new PopulationState(count);
+	}
+
+	public Measure<PopulationState> fractionMeasure(int i) {
+		if ((i<0)||(i>=elements.size())) {
+			throw new IndexOutOfBoundsException();
+		}
+		return new FractionOfSpecies(String.format(FRACTION_OF_SPECIES_MEASURE_LABEL,stringOf(i)),i);
+	}
+
+	public Measure<PopulationState> occupancyMeasure(int i) {
+		if ((i<0)||(i>=count)) {
+			throw new IndexOutOfBoundsException();
+		}
+		return new NumberOfSpecies(String.format(NUMBER_OF_SPECIES_MEASURE_LABEL,stringOf(i)),i);
+	}
+
 	private static class Tuple {
-		
+
+		private String label;
+
 		private Object[] values;
 		
-		public Tuple( Object ... values ) {
+		public Tuple( String label, Object ... values ) {
+			this.label = label;
 			this.values = values;
 		}
 
 		@Override
 		public int hashCode() {
 			final int prime = 31;
-			int result = 1;
+			int result = label.hashCode();
 			result = prime * result + Arrays.deepHashCode(values);
 			return result;
 		}
@@ -100,14 +143,18 @@ public class PopulationRegistry {
 			if (getClass() != obj.getClass())
 				return false;
 			Tuple other = (Tuple) obj;
-			if (!Arrays.deepEquals(values, other.values))
+			if (!this.label.equals(other.label)||!Arrays.deepEquals(values, other.values))
 				return false;
 			return true;
 		}
 
 		@Override
 		public String toString() {
-			return "[" + Arrays.toString(values) + "]";
+			String toReturn = label;
+			if (values.length > 0) {
+				toReturn += Arrays.deepToString(values);
+			}
+			return toReturn;
 		}
 
 

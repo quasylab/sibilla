@@ -26,35 +26,63 @@
 
 package quasylab.sibilla.core.models.pm;
 
-import java.util.Arrays;
+import quasylab.sibilla.core.models.AbstractModelDefinition;
+import quasylab.sibilla.core.models.Model;
+import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import quasylab.sibilla.core.simulator.sampling.Measure;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * Instances of this class represent the definition of a population model.
  */
 public abstract class PopulationModelDefinition extends AbstractModelDefinition<PopulationState> {
 
-    private final PopulationIndex speciesIndex;
+    private PopulationRegistry registy;
 
-    public PopulationModelDefinition() { this(new String[0]); }
+    protected abstract PopulationRegistry generatePopulationRegistry();
 
-    public PopulationModelDefinition(String[] species) {
-        speciesIndex = new PopulationIndex(species);
+    protected abstract List<PopulationRule> getRules();
+
+    protected abstract List<Measure<PopulationState>> getMeasures();
+
+    protected abstract void registerStates( );
+
+    public PopulationModelDefinition() {
+        super();
+        this.registerStates();
     }
 
-    public int register(String name,int ... args) {
-        return speciesIndex.registerSpecies(getAgentId(name,args));
+    @Override
+    protected synchronized void reset() {
+        this.registy = null;
     }
 
-    public String getAgentId(String name, int[] args) {
-        return name+(args.length==0?"": Arrays.toString(args));
+    @Override
+    public synchronized final PopulationModel createModel() {
+        PopulationRegistry reg = getRegistry();
+        PopulationModel model = new PopulationModel(reg,this);
+        model.addRules(getRules());
+        model.addMeasures(createDefaultMeasure());
+        model.addMeasures(getMeasures());
+        return model;
     }
 
-    public String[] getSpecies() {
-        return speciesIndex.getSpecies();
+    protected final PopulationRegistry getRegistry() {
+        if (this.registy == null) {
+            this.registy = generatePopulationRegistry();
+        }
+        return this.registy;
     }
 
-    public int indexOf(String name, int ... args) {
-        return speciesIndex.indexOf(getAgentId(name,args));
+    private List<Measure<PopulationState>> createDefaultMeasure() {
+        PopulationRegistry reg = getRegistry();
+        LinkedList<Measure<PopulationState>> measures = new LinkedList<>();
+        IntStream.range(0,reg.size()).sequential().forEach(i -> measures.add(reg.fractionMeasure(i)));
+        IntStream.range(0,reg.size()).sequential().forEach(i -> measures.add(reg.occupancyMeasure(i)));
+        return measures;
     }
 
     public static double fraction(double a, double b) {
