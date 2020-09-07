@@ -26,16 +26,14 @@ package quasylab.sibilla.examples.pm.seir;
 
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.pm.*;
+import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import quasylab.sibilla.core.simulator.sampling.Measure;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class CovidAGDefinition extends PopulationModelDefinition {
 
-    public final static int S = 0;
-    public final static int A = 1;
-    public final static int G = 2;
-    public final static int R = 3;
-    public final static int D = 4;
-    public final static int IG = 5;
-    public final static int IA = 6;
 
     public final static int SCALE = 100;
     public final static int INIT_S = 99*SCALE;
@@ -62,36 +60,20 @@ public class CovidAGDefinition extends PopulationModelDefinition {
     private final static double PROB_A_G = 0.5;
     private final static double PROB_DEATH = 0.02;
 
-    public CovidAGDefinition() {
-        super(new String[] {"S", "A", "G", "R", "D", "IG", "IA"} );
-    }
-
-
     @Override
-    public int stateArity() {
-        return 0;
+    protected PopulationRegistry generatePopulationRegistry() {
+        return PopulationRegistry.createRegistry("S", "A", "G", "R", "D", "IG", "IA");
     }
 
     @Override
-    public String[] states() {
-        return new String[] { "init" };
-    }
-
-    @Override
-    public PopulationState state(String name, double... parameters) {
-        if (name.equals("init")) {
-            return state(parameters);
-        }
-        throw new IllegalArgumentException(String.format("State %s is unknown!",name));
-    }
-
-    @Override
-    public PopulationState state(double... parameters) {
-        return new PopulationState( new int[] { INIT_S, INIT_A, INIT_G, INIT_R, INIT_D, INIT_IG , INIT_IA } );
-    }
-
-    @Override
-    public Model<PopulationState> createModel() {
+    protected List<PopulationRule> getRules() {
+        int S = getRegistry().indexOf("S");
+        int A = getRegistry().indexOf("A");;
+        int G = getRegistry().indexOf("G");;
+        int R = getRegistry().indexOf("R");;
+        int D = getRegistry().indexOf("D");;
+        int IG = getRegistry().indexOf("IG");;
+        int IA = getRegistry().indexOf("IA");;
         PopulationRule rule_S_A_A = new ReactionRule(
                 "S->A",
                 new Population[] { new Population(S), new Population(A)} ,
@@ -187,22 +169,36 @@ public class CovidAGDefinition extends PopulationModelDefinition {
                 (t,s) -> s.getOccupancy(IG)*LAMBDA_R_G*PROB_DEATH
         );
 
-        PopulationModel f = new PopulationModel(7,this);
-        f.addRule(rule_S_A_A);
-        f.addRule(rule_S_G_A);
-        f.addRule(rule_S_A_G);
-        f.addRule(rule_S_G_G);
-        f.addRule(rule_A_G);
-        f.addRule(rule_A_R);
-        f.addRule(rule_G_R);
-        f.addRule(rule_G_D);
-        f.addRule(rule_G_IG);
-        f.addRule(rule_IG_R);
-        f.addRule(rule_IG_R);
-        f.addRule(rule_IA_IG);
-        f.addRule(rule_A_IA);
-        f.addRule(rule_IA_R);
-        return f;
+        LinkedList<PopulationRule> rules = new LinkedList<>();
+        rules.add(rule_S_A_A);
+        rules.add(rule_S_G_A);
+        rules.add(rule_S_A_G);
+        rules.add(rule_S_G_G);
+        rules.add(rule_A_G);
+        rules.add(rule_A_R);
+        rules.add(rule_G_R);
+        rules.add(rule_G_D);
+        rules.add(rule_G_IG);
+        rules.add(rule_IG_R);
+        rules.add(rule_IG_R);
+        rules.add(rule_IA_IG);
+        rules.add(rule_A_IA);
+        rules.add(rule_IA_R);
+        return rules;
+    }
+
+    @Override
+    protected List<Measure<PopulationState>> getMeasures() {
+        return null;
+    }
+
+    @Override
+    protected void registerStates() {
+        setDefaultStateBuilder(this::initialState);
+    }
+
+    public PopulationState initialState(double... parameters) {
+        return new PopulationState( new int[] { INIT_S, INIT_A, INIT_G, INIT_R, INIT_D, INIT_IG , INIT_IA } );
     }
 
 

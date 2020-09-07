@@ -29,18 +29,17 @@ package quasylab.sibilla.examples.benchmarks.seirmaster;
 
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.pm.*;
+import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import quasylab.sibilla.core.simulator.sampling.Measure;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 
-public class SEIRModelDefinitionFourRules extends PopulationModelDefinition implements Serializable {
-
-    public final static int S = 0;
-    public final static int E = 1;
-    public final static int I = 2;
-    public final static int R = 3;
+public class SEIRModelDefinitionFourRules extends PopulationModelDefinition {
 
     public final static int INIT_S = 99;
     public final static int INIT_E = 0;
@@ -53,34 +52,18 @@ public class SEIRModelDefinitionFourRules extends PopulationModelDefinition impl
     public final static double LAMBDA_R = 1 / 7.0;
     public final static double LAMBDA_DECAY = 1 / 30.0;
 
-    public SEIRModelDefinitionFourRules() {
-        super(new String[]{"S", "E", "I", "R"});
+    @Override
+    protected PopulationRegistry generatePopulationRegistry() {
+        return PopulationRegistry.createRegistry("S", "E", "I", "R");
     }
 
     @Override
-    public int stateArity() {
-        return 4;
-    }
-
-    @Override
-    public String[] states() {
-        return new String[0];
-    }
-
-    @Override
-    public PopulationState state(String name, double... parameters) {
-        return null;
-    }
-
-
-    @Override
-    public PopulationState state(double... parameters) {
-        return new PopulationState(new int[]{INIT_S, INIT_E, INIT_I, INIT_R});
-    }
-
-
-    @Override
-    public Model<PopulationState> createModel() {
+    protected List<PopulationRule> getRules() {
+        PopulationRegistry registry = getRegistry();
+        int S = registry.indexOf("S");
+        int E = registry.indexOf("E");
+        int I = registry.indexOf("I");
+        int R = registry.indexOf("R");
         PopulationRule rule_S_E = new ReactionRule(
                 "S->E",
                 new Population[]{new Population(S), new Population(I)},
@@ -109,37 +92,27 @@ public class SEIRModelDefinitionFourRules extends PopulationModelDefinition impl
                 (t, s) -> s.getOccupancy(R) * LAMBDA_DECAY
         );
 
-        PopulationModel f = new PopulationModel(4,this);
-        f.addRule(rule_S_E);
-        f.addRule(rule_E_I);
-        f.addRule(rule_I_R);
-        f.addRule(rule_R_S);
-        return f;
+        LinkedList<PopulationRule> rules = new LinkedList<>();
+        rules.add(rule_S_E);
+        rules.add(rule_E_I);
+        rules.add(rule_I_R);
+        rules.add(rule_R_S);
+        return rules;
+    }
+
+    @Override
+    protected List<Measure<PopulationState>> getMeasures() {
+        return null;
+    }
+
+    @Override
+    protected void registerStates() {
+        setDefaultStateBuilder(this::initialState);
+    }
+
+    public PopulationState initialState(double... parameters) {
+        return new PopulationState(new int[]{INIT_S, INIT_E, INIT_I, INIT_R});
     }
 
 
-    public static double fractionOfS(PopulationState s) {
-        return s.getFraction(S);
-    }
-
-    public static double fractionOfI(PopulationState s) {
-        return s.getFraction(I);
-    }
-
-    public static double fractionOfE(PopulationState s) {
-        return s.getFraction(E);
-    }
-
-    public static double fractionOfR(PopulationState s) {
-        return s.getFraction(R);
-    }
-
-    public static SamplingFunction<PopulationState> getCollection(int SAMPLINGS, double DEADLINE) {
-        SamplingCollection<PopulationState> collection = new SamplingCollection<>();
-        collection.add(StatisticSampling.measure("S", SAMPLINGS, DEADLINE, SEIRModelDefinitionFourRules::fractionOfS));
-        collection.add(StatisticSampling.measure("E", SAMPLINGS, DEADLINE, SEIRModelDefinitionFourRules::fractionOfE));
-        collection.add(StatisticSampling.measure("I", SAMPLINGS, DEADLINE, SEIRModelDefinitionFourRules::fractionOfI));
-        collection.add(StatisticSampling.measure("R", SAMPLINGS, DEADLINE, SEIRModelDefinitionFourRules::fractionOfR));
-        return collection;
-    }
 }

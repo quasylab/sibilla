@@ -1,52 +1,34 @@
 package quasylab.sibilla.examples.pm.crowds;
 
 import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import quasylab.sibilla.core.simulator.sampling.Measure;
+import quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class ChordModelRefactored extends PopulationModelDefinition  {
+public class ChordModel extends PopulationModelDefinition  {
 
     public static double LAMBDA_S = 5.0;
     public static double P_F = 0.75;
-    public static int N = 10;
-    public static PopulationRegistry reg = new PopulationRegistry();
+    public static int DEFAULT_N = 2;
     public final static int SAMPLINGS = 100;
     public final static double DEADLINE = 10;
     private final static int TASKS = 5;
     private final static int REPLICA = 1000;
 
-    @Override
-    public int stateArity() {
-        return 0;
+    public ChordModel() {
+        super();
+        setParameter("N",DEFAULT_N);
     }
 
     @Override
-    public String[] states() {
-        return new String[0];
-    }
-
-    @Override
-    public PopulationState state(String name, double... parameters) {
-        return null;
-    }
-
-
-    @Override
-    public PopulationState state(double... parameters) {
-        return null;
-    }
-
-
-    @Override
-    public Model<PopulationState> createModel() {
-
-        //Inserimento degli agenti all'interno del registro
-
+    protected PopulationRegistry generatePopulationRegistry() {
+        PopulationRegistry reg = new PopulationRegistry();
+        int N = (int) getParameter("N");
         for (int i=0; i<N; i++) {
             reg.register("A", i);
         }
@@ -57,10 +39,14 @@ public class ChordModelRefactored extends PopulationModelDefinition  {
 
         reg.register("M1");
         reg.register("M2");
+        return reg;
+    }
 
-        //inizio regole chord
-
-        List<PopulationRule> rules = new LinkedList<PopulationRule>();
+    @Override
+    protected List<PopulationRule> getRules() {
+        int N = (int) getParameter("N");
+        PopulationRegistry reg = getRegistry();
+        List<PopulationRule> rules = new LinkedList<>();
 
         //regole inserimento nel crowd
 
@@ -107,41 +93,36 @@ public class ChordModelRefactored extends PopulationModelDefinition  {
 
 
         }
-
-        PopulationModel pModel = new PopulationModel(reg.size());
-
-        pModel.addRules(rules);
-
-        return pModel;
+        return rules;
     }
 
+    @Override
+    protected List<Measure<PopulationState>> getMeasures() {
+        int N = (int) getParameter("N");
+        PopulationRegistry reg = getRegistry();
+        LinkedList<Measure<PopulationState>> toReturn = new LinkedList<>();
+        toReturn.add(new SimpleMeasure<>("MESSAGES",s -> runningMessages(N,reg,s)));
+        return toReturn;
+    }
 
-    public static List<StatisticSampling<PopulationState>> getSamplingList(){
+    @Override
+    protected void registerStates() {
+        int N = (int) getParameter("N");
+        setDefaultStateBuilder(new SimpleStateBuilder<>(0,args -> initialState(N,args)));
+    }
 
-        List<StatisticSampling<PopulationState>> samplings = new LinkedList<>();
-
-        for( int i=0 ; i<N ; i++ ) {
-            int idx = i;
-            samplings.add(
-                    StatisticSampling.measure(
-                            "AM"+i,
-                            SAMPLINGS,DEADLINE,
-                            s -> s.getOccupancy(reg.indexOf("AM",idx))
-                    )
-            );
+    private PopulationState initialState(int N, double ... parameters) {
+        PopulationRegistry reg = getRegistry();
+        Population[] pop = new Population[N+1];
+        pop[0] = new Population(reg.indexOf("M1"),1);
+        for( int i=0 ; i<N ; i++) {
+            pop[i+1] = new Population(reg.indexOf("A",i),1);
         }
-        samplings.add(
-                StatisticSampling.measure(
-                        "MESSAGES",
-                        SAMPLINGS,DEADLINE,
-                        ChordModelRefactored::runningMessages
-                )
-        );
+        return new PopulationState(reg.size(),pop);
 
-        return samplings;
     }
 
-    public static double runningMessages( PopulationState s ) {
+    public static double runningMessages( int N, PopulationRegistry reg, PopulationState s ) {
         double sum = s.getOccupancy(reg.indexOf("M1"))+s.getOccupancy(reg.indexOf("M2"));
         for( int i=0 ; i<N ; i++ ) {
             sum += s.getOccupancy(reg.indexOf("AM",i));
@@ -149,12 +130,7 @@ public class ChordModelRefactored extends PopulationModelDefinition  {
         return sum;
     }
 
-    public static PopulationState initialState(int m ) {
-        Population[] population = new Population[N+1];
-        for( int i=0 ; i<N ; i++ ) {
-            population[i] = new Population( reg.indexOf("A",i ),1);
-        }
-        population[N] = new Population( reg.indexOf("M"+m),1);
-        return new PopulationState(reg.size(),population);
-    }
+
+
+
 }

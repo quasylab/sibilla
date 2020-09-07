@@ -27,11 +27,17 @@
 package quasylab.sibilla.core.models;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.simulator.sampling.Measure;
+import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a <i>Stochastic Process</i>.
@@ -65,8 +71,20 @@ public interface Model<S extends State> {
 
     ModelDefinition<S> getModelDefinition();
 
+    /**
+     * Returns the number of bytes needed to store model states.
+     *
+     * @return the number of bytes needed to store model states.
+     */
     int stateByteArraySize();
 
+    /**
+     * Returns the array of bytes representing the given state.
+     *
+     * @param state the state to serialise.
+     * @return the array of bytes representing the given state.
+     * @throws IOException this exception is thrown if the
+     */
     byte[] serializeState(S state) throws IOException;
 
     S deserializeState(byte[] bytes) throws IOException;
@@ -96,4 +114,32 @@ public interface Model<S extends State> {
      * @return the measure with name <code>m</code>.
      */
     Measure<S> getMeasure(String m);
+
+
+    /**
+     * Returns the samplings that can be used to collect simulation data of the given measures.
+     *
+     * @param samplings number of samplings to collect.
+     * @param dt time gap among two samplings.
+     * @param measures neames of measures to collect.
+     * @return the samplings that can be used to collect simulation data of the given measures.
+     */
+    default SamplingFunction<S> selectSamplingFunction(int samplings, double dt, String ... measures) {
+        if (measures.length == 0)  return null;
+        if (measures.length == 1) {
+            Measure<S> m = getMeasure(measures[0]);
+            if (m != null) return new StatisticSampling<>(samplings,dt,m);
+        } else {
+            SamplingCollection<S> collection = new SamplingCollection<>();
+            Arrays.stream(measures).map(this::getMeasure).filter(Objects::nonNull)
+                    .sequential().forEach(m -> collection.add(new StatisticSampling<S>(samplings,dt,m)));
+            return collection;
+        }
+        return null;
+    }
+
+    default SamplingFunction<S> getSamplingFunction(int samplings, double dt) {
+        return selectSamplingFunction(samplings,dt,measures());
+    }
+
 }

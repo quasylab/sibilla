@@ -26,6 +26,10 @@ package quasylab.sibilla.examples.pm.seir;
 
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.pm.*;
+import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import quasylab.sibilla.core.simulator.sampling.Measure;
+
+import java.util.List;
 
 public class CovidDSDefinition extends PopulationModelDefinition {
 
@@ -52,98 +56,118 @@ public class CovidDSDefinition extends PopulationModelDefinition {
     private final static double PROB_A_G = 0.5;
     private final static double PROB_DEATH = 0.02;
 
+    @Override
+    protected PopulationRegistry generatePopulationRegistry() {
+        return null;
+    }
+
+    @Override
+    protected List<PopulationRule> getRules() {
+        return null;
+    }
+
+    @Override
+    protected List<Measure<PopulationState>> getMeasures() {
+        return null;
+    }
+
+    @Override
+    protected void registerStates() {
+
+    }
+
     public CovidDSDefinition() {
-        super(new String[] {"S", "A", "G", "R", "D"});
+        //super(new String[] {"S", "A", "G", "R", "D"});
     }
 
-    @Override
-    public int stateArity() {
-        return 0;
-    }
+//    @Override
+//    public int stateArity() {
+//        return 0;
+//    }
+//
+//    @Override
+//    public String[] states() {
+//        return new String[] { "init" };
+//    }
+//
+//    @Override
+//    public PopulationState state(String name, double... parameters) {
+//        if (name.equals("init")) {
+//            return state(parameters);
+//        }
+//        throw new IllegalArgumentException(String.format("State %s is unknown!",name));
+//    }
 
-    @Override
-    public String[] states() {
-        return new String[] { "init" };
-    }
 
-    @Override
-    public PopulationState state(String name, double... parameters) {
-        if (name.equals("init")) {
-            return state(parameters);
-        }
-        throw new IllegalArgumentException(String.format("State %s is unknown!",name));
-    }
+//    @Override
+//    public PopulationState state(double... parameters) {
+//        return new PopulationState( new int[] { INIT_S, INIT_A, INIT_G, INIT_R, INIT_D } );
+//    }
 
-
-    @Override
-    public PopulationState state(double... parameters) {
-        return new PopulationState( new int[] { INIT_S, INIT_A, INIT_G, INIT_R, INIT_D } );
-    }
-
-    @Override
-    public Model<PopulationState> createModel() {
-        PopulationRule rule_S_A_A = new ReactionRule(
-                "S->A",
-                new Population[] { new Population(S), new Population(A)} ,
-                new Population[] { new Population(A), new Population(A)},
-                (t,s) -> PROB_ASINT*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(A)/N));
-
-        PopulationRule rule_S_G_A = new ReactionRule(
-                "S->A",
-                new Population[] { new Population(S), new Population(A)} ,
-                new Population[] { new Population(G), new Population(A)},
-                (t,s) -> (1-PROB_ASINT)*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(A)/N));
-
-        PopulationRule rule_S_A_G = new ReactionRule(
-                "S->A",
-                new Population[] { new Population(S), new Population(G)} ,
-                new Population[] { new Population(A), new Population(G)},
-                (t,s) -> PROB_ASINT*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(G)/N));
-
-        PopulationRule rule_S_G_G = new ReactionRule(
-                "S->A",
-                new Population[] { new Population(S), new Population(G)} ,
-                new Population[] { new Population(G), new Population(G)},
-                (t,s) -> (1-PROB_ASINT)*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(G)/N));
-
-        PopulationRule rule_A_R = new ReactionRule(
-                "I->R",
-                new Population[] { new Population(A) },
-                new Population[] { new Population(R) },
-                (t,s) -> s.getOccupancy(A)*LAMBDA_R_A*(1-PROB_A_G)
-        );
-
-        PopulationRule rule_A_G = new ReactionRule(
-                "I->R",
-                new Population[] { new Population(A) },
-                new Population[] { new Population(G) },
-                (t,s) -> s.getOccupancy(A)*LAMBDA_R_A*PROB_A_G
-        );
-
-        PopulationRule rule_G_R = new ReactionRule(
-                "I->R",
-                new Population[] { new Population(G) },
-                new Population[] { new Population(R) },
-                (t,s) -> s.getOccupancy(G)*LAMBDA_R_G*(1-PROB_DEATH)
-        );
-
-        PopulationRule rule_G_D = new ReactionRule(
-                "I->R",
-                new Population[] { new Population(G) },
-                new Population[] { new Population(D) },
-                (t,s) -> s.getOccupancy(G)*LAMBDA_R_G*PROB_DEATH
-        );
-
-        PopulationModel f = new PopulationModel(5,this);
-        f.addRule(rule_S_A_A);
-        f.addRule(rule_S_G_A);
-        f.addRule(rule_S_A_G);
-        f.addRule(rule_S_G_G);
-        f.addRule(rule_A_G);
-        f.addRule(rule_A_R);
-        f.addRule(rule_G_R);
-        f.addRule(rule_G_D);
-        return f;
-    }
+//    @Override
+//    public Model<PopulationState> createModel() {
+//        PopulationRule rule_S_A_A = new ReactionRule(
+//                "S->A",
+//                new Population[] { new Population(S), new Population(A)} ,
+//                new Population[] { new Population(A), new Population(A)},
+//                (t,s) -> PROB_ASINT*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(A)/N));
+//
+//        PopulationRule rule_S_G_A = new ReactionRule(
+//                "S->A",
+//                new Population[] { new Population(S), new Population(A)} ,
+//                new Population[] { new Population(G), new Population(A)},
+//                (t,s) -> (1-PROB_ASINT)*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(A)/N));
+//
+//        PopulationRule rule_S_A_G = new ReactionRule(
+//                "S->A",
+//                new Population[] { new Population(S), new Population(G)} ,
+//                new Population[] { new Population(A), new Population(G)},
+//                (t,s) -> PROB_ASINT*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(G)/N));
+//
+//        PopulationRule rule_S_G_G = new ReactionRule(
+//                "S->A",
+//                new Population[] { new Population(S), new Population(G)} ,
+//                new Population[] { new Population(G), new Population(G)},
+//                (t,s) -> (1-PROB_ASINT)*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(G)/N));
+//
+//        PopulationRule rule_A_R = new ReactionRule(
+//                "I->R",
+//                new Population[] { new Population(A) },
+//                new Population[] { new Population(R) },
+//                (t,s) -> s.getOccupancy(A)*LAMBDA_R_A*(1-PROB_A_G)
+//        );
+//
+//        PopulationRule rule_A_G = new ReactionRule(
+//                "I->R",
+//                new Population[] { new Population(A) },
+//                new Population[] { new Population(G) },
+//                (t,s) -> s.getOccupancy(A)*LAMBDA_R_A*PROB_A_G
+//        );
+//
+//        PopulationRule rule_G_R = new ReactionRule(
+//                "I->R",
+//                new Population[] { new Population(G) },
+//                new Population[] { new Population(R) },
+//                (t,s) -> s.getOccupancy(G)*LAMBDA_R_G*(1-PROB_DEATH)
+//        );
+//
+//        PopulationRule rule_G_D = new ReactionRule(
+//                "I->R",
+//                new Population[] { new Population(G) },
+//                new Population[] { new Population(D) },
+//                (t,s) -> s.getOccupancy(G)*LAMBDA_R_G*PROB_DEATH
+//        );
+//
+//        PopulationModel f = new PopulationModel(5,this);
+//        f.addRule(rule_S_A_A);
+//        f.addRule(rule_S_G_A);
+//        f.addRule(rule_S_A_G);
+//        f.addRule(rule_S_G_G);
+//        f.addRule(rule_A_G);
+//        f.addRule(rule_A_R);
+//        f.addRule(rule_G_R);
+//        f.addRule(rule_G_D);
+//        return f;
+//    }
 
 }

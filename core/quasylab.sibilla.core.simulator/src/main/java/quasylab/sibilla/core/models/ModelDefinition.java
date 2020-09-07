@@ -26,20 +26,29 @@
 
 package quasylab.sibilla.core.models;
 
+import java.io.Serializable;
+
 /**
  * This interface implements a factory that can be used to build a model according
  * to some parameters.
  *
  * @param <S>
  */
-public interface ModelDefinition<S extends State> {
+public interface ModelDefinition<S extends State> extends Serializable {
 
     /**
-     * Returns the number of parameters needed to build a state.
+     * Returns the number of parameters needed to build default initial state.
      *
-     * @return the number of parameters needed to build a state.
+     * @return the number of parameters needed to build default initial state.
      */
     int stateArity();
+
+    /**
+     * Returns the number of parameters needed to build initial state <code>name</code>.
+     *
+     * @return the number of parameters needed to build initial state <code>name</code>.
+     */
+    int stateArity(String name);
 
     /**
      * Returns the number of parameters needed to build a model.
@@ -62,9 +71,9 @@ public interface ModelDefinition<S extends State> {
     }
 
     /**
-     * Returns the array of initial states defined in the model.
+     * Returns the array of possible initial states defined in the model.
      *
-     * @return the array of initial states defined in the model.
+     * @return the array of possible initial states defined in the model.
      */
     String[] states();
 

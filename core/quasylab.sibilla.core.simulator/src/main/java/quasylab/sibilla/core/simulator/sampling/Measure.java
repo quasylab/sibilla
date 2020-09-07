@@ -34,7 +34,7 @@ import java.io.Serializable;
  * @author loreti
  *
  */
-public interface Measure<S extends State> extends Serializable{
+public interface Measure<S extends State> extends Serializable {
 
 	double measure(S t);
 

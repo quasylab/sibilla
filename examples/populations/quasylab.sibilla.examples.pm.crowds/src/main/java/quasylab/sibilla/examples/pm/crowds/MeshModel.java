@@ -1,9 +1,10 @@
 package quasylab.sibilla.examples.pm.crowds;
 
 import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import quasylab.sibilla.core.simulator.sampling.Measure;
+import quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.util.LinkedList;
@@ -15,63 +16,54 @@ import java.util.List;
  *
  */
 
-public class MeshModelRefactored extends PopulationModelDefinition {
+public class MeshModel extends PopulationModelDefinition {
 
 
     public static double LAMBDA_S=5.0;
     public static double P_F= 0.75;
     public static int H = 4; //altezza della rete.
     public static int N = 4;
-    public static PopulationRegistry r= new PopulationRegistry();
     public final static int SAMPLINGS= 500;
     public final static double DEADLINE = 10;
     public final static int TASKS= 5;
     private final static int REPLICA = 1000;
 
-    @Override
-    public int stateArity() {
-        return 0;
+    public MeshModel() {
+        super();
+        setParameter("H",H);
+        setParameter("N",N);
     }
 
     @Override
-    public String[] states() {
-        return new String[0];
-    }
+    protected PopulationRegistry generatePopulationRegistry() {
+        PopulationRegistry reg = new PopulationRegistry();
+        int N = (int) getParameter("N");
+        int H = (int) getParameter( "H");
 
-    @Override
-    public PopulationState state(String name, double... parameters) {
-        return null;
-    }
-
-
-    @Override
-    public PopulationState state(double... parameters) {
-        return null;
-    }
-
-    @Override
-    public Model<PopulationState> createModel() {
-
-        r.register("M1");
-        r.register("M2");
+        reg.register("M1");
+        reg.register("M2");
 
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < H; j++) {
-                r.register("A", i, j);
+                reg.register("A", i, j);
             }
         }
 
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < H; j++) {
-                r.register("AM", i, j);
+                reg.register("AM", i, j);
             }
         }
 
-        //inizio regole tier
+        return reg;
+    }
 
-        List<PopulationRule> rules = new LinkedList<PopulationRule>();
-
-        //regole inserimento nel crowd
+    @Override
+    protected List<PopulationRule> getRules() {
+        PopulationRegistry r = new PopulationRegistry();
+        int N = (int) getParameter("N");
+        int H = (int) getParameter( "H");
+        List<PopulationRule> rules = new LinkedList<>();
 
         rules.add(new ReactionRule(
                 "M1->A"+0+0,
@@ -249,66 +241,49 @@ public class MeshModelRefactored extends PopulationModelDefinition {
                 new Population[] {new Population(r.indexOf("A",z,x)), new Population(r.indexOf("AM",z,c))},
                 (t,s) -> LAMBDA_S*P_F
         ));
+        return rules;
+    }
 
+    @Override
+    protected List<Measure<PopulationState>> getMeasures() {
+        int N = (int) getParameter("N");
+        int H = (int) getParameter("H");
+        PopulationRegistry reg = getRegistry();
+        LinkedList<Measure<PopulationState>> toReturn = new LinkedList<>();
+        toReturn.add(new SimpleMeasure<>("MESSAGES", s -> runningMessages(H,N,reg,s)));
+        return toReturn;
+    }
 
+    @Override
+    protected void registerStates() {
+        int N = (int) getParameter("N");
+        int H = (int) getParameter("H");
+        setDefaultStateBuilder(new SimpleStateBuilder<>(0,args -> initialState(H,N,args)));
+    }
 
-        PopulationModel pModel = new PopulationModel(r.size());
-
-        pModel.addRules(rules);
-
-        return pModel;
+    private PopulationState initialState(int H, int N, double ... parameters) {
+        PopulationRegistry reg = getRegistry();
+        LinkedList<Population> pop = new LinkedList<>();
+        pop.add(new Population(reg.indexOf("M1"),1));
+        for( int i=0 ; i<N ; i++ ) {
+            for (int j = 0; j < H; j++) {
+                pop.add(new Population(reg.indexOf("A", i), 1));
+            }
+        }
+        return new PopulationState(reg.size(),pop.toArray(new Population[0]));
 
     }
 
-
-    public static List<StatisticSampling<PopulationState>> getSamplingList(){
-
-        List<StatisticSampling<PopulationState>> samplings = new LinkedList<>();
-
+    public static double runningMessages( int H, int N, PopulationRegistry reg, PopulationState s ) {
+        double sum = s.getOccupancy(reg.indexOf("M1"))+s.getOccupancy(reg.indexOf("M2"));
         for( int i=0 ; i<N ; i++ ) {
-            for(int j=0; j<H; j++) {
-                int jdx =j;
-
-                int idx = i;
-                samplings.add(
-                        StatisticSampling.measure(
-                                "AM"+i+j,
-                                SAMPLINGS,DEADLINE,
-                                s -> s.getOccupancy(r.indexOf("AM",idx, jdx))
-                        )
-                );
-            }}
-        samplings.add(
-                StatisticSampling.measure(
-                        "MESSAGES",
-                        SAMPLINGS,DEADLINE,
-                        MeshModelRefactored::runningMessages
-                )
-        );
-
-        return samplings;
-    }
-
-
-
-    public static double runningMessages( PopulationState s ) {
-        double sum = s.getOccupancy(r.indexOf("M1"))+s.getOccupancy(r.indexOf("M2"));
-        for( int i=0 ; i<N ; i++ ) {
-            for (int j=0; j<H; j++) {
-                sum += s.getOccupancy(r.indexOf("AM",i,j));
-            }}
+            for (int j = 0; j < H; j++) {
+                sum += s.getOccupancy(reg.indexOf("AM", i, j));
+            }
+        }
         return sum;
     }
 
-    public static PopulationState initialState(int m ) {
-        Population[] population = new Population[N+1];
-        for( int i=0 ; i<N ; i++ ) {
-            for(int j=0; j<H;j++) {
-                population[i] = new Population( r.indexOf("A",i,j ),1);
-            }}
-        population[N] = new Population( r.indexOf("M"+m),1);
-        return new PopulationState(r.size(),population);
-    }
 
 
 }

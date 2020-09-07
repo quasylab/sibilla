@@ -27,6 +27,11 @@ package quasylab.sibilla.examples.pm.taxis;
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.pm.*;
+import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import quasylab.sibilla.core.simulator.sampling.Measure;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Model for taxi
@@ -38,7 +43,7 @@ import quasylab.sibilla.core.models.pm.*;
  *      I ---> Users that are inactive, not asking for a taxi
  *
  */
-public class TaxiDefinition implements ModelDefinition<PopulationState> {
+public class TaxiDefinition extends PopulationModelDefinition {
 
 
     public final static int T = 0; //A Taxi ready to collect a citizen.
@@ -82,23 +87,7 @@ public class TaxiDefinition implements ModelDefinition<PopulationState> {
     public final static double PROB_SHORT = 0.5;
     private static final double WEIGHT = 100;
 
-    @Override
-    public int stateArity() {
-        return 0;
-    }
-
-    @Override
-    public String[] states() {
-        return new String[0];
-    }
-
-    @Override
-    public PopulationState state(String name, double... parameters) {
-        return null;
-    }
-
-    @Override
-    public PopulationState state(double... parameters) {
+    public PopulationState initialState(double... parameters) {
         if (parameters.length != 8) {
             return new PopulationState( new int[] { INIT_T, INIT_W, INIT_S, INIT_L,INIT_I, INIT_D, INIT_A, INIT_B} );
         } else {
@@ -114,8 +103,42 @@ public class TaxiDefinition implements ModelDefinition<PopulationState> {
         }
     }
 
+
+    public double rateTakeTaxiStandardUser(PopulationState s, double lambda_s, double weight, double p_s) {
+        if (s.getOccupancy(W)==0) {
+            return 0.0;
+        } else {
+            double probUserKind = s.getOccupancy(W)/(weight*s.getOccupancy(A)+s.getOccupancy(W));
+            return s.getOccupancy(T)*probUserKind*lambda_s * p_s;
+        }
+    }
+
+    public double rateTakeTaxiAngryUser(PopulationState s, double lambda_s, double weight, double p_s) {
+        if (s.getOccupancy(A)==0) {
+            return 0.0;
+        } else {
+            double probUserKind = (weight*s.getOccupancy(A))/(weight*s.getOccupancy(A)+s.getOccupancy(W));
+            return s.getOccupancy(T)*probUserKind*lambda_s * p_s;
+        }
+    }
+
+
     @Override
-    public Model<PopulationState> createModel() {
+    protected PopulationRegistry generatePopulationRegistry() {
+        return PopulationRegistry.createRegistry("T", "W", "S", "L", "I", "D", "A", "B");
+    }
+
+    @Override
+    protected List<PopulationRule> getRules() {
+        PopulationRegistry reg = getRegistry();
+        int T = reg.indexOf("T"); //A Taxi ready to collect a citizen.
+        int W = reg.indexOf("W"); //A User waiting for a taxi
+        int S = reg.indexOf("S"); //A Taxi travelling on a short trip.
+        int L = reg.indexOf("L"); //A Taxi travelling on a long trip.
+        int I = reg.indexOf("I"); //An inactive user.
+        int D = reg.indexOf("D"); //A Taxi that is in the deposit.
+        int A = reg.indexOf("A"); //An angry user that has not yet received his taxi.
+        int B = reg.indexOf("B"); //A bored taxi driver that has not a user to serve.
 
         double lambda_a;
         double lambda_s;
@@ -127,15 +150,16 @@ public class TaxiDefinition implements ModelDefinition<PopulationState> {
         double lambda_boring;
         double weight = WEIGHT;
 
-            lambda_a = LAMBDA_A;
-            lambda_s = LAMBDA_S;
-            lambda_short_end = LAMBDA_S_END;
-            lambda_long_end = LAMBDA_L_END;
-            p_s = PROB_SHORT;
-            lambda_d = LAMBDA_D;
-            lambda_angry = LAMBDA_ANGRY;
-            lambda_boring = LAMBDA_BORING;
+        lambda_a = LAMBDA_A;
+        lambda_s = LAMBDA_S;
+        lambda_short_end = LAMBDA_S_END;
+        lambda_long_end = LAMBDA_L_END;
+        p_s = PROB_SHORT;
+        lambda_d = LAMBDA_D;
+        lambda_angry = LAMBDA_ANGRY;
+        lambda_boring = LAMBDA_BORING;
 
+        LinkedList<PopulationRule> rules = new LinkedList<>();
 
         PopulationRule rule_user_arrival = new ReactionRule(
                 "user_arrival",
@@ -191,39 +215,27 @@ public class TaxiDefinition implements ModelDefinition<PopulationState> {
                 new Population[] { new Population(T)},
                 (t,s) ->lambda_d*s.getOccupancy(D));
 
-        PopulationModel pModel = new PopulationModel(8);
 
-        pModel.addRule(rule_user_arrival);
-        pModel.addRule(rule_user_angry);
-        pModel.addRule(rule_taxi_short);
-        pModel.addRule(rule_taxi_long);
-        pModel.addRule(rule_taxi_short_angry);
-        pModel.addRule(rule_taxi_long_angry);
-        pModel.addRule(rule_short_end);
-        pModel.addRule(rule_long_end);
-        pModel.addRule(rule_taxi_exit);
+        rules.add(rule_user_arrival);
+        rules.add(rule_user_angry);
+        rules.add(rule_taxi_short);
+        rules.add(rule_taxi_long);
+        rules.add(rule_taxi_short_angry);
+        rules.add(rule_taxi_long_angry);
+        rules.add(rule_short_end);
+        rules.add(rule_long_end);
+        rules.add(rule_taxi_exit);
 
-        return pModel;
-
-    }
-
-    public double rateTakeTaxiStandardUser(PopulationState s, double lambda_s, double weight, double p_s) {
-        if (s.getOccupancy(W)==0) {
-            return 0.0;
-        } else {
-            double probUserKind = s.getOccupancy(W)/(weight*s.getOccupancy(A)+s.getOccupancy(W));
-            return s.getOccupancy(T)*probUserKind*lambda_s * p_s;
+        return rules;
         }
+
+    @Override
+    protected List<Measure<PopulationState>> getMeasures() {
+        return null;
     }
 
-    public double rateTakeTaxiAngryUser(PopulationState s, double lambda_s, double weight, double p_s) {
-        if (s.getOccupancy(A)==0) {
-            return 0.0;
-        } else {
-            double probUserKind = (weight*s.getOccupancy(A))/(weight*s.getOccupancy(A)+s.getOccupancy(W));
-            return s.getOccupancy(T)*probUserKind*lambda_s * p_s;
-        }
+    @Override
+    protected void registerStates() {
+        setDefaultStateBuilder(new SimpleStateBuilder<>(this::initialState));
     }
-
-
 }

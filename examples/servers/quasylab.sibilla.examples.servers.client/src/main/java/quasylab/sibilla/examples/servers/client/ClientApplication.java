@@ -27,6 +27,7 @@
 package quasylab.sibilla.examples.servers.client;
 
 import org.apache.commons.math3.random.AbstractRandomGenerator;
+import quasylab.sibilla.core.models.pm.PopulationModel;
 import quasylab.sibilla.core.network.HostLoggerSupplier;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
@@ -99,8 +100,10 @@ public class ClientApplication implements Serializable {
 
         SEIRModelDefinition modelDefinition = new SEIRModelDefinition();
 
+        PopulationModel model = modelDefinition.createModel();
+
         new ClientSimulationEnvironment(
-                RANDOM_GENERATOR, modelDefinition, modelDefinition.createModel(), modelDefinition.state(), SEIRModelDefinition.getCollection(SAMPLINGS, DEADLINE),
+                RANDOM_GENERATOR, modelDefinition, model, modelDefinition.state(), model.getSamplingFunction(SAMPLINGS, DEADLINE/SAMPLINGS),
                 REPLICA, DEADLINE, masterServerInfo, SerializerType.FST, submitRepetitions);
 
 

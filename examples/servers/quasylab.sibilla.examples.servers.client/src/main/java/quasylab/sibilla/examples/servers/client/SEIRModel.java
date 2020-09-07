@@ -29,9 +29,11 @@
  */
 package quasylab.sibilla.examples.servers.client;
 
+import quasylab.sibilla.core.models.pm.PopulationModel;
 import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.simulator.SimulationEnvironment;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
+import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.io.FileNotFoundException;
@@ -50,12 +52,9 @@ public class SEIRModel {
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
 		SEIRModelDefinition def = new SEIRModelDefinition();
 		SimulationEnvironment simulator = new SimulationEnvironment();
-		SamplingCollection<PopulationState> collection = new SamplingCollection<>();
-		collection.add(StatisticSampling.measure("S",SAMPLINGS,DEADLINE,SEIRModelDefinition::fractionOfS));
-		collection.add(StatisticSampling.measure("E",SAMPLINGS,DEADLINE,SEIRModelDefinition::fractionOfE));
-		collection.add(StatisticSampling.measure("I",SAMPLINGS,DEADLINE,SEIRModelDefinition::fractionOfI));
-		collection.add(StatisticSampling.measure("R",SAMPLINGS,DEADLINE,SEIRModelDefinition::fractionOfR));
-		simulator.simulate(def.createModel(),def.state(),collection,REPLICA,DEADLINE);
+		PopulationModel model = def.createModel();
+		SamplingFunction<PopulationState> collection = model.getSamplingFunction(SAMPLINGS,DEADLINE/SAMPLINGS);
+		simulator.simulate(model,def.state(),collection,REPLICA,DEADLINE);
 		collection.printTimeSeries("data","seir_",".data");
 	}
 

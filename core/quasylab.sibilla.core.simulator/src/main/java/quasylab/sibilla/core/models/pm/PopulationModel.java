@@ -29,6 +29,7 @@ package quasylab.sibilla.core.models.pm;
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.MarkovProcess;
 import quasylab.sibilla.core.models.StepFunction;
+import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import quasylab.sibilla.core.simulator.sampling.Measure;
 import quasylab.sibilla.core.simulator.util.WeightedElement;
 import quasylab.sibilla.core.simulator.util.WeightedLinkedList;
@@ -39,10 +40,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 
 /**
@@ -57,20 +55,27 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
 
     private static final long serialVersionUID = 6871037109869821108L;
 
-    private final PopulationModelDefinition modelDefinition;
+    private final PopulationRegistry registry;
 
-    private int species;
+    private final PopulationModelDefinition modelDefinition;
 
     private LinkedList<PopulationRule> rules;
 
-    public PopulationModel(int species) {
-        this(species,null);
+    private Map<String,Measure<PopulationState>> measuresTable;
+
+    public PopulationModel(int size) {
+        this(PopulationRegistry.createRegistry(size));
     }
 
-    public PopulationModel(int species, PopulationModelDefinition modelDefinition) {
-        this.rules = new LinkedList<PopulationRule>();
+    public PopulationModel(PopulationRegistry registry) {
+        this(registry,null);
+    }
+
+    public PopulationModel(PopulationRegistry registry, PopulationModelDefinition modelDefinition) {
+        this.registry = registry;
         this.modelDefinition = modelDefinition;
-        this.species = species;
+        this.rules = new LinkedList<>();
+        this.measuresTable = new TreeMap<>();
     }
 
     @Override
@@ -118,7 +123,7 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
 
     @Override
     public int stateByteArraySize() {
-        return species * 4;
+        return registry.size() * 4;
     }
 
     @Override
@@ -140,7 +145,7 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
 
     @Override
     public PopulationState deserializeState(ByteArrayInputStream bais) throws IOException {
-        int length = species;
+        int length = registry.size();
         int[] vector = new int[length];
         for (int i = 0; i < length; i++) {
             vector[i] = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
@@ -152,37 +157,31 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
 
     @Override
     public String[] measures() {
-        return (modelDefinition==null?new String[0]:modelDefinition.getSpecies());
+        return measuresTable.keySet().toArray(new String[0]);
     }
 
     @Override
     public double measure(String m, PopulationState state) {
-        int idx = modelDefinition.indexOf(m);
-        if (idx<0) {
+        Measure<PopulationState> measure = measuresTable.get(m);
+        if (measure == null) {
             throw new IllegalArgumentException("Species "+m+" is unknown!");
         }
-        return state.getFraction(idx);
+        return measure.measure(state);
     }
 
     @Override
     public Measure<PopulationState> getMeasure(String m) {
-        int idx = modelDefinition.indexOf(m);
-        if (idx<0) {
-            throw new IllegalArgumentException("Species "+m+" is unknown!");
-        }
-
-        return new Measure<PopulationState>() {
-            @Override
-            public double measure(PopulationState t) {
-                return t.getFraction(idx);
-            }
-
-            @Override
-            public String getName() {
-                return m;
-            }
-        };
+        return measuresTable.get(m);
     }
 
 
+    public void addMeasures(List<Measure<PopulationState>> measures) {
+        if (measures != null) {
+            measures.forEach(m -> measuresTable.put(m.getName(),m));
+        }
+    }
+
+    public int indexOf(String label, Object ... args) {
+        return registry.indexOf(label,args);
+    }
 }

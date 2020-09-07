@@ -51,8 +51,18 @@ public class SIRModelDefinition implements ModelDefinition<PopulationState> {
     }
 
     @Override
+    public int stateArity(String name) {
+        return 0;
+    }
+
+    @Override
     public String[] getModelParameters() {
         return new String[0];
+    }
+
+    @Override
+    public void setParameter(String name, double value) {
+
     }
 
 

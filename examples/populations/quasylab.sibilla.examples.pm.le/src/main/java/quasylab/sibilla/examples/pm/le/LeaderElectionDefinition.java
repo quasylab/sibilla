@@ -28,15 +28,17 @@ package quasylab.sibilla.examples.pm.le;
 
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.ModelDefinition;
+import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.models.pm.*;
+import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import quasylab.sibilla.core.simulator.sampling.Measure;
+import quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
 
-public class LeaderElectionDefinition implements ModelDefinition<PopulationState> {
+import java.util.LinkedList;
+import java.util.List;
 
-    public final static int C = 0;
-    public final static int S0 = 1;
-    public final static int S1 = 2;
-    public final static int F = 3;
-    public final static int L = 4;
+public class LeaderElectionDefinition extends PopulationModelDefinition {
+
 
     public final static int INIT_C = 100;
     public final static int INIT_S0 = 0;
@@ -50,30 +52,20 @@ public class LeaderElectionDefinition implements ModelDefinition<PopulationState
     public final static double WAITING_RATE = 20.0;
     public final static double MEET_PROB = 0.1;
 
-
-
     @Override
-    public int stateArity() {
-        return 0;
+    protected PopulationRegistry generatePopulationRegistry() {
+        return PopulationRegistry.createRegistry("C", "S0", "S1", "F", "L");
     }
 
     @Override
-    public String[] states() {
-        return new String[0];
-    }
-
-    @Override
-    public PopulationState state(String name, double... parameters) {
-        return null;
-    }
-
-    @Override
-    public PopulationState state(double... parameters) {
-        return new PopulationState(new int[] { INIT_C, INIT_S0, INIT_S1, INIT_F , INIT_L });
-    }
-
-    @Override
-    public Model<PopulationState> createModel() {
+    protected List<PopulationRule> getRules() {
+        PopulationRegistry reg = getRegistry();
+        int C = reg.indexOf("C");
+        int S0 = reg.indexOf("S0");
+        int S1 = reg.indexOf("S1");
+        int F = reg.indexOf("F");
+        int L = reg.indexOf("L");
+        LinkedList<PopulationRule> rules = new LinkedList<>();
         PopulationRule rule_C_S0 = new ReactionRule(
                 "C->S0",
                 new Population[] { new Population(C) } ,
@@ -146,29 +138,39 @@ public class LeaderElectionDefinition implements ModelDefinition<PopulationState
                 (t,s) -> s.getOccupancy(S0,S1,C)/N*s.getOccupancy(L)*COM_RATE);
 
 
-        PopulationModel f = new PopulationModel(5);
-        f.addRule(rule_C_S0);
-        f.addRule(rule_C_S1);
-        f.addRule(rule_S0_S1);
-        f.addRule(rule_S0_S0);
-        f.addRule(rule_S1_S1);
-        f.addRule(rule_L_C);
-        f.addRule(rule_S0_L);
-        f.addRule(rule_S1_L);
-        return f;
+        rules.add(rule_C_S0);
+        rules.add(rule_C_S1);
+        rules.add(rule_S0_S1);
+        rules.add(rule_S0_S0);
+        rules.add(rule_S1_S1);
+        rules.add(rule_L_C);
+        rules.add(rule_S0_L);
+        rules.add(rule_S1_L);
+        return rules;
     }
 
-    public static double numberOfSupplicants(PopulationState s) {
-        return s.getOccupancy(C)+s.getOccupancy(S0)+s.getOccupancy(S1);
+    @Override
+    protected List<Measure<PopulationState>> getMeasures() {
+        PopulationRegistry reg = getRegistry();
+        int C = reg.indexOf("C");
+        int S0 = reg.indexOf("S0");
+        int S1 = reg.indexOf("S1");
+        int F = reg.indexOf("F");
+        int L = reg.indexOf("L");
+        LinkedList<Measure<PopulationState>> measures = new LinkedList<>();
+        measures.add(new SimpleMeasure<>("supplicants", s -> s.getOccupancy(C,S0,S1)));
+        return null;
     }
 
-    public static double numberOfFollowers(PopulationState s) {
-        return s.getOccupancy(F);
+    @Override
+    protected void registerStates() {
+        setDefaultStateBuilder(new SimpleStateBuilder<>(this::initialState));
     }
 
-    public static double numberOfLeaders(PopulationState s) {
-        return s.getOccupancy(L);
+    private PopulationState initialState(double[] doubles) {
+        return new PopulationState(getRegistry().size(), new Population(getRegistry().indexOf("C"),INIT_C));
     }
+
 
 
 }

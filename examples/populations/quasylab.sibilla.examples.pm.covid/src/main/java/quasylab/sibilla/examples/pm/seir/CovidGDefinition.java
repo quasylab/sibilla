@@ -63,6 +63,11 @@ public class CovidGDefinition implements ModelDefinition<PopulationState> {
     }
 
     @Override
+    public int stateArity(String name) {
+        return 0;
+    }
+
+    @Override
     public String[] getModelParameters() {
         return new String[0];
     }
