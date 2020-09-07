@@ -124,12 +124,17 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
     @Override
     public byte[] serializeState(PopulationState state) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        for (int vectorSingleValue : state.getPopulationVector()) {
-            baos.write(ByteBuffer.allocate(4).putInt(vectorSingleValue).array());
-        }
+        serializeState(baos, state);
         byte[] toReturn = baos.toByteArray();
         baos.close();
         return toReturn;
+    }
+
+    @Override
+    public void serializeState(ByteArrayOutputStream toSerializeInto, PopulationState state) throws IOException {
+        for (int vectorSingleValue : state.getPopulationVector()) {
+            toSerializeInto.write(ByteBuffer.allocate(4).putInt(vectorSingleValue).array());
+        }
     }
 
     @Override
