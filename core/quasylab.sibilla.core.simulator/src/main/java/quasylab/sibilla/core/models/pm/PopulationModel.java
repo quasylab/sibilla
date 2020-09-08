@@ -57,8 +57,6 @@ public class PopulationModel implements MarkovProcess<PopulationState> {
 
     private final PopulationRegistry registry;
 
-    private final PopulationModelDefinition modelDefinition;
-
     private LinkedList<PopulationRule> rules;
 
     private Map<String, Measure<PopulationState>> measuresTable;
@@ -68,12 +66,7 @@ public class PopulationModel implements MarkovProcess<PopulationState> {
     }
 
     public PopulationModel(PopulationRegistry registry) {
-        this(registry, null);
-    }
-
-    public PopulationModel(PopulationRegistry registry, PopulationModelDefinition modelDefinition) {
         this.registry = registry;
-        this.modelDefinition = modelDefinition;
         this.rules = new LinkedList<>();
         this.measuresTable = new TreeMap<>();
     }
@@ -107,11 +100,6 @@ public class PopulationModel implements MarkovProcess<PopulationState> {
 
     public void addRules(Collection<PopulationRule> rules) {
         this.rules.addAll(rules);
-    }
-
-    @Override
-    public PopulationModelDefinition getModelDefinition() {
-        return modelDefinition;
     }
 
     @Override

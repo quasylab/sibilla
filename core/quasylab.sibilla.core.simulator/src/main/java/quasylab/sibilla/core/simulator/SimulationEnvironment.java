@@ -130,7 +130,7 @@ public class SimulationEnvironment implements Serializable {
 			S initialState, SamplingFunction<S> sampling_function, int iterations, double deadline)
 			throws InterruptedException {
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, monitor,
-				model.getModelDefinition(), trc -> trc.sample(sampling_function));
+				trc -> trc.sample(sampling_function));
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, initialState,
 				SamplePredicate.timeDeadlinePredicate(deadline));
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
@@ -243,7 +243,7 @@ public class SimulationEnvironment implements Serializable {
 		SimulationUnit<S> unit = new SimulationUnit<>(model, state,
 				(t, s) -> (t >= deadline) || goal.check(s) || !condition.check(s), goal);
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, monitor,
-				model.getModelDefinition(), traceConsumer);
+				traceConsumer);
 
 		for (int i = 0; i < n; i++) {
 			simulationManager.simulate(unit);

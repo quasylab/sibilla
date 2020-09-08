@@ -108,7 +108,7 @@ public class SEIRModelDefinition extends PopulationModelDefinition {
 
 
     public PopulationState initialState(double... parameters) {
-        return new PopulationState( new int[] { INIT_S, INIT_I, INIT_R } );
+        return new PopulationState( new int[] { INIT_S, INIT_E, INIT_I, INIT_R } );
     }
 
 

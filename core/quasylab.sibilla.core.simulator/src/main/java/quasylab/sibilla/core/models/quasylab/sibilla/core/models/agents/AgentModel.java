@@ -66,11 +66,6 @@ public abstract class AgentModel implements Model<SystemState> {
     }
 
     @Override
-    public ModelDefinition<SystemState> getModelDefinition() {
-        return null;
-    }
-
-    @Override
     public int stateByteArraySize() {
         return 0;
     }

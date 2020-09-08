@@ -71,8 +71,6 @@ public interface Model<S extends State> extends Serializable {
      */
     List<Action<S>> actions(RandomGenerator r, double time, S state);
 
-    ModelDefinition<S> getModelDefinition();
-
     /**
      * Returns the number of bytes needed to store model states.
      *
