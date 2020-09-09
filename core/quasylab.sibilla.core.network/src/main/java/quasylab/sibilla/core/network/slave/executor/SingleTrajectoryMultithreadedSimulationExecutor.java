@@ -10,9 +10,9 @@ import quasylab.sibilla.core.simulator.Trajectory;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 
 public class SingleTrajectoryMultithreadedSimulationExecutor extends SimulationExecutor {
 
@@ -26,8 +26,10 @@ public class SingleTrajectoryMultithreadedSimulationExecutor extends SimulationE
     public void simulate(NetworkTask networkTask, TCPNetworkManager master) {
         List<? extends SimulationTask<?>> tasks = networkTask.getTasks();
         Model model = tasks.get(0).getUnit().getModel();
-        CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
+
+        /*
         LinkedList<Trajectory<?>> trajectories = new LinkedList<>();
+        CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
 
         this.computationBenchmark.run(() -> {
             for (int i = 0; i < tasks.size(); i++) {
@@ -36,12 +38,6 @@ public class SingleTrajectoryMultithreadedSimulationExecutor extends SimulationE
             CompletableFuture.allOf(futures).join();
             for (SimulationTask<?> task : tasks) {
                 Trajectory trajectory = task.getTrajectory();
-                /*try {
-                BytearrayToFile.toFile(TrajectorySerializer.serialize(toAdd, model), "optTrajectories", String.format("SEIR_4_Rules_Trajectory_Custom_%d", toAdd.getData().size()));
-           System.out.println("Trajectory on file");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }*/
                 trajectories.add(trajectory);
             }
             return List.of((double) tasks.size());
@@ -50,5 +46,13 @@ public class SingleTrajectoryMultithreadedSimulationExecutor extends SimulationE
         for (Trajectory singleTrajectory : trajectories) {
             sendResult(new ComputationResult(new LinkedList<>(List.of(singleTrajectory))), master, model);
         }
+         */
+
+        IntStream.range(0, tasks.size()).forEach(i -> {
+            taskExecutor.execute(() -> {
+                Trajectory trajectory = tasks.get(i).get();
+                sendResult(new ComputationResult(new LinkedList<>(List.of(trajectory))), master, model);
+            });
+        });
     }
 }
