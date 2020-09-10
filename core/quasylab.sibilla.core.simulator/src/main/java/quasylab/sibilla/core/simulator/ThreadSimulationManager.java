@@ -27,7 +27,6 @@
 package quasylab.sibilla.core.simulator;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.State;
 
 import java.util.concurrent.CompletableFuture;
@@ -38,82 +37,80 @@ import java.util.logging.Logger;
 
 /**
  * @author belenchia
- *
  */
 
 public class ThreadSimulationManager<S extends State> extends AbstractSimulationManager<S> {
 
-	private static final Logger LOGGER = Logger.getLogger(ThreadSimulationManager.class.getName());
-	private ExecutorService executor;
-	private int pendingTasks = 0;
+    private static final Logger LOGGER = Logger.getLogger(ThreadSimulationManager.class.getName());
+    private ExecutorService executor;
+    private int pendingTasks = 0;
 
-	public ThreadSimulationManager(RandomGenerator random, SimulationMonitor monitor, Consumer<Trajectory<S>> consumer) {
-		this(Executors.newCachedThreadPool(), random, monitor, consumer);
-	}
+    public ThreadSimulationManager(RandomGenerator random, SimulationMonitor monitor, Consumer<Trajectory<S>> consumer) {
+        this(Executors.newCachedThreadPool(), random, monitor, consumer);
+    }
 
-	public ThreadSimulationManager(ExecutorService executor, RandomGenerator random, SimulationMonitor monitor, Consumer<Trajectory<S>> consumer) {
-		super(random,monitor,consumer);
-		this.executor = executor;
-	}
+    public ThreadSimulationManager(ExecutorService executor, RandomGenerator random, SimulationMonitor monitor, Consumer<Trajectory<S>> consumer) {
+        super(random, monitor, consumer);
+        this.executor = executor;
+    }
 
-	public static final SimulationManagerFactory getThreadSimulationManagerFacotry(ExecutorService executor) {
-		return new SimulationManagerFactory() {
-			@Override
-			public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random, SimulationMonitor monitor, ModelDefinition<S> modelDefinition, Consumer<Trajectory<S>> consumer) {
-				return new ThreadSimulationManager<>(executor,random,monitor,consumer);
-			}
-		};
-	}
+    public static final SimulationManagerFactory getThreadSimulationManagerFacotry(ExecutorService executor) {
+        return new SimulationManagerFactory() {
+            @Override
+            public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random, SimulationMonitor monitor, Consumer<Trajectory<S>> consumer) {
+                return new ThreadSimulationManager<>(executor, random, monitor, consumer);
+            }
+        };
+    }
 
-	public static final SimulationManagerFactory getFixedThreadSimulationManagerFactory(int n) {
-		return getThreadSimulationManagerFacotry(Executors.newFixedThreadPool(n));
-	}
+    public static final SimulationManagerFactory getFixedThreadSimulationManagerFactory(int n) {
+        return getThreadSimulationManagerFacotry(Executors.newFixedThreadPool(n));
+    }
 
-	public static final SimulationManagerFactory getCachedThreadSimulationManagerFactory() {
-		return getThreadSimulationManagerFacotry(Executors.newCachedThreadPool());
-	}
+    public static final SimulationManagerFactory getCachedThreadSimulationManagerFactory() {
+        return getThreadSimulationManagerFacotry(Executors.newCachedThreadPool());
+    }
 
-	public static final SimulationManagerFactory getWorkStealingPoolSimulationManagerFactory() {
-		return getThreadSimulationManagerFacotry(Executors.newWorkStealingPool());
-	}
-
-
-
-	@Override
-	protected synchronized void handleTask(SimulationTask<S> simulationTask) {
-		this.pendingTasks++;
-		CompletableFuture.supplyAsync(simulationTask,executor).whenComplete(
-				(t,e) -> {
-					if (t != null) {
-						handleTrajectory(t);
-					}
-					//TODO: handle exception!
-					taskCompleted(simulationTask);
-				}
-		);
-	}
-
-	private synchronized void taskCompleted(SimulationTask<S> simulationTask) {
-		this.pendingTasks--;
-		notifyAll();
-	}
+    public static final SimulationManagerFactory getWorkStealingPoolSimulationManagerFactory() {
+        return getThreadSimulationManagerFacotry(Executors.newWorkStealingPool());
+    }
 
 
-	@Override
-	public synchronized int pendingTasks() {
-		return pendingTasks;
-	}
+    @Override
+    protected synchronized void handleTask(SimulationTask<S> simulationTask) {
+        this.pendingTasks++;
+        CompletableFuture.supplyAsync(simulationTask, executor).whenComplete(
+                (t, e) -> {
+                    if (t != null) {
+                        handleTrajectory(t);
+                    }
+                    //TODO: handle exception!
+                    taskCompleted(simulationTask);
+                }
+        );
+    }
 
-	@Override
-	public synchronized void join() throws InterruptedException {
-		while (isRunning()&&pendingTasks()!=0) {
-			wait();
-		}
-	}
+    private synchronized void taskCompleted(SimulationTask<S> simulationTask) {
+        this.pendingTasks--;
+        notifyAll();
+    }
 
-	@Override
-	public synchronized void shutdown() throws InterruptedException {
-		super.shutdown();
-		executor.shutdown();
-	}
+
+    @Override
+    public synchronized int pendingTasks() {
+        return pendingTasks;
+    }
+
+    @Override
+    public synchronized void join() throws InterruptedException {
+        while (isRunning() && pendingTasks() != 0) {
+            wait();
+        }
+    }
+
+    @Override
+    public synchronized void shutdown() throws InterruptedException {
+        super.shutdown();
+        executor.shutdown();
+    }
 }

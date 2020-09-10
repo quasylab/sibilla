@@ -83,7 +83,7 @@ public class SimulationTask<S extends State> implements Supplier<Trajectory<S>>,
 		while (!unit.getStoppingPredicate().test(this.time, currentState)&&(!isCancelled())) {
 			step();
 		}
-		this.trajectory.setSuccesfull(this.unit.getReachPredicate().check(currentState));
+		this.trajectory.setSuccessful(this.unit.getReachPredicate().check(currentState));
 		completed(true);
 		this.trajectory.setGenerationTime(System.nanoTime()-startTime);
 		return this.getTrajectory();

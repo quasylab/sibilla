@@ -38,11 +38,11 @@ import java.util.function.Consumer;
  */
 public class SequentialSimulationManager<S extends State> extends AbstractSimulationManager<S> {
 
-	public SequentialSimulationManager(RandomGenerator random, SimulationMonitor monitor, ModelDefinition<S> definitions, Consumer<Trajectory<S>> trajectoryConsumer) {
+	public SequentialSimulationManager(RandomGenerator random, SimulationMonitor monitor, Consumer<Trajectory<S>> trajectoryConsumer) {
 		super(random, monitor, trajectoryConsumer);
 	}
 
-	@Override
+    @Override
 	protected synchronized void handleTask(SimulationTask<S> simulationTask) {
 		notifyMonitorStartInteration(simulationTask.getIndex());
 		handleTrajectory( simulationTask.get() );

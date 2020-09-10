@@ -50,7 +50,7 @@ public class ComputationResult<S extends State> implements Externalizable {
     /**
      * List of trajectory that contains the results of a simulation.
      */
-    private LinkedList<Trajectory<S>> results;
+    private List<Trajectory<S>> results;
 
     public ComputationResult() {
     }
@@ -60,8 +60,8 @@ public class ComputationResult<S extends State> implements Externalizable {
      *
      * @param results list of trajectories that compose the result of a simulation
      */
-    public ComputationResult(LinkedList<Trajectory<S>> results) {
-        this.results = results;
+    public ComputationResult(List<Trajectory<S>> results) {
+        this.results = new LinkedList<>(results);
     }
 
     /**

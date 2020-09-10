@@ -26,15 +26,10 @@
 
 package quasylab.sibilla.examples.servers.client;
 
-import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import quasylab.sibilla.core.simulator.sampling.Measure;
-import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
-import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
-import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -113,6 +108,9 @@ public class SEIRModelDefinition extends PopulationModelDefinition {
 
 
     public PopulationState initialState(double... parameters) {
-        return new PopulationState( new int[] { INIT_S, INIT_I, INIT_R } );
+        return new PopulationState( new int[] { INIT_S, INIT_E, INIT_I, INIT_R } );
     }
+
+
+
 }

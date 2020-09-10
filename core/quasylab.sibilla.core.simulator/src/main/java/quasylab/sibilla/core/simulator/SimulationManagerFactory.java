@@ -39,6 +39,6 @@ import java.util.function.Consumer;
 @FunctionalInterface
 public interface SimulationManagerFactory {
 	
-	<S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random, SimulationMonitor monitor, ModelDefinition<S> modelDefinition, Consumer<Trajectory<S>> consumer);
+	<S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random, SimulationMonitor monitor, Consumer<Trajectory<S>> consumer);
 
 }

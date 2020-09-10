@@ -51,46 +51,34 @@ import java.util.stream.IntStream;
  *
  * @author loreti
  */
-public class PopulationModel implements MarkovProcess<PopulationState>, Serializable {
+public class PopulationModel implements MarkovProcess<PopulationState> {
 
     private static final long serialVersionUID = 6871037109869821108L;
 
     private final PopulationRegistry registry;
 
-    private final PopulationModelDefinition modelDefinition;
-
     private LinkedList<PopulationRule> rules;
 
-    private Map<String,Measure<PopulationState>> measuresTable;
+    private Map<String, Measure<PopulationState>> measuresTable;
 
     public PopulationModel(int size) {
         this(PopulationRegistry.createRegistry(size));
     }
 
     public PopulationModel(PopulationRegistry registry) {
-        this(registry,null);
-    }
-
-    public PopulationModel(PopulationRegistry registry, PopulationModelDefinition modelDefinition) {
         this.registry = registry;
-        this.modelDefinition = modelDefinition;
         this.rules = new LinkedList<>();
         this.measuresTable = new TreeMap<>();
     }
 
     @Override
-    public WeightedStructure<StepFunction<PopulationState>> getTransitions(RandomGenerator r, double now, PopulationState state) {
-        WeightedLinkedList<StepFunction<PopulationState>> activities =
-                new WeightedLinkedList<>();
+    public WeightedStructure<StepFunction<PopulationState>> getTransitions(RandomGenerator r, double now,
+            PopulationState state) {
+        WeightedLinkedList<StepFunction<PopulationState>> activities = new WeightedLinkedList<>();
         for (PopulationRule rule : rules) {
             PopulationTransition tra = rule.apply(r, now, state);
             if (tra != null) {
-                activities.add(
-                        new WeightedElement<>(
-                                tra.getRate(),
-                                (rnd, t, dt) -> state.apply(tra.apply(rnd))
-                        )
-                );
+                activities.add(new WeightedElement<>(tra.getRate(), (rnd, t, dt) -> state.apply(tra.apply(rnd))));
             }
         }
         return activities;
@@ -106,7 +94,6 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
         return new PopulationState(species);
     }
 
-
     public void addRule(PopulationRule rule) {
         this.rules.add(rule);
     }
@@ -116,12 +103,6 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
     }
 
     @Override
-    public PopulationModelDefinition getModelDefinition() {
-        return modelDefinition;
-    }
-
-
-    @Override
     public int stateByteArraySize() {
         return registry.size() * 4;
     }
@@ -129,18 +110,25 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
     @Override
     public byte[] serializeState(PopulationState state) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        for (int vectorSingleValue : state.getPopulationVector()) {
-            baos.write(ByteBuffer.allocate(4).putInt(vectorSingleValue).array());
-        }
+        serializeState(baos, state);
         byte[] toReturn = baos.toByteArray();
         baos.close();
         return toReturn;
     }
 
     @Override
+    public void serializeState(ByteArrayOutputStream toSerializeInto, PopulationState state) throws IOException {
+        for (int vectorSingleValue : state.getPopulationVector()) {
+            toSerializeInto.write(ByteBuffer.allocate(4).putInt(vectorSingleValue).array());
+        }
+    }
+
+    @Override
     public PopulationState deserializeState(byte[] bytes) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        return deserializeState(bais);
+        PopulationState deserialized = deserializeState(bais);
+        bais.close();
+        return deserialized;
     }
 
     @Override
@@ -150,10 +138,8 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
         for (int i = 0; i < length; i++) {
             vector[i] = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
         }
-        bais.close();
         return new PopulationState(vector);
     }
-
 
     @Override
     public String[] measures() {
@@ -164,7 +150,7 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
     public double measure(String m, PopulationState state) {
         Measure<PopulationState> measure = measuresTable.get(m);
         if (measure == null) {
-            throw new IllegalArgumentException("Species "+m+" is unknown!");
+            throw new IllegalArgumentException("Species " + m + " is unknown!");
         }
         return measure.measure(state);
     }
@@ -174,14 +160,13 @@ public class PopulationModel implements MarkovProcess<PopulationState>, Serializ
         return measuresTable.get(m);
     }
 
-
     public void addMeasures(List<Measure<PopulationState>> measures) {
         if (measures != null) {
-            measures.forEach(m -> measuresTable.put(m.getName(),m));
+            measures.forEach(m -> measuresTable.put(m.getName(), m));
         }
     }
 
-    public int indexOf(String label, Object ... args) {
-        return registry.indexOf(label,args);
+    public int indexOf(String label, Object... args) {
+        return registry.indexOf(label, args);
     }
 }

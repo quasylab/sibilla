@@ -34,7 +34,7 @@ import java.io.Serializable;
  *
  * @param <S>
  */
-public interface ModelDefinition<S extends State> extends Serializable {
+public interface ModelDefinition<S extends State> {
 
     /**
      * Returns the number of parameters needed to build default initial state.

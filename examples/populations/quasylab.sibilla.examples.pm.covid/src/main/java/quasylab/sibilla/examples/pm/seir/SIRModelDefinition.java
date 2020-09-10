@@ -35,15 +35,14 @@ public class SIRModelDefinition implements ModelDefinition<PopulationState> {
     public final static int R = 2;
 
     public final static int SCALE = 100;
-    public final static int INIT_S = 99*SCALE;
-    public final static int INIT_I = 1*SCALE;
-    public final static int INIT_R = 0*SCALE;
+    public final static int INIT_S = 99 * SCALE;
+    public final static int INIT_I = 1 * SCALE;
+    public final static int INIT_R = 0 * SCALE;
     public final static double N = INIT_S + INIT_I + INIT_R;
 
     public final static double LAMBDA_MEET = 4;
     public final static double PROB_TRANSMISSION = 0.1;
     public final static double LAMBDA_R = 1 / 15.0;
-
 
     @Override
     public int stateArity() {
@@ -65,7 +64,6 @@ public class SIRModelDefinition implements ModelDefinition<PopulationState> {
 
     }
 
-
     @Override
     public String[] states() {
         return new String[] { "init" };
@@ -76,35 +74,27 @@ public class SIRModelDefinition implements ModelDefinition<PopulationState> {
         if (name.equals("init")) {
             return state(parameters);
         }
-        throw new IllegalArgumentException(String.format("State %s is unknown!",name));
+        throw new IllegalArgumentException(String.format("State %s is unknown!", name));
     }
 
     @Override
     public PopulationState state(double... parameters) {
-        return new PopulationState( new int[] { INIT_S, INIT_I, INIT_R } );
+        return new PopulationState(new int[] { INIT_S, INIT_I, INIT_R });
     }
 
     @Override
     public Model<PopulationState> createModel() {
-        PopulationRule rule_S_I = new ReactionRule(
-                "S->I",
-                new Population[] { new Population(S), new Population(I)} ,
-                new Population[] { new Population(I), new Population(I)},
-                (t,s) -> s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(I)/N));
+        PopulationRule rule_S_I = new ReactionRule("S->I", new Population[] { new Population(S), new Population(I) },
+                new Population[] { new Population(I), new Population(I) },
+                (t, s) -> s.getOccupancy(S) * PROB_TRANSMISSION * LAMBDA_MEET * (s.getOccupancy(I) / N));
 
-        PopulationRule rule_I_R = new ReactionRule(
-                "I->R",
-                new Population[] { new Population(I) },
-                new Population[] { new Population(R) },
-                (t,s) -> s.getOccupancy(I)*LAMBDA_R
-        );
+        PopulationRule rule_I_R = new ReactionRule("I->R", new Population[] { new Population(I) },
+                new Population[] { new Population(R) }, (t, s) -> s.getOccupancy(I) * LAMBDA_R);
 
-
-        PopulationModel f = new PopulationModel(3);
+        PopulationModel f = new PopulationModel(3, this);
         f.addRule(rule_S_I);
         f.addRule(rule_I_R);
         return f;
     }
-
 
 }
