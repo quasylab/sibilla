@@ -209,7 +209,7 @@ public class GossipUnicast {
 	}
 
 	private PopulationModel buildPopulationModel(int scale) {
-		PopulationModel m = new PopulationModel(6, this);
+		PopulationModel m = new PopulationModel(6);
 		m.addRules(buildRules());
 		return m;
 	}
