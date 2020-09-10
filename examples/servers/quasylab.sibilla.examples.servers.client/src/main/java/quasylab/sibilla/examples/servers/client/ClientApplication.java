@@ -87,7 +87,7 @@ public class ClientApplication implements Serializable {
                 keyStoreType, keyStorePath, trustStoreType, trustStorePath, masterAddress, masterPort,
                 masterNetworkManagerType));
 
-        SEIRModelDefinition modelDefinition = new SEIRModelDefinition();
+        ChordModel modelDefinition = new ChordModel();
 
         PopulationModel model = modelDefinition.createModel();
 

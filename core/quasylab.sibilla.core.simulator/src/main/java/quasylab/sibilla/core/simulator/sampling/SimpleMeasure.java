@@ -23,6 +23,7 @@
 
 package quasylab.sibilla.core.simulator.sampling;
 
+import quasylab.sibilla.core.models.MeasureFunction;
 import quasylab.sibilla.core.models.State;
 
 import java.util.function.Function;
@@ -30,9 +31,9 @@ import java.util.function.Function;
 public class SimpleMeasure<S extends State> implements Measure<S> {
 
     private final String name;
-    private final Function<S,Double> measure;
+    private final MeasureFunction<S> measure;
 
-    public SimpleMeasure(String name, Function<S, Double> measure) {
+    public SimpleMeasure(String name, MeasureFunction<S> measure) {
         this.name = name;
         this.measure = measure;
     }
