@@ -10,7 +10,6 @@ import quasylab.sibilla.core.simulator.SimulationTask;
 import quasylab.sibilla.core.simulator.SimulationUnit;
 import quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,6 +17,7 @@ import java.util.logging.Logger;
 
 public abstract class ComputationBenchmarkEnvironment<S extends State> {
     private static final double DEADLINE = 600;
+    protected Type type;
     protected BenchmarkUnit mainBenchmarkUnit;
     protected String benchmarkName;
     protected ModelDefinition<S> model;
@@ -27,20 +27,31 @@ public abstract class ComputationBenchmarkEnvironment<S extends State> {
     private int step = 20;
     private int tasksCount;
 
-    protected ComputationBenchmarkEnvironment(String benchmarkName, ModelDefinition<S> modelDefinition) {
+    protected ComputationBenchmarkEnvironment(Type type, String benchmarkName, ModelDefinition<S> modelDefinition,
+                                              int repetitions, int threshold, int step) {
+        this.type = type;
         this.benchmarkName = benchmarkName;
         this.mainBenchmarkUnit = getMainBenchmarkUnit();
         this.model = modelDefinition;
+        this.repetitions = repetitions;
+        this.threshold = threshold;
+        this.step = step;
         tasksCount = 0;
         LOGGER = HostLoggerSupplier.getInstance("Computation Benchmark").getLogger();
     }
 
-    public static ComputationBenchmarkEnvironment getComputationEnvironment(ModelDefinition model) {
-        return new MultithreadComputationBenchmarkEnvironment("s", model);
+    public static <S extends State> ComputationBenchmarkEnvironment<S> getComputationEnvironment(Type type, String benchmarkName, ModelDefinition<S> model, int repetitions, int threshold, int step) {
+        switch (type) {
+            case MULTITHREAD:
+                return new MultithreadComputationBenchmarkEnvironment<>(type, benchmarkName, model, repetitions, threshold, step);
+            case SEQUENTIAL:
+            default:
+                return new SequentialComputationBenchmarkEnvironment<>(type, benchmarkName, model, repetitions, threshold, step);
+        }
     }
 
     private String getMainLabel() {
-        return "sas";
+        return type.label;
     }
 
     private List<String> getMainBenchmarkLabels() {
@@ -57,21 +68,24 @@ public abstract class ComputationBenchmarkEnvironment<S extends State> {
 
     private BenchmarkUnit getMainBenchmarkUnit() {
         return new BenchmarkUnit(this.getDirectory(),
-                "%s_compute", this.getBenchmarkExtension(),
-                this.getMainLabel(), this.getMainBenchmarkLabels());
+                String.format("%s_compute", this.type.fullName),
+                this.getBenchmarkExtension(),
+                this.getMainLabel(),
+                this.getMainBenchmarkLabels());
     }
 
-    public abstract void compute(NetworkTask task);
+    public abstract void compute(NetworkTask<S> task);
 
     public void run() {
-        LOGGER.info(String.format("STARTING COMPUTATION %s BENCHMARK", getMainLabel()));
-
+        LOGGER.info(String.format("STARTING %s COMPUTATION BENCHMARK", getMainLabel()));
 
         for (int j = 1; j <= repetitions; j++) {
+            AtomicInteger currentRepetition = new AtomicInteger(j);
             while (tasksCount < threshold) {
                 tasksCount += step;
 
-                SimulationUnit<S> unit = new SimulationUnit<S>(model.createModel(), model.state(), SamplePredicate.timeDeadlinePredicate(DEADLINE));
+                SimulationUnit<S> unit = new SimulationUnit<S>(model.createModel(), model.state(),
+                        SamplePredicate.timeDeadlinePredicate(DEADLINE));
 
                 List<SimulationTask<S>> tasks = new ArrayList<>();
                 for (int i = 0; i < tasksCount; i++) {
@@ -80,12 +94,29 @@ public abstract class ComputationBenchmarkEnvironment<S extends State> {
                 NetworkTask<S> task = new NetworkTask<>(tasks);
 
                 mainBenchmarkUnit.run(() -> {
-                    LOGGER.info(String.format("Computating %d tasks", tasksCount));
+                    LOGGER.info("-----------------------------------------------");
+                    LOGGER.info(String.format("[%d] Computing [%d] tasks", currentRepetition.get(), tasksCount));
                     compute(task);
+                    LOGGER.info(String.format("[%d] Trajectories computed [%d]", currentRepetition.get(), tasksCount));
                     return List.of((double) tasksCount);
                 });
             }
         }
     }
 
+    public enum Type {
+        SEQUENTIAL("s", "Sequential"), MULTITHREAD("m", "Multithread");
+
+        private final String label;
+        private final String fullName;
+
+        Type(String label, String fullName) {
+            this.label = label;
+            this.fullName = fullName;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+    }
 }
