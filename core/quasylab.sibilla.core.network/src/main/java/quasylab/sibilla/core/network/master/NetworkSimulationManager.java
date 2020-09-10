@@ -416,8 +416,6 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             sendRecBenchmark.run(() -> {
                 server.writeObject(serializer.serialize(MasterCommand.TASK));
                 server.writeObject(Compressor.compress(serializer.serialize(networkTask)));
-                state.setSentTasks(networkTask.getTasks().size());
-                state.setReceivedTasks(0);
                 wrapper.result = awaitingResults(server, state, networkTask);
 
                 return List.of((double) networkTask.getTasks().size(), (double) wrapper.result.getResults().size());
@@ -447,6 +445,8 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
     private ComputationResult<S> awaitingResults(TCPNetworkManager server, SlaveState state, NetworkTask<?> tasks)
             throws IOException {
         ComputationResult<S> results = new ComputationResult<>(new LinkedList<>());
+        state.setSentTasks(tasks.getTasks().size());
+        state.setReceivedTasks(0);
         long elapsedTime = System.nanoTime();
 
         server.getSocket().setSoTimeout((int) (state.getTimeout() / 1000000));
