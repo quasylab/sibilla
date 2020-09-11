@@ -29,6 +29,19 @@ public class MultithreadedSimulationExecutor extends SimulationExecutor {
         Model model = tasks.get(0).getUnit().getModel();
         CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
 
+        this.computationBenchmark.run(() -> {
+            for (int i = 0; i < tasks.size(); i++) {
+                futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
+            }
+            CompletableFuture.allOf(futures).join();
+            for (SimulationTask<?> task : tasks) {
+                Trajectory trajectory = task.getTrajectory();
+                trajectories.add(trajectory);
+            }
+            return List.of((double) tasks.size());
+        });
+
+        /*
         for (int i = 0; i < tasks.size(); i++) {
             futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
         }
@@ -37,6 +50,7 @@ public class MultithreadedSimulationExecutor extends SimulationExecutor {
             Trajectory trajectory = task.getTrajectory();
             trajectories.add(trajectory);
         }
+         */
 
         sendResult(new ComputationResult(trajectories), master, model);
     }

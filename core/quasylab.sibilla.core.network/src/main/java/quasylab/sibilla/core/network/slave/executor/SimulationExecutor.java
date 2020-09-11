@@ -3,6 +3,7 @@ package quasylab.sibilla.core.network.slave.executor;
 import quasylab.sibilla.core.models.Model;
 import quasylab.sibilla.core.network.ComputationResult;
 import quasylab.sibilla.core.network.NetworkTask;
+import quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
 import quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import quasylab.sibilla.core.network.compression.Compressor;
 import quasylab.sibilla.core.network.serialization.ComputationResultSerializer;
@@ -11,6 +12,7 @@ import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Represents an executor of simulations that manages the computation and the
@@ -23,10 +25,8 @@ public abstract class SimulationExecutor {
 
     private final ExecutorType executorType;
 
-    /*
     protected final BenchmarkUnit computationBenchmark;
     private final BenchmarkUnit sendBenchmark;
-     */
 
     //TODO
     private final ComputationResultSerializerType crSerializerType;
@@ -42,7 +42,6 @@ public abstract class SimulationExecutor {
         this.executorType = exType;
         this.crSerializerType = crSerializerType;
 
-        /*
         this.computationBenchmark = new BenchmarkUnit("sibillaBenchmarks/slaveBenchmarking/",
                 String.format("%s_computation", this.executorType), "csv", "o", List.of("comptime", "tasks"));
 
@@ -50,7 +49,6 @@ public abstract class SimulationExecutor {
                 String.format("%s_resultsCompressSerializeAndSend", this.crSerializerType.toString()), "csv",
                 this.crSerializerType.getLabel(),
                 List.of("sertime", "trajectories", "serbytes", "comprtime", "comprbytes", "sendtime"));
-         */
     }
 
     /**
@@ -94,7 +92,6 @@ public abstract class SimulationExecutor {
      * @param model   the Model of the executed simulation
      */
     protected void sendResult(ComputationResult results, TCPNetworkManager master, Model model) {
-        /*
         final var wrapper = new Object() {
             private byte[] toSend;
         };
@@ -109,13 +106,14 @@ public abstract class SimulationExecutor {
             master.writeObject(wrapper.toSend);
             return List.of();
         });
-         */
 
+        /*
         try {
             master.writeObject(Compressor.compress(this.serializeComputationResult(results, model)));
         } catch (IOException e) {
             e.printStackTrace();
         }
+         */
     }
 
     //TODO

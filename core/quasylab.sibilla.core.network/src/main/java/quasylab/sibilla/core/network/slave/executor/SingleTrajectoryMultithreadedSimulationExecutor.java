@@ -29,6 +29,23 @@ public class SingleTrajectoryMultithreadedSimulationExecutor extends SimulationE
         LinkedList<Trajectory<?>> trajectories = new LinkedList<>();
         CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
 
+        this.computationBenchmark.run(() -> {
+            for (int i = 0; i < tasks.size(); i++) {
+                futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
+            }
+            CompletableFuture.allOf(futures).join();
+            for (SimulationTask<?> task : tasks) {
+                Trajectory trajectory = task.getTrajectory();
+                trajectories.add(trajectory);
+            }
+            return List.of((double) tasks.size());
+        });
+
+        for (Trajectory singleTrajectory : trajectories) {
+            sendResult(new ComputationResult(new LinkedList<>(List.of(singleTrajectory))), master, model);
+        }
+
+        /*
         for (int i = 0; i < tasks.size(); i++) {
             futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
         }
@@ -41,5 +58,6 @@ public class SingleTrajectoryMultithreadedSimulationExecutor extends SimulationE
         for (Trajectory singleTrajectory : trajectories) {
             sendResult(new ComputationResult(new LinkedList<>(List.of(singleTrajectory))), master, model);
         }
+         */
     }
 }
