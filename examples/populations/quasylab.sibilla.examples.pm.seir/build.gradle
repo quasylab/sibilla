@@ -3,6 +3,8 @@ plugins {
   id 'application'
 }
 
+sourceCompatibility = '11'
+
 dependencies {
   compile project(':core:quasylab.sibilla.core.network')
 }

@@ -3,7 +3,7 @@ plugins {
     id 'application'
 }
 
-group = 'quasylab.sibilla.examples.servers.client'
+group = 'quasylab.sibilla.examples.benchmarks.slave'
 version = '1.0.0'
 sourceCompatibility = '11'
 
@@ -14,6 +14,7 @@ repositories {
 dependencies {
     compile project(':core:quasylab.sibilla.core.network')
     compile project(':examples:populations:quasylab.sibilla.examples.pm.crowds')
+    compile project(':examples:populations:quasylab.sibilla.examples.pm.seir')
 }
 
-mainClassName = 'quasylab.sibilla.examples.servers.client.ClientApplication'
+mainClassName = 'quasylab.sibilla.examples.benchmarks.slave.SlaveBenchmark'

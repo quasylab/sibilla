@@ -1,5 +1,6 @@
 package quasylab.sibilla.examples.benchmarks.seirslave;
 
+import quasylab.sibilla.core.models.pm.PopulationModel;
 import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.benchmark.slave.SlaveBenchmarkEnvironment;
@@ -9,6 +10,7 @@ import quasylab.sibilla.core.network.serialization.ComputationResultSerializerTy
 import quasylab.sibilla.core.network.serialization.Serializer;
 import quasylab.sibilla.core.network.serialization.SerializerType;
 import quasylab.sibilla.core.network.util.NetworkUtils;
+import quasylab.sibilla.examples.pm.crowds.ChordModel;
 
 import java.io.IOException;
 
@@ -25,9 +27,13 @@ public class SlaveBenchmark {
         ComputationResultSerializerType type = (ComputationResultSerializerType) fstSerializer.deserialize(networkManager.readObject());
         networkManager.writeObject(fstSerializer.serialize(benchmarkName));
 
+        ChordModel def = new ChordModel();
+        def.setParameter("N",10);
+        PopulationModel model = def.createModel();
+        
         SlaveBenchmarkEnvironment<PopulationState> env = SlaveBenchmarkEnvironment.getSlaveBenchmark(networkManager,
                 benchmarkName, "src/main/resources", "SEIR_4_Rules_Trajectory_Custom_5128",
-                new SEIRModelDefinitionThreeRules().createModel(), type);
+                model, type);
 
         env.run();
     }

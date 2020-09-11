@@ -37,6 +37,7 @@ import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.network.util.StartupUtils;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import quasylab.sibilla.examples.pm.crowds.ChordModel;
 
 import java.io.Serializable;
 import java.net.InetAddress;

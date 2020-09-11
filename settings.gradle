@@ -23,7 +23,7 @@ include 'core:quasylab.sibilla.core.simulator',
 		'examples:servers:quasylab.sibilla.examples.servers.master',
 		'examples:servers:quasylab.sibilla.examples.servers.slave',
 		'examples:populations:quasylab.sibilla.examples.pm.taxis',
-    'examples:benchmarks:quasylab.sibilla.examples.benchmarks.seirslave',
-    'examples:benchmarks:quasylab.sibilla.examples.benchmarks.seirmaster'
+    'examples:benchmarks:quasylab.sibilla.examples.benchmarks.slave',
+    'examples:benchmarks:quasylab.sibilla.examples.benchmarks.master',
 		'examples:agents:quasylab.sibila.examples.agents.RobotAgents'
 
