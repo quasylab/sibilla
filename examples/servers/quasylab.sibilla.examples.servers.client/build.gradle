@@ -13,7 +13,6 @@ repositories {
 
 dependencies {
     compile project(':core:quasylab.sibilla.core.network')
-    compile project(':examples:populations:quasylab.sibilla.examples.pm.crowds')
 }
 
 mainClassName = 'quasylab.sibilla.examples.servers.client.ClientApplication'

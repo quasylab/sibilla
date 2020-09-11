@@ -37,7 +37,6 @@ import quasylab.sibilla.core.network.util.NetworkUtils;
 import quasylab.sibilla.core.network.util.SSLUtils;
 import quasylab.sibilla.core.network.util.StartupUtils;
 import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
-import quasylab.sibilla.examples.pm.crowds.ChordModel;
 
 import java.io.Serializable;
 import java.net.InetAddress;
@@ -50,7 +49,7 @@ public class ClientApplication implements Serializable {
     public final static double DEADLINE = 600;
     private static Logger LOGGER;
     private static final long serialVersionUID = 1L;
-    private static final int REPLICA = 1000;
+    private static final int REPLICA = 10000;
     private static final int submitRepetitions = 1;
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
 
@@ -88,12 +87,12 @@ public class ClientApplication implements Serializable {
                 keyStoreType, keyStorePath, trustStoreType, trustStorePath, masterAddress, masterPort,
                 masterNetworkManagerType));
 
-        ChordModel modelDefinition = new ChordModel();
+        ChordModel def = new ChordModel();
+        def.setParameter("N",500);
+        PopulationModel model = def.createModel();
 
-        PopulationModel model = modelDefinition.createModel();
 
-
-        new ClientSimulationEnvironment(RANDOM_GENERATOR, modelDefinition, model, modelDefinition.state(),
+        new ClientSimulationEnvironment(RANDOM_GENERATOR, def, model, def.state(),
                 model.getSamplingFunction(SAMPLINGS, DEADLINE / SAMPLINGS), REPLICA, DEADLINE,
                 masterServerInfo, SerializerType.FST, submitRepetitions);
 

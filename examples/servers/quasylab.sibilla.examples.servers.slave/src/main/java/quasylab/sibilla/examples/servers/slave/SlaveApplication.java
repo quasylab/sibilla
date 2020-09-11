@@ -92,7 +92,7 @@ public class SlaveApplication {
 
 
         new DiscoverableBasicSimulationServer(localDiscoveryPort, masterSimulationNetworkManagerType,
-                masterDiscoveryNetworkManagerType, SerializerType.FST, SimulationExecutor.ExecutorType.SINGLE_TRAJECTORY_MULTITHREADED, ComputationResultSerializerType.CUSTOM).start(localSimulationPort);
+                masterDiscoveryNetworkManagerType, SerializerType.FST, SimulationExecutor.ExecutorType.MULTITHREADED, ComputationResultSerializerType.CUSTOM).start(localSimulationPort);
     }
 
 
