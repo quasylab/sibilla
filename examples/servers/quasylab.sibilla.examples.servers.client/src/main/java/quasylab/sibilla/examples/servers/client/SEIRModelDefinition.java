@@ -24,10 +24,8 @@
  *
  */
 
-package quasylab.sibilla.examples.pm.seir;
+package quasylab.sibilla.examples.servers.client;
 
-import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.models.pm.*;
 import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import quasylab.sibilla.core.simulator.sampling.Measure;
