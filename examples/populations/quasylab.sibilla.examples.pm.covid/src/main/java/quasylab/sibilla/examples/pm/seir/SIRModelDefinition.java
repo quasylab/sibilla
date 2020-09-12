@@ -91,7 +91,7 @@ public class SIRModelDefinition implements ModelDefinition<PopulationState> {
         PopulationRule rule_I_R = new ReactionRule("I->R", new Population[] { new Population(I) },
                 new Population[] { new Population(R) }, (t, s) -> s.getOccupancy(I) * LAMBDA_R);
 
-        PopulationModel f = new PopulationModel(3, this);
+        PopulationModel f = new PopulationModel(3);
         f.addRule(rule_S_I);
         f.addRule(rule_I_R);
         return f;
