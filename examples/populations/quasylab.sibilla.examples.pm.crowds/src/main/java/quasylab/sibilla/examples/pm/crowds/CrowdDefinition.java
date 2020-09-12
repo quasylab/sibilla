@@ -111,11 +111,11 @@ public class CrowdDefinition extends PopulationModelDefinition {
 
 	@Override
 	protected void registerStates() {
-		int N = (int) getParameter("N");
-		setDefaultStateBuilder(new SimpleStateBuilder<>(0, args -> initialState(N, args)));
+		setDefaultStateBuilder(new SimpleStateBuilder<>(0, args -> initialState( args)));
 	}
 
-	private PopulationState initialState(int N, double... parameters) {
+	private PopulationState initialState(double... parameters) {
+		int N = (int) getParameter("N");
 		PopulationRegistry reg = getRegistry();
 		Population[] pop = new Population[N + 1];
 		pop[0] = new Population(reg.indexOf("M1"), 1);

@@ -93,8 +93,7 @@ public class ChordModel extends PopulationModelDefinition {
 
     @Override
     protected void registerStates() {
-        int N = (int) getParameter("N");
-        setDefaultStateBuilder(new SimpleStateBuilder<>(0, args -> initialState(N, args)));
+        setDefaultStateBuilder(new SimpleStateBuilder<>(0, args -> initialState((int) getParameter("N"), args)));
     }
 
     private PopulationState initialState(int N, double... parameters) {

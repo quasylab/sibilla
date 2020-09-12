@@ -26,6 +26,7 @@ package quasylab.sibilla.core.simulator.sampling;
 import quasylab.sibilla.core.models.MeasureFunction;
 import quasylab.sibilla.core.models.State;
 
+import java.io.Serializable;
 import java.util.function.Function;
 
 public class SimpleMeasure<S extends State> implements Measure<S> {

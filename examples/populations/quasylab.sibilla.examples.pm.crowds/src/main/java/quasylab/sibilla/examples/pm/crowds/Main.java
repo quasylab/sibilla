@@ -41,7 +41,7 @@ import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 public class Main {
 
     public static void main(String[] args) throws InterruptedException {
-        simulateChordModel(10,1000,1000,1000);
+        simulateChordModel(100,1000,1000,1000);
         simulateCrowdModel(10,1000,1000,1000);
         simulateMeshModel(50, 50,1000,1000,1000);
         simulateTierModel(50, 50,1000,1000,1000);
