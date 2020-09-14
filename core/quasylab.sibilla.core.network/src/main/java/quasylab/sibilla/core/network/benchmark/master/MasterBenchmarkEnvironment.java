@@ -171,9 +171,10 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
         LOGGER.info(String.format("STARTING MASTER %s BENCHMARK", this.benchmarkType.toString()));
         netManager.writeObject(serializer.serialize(repetitions));
         netManager.writeObject(serializer.serialize(threshold));
-
+        
 
         for (int j = 1; j <= repetitions; j++) {
+            System.out.println("Repetitions " + j + "/" + repetitions);
             AtomicInteger currentRepetition = new AtomicInteger(j);
             while (sentTasksCount < threshold) {
                 sentTasksCount += step;
@@ -202,6 +203,8 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
 
                 // LOGGER.info(String.format("[%d] Trajectories received: [%d]", currentRepetition.get(), results.getResults().size()));
             }
+            sentTasksCount = 0;
+            netManager.writeObject(serializer.serialize(sentTasksCount));
         }
         netManager.closeConnection();
     }
@@ -240,7 +243,7 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
     private List<String> getSendBenchmarkLabels() {
         return List.of("sendandreceivetime",
                 "tasks",
-                "trajectories");
+                "resultsSize");
     }
 
     private String getDirectory() {
