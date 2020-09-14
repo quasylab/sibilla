@@ -29,10 +29,7 @@ package quasylab.sibilla.core.network;
 import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.simulator.Trajectory;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,7 +41,7 @@ import java.util.List;
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */
-public class ComputationResult<S extends State> implements Externalizable {
+public class ComputationResult<S extends State> implements Serializable {
     private static final long serialVersionUID = -545122842766553412L;
 
     /**
@@ -77,7 +74,7 @@ public class ComputationResult<S extends State> implements Externalizable {
         this.results.addAll(otherResults.results);
     }
 
-    @Override
+    /*@Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeInt(results.size());
         for (Trajectory trajectoryToWrite : results) {
@@ -93,5 +90,5 @@ public class ComputationResult<S extends State> implements Externalizable {
             trajectories.add((Trajectory) in.readObject());
         }
         this.results = trajectories;
-    }
+    }*/
 }

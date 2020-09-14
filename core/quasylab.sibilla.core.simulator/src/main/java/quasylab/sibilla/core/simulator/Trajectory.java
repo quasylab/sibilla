@@ -30,17 +30,14 @@ import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.simulator.sampling.Sample;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
  * @author loreti
  */
-public class Trajectory<S extends State> implements Externalizable {
+public class Trajectory<S extends State> implements Serializable {
 
     private static final long serialVersionUID = -9039722623650234376L;
     private List<Sample<S>> data;
@@ -129,7 +126,7 @@ public class Trajectory<S extends State> implements Externalizable {
         this.end = end;
     }
 
-    @Override
+   /* @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeInt(data.size());
         out.writeDouble(start);
@@ -155,5 +152,5 @@ public class Trajectory<S extends State> implements Externalizable {
             samples.add((Sample) in.readObject());
         }
         this.data = samples;
-    }
+    }*/
 }

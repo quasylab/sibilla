@@ -213,7 +213,7 @@ public class PopulationState implements State {
         return this.populationVector;
     }
 
-    @Override
+    /*@Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeInt(populationVector.length);
         out.writeDouble(population);
@@ -231,5 +231,5 @@ public class PopulationState implements State {
             newPopVec[i] = in.readInt();
         }
         this.populationVector = newPopVec;
-    }
+    }*/
 }
