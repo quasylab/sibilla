@@ -35,7 +35,7 @@ public class SlaveBenchmark {
         PopulationModel model = def.createModel();
         
         SlaveBenchmarkEnvironment<PopulationState> env = SlaveBenchmarkEnvironment.getSlaveBenchmark(networkManager,
-                benchmarkName, "src/main/resources", "chordTrajectory_N1000_Samples4",
+                benchmarkName, "src/main/resources", "chordTrajectory_Samplings100_Deadline600_N1000_Samples6",
                 model, type);
 
         env.run();

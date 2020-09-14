@@ -46,8 +46,8 @@ import java.util.logging.Logger;
 
 public class ClientApplication implements Serializable {
 
-    public final static int SAMPLINGS = 1000;
-    public final static double DEADLINE = 1000;
+    public final static int SAMPLINGS = 100;
+    public final static double DEADLINE = 600;
     private static Logger LOGGER;
     private static final long serialVersionUID = 1L;
     private static final int REPLICA = 1;
