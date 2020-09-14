@@ -38,7 +38,5 @@ public class SequentialSimulationExecutor extends SimulationExecutor {
             trajectories.add(trajectory);
         }
          */
-
-        sendResult(new ComputationResult(trajectories), master, model);
     }
 }

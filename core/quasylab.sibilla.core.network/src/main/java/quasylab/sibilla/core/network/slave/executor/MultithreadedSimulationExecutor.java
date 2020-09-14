@@ -41,6 +41,8 @@ public class MultithreadedSimulationExecutor extends SimulationExecutor {
             return List.of((double) tasks.size());
         });
 
+        sendResult(new ComputationResult(trajectories), master, model);
+
         /*
         for (int i = 0; i < tasks.size(); i++) {
             futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
@@ -52,6 +54,5 @@ public class MultithreadedSimulationExecutor extends SimulationExecutor {
         }
          */
 
-        sendResult(new ComputationResult(trajectories), master, model);
     }
 }
