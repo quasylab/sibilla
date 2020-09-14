@@ -100,7 +100,7 @@ public class SystemState implements State {
         return agentInfo[a][i];
     }
 
-    @Override
+    /*@Override
     public void writeExternal(ObjectOutput out) throws IOException {
 
     }
@@ -108,5 +108,5 @@ public class SystemState implements State {
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 
-    }
+    }*/
 }
