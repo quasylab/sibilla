@@ -1,6 +1,7 @@
-package quasylab.sibilla.examples.benchmarks.seirslave;
+package quasylab.sibilla.examples.benchmarks.slave;
 
 import quasylab.sibilla.core.models.pm.PopulationModel;
+import quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.benchmark.slave.SlaveBenchmarkEnvironment;
@@ -18,7 +19,9 @@ public class SlaveBenchmark {
 
     public static void main(String[] args) throws IOException {
         Serializer fstSerializer = Serializer.getSerializer(SerializerType.FST);
-        String benchmarkName = "testNewOpti4Rules";
+
+        String benchmarkName = "prebenchmarkTest";
+
         NetworkInfo localInfo = new NetworkInfo(NetworkUtils.getLocalAddress(), 10000, TCPNetworkManagerType.DEFAULT);
         TCPNetworkManager networkManager = TCPNetworkManager
                 .createNetworkManager((TCPNetworkManagerType) localInfo.getType(), TCPNetworkManager
@@ -27,12 +30,12 @@ public class SlaveBenchmark {
         ComputationResultSerializerType type = (ComputationResultSerializerType) fstSerializer.deserialize(networkManager.readObject());
         networkManager.writeObject(fstSerializer.serialize(benchmarkName));
 
-        ChordModel def = new ChordModel();
-        def.setParameter("N",10);
+        PopulationModelDefinition def = new ChordModel();
+        def.setParameter("N",1000);
         PopulationModel model = def.createModel();
         
         SlaveBenchmarkEnvironment<PopulationState> env = SlaveBenchmarkEnvironment.getSlaveBenchmark(networkManager,
-                benchmarkName, "src/main/resources", "SEIR_4_Rules_Trajectory_Custom_5128",
+                benchmarkName, "src/main/resources", "chordTrajectory_N1000_Samples4",
                 model, type);
 
         env.run();

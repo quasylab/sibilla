@@ -1,4 +1,4 @@
-package quasylab.sibilla.examples.benchmarks.seirslave;
+package quasylab.sibilla.examples.benchmarks.slave;
 
 import quasylab.sibilla.core.models.ModelDefinition;
 import quasylab.sibilla.core.network.benchmark.computation.ComputationBenchmarkEnvironment;
