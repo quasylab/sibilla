@@ -61,6 +61,7 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
 
     protected ComputationResultSerializerType computationResultSerializerType;
     protected BenchmarkUnit mainBenchmarkUnit;
+    protected BenchmarkUnit sendBenchmarkUnit;
     protected String benchmarkName;
     private Serializer serializer;
     protected Logger LOGGER;
@@ -89,6 +90,7 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
         this.trajectoryFileName = trajectoryFileName;
         this.computationResultSerializerType = computationResultSerializerType;
         this.mainBenchmarkUnit = getMainBenchmarkUnit();
+        this.sendBenchmarkUnit = getSendBenchmarkUnit();
         serializer = Serializer.getSerializer(SerializerType.FST);
         this.LOGGER = HostLoggerSupplier.getInstance("Slave Benchmark").getLogger();
         this.currentTasksCount = 0;
@@ -189,6 +191,11 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
         return List.of("sertime", "trajectories", "serbytes", "comprtime", "comprbytes", "sendtime");
     }
 
+    private List<String> getSendBenchmarkLabels() {
+        return List.of("receiveandsendtime",
+                "resultsSize", "tasks");
+    }
+
     private String getDirectory() {
         return String.format("benchmarks/slaveBenchmarking/%s/", this.benchmarkName);
     }
@@ -201,6 +208,16 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
         return new BenchmarkUnit(this.getDirectory(),
                 String.format("%s_compressSerializeAndSend", this.getSerializerName()), this.getBenchmarkExtension(),
                 this.getMainLabel(), this.getMainBenchmarkLabels());
+    }
+
+    private BenchmarkUnit getSendBenchmarkUnit() {
+        return new BenchmarkUnit(
+                this.getDirectory(),
+                String.format("%s_receiveAndSend", this.getSerializerName()),
+                this.getBenchmarkExtension(),
+                this.getMainLabel(),
+                this.getSendBenchmarkLabels()
+        );
     }
 
     /**
@@ -218,19 +235,24 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
         for (int j = 1; j <= repetitions; j++) {
             AtomicInteger currentRepetition = new AtomicInteger(j);
             while (currentTasksCount < threshold) {
-                this.currentTasksCount = (int) serializer.deserialize(netManager.readObject());
-                this.resultsSize = (int) serializer.deserialize(netManager.readObject());
-                LOGGER.info("-----------------------------------------------");
-                LOGGER.info(String.format("[%d] Received [%d] tasks. Groups of [%d] trajectories",
-                        currentRepetition.get(), currentTasksCount, resultsSize));
+                this.sendBenchmarkUnit.run(() -> {
+                    this.currentTasksCount = (int) serializer.deserialize(netManager.readObject());
+                    this.resultsSize = (int) serializer.deserialize(netManager.readObject());
+                    LOGGER.info("-----------------------------------------------");
+                    LOGGER.info(String.format("[%d] Received [%d] tasks. Groups of [%d] trajectories",
+                            currentRepetition.get(), currentTasksCount, resultsSize));
 
-                ComputationResult<S> computationResult = this.getComputationResult(new LinkedList<>(), resultsSize);
-                for (int i = resultsSize; i <= currentTasksCount; i += resultsSize) {
-                    this.serializeCompressAndSend(computationResult, currentRepetition.get());
-                    LOGGER.info(String.format("[%d] Trajectories sent [%d/%d]", currentRepetition.get(), i,
-                            currentTasksCount));
-                }
+                    ComputationResult<S> computationResult = this.getComputationResult(new LinkedList<>(), resultsSize);
+                    for (int i = resultsSize; i <= currentTasksCount; i += resultsSize) {
+                        this.serializeCompressAndSend(computationResult, currentRepetition.get());
+                        LOGGER.info(String.format("[%d] Trajectories sent [%d/%d]", currentRepetition.get(), i,
+                                currentTasksCount));
+                    }
+                    return List.of((double) resultsSize, (double) currentTasksCount);
+                });
+
             }
+            this.currentTasksCount = (int) serializer.deserialize(netManager.readObject());
         }
         netManager.closeConnection();
     }
