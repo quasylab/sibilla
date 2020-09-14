@@ -90,6 +90,7 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
         this.trajectoryFileName = trajectoryFileName;
         this.computationResultSerializerType = computationResultSerializerType;
         this.mainBenchmarkUnit = getMainBenchmarkUnit();
+        this.sendBenchmarkUnit = getSendBenchmarkUnit();
         serializer = Serializer.getSerializer(SerializerType.FST);
         this.LOGGER = HostLoggerSupplier.getInstance("Slave Benchmark").getLogger();
         this.currentTasksCount = 0;
