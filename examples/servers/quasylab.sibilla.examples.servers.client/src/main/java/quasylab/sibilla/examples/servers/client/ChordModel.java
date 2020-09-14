@@ -13,6 +13,10 @@ public class ChordModel extends PopulationModelDefinition {
     public static double LAMBDA_S = 5.0;
     public static double P_F = 0.75;
     public static int DEFAULT_N = 2;
+    public final static int SAMPLINGS = 100;
+    public final static double DEADLINE = 10;
+    private final static int TASKS = 5;
+    private final static int REPLICA = 1000;
 
     public ChordModel() {
         super();
@@ -87,8 +91,7 @@ public class ChordModel extends PopulationModelDefinition {
 
     @Override
     protected void registerStates() {
-        int N = (int) getParameter("N");
-        setDefaultStateBuilder(new SimpleStateBuilder<>(0, args -> initialState(N, args)));
+        setDefaultStateBuilder(new SimpleStateBuilder<>(0, args -> initialState((int) getParameter("N"), args)));
     }
 
     private PopulationState initialState(int N, double... parameters) {

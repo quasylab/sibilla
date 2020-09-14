@@ -267,7 +267,7 @@ public class MeshModel extends PopulationModelDefinition {
         pop.add(new Population(reg.indexOf("M1"),1));
         for( int i=0 ; i<N ; i++ ) {
             for (int j = 0; j < H; j++) {
-                pop.add(new Population(reg.indexOf("A", i), 1));
+                pop.add(new Population(reg.indexOf("A", i,j), 1));
             }
         }
         return new PopulationState(reg.size(),pop.toArray(new Population[0]));

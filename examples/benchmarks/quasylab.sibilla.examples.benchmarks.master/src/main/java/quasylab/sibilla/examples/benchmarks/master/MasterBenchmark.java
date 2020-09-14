@@ -1,6 +1,7 @@
-package quasylab.sibilla.examples.benchmarks.seirmaster;
+package quasylab.sibilla.examples.benchmarks.master;
 
 import quasylab.sibilla.core.models.pm.PopulationModel;
+import quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.network.NetworkInfo;
 import quasylab.sibilla.core.network.benchmark.master.MasterBenchmarkEnvironment;
@@ -20,6 +21,7 @@ public class MasterBenchmark {
         Serializer fstSerializer = Serializer.getSerializer(SerializerType.FST);
 
         ComputationResultSerializerType type = ComputationResultSerializerType.CUSTOM;
+
         NetworkInfo slaveInfo = new NetworkInfo(InetAddress.getByName("localhost"), 10000,
                 TCPNetworkManagerType.DEFAULT);
         TCPNetworkManager networkManager = TCPNetworkManager.createNetworkManager(slaveInfo);
@@ -27,13 +29,13 @@ public class MasterBenchmark {
         networkManager.writeObject(fstSerializer.serialize(type));
         String benchmarkName = (String) fstSerializer.deserialize(networkManager.readObject());
 
-        ChordModel def = new ChordModel();
-        def.setParameter("N",10);
+        PopulationModelDefinition def = new ChordModel();
+        def.setParameter("N",1000);
         PopulationModel model = def.createModel();
 
         MasterBenchmarkEnvironment<PopulationState> env = MasterBenchmarkEnvironment.getMasterBenchmark(
                 networkManager, benchmarkName, type, model,
-                50, 2000, 5, 2000);
+                50, 2000, 1, 2000);
 
         env.run();
     }
