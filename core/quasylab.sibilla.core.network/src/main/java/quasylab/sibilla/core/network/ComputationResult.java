@@ -41,7 +41,7 @@ import java.util.List;
  * @author Stelluti Francesco Pio
  * @author Zamponi Marco
  */
-public class ComputationResult<S extends State> implements Serializable {
+public class ComputationResult<S extends State> implements Externalizable {
     private static final long serialVersionUID = -545122842766553412L;
 
     /**
@@ -74,7 +74,7 @@ public class ComputationResult<S extends State> implements Serializable {
         this.results.addAll(otherResults.results);
     }
 
-    /*@Override
+    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeInt(results.size());
         for (Trajectory trajectoryToWrite : results) {
@@ -90,5 +90,5 @@ public class ComputationResult<S extends State> implements Serializable {
             trajectories.add((Trajectory) in.readObject());
         }
         this.results = trajectories;
-    }*/
+    }
 }

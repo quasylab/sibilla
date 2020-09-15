@@ -26,6 +26,6 @@ package quasylab.sibilla.core.models;
 import java.io.Externalizable;
 import java.io.Serializable;
 
-public interface State extends Serializable {
+public interface State extends Externalizable {
 
 }

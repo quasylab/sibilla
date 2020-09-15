@@ -33,7 +33,7 @@ import java.io.*;
 /**
  * @author loreti
  */
-public class Sample<S extends State> implements Serializable {
+public class Sample<S extends State> implements Externalizable {
 
     private static final long serialVersionUID = -2981890753216588999L;
 
@@ -95,7 +95,7 @@ public class Sample<S extends State> implements Serializable {
         return value;
     }
 
-  /*  @Override
+    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeDouble(time);
         out.writeObject(value);
@@ -105,5 +105,5 @@ public class Sample<S extends State> implements Serializable {
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         this.time = in.readDouble();
         this.value = (S) in.readObject();
-    }*/
+    }
 }

@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * @author loreti
  */
-public class Trajectory<S extends State> implements Serializable {
+public class Trajectory<S extends State> implements Externalizable {
 
     private static final long serialVersionUID = -9039722623650234376L;
     private List<Sample<S>> data;
@@ -126,7 +126,7 @@ public class Trajectory<S extends State> implements Serializable {
         this.end = end;
     }
 
-   /* @Override
+    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeInt(data.size());
         out.writeDouble(start);
@@ -152,5 +152,5 @@ public class Trajectory<S extends State> implements Serializable {
             samples.add((Sample) in.readObject());
         }
         this.data = samples;
-    }*/
+    }
 }
