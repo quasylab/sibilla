@@ -202,6 +202,8 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
 
                 // LOGGER.info(String.format("[%d] Trajectories received: [%d]", currentRepetition.get(), results.getResults().size()));
             }
+            sentTasksCount = 0;
+            netManager.writeObject(serializer.serialize(sentTasksCount));
         }
         netManager.closeConnection();
     }
