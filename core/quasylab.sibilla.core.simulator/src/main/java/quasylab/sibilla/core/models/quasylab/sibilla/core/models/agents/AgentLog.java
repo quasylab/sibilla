@@ -23,14 +23,28 @@
 
 package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import java.util.LinkedList;
+import java.util.stream.Collectors;
 
-import java.io.Serializable;
+public class AgentLog {
 
-public interface AgentAction extends Serializable {
+    private final LinkedList<AgentStep> steps;
 
-    String getName();
+    public AgentLog() {
+        this(new LinkedList<>());
+    }
 
-    double[] performAction(RandomGenerator rg, double[] currentState);
+    public AgentLog(LinkedList<AgentStep> steps) {
+        this.steps = steps;
+    }
 
+    public synchronized LinkedList<AgentStep> select(double[] state, double[] observations) {
+        return steps.stream()
+                    .filter(s -> s.sameConditions(state,observations))
+                    .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    public synchronized void add(double[] state, double[] observations, AgentAction action) {
+        steps.add(new AgentStep(state,observations,action));
+    }
 }

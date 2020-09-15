@@ -25,12 +25,19 @@ package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.io.Serializable;
+import java.util.Arrays;
 
-public interface AgentAction extends Serializable {
+public class SkipAction implements AgentAction {
 
-    String getName();
+    private static final String SKIP = "SKIP";
 
-    double[] performAction(RandomGenerator rg, double[] currentState);
+    @Override
+    public String getName() {
+        return SKIP;
+    }
 
+    @Override
+    public double[] performAction(RandomGenerator rg, double[] currentState) {
+        return Arrays.copyOf(currentState,currentState.length);
+    }
 }

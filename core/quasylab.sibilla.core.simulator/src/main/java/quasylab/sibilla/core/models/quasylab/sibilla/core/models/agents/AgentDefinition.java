@@ -25,7 +25,9 @@ package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-public class AgentDefinition {
+import java.io.Serializable;
+
+public class AgentDefinition implements Serializable {
 
     private AgentBehaviour behaviour;
     private int numberOfObservations;

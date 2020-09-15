@@ -25,12 +25,25 @@ package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.io.Serializable;
+public class AgentLogger implements AgentBehaviour {
 
-public interface AgentAction extends Serializable {
+    private final AgentBehaviour observedAgent;
+    private final AgentLog agentLog;
 
-    String getName();
+    public AgentLogger(AgentBehaviour observedAgent) {
+        this(observedAgent,new AgentLog());
+    }
 
-    double[] performAction(RandomGenerator rg, double[] currentState);
+    public AgentLogger(AgentBehaviour observedAgent, AgentLog agentLog) {
+        this.observedAgent = observedAgent;
+        this.agentLog = agentLog;
+    }
 
+
+    @Override
+    public AgentAction step(RandomGenerator rg, double now, double[] currentState, double[] observations) {
+        AgentAction action = observedAgent.step(rg,now,currentState,observations);
+        agentLog.add(currentState,observations,action);
+        return action;
+    }
 }

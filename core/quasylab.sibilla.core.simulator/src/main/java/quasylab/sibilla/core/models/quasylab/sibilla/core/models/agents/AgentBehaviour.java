@@ -25,8 +25,12 @@ package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-public interface AgentBehaviour {
+import java.io.Serializable;
+import java.util.List;
+
+public interface AgentBehaviour extends Serializable {
 
     AgentAction step(RandomGenerator rg, double now, double[] currentState, double[] observations);
+
 
 }

@@ -23,14 +23,33 @@
 
 package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import java.util.Arrays;
 
-import java.io.Serializable;
+public class AgentStep {
 
-public interface AgentAction extends Serializable {
+    private final double[] state;
+    private final double[] observations;
+    private final AgentAction action;
 
-    String getName();
+    public AgentStep(double[] state, double[] observations, AgentAction action) {
+        this.state = state;
+        this.observations = observations;
+        this.action = action;
+    }
 
-    double[] performAction(RandomGenerator rg, double[] currentState);
+    public double[] getState() {
+        return state;
+    }
 
+    public double[] getObservations() {
+        return observations;
+    }
+
+    public AgentAction getAction() {
+        return action;
+    }
+
+    public boolean sameConditions(double[] state, double[] observations) {
+        return Arrays.equals(state,this.state)&&Arrays.equals(observations,this.observations);
+    }
 }

@@ -25,12 +25,23 @@ package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.io.Serializable;
+import java.util.LinkedList;
 
-public interface AgentAction extends Serializable {
+public class StatisticalDigitalTwin implements AgentBehaviour {
 
-    String getName();
+    private final AgentLog log;
 
-    double[] performAction(RandomGenerator rg, double[] currentState);
+    public StatisticalDigitalTwin(AgentLog log) {
+        this.log = log;
+    }
 
+    @Override
+    public AgentAction step(RandomGenerator rg, double now, double[] currentState, double[] observations) {
+        LinkedList<AgentStep> steps = log.select(currentState,observations);
+        if (steps.size()==0) {
+            return new SkipAction();
+        } else {
+            return steps.get(rg.nextInt(steps.size())).getAction();
+        }
+    }
 }

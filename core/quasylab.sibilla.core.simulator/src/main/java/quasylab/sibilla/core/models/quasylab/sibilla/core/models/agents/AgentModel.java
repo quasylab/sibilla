@@ -31,17 +31,18 @@ import quasylab.sibilla.core.models.TimeStep;
 import quasylab.sibilla.core.simulator.sampling.Measure;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public abstract class AgentModel implements Model<SystemState> {
+public class AgentModel implements Model<SystemState> {
 
     private final AgentDefinition[] agents;
     private final OmegaFunction[] omega;
     private final SystemEnvironment environment;
 
-    protected AgentModel(AgentDefinition[] agents, OmegaFunction[] omega, SystemEnvironment environment) {
+    public AgentModel(AgentDefinition[] agents, OmegaFunction[] omega, SystemEnvironment environment) {
         this.agents = agents;
         this.omega = omega;
         this.environment = environment;
@@ -73,6 +74,11 @@ public abstract class AgentModel implements Model<SystemState> {
     @Override
     public byte[] serializeState(SystemState state) throws IOException {
         return new byte[0];
+    }
+
+    @Override
+    public void serializeState(ByteArrayOutputStream toSerializeInto, SystemState state) throws IOException {
+
     }
 
     @Override
