@@ -23,10 +23,6 @@
 
 package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
-import org.apache.commons.math3.random.RandomGenerator;
-
-public interface SystemEnvironment<W extends World> {
-
-    SystemState<W> apply(RandomGenerator rg, SystemState<W> currentState, AgentAction[] actions);
+public interface World {
 
 }

@@ -20,6 +20,7 @@ import quasylab.sibilla.core.ExecutionEnvironment;
 import quasylab.sibilla.core.models.pm.PopulationState;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class InteractiveController {
 

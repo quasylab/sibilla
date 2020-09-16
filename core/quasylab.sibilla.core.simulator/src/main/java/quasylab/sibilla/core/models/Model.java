@@ -37,9 +37,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Represents a <i>Stochastic Process</i>.
@@ -144,4 +142,11 @@ public interface Model<S extends State> extends Serializable {
         return selectSamplingFunction(samplings,dt,measures());
     }
 
+    default Map<String, Double> measuresOf(S state) {
+        TreeMap<String,Double> toReturn = new TreeMap<>();
+        for(String name: measures()) {
+            toReturn.put(name,measure(name,state));
+        }
+        return toReturn;
+    }
 }

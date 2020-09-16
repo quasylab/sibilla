@@ -49,6 +49,8 @@ public class RobotAgents {
     public static final int RIGHT_SENSOR = 1;
     public static final int LEFT_SENSOR = 2;
     public static final int BACK_SENSOR = 3;
+    public static final int GOAL_SENSOR = 4;
+
 
     private static AgentAction UP = new ChangeDirectionAction("UP",0,+1);
     private static AgentAction DOWN = new ChangeDirectionAction("DOWN",0,-1);
@@ -77,21 +79,21 @@ public class RobotAgents {
     };
 
 
-    private static SystemEnvironment ENVIRONMENT = new SystemEnvironment() {
+    private static SystemEnvironment<WorldDefinition> ENVIRONMENT = new SystemEnvironment<>() {
 
         @Override
-        public SystemState apply(RandomGenerator rg, SystemState currentState, AgentAction[] actions) {
+        public SystemState<WorldDefinition> apply(RandomGenerator rg, SystemState<WorldDefinition> currentState, AgentAction[] actions) {
             double[][] localStates = applyActions(rg,currentState,actions);
             double[][] newInfo = getNewInfo(currentState,localStates);
 
-            return getSystemState(localStates,newInfo);
+            return getSystemState(currentState.getWorld(), localStates,newInfo);
         }
 
 
     };
 
-    private static SystemState getSystemState(double[][] localStates, double[][] newInfo) {
-        return new SystemState(new double[0], newInfo,localStates);
+    private static SystemState<WorldDefinition> getSystemState(WorldDefinition world, double[][] localStates, double[][] newInfo) {
+        return new SystemState(world, newInfo,localStates);
     }
 
     private static AgentDefinition ROBOT = new AgentDefinition(DETERMINISTIC_ROBOT_BEHAVIOUR,4);
@@ -101,22 +103,23 @@ public class RobotAgents {
         return new double[] {id, (reached?1.0:0.0), dx, dy};
     }
 
-    public static double[] getRobotObservations(int i, SystemState currentState) {
-        double[] observations = new double[4];
-        observations[FRONT_SENSOR] = sense(i,0,1,currentState);
-        observations[LEFT_SENSOR] = sense(i,-1,0,currentState);
-        observations[RIGHT_SENSOR] = sense(i,1,0,currentState);
-        observations[BACK_SENSOR] = sense(i,0,-1,currentState);
+    public static double[] getRobotObservations(int i, SystemState<WorldDefinition> currentState) {
+        double[] observations = new double[5];
+        WorldDefinition world = currentState.getWorld();
+        double x = currentState.getInfo(i,X_VAR);
+        double y = currentState.getInfo(i,Y_VAR);
+        observations[FRONT_SENSOR] = Math.max(world.thereIsAnObstacle(x,y+1), thereIsAnAgentAt(i,x,y+1,currentState));
+        observations[LEFT_SENSOR] = Math.max(world.thereIsAnObstacle(x-1,y), thereIsAnAgentAt(i,x-1,y,currentState));
+        observations[RIGHT_SENSOR] = Math.max(world.thereIsAnObstacle(x+1,y), thereIsAnAgentAt(i,x+1,y,currentState));
+        observations[BACK_SENSOR] = Math.max(world.thereIsAnObstacle(x,y-1), thereIsAnAgentAt(i,x,y-1,currentState));
+        observations[GOAL_SENSOR] = world.goalReached(x,y);
         return observations;
     }
 
-    private static double sense(int i, int dx, int dy, SystemState currentState) {
-        double x = currentState.getInfo(i,X_VAR);
-        double y = currentState.getInfo(i,Y_VAR);
-        if ((x+dx<0)||(x+dx==WIDTH)||(x+dy<0)||(x+dy==HEIGHT)) { return 1.0; }
+    private static double thereIsAnAgentAt(int i, double x, double y, SystemState currentState) {
         for( int j=0 ; j<currentState.numberOfAgents() ; j++ ) {
             if (i !=j) {
-                if ((x+dx==currentState.getInfo(j,X_VAR))&&(y+dy==currentState.getInfo(j,Y_VAR))) {
+                if ((x==currentState.getInfo(j,X_VAR))&&(y==currentState.getInfo(j,Y_VAR))) {
                     return 1.0;
                 }
             }
@@ -150,17 +153,17 @@ public class RobotAgents {
         int N = 10;
         double deadline = 100.0;
         AgentModel model = new AgentModel(getAgents(N),getOmega(N),ENVIRONMENT);
-        Trajectory<SystemState> trajectory = simulate(rg,model,getInitialState(N),deadline);
+        Trajectory<SystemState<WorldDefinition>> trajectory = simulate(rg,model,getInitialState(N),deadline);
         //Use trajectory....
     }
 
-    private static Trajectory<SystemState> simulate(RandomGenerator rg, AgentModel model, SystemState initialState, double deadline) {
-        SimulationUnit<SystemState> simulationUnit = new SimulationUnit<>(model,initialState, SamplePredicate.timeDeadlinePredicate(deadline));
-        SimulationTask<SystemState> task = new SimulationTask<>(rg,simulationUnit);
+    private static Trajectory<SystemState<WorldDefinition>> simulate(RandomGenerator rg, AgentModel model, SystemState initialState, double deadline) {
+        SimulationUnit<SystemState<WorldDefinition>> simulationUnit = new SimulationUnit<>(model,initialState, SamplePredicate.timeDeadlinePredicate(deadline));
+        SimulationTask<SystemState<WorldDefinition>> task = new SimulationTask<>(rg,simulationUnit);
         return task.getTrajectory();
     }
 
-    private static SystemState getInitialState(int n) {
+    private static SystemState<WorldDefinition> getInitialState(int n) {
         //Add here the code used to generate an initial state with n robots.
         return null;
     }

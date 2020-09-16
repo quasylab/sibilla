@@ -29,13 +29,14 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Arrays;
+import java.util.Objects;
 
-public class SystemState implements State {
+public class SystemState<W extends World> implements State {
 
     /**
      * Global variables describing the global system state.
      */
-    private final double[] global;
+    private final W world;
 
     /**
      * Each agent is associated with a set of variables that are
@@ -49,15 +50,15 @@ public class SystemState implements State {
      */
     private final double[][] local;
 
-    public SystemState(double[] global, double[][] agentInfo, double[][] local) {
-        this.global = global;
+    public SystemState(W world, double[][] agentInfo, double[][] local) {
+        this.world = world;
         this.agentInfo = agentInfo;
         this.local = local;
     }
 
 
-    public double getGlobal(int i) {
-        return global[i];
+    public W getWorld() {
+        return world;
     }
 
     public double getLocal(int a, int i) {
@@ -66,10 +67,6 @@ public class SystemState implements State {
 
     public double[] getLocal(int a) {
         return local[a];
-    }
-
-    public int size() {
-        return global.length;
     }
 
     public int numberOfAgents() {
@@ -85,13 +82,13 @@ public class SystemState implements State {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SystemState that = (SystemState) o;
-        return Arrays.equals(global, that.global) &&
+        return Objects.equals(world, that.world) &&
                 Arrays.equals(local, that.local);
     }
 
     @Override
     public int hashCode() {
-        int result = Arrays.hashCode(global);
+        int result = world.hashCode();
         result = 31 * result + Arrays.hashCode(local);
         return result;
     }

@@ -36,13 +36,13 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class AgentModel implements Model<SystemState> {
+public class AgentModel<W extends World> implements Model<SystemState<W>> {
 
     private final AgentDefinition[] agents;
     private final OmegaFunction[] omega;
-    private final SystemEnvironment environment;
+    private final SystemEnvironment<W> environment;
 
-    public AgentModel(AgentDefinition[] agents, OmegaFunction[] omega, SystemEnvironment environment) {
+    public AgentModel(AgentDefinition[] agents, OmegaFunction[] omega, SystemEnvironment<W> environment) {
         this.agents = agents;
         this.omega = omega;
         this.environment = environment;
@@ -102,7 +102,7 @@ public class AgentModel implements Model<SystemState> {
     }
 
     @Override
-    public Measure<SystemState> getMeasure(String m) {
+    public Measure<SystemState<W>> getMeasure(String m) {
         return null;
     }
 }
