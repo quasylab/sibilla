@@ -25,8 +25,8 @@ package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-public interface SystemEnvironment {
+public interface SystemEnvironment<W extends World> {
 
-    SystemState apply(RandomGenerator rg, SystemState currentState, AgentAction[] actions);
+    SystemState<W> apply(RandomGenerator rg, SystemState<W> currentState, AgentAction[] actions);
 
 }

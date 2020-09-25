@@ -25,10 +25,12 @@ package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-public interface AgentAction {
+import java.io.Serializable;
+
+public interface AgentAction extends Serializable {
 
     String getName();
 
-    double[] performAction(RandomGenerator rg, double[] currentState);
+    VariableMapping performAction(RandomGenerator rg, VariableMapping currentState);
 
 }

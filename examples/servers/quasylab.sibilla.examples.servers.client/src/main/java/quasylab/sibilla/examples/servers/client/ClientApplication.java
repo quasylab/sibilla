@@ -53,11 +53,9 @@ public class ClientApplication implements Serializable {
     private static final int submitRepetitions = 1;
     private static final AbstractRandomGenerator RANDOM_GENERATOR = new DefaultRandomGenerator();
 
-
     public static void main(String... args) throws Exception {
 
         LOGGER = HostLoggerSupplier.getInstance(String.format("Client")).getLogger();
-
 
         final Map<String, String> options = StartupUtils.parseOptions(args);
 
@@ -77,35 +75,26 @@ public class ClientApplication implements Serializable {
 
         final String masterAddress = options.getOrDefault("masterAddress", "");
         final int masterPort = Integer.parseInt(options.getOrDefault("masterPort", "10001"));
-        final TCPNetworkManagerType masterNetworkManagerType = StartupUtils.TCPNetworkManagerParser(options.getOrDefault("masterCommunicationType", "SECURE"));
+        final TCPNetworkManagerType masterNetworkManagerType = StartupUtils
+                .TCPNetworkManagerParser(options.getOrDefault("masterCommunicationType", "SECURE"));
 
         final NetworkInfo masterServerInfo = new NetworkInfo(InetAddress.getByName(masterAddress), masterPort,
                 masterNetworkManagerType);
         LOGGER.info(String.format("Local address: [%s]", NetworkUtils.getLocalAddress()));
-        LOGGER.info(String.format("Starting the Master Server with the params:\n" +
-                        "-keyStoreType: [%s]\n" +
-                        "-keyStorePath: [%s]\n" +
-                        "-trustStoreType: [%s]\n" +
-                        "-trustStorePath: [%s]\n" +
-                        "-masterAddress: [%s]\n" +
-                        "-masterPort: [%d]\n" +
-                        "-masterCommunicationType: [%s]",
-                keyStoreType,
-                keyStorePath,
-                trustStoreType,
-                trustStorePath,
-                masterAddress,
-                masterPort,
+        LOGGER.info(String.format("Starting the Master Server with the params:\n" + "-keyStoreType: [%s]\n"
+                        + "-keyStorePath: [%s]\n" + "-trustStoreType: [%s]\n" + "-trustStorePath: [%s]\n"
+                        + "-masterAddress: [%s]\n" + "-masterPort: [%d]\n" + "-masterCommunicationType: [%s]",
+                keyStoreType, keyStorePath, trustStoreType, trustStorePath, masterAddress, masterPort,
                 masterNetworkManagerType));
 
-        SEIRModelDefinition modelDefinition = new SEIRModelDefinition();
+        ChordModel modelDefinition = new ChordModel();
 
         PopulationModel model = modelDefinition.createModel();
 
-        new ClientSimulationEnvironment(
-                RANDOM_GENERATOR, modelDefinition, model, modelDefinition.state(), model.getSamplingFunction(SAMPLINGS, DEADLINE/SAMPLINGS),
-                REPLICA, DEADLINE, masterServerInfo, SerializerType.FST, submitRepetitions);
 
+        new ClientSimulationEnvironment(RANDOM_GENERATOR, modelDefinition, model, modelDefinition.state(),
+                model.getSamplingFunction(SAMPLINGS, DEADLINE / SAMPLINGS), REPLICA, DEADLINE,
+                masterServerInfo, SerializerType.FST, submitRepetitions);
 
     }
 

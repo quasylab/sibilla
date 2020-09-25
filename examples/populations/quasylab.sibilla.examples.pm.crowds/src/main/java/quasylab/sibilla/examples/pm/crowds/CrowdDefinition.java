@@ -35,8 +35,7 @@ import java.util.List;
 
 public class CrowdDefinition extends PopulationModelDefinition {
 
-
-    public static double LAMBDA_S = 1.0;
+	public static double LAMBDA_S = 1.0;
 	public static double P_F = 1.0;
 	public static int N = 10;
 	public final static int SAMPLINGS = 100;
@@ -46,18 +45,18 @@ public class CrowdDefinition extends PopulationModelDefinition {
 
 	public CrowdDefinition() {
 		super();
-		setParameter("N",N);
+		setParameter("N", N);
 	}
 
 	@Override
 	protected PopulationRegistry generatePopulationRegistry() {
 		PopulationRegistry reg = new PopulationRegistry();
 		int N = (int) getParameter("N");
-		for (int i=0; i<N; i++) {
+		for (int i = 0; i < N; i++) {
 			reg.register("A", i);
 		}
 
-		for (int i=0; i<N; i++) {
+		for (int i = 0; i < N; i++) {
 			reg.register("AM", i);
 		}
 
@@ -72,44 +71,30 @@ public class CrowdDefinition extends PopulationModelDefinition {
 		PopulationRegistry r = getRegistry();
 		List<PopulationRule> rules = new LinkedList<>();
 
-		for( int i=0 ; i<N ; i++ ) {
-			rules.add( new ReactionRule(
-				"M1->A"+i,
-				new Population[] { new Population(r.indexOf("A",i)) , new Population(r.indexOf("M1"))} ,
-				new Population[] { new Population(r.indexOf("AM",i)) } ,
-                    (t,s) -> LAMBDA_S/N
-			));
+		for (int i = 0; i < N; i++) {
+			rules.add(new ReactionRule("M1->A" + i,
+					new Population[] { new Population(r.indexOf("A", i)), new Population(r.indexOf("M1")) },
+					new Population[] { new Population(r.indexOf("AM", i)) }, (t, s) -> LAMBDA_S / N));
 		}
 
-		for( int i=0 ; i<N ; i++ ) {
-			rules.add( new ReactionRule(
-				"M2->A"+i,
-				new Population[] { new Population(r.indexOf("A",i)) , new Population(r.indexOf("M2"))} ,
-				new Population[] { new Population(r.indexOf("AM",i)) } ,
-                    (t,s) -> LAMBDA_S/N
-			));
+		for (int i = 0; i < N; i++) {
+			rules.add(new ReactionRule("M2->A" + i,
+					new Population[] { new Population(r.indexOf("A", i)), new Population(r.indexOf("M2")) },
+					new Population[] { new Population(r.indexOf("AM", i)) }, (t, s) -> LAMBDA_S / N));
 		}
-		for( int i=0 ; i<N ; i++ ) {
-			for( int j=0; j<N ; j++ ) {
-				if (i!=j) {
-					rules.add(
-						new ReactionRule(
-							"A"+i+"->A"+j,
-							new Population[] { new Population(r.indexOf("AM",i)) , new Population(r.indexOf("A",j))} ,
-							new Population[] { new Population(r.indexOf("A",i)) , new Population(r.indexOf("AM",j))} ,
-                                (t,s) -> P_F*LAMBDA_S/N
-						)
-					);
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				if (i != j) {
+					rules.add(new ReactionRule("A" + i + "->A" + j,
+							new Population[] { new Population(r.indexOf("AM", i)), new Population(r.indexOf("A", j)) },
+							new Population[] { new Population(r.indexOf("A", i)), new Population(r.indexOf("AM", j)) },
+							(t, s) -> P_F * LAMBDA_S / N));
 				}
 			}
 		}
-		for( int i=0 ; i<N ; i++ ) {
-			rules.add( new ReactionRule(
-				"A"+i+"->D",
-				new Population[] { new Population(r.indexOf("AM",i)) } ,
-				new Population[] { new Population(r.indexOf("A",i)) } ,
-                    (t,s) -> (1-P_F)*LAMBDA_S
-			));
+		for (int i = 0; i < N; i++) {
+			rules.add(new ReactionRule("A" + i + "->D", new Population[] { new Population(r.indexOf("AM", i)) },
+					new Population[] { new Population(r.indexOf("A", i)) }, (t, s) -> (1 - P_F) * LAMBDA_S));
 		}
 
 		return rules;
@@ -120,35 +105,33 @@ public class CrowdDefinition extends PopulationModelDefinition {
 		int N = (int) getParameter("N");
 		PopulationRegistry reg = getRegistry();
 		LinkedList<Measure<PopulationState>> toReturn = new LinkedList<>();
-		toReturn.add(new SimpleMeasure<>("MESSAGES", s -> runningMessages(N,reg,s)));
+		toReturn.add(new SimpleMeasure<>("MESSAGES", s -> runningMessages(N, reg, s)));
 		return toReturn;
 	}
 
 	@Override
 	protected void registerStates() {
+		setDefaultStateBuilder(new SimpleStateBuilder<>(0, args -> initialState( args)));
+	}
+
+	private PopulationState initialState(double... parameters) {
 		int N = (int) getParameter("N");
-		setDefaultStateBuilder(new SimpleStateBuilder<>(0,args -> initialState(N,args)));
-	}
-
-	private PopulationState initialState(int N, double ... parameters) {
 		PopulationRegistry reg = getRegistry();
-		Population[] pop = new Population[N+1];
-		pop[0] = new Population(reg.indexOf("M1"),1);
-		for( int i=0 ; i<N ; i++) {
-			pop[i+1] = new Population(reg.indexOf("A",i),1);
+		Population[] pop = new Population[N + 1];
+		pop[0] = new Population(reg.indexOf("M1"), 1);
+		for (int i = 0; i < N; i++) {
+			pop[i + 1] = new Population(reg.indexOf("A", i), 1);
 		}
-		return new PopulationState(reg.size(),pop);
+		return new PopulationState(reg.size(), pop);
 
 	}
 
-	public static double runningMessages( int N, PopulationRegistry reg, PopulationState s ) {
-		double sum = s.getOccupancy(reg.indexOf("M1"))+s.getOccupancy(reg.indexOf("M2"));
-		for( int i=0 ; i<N ; i++ ) {
-			sum += s.getOccupancy(reg.indexOf("AM",i));
+	public static double runningMessages(int N, PopulationRegistry reg, PopulationState s) {
+		double sum = s.getOccupancy(reg.indexOf("M1")) + s.getOccupancy(reg.indexOf("M2"));
+		for (int i = 0; i < N; i++) {
+			sum += s.getOccupancy(reg.indexOf("AM", i));
 		}
 		return sum;
 	}
-
-
 
 }

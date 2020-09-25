@@ -63,7 +63,7 @@ public abstract class PopulationModelDefinition extends AbstractModelDefinition<
     @Override
     public synchronized final PopulationModel createModel() {
         PopulationRegistry reg = getRegistry();
-        PopulationModel model = new PopulationModel(reg,this);
+        PopulationModel model = new PopulationModel(reg);
         model.addRules(getRules());
         model.addMeasures(createDefaultMeasure());
         model.addMeasures(getMeasures());

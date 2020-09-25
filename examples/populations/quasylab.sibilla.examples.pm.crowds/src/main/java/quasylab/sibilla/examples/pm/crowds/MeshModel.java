@@ -256,18 +256,18 @@ public class MeshModel extends PopulationModelDefinition {
 
     @Override
     protected void registerStates() {
-        int N = (int) getParameter("N");
-        int H = (int) getParameter("H");
-        setDefaultStateBuilder(new SimpleStateBuilder<>(0,args -> initialState(H,N,args)));
+        setDefaultStateBuilder(new SimpleStateBuilder<>(0,args -> initialState(args)));
     }
 
-    private PopulationState initialState(int H, int N, double ... parameters) {
+    private PopulationState initialState(double ... parameters) {
+        int N = (int) getParameter("N");
+        int H = (int) getParameter("H");
         PopulationRegistry reg = getRegistry();
         LinkedList<Population> pop = new LinkedList<>();
         pop.add(new Population(reg.indexOf("M1"),1));
         for( int i=0 ; i<N ; i++ ) {
             for (int j = 0; j < H; j++) {
-                pop.add(new Population(reg.indexOf("A", i), 1));
+                pop.add(new Population(reg.indexOf("A", i,j), 1));
             }
         }
         return new PopulationState(reg.size(),pop.toArray(new Population[0]));

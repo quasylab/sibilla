@@ -25,7 +25,9 @@ package quasylab.sibilla.core.models.pm;
 
 import quasylab.sibilla.core.models.State;
 
-public interface StateBuilder<S extends State> {
+import java.io.Serializable;
+
+public interface StateBuilder<S extends State> extends Serializable {
 
     default int arity() {
         return 0;

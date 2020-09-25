@@ -31,17 +31,18 @@ import quasylab.sibilla.core.models.TimeStep;
 import quasylab.sibilla.core.simulator.sampling.Measure;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public abstract class AgentModel implements Model<SystemState> {
+public class AgentModel<W extends World> implements Model<SystemState<W>> {
 
-    private final AgentDefinition[] agents;
+    private final AgentBehaviour[] agents;
     private final OmegaFunction[] omega;
-    private final SystemEnvironment environment;
+    private final SystemEnvironment<W> environment;
 
-    protected AgentModel(AgentDefinition[] agents, OmegaFunction[] omega, SystemEnvironment environment) {
+    public AgentModel(AgentBehaviour[] agents, OmegaFunction[] omega, SystemEnvironment<W> environment) {
         this.agents = agents;
         this.omega = omega;
         this.environment = environment;
@@ -49,24 +50,19 @@ public abstract class AgentModel implements Model<SystemState> {
 
 
     @Override
-    public TimeStep<SystemState> next(RandomGenerator r, double now, SystemState state) {
+    public TimeStep<SystemState<W>> next(RandomGenerator r, double now, SystemState<W> state) {
         AgentAction[] actions = new AgentAction[agents.length];
         IntStream.range(0,agents.length).forEach(i -> actions[i] = getAgentAction(r,now,i,state));
-        return new TimeStep<SystemState>(now+1.0,environment.apply(r,state,actions));
+        return new TimeStep<SystemState<W>>(1.0,environment.apply(r,state,actions));
     }
 
-    private AgentAction getAgentAction(RandomGenerator r, double now, int i, SystemState state) {
-        double[] observations = omega[i].getObservations(r,state.getLocal(i),state);
-        return agents[i].getAction(r,now,state.getLocal(i),observations);
-    }
-
-    @Override
-    public List<Action<SystemState>> actions(RandomGenerator r, double time, SystemState state) {
-        return null;
+    private AgentAction getAgentAction(RandomGenerator r, double now, int i, SystemState<W> state) {
+        VariableMapping observations = omega[i].getObservations(r,state.getLocal(i),state);
+        return agents[i].step(r,now,state.getLocal(i),observations);
     }
 
     @Override
-    public ModelDefinition<SystemState> getModelDefinition() {
+    public List<Action<SystemState<W>>> actions(RandomGenerator r, double time, SystemState<W> state) {
         return null;
     }
 
@@ -76,17 +72,22 @@ public abstract class AgentModel implements Model<SystemState> {
     }
 
     @Override
-    public byte[] serializeState(SystemState state) throws IOException {
+    public byte[] serializeState(SystemState<W> state) throws IOException {
         return new byte[0];
     }
 
     @Override
-    public SystemState deserializeState(byte[] bytes) throws IOException {
+    public void serializeState(ByteArrayOutputStream toSerializeInto, SystemState<W> state) throws IOException {
+
+    }
+
+    @Override
+    public SystemState<W> deserializeState(byte[] bytes) throws IOException {
         return null;
     }
 
     @Override
-    public SystemState deserializeState(ByteArrayInputStream toDeserializeFrom) throws IOException {
+    public SystemState<W> deserializeState(ByteArrayInputStream toDeserializeFrom) throws IOException {
         return null;
     }
 
@@ -96,12 +97,12 @@ public abstract class AgentModel implements Model<SystemState> {
     }
 
     @Override
-    public double measure(String m, SystemState state) {
+    public double measure(String m, SystemState<W> state) {
         return 0;
     }
 
     @Override
-    public Measure<SystemState> getMeasure(String m) {
+    public Measure<SystemState<W>> getMeasure(String m) {
         return null;
     }
 }

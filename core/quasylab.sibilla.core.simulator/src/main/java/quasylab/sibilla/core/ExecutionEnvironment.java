@@ -30,6 +30,8 @@ import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.models.TimeStep;
 
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Predicate;
 
 /**
@@ -151,5 +153,15 @@ public class ExecutionEnvironment<S extends State> {
     public Model<S> getModel(){
         return this.model;
     }
+
+    public String[] measures() {
+        return getModel().measures();
+    }
+
+    public Map<String,Double> lastMeasures() {
+        return model.measuresOf(currentState);
+    }
+
+
 
 }

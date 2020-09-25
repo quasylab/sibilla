@@ -21,35 +21,30 @@
  *  limitations under the License.
  */
 
-package quasylab.sibilla.examples.agents;
+package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
-import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentAction;
+import java.util.LinkedList;
+import java.util.stream.Collectors;
 
-import java.util.Arrays;
+public class AgentLog {
 
+    private final LinkedList<AgentStep> steps;
 
-public class ChangeDirectionAction implements AgentAction {
-    private final String name;
-    private final double dx;
-    private final double dy;
-
-    public ChangeDirectionAction(String name, double dx, double dy) {
-        this.name = name;
-        this.dx = dx;
-        this.dy = dy;
+    public AgentLog() {
+        this(new LinkedList<>());
     }
 
-    @Override
-    public String getName() {
-        return name;
+    public AgentLog(LinkedList<AgentStep> steps) {
+        this.steps = steps;
     }
 
-    @Override
-    public double[] performAction(RandomGenerator rg, double[] currentState) {
-        double[] nextState = Arrays.copyOf(currentState,currentState.length);
-        nextState[RobotAgents.DIRX_VAR] = dx;
-        nextState[RobotAgents.DIRY_VAR] = dy;
-        return nextState;
+    public synchronized LinkedList<AgentStep> select(VariableMapping state, VariableMapping observations) {
+        return steps.stream()
+                    .filter(s -> s.sameConditions(state,observations))
+                    .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    public synchronized void add(VariableMapping state, VariableMapping observations, AgentAction action) {
+        steps.add(new AgentStep(state,observations,action));
     }
 }

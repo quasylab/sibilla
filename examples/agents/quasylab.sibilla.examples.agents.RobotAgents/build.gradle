@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    implementation 'org.junit.jupiter:junit-jupiter:5.4.2'
     compile project(':core:quasylab.sibilla.core.simulator')
 }
 

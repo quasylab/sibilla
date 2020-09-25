@@ -29,47 +29,44 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Arrays;
+import java.util.Objects;
 
-public class SystemState implements State {
+public class SystemState<W extends World> implements State {
 
     /**
      * Global variables describing the global system state.
      */
-    private final double[] global;
+    private final W world;
 
     /**
      * Each agent is associated with a set of variables that are
      * used to describe in the environment (for instance, the agent
      * position).
      */
-    private final double[][] agentInfo;
+    private final VariableMapping[]  agentInfo;
 
     /**
      * Local variables used by each agent to select its state.
      */
-    private final double[][] local;
+    private final VariableMapping[] local;
 
-    public SystemState(double[] global, double[][] agentInfo, double[][] local) {
-        this.global = global;
+    public SystemState(W world, VariableMapping[] agentInfo, VariableMapping[] local) {
+        this.world = world;
         this.agentInfo = agentInfo;
         this.local = local;
     }
 
 
-    public double getGlobal(int i) {
-        return global[i];
+    public W getWorld() {
+        return world;
     }
 
-    public double getLocal(int a, int i) {
-        return local[a][i];
+    public double getLocal(int a, String variable) {
+        return local[a].get(variable);
     }
 
-    public double[] getLocal(int a) {
+    public VariableMapping getLocal(int a) {
         return local[a];
-    }
-
-    public int size() {
-        return global.length;
     }
 
     public int numberOfAgents() {
@@ -77,7 +74,7 @@ public class SystemState implements State {
     }
 
     public int size(int a) {
-        return local[a].length;
+        return local[a].size();
     }
 
     @Override
@@ -85,19 +82,23 @@ public class SystemState implements State {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SystemState that = (SystemState) o;
-        return Arrays.equals(global, that.global) &&
+        return Objects.equals(world, that.world) &&
                 Arrays.equals(local, that.local);
     }
 
     @Override
     public int hashCode() {
-        int result = Arrays.hashCode(global);
+        int result = world.hashCode();
         result = 31 * result + Arrays.hashCode(local);
         return result;
     }
 
-    public double getInfo(int a, int i) {
-        return agentInfo[a][i];
+    public double getInfo(int a, String variable) {
+        return agentInfo[a].get(variable);
+    }
+
+    public VariableMapping getInfo(int a) {
+        return agentInfo[a];
     }
 
     @Override
@@ -108,5 +109,14 @@ public class SystemState implements State {
     @Override
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 
+    }
+
+    @Override
+    public String toString() {
+        return "SystemState{" +
+                "world=" + world +
+                ", agentInfo=" + Arrays.toString(agentInfo) +
+                ", local=" + Arrays.toString(local) +
+                '}';
     }
 }
