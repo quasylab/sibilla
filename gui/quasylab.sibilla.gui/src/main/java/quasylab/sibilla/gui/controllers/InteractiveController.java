@@ -81,7 +81,7 @@ public class InteractiveController {
     @FXML
     public void init() {
         tableViewController.init(this);
-        areaChartController.init(this);
+        areaChartController.init(this.ee);
         lineChartController.init(this);
     }
 
@@ -167,10 +167,6 @@ public class InteractiveController {
         tableViewController.tableView();
     }
 
-    @FXML
-    private void createAreaChart(){
-        areaChartController.areaChartView();
-    }
 
     @FXML
     private void createLineChart(){
@@ -182,8 +178,7 @@ public class InteractiveController {
     public void update(){
         this.timeunitsField.setText(String.valueOf(this.ee.currentTime()));
         this.stepsField.setText(String.valueOf(this.ee.steps()));
-        tableView();
-        createAreaChart();
+        //tableView();
         //createLineChart();
         //barChartView();
     }
@@ -389,7 +384,8 @@ public class InteractiveController {
     public void step(MouseEvent mouseEvent) {
         if (execute(stepBtn.getId(), ee)) {
             //consoleArea.appendText("STEP\n");
-            update();
+            //update();
+            areaChartController.step();
         }
     }
 
@@ -398,6 +394,7 @@ public class InteractiveController {
         if (execute(previousBtn.getId(), ee)) {
             //consoleArea.appendText("PREVIUOS\n");
             update();
+            areaChartController.back();
         }
     }
 

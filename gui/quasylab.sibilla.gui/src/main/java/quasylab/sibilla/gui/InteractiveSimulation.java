@@ -64,7 +64,7 @@ public class InteractiveSimulation extends Application {
         InteractiveController controller = loader.getController();
 
         controller.setExecutionEnvironment(ee);
-
+        //controller.init();
         Scene scene = new Scene(root);
 
         scene.getStylesheets().add("/css/style.css");
