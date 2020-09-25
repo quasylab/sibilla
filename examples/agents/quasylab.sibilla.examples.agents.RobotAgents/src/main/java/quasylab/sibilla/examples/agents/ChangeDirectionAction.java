@@ -25,11 +25,19 @@ package quasylab.sibilla.examples.agents;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentAction;
-
-import java.util.Arrays;
+import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.SetVariable;
+import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.VariableMapping;
 
 
 public class ChangeDirectionAction implements AgentAction {
+
+    public static AgentAction UP = new ChangeDirectionAction("UP",0,+1);
+    public static AgentAction DOWN = new ChangeDirectionAction("DOWN",0,-1);
+    public static AgentAction RIGHT = new ChangeDirectionAction("RIGHT",+1,0);
+    public static AgentAction LEFT = new ChangeDirectionAction("LEFT",-1,0);
+    public static AgentAction STAND = new ChangeDirectionAction("STAND",0,0);
+
+
     private final String name;
     private final double dx;
     private final double dy;
@@ -46,10 +54,8 @@ public class ChangeDirectionAction implements AgentAction {
     }
 
     @Override
-    public double[] performAction(RandomGenerator rg, double[] currentState) {
-        double[] nextState = Arrays.copyOf(currentState,currentState.length);
-        nextState[RobotAgents.DIRX_VAR] = dx;
-        nextState[RobotAgents.DIRY_VAR] = dy;
-        return nextState;
+    public VariableMapping performAction(RandomGenerator rg, VariableMapping currentState) {
+        System.err.println(name);
+        return currentState.set(new SetVariable("dx",dx), new SetVariable("dy",dy));
     }
 }

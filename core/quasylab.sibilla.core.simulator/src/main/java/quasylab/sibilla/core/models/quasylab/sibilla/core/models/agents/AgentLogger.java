@@ -41,7 +41,7 @@ public class AgentLogger implements AgentBehaviour {
 
 
     @Override
-    public AgentAction step(RandomGenerator rg, double now, double[] currentState, double[] observations) {
+    public AgentAction step(RandomGenerator rg, double now, VariableMapping currentState, VariableMapping observations) {
         AgentAction action = observedAgent.step(rg,now,currentState,observations);
         agentLog.add(currentState,observations,action);
         return action;

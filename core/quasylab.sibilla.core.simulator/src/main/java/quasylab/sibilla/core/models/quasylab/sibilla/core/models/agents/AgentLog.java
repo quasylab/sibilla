@@ -38,13 +38,13 @@ public class AgentLog {
         this.steps = steps;
     }
 
-    public synchronized LinkedList<AgentStep> select(double[] state, double[] observations) {
+    public synchronized LinkedList<AgentStep> select(VariableMapping state, VariableMapping observations) {
         return steps.stream()
                     .filter(s -> s.sameConditions(state,observations))
                     .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    public synchronized void add(double[] state, double[] observations, AgentAction action) {
+    public synchronized void add(VariableMapping state, VariableMapping observations, AgentAction action) {
         steps.add(new AgentStep(state,observations,action));
     }
 }

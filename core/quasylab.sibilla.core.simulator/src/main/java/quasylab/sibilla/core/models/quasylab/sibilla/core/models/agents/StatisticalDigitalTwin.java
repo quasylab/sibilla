@@ -36,7 +36,7 @@ public class StatisticalDigitalTwin implements AgentBehaviour {
     }
 
     @Override
-    public AgentAction step(RandomGenerator rg, double now, double[] currentState, double[] observations) {
+    public AgentAction step(RandomGenerator rg, double now, VariableMapping currentState, VariableMapping observations) {
         LinkedList<AgentStep> steps = log.select(currentState,observations);
         if (steps.size()==0) {
             return new SkipAction();

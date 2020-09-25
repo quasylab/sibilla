@@ -27,21 +27,21 @@ import java.util.Arrays;
 
 public class AgentStep {
 
-    private final double[] state;
-    private final double[] observations;
+    private final VariableMapping state;
+    private final VariableMapping observations;
     private final AgentAction action;
 
-    public AgentStep(double[] state, double[] observations, AgentAction action) {
+    public AgentStep(VariableMapping state, VariableMapping observations, AgentAction action) {
         this.state = state;
         this.observations = observations;
         this.action = action;
     }
 
-    public double[] getState() {
+    public VariableMapping getState() {
         return state;
     }
 
-    public double[] getObservations() {
+    public VariableMapping getObservations() {
         return observations;
     }
 
@@ -49,7 +49,7 @@ public class AgentStep {
         return action;
     }
 
-    public boolean sameConditions(double[] state, double[] observations) {
-        return Arrays.equals(state,this.state)&&Arrays.equals(observations,this.observations);
+    public boolean sameConditions(VariableMapping state, VariableMapping observations) {
+        return this.state.equals(state)&& this.observations.equals(observations);
     }
 }

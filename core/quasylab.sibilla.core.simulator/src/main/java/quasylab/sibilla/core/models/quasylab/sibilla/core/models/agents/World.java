@@ -25,4 +25,5 @@ package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
 public interface World {
 
+
 }

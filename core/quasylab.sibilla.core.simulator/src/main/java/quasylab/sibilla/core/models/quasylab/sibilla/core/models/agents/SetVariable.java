@@ -23,25 +23,24 @@
 
 package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
-import org.apache.commons.math3.random.RandomGenerator;
+public class SetVariable {
 
-import java.io.Serializable;
+    private final String variable;
+    private final double value;
 
-public class AgentDefinition implements Serializable {
 
-    private AgentBehaviour behaviour;
-    private int numberOfObservations;
-
-    public AgentDefinition(AgentBehaviour behaviour, int numberOfObservations) {
-        this.behaviour = behaviour;
-        this.numberOfObservations = numberOfObservations;
+    public SetVariable(String variable, double value) {
+        this.variable = variable;
+        this.value = value;
     }
 
-    public AgentAction getAction(RandomGenerator rg, double now, double[] currentState, double[] observations) {
-        if (observations.length != numberOfObservations) {
-            throw new IllegalArgumentException();
-        }
-        return behaviour.step(rg,now,currentState,observations);
+
+    public String getVariable() {
+        return variable;
+    }
+
+    public double getValue() {
+        return value;
     }
 
 }

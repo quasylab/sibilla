@@ -21,16 +21,20 @@
  *  limitations under the License.
  */
 
-package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
+package quasylab.sibilla.examples.agents;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import org.junit.jupiter.api.Test;
 
-import java.io.Serializable;
+import static org.junit.jupiter.api.Assertions.*;
 
-public interface AgentAction extends Serializable {
+class RobotArenaTest {
 
-    String getName();
+    @Test
+    void thereIsAnObstacle()
+    {
+        RobotArena arena = new RobotArena(100,100);
+        arena.addObstacles(10,10);
+        assertEquals(1.0, arena.thereIsAnObstacle(10,10));
 
-    VariableMapping performAction(RandomGenerator rg, VariableMapping currentState);
-
+    }
 }

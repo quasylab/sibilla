@@ -25,8 +25,8 @@ package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-public interface OmegaFunction {
+public interface OmegaFunction<W extends World> {
 
-    double[] getObservations(RandomGenerator r, double[] agentState, SystemState currentState);
+    VariableMapping getObservations(RandomGenerator r, VariableMapping agentState, SystemState<W> currentState);
 
 }

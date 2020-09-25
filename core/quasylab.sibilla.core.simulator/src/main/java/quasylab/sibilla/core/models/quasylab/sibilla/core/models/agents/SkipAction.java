@@ -25,8 +25,6 @@ package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.Arrays;
-
 public class SkipAction implements AgentAction {
 
     private static final String SKIP = "SKIP";
@@ -37,7 +35,7 @@ public class SkipAction implements AgentAction {
     }
 
     @Override
-    public double[] performAction(RandomGenerator rg, double[] currentState) {
-        return Arrays.copyOf(currentState,currentState.length);
+    public VariableMapping performAction(RandomGenerator rg, VariableMapping currentState) {
+        return currentState;
     }
 }

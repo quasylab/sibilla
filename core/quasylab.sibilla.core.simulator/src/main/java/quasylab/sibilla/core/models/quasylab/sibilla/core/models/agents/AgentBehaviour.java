@@ -30,7 +30,7 @@ import java.util.List;
 
 public interface AgentBehaviour extends Serializable {
 
-    AgentAction step(RandomGenerator rg, double now, double[] currentState, double[] observations);
+    AgentAction step(RandomGenerator rg, double now, VariableMapping currentState, VariableMapping observations);
 
 
 }
