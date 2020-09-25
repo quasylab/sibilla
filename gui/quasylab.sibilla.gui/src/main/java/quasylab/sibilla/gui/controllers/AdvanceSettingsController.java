@@ -12,7 +12,7 @@ import quasylab.sibilla.core.models.pm.PopulationState;
 
 public class AdvanceSettingsController  {
 
-    ExecutionEnvironment<?> ee;
+    ExecutionEnvironment<PopulationState> ee;
 
 
     @FXML

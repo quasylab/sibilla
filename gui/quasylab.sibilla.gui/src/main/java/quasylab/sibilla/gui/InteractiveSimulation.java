@@ -60,10 +60,10 @@ public class InteractiveSimulation extends Application {
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource(("/fxml/InteractiveView.fxml")));
         Parent root = loader.load();
-        InteractiveController contr = loader.getController();
 
-        contr.setExecutionEnvironment(ee);
+        InteractiveController controller = loader.getController();
 
+        controller.setExecutionEnvironment(ee);
 
         Scene scene = new Scene(root);
 
@@ -71,6 +71,7 @@ public class InteractiveSimulation extends Application {
         stage.setTitle("Debugger");
         stage.setScene(scene);
         stage.show();
+
 
         stage.setOnCloseRequest(this::closeProgram);
 }

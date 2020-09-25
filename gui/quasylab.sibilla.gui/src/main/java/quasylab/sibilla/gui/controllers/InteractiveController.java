@@ -9,48 +9,43 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import quasylab.sibilla.core.ExecutionEnvironment;
 import quasylab.sibilla.core.models.pm.PopulationState;
+import quasylab.sibilla.core.simulator.sampling.Measure;
 
+import java.io.DataOutput;
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class InteractiveController {
 
     @FXML private BorderPane root;
-
     //Table View
-    @FXML private Tab tableviewTab;
-    @FXML private TableView<PopulationState> tableView;
-    @FXML public TableColumn<PopulationState,String> agentsCol;
-    @FXML public TableColumn<PopulationState,Integer> occurrencesCol;
+    @FXML public Parent tableView;
     //Area Chart
-    @FXML private Tab areachartTab;
-    @FXML private AreaChart<Integer, Double> areachartView;
-    @FXML public NumberAxis areachartXaxis;
-    @FXML public NumberAxis areachartYaxis;
+    @FXML public Parent areaChart;
     //Line Chart
-    @FXML private Tab linechartTab;
-    @FXML private LineChart<Integer, Double> linechartView;
-    @FXML public NumberAxis linechartXaxis;
-    @FXML public NumberAxis linechartYaxis;
+    @FXML public Parent lineChart;
+
     //Bar Chart
     @FXML private Tab barchartTab;
     @FXML private BarChart<?, ?> barchartView;
     @FXML public CategoryAxis barchartXaxis;
     @FXML public NumberAxis barchartYaxis;
-    //Pie Chart
-    @FXML private Tab piechartTab;
-    @FXML private PieChart piechartView;
-
     //Header
-    @FXML private TextField modelTypeField;
+    //@FXML private TextField modelTypeField;
     @FXML private TextField timeunitsField;
     @FXML private TextField stepsField;
     //Commands
@@ -60,65 +55,159 @@ public class InteractiveController {
     @FXML private ToggleButton advanceCommands;
     //Other
     @FXML private JFXProgressBar progressBar;
-    @FXML private TextArea consoleArea;
 
-
-
+    //Controller delle viste
+    @FXML public TableViewController tableViewController = new TableViewController();
+    @FXML public AreaChartController areaChartController = new AreaChartController();
+    @FXML public LineChartController lineChartController = new LineChartController();
 
     //Riferimento ad ExecutionEnvironment
     private ExecutionEnvironment<PopulationState> ee;
 
+    @FXML
     public void setExecutionEnvironment(ExecutionEnvironment<PopulationState> ee){
         this.ee = ee;
+        init();
         update();
+    }
+
+    public ExecutionEnvironment<PopulationState> getExecutionEnvironment(){
+        return this.ee;
+    }
+
+
+    @FXML
+    public void init() {
+        tableViewController.init(this);
+        areaChartController.init(this);
+        lineChartController.init(this);
+    }
+
+    /**
+     * Get measures from given model.
+     * @return string array of measures
+     */
+    public String[] measures(){
+        return ee.getModel().measures();
+    }
+
+    /**
+     * This methos create an observable list of my data series in according with given model.
+     * @return an observable list of data series.
+     */
+    public Map<String,ObservableList<XYChart.Series<Double,Double>>> doSeries() {
+        TreeMap<String, ObservableList<XYChart.Series<Double, Double>>> toReturn = new TreeMap<>();
+        if (ee.getModel().measures() == null) {
+            System.out.println("There are no measurements");
+        } else {
+
+            for (String m : ee.getModel().measures()) {
+                FXCollections.observableArrayList();
+                XYChart.Series<Double, Double> current = new XYChart.Series<>();
+                ObservableList<XYChart.Series<Double, Double>> myList = null;
+                toReturn.put(m, myList);
+            }
+        }
+        return toReturn;
+    }
+
+
+/*
+    @FXML
+    public void initialize() {
+
+        //Initialize Table View
+        Node tableview = null;
+        try {
+            tableview = FXMLLoader.load(getClass().getResource("/fxml/views/TableView.fxml"));
+        } catch (IOException e) {
+            System.out.println("StatusSectionController doesn't found fxml file");
+        }
+        tableviewTab.setContent(tableview);
+
+
+        //Initialize Area Chart
+        Node areachart = null;
+        try {
+            areachart = FXMLLoader.load(getClass().getResource("/fxml/views/AreaChartView.fxml"));
+        } catch (IOException e) {
+            System.out.println("StatusSectionController doesn't found fxml file");
+        }
+        areachartTab.setContent(areachart);
+
+        //Initialize Line Chart
+        Node linechart = null;
+        try {
+            linechart = FXMLLoader.load(getClass().getResource("/fxml/views/LineChartView.fxml"));
+        } catch (IOException e) {
+            System.out.println("StatusSectionController doesn't found fxml file");
+        }
+        linechartTab.setContent(linechart);
+
+        //Initialize Bar Chart
+        Node barchart = null;
+        try {
+            barchart = FXMLLoader.load(getClass().getResource("/fxml/views/BarChartView.fxml"));
+        } catch (IOException e) {
+            System.out.println("StatusSectionController doesn't found fxml file");
+        }
+        barchartTab.setContent(barchart);
+
+
+    }
+
+
+ */
+
+
+    @FXML
+    private void tableView(){
+        tableViewController.tableView();
+    }
+
+    @FXML
+    private void createAreaChart(){
+        areaChartController.areaChartView();
+    }
+
+    @FXML
+    private void createLineChart(){
+        lineChartController.lineChartView();
     }
 
 
     @FXML
     public void update(){
-        //this.modelTypeField.setText(String.valueOf(this.ee.getModel()));
         this.timeunitsField.setText(String.valueOf(this.ee.currentTime()));
         this.stepsField.setText(String.valueOf(this.ee.steps()));
-        this.consoleArea.appendText(this.ee.currentState().toString()+"\n\n");
         tableView();
-        areaChartView();
-        lineChartView();
-        barChartView();
-        pieChartView();
+        createAreaChart();
+        //createLineChart();
+        //barChartView();
     }
 
-
+/*
     @FXML
     private void tableView() {
-        /*ObservableList<Integer> occurrencesList = FXCollections.observableArrayList(
-            (int) ee.currentState().getOccupancy(0),
-            (int) ee.currentState().getOccupancy(1),
-            (int) ee.currentState().getOccupancy(2),
-            (int) ee.currentState().getOccupancy(3),
-            (int) ee.currentState().getOccupancy(4));
-
-         */
-        ObservableList<PopulationState> observableList = FXCollections.observableArrayList();
-        for (int i = 0; i<=ee.currentState().size(); i++){
-            observableList.add(ee.currentState());
+        //Create my observable list according to considered model
+        ObservableList<Measure> observableList = FXCollections.observableArrayList();
+        for (String s: ee.getModel().measures()) {
+            observableList.add(ee.getModel().getMeasure(s));
         }
 
-        ObservableList<PopulationState> occurrencesList = FXCollections.observableArrayList(
-                ee.currentState(),
-                ee.currentState(),
-                ee.currentState(),
-                ee.currentState(),
-                ee.currentState());
+        //Create my observable list according SEIR model
+        ObservableList<Measure> occurrencesList2 = FXCollections.observableArrayList(
+                ee.getModel().getMeasure("S"),
+                ee.getModel().getMeasure("A"),
+                ee.getModel().getMeasure("G"),
+                ee.getModel().getMeasure("R"),
+                ee.getModel().getMeasure("D"));
 
-
-
-        tableView.setItems(occurrencesList);
+        tableView.setItems(observableList);
         agentsCol = new TableColumn<>("AGENTS");
         occurrencesCol = new TableColumn<>("OCCURENCES");
 
-
-        //System.out.println(tableView.getItems().get(1).getOccupancy(1));
-/*
+        //In first column show the specie's names.
         agentsCol.setCellValueFactory(param -> new ObservableValue<>() {
             @Override
             public void addListener(ChangeListener<? super String> listener) {
@@ -133,8 +222,7 @@ public class InteractiveController {
             @Override
             public String getValue() {
                 // return a name of a single specie in currentState
-                return  String.valueOf(param.getValue().getOccupancy());
-                //return  String.valueOf(tableView.getItems().get(1).getOccupancy(1));
+                return  param.getValue().getName();
             }
 
             @Override
@@ -148,38 +236,7 @@ public class InteractiveController {
             }
         });
 
-
-        occurrencesCol.getColumns().;
-        occurrencesCol.setCellValueFactory(param -> new ObservableValue() {
-
-            @Override
-            public void addListener(ChangeListener listener) {
-
-            }
-
-            @Override
-            public void removeListener(ChangeListener listener) {
-
-            }
-
-            @Override
-            public Object getValue() {
-                return param.getValue().getOccupancy(1);
-            }
-
-            @Override
-            public void addListener(InvalidationListener listener) {
-
-            }
-
-            @Override
-            public void removeListener(InvalidationListener listener) {
-
-            }
-        });
-*/
-
-
+        //In second column show the occurrences species.
         occurrencesCol.setCellValueFactory(param -> new ObservableValue<>() {
             @Override
             public void addListener(ChangeListener<? super Integer> listener) {
@@ -193,7 +250,8 @@ public class InteractiveController {
 
             @Override
             public Integer getValue() {
-                return (int) param.getValue().getOccupancy(0);
+                double current = param.getValue().measure(ee.currentState());
+                return (int) Math.round(current);
             }
 
             @Override
@@ -212,12 +270,15 @@ public class InteractiveController {
         tableView.getColumns().setAll(agentsCol, occurrencesCol);
     }
 
+ */
+/*
 
     XYChart.Series index0 = new XYChart.Series();
     XYChart.Series index1 = new XYChart.Series();
     XYChart.Series index2 = new XYChart.Series();
     XYChart.Series index3 = new XYChart.Series();
     XYChart.Series index4 = new XYChart.Series();
+
 
     @FXML
     private void areaChartView() {
@@ -254,6 +315,13 @@ public class InteractiveController {
         //areachartView.getData().addAll(index0,index1,index2,index3,index4);
     }
 
+ */
+
+
+
+
+/*
+
 
     XYChart.Series linechartSeries_index0 = new XYChart.Series();
     XYChart.Series linechartSeries_index1 = new XYChart.Series();
@@ -283,6 +351,10 @@ public class InteractiveController {
                 linechartSeries_index2,linechartSeries_index3,linechartSeries_index4);
     }
 
+
+ */
+    /*
+
     XYChart.Series barchartSeries_index0 = new XYChart.Series();
     XYChart.Series barchartSeries_index1 = new XYChart.Series();
     XYChart.Series barchartSeries_index2 = new XYChart.Series();
@@ -309,27 +381,12 @@ public class InteractiveController {
 
     }
 
-
-    @FXML
-    private void pieChartView() {
-        double i0 = ee.currentState().getOccupancy(0);
-        double i1 = ee.currentState().getOccupancy(1);
-        double i2 = ee.currentState().getOccupancy(2);
-        double i3 = ee.currentState().getOccupancy(3);
-        double i4 = ee.currentState().getOccupancy(4);
-        ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(
-                new PieChart.Data("Susceptible", i0),
-                new PieChart.Data("Asintomatic", i1),
-                new PieChart.Data("Grave", i2),
-                new PieChart.Data("Recovered", i3),
-                new PieChart.Data("Death", i4));
-        piechartView.setData(pieChartData);
-    }
+     */
 
     @FXML
     public void step(MouseEvent mouseEvent) {
         if (execute(stepBtn.getId(), ee)) {
-            consoleArea.appendText("STEP\n");
+            //consoleArea.appendText("STEP\n");
             update();
         }
     }
@@ -337,7 +394,7 @@ public class InteractiveController {
     @FXML
     public void previous(MouseEvent mouseEvent) {
         if (execute(previousBtn.getId(), ee)) {
-            consoleArea.appendText("PREVIUOS\n");
+            //consoleArea.appendText("PREVIUOS\n");
             update();
         }
     }
@@ -345,7 +402,7 @@ public class InteractiveController {
     @FXML
     private void restart(MouseEvent mouseEvent) {
         if (execute(restartBtn.getId(), ee)) {
-            consoleArea.setText("RESTART\n");
+            //consoleArea.setText("RESTART\n");
             update();
         }
     }
@@ -391,4 +448,7 @@ public class InteractiveController {
     }
 
 
+    public Parent getRoot() {
+        return this.root;
+    }
 }

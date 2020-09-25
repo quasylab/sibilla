@@ -35,7 +35,7 @@
 .jfx-tab-pane .tab .tab-label {
     -fx-alignment: CENTER;
     -fx-text-fill: lightgrey;
-    -fx-font-size: 16px;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-text-transform: uppercase;
     -fx-wrap-text: true;
@@ -110,4 +110,9 @@
 
 .progressBar > .bar {
     -fx-background-color: #05C793;
+}
+
+.table-column {
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER;
 }
