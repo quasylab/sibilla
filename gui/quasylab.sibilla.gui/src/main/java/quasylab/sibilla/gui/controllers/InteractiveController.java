@@ -85,35 +85,6 @@ public class InteractiveController {
         lineChartController.init(this);
     }
 
-    /**
-     * Get measures from given model.
-     * @return string array of measures
-     */
-    public String[] measures(){
-        return ee.getModel().measures();
-    }
-
-    /**
-     * This methos create an observable list of my data series in according with given model.
-     * @return an observable list of data series.
-     */
-    public Map<String,ObservableList<XYChart.Series<Double,Double>>> doSeries() {
-        TreeMap<String, ObservableList<XYChart.Series<Double, Double>>> toReturn = new TreeMap<>();
-        if (ee.getModel().measures() == null) {
-            System.out.println("There are no measurements");
-        } else {
-
-            for (String m : ee.getModel().measures()) {
-                FXCollections.observableArrayList();
-                XYChart.Series<Double, Double> current = new XYChart.Series<>();
-                ObservableList<XYChart.Series<Double, Double>> myList = null;
-                toReturn.put(m, myList);
-            }
-        }
-        return toReturn;
-    }
-
-
 /*
     @FXML
     public void initialize() {
@@ -163,24 +134,10 @@ public class InteractiveController {
 
 
     @FXML
-    private void tableView(){
-        tableViewController.tableView();
-    }
-
-
-    @FXML
-    private void createLineChart(){
-        lineChartController.lineChartView();
-    }
-
-
-    @FXML
     public void update(){
         this.timeunitsField.setText(String.valueOf(this.ee.currentTime()));
         this.stepsField.setText(String.valueOf(this.ee.steps()));
-        //tableView();
-        //createLineChart();
-        //barChartView();
+        this.tableViewController.tableView();
     }
 
 /*
@@ -383,27 +340,25 @@ public class InteractiveController {
     @FXML
     public void step(MouseEvent mouseEvent) {
         if (execute(stepBtn.getId(), ee)) {
-            //consoleArea.appendText("STEP\n");
-            //update();
             areaChartController.step();
         }
+        update();
     }
 
     @FXML
     public void previous(MouseEvent mouseEvent) {
         if (execute(previousBtn.getId(), ee)) {
-            //consoleArea.appendText("PREVIUOS\n");
-            update();
             areaChartController.back();
         }
+        update();
     }
 
     @FXML
     private void restart(MouseEvent mouseEvent) {
         if (execute(restartBtn.getId(), ee)) {
-            //consoleArea.setText("RESTART\n");
-            update();
+            areaChartController.restart();
         }
+        update();
     }
 
     @FXML

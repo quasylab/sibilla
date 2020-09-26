@@ -26,15 +26,10 @@ public class AreaChartController {
     @FXML
     private AreaChart<Double, Double> areaChartView;
 
-    private Double time;
-
     private int counter;
 
     Map<String,ObservableList<XYChart.Data<Double, Double>>> myDataList;
-    //ObservableList<XYChart.Series<Double, Double>> mySeriesList = FXCollections.observableArrayList();
     Map<String, XYChart.Series<Double, Double>> measuresTable;
-
-
     private ExecutionEnvironment<?> executionEnvironment;
 
     @FXML
@@ -47,12 +42,12 @@ public class AreaChartController {
         this.myDataList = new TreeMap<>();
         this.measuresTable = new TreeMap<>();
         for( String measureName: executionEnvironment.measures()) {
-            ObservableList<XYChart.Data<Double,Double>> observaleList = FXCollections.observableArrayList();
-            XYChart.Series<Double,Double> series = new XYChart.Series(observaleList);
-            series.setName(measureName);
-            areaChartView.getData().add(series);
-            myDataList.put(measureName,observaleList);
-            measuresTable.put(measureName,series);
+            ObservableList<XYChart.Data<Double,Double>> dataList = FXCollections.observableArrayList();
+            XYChart.Series<Double,Double> dataSerie = new XYChart.Series<>(dataList);
+            dataSerie.setName(measureName);
+            areaChartView.getData().add(dataSerie);
+            myDataList.put(measureName,dataList);
+            measuresTable.put(measureName,dataSerie);
         }
         addData(executionEnvironment.currentTime(),executionEnvironment.lastMeasures());
         counter = 0;
@@ -75,10 +70,15 @@ public class AreaChartController {
     public void back() {
         if (counter > 0) {
             for (Map.Entry<String, ObservableList<XYChart.Data<Double, Double>>> entry: myDataList.entrySet()) {
-                entry.getValue().remove(counter);
-                counter--;
+                entry.getValue().remove(entry.getValue().size() - 1);
             }
+            counter--;
         }
+    }
+
+    public void restart(){
+        this.areaChartView.getData().clear();
+        init(this.executionEnvironment);
     }
 
 
