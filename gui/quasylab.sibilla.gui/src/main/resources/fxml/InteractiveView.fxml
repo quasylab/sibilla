@@ -4,10 +4,6 @@
 <?import com.jfoenix.controls.JFXProgressBar?>
 <?import com.jfoenix.controls.JFXTabPane?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.chart.BarChart?>
-<?import javafx.scene.chart.CategoryAxis?>
-<?import javafx.scene.chart.LineChart?>
-<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TextField?>
@@ -26,44 +22,21 @@
             <children>
             <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <left>
-                  <JFXTabPane prefHeight="558.0" prefWidth="300.0" BorderPane.alignment="CENTER">
+                  <JFXTabPane fx:id="tablePane" prefHeight="558.0" prefWidth="300.0" BorderPane.alignment="CENTER">
                      <tabs>
-                        <Tab text="TABLE VIEW">
-                            <content>
-                                <fx:include fx:id="tableView" source="views/TableView.fxml" />
-                            </content>
+                        <Tab fx:id="tableTab" text="TABLE VIEW">
                         </Tab>
                      </tabs>
                   </JFXTabPane>
                </left>
                <center>
-                      <JFXTabPane nodeOrientation="LEFT_TO_RIGHT" tabMaxWidth="220.0" BorderPane.alignment="CENTER">
+                      <JFXTabPane fx:id="tabPane" nodeOrientation="LEFT_TO_RIGHT" BorderPane.alignment="CENTER">
                           <tabs>
-                              <Tab text="AREA CHART">
-                                  <content>
-                                      <fx:include fx:id="areaChart" source="views/AreaChartView.fxml" />
-                                  </content>
+                              <Tab fx:id="areachartTab" text="AREA CHART">
                               </Tab>
                               <Tab fx:id="linechartTab" text="LINE CHART">
-                                  <content>
-                                      <fx:include fx:id="lineChart" source="views/LineChartView.fxml" />
-                                  </content>
                               </Tab>
                               <Tab fx:id="barchartTab" text="BAR CHART">
-                                  <content>
-                                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" styleClass="anchorPaneCharts">
-                                 <children>
-                                    <BarChart fx:id="barchartView" layoutX="101.0" layoutY="34.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                      <xAxis>
-                                        <CategoryAxis fx:id="barchartXaxis" side="BOTTOM" />
-                                      </xAxis>
-                                      <yAxis>
-                                        <NumberAxis fx:id="barchartYaxis" side="LEFT" />
-                                      </yAxis>
-                                    </BarChart>
-                                 </children>
-                              </AnchorPane>
-                                  </content>
                               </Tab>
                           </tabs>
                       </JFXTabPane>

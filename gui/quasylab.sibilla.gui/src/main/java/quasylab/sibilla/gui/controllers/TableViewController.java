@@ -24,18 +24,19 @@ public class TableViewController {
     @FXML public TableView<Measure> tableView;
     @FXML public TableColumn<Measure, String> agentsCol;
     @FXML public TableColumn<Measure, Integer> occurrencesCol;
+    private ExecutionEnvironment<?> executionEnvironment;
 
     @FXML
-    public void init(InteractiveController interactiveController) {
-        mainController = interactiveController;
+    public void init(ExecutionEnvironment<?> executionEnvironment) {
+        this.executionEnvironment = executionEnvironment;
     }
 
     @FXML
     public void tableView() {
         //Create my observable list according to considered model
         ObservableList<Measure> observableList = FXCollections.observableArrayList();
-        for (String s: mainController.getExecutionEnvironment().getModel().measures()) {
-            observableList.add(mainController.getExecutionEnvironment().getModel().getMeasure(s));
+        for (String s: executionEnvironment.getModel().measures()) {
+            observableList.add(executionEnvironment.getModel().getMeasure(s));
         }
 /*
         //Create my observable list according SEIR model
@@ -95,7 +96,7 @@ public class TableViewController {
 
             @Override
             public Integer getValue() {
-                double current = param.getValue().measure(mainController.getExecutionEnvironment().currentState());
+                double current = param.getValue().measure(executionEnvironment.currentState());
                 return (int) Math.round(current);
             }
 

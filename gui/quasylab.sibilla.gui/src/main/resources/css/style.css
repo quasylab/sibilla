@@ -18,6 +18,10 @@
     -fx-background-color: #6c757d;
 }
 
+.jfx-tab-pane .tab-header-area {
+    -fx-alignment: CENTER;
+}
+
 .jfx-tab-pane .tab-header-area .jfx-rippler{
     -jfx-rippler-fill :rgba(6, 214, 160);
 }

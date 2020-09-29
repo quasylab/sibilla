@@ -13,10 +13,10 @@
     <children>
         <LineChart fx:id="linechartView" layoutX="45.0" layoutY="-25.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <xAxis>
-                <NumberAxis fx:id="linechartXaxis" side="BOTTOM" />
+                <NumberAxis fx:id="Xaxis" side="BOTTOM" />
             </xAxis>
             <yAxis>
-                <NumberAxis fx:id="linechartYaxis" side="LEFT" />
+                <NumberAxis fx:id="Yaxis" side="LEFT" />
             </yAxis>
         </LineChart>
     </children>

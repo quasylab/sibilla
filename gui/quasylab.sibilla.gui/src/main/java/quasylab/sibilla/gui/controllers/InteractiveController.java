@@ -2,6 +2,7 @@ package quasylab.sibilla.gui.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXProgressBar;
+import com.jfoenix.controls.JFXTabPane;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -33,21 +34,16 @@ import java.util.TreeMap;
 
 public class InteractiveController {
 
+    @FXML public JFXTabPane tabPane;
+    @FXML public JFXTabPane tablePane;
+    //Root
     @FXML private BorderPane root;
-    //Table View
-    @FXML public Parent tableView;
-    //Area Chart
-    @FXML public Parent areaChart;
-    //Line Chart
-    @FXML public Parent lineChart;
-
-    //Bar Chart
-    @FXML private Tab barchartTab;
-    @FXML private BarChart<?, ?> barchartView;
-    @FXML public CategoryAxis barchartXaxis;
-    @FXML public NumberAxis barchartYaxis;
-    //Header
-    //@FXML private TextField modelTypeField;
+    //Tabs
+    @FXML public Tab tableTab;
+    @FXML public Tab areachartTab;
+    @FXML public Tab linechartTab;
+    @FXML public Tab barchartTab;
+    //Fields
     @FXML private TextField timeunitsField;
     @FXML private TextField stepsField;
     //Commands
@@ -57,13 +53,13 @@ public class InteractiveController {
     @FXML private ToggleButton advanceCommands;
     //Other
     @FXML private JFXProgressBar progressBar;
+    //Controllers
+    @FXML public TableViewController tableViewController;
+    @FXML public AreaChartController areaChartController;
+    @FXML public LineChartController lineChartController;
+    @FXML public BarChartController barChartController;
 
-    //Controller delle viste
-    @FXML public TableViewController tableViewController = new TableViewController();
-    @FXML public AreaChartController areaChartController = new AreaChartController();
-    @FXML public LineChartController lineChartController = new LineChartController();
 
-    //Riferimento ad ExecutionEnvironment
     private ExecutionEnvironment<PopulationState> ee;
 
     @FXML
@@ -73,64 +69,82 @@ public class InteractiveController {
         update();
     }
 
-    public ExecutionEnvironment<PopulationState> getExecutionEnvironment(){
-        return this.ee;
-    }
+
 
 
     @FXML
     public void init() {
-        tableViewController.init(this);
+        tableViewController.init(this.ee);
         areaChartController.init(this.ee);
-        lineChartController.init(this);
+        lineChartController.init(this.ee);
+        barChartController.init(this.ee);
     }
 
-/*
+
+
+
     @FXML
     public void initialize() {
-
+        tablePane.widthProperty().addListener((observable, oldValue, newValue) ->
+        {
+            tablePane.setTabMinWidth((tablePane.getWidth() - 11) / tablePane.getTabs().size());
+            tablePane.setTabMaxWidth((tablePane.getWidth() - 11) / tablePane.getTabs().size());
+        });
+        tabPane.widthProperty().addListener((observable, oldValue, newValue) ->
+        {
+            tabPane.setTabMinWidth((tabPane.getWidth() - 11) / tabPane.getTabs().size());
+            tabPane.setTabMaxWidth((tabPane.getWidth() - 11) / tabPane.getTabs().size());
+        });
         //Initialize Table View
         Node tableview = null;
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(("/fxml/views/TableView.fxml")));
         try {
-            tableview = FXMLLoader.load(getClass().getResource("/fxml/views/TableView.fxml"));
+            tableview = loader.load();
+            //tableview = FXMLLoader.load(getClass().getResource("/fxml/views/TableView.fxml"));
         } catch (IOException e) {
             System.out.println("StatusSectionController doesn't found fxml file");
         }
-        tableviewTab.setContent(tableview);
-
+        tableTab.setContent(tableview);
+        tableViewController = loader.getController();
 
         //Initialize Area Chart
         Node areachart = null;
+        FXMLLoader loader2 = new FXMLLoader(getClass().getResource(("/fxml/views/AreaChartView.fxml")));
         try {
-            areachart = FXMLLoader.load(getClass().getResource("/fxml/views/AreaChartView.fxml"));
+            areachart = loader2.load();
+            //areachart = FXMLLoader.load(getClass().getResource("/fxml/views/AreaChartView.fxml"));
         } catch (IOException e) {
             System.out.println("StatusSectionController doesn't found fxml file");
         }
         areachartTab.setContent(areachart);
+        areaChartController = loader2.getController();
 
         //Initialize Line Chart
         Node linechart = null;
+        FXMLLoader loader3 = new FXMLLoader(getClass().getResource(("/fxml/views/LineChartView.fxml")));
         try {
-            linechart = FXMLLoader.load(getClass().getResource("/fxml/views/LineChartView.fxml"));
+            linechart = loader3.load();
+            //linechart = FXMLLoader.load(getClass().getResource("/fxml/views/LineChartView.fxml"));
         } catch (IOException e) {
             System.out.println("StatusSectionController doesn't found fxml file");
         }
         linechartTab.setContent(linechart);
+        lineChartController = loader3.getController();
 
         //Initialize Bar Chart
         Node barchart = null;
+        FXMLLoader loader4 = new FXMLLoader(getClass().getResource(("/fxml/views/BarChartView.fxml")));
         try {
-            barchart = FXMLLoader.load(getClass().getResource("/fxml/views/BarChartView.fxml"));
+            loader4.load();
+            //barchart = FXMLLoader.load(getClass().getResource("/fxml/views/BarChartView.fxml"));
         } catch (IOException e) {
             System.out.println("StatusSectionController doesn't found fxml file");
         }
         barchartTab.setContent(barchart);
-
-
+        barChartController = loader4.getController();
     }
 
 
- */
 
 
     @FXML
@@ -341,6 +355,8 @@ public class InteractiveController {
     public void step(MouseEvent mouseEvent) {
         if (execute(stepBtn.getId(), ee)) {
             areaChartController.step();
+            lineChartController.step();
+            barChartController.step();
         }
         update();
     }
@@ -349,6 +365,8 @@ public class InteractiveController {
     public void previous(MouseEvent mouseEvent) {
         if (execute(previousBtn.getId(), ee)) {
             areaChartController.back();
+            lineChartController.back();
+            barChartController.back();
         }
         update();
     }
@@ -357,6 +375,8 @@ public class InteractiveController {
     private void restart(MouseEvent mouseEvent) {
         if (execute(restartBtn.getId(), ee)) {
             areaChartController.restart();
+            lineChartController.restart();
+            barChartController.restart();
         }
         update();
     }
@@ -401,8 +421,4 @@ public class InteractiveController {
         return true;
     }
 
-
-    public Parent getRoot() {
-        return this.root;
-    }
 }
