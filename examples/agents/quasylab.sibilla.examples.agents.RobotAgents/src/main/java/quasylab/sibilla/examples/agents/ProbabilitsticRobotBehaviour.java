@@ -21,33 +21,32 @@
  *  limitations under the License.
  */
 
-package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
+package quasylab.sibilla.examples.agents;
 
 import org.apache.commons.math3.random.RandomGenerator;
+import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentAction;
+import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentBehaviour;
+import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.VariableMapping;
 
-public class AgentLogger implements AgentBehaviour {
+import static quasylab.sibilla.examples.agents.RoboticScenarioDefinition.*;
 
-    private final AgentBehaviour observedAgent;
-    private final AgentLog agentLog;
-
-    public AgentLogger(AgentBehaviour observedAgent) {
-        this(observedAgent,new AgentLog());
-    }
-
-    public AgentLogger(AgentBehaviour observedAgent, AgentLog agentLog) {
-        this.observedAgent = observedAgent;
-        this.agentLog = agentLog;
-    }
-
+public class ProbabilitsticRobotBehaviour implements AgentBehaviour {
 
     @Override
     public AgentAction step(RandomGenerator rg, double now, VariableMapping currentState, VariableMapping observations) {
-        AgentAction action = observedAgent.step(rg,now,currentState,observations);
-        agentLog.add(currentState,observations,action);
-        return action;
-    }
-
-    public AgentLog getLog() {
-        return agentLog;
+        if (observations.get(GOAL_SENSOR)==0.0) {
+            if (observations.get(FRONT_SENSOR) == 0) {
+                return ChangeDirectionAction.UP;
+            }
+            if (observations.get(RIGHT_SENSOR) == 0) {
+                return ChangeDirectionAction.RIGHT;
+            }
+            if (observations.get(LEFT_SENSOR) == 0) {
+                return ChangeDirectionAction.LEFT;
+            }
+        } else {
+            System.err.println("GOAL!!!!");
+        }
+        return ChangeDirectionAction.STAND;
     }
 }

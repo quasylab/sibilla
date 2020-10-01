@@ -23,31 +23,22 @@
 
 package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
-import org.apache.commons.math3.random.RandomGenerator;
+public class MultipleAgentLogBuilder implements AgentLogBuilder {
 
-public class AgentLogger implements AgentBehaviour {
+    private final AgentLog[] agentLogs;
 
-    private final AgentBehaviour observedAgent;
-    private final AgentLog agentLog;
-
-    public AgentLogger(AgentBehaviour observedAgent) {
-        this(observedAgent,new AgentLog());
+    public MultipleAgentLogBuilder(int numberOfAgents) {
+        agentLogs = new AgentLog[numberOfAgents];
     }
-
-    public AgentLogger(AgentBehaviour observedAgent, AgentLog agentLog) {
-        this.observedAgent = observedAgent;
-        this.agentLog = agentLog;
-    }
-
 
     @Override
-    public AgentAction step(RandomGenerator rg, double now, VariableMapping currentState, VariableMapping observations) {
-        AgentAction action = observedAgent.step(rg,now,currentState,observations);
-        agentLog.add(currentState,observations,action);
-        return action;
-    }
-
-    public AgentLog getLog() {
-        return agentLog;
+    public AgentLog getLogger(int i) {
+        if (i>=agentLogs.length) {
+            return null;
+        }
+        if (agentLogs[i] == null) {
+            agentLogs[i] = new AgentLog();
+        }
+        return agentLogs[i];
     }
 }

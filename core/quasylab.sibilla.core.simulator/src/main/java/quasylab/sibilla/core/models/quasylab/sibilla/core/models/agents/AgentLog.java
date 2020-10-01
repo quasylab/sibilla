@@ -24,6 +24,7 @@
 package quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class AgentLog {
@@ -46,5 +47,9 @@ public class AgentLog {
 
     public synchronized void add(VariableMapping state, VariableMapping observations, AgentAction action) {
         steps.add(new AgentStep(state,observations,action));
+    }
+
+    public List<AgentStep> getLog() {
+        return steps;
     }
 }

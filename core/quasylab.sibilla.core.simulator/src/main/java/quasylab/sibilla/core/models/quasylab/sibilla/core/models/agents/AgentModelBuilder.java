@@ -27,6 +27,8 @@ public interface AgentModelBuilder<W extends World> {
 
     W getWorld();
 
+    void initialiseWorld();
+
     int getNumberOfAgents();
 
     SystemEnvironment<W> getEnvironment();
