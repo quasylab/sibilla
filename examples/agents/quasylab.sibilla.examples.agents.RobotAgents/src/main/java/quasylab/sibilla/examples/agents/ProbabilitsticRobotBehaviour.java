@@ -35,7 +35,9 @@ public class ProbabilitsticRobotBehaviour implements AgentBehaviour {
 	@Override
 	public AgentAction step(RandomGenerator rg, double now, VariableMapping currentState,
 			VariableMapping observations) {
+		
 		int rand = rg.nextInt(100);
+		
 		if (observations.get(GOAL_SENSOR) == 0.0) {
 			if (observations.get(FRONT_SENSOR) == 0) {
 				return ChangeDirectionAction.UP;
@@ -57,21 +59,4 @@ public class ProbabilitsticRobotBehaviour implements AgentBehaviour {
 		return ChangeDirectionAction.STAND;
 	}
 
-//    @Override
-//    public AgentAction step(RandomGenerator rg, double now, VariableMapping currentState, VariableMapping observations) {
-//        if (observations.get(GOAL_SENSOR)==0.0) {
-//            if (observations.get(FRONT_SENSOR) == 0) {
-//                return ChangeDirectionAction.UP;
-//            }
-//            if (observations.get(RIGHT_SENSOR) == 0) {
-//                return ChangeDirectionAction.RIGHT;
-//            }
-//            if (observations.get(LEFT_SENSOR) == 0) {
-//                return ChangeDirectionAction.LEFT;
-//            }
-//        } else {
-//            System.err.println("GOAL!!!!");
-//        }
-//        return ChangeDirectionAction.STAND;
-//    }
 }
