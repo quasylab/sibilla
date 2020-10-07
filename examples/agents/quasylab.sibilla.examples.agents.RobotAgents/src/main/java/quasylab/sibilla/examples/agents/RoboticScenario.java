@@ -47,6 +47,7 @@ public class RoboticScenario {
         RoboticScenario rs = new RoboticScenario(new DefaultRandomGenerator());
         rs.testTwinGeneration("test1", 1,10,10,10,i-> new DeterministicRobotBehaviour(),100,100.0);
         rs.testTwinGeneration("test2", 1,10,10,10,i-> new ProbabilitsticRobotBehaviour(),100,100.0);
+        rs.testTwinGeneration("test3", 1, 10, 10, 10, i-> new RandomisedRobotBehaviour(), 100, 100.0);
     }
 
     public void testTwinGeneration(String label, int numberOfAgents, int numberOfObstacles, int height, int widht, IntFunction<AgentBehaviour> agentBehaviour, int iterations, double deadline) throws InterruptedException {
