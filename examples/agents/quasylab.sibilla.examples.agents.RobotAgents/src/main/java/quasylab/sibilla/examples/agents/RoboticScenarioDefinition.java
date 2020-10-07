@@ -27,53 +27,54 @@ import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.*;
 
 import java.util.HashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
-public class RoboticScenarioDeterministicDefinition implements AgentModelBuilder<RobotArena> {
-
+public class RoboticScenarioDefinition implements AgentModelBuilder<RobotArena> {
     public static final String ID_VAR = "id";
     public static final String REACH_VAR = "reach";
     public static final String DIRX_VAR = "dx";
     public static final String DIRY_VAR = "dy";
-
     public final static String X_VAR = "x";
     public final static String Y_VAR = "y";
-
-    private static final int ROBOT_OBSERVATIONS = 4;
-
     public static final String FRONT_SENSOR = "front_sensor";
     public static final String RIGHT_SENSOR = "right_sensor";
     public static final String LEFT_SENSOR = "left_sensor";
     public static final String BACK_SENSOR = "back_sensor";
     public static final String GOAL_SENSOR = "goal_sensor";
+    private static final int ROBOT_OBSERVATIONS = 4;
+    protected final int numberOfAgents;
+    protected final int numberOfObstacles;
+    protected final RandomGenerator rg;
+    protected final int width;
+    protected final int height;
+    private IntFunction<AgentBehaviour> agentBehaviourIntFunction;
+    private RobotArena world;
 
-
-    private final int numberOfAgents;
-
-    private final int numberOfObstacles;
-
-    private final RandomGenerator rg;
-    private final int width;
-    private final int height;
-
-    public RoboticScenarioDeterministicDefinition(RandomGenerator rg,
-                                                  int width,
-                                                  int height,
-                                                  int numberOfAgents,
-                                                  int numberOfObstacles) {
-        this.rg = rg;
+    public RoboticScenarioDefinition(IntFunction<AgentBehaviour> agentBehaviourIntFunction, int numberOfAgents, int numberOfObstacles, RandomGenerator rg, int width, int height) {
         this.numberOfAgents = numberOfAgents;
         this.numberOfObstacles = numberOfObstacles;
+        this.rg = rg;
         this.width = width;
         this.height = height;
+        this.agentBehaviourIntFunction = agentBehaviourIntFunction;
     }
-
 
     @Override
     public RobotArena getWorld() {
-        return RobotArena.generate(rg,width,height,numberOfObstacles);
+        if (world == null) {
+            initialiseWorld();
+        }
+        return world;
+    }
+
+    @Override
+    public void initialiseWorld() {
+        world = RobotArena.generate(rg, width, height, numberOfObstacles);
+    }
+
+    public void setAgentBehaviourIntFunction(IntFunction<AgentBehaviour> agentBehaviourIntFunction) {
+        this.agentBehaviourIntFunction = agentBehaviourIntFunction;
     }
 
     @Override
@@ -84,21 +85,21 @@ public class RoboticScenarioDeterministicDefinition implements AgentModelBuilder
     @Override
     public SystemEnvironment<RobotArena> getEnvironment() {
         return (rg, currentState, actions) -> {
-            VariableMapping[] localStates = applyActions(rg,currentState,actions);
-            VariableMapping[] newInfo = getNewInfo(currentState,localStates);
-            return new SystemState<>(currentState.getWorld(), newInfo,localStates);
+            VariableMapping[] localStates = applyActions(rg, currentState, actions);
+            VariableMapping[] newInfo = getNewInfo(currentState, localStates);
+            return new SystemState<>(currentState.getWorld(), newInfo, localStates);
         };
     }
 
     public VariableMapping[] applyActions(RandomGenerator rg, SystemState<RobotArena> state, AgentAction[] actions) {
         VariableMapping[] toReturn = new VariableMapping[state.numberOfAgents()];
-        IntStream.range(0,state.numberOfAgents()).forEach(i -> toReturn[i] = actions[i].performAction(rg,state.getLocal(i)) );
+        IntStream.range(0, state.numberOfAgents()).forEach(i -> toReturn[i] = actions[i].performAction(rg, state.getLocal(i)));
         return toReturn;
     }
 
     public VariableMapping[] getNewInfo(SystemState<RobotArena> state, VariableMapping[] agentStates) {
         VariableMapping[] toReturn = new VariableMapping[agentStates.length];
-        IntStream.range(0,agentStates.length).forEach(i -> toReturn[i] = getNewInfo(state.getInfo(i),agentStates[i]));
+        IntStream.range(0, agentStates.length).forEach(i -> toReturn[i] = getNewInfo(state.getInfo(i), agentStates[i]));
         return toReturn;
     }
 
@@ -106,31 +107,29 @@ public class RoboticScenarioDeterministicDefinition implements AgentModelBuilder
         double x = currentInfo.get("x");
         double y = currentInfo.get("y");
 
-        return currentInfo.set(new SetVariable("x",x+state.get("dx")),new SetVariable("y",y+state.get("dy")));
+        return currentInfo.set(new SetVariable("x", x + state.get("dx")), new SetVariable("y", y + state.get("dy")));
     }
-
-
 
     @Override
     public OmegaFunction getOmegaFunction(int i) {
         return (OmegaFunction<RobotArena>) (r, agentState, currentState) -> {
-            HashMap<String,Double> map = new HashMap<>();
+            HashMap<String, Double> map = new HashMap<>();
             RobotArena world = currentState.getWorld();
-            double x = currentState.getInfo(i,X_VAR);
-            double y = currentState.getInfo(i,Y_VAR);
-            map.put(FRONT_SENSOR,Math.max(world.thereIsAnObstacle(x,y+1), thereIsAnAgentAt(i,x,y+1,currentState)));
-            map.put(LEFT_SENSOR,Math.max(world.thereIsAnObstacle(x-1,y), thereIsAnAgentAt(i,x-1,y,currentState)));
-            map.put(RIGHT_SENSOR,Math.max(world.thereIsAnObstacle(x+1,y), thereIsAnAgentAt(i,x+1,y,currentState)));
-            map.put(BACK_SENSOR,Math.max(world.thereIsAnObstacle(x,y-1), thereIsAnAgentAt(i,x,y-1,currentState)));
-            map.put(GOAL_SENSOR,world.goalReached(x,y));
+            double x = currentState.getInfo(i, X_VAR);
+            double y = currentState.getInfo(i, Y_VAR);
+            map.put(FRONT_SENSOR, Math.max(world.thereIsAnObstacle(x, y + 1), thereIsAnAgentAt(i, x, y + 1, currentState)));
+            map.put(LEFT_SENSOR, Math.max(world.thereIsAnObstacle(x - 1, y), thereIsAnAgentAt(i, x - 1, y, currentState)));
+            map.put(RIGHT_SENSOR, Math.max(world.thereIsAnObstacle(x + 1, y), thereIsAnAgentAt(i, x + 1, y, currentState)));
+            map.put(BACK_SENSOR, Math.max(world.thereIsAnObstacle(x, y - 1), thereIsAnAgentAt(i, x, y - 1, currentState)));
+            map.put(GOAL_SENSOR, world.goalReached(x, y));
             return new VariableMapping(map);
         };
     }
 
     private double thereIsAnAgentAt(int i, double x, double y, SystemState<RobotArena> currentState) {
-        for( int j=0 ; j<currentState.numberOfAgents() ; j++ ) {
-            if (i !=j) {
-                if ((x==currentState.getInfo(j,X_VAR))&&(y==currentState.getInfo(j,Y_VAR))) {
+        for (int j = 0; j < currentState.numberOfAgents(); j++) {
+            if (i != j) {
+                if ((x == currentState.getInfo(j, X_VAR)) && (y == currentState.getInfo(j, Y_VAR))) {
                     return 1.0;
                 }
             }
@@ -140,41 +139,25 @@ public class RoboticScenarioDeterministicDefinition implements AgentModelBuilder
 
     @Override
     public AgentBehaviour getAgentBehaviour(int i) {
-        return (AgentBehaviour) (rg, now, currentState, observations) -> {
-            if (observations.get(GOAL_SENSOR)==0.0) {
-                if (observations.get(FRONT_SENSOR) == 0) {
-                    return ChangeDirectionAction.UP;
-                }
-                if (observations.get(RIGHT_SENSOR) == 0) {
-                    return ChangeDirectionAction.RIGHT;
-                }
-                if (observations.get(LEFT_SENSOR) == 0) {
-                    return ChangeDirectionAction.LEFT;
-                }
-            } else {
-                System.err.println("GOAL!!!!");
-            }
-            return ChangeDirectionAction.STAND;
-        };
+        return agentBehaviourIntFunction.apply(i);
     }
 
     @Override
     public VariableMapping getAgentState(RobotArena world, int i) {
-        HashMap<String,Double> map = new HashMap<>();
-        map.put(ID_VAR,(double) i);
-        map.put(DIRX_VAR,0.0);
-        map.put(DIRY_VAR,0.0);
-        map.put(REACH_VAR,0.0);
+        HashMap<String, Double> map = new HashMap<>();
+        map.put(ID_VAR, (double) i);
+        map.put(DIRX_VAR, 0.0);
+        map.put(DIRY_VAR, 0.0);
+        map.put(REACH_VAR, 0.0);
         return new VariableMapping(map);
     }
 
     @Override
     public VariableMapping getAgentInfo(RobotArena world, int i) {
-        int gap = world.getWidth() /(numberOfAgents+1);
-        HashMap<String,Double> map = new HashMap<>();
-        map.put(X_VAR,(double) i*gap);
-        map.put(Y_VAR,0.0);
+        int gap = world.getWidth() / (numberOfAgents + 1);
+        HashMap<String, Double> map = new HashMap<>();
+        map.put(X_VAR, (double) i * gap);
+        map.put(Y_VAR, 0.0);
         return new VariableMapping(map);
     }
-
 }
