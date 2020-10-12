@@ -25,41 +25,25 @@ package quasylab.sibilla.examples.agents;
 
 import org.apache.commons.math3.random.RandomGenerator;
 import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentAction;
-import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentBehaviour;
+import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentActionWrapper;
+import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.SetVariable;
 import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.VariableMapping;
 
-import java.util.ArrayList;
+public class ChangeFlagAction extends AgentActionWrapper {
 
-import static quasylab.sibilla.examples.agents.RoboticScenarioDefinition.*;
-
-public class ProbabilitsticRobotBehaviour implements AgentBehaviour {
-
-	@Override
-	public AgentAction step(RandomGenerator rg, double now, VariableMapping currentState,
-			VariableMapping observations) {
+    public final static ChangeFlagAction LEFT_AND_CHANGE_FLAG_ACTION = new ChangeFlagAction("goLeft",false,ChangeDirectionAction.LEFT);
+    public final static ChangeFlagAction RIGHT_AND_CHANGE_FLAG_ACTION = new ChangeFlagAction("goRight",true,ChangeDirectionAction.RIGHT);
 
 
-		if (observations.get(GOAL_SENSOR) == 0.0) {
-			ArrayList<AgentAction> actions = new ArrayList<>();
-			if ((observations.get(FRONT_SENSOR) == 0)) {
-				actions.add(ChangeDirectionAction.UP);
-			}
-			if (observations.get(LEFT_SENSOR) != 0) {
-				actions.add(ChangeDirectionAction.LEFT);
-			}
-			if (observations.get(RIGHT_SENSOR) != 0) {
-				actions.add(ChangeDirectionAction.RIGHT);
-			}
-			if (observations.get(BACK_SENSOR) != 0) {
-				actions.add(ChangeDirectionAction.DOWN);
-			}
-			if (!actions.isEmpty()) {
-				return actions.get(rg.nextInt(actions.size()));
-			}
-		} else {
-			System.err.println("GOAL!!!!");
-		}
-		return ChangeDirectionAction.STAND;
-	}
+    private final boolean goRight;
 
+    public ChangeFlagAction(String name, boolean goRight, AgentAction action) {
+        super(name, action);
+        this.goRight = goRight;
+    }
+
+    @Override
+    protected VariableMapping extendResult(RandomGenerator rg, VariableMapping currentState, VariableMapping innerActionResult) {
+        return innerActionResult.set(new SetVariable(RoboticScenarioDefinition.DIR_FLAG_VARIABLE,(goRight?1.0:0.0)));
+    }
 }

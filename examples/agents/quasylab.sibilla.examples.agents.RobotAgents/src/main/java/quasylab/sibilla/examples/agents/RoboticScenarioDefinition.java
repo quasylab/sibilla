@@ -35,6 +35,7 @@ public class RoboticScenarioDefinition implements AgentModelBuilder<RobotArena> 
     public static final String REACH_VAR = "reach";
     public static final String DIRX_VAR = "dx";
     public static final String DIRY_VAR = "dy";
+    public static final String DIR_FLAG_VARIABLE = "goRight";
     public final static String X_VAR = "x";
     public final static String Y_VAR = "y";
     public static final String FRONT_SENSOR = "front_sensor";
@@ -48,16 +49,22 @@ public class RoboticScenarioDefinition implements AgentModelBuilder<RobotArena> 
     protected final RandomGenerator rg;
     protected final int width;
     protected final int height;
+    private final boolean withDirectionFlag;
     private IntFunction<AgentBehaviour> agentBehaviourIntFunction;
     private RobotArena world;
 
-    public RoboticScenarioDefinition(IntFunction<AgentBehaviour> agentBehaviourIntFunction, int numberOfAgents, int numberOfObstacles, RandomGenerator rg, int width, int height) {
+    public RoboticScenarioDefinition(IntFunction<AgentBehaviour> agentBehaviourIntFunction, int numberOfAgents, int numberOfObstacles, RandomGenerator rg, int width, int height, boolean withDirectionFlag) {
         this.numberOfAgents = numberOfAgents;
         this.numberOfObstacles = numberOfObstacles;
         this.rg = rg;
         this.width = width;
         this.height = height;
         this.agentBehaviourIntFunction = agentBehaviourIntFunction;
+        this.withDirectionFlag = withDirectionFlag;
+    }
+
+    public RoboticScenarioDefinition(IntFunction<AgentBehaviour> agentBehaviourIntFunction, int numberOfAgents, int numberOfObstacles, RandomGenerator rg, int width, int height) {
+        this(agentBehaviourIntFunction,numberOfAgents,numberOfObstacles,rg,width,height,false);
     }
 
     @Override
@@ -149,6 +156,9 @@ public class RoboticScenarioDefinition implements AgentModelBuilder<RobotArena> 
         map.put(DIRX_VAR, 0.0);
         map.put(DIRY_VAR, 0.0);
         map.put(REACH_VAR, 0.0);
+        if (withDirectionFlag) {
+            map.put(DIR_FLAG_VARIABLE,1.0);
+        }
         return new VariableMapping(map);
     }
 
@@ -156,7 +166,7 @@ public class RoboticScenarioDefinition implements AgentModelBuilder<RobotArena> 
     public VariableMapping getAgentInfo(RobotArena world, int i) {
         int gap = world.getWidth() / (numberOfAgents + 1);
         HashMap<String, Double> map = new HashMap<>();
-        map.put(X_VAR, (double) i * gap);
+        map.put(X_VAR, (double) (i+1) * gap);
         map.put(Y_VAR, 0.0);
         return new VariableMapping(map);
     }

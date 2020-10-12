@@ -29,7 +29,10 @@ import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.*;
 import quasylab.sibilla.core.simulator.*;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.IntFunction;
 
 public class RoboticScenario {
@@ -43,36 +46,68 @@ public class RoboticScenario {
         this.outputDir = new File(".");
     }
 
-    public static void main(String[] argv) throws InterruptedException {
+    public static void main(String[] argv) throws InterruptedException, FileNotFoundException {
         RoboticScenario rs = new RoboticScenario(new DefaultRandomGenerator());
-        rs.testTwinGeneration("test1", 1,10,10,10,i-> new DeterministicRobotBehaviour(),100,100.0);
-        rs.testTwinGeneration("test2", 1,10,10,10,i-> new ProbabilitsticRobotBehaviour(),100,100.0);
-        rs.testTwinGeneration("test3", 1, 10, 10, 10, i-> new RandomisedRobotBehaviour(), 100, 100.0);
+        rs.testTwinGeneration("deterministic", 1,40,10,10,i-> new DeterministicRobotBehaviour(),100,100.0);
+        rs.testTwinGeneration("probabilistic", 1,10,10,10,i-> new ProbabilitsticRobotBehaviour(),100,100.0);
+        //rs.testTwinGeneration("nondeterministic", 1, 10, 10, 10, i-> new NondeterministicRobotBehaviour(), 100, 100.0);
+        //rs.testTwinGeneration("prioritised", 1, 10, 10, 10, true, i-> new PrioritisedRobotBehaviour(), 100, 100.0);
     }
 
-    public void testTwinGeneration(String label, int numberOfAgents, int numberOfObstacles, int height, int widht, IntFunction<AgentBehaviour> agentBehaviour, int iterations, double deadline) throws InterruptedException {
-        RoboticScenarioDefinition def = new RoboticScenarioDefinition(agentBehaviour,numberOfAgents,numberOfObstacles,rg,widht,height);
+    public void testTwinGeneration(String label, int numberOfAgents, int numberOfObstacles, int height, int width, IntFunction<AgentBehaviour> agentBehaviour, int iterations, double deadline) throws InterruptedException, FileNotFoundException {
+        testTwinGeneration(label,numberOfAgents,numberOfObstacles,height,width,false,agentBehaviour,iterations,deadline);
+    }
+
+    public void testTwinGeneration(String label, int numberOfAgents, int numberOfObstacles, int height, int widht, boolean withFlagDirection, IntFunction<AgentBehaviour> agentBehaviour, int iterations, double deadline) throws InterruptedException, FileNotFoundException {
+        RoboticScenarioDefinition def = new RoboticScenarioDefinition(agentBehaviour,numberOfAgents,numberOfObstacles,rg,widht,height,withFlagDirection);
         SingleLogBuilder logBuilder = new SingleLogBuilder();
         LoggerWrapper<RobotArena> logger = getLoggedDefinition(def,logBuilder);
         LinkedList<Trajectory<SystemState<RobotArena>>> trainingTrajectories = generateData(logger,iterations,deadline);
-        saveTrajectories(label, trainingTrajectories);
+        File cwd = new File("."+File.separator+label+"_training");
+        cwd.mkdir();
+        saveTrajectories(cwd, label, trainingTrajectories);
         def.initialiseWorld();
         Trajectory<SystemState<RobotArena>> originalTrajectory = getTrajectory(def,deadline);
         def.setAgentBehaviourIntFunction(i -> new AgentTwin(logBuilder.getLogger()));
         Trajectory<SystemState<RobotArena>> twinTrajectory = getTrajectory(def,deadline);
-        saveTrajectory(label, originalTrajectory);
-        saveTrajectory(label, twinTrajectory);
+        cwd = new File("."+File.separator+label+"_result");
+        cwd.mkdir();
+        saveTrajectory(cwd, label+"_original", originalTrajectory);
+        saveTrajectory(cwd, label+"_twin", twinTrajectory);
     }
 
-    private void saveTrajectories(String label, LinkedList<Trajectory<SystemState<RobotArena>>> trajectories) {
-
+    private void saveTrajectories(File outputDir, String label, LinkedList<Trajectory<SystemState<RobotArena>>> trajectories) throws FileNotFoundException{
+        int counter = 0;
+        for(Trajectory<SystemState<RobotArena>> t: trajectories) {
+            saveDataOfAgents(new PrintWriter(new File(outputDir,label+"_"+(counter++)+".data")),t);
+        }
     }
 
-    private void saveTrajectory(String label, Trajectory<SystemState<RobotArena>> trajectory) {
+    private void saveTrajectory(File outputDir, String label, Trajectory<SystemState<RobotArena>> trajectory) throws FileNotFoundException {
+        saveDataOfArena(new PrintWriter(new File(outputDir,label+"_arena.data")),trajectory.getData().get(0).getValue().getWorld());
+        saveDataOfAgents(new PrintWriter(new File(outputDir, label+"_agents.data")),trajectory);
     }
 
+    private void saveDataOfArena(PrintWriter pw, RobotArena arena) {
+        pw.printf("%d\n",arena.getWidth());
+        pw.printf("%d\n",arena.getHeight());
+        arena.getObstacles().stream().sequential().forEach(o -> pw.printf("%d;%d\n",o.getXPos(),o.getYPos()));
+        pw.flush();
+        pw.close();
+    }
 
-
+    private void saveDataOfAgents(PrintWriter pw, Trajectory<SystemState<RobotArena>> trajectory) {
+        trajectory.getData().stream().sequential().forEach(s -> {
+            pw.printf("%f",s.getTime());
+            SystemState<RobotArena> state = s.getValue();
+            for(int i=0 ; i<state.numberOfAgents() ; i++) {
+                pw.printf(";%f;%f",state.getInfo(i,RoboticScenarioDefinition.X_VAR),state.getInfo(i,RoboticScenarioDefinition.Y_VAR));
+            }
+            pw.println();
+        });
+        pw.flush();
+        pw.close();
+    }
 
     private  AgentModelBuilder<RobotArena> getDeterministicDefinition(RandomGenerator rg, int width, int height, int numberOfAgents, int numberOfObstacles) {
         return new RoboticScenarioDefinition(
@@ -92,13 +127,13 @@ public class RoboticScenario {
     private  LinkedList<Trajectory<SystemState<RobotArena>>> generateData(AgentModelBuilder<RobotArena> def, int iterations, double deadline) throws InterruptedException {
         LinkedList<Trajectory<SystemState<RobotArena>>> trajectories = new LinkedList<>();
         for(int i=0; i<iterations; i++) {
+            def.initialiseWorld();
             trajectories.add(getTrajectory(def, deadline));
         }
         return trajectories;
     }
 
     private  Trajectory<SystemState<RobotArena>> getTrajectory(AgentModelBuilder<RobotArena> def, double deadline) {
-        def.initialiseWorld();
         AgentModel<RobotArena> model = def.getAgentModel();
         SystemState<RobotArena> state = def.getState();
         SimulationUnit<SystemState<RobotArena>> simulationUnit = new SimulationUnit<SystemState<RobotArena>>(model,state,(t,s) -> t>=deadline);
