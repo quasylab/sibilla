@@ -44,13 +44,13 @@ public class ProbabilitsticRobotBehaviour implements AgentBehaviour {
 			if ((observations.get(FRONT_SENSOR) == 0)) {
 				actions.add(ChangeDirectionAction.UP);
 			}
-			if (observations.get(LEFT_SENSOR) != 0) {
+			if (observations.get(LEFT_SENSOR) == 0) {
 				actions.add(ChangeDirectionAction.LEFT);
 			}
-			if (observations.get(RIGHT_SENSOR) != 0) {
+			if (observations.get(RIGHT_SENSOR) == 0) {
 				actions.add(ChangeDirectionAction.RIGHT);
 			}
-			if (observations.get(BACK_SENSOR) != 0) {
+			if (observations.get(BACK_SENSOR) == 0) {
 				actions.add(ChangeDirectionAction.DOWN);
 			}
 			if (!actions.isEmpty()) {
