@@ -42,15 +42,18 @@ public class RoboticScenario {
 
     public RoboticScenario(DefaultRandomGenerator rg) {
         this.rg = rg;
-        this.outputDir = new File(".");
+        this.outputDir = new File("./data");
+        if (!this.outputDir.exists()) {
+            this.outputDir.mkdir();
+        }
     }
 
     public static void main(String[] argv) throws InterruptedException, FileNotFoundException {
         RoboticScenario rs = new RoboticScenario(new DefaultRandomGenerator());
-        rs.testTwinGeneration("deterministic", 1,40,10,10,i-> new DeterministicRobotBehaviour(),100,100.0);
-        rs.testTwinGeneration("probabilistic", 1,10,10,10,i-> new ProbabilitsticRobotBehaviour(),100,100.0);
-        //rs.testTwinGeneration("nondeterministic", 1, 10, 10, 10, i-> new NondeterministicRobotBehaviour(), 100, 100.0);
-        //rs.testTwinGeneration("prioritised", 1, 10, 10, 10, true, i-> new PrioritisedRobotBehaviour(), 100, 100.0);
+        rs.testTwinGeneration("deterministic", 1,15,10,10,i-> new DeterministicRobotBehaviour(),100,100.0);
+        rs.testTwinGeneration("probabilistic", 1,15,10,10,i-> new ProbabilitsticRobotBehaviour(),100,500.0);
+        rs.testTwinGeneration("nondeterministic", 1, 15, 10, 10, i-> new NondeterministicRobotBehaviour(), 100, 100.0);
+        rs.testTwinGeneration("prioritised", 1, 15, 10, 10, true, i-> new PrioritisedRobotBehaviour(), 100, 100.0);
     }
 
     public void testTwinGeneration(String label, int numberOfAgents, int numberOfObstacles, int height, int width, IntFunction<AgentBehaviour> agentBehaviour, int iterations, double deadline) throws InterruptedException, FileNotFoundException {
@@ -62,14 +65,14 @@ public class RoboticScenario {
         SingleLogBuilder logBuilder = new SingleLogBuilder();
         LoggerWrapper<RobotArena> logger = getLoggedDefinition(def,logBuilder);
         LinkedList<Trajectory<SystemState<RobotArena>>> trainingTrajectories = generateData(logger,iterations,deadline);
-        File cwd = new File("."+File.separator+label+"_training");
+        File cwd = new File(this.outputDir,label+"_training");
         cwd.mkdir();
         saveTrajectories(cwd, label, trainingTrajectories);
         def.initialiseWorld();
         Trajectory<SystemState<RobotArena>> originalTrajectory = getTrajectory(def,deadline);
         def.setAgentBehaviourIntFunction(i -> new AgentTwin(logBuilder.getLogger()));
         Trajectory<SystemState<RobotArena>> twinTrajectory = getTrajectory(def,deadline);
-        cwd = new File("."+File.separator+label+"_result");
+        cwd = new File(this.outputDir,label+"_result");
         cwd.mkdir();
         saveTrajectory(cwd, label+"_original", originalTrajectory);
         saveTrajectory(cwd, label+"_twin", twinTrajectory);

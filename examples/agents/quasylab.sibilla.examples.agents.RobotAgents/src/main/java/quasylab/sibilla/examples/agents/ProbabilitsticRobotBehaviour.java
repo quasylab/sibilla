@@ -43,6 +43,10 @@ public class ProbabilitsticRobotBehaviour implements AgentBehaviour {
 			ArrayList<AgentAction> actions = new ArrayList<>();
 			if ((observations.get(FRONT_SENSOR) == 0)) {
 				actions.add(ChangeDirectionAction.UP);
+			} else {
+				if (observations.get(BACK_SENSOR) == 0) {
+					actions.add(ChangeDirectionAction.DOWN);
+				}
 			}
 			if (observations.get(LEFT_SENSOR) == 0) {
 				actions.add(ChangeDirectionAction.LEFT);
@@ -50,14 +54,9 @@ public class ProbabilitsticRobotBehaviour implements AgentBehaviour {
 			if (observations.get(RIGHT_SENSOR) == 0) {
 				actions.add(ChangeDirectionAction.RIGHT);
 			}
-			if (observations.get(BACK_SENSOR) == 0) {
-				actions.add(ChangeDirectionAction.DOWN);
-			}
 			if (!actions.isEmpty()) {
 				return actions.get(rg.nextInt(actions.size()));
 			}
-		} else {
-			System.err.println("GOAL!!!!");
 		}
 		return ChangeDirectionAction.STAND;
 	}

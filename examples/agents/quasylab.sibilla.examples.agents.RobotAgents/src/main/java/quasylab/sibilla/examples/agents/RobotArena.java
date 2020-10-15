@@ -91,8 +91,8 @@ public class RobotArena implements World {
 		LinkedList<Obstacle> obstacles = new LinkedList<>();
 		int count = 0;
 		while(count < numberOfObstacles) {
-			int x = rg.nextInt(width);
-			int y = rg.nextInt(height);
+			int x = 1+rg.nextInt(width-2);
+			int y = 1+rg.nextInt(height-2);
 			if (!grid[x][y]) {
 				obstacles.add(new Obstacle(x,y));
 				grid[x][y] = true;

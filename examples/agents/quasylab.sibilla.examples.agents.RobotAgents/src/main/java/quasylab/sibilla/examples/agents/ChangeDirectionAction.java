@@ -55,7 +55,6 @@ public class ChangeDirectionAction implements AgentAction {
 
     @Override
     public VariableMapping performAction(RandomGenerator rg, VariableMapping currentState) {
-        System.err.println(name);
         return currentState.set(new SetVariable("dx",dx), new SetVariable("dy",dy));
     }
 }

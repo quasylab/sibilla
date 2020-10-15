@@ -225,3 +225,6 @@ logs
 /benchmarks
 
 *.csv
+
+./data
+./data/*
