@@ -1,13 +1,13 @@
 package quasylab.sibilla.examples.benchmarks.seirmaster;
 
-import quasylab.sibilla.core.models.pm.PopulationState;
-import quasylab.sibilla.core.network.NetworkInfo;
-import quasylab.sibilla.core.network.benchmark.master.MasterBenchmarkEnvironment;
-import quasylab.sibilla.core.network.communication.TCPNetworkManager;
-import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
-import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
-import quasylab.sibilla.core.network.serialization.Serializer;
-import quasylab.sibilla.core.network.serialization.SerializerType;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
+import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
+import it.unicam.quasylab.sibilla.core.network.benchmark.master.MasterBenchmarkEnvironment;
+import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
+import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
+import it.unicam.quasylab.sibilla.core.network.serialization.Serializer;
+import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
 
 import java.io.IOException;
 import java.net.InetAddress;

@@ -27,16 +27,16 @@
 package quasylab.sibilla.examples.servers.client;
 
 import org.apache.commons.math3.random.AbstractRandomGenerator;
-import quasylab.sibilla.core.models.pm.PopulationModel;
-import quasylab.sibilla.core.network.HostLoggerSupplier;
-import quasylab.sibilla.core.network.NetworkInfo;
-import quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
-import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
-import quasylab.sibilla.core.network.serialization.SerializerType;
-import quasylab.sibilla.core.network.util.NetworkUtils;
-import quasylab.sibilla.core.network.util.SSLUtils;
-import quasylab.sibilla.core.network.util.StartupUtils;
-import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationModel;
+import it.unicam.quasylab.sibilla.core.network.HostLoggerSupplier;
+import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
+import it.unicam.quasylab.sibilla.core.network.client.ClientSimulationEnvironment;
+import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
+import it.unicam.quasylab.sibilla.core.network.util.NetworkUtils;
+import it.unicam.quasylab.sibilla.core.network.util.SSLUtils;
+import it.unicam.quasylab.sibilla.core.network.util.StartupUtils;
+import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 
 import java.io.Serializable;
 import java.net.InetAddress;

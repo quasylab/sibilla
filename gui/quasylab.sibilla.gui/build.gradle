@@ -31,7 +31,7 @@ plugins {
 }
 
 dependencies {
-    compile project(':core:quasylab.sibilla.core.simulator')
+    compile project(':core:simulator')
     compile project(':examples:populations:quasylab.sibilla.examples.pm.covid')
     compile group: 'com.jfoenix', name: 'jfoenix', version: '9.0.8'
 }

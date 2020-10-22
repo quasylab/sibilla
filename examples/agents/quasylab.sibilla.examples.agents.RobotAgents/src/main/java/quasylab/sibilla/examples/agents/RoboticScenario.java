@@ -24,9 +24,12 @@
 package quasylab.sibilla.examples.agents;
 
 
+import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.*;
+import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import it.unicam.quasylab.sibilla.core.simulator.SimulationTask;
+import it.unicam.quasylab.sibilla.core.simulator.SimulationUnit;
+import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.*;
-import quasylab.sibilla.core.simulator.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -111,7 +114,7 @@ public class RoboticScenario {
         pw.close();
     }
 
-    private  AgentModelBuilder<RobotArena> getDeterministicDefinition(RandomGenerator rg, int width, int height, int numberOfAgents, int numberOfObstacles) {
+    private AgentModelBuilder<RobotArena> getDeterministicDefinition(RandomGenerator rg, int width, int height, int numberOfAgents, int numberOfObstacles) {
         return new RoboticScenarioDefinition(
                 i -> new DeterministicRobotBehaviour(),
                 width,
@@ -138,7 +141,7 @@ public class RoboticScenario {
     private  Trajectory<SystemState<RobotArena>> getTrajectory(AgentModelBuilder<RobotArena> def, double deadline) {
         AgentModel<RobotArena> model = def.getAgentModel();
         SystemState<RobotArena> state = def.getState();
-        SimulationUnit<SystemState<RobotArena>> simulationUnit = new SimulationUnit<SystemState<RobotArena>>(model,state,(t,s) -> t>=deadline);
+        SimulationUnit<SystemState<RobotArena>> simulationUnit = new SimulationUnit<SystemState<RobotArena>>(model,state,(t, s) -> t>=deadline);
         SimulationTask<SystemState<RobotArena>> task = new SimulationTask<>(rg,simulationUnit);
         return task.get();
     }

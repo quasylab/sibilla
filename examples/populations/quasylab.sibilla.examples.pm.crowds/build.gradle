@@ -6,7 +6,7 @@ plugins {
 sourceCompatibility = '11'
 
 dependencies {
-  compile project(':core:quasylab.sibilla.core.simulator') 
+  compile project(':core:simulator')
 }
 
 mainClassName = 'quasylab.sibilla.examples.pm.crowds.Main'

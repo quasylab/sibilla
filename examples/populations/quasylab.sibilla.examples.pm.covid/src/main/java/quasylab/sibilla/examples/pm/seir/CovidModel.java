@@ -23,12 +23,10 @@
  */
 package quasylab.sibilla.examples.pm.seir;
 
-import quasylab.sibilla.core.models.pm.PopulationModel;
-import quasylab.sibilla.core.models.pm.PopulationState;
-import quasylab.sibilla.core.simulator.SimulationEnvironment;
-import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
-import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationModel;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
+import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 
 import java.io.FileNotFoundException;
 import java.net.UnknownHostException;

@@ -26,9 +26,9 @@
 
 package quasylab.sibilla.examples.servers.client;
 
-import quasylab.sibilla.core.models.pm.*;
-import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
-import quasylab.sibilla.core.simulator.sampling.Measure;
+import it.unicam.quasylab.sibilla.core.models.pm.*;
+import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 
 import java.util.LinkedList;
 import java.util.List;

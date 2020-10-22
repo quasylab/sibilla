@@ -27,15 +27,10 @@
 package quasylab.sibilla.examples.benchmarks.seirslave;
 
 
-import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.pm.*;
-import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
-import quasylab.sibilla.core.simulator.sampling.Measure;
-import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
-import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import quasylab.sibilla.core.simulator.sampling.StatisticSampling;
+import it.unicam.quasylab.sibilla.core.models.pm.*;
+import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 
-import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 

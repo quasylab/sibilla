@@ -24,10 +24,6 @@
 
 package quasylab.sibilla.examples.pm.seir;
 
-import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.ModelDefinition;
-import quasylab.sibilla.core.models.pm.*;
-
 public class CovidGDefinition { //mplements ModelDefinition<PopulationState> {
 
 //        public final static int S = 0;

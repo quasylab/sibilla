@@ -24,7 +24,7 @@
 
 package quasylab.sibilla.examples.pm.molecule;
 
-import quasylab.sibilla.core.simulator.SimulationEnvironment;
+import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 
 public class MainMolecules {
 

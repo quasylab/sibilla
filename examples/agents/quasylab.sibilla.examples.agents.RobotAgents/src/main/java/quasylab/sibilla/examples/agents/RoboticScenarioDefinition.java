@@ -23,8 +23,8 @@
 
 package quasylab.sibilla.examples.agents;
 
+import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.*;
 import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.*;
 
 import java.util.HashMap;
 import java.util.function.IntFunction;

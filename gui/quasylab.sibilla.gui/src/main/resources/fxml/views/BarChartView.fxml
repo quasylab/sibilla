@@ -5,7 +5,7 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" styleClass="anchorPaneCharts" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="quasylab.sibilla.gui.controllers.BarChartController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" styleClass="anchorPaneCharts" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unicam.quasylab.sibilla.gui.controllers.BarChartController">
    <BarChart fx:id="barchartView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
      <xAxis>
        <CategoryAxis fx:id="Xaxis" side="BOTTOM" />

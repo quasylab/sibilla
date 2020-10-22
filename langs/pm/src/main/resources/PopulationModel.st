@@ -7,7 +7,7 @@ Generated with Sibilla.
 
 package <package>;
 
-import quasylab.sibilla.core.models.Model;
+import Model;
 import quasylab.sibilla.core.models.pm.*;
 
 public class <className> extends PopulationModelDefinition {

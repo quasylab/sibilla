@@ -1,0 +1,37 @@
+apply plugin: 'maven-publish'
+apply plugin: 'java-library'
+
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+group = 'simulator'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':core:simulator')
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/quasylab/sibilla")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            groupId = "it.unicam.quasylab.sibilla.core"
+            artifactId = "runtime"
+            from(components.java)
+        }
+    }
+}

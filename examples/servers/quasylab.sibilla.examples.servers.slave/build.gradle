@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':core:quasylab.sibilla.core.network')
+    compile project(':core:network')
 }
 
 mainClassName = 'quasylab.sibilla.examples.servers.slave.SlaveApplication'

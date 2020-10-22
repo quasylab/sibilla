@@ -26,16 +26,16 @@
 
 package quasylab.sibilla.examples.servers.slave;
 
-import quasylab.sibilla.core.network.HostLoggerSupplier;
-import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
-import quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
-import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
-import quasylab.sibilla.core.network.serialization.SerializerType;
-import quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer;
-import quasylab.sibilla.core.network.slave.executor.SimulationExecutor;
-import quasylab.sibilla.core.network.util.NetworkUtils;
-import quasylab.sibilla.core.network.util.SSLUtils;
-import quasylab.sibilla.core.network.util.StartupUtils;
+import it.unicam.quasylab.sibilla.core.network.HostLoggerSupplier;
+import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import it.unicam.quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
+import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
+import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
+import it.unicam.quasylab.sibilla.core.network.slave.DiscoverableBasicSimulationServer;
+import it.unicam.quasylab.sibilla.core.network.slave.executor.SimulationExecutor;
+import it.unicam.quasylab.sibilla.core.network.util.NetworkUtils;
+import it.unicam.quasylab.sibilla.core.network.util.SSLUtils;
+import it.unicam.quasylab.sibilla.core.network.util.StartupUtils;
 
 import java.net.SocketException;
 import java.util.Map;

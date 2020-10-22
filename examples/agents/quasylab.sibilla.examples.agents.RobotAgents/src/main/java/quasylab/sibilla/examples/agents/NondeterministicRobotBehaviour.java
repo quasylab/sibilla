@@ -1,13 +1,10 @@
 
 package quasylab.sibilla.examples.agents;
 
+import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentAction;
+import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentBehaviour;
+import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.VariableMapping;
 import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.*;
-
-import java.util.HashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.IntStream;
 
 import static quasylab.sibilla.examples.agents.RoboticScenarioDefinition.*;
 

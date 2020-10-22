@@ -24,9 +24,9 @@
 
 package quasylab.sibilla.examples.pm.seir;
 
-import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.ModelDefinition;
-import quasylab.sibilla.core.models.pm.*;
+import it.unicam.quasylab.sibilla.core.models.Model;
+import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
+import it.unicam.quasylab.sibilla.core.models.pm.*;
 
 public class SIRModelDefinition implements ModelDefinition<PopulationState> {
 

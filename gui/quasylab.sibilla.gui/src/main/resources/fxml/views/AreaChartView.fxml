@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" styleClass="anchorPaneCharts" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="quasylab.sibilla.gui.controllers.AreaChartController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" styleClass="anchorPaneCharts" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unicam.quasylab.sibilla.gui.controllers.AreaChartController">
     <AreaChart fx:id="areaChartView" layoutX="92.0" layoutY="14.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <xAxis>
             <NumberAxis fx:id="Xaxis" side="BOTTOM" tickLabelFill="WHITE">

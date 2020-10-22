@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="200.0" prefWidth="250.0" stylesheets="@../css/style.css"  xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="quasylab.sibilla.gui.controllers.AdvanceSettingsController">
+<AnchorPane prefHeight="200.0" prefWidth="250.0" stylesheets="@../css/style.css"  xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unicam.quasylab.sibilla.gui.controllers.AdvanceSettingsController">
    <children>
       <JFXButton fx:id="stepToBtn" alignment="CENTER" contentDisplay="CENTER" layoutX="17.0" layoutY="30.0" onMouseClicked="#stepTo" prefHeight="40.0" prefWidth="120.0" styleClass="btnInput" text="STEP TO" textAlignment="CENTER" textFill="WHITE" wrapText="true">
          <font>

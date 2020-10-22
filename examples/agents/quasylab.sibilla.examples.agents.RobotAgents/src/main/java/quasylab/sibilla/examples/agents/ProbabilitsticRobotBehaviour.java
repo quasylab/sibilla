@@ -24,9 +24,9 @@
 package quasylab.sibilla.examples.agents;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentAction;
-import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentBehaviour;
-import quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.VariableMapping;
+import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentAction;
+import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentBehaviour;
+import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.VariableMapping;
 
 import java.util.ArrayList;
 
