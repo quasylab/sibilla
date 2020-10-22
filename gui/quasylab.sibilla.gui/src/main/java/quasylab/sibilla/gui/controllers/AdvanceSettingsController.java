@@ -12,7 +12,7 @@ import quasylab.sibilla.core.models.pm.PopulationState;
 
 public class AdvanceSettingsController  {
 
-    ExecutionEnvironment<PopulationState> ee;
+     private ExecutionEnvironment<PopulationState> ee;
 
 
     @FXML
@@ -48,7 +48,7 @@ public class AdvanceSettingsController  {
         if (stepN == 0){}
         int i=0;
         while (i<stepN){
-            this.ee.step();
+            this.ic.step(mouseEvent);
             i++;
         }
         this.ic.update();
@@ -62,7 +62,7 @@ public class AdvanceSettingsController  {
         if (previousN == 0){}
         int i=0;
         while (i<previousN){
-            this.ee.previous();
+            this.ic.previous(mouseEvent);
             i++;
         }
         this.ic.update();

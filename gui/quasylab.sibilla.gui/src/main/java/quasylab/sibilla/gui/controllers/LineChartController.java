@@ -1,50 +1,77 @@
 package quasylab.sibilla.gui.controllers;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import quasylab.sibilla.core.ExecutionEnvironment;
+import quasylab.sibilla.core.models.pm.PopulationState;
+
+import java.util.Map;
+import java.util.TreeMap;
 
 public class LineChartController {
 
-    @FXML public InteractiveController mainController;
+    @FXML public LineChart<Double, Double> linechartView;
+    @FXML public NumberAxis Xaxis;
+    @FXML public NumberAxis Yaxis;
+    private int counter;
 
-    @FXML public LineChart linechartView;
-    @FXML public NumberAxis linechartXaxis;
-    @FXML public NumberAxis linechartYaxis;
+    Map<String, ObservableList<XYChart.Data<Double, Double>>> myDataList;
+    Map<String, XYChart.Series<Double, Double>> measuresTable;
+    private ExecutionEnvironment<?> executionEnvironment;
 
     @FXML
-    public void init(InteractiveController interactiveController) {
-        mainController = interactiveController;
+    public void init(ExecutionEnvironment<?> executionEnvironment) {
+        Xaxis.setTickUnit(1);
+        Xaxis.setLabel("Time");
+        Yaxis.setTickUnit(1);
+        Yaxis.setLabel("Occurrences");
+        this.executionEnvironment = executionEnvironment;
+        this.myDataList = new TreeMap<>();
+        this.measuresTable = new TreeMap<>();
+        for( String measureName: executionEnvironment.measures()) {
+            ObservableList<XYChart.Data<Double,Double>> dataList = FXCollections.observableArrayList();
+            XYChart.Series<Double,Double> dataSerie = new XYChart.Series<>(dataList);
+            dataSerie.setName(measureName);
+            linechartView.getData().add(dataSerie);
+            myDataList.put(measureName,dataList);
+            measuresTable.put(measureName,dataSerie);
+        }
+        addData(executionEnvironment.currentTime(),executionEnvironment.lastMeasures());
+        counter = 0;
     }
 
-    XYChart.Series linechartSeries_index0 = new XYChart.Series();
-    XYChart.Series linechartSeries_index1 = new XYChart.Series();
-    XYChart.Series linechartSeries_index2 = new XYChart.Series();
-    XYChart.Series linechartSeries_index3 = new XYChart.Series();
-    XYChart.Series linechartSeries_index4 = new XYChart.Series();
-
-    public void lineChartView() {
-        linechartXaxis.setLabel("Steps");
-        linechartYaxis.setLabel("Occurrences");
-
-
-        linechartSeries_index0.setName("Suscettible");
-        linechartSeries_index1.setName("Asintomatic");
-        linechartSeries_index2.setName("Grave");
-        linechartSeries_index3.setName("Recovered");
-        linechartSeries_index4.setName("Death");
-
-        linechartSeries_index0.getData().add(new XYChart.Data<>(mainController.getExecutionEnvironment().steps(), mainController.getExecutionEnvironment().currentState().getOccupancy(0)));
-        linechartSeries_index1.getData().add(new XYChart.Data<>(mainController.getExecutionEnvironment().steps(), mainController.getExecutionEnvironment().currentState().getOccupancy(1)));
-        linechartSeries_index2.getData().add(new XYChart.Data<>(mainController.getExecutionEnvironment().steps(), mainController.getExecutionEnvironment().currentState().getOccupancy(2)));
-        linechartSeries_index3.getData().add(new XYChart.Data<>(mainController.getExecutionEnvironment().steps(), mainController.getExecutionEnvironment().currentState().getOccupancy(3)));
-        linechartSeries_index4.getData().add(new XYChart.Data<>(mainController.getExecutionEnvironment().steps(), mainController.getExecutionEnvironment().currentState().getOccupancy(4)));
-
-
-        linechartView.getData().addAll(linechartSeries_index0,linechartSeries_index1,
-                linechartSeries_index2,linechartSeries_index3,linechartSeries_index4);
+    private void addData(double currentTime, Map<String, Double> lastMeasures) {
+        for (Map.Entry<String, Double> entry: lastMeasures.entrySet()) {
+            ObservableList<XYChart.Data<Double, Double>> observableList = myDataList.get(entry.getKey());
+            if (observableList != null) {
+                observableList.add(new XYChart.Data<>(currentTime,entry.getValue()));
+            }
+        }
     }
+
+    public void step() {
+        addData(executionEnvironment.currentTime(), executionEnvironment.lastMeasures());
+        counter++;
+    }
+
+    public void back() {
+        if (counter > 0) {
+            for (Map.Entry<String, ObservableList<XYChart.Data<Double, Double>>> entry: myDataList.entrySet()) {
+                entry.getValue().remove(entry.getValue().size() - 1);
+            }
+            counter--;
+        }
+    }
+
+    public void restart(){
+        this.linechartView.getData().clear();
+        init(this.executionEnvironment);
+    }
+
 
 
 
