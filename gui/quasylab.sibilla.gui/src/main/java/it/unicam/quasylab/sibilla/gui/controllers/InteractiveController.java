@@ -144,7 +144,7 @@ public class InteractiveController {
         Node barchart = null;
         FXMLLoader loader4 = new FXMLLoader(getClass().getResource(("/fxml/views/BarChartView.fxml")));
         try {
-            loader4.load();
+             barchart = loader4.load();
             //barchart = FXMLLoader.load(getClass().getResource("/fxml/views/BarChartView.fxml"));
         } catch (IOException e) {
             System.out.println("StatusSectionController doesn't found fxml file");
