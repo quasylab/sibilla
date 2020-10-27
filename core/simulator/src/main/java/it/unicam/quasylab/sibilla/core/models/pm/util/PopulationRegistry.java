@@ -37,7 +37,7 @@ import java.util.function.Function;
  */
 public class PopulationRegistry implements Serializable {
 
-    private static final String FRACTION_OF_SPECIES_MEASURE_LABEL = "%%s";
+    private static final String FRACTION_OF_SPECIES_MEASURE_LABEL = "%%%s";
     private static final String NUMBER_OF_SPECIES_MEASURE_LABEL = "#%s";
     private int count;
 

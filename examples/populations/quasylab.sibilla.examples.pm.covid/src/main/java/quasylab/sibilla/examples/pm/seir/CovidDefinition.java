@@ -51,7 +51,6 @@ public class CovidDefinition extends PopulationModelDefinition {
     private final static double PROB_DEATH = 0.02;
 
 
-
     @Override
     protected PopulationRegistry generatePopulationRegistry() {
         return PopulationRegistry.createRegistry("S","A","G","R","D");
@@ -141,6 +140,8 @@ public class CovidDefinition extends PopulationModelDefinition {
     }
 
     public CovidDefinition() {
+        super();
+        setParameter("lambdaMeet",1.0);
     }
 
 

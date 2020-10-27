@@ -41,7 +41,7 @@ public class TableViewController {
 
     @FXML public TableView<Measure> tableView;
     @FXML public TableColumn<Measure, String> agentsCol;
-    @FXML public TableColumn<Measure, Integer> occurrencesCol;
+    @FXML public TableColumn<Measure, Double> occurrencesCol;
     private ExecutionEnvironment<?> executionEnvironment;
 
     @FXML
@@ -103,19 +103,20 @@ public class TableViewController {
         //In second column show the occurrences species.
         occurrencesCol.setCellValueFactory(param -> new ObservableValue<>() {
             @Override
-            public void addListener(ChangeListener<? super Integer> listener) {
+            public void addListener(ChangeListener<? super Double> listener) {
 
             }
 
             @Override
-            public void removeListener(ChangeListener<? super Integer> listener) {
+            public void removeListener(ChangeListener<? super Double> listener) {
 
             }
 
             @Override
-            public Integer getValue() {
-                double current = param.getValue().measure(executionEnvironment.currentState());
-                return (int) Math.round(current);
+            public Double getValue() {
+                //double current = param.getValue().measure(executionEnvironment.currentState());
+                //return (int) Math.round(current);
+                return param.getValue().measure(executionEnvironment.currentState());
             }
 
             @Override
