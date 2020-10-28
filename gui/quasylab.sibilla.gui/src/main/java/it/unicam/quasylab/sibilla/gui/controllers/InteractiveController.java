@@ -79,8 +79,6 @@ public class InteractiveController {
     }
 
 
-
-
     @FXML
     public void init() {
         tableViewController.init(this.ee);
@@ -88,8 +86,6 @@ public class InteractiveController {
         lineChartController.init(this.ee);
         barChartController.init(this.ee);
     }
-
-
 
 
     @FXML
@@ -155,7 +151,6 @@ public class InteractiveController {
 
 
 
-
     @FXML
     public void update(){
         this.timeunitsField.setText(String.valueOf(this.ee.currentTime()));
@@ -163,202 +158,6 @@ public class InteractiveController {
         this.tableViewController.tableView();
     }
 
-/*
-    @FXML
-    private void tableView() {
-        //Create my observable list according to considered model
-        ObservableList<Measure> observableList = FXCollections.observableArrayList();
-        for (String s: ee.getModel().measures()) {
-            observableList.add(ee.getModel().getMeasure(s));
-        }
-
-        //Create my observable list according SEIR model
-        ObservableList<Measure> occurrencesList2 = FXCollections.observableArrayList(
-                ee.getModel().getMeasure("S"),
-                ee.getModel().getMeasure("A"),
-                ee.getModel().getMeasure("G"),
-                ee.getModel().getMeasure("R"),
-                ee.getModel().getMeasure("D"));
-
-        tableView.setItems(observableList);
-        agentsCol = new TableColumn<>("AGENTS");
-        occurrencesCol = new TableColumn<>("OCCURENCES");
-
-        //In first column show the specie's names.
-        agentsCol.setCellValueFactory(param -> new ObservableValue<>() {
-            @Override
-            public void addListener(ChangeListener<? super String> listener) {
-
-            }
-
-            @Override
-            public void removeListener(ChangeListener<? super String> listener) {
-
-            }
-
-            @Override
-            public String getValue() {
-                // return a name of a single specie in currentState
-                return  param.getValue().getName();
-            }
-
-            @Override
-            public void addListener(InvalidationListener listener) {
-
-            }
-
-            @Override
-            public void removeListener(InvalidationListener listener) {
-
-            }
-        });
-
-        //In second column show the occurrences species.
-        occurrencesCol.setCellValueFactory(param -> new ObservableValue<>() {
-            @Override
-            public void addListener(ChangeListener<? super Integer> listener) {
-
-            }
-
-            @Override
-            public void removeListener(ChangeListener<? super Integer> listener) {
-
-            }
-
-            @Override
-            public Integer getValue() {
-                double current = param.getValue().measure(ee.currentState());
-                return (int) Math.round(current);
-            }
-
-            @Override
-            public void addListener(InvalidationListener listener) {
-
-            }
-
-            @Override
-            public void removeListener(InvalidationListener listener) {
-
-            }
-        });
-
-
-
-        tableView.getColumns().setAll(agentsCol, occurrencesCol);
-    }
-
- */
-/*
-
-    XYChart.Series index0 = new XYChart.Series();
-    XYChart.Series index1 = new XYChart.Series();
-    XYChart.Series index2 = new XYChart.Series();
-    XYChart.Series index3 = new XYChart.Series();
-    XYChart.Series index4 = new XYChart.Series();
-
-
-    @FXML
-    private void areaChartView() {
-        //if (ee.currentTime() == 0){
-        // X axis
-        //areachartXaxis.setAutoRanging(false);
-        //areachartXaxis.setLowerBound(0);
-        //areachartXaxis.setUpperBound(ee.steps());
-        areachartXaxis.setTickUnit(1);
-        areachartXaxis.setLabel("Steps");
-        // Y axis
-        //areachartYaxis.setAutoRanging(false);
-        //areachartYaxis.setLowerBound(0);
-        //areachartYaxis.setUpperBound(10000);
-        areachartYaxis.setTickUnit(1);
-        areachartYaxis.setLabel("Occurrences");
-
-        index0.setName("Suscettible");
-        index1.setName("Asintomatic");
-        index2.setName("Grave");
-        index3.setName("Recovered");
-        index4.setName("Death");
-
-
-        index0.getData().add(new XYChart.Data<>(ee.steps(), ee.currentState().getOccupancy(0)));
-        index1.getData().add(new XYChart.Data<>(ee.steps(), ee.currentState().getOccupancy(1)));
-        index2.getData().add(new XYChart.Data<>(ee.steps(), ee.currentState().getOccupancy(2)));
-        index3.getData().add(new XYChart.Data<>(ee.steps(), ee.currentState().getOccupancy(3)));
-        index4.getData().add(new XYChart.Data<>(ee.steps(), ee.currentState().getOccupancy(4)));
-
-        ObservableList<XYChart.Series<Integer, Double>> seriesList = FXCollections.observableArrayList();
-        seriesList.setAll(index0,index1,index2,index3,index4);
-        areachartView.setData(seriesList);
-        //areachartView.getData().addAll(index0,index1,index2,index3,index4);
-    }
-
- */
-
-
-
-
-/*
-
-
-    XYChart.Series linechartSeries_index0 = new XYChart.Series();
-    XYChart.Series linechartSeries_index1 = new XYChart.Series();
-    XYChart.Series linechartSeries_index2 = new XYChart.Series();
-    XYChart.Series linechartSeries_index3 = new XYChart.Series();
-    XYChart.Series linechartSeries_index4 = new XYChart.Series();
-
-    private void lineChartView() {
-        linechartXaxis.setLabel("Steps");
-        linechartYaxis.setLabel("Occurrences");
-
-
-        linechartSeries_index0.setName("Suscettible");
-        linechartSeries_index1.setName("Asintomatic");
-        linechartSeries_index2.setName("Grave");
-        linechartSeries_index3.setName("Recovered");
-        linechartSeries_index4.setName("Death");
-
-        linechartSeries_index0.getData().add(new XYChart.Data<>(ee.steps(), ee.currentState().getOccupancy(0)));
-        linechartSeries_index1.getData().add(new XYChart.Data<>(ee.steps(), ee.currentState().getOccupancy(1)));
-        linechartSeries_index2.getData().add(new XYChart.Data<>(ee.steps(), ee.currentState().getOccupancy(2)));
-        linechartSeries_index3.getData().add(new XYChart.Data<>(ee.steps(), ee.currentState().getOccupancy(3)));
-        linechartSeries_index4.getData().add(new XYChart.Data<>(ee.steps(), ee.currentState().getOccupancy(4)));
-
-
-        linechartView.getData().addAll(linechartSeries_index0,linechartSeries_index1,
-                linechartSeries_index2,linechartSeries_index3,linechartSeries_index4);
-    }
-
-
- */
-    /*
-
-    XYChart.Series barchartSeries_index0 = new XYChart.Series();
-    XYChart.Series barchartSeries_index1 = new XYChart.Series();
-    XYChart.Series barchartSeries_index2 = new XYChart.Series();
-    XYChart.Series barchartSeries_index3 = new XYChart.Series();
-    XYChart.Series barchartSeries_index4 = new XYChart.Series();
-
-    private void barChartView() {
-        barchartXaxis.setLabel("Steps");
-        barchartYaxis.setLabel("Occurrences");
-
-        barchartSeries_index0.setName("Suscettible");
-        barchartSeries_index1.setName("Asintomatic");
-        barchartSeries_index2.setName("Grave");
-        barchartSeries_index3.setName("Recovered");
-        barchartSeries_index4.setName("Death");
-
-        barchartSeries_index0.getData().add(new XYChart.Data<>("STEPS", ee.currentState().getOccupancy(0)));
-        barchartSeries_index1.getData().add(new XYChart.Data<>("STEPS", ee.currentState().getOccupancy(1)));
-        barchartSeries_index2.getData().add(new XYChart.Data<>("STEPS", ee.currentState().getOccupancy(2)));
-        barchartSeries_index3.getData().add(new XYChart.Data<>("STEPS", ee.currentState().getOccupancy(3)));
-        barchartSeries_index4.getData().add(new XYChart.Data<>("STEPS", ee.currentState().getOccupancy(4)));
-
-        barchartView.getData().addAll(barchartSeries_index0,barchartSeries_index1,barchartSeries_index2,barchartSeries_index3,barchartSeries_index4);
-
-    }
-
-     */
 
     @FXML
     public void step(MouseEvent mouseEvent) {
@@ -381,7 +180,7 @@ public class InteractiveController {
     }
 
     @FXML
-    private void restart(MouseEvent mouseEvent) {
+    public void restart(MouseEvent mouseEvent) {
         if (execute(restartBtn.getId(), ee)) {
             areaChartController.restart();
             lineChartController.restart();

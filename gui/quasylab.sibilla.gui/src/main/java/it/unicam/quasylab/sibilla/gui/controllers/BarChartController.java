@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.gui.controllers;
 
+import it.unicam.quasylab.sibilla.gui.logarithmicView.LogarithmicNumberAxis;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -43,7 +44,7 @@ public class BarChartController {
     @FXML
     private CategoryAxis Xaxis;
     @FXML
-    private NumberAxis Yaxis;
+    private LogarithmicNumberAxis Yaxis;
     @FXML
     public BarChart<String, Double> barchartView;
 
@@ -57,7 +58,6 @@ public class BarChartController {
     public void init(ExecutionEnvironment<?> executionEnvironment) {
         //Xaxis.setTickUnit(1);
         Xaxis.setLabel("Time");
-        Yaxis.setTickUnit(1);
         Yaxis.setLabel("Occurrences");
         this.executionEnvironment = executionEnvironment;
         this.myDataList = new TreeMap<>();
