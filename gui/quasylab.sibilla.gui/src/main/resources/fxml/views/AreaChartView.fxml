@@ -5,8 +5,9 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" styleClass="anchorPaneCharts" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unicam.quasylab.sibilla.gui.controllers.AreaChartController">
-    <AreaChart fx:id="areaChartView" layoutX="92.0" layoutY="14.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<?import it.unicam.quasylab.sibilla.gui.logarithmicView.LogarithmicNumberAxis?>
+<AnchorPane prefHeight="400.0" prefWidth="600.0" styleClass="chart" stylesheets="@../../css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unicam.quasylab.sibilla.gui.controllers.AreaChartController">
+    <AreaChart fx:id="areaChartView" horizontalZeroLineVisible="false" layoutX="92.0" layoutY="14.0" stylesheets="@../../css/style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <xAxis>
             <NumberAxis fx:id="Xaxis" side="BOTTOM" tickLabelFill="WHITE">
                 <tickLabelFont>
@@ -14,10 +15,10 @@
                 </tickLabelFont></NumberAxis>
         </xAxis>
         <yAxis>
-            <NumberAxis fx:id="Yaxis" side="LEFT" tickLabelFill="WHITE">
+            <LogarithmicNumberAxis fx:id="Yaxis" side="LEFT" tickLabelFill="WHITE">
                 <tickLabelFont>
-                    <Font name="System Bold" size="12.0" />
-                </tickLabelFont></NumberAxis>
+                    <Font name="System Bold" size="11.0" />
+                </tickLabelFont></LogarithmicNumberAxis>
         </yAxis>
     </AreaChart>
 </AnchorPane>

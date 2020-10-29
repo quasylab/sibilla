@@ -46,8 +46,15 @@
     -fx-cursor:hand;
 }
 
-.anchorPaneCharts{
-    -fx-background-color: #adb5bd;
+
+.chart {
+    -fx-background-color: #6c757d;
+    -fx-font-family: "SansSerif";
+    -fx-text-fill: white;
+}
+
+.chart-plot-background {
+    -fx-background-color:transparent;
 }
 
 .btnInput{

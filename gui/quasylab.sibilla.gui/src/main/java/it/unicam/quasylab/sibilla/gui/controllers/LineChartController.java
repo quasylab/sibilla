@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.gui.controllers;
 
+import it.unicam.quasylab.sibilla.gui.logarithmicView.LogarithmicNumberAxis;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -39,7 +40,7 @@ public class LineChartController {
 
     @FXML public LineChart<Double, Double> linechartView;
     @FXML public NumberAxis Xaxis;
-    @FXML public NumberAxis Yaxis;
+    @FXML public LogarithmicNumberAxis Yaxis;
     private int counter;
 
     Map<String, ObservableList<XYChart.Data<Double, Double>>> myDataList;
@@ -50,7 +51,7 @@ public class LineChartController {
     public void init(ExecutionEnvironment<?> executionEnvironment) {
         Xaxis.setTickUnit(1);
         Xaxis.setLabel("Time");
-        Yaxis.setTickUnit(1);
+        //Yaxis.setTickUnit(1);
         Yaxis.setLabel("Occurrences");
         this.executionEnvironment = executionEnvironment;
         this.myDataList = new TreeMap<>();

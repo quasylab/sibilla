@@ -35,20 +35,16 @@ import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 
 public class AdvanceSettingsController  {
 
-     private ExecutionEnvironment<PopulationState> ee;
+
+    private ExecutionEnvironment<PopulationState> ee;
 
 
-    @FXML
-    InteractiveController ic;
+     private InteractiveController ic;
 
-    @FXML
-    JFXButton stepToBtn;
-    @FXML
-    JFXButton previousToBtn;
-    @FXML
-    TextField stepToNumber;
-    @FXML
-    TextField previousToNumber;
+    @FXML public JFXButton stepToBtn;
+    @FXML public TextField stepToNumber;
+    @FXML public JFXButton timeToBtn;
+    @FXML public TextField timeToNumber;
 
 
     @FXML
@@ -59,37 +55,63 @@ public class AdvanceSettingsController  {
         this.ee = ee;
     }
 
-    @FXML
+
     public void setRootController(InteractiveController ic) {
         this.ic = ic;
     }
 
-    @FXML
-    public void stepTo(MouseEvent mouseEvent) {
+
+    public void stepTo(MouseEvent me) {
         if (stepToNumber.getText().equals(""))
             showAlert();
-        int stepN = Integer.parseInt(stepToNumber.getText());
-        if (stepN == 0){}
-        int i=0;
-        while (i<stepN){
-            this.ic.step(mouseEvent);
-            i++;
+        double stepToN = Double.parseDouble((stepToNumber.getText()));
+        //Reset simulation steps
+        if (stepToN == 0){
+            this.ic.restart(me);
+            this.ic.update();
         }
-        this.ic.update();
+        //Advance with simulation steps
+        if (ee.steps() < stepToN){
+            while (ee.steps() < stepToN){
+                this.ic.step(me);
+            }
+            this.ic.update();
+        }
+        //Go back with simulation steps
+        if (ee.steps() > stepToN){
+            while (ee.steps() > stepToN){
+                this.ic.previous(me);
+            }
+            this.ic.update();
+        }
     }
 
-    @FXML
-    public void previousTo (MouseEvent mouseEvent){
-        if (previousToNumber.getText().equals(""))
+
+
+    public void timeTo(MouseEvent me){
+        if (timeToNumber.getText().equals(""))
             showAlert();
-        int previousN = Integer.parseInt(previousToNumber.getText());
-        if (previousN == 0){}
-        int i=0;
-        while (i<previousN){
-            this.ic.previous(mouseEvent);
-            i++;
+        double timeToN = Double.parseDouble((timeToNumber.getText()));
+        //Reset simulation time
+        if (timeToN == 0){
+            this.ic.restart(me);
+            this.ic.update();
         }
-        this.ic.update();
+        //Advance with simulation time
+        if (ee.currentTime() < timeToN){
+            while (ee.currentTime() <= timeToN){
+                this.ic.step(me);
+            }
+            this.ic.update();
+        }
+        //Go back with simulation time
+        if (ee.currentTime() > timeToN){
+            while (ee.currentTime() >= timeToN){
+                this.ic.previous(me);
+            }
+            this.ic.update();
+        }
+
     }
 
     @FXML
@@ -100,11 +122,6 @@ public class AdvanceSettingsController  {
         alert.setTitle("Information");
         alert.setHeaderText(null);
         alert.show();
-    }
-
-    @FXML
-    private void checkEvent(MouseEvent me, MouseButton mb){
-        if (me.getSource().equals(mb));
     }
 
 

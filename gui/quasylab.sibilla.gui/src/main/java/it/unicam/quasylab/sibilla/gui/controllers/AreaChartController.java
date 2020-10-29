@@ -23,13 +23,19 @@
 
 package it.unicam.quasylab.sibilla.gui.controllers;
 
+
+import com.sun.javafx.charts.Legend;
+import it.unicam.quasylab.sibilla.gui.logarithmicView.LogarithmicNumberAxis;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import it.unicam.quasylab.sibilla.core.ExecutionEnvironment;
+import javafx.scene.input.MouseButton;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -39,7 +45,7 @@ public class AreaChartController {
     @FXML
     private NumberAxis Xaxis;
     @FXML
-    private NumberAxis Yaxis;
+    private LogarithmicNumberAxis Yaxis;
     @FXML
     private AreaChart<Double, Double> areaChartView;
 
@@ -53,7 +59,6 @@ public class AreaChartController {
     public void init(ExecutionEnvironment<?> executionEnvironment) {
         Xaxis.setTickUnit(1);
         Xaxis.setLabel("Time");
-        Yaxis.setTickUnit(1);
         Yaxis.setLabel("Occurrences");
         this.executionEnvironment = executionEnvironment;
         this.myDataList = new TreeMap<>();
@@ -68,6 +73,7 @@ public class AreaChartController {
         }
         addData(executionEnvironment.currentTime(),executionEnvironment.lastMeasures());
         counter = 0;
+        filteredView();
     }
 
     private void addData(double currentTime, Map<String, Double> lastMeasures) {
@@ -82,6 +88,7 @@ public class AreaChartController {
     public void step() {
         addData(executionEnvironment.currentTime(), executionEnvironment.lastMeasures());
         counter++;
+        filteredView();
     }
 
     public void back() {
@@ -91,6 +98,7 @@ public class AreaChartController {
             }
             counter--;
         }
+        filteredView();
     }
 
     public void restart(){
@@ -98,98 +106,30 @@ public class AreaChartController {
         init(this.executionEnvironment);
     }
 
-
-//    //Devo creare tot liste di oggetti di tipo "Data" quante sono le mie occorrenze nel modello
-//    public ObservableList<XYChart.Data<Double, Double>> doDataList(int n){
-//        myDataList.addListener(new ListChangeListener<XYChart.Data<Double, Double>>() {
-//            @Override
-//            public void onChanged(Change<? extends XYChart.Data<Double, Double>> c) {
-//
-//
-//            }
-//        });
-//
-//        return null;
-//    }
-//
-//
-//    //Creo tot serie quante sono le specie del mio modello
-//    public ObservableList<XYChart.Series<Double, Double>> doSeriesList(){
-//        if (getEe().getModel().measures().length != 0){
-//            for (String s: getEe().getModel().measures()) {
-//                XYChart.Series<Double, Double> current = new XYChart.Series<>();
-//                mySeriesList.add(current);
-//            }
-//        }
-//        return  mySeriesList;
-//    }
-//
-//    //
-//    public void doHashmap(XYChart.Series<Double, Double> serie){
-//        for (int i = 0; i < getEe().getModel().measures().length; i++){
-//            measuresTable.put(getEe().getModel().measures()[i] , serie);
-//        }
-//        System.out.println(measuresTable);
-//        System.out.println(getEe().getModel().measure("#S", getEe().currentState()));
-//    }
-//
-//
-//    @FXML
-//    public void areaChartView() {
-//        updateSeries(mySeriesList);
-//
-//
-//        this.areaChartView.setData(mySeriesList);
-//    }
-//
-//    private void updateSeries(ObservableList<XYChart.Series<Double, Double>> seriesList) {
-//            for (XYChart.Series<Double, Double> s : seriesList) {
-//                s.getData().add(new XYChart.Data<>(getEe().currentTime(), getEe().getModel().measure(s.getName(), getEe().currentState())));
-//                s.getData().remove(s.getData().size() - 1);
-//        }
-//    }
-//
-//    private void setSeriesNames(ObservableList<XYChart.Series<Double, Double>> seriesList) {
-//        int i = 0;
-//        String[] measuresModel = getEe().getModel().measures();
-//        for (XYChart.Series<Double, Double> s: seriesList) {
-//            s.setName(measuresModel[i]);
-//            i++;
-//        }
-//    }
-//    /*
-//
-//    @FXML
-//    public void areaChartView() {
-//        ObservableList<XYChart.Series<Double, Double>> seriesList = FXCollections.observableArrayList();
-//        Xaxis.setTickUnit(1);
-//        Xaxis.setLabel("Steps");
-//
-//        Yaxis.setTickUnit(1);
-//        Yaxis.setLabel("Occurrences");
-//
-//        index0.setName("Suscettible");
-//        index1.setName("Asintomatic");
-//        index2.setName("Grave");
-//        index3.setName("Recovered");
-//        index4.setName("Death");
-//
-//        index0.getData().add(new XYChart.Data<>(mainController.getExecutionEnvironment().steps(), mainController.getExecutionEnvironment().currentState().getOccupancy(0)));
-//        index1.getData().add(new XYChart.Data<>(mainController.getExecutionEnvironment().steps(), mainController.getExecutionEnvironment().currentState().getOccupancy(1)));
-//        index2.getData().add(new XYChart.Data<>(mainController.getExecutionEnvironment().steps(), mainController.getExecutionEnvironment().currentState().getOccupancy(2)));
-//        index3.getData().add(new XYChart.Data<>(mainController.getExecutionEnvironment().steps(), mainController.getExecutionEnvironment().currentState().getOccupancy(3)));
-//        index4.getData().add(new XYChart.Data<>(mainController.getExecutionEnvironment().steps(), mainController.getExecutionEnvironment().currentState().getOccupancy(4)));
-//
-//        seriesList.setAll(index0,index1,index2,index3,index4);
-//        this.areaChartView.setData(seriesList);
-//    }
-//
-//     */
-//
-//    private ExecutionEnvironment<PopulationState> getEe(){
-//        return mainController.getExecutionEnvironment();
-//    }
-//
-
+    public void filteredView(){
+        for (Node n : areaChartView.getChildrenUnmodifiable()) {
+            if (n instanceof Legend) {
+                Legend l = (Legend) n;
+                for (Legend.LegendItem li : l.getItems()) {
+                    for (XYChart.Series<Double, Double> s : areaChartView.getData()) {
+                        if (s.getName().equals(li.getText())) {
+                            li.getSymbol().setCursor(Cursor.HAND); // Hint user that legend symbol is clickable
+                            li.getSymbol().setOnMouseClicked(me -> {
+                                if (me.getButton() == MouseButton.PRIMARY) {
+                                    s.getNode().setVisible(!s.getNode().isVisible()); // Toggle visibility of line
+                                    for (XYChart.Data<Double, Double> d : s.getData()) {
+                                        if (d.getNode() != null) {
+                                            d.getNode().setVisible(s.getNode().isVisible()); // Toggle visibility of every node in the series
+                                        }
+                                    }
+                                }
+                            });
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 }
