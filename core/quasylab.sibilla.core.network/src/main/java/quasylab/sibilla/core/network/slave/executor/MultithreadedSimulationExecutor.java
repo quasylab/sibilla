@@ -40,12 +40,6 @@ public class MultithreadedSimulationExecutor extends SimulationExecutor {
             for (SimulationTask<?> task : tasks) {
                 Trajectory trajectory = task.getTrajectory();
                 trajectories.add(trajectory);
-                try {
-                    BytearrayToFile.toFile(TrajectorySerializer.serialize(trajectory, model), ".", "seirTraj");
-                    System.out.println("Su file traiettoria con samples " + trajectory.getData().size());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
             return List.of((double) tasks.size());
         });
