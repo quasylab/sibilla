@@ -26,7 +26,6 @@
 
 package quasylab.sibilla.examples.servers.client;
 
-import org.apache.commons.math3.random.AbstractRandomGenerator;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModel;
 import it.unicam.quasylab.sibilla.core.network.HostLoggerSupplier;
 import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
@@ -37,6 +36,7 @@ import it.unicam.quasylab.sibilla.core.network.util.NetworkUtils;
 import it.unicam.quasylab.sibilla.core.network.util.SSLUtils;
 import it.unicam.quasylab.sibilla.core.network.util.StartupUtils;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import org.apache.commons.math3.random.AbstractRandomGenerator;
 
 import java.io.Serializable;
 import java.net.InetAddress;

@@ -23,11 +23,11 @@
 
 package it.unicam.quasylab.sibilla.core.network.slave.executor;
 
-import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
-import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.network.ComputationResult;
 import it.unicam.quasylab.sibilla.core.network.NetworkTask;
+import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
+import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationTask;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 
@@ -44,7 +44,6 @@ public class SingleTrajectorySequentialSimulationExecutor extends SimulationExec
         List<? extends SimulationTask<?>> tasks = networkTask.getTasks();
         Model model = tasks.get(0).getUnit().getModel();
 
-        /*
         LinkedList<Trajectory> trajectories = new LinkedList<>();
 
         this.computationBenchmark.run(() -> {
@@ -58,12 +57,13 @@ public class SingleTrajectorySequentialSimulationExecutor extends SimulationExec
         for (Trajectory singleTrajectory : trajectories) {
             sendResult(new ComputationResult(new LinkedList<>(List.of(singleTrajectory))), master, model);
         }
-         */
 
+        /*
         for (int i = 0; i < tasks.size(); i++) {
             Trajectory trajectory = tasks.get(i).get();
             sendResult(new ComputationResult(new LinkedList<>(List.of(trajectory))), master, model);
         }
+         */
 
     }
 }

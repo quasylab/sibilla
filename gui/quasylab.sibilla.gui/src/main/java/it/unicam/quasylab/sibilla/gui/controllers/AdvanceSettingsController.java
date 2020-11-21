@@ -24,14 +24,13 @@
 package it.unicam.quasylab.sibilla.gui.controllers;
 
 import com.jfoenix.controls.JFXButton;
+import it.unicam.quasylab.sibilla.core.ExecutionEnvironment;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import it.unicam.quasylab.sibilla.core.ExecutionEnvironment;
-import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 
 public class AdvanceSettingsController  {
 

@@ -1,6 +1,5 @@
 package quasylab.sibilla.examples.benchmarks.slave;
 
-import quasylab.sibilla.core.models.State;
 import quasylab.sibilla.core.models.pm.PopulationModel;
 import quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import quasylab.sibilla.core.models.pm.PopulationState;
@@ -14,7 +13,6 @@ import quasylab.sibilla.core.network.util.BytearrayToFile;
 import quasylab.sibilla.core.simulator.Trajectory;
 import quasylab.sibilla.core.simulator.sampling.Sample;
 import quasylab.sibilla.examples.pm.crowds.ChordModel;
-import quasylab.sibilla.examples.pm.seir.SEIRModelDefinition;
 
 import java.io.IOException;
 import java.util.LinkedList;

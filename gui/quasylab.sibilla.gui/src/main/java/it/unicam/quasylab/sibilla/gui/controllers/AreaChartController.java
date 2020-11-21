@@ -25,6 +25,7 @@ package it.unicam.quasylab.sibilla.gui.controllers;
 
 
 import com.sun.javafx.charts.Legend;
+import it.unicam.quasylab.sibilla.core.ExecutionEnvironment;
 import it.unicam.quasylab.sibilla.gui.logarithmicView.LogarithmicNumberAxis;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -34,7 +35,6 @@ import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import it.unicam.quasylab.sibilla.core.ExecutionEnvironment;
 import javafx.scene.input.MouseButton;
 
 import java.util.Map;

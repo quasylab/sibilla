@@ -23,15 +23,16 @@
 
 package it.unicam.quasylab.sibilla.core.network.slave.executor;
 
+import it.unicam.quasylab.sibilla.core.models.Model;
+import it.unicam.quasylab.sibilla.core.network.ComputationResult;
+import it.unicam.quasylab.sibilla.core.network.NetworkTask;
 import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import it.unicam.quasylab.sibilla.core.network.compression.Compressor;
+import it.unicam.quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
 import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializer;
 import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import it.unicam.quasylab.sibilla.core.network.serialization.Serializer;
 import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
-import it.unicam.quasylab.sibilla.core.models.Model;
-import it.unicam.quasylab.sibilla.core.network.ComputationResult;
-import it.unicam.quasylab.sibilla.core.network.NetworkTask;
 
 import java.io.IOException;
 import java.util.List;
@@ -82,7 +83,7 @@ public abstract class SimulationExecutor {
      * @return the created SimulationExecutor
      */
     public static SimulationExecutor getExecutor(ExecutorType exType,
-            ComputationResultSerializerType crSerializerType) {
+                                                 ComputationResultSerializerType crSerializerType) {
         switch (exType) {
             case MULTITHREADED:
                 return new MultithreadedSimulationExecutor(exType, crSerializerType);

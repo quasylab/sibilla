@@ -1,10 +1,6 @@
 package it.unicam.quasylab.sibilla.gui.logarithmicView;
 
 import com.sun.javafx.charts.ChartLayoutAnimator;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.beans.binding.DoubleBinding;
@@ -12,6 +8,11 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.chart.ValueAxis;
 import javafx.util.Duration;
+
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 //http://blog.dooapp.com/logarithmic-scale-strikes-back-in-javafx-20
 //Edited for this project.

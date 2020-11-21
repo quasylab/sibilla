@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import it.unicam.quasylab.sibilla.gui.logarithmicView.LogarithmicNumberAxis?>
 <?import javafx.scene.chart.AreaChart?>
 <?import javafx.scene.chart.NumberAxis?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-
-<?import it.unicam.quasylab.sibilla.gui.logarithmicView.LogarithmicNumberAxis?>
 <AnchorPane prefHeight="400.0" prefWidth="600.0" styleClass="chart" stylesheets="@../../css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unicam.quasylab.sibilla.gui.controllers.AreaChartController">
     <AreaChart fx:id="areaChartView" horizontalZeroLineVisible="false" layoutX="92.0" layoutY="14.0" stylesheets="@../../css/style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <xAxis>

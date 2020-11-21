@@ -1,21 +1,21 @@
-package quasylab.sibilla.core.network.benchmark.computation;
+package it.unicam.quasylab.sibilla.core.network.benchmark.computation;
 
-import quasylab.sibilla.core.models.ModelDefinition;
-import quasylab.sibilla.core.models.State;
-import quasylab.sibilla.core.network.HostLoggerSupplier;
-import quasylab.sibilla.core.network.NetworkTask;
-import quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
-import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
-import quasylab.sibilla.core.simulator.SimulationTask;
-import quasylab.sibilla.core.simulator.SimulationUnit;
-import quasylab.sibilla.core.simulator.sampling.SamplePredicate;
+import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
+import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
+import it.unicam.quasylab.sibilla.core.network.NetworkTask;
+import it.unicam.quasylab.sibilla.core.network.HostLoggerSupplier;
+import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import it.unicam.quasylab.sibilla.core.simulator.SimulationTask;
+import it.unicam.quasylab.sibilla.core.simulator.SimulationUnit;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-public abstract class ComputationBenchmarkEnvironment<S extends State> {
+public abstract class ComputationBenchmarkEnvironment<S extends it.unicam.quasylab.sibilla.core.models.State> {
     private static final double DEADLINE = 600;
     protected Type type;
     protected BenchmarkUnit mainBenchmarkUnit;

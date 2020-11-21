@@ -23,11 +23,14 @@
 
 package it.unicam.quasylab.sibilla.core.simulator;
 
+import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Sample;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import it.unicam.quasylab.sibilla.core.models.State;
 
-import java.io.*;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.LinkedList;
 import java.util.List;
 

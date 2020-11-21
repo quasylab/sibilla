@@ -26,10 +26,6 @@
 
 package quasylab.sibilla.examples.servers.master;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import it.unicam.quasylab.sibilla.core.network.HostLoggerSupplier;
 import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import it.unicam.quasylab.sibilla.core.network.communication.UDPNetworkManagerType;
@@ -39,6 +35,10 @@ import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
 import it.unicam.quasylab.sibilla.core.network.util.NetworkUtils;
 import it.unicam.quasylab.sibilla.core.network.util.SSLUtils;
 import it.unicam.quasylab.sibilla.core.network.util.StartupUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.net.SocketException;
 import java.util.Map;

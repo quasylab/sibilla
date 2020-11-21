@@ -23,18 +23,18 @@
 
 package it.unicam.quasylab.sibilla.core.network.benchmark.slave;
 
-import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
-import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
-import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
-import it.unicam.quasylab.sibilla.core.network.serialization.Serializer;
-import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
-import it.unicam.quasylab.sibilla.core.network.serialization.TrajectorySerializer;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.network.ComputationResult;
 import it.unicam.quasylab.sibilla.core.network.HostLoggerSupplier;
 import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
 import it.unicam.quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
+import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
+import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
+import it.unicam.quasylab.sibilla.core.network.serialization.Serializer;
+import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
+import it.unicam.quasylab.sibilla.core.network.serialization.TrajectorySerializer;
 import it.unicam.quasylab.sibilla.core.network.util.BytearrayToFile;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 

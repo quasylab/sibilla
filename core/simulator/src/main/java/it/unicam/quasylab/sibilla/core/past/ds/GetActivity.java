@@ -22,8 +22,8 @@
  */
 package it.unicam.quasylab.sibilla.core.past.ds;
 
-import org.apache.commons.math3.random.RandomGenerator;
 import it.unicam.quasylab.sibilla.core.past.Activity;
+import org.apache.commons.math3.random.RandomGenerator;
 
 /**
  * @author loreti

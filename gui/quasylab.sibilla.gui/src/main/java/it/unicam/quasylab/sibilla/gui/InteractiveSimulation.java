@@ -23,6 +23,9 @@
 
 package it.unicam.quasylab.sibilla.gui;
 
+import it.unicam.quasylab.sibilla.core.ExecutionEnvironment;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
+import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.gui.controllers.InteractiveController;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -33,11 +36,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-
-import it.unicam.quasylab.sibilla.core.ExecutionEnvironment;
-import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
-import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
-
 import quasylab.sibilla.examples.pm.seir.CovidDefinition;
 
 import java.io.IOException;

@@ -23,17 +23,14 @@
 
 package it.unicam.quasylab.sibilla.gui.controllers;
 
+import it.unicam.quasylab.sibilla.core.ExecutionEnvironment;
 import it.unicam.quasylab.sibilla.gui.logarithmicView.LogarithmicNumberAxis;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
-
 import javafx.scene.chart.CategoryAxis;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import it.unicam.quasylab.sibilla.core.ExecutionEnvironment;
-
 
 import java.util.Map;
 import java.util.TreeMap;

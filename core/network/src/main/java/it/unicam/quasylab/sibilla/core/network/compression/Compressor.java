@@ -21,7 +21,6 @@
  *  limitations under the License.
  */
 
-
 package it.unicam.quasylab.sibilla.core.network.compression;
 
 import java.io.ByteArrayInputStream;

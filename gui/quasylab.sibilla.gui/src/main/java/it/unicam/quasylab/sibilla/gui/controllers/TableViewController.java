@@ -23,15 +23,16 @@
 
 package it.unicam.quasylab.sibilla.gui.controllers;
 
+import it.unicam.quasylab.sibilla.core.ExecutionEnvironment;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import it.unicam.quasylab.sibilla.core.ExecutionEnvironment;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 
 
 public class TableViewController {

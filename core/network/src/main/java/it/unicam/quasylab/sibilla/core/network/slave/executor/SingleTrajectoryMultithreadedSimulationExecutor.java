@@ -23,11 +23,11 @@
 
 package it.unicam.quasylab.sibilla.core.network.slave.executor;
 
-import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
-import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.network.ComputationResult;
 import it.unicam.quasylab.sibilla.core.network.NetworkTask;
+import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
+import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationTask;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 

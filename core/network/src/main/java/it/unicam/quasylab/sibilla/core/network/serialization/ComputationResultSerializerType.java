@@ -36,7 +36,7 @@ public enum ComputationResultSerializerType {
         return fullName;
     }
 
-    private ComputationResultSerializerType(String label, String fullName) {
+    ComputationResultSerializerType(String label, String fullName) {
         this.fullName = fullName;
         this.label = label;
     }

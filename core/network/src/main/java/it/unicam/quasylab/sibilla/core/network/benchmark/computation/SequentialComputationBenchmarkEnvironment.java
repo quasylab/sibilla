@@ -1,9 +1,10 @@
-package quasylab.sibilla.core.network.benchmark.computation;
+package it.unicam.quasylab.sibilla.core.network.benchmark.computation;
 
-import quasylab.sibilla.core.models.ModelDefinition;
-import quasylab.sibilla.core.models.State;
-import quasylab.sibilla.core.network.NetworkTask;
-import quasylab.sibilla.core.simulator.SimulationTask;
+
+import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
+import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.simulator.SimulationTask;
+import it.unicam.quasylab.sibilla.core.network.NetworkTask;
 
 import java.util.List;
 
