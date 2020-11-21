@@ -20,9 +20,9 @@ public class MasterBenchmark {
     public static void main(String[] args) throws IOException {
         Serializer fstSerializer = Serializer.getSerializer(SerializerType.FST);
 
-        ComputationResultSerializerType type = ComputationResultSerializerType.CUSTOM;
+        ComputationResultSerializerType type = ComputationResultSerializerType.APACHE;
 
-        NetworkInfo slaveInfo = new NetworkInfo(InetAddress.getByName("localhost"), 10000,
+        NetworkInfo slaveInfo = new NetworkInfo(InetAddress.getByName("192.168.42.202"), 10000,
                 TCPNetworkManagerType.DEFAULT);
         TCPNetworkManager networkManager = TCPNetworkManager.createNetworkManager(slaveInfo);
 
@@ -35,7 +35,7 @@ public class MasterBenchmark {
 
         MasterBenchmarkEnvironment<PopulationState> env = MasterBenchmarkEnvironment.getMasterBenchmark(
                 networkManager, benchmarkName, type, model,
-                50, 2000, 1, 2000);
+                50, 2000, 10, 2000);
 
         env.run();
     }

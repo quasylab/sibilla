@@ -28,10 +28,7 @@ package quasylab.sibilla.core.simulator.sampling;
 
 import quasylab.sibilla.core.models.State;
 
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+import java.io.*;
 
 /**
  * @author loreti
