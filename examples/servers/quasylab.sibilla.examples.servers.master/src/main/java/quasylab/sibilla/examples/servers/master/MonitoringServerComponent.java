@@ -28,7 +28,7 @@ package quasylab.sibilla.examples.servers.master;
 
 
 import org.springframework.stereotype.Component;
-import quasylab.sibilla.core.network.master.MasterState;
+import it.unicam.quasylab.sibilla.core.network.master.MasterState;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

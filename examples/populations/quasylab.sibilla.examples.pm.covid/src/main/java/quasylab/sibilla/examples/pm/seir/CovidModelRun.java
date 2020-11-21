@@ -23,9 +23,9 @@
  */
 package quasylab.sibilla.examples.pm.seir;
 
-import quasylab.sibilla.core.ExecutionEnvironment;
-import quasylab.sibilla.core.models.pm.PopulationState;
-import quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import it.unicam.quasylab.sibilla.core.ExecutionEnvironment;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
+import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 
 import java.io.BufferedReader;
 import java.io.IOException;

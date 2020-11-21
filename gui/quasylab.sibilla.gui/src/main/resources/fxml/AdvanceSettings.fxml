@@ -1,31 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="200.0" prefWidth="250.0" stylesheets="@../css/style.css"  xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="quasylab.sibilla.gui.controllers.AdvanceSettingsController">
+<AnchorPane prefHeight="300.0" prefWidth="400.0" stylesheets="@../css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unicam.quasylab.sibilla.gui.controllers.AdvanceSettingsController">
    <children>
-      <JFXButton fx:id="stepToBtn" alignment="CENTER" contentDisplay="CENTER" layoutX="17.0" layoutY="30.0" onMouseClicked="#stepTo" prefHeight="40.0" prefWidth="120.0" styleClass="btnInput" text="STEP TO" textAlignment="CENTER" textFill="WHITE" wrapText="true">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font>
-      </JFXButton>
-      <TextField fx:id="stepToNumber" layoutX="153.0" layoutY="34.0" prefHeight="20.0" prefWidth="80.0" styleClass="textField">
-         <font>
-            <Font name="System Bold" size="16.0" />
-         </font>
-      </TextField>
-      <TextField fx:id="previousToNumber" layoutX="153.0" layoutY="134.0" prefHeight="20.0" prefWidth="80.0" styleClass="textField">
-         <font>
-            <Font name="System Bold" size="16.0" />
-         </font>
-      </TextField>
-      <JFXButton fx:id="previousToBtn" alignment="CENTER" contentDisplay="CENTER" layoutX="17.0" layoutY="130.0" onMouseClicked="#previousTo" prefHeight="40.0" prefWidth="120.0" styleClass="btnInput" text="PREVIOUS TO" textAlignment="CENTER" textFill="WHITE" wrapText="true">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font>
-      </JFXButton>
+      <VBox layoutX="115.0" prefHeight="200.0" prefWidth="370.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <TextField alignment="CENTER" style="-fx-background-color: TRASPARENT;" styleClass="textField" text="ADVANCED COMMANDS" />
+            <HBox prefHeight="100.0" prefWidth="200.0" spacing="25.0">
+               <children>
+                  <JFXButton fx:id="stepToBtn" alignment="CENTER" contentDisplay="CENTER" onMouseClicked="#stepTo" prefHeight="40.0" prefWidth="120.0" styleClass="btnInput" text="STEP TO" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </JFXButton>
+                  <TextField fx:id="stepToNumber" prefHeight="20.0" prefWidth="100.0" styleClass="textField">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets top="2.5" />
+                     </HBox.margin>
+                  </TextField>
+               </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+               <padding>
+                  <Insets left="75.0" top="25.0" />
+               </padding>
+            </HBox>
+            <HBox prefHeight="100.0" prefWidth="200.0" spacing="25.0">
+               <children>
+                  <JFXButton fx:id="timeToBtn" alignment="CENTER" contentDisplay="CENTER" onMouseClicked="#timeTo" prefHeight="40.0" prefWidth="120.0" styleClass="btnInput" text="TIME TO" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </JFXButton>
+                  <TextField fx:id="timeToNumber" prefHeight="20.0" prefWidth="100.0" styleClass="textField">
+                     <font>
+                        <Font name="System Bold" size="16.0" />
+                     </font>
+                     <HBox.margin>
+                        <Insets top="2.5" />
+                     </HBox.margin>
+                  </TextField>
+               </children>
+               <padding>
+                  <Insets left="75.0" top="25.0" />
+               </padding>
+            </HBox>
+         </children>
+      </VBox>
    </children>
 </AnchorPane>

@@ -1,16 +1,13 @@
 package quasylab.sibilla.examples.benchmarks.master;
 
-import quasylab.sibilla.core.models.pm.PopulationModel;
-import quasylab.sibilla.core.models.pm.PopulationModelDefinition;
-import quasylab.sibilla.core.models.pm.PopulationState;
-import quasylab.sibilla.core.network.NetworkInfo;
-import quasylab.sibilla.core.network.benchmark.master.MasterBenchmarkEnvironment;
-import quasylab.sibilla.core.network.communication.TCPNetworkManager;
-import quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
-import quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
-import quasylab.sibilla.core.network.serialization.Serializer;
-import quasylab.sibilla.core.network.serialization.SerializerType;
-import quasylab.sibilla.examples.pm.crowds.ChordModel;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
+import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
+import it.unicam.quasylab.sibilla.core.network.benchmark.master.MasterBenchmarkEnvironment;
+import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
+import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
+import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
+import it.unicam.quasylab.sibilla.core.network.serialization.Serializer;
+import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -30,12 +27,11 @@ public class MasterBenchmark {
         String benchmarkName = (String) fstSerializer.deserialize(networkManager.readObject());
 
         PopulationModelDefinition def = new ChordModel();
-        def.setParameter("N",1000);
+        def.setParameter("N", 1000);
         PopulationModel model = def.createModel();
 
-        MasterBenchmarkEnvironment<PopulationState> env = MasterBenchmarkEnvironment.getMasterBenchmark(
-                networkManager, benchmarkName, type, model,
-                50, 2000, 10, 2000);
+        MasterBenchmarkEnvironment<PopulationState> env = MasterBenchmarkEnvironment.getMasterBenchmark(networkManager,
+                benchmarkName, type, model, 50, 2000, 10, 2000);
 
         env.run();
     }

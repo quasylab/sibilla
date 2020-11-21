@@ -18,6 +18,10 @@
     -fx-background-color: #6c757d;
 }
 
+.jfx-tab-pane .tab-header-area {
+    -fx-alignment: CENTER;
+}
+
 .jfx-tab-pane .tab-header-area .jfx-rippler{
     -jfx-rippler-fill :rgba(6, 214, 160);
 }
@@ -35,15 +39,22 @@
 .jfx-tab-pane .tab .tab-label {
     -fx-alignment: CENTER;
     -fx-text-fill: lightgrey;
-    -fx-font-size: 16px;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-text-transform: uppercase;
     -fx-wrap-text: true;
     -fx-cursor:hand;
 }
 
-.anchorPaneCharts{
-    -fx-background-color: #adb5bd;
+
+.chart {
+    -fx-background-color: #6c757d;
+    -fx-font-family: "SansSerif";
+    -fx-text-fill: white;
+}
+
+.chart-plot-background {
+    -fx-background-color:transparent;
 }
 
 .btnInput{
@@ -110,4 +121,9 @@
 
 .progressBar > .bar {
     -fx-background-color: #05C793;
+}
+
+.table-column {
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER;
 }

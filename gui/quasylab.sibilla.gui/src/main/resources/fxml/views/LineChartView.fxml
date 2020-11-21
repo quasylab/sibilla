@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<?import it.unicam.quasylab.sibilla.gui.logarithmicView.LogarithmicNumberAxis?>
+<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" styleClass="root" stylesheets="@../../css/style.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unicam.quasylab.sibilla.gui.controllers.LineChartController">
+    <children>
+        <LineChart fx:id="linechartView" layoutX="45.0" layoutY="-25.0" stylesheets="@../../css/style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <xAxis>
+                <NumberAxis fx:id="Xaxis" side="BOTTOM" tickLabelFill="WHITE" />
+            </xAxis>
+            <yAxis>
+                <LogarithmicNumberAxis fx:id="Yaxis" side="LEFT" tickLabelFill="WHITE">
+               <tickLabelFont>
+                  <Font name="System Bold" size="11.0" />
+               </tickLabelFont></LogarithmicNumberAxis>
+            </yAxis>
+        </LineChart>
+    </children>
+</AnchorPane>

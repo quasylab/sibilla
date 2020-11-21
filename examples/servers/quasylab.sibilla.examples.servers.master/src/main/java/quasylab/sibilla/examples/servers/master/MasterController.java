@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import quasylab.sibilla.core.network.master.MasterState;
+import it.unicam.quasylab.sibilla.core.network.master.MasterState;
 
 @RestController
 @RequestMapping("/master")

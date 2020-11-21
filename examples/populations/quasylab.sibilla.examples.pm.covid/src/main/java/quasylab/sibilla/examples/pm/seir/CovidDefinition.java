@@ -24,14 +24,12 @@
 
 package quasylab.sibilla.examples.pm.seir;
 
-import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.pm.*;
-import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
-import quasylab.sibilla.core.simulator.sampling.Measure;
+import it.unicam.quasylab.sibilla.core.models.pm.*;
+import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class CovidDefinition extends PopulationModelDefinition {
 
@@ -51,7 +49,6 @@ public class CovidDefinition extends PopulationModelDefinition {
     private final static double PROB_ASINT = 0.8;
     private final static double PROB_A_G = 0.5;
     private final static double PROB_DEATH = 0.02;
-
 
 
     @Override
@@ -143,6 +140,8 @@ public class CovidDefinition extends PopulationModelDefinition {
     }
 
     public CovidDefinition() {
+        super();
+        setParameter("lambdaMeet",1.0);
     }
 
 

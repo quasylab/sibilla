@@ -6,7 +6,7 @@ plugins {
 sourceCompatibility = '11'
 
 dependencies {
-  compile project(':core:quasylab.sibilla.core.network')
+  compile project(':core:network')
 }
 
 mainClassName = 'quasylab.sibilla.examples.pm.seir.NetworkMain'

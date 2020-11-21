@@ -26,13 +26,10 @@
 
 package quasylab.sibilla.examples.pm.le;
 
-import quasylab.sibilla.core.models.Model;
-import quasylab.sibilla.core.models.ModelDefinition;
-import quasylab.sibilla.core.models.State;
-import quasylab.sibilla.core.models.pm.*;
-import quasylab.sibilla.core.models.pm.util.PopulationRegistry;
-import quasylab.sibilla.core.simulator.sampling.Measure;
-import quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
+import it.unicam.quasylab.sibilla.core.models.pm.*;
+import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
 
 import java.util.LinkedList;
 import java.util.List;

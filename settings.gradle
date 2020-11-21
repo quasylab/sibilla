@@ -7,11 +7,11 @@
  * in the user manual at https://docs.gradle.org/5.4.1/userguide/multi_project_builds.html
  */
 
-rootProject.name = 'quasylab.sibilla'
+rootProject.name = 'it.unicam.quasylab.sibilla'
 
-include 'core:quasylab.sibilla.core.simulator',
-		'core:quasylab.sibilla.core.network',
-		'core:quasylab.sibilla.core.runtime',
+include 'core:simulator',
+		'core:network',
+		'core:runtime',
 		'langs:pm',
 		'gui:quasylab.sibilla.gui',
         'examples:populations:quasylab.sibilla.examples.pm.crowds',
