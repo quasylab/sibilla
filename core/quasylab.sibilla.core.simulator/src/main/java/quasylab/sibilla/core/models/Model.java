@@ -27,7 +27,6 @@
 package quasylab.sibilla.core.models;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import quasylab.sibilla.core.models.pm.PopulationState;
 import quasylab.sibilla.core.simulator.sampling.Measure;
 import quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import quasylab.sibilla.core.simulator.sampling.SamplingFunction;
