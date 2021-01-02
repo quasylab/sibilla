@@ -23,9 +23,9 @@
 
 package it.unicam.quasylab.sibilla.core.network.master;
 
+import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
 import it.unicam.quasylab.sibilla.core.network.SimulationDataSet;
 import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
-import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
 import it.unicam.quasylab.sibilla.core.network.slave.SlaveState;
 
 import java.beans.PropertyChangeEvent;

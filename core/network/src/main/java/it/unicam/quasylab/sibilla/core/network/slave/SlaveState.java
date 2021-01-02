@@ -23,8 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.network.slave;
 
-import it.unicam.quasylab.sibilla.core.network.master.SimulationState;
 import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
+import it.unicam.quasylab.sibilla.core.network.master.SimulationState;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;

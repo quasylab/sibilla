@@ -4,7 +4,7 @@ apply plugin: 'java-library'
 sourceCompatibility = '11'
 targetCompatibility = '11'
 
-group = 'simulator'
+group = 'it.unicam.quasylab.sibilla.core.runtime'
 
 repositories {
     mavenCentral()

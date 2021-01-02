@@ -24,13 +24,13 @@
 package it.unicam.quasylab.sibilla.core.models.pm;
 
 import it.unicam.quasylab.sibilla.core.models.MarkovProcess;
+import it.unicam.quasylab.sibilla.core.models.StepFunction;
+import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedElement;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedLinkedList;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
 import org.apache.commons.math3.random.RandomGenerator;
-import it.unicam.quasylab.sibilla.core.models.StepFunction;
-import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

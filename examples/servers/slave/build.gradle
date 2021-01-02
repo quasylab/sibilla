@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'it.unicam.quasylab.sibilla.examples.servers.slave'
+version = '1.0.0'
+sourceCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':core:network')
+}
+
+mainClassName = 'quasylab.sibilla.examples.servers.slave.SlaveApplication'

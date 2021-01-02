@@ -23,11 +23,11 @@
 
 package it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents;
 
-import it.unicam.quasylab.sibilla.core.models.Model;
-import org.apache.commons.math3.random.RandomGenerator;
 import it.unicam.quasylab.sibilla.core.models.Action;
+import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.TimeStep;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -26,10 +26,8 @@ package quasylab.sibilla.langs.pm;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class ModelValidator extends PopulationModelBaseVisitor<Boolean> {
 

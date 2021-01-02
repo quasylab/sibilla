@@ -27,7 +27,7 @@
 apply plugin: 'maven-publish'
 apply plugin: 'java-library'
 
-group = 'simulator'
+group = 'it.unicam.quasylab.sibilla.core.simulator'
 
 
 repositories {

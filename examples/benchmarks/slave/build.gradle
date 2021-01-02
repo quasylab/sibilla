@@ -1,0 +1,20 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'it.unicam.quasylab.sibilla.examples.benchmarks.slave'
+version = '1.0.0'
+sourceCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':core:network')
+    compile project(':examples:populations:crowds')
+    compile project(':examples:populations:seir')
+}
+
+mainClassName = 'quasylab.sibilla.examples.benchmarks.slave.SlaveBenchmark'

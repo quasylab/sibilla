@@ -26,8 +26,6 @@ package quasylab.sibilla.langs.pm;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
-import java.util.Locale;
-
 public class ParseUtil {
 
     public static final String DUPLICATED_SYMBOL_ERROR_MESSAGE = "Symbol %s at line %d char %d is already defined at line %d char %d!";

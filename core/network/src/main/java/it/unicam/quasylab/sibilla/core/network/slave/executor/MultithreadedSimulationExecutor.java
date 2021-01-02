@@ -23,11 +23,11 @@
 
 package it.unicam.quasylab.sibilla.core.network.slave.executor;
 
-import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
-import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.network.ComputationResult;
 import it.unicam.quasylab.sibilla.core.network.NetworkTask;
+import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
+import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationTask;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 
@@ -52,7 +52,6 @@ public class MultithreadedSimulationExecutor extends SimulationExecutor {
         Model model = tasks.get(0).getUnit().getModel();
         CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
 
-        /*
         this.computationBenchmark.run(() -> {
             for (int i = 0; i < tasks.size(); i++) {
                 futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
@@ -67,17 +66,13 @@ public class MultithreadedSimulationExecutor extends SimulationExecutor {
 
         sendResult(new ComputationResult(trajectories), master, model);
 
+        /*
+         * for (int i = 0; i < tasks.size(); i++) { futures[i] =
+         * CompletableFuture.supplyAsync(tasks.get(i), taskExecutor); }
+         * CompletableFuture.allOf(futures).join(); for (SimulationTask<?> task : tasks)
+         * { Trajectory trajectory = task.getTrajectory(); trajectories.add(trajectory);
+         * }
          */
 
-        for (int i = 0; i < tasks.size(); i++) {
-            futures[i] = CompletableFuture.supplyAsync(tasks.get(i), taskExecutor);
-        }
-        CompletableFuture.allOf(futures).join();
-        for (SimulationTask<?> task : tasks) {
-            Trajectory trajectory = task.getTrajectory();
-            trajectories.add(trajectory);
-        }
-
-        sendResult(new ComputationResult(trajectories), master, model);
     }
 }
