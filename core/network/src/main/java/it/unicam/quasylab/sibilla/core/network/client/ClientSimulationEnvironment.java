@@ -23,6 +23,11 @@
 
 package it.unicam.quasylab.sibilla.core.network.client;
 
+import it.unicam.quasylab.sibilla.core.models.Model;
+import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
+import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.network.HostLoggerSupplier;
+import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
 import it.unicam.quasylab.sibilla.core.network.SimulationDataSet;
 import it.unicam.quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
 import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
@@ -30,13 +35,8 @@ import it.unicam.quasylab.sibilla.core.network.loaders.ClassBytesLoader;
 import it.unicam.quasylab.sibilla.core.network.master.MasterCommand;
 import it.unicam.quasylab.sibilla.core.network.serialization.Serializer;
 import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
-import org.apache.commons.math3.random.RandomGenerator;
-import it.unicam.quasylab.sibilla.core.models.Model;
-import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
-import it.unicam.quasylab.sibilla.core.models.State;
-import it.unicam.quasylab.sibilla.core.network.HostLoggerSupplier;
-import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;
 import java.util.List;

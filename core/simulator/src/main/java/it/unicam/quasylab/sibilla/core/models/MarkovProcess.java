@@ -24,8 +24,8 @@ package it.unicam.quasylab.sibilla.core.models;
 
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedElement;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
-import org.apache.commons.math3.random.RandomGenerator;
 import it.unicam.quasylab.sibilla.core.util.SibillaMessages;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.LinkedList;
 import java.util.List;

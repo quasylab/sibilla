@@ -23,6 +23,9 @@
 
 package it.unicam.quasylab.sibilla.core.network.slave;
 
+import it.unicam.quasylab.sibilla.core.network.HostLoggerSupplier;
+import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
+import it.unicam.quasylab.sibilla.core.network.NetworkTask;
 import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManagerType;
 import it.unicam.quasylab.sibilla.core.network.compression.Compressor;
@@ -33,9 +36,6 @@ import it.unicam.quasylab.sibilla.core.network.serialization.Serializer;
 import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
 import it.unicam.quasylab.sibilla.core.network.slave.executor.SimulationExecutor;
 import it.unicam.quasylab.sibilla.core.network.util.NetworkUtils;
-import it.unicam.quasylab.sibilla.core.network.HostLoggerSupplier;
-import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
-import it.unicam.quasylab.sibilla.core.network.NetworkTask;
 
 import java.io.IOException;
 import java.net.ServerSocket;

@@ -24,12 +24,10 @@
 
 package quasylab.sibilla.langs.pm;
 
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.jupiter.api.Test;
-import org.stringtemplate.v4.ST;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestParser {
 

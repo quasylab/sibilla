@@ -23,11 +23,11 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
-import org.apache.commons.math3.random.RandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingCollection;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.StatisticSampling;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -43,9 +43,8 @@ import java.util.*;
 public interface Model<S extends State> extends Serializable {
 
     /**
-     * Samples possible next state when the process is in a given state at
-     * a given time. A random generator is passed to sample random values when
-     * needed.
+     * Samples possible next state when the process is in a given state at a given
+     * time. A random generator is passed to sample random values when needed.
      *
      * @param r     random generator used to sample needed random values.
      * @param time  current time.
@@ -55,8 +54,8 @@ public interface Model<S extends State> extends Serializable {
     TimeStep<S> next(RandomGenerator r, double time, S state);
 
     /**
-     * Returns the list of actions that are enabled when the process a a given
-     * time is in a given state.
+     * Returns the list of actions that are enabled when the process a a given time
+     * is in a given state.
      *
      * @param r     random generator used to sample needed random values.
      * @param time  current time.
@@ -88,8 +87,8 @@ public interface Model<S extends State> extends Serializable {
     S deserializeState(ByteArrayInputStream toDeserializeFrom) throws IOException;
 
     /**
-     * Each model is associated with a set of measures. This method returns the array of measure
-     * names identified by strings.
+     * Each model is associated with a set of measures. This method returns the
+     * array of measure names identified by strings.
      *
      * @return the array of measure names.
      */
@@ -98,7 +97,7 @@ public interface Model<S extends State> extends Serializable {
     /**
      * Compute the measure <code>m</code> on the state <code>state</code>.
      *
-     * @param m name of the measure to compute.
+     * @param m     name of the measure to compute.
      * @param state state to measure.
      * @return the value of measure <code>m</code> on state <code>state</code>.
      */
@@ -106,42 +105,46 @@ public interface Model<S extends State> extends Serializable {
 
     /**
      * Returns the measure with name <code>m</code>.
+     * 
      * @param m measure name.
      * @return the measure with name <code>m</code>.
      */
     Measure<S> getMeasure(String m);
 
-
     /**
-     * Returns the samplings that can be used to collect simulation data of the given measures.
+     * Returns the samplings that can be used to collect simulation data of the
+     * given measures.
      *
      * @param samplings number of samplings to collect.
-     * @param dt time gap among two samplings.
-     * @param measures neames of measures to collect.
-     * @return the samplings that can be used to collect simulation data of the given measures.
+     * @param dt        time gap among two samplings.
+     * @param measures  neames of measures to collect.
+     * @return the samplings that can be used to collect simulation data of the
+     *         given measures.
      */
-    default SamplingFunction<S> selectSamplingFunction(int samplings, double dt, String ... measures) {
-        if (measures.length == 0)  return null;
+    default SamplingFunction<S> selectSamplingFunction(int samplings, double dt, String... measures) {
+        if (measures.length == 0)
+            return null;
         if (measures.length == 1) {
             Measure<S> m = getMeasure(measures[0]);
-            if (m != null) return new StatisticSampling<>(samplings,dt,m);
+            if (m != null)
+                return new StatisticSampling<>(samplings, dt, m);
         } else {
             SamplingCollection<S> collection = new SamplingCollection<>();
-            Arrays.stream(measures).map(this::getMeasure).filter(Objects::nonNull)
-                    .sequential().forEach(m -> collection.add(new StatisticSampling<S>(samplings,dt,m)));
+            Arrays.stream(measures).map(this::getMeasure).filter(Objects::nonNull).sequential()
+                    .forEach(m -> collection.add(new StatisticSampling<S>(samplings, dt, m)));
             return collection;
         }
         return null;
     }
 
     default SamplingFunction<S> getSamplingFunction(int samplings, double dt) {
-        return selectSamplingFunction(samplings,dt,measures());
+        return selectSamplingFunction(samplings, dt, measures());
     }
 
     default Map<String, Double> measuresOf(S state) {
-        TreeMap<String,Double> toReturn = new TreeMap<>();
-        for(String name: measures()) {
-            toReturn.put(name,measure(name,state));
+        TreeMap<String, Double> toReturn = new TreeMap<>();
+        for (String name : measures()) {
+            toReturn.put(name, measure(name, state));
         }
         return toReturn;
     }

@@ -23,16 +23,16 @@
 
 package it.unicam.quasylab.sibilla.core.network.benchmark.master;
 
-import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
-import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
-import it.unicam.quasylab.sibilla.core.network.serialization.Serializer;
-import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.network.ComputationResult;
 import it.unicam.quasylab.sibilla.core.network.HostLoggerSupplier;
 import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
 import it.unicam.quasylab.sibilla.core.network.benchmark.BenchmarkUnit;
+import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
+import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
+import it.unicam.quasylab.sibilla.core.network.serialization.Serializer;
+import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -168,9 +168,10 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
         LOGGER.info(String.format("STARTING MASTER %s BENCHMARK", this.benchmarkType.toString()));
         netManager.writeObject(serializer.serialize(repetitions));
         netManager.writeObject(serializer.serialize(threshold));
-
+        
 
         for (int j = 1; j <= repetitions; j++) {
+            System.out.println("Repetitions " + j + "/" + repetitions);
             AtomicInteger currentRepetition = new AtomicInteger(j);
             while (sentTasksCount < threshold) {
                 sentTasksCount += step;
@@ -199,6 +200,8 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
 
                 // LOGGER.info(String.format("[%d] Trajectories received: [%d]", currentRepetition.get(), results.getResults().size()));
             }
+            sentTasksCount = 0;
+            netManager.writeObject(serializer.serialize(sentTasksCount));
         }
         netManager.closeConnection();
     }
@@ -237,7 +240,7 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
     private List<String> getSendBenchmarkLabels() {
         return List.of("sendandreceivetime",
                 "tasks",
-                "trajectories");
+                "resultsSize");
     }
 
     private String getDirectory() {

@@ -23,9 +23,9 @@
 
 package it.unicam.quasylab.sibilla.core.simulator;
 
-import org.apache.commons.math3.random.RandomGenerator;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.models.TimeStep;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
 import java.util.function.Supplier;

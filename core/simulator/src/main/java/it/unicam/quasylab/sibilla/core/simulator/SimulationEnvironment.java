@@ -23,13 +23,13 @@
 
 package it.unicam.quasylab.sibilla.core.simulator;
 
-import it.unicam.quasylab.sibilla.core.models.Model;
-import org.apache.commons.math3.random.RandomGenerator;
 import it.unicam.quasylab.sibilla.core.models.MarkovProcess;
+import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.models.StatePredicate;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
 import java.util.function.Consumer;

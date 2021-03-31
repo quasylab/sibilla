@@ -23,10 +23,10 @@
 
 package it.unicam.quasylab.sibilla.core;
 
-import org.apache.commons.math3.random.RandomGenerator;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.models.TimeStep;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.LinkedList;
 import java.util.Map;

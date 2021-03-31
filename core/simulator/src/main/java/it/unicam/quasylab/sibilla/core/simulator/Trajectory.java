@@ -23,9 +23,9 @@
 
 package it.unicam.quasylab.sibilla.core.simulator;
 
+import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Sample;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import it.unicam.quasylab.sibilla.core.models.State;
 
 import java.io.Externalizable;
 import java.io.IOException;

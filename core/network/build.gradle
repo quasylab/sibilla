@@ -1,7 +1,10 @@
 apply plugin: 'maven-publish'
 apply plugin: 'java-library'
 
-group = 'network'
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+group = 'it.unicam.quasylab.sibilla.core.network'
 
 repositories {
     mavenCentral()

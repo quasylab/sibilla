@@ -23,15 +23,15 @@
 
 package it.unicam.quasylab.sibilla.core.network.benchmark.master;
 
+import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.network.ComputationResult;
+import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
 import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManager;
 import it.unicam.quasylab.sibilla.core.network.compression.Compressor;
 import it.unicam.quasylab.sibilla.core.network.serialization.ApacheSerializer;
 import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import it.unicam.quasylab.sibilla.core.network.serialization.Serializer;
 import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
-import it.unicam.quasylab.sibilla.core.models.State;
-import it.unicam.quasylab.sibilla.core.network.ComputationResult;
-import it.unicam.quasylab.sibilla.core.network.NetworkInfo;
 
 import java.io.IOException;
 import java.util.List;
