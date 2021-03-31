@@ -222,4 +222,9 @@ core/quasylab.sibilla.core.simulator/src/main/main.iml
 logs
 
 # Sibilla benchmarks
-benchmarks
+/benchmarks
+
+*.csv
+
+./data
+./data/*

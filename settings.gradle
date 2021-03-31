@@ -7,21 +7,23 @@
  * in the user manual at https://docs.gradle.org/5.4.1/userguide/multi_project_builds.html
  */
 
-rootProject.name = 'quasylab.sibilla'
+rootProject.name = 'it.unicam.quasylab.sibilla'
 
-include 'core:quasylab.sibilla.core.simulator',
-		'core:quasylab.sibilla.core.network',
-		'gui:quasylab.sibilla.gui',
-        'langs:quasylab.sibilla.lang.pm.parent',
-        'langs:quasylab.sibilla.lang.pm.parent:quasylab.sibilla.lang.pm',
-        'langs:quasylab.sibilla.lang.pm.parent:quasylab.sibilla.lang.ide',
-        'examples:populations:quasylab.sibilla.examples.pm.crowds',
-		'examples:populations:quasylab.sibilla.examples.pm.seir',
-        'examples:populations:quasylab.sibilla.examples.pm.le',
-		'examples:populations:quasylab.sibilla.examples.pm.covid',
-		'examples:populations:quasylab.sibilla.examples.pm.molecule',
-		'examples:servers:quasylab.sibilla.examples.servers.client',
-		'examples:servers:quasylab.sibilla.examples.servers.master',
-		'examples:servers:quasylab.sibilla.examples.servers.slave',
-		'examples:populations:quasylab.sibilla.examples.pm.taxis'
+include 'core:simulator',
+		'core:network',
+		'core:runtime',
+		'langs:pm',
+		'gui:gui',
+        'examples:populations:crowds',
+		'examples:populations:seir',
+        'examples:populations:le',
+		'examples:populations:covid',
+		'examples:populations:molecule',
+		'examples:servers:client',
+		'examples:servers:master',
+		'examples:servers:slave',
+		'examples:populations:taxis',
+    	'examples:benchmarks:slave',
+   	 	'examples:benchmarks:master',
+		'examples:agents:RobotAgents'
 

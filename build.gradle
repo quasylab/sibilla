@@ -4,8 +4,9 @@
  * This is a general purpose Gradle build.
  * Learn how to create Gradle builds at https://guides.gradle.org/creating-new-gradle-builds/
  */
- 
- 
+
+
+
 allprojects {
     repositories {
         jcenter() 
@@ -13,8 +14,9 @@ allprojects {
 }
 
 subprojects {
-    version = '1.0'
-    
+
+    version = '1.0.4-SNAPSHOT'
+
 }
 
 
