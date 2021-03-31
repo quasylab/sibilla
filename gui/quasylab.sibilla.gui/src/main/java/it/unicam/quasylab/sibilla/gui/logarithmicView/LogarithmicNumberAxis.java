@@ -29,7 +29,8 @@ public class LogarithmicNumberAxis extends ValueAxis<Number> {
     //We bind our properties with the default bounds of the value axis.
     // But before, we should verify the given range according to the mathematic logarithmic interval definition.
     public LogarithmicNumberAxis() {
-        super(1, 100000);
+        super(0.00001, 10000);
+        //super();
         bindLogBoundsToDefaultBounds();
     }
 

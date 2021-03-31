@@ -33,7 +33,7 @@ import java.util.List;
 
 public class CovidDefinition extends PopulationModelDefinition {
 
-    public final static int SCALE = 100;
+    public final static int SCALE = 150;
     public final static int INIT_S = 99*SCALE;
     public final static int INIT_A = 1*SCALE;
     public final static int INIT_G = 0*SCALE;
