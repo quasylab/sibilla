@@ -6,7 +6,7 @@ import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agent
 import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentBehaviour;
 import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.VariableMapping;
 
-import static quasylab.sibilla.examples.agents.RoboticScenarioDefinition.*;
+import static it.unicam.quasylab.sibilla.examples.agents.RoboticScenarioDefinition.*;
 
 public class PrioritisedRobotBehaviour implements AgentBehaviour {
 

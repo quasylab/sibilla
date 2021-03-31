@@ -28,7 +28,6 @@ import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agent
 import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentActionWrapper;
 import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.SetVariable;
 import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.VariableMapping;
-import quasylab.sibilla.examples.agents.RoboticScenarioDefinition;
 
 public class ChangeFlagAction extends AgentActionWrapper {
 

@@ -28,7 +28,7 @@ import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agent
 import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.VariableMapping;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import static quasylab.sibilla.examples.agents.RoboticScenarioDefinition.*;
+import static it.unicam.quasylab.sibilla.examples.agents.RoboticScenarioDefinition.*;
 
 public class DeterministicRobotBehaviour implements AgentBehaviour {
 

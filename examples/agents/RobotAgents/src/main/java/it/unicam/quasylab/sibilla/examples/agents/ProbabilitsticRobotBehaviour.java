@@ -30,7 +30,7 @@ import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agent
 
 import java.util.ArrayList;
 
-import static quasylab.sibilla.examples.agents.RoboticScenarioDefinition.*;
+import static it.unicam.quasylab.sibilla.examples.agents.RoboticScenarioDefinition.*;
 
 public class ProbabilitsticRobotBehaviour implements AgentBehaviour {
 

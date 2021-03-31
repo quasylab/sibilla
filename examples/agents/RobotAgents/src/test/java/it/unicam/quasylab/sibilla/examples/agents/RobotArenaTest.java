@@ -21,7 +21,7 @@
  *  limitations under the License.
  */
 
-package quasylab.sibilla.examples.agents;
+package it.unicam.quasylab.sibilla.examples.agents;
 
 import org.junit.jupiter.api.Test;
 
