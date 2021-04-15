@@ -3,6 +3,8 @@
  */
 package it.unicam.quasylab.sibilla.examples.pm.seir;
 
+import it.unicam.quasylab.sibilla.core.models.StateSet;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingCollection;
@@ -22,7 +24,11 @@ public class SIRModel  {
 	private static final int REPLICA = 10;
 
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
-		SIRModelDefinition def = new SIRModelDefinition();
+		PopulationModelDefinition def = new PopulationModelDefinition(
+				SIRModelDefinition::createPopulationRegistry,
+				SIRModelDefinition::generateRules,
+				(ee,pr) -> StateSet.newStateSet(SIRModelDefinition.geneateState())
+		);
 		SimulationEnvironment simulator = new SimulationEnvironment();
 		SamplingCollection<PopulationState> collection = new SamplingCollection<>();
 		collection.add(StatisticSampling.measure("S",SAMPLINGS,DEADLINE,s -> s.getFraction(SIRModelDefinition.S)));

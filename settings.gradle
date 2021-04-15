@@ -12,6 +12,7 @@ rootProject.name = 'it.unicam.quasylab.sibilla'
 include 'core:simulator',
 		'core:network',
 		'core:runtime',
+		'langs:util',
 		'langs:pm',
 		'gui:gui',
         'examples:populations:crowds',
@@ -26,4 +27,5 @@ include 'core:simulator',
     	'examples:benchmarks:slave',
    	 	'examples:benchmarks:master',
 		'examples:agents:RobotAgents'
+findProject(':langs:util')?.name = 'util'
 

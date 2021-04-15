@@ -40,30 +40,30 @@ public class MainMolecules {
         System.out.println("\n\n***"+lambda+"->"+p+"****\n\n");
          */
 
-        MoleculeDefiniton def = new MoleculeDefiniton();
-        SimulationEnvironment simulator = new SimulationEnvironment();
-        SimulationEnvironment.silent = false;
-        final double lambda = 1;
-
-        double increment = 0.245;
-        double[] results = new double[11];
-
-        for (int i = 5; i <= 10 ; i++) {
-            final double percentage = increment;
-            int occupancy = i;
-            def.setParameter("lambda",lambda);
-            double p = simulator.reachability(0.01,0.01,0.005,def.createModel(),
-                    def.state(10,10,0,0),
-                    s ->(s.getOccupancy(MoleculeDefiniton.NaPositive))>=occupancy);
-            increment = increment + 0.0001;
-            results[i] = p;
-            System.out.println(""+occupancy+"->"+p+"****\n\n");
-
-        }
-
-        for( int i=0 ; i<=10 ; i++ ) {
-            System.out.println(i+"->"+results[i]+" ");
-        }
+//        MoleculeDefiniton def = new MoleculeDefiniton();
+//        SimulationEnvironment simulator = new SimulationEnvironment();
+//        SimulationEnvironment.silent = false;
+//        final double lambda = 1;
+//
+//        double increment = 0.245;
+//        double[] results = new double[11];
+//
+//        for (int i = 5; i <= 10 ; i++) {
+//            final double percentage = increment;
+//            int occupancy = i;
+//            def.setParameter("lambda",lambda);
+//            double p = simulator.reachability(0.01,0.01,0.005,def.createModel(),
+//                    def.state(10,10,0,0),
+//                    s ->(s.getOccupancy(MoleculeDefiniton.NaPositive))>=occupancy);
+//            increment = increment + 0.0001;
+//            results[i] = p;
+//            System.out.println(""+occupancy+"->"+p+"****\n\n");
+//
+//        }
+//
+//        for( int i=0 ; i<=10 ; i++ ) {
+//            System.out.println(i+"->"+results[i]+" ");
+//        }
     }
 
 }

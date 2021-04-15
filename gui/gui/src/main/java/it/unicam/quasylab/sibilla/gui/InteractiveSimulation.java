@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.gui;
 
 import it.unicam.quasylab.sibilla.core.ExecutionEnvironment;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.gui.controllers.InteractiveController;
@@ -46,7 +47,9 @@ public class InteractiveSimulation extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-        CovidDefinition def = new CovidDefinition();
+        PopulationModelDefinition def = new PopulationModelDefinition(CovidDefinition::generatePopulationRegistry,
+                CovidDefinition::getRules,
+                CovidDefinition::states);
         ExecutionEnvironment<PopulationState> ee = new ExecutionEnvironment<>(
                 new DefaultRandomGenerator(),
                 def.createModel(),

@@ -23,82 +23,99 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
-import it.unicam.quasylab.sibilla.core.models.pm.StateBuilder;
-
+import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * This class provides basic features for handling a ModelDefinition.
+ *
+ * @param <T> type of states handled in the generated model.
+ */
 public abstract class AbstractModelDefinition<T extends State> implements ModelDefinition<T> {
 
-    private TreeMap<String,Double> parameters;
-    private TreeMap<String, StateBuilder<T>> states;
-    private StateBuilder<T> defaultStateBuilder;
+    private final EvaluationEnvironment environment;
 
+    /**
+     * Creates a definition with an empty EvaluationEnvironment and a default state builder.
+     */
     public AbstractModelDefinition() {
-        this.parameters = new TreeMap<>();
-        this.states = new TreeMap<>();
+        this(new EvaluationEnvironment());
+    }
+
+    /**
+     * Creates a definition with a given EvaluationEnvironment.
+     */
+    public AbstractModelDefinition(EvaluationEnvironment parameters) {
+        this.environment = parameters;
     }
 
     @Override
     public String[] getModelParameters() {
-        return parameters.keySet().toArray(new String[0]);
+        return environment.getParameters();
+    }
+
+    /**
+     * Register a new parameter to the model.
+     *
+     * @param name parameter to register.
+     * @param value parameter defaul value.
+     */
+    public void registerParameter(String name, double value) {
+        this.environment.register(name,value);
     }
 
     @Override
     public void setParameter(String name, double value) {
-        reset();
-        parameters.put(name,value);
+        environment.register(name,value);
     }
 
-    protected abstract void reset();
+    /**
+     * Clear the all the data that have been computed in a ModelDefinition.
+     */
+    protected abstract void clearCache();
 
-    public double getParameter(String name) {
-        return parameters.getOrDefault(name,0.0);
+    /**
+     * Reset the EvaluationEnvironment of the model to its default values.
+     */
+    public synchronized void reset() {
+        environment.reset();
     }
 
-    public void setDefaultStateBuilder(StateBuilder<T> defaultStateBuilder) {
-        this.defaultStateBuilder = defaultStateBuilder;
+    /**
+     * Reset the parameter name to its default value.
+     *
+     * @param name the name of parameter to reset.
+     */
+    public synchronized void reset(String name) {
+        environment.reset(name);
     }
 
-    public void addStateBuilder(String name, StateBuilder<T> builder) {
-        this.states.put(name,builder);
+    /**
+     * Return the value associated with the given parameter.
+     *
+     * @param name name of parameter.
+     * @return the value associated with the given parameter.
+     */
+    public double getValue(String name) {
+        return environment.get(name);
     }
 
-    @Override
-    public int stateArity() {
-        if (defaultStateBuilder != null) {
-            return defaultStateBuilder.arity();
-        }
-        return -1;
+    /**
+     * Return the default value associated with the given parameter.
+     *
+     * @param name name of parameter.
+     * @return the default value associated with the given parameter.
+     */
+    public double getDefaultValue(String name) {
+        return environment.getDefault(name);
     }
 
-    @Override
-    public int stateArity(String name) {
-        StateBuilder<T> builder = states.get(name);
-        if (builder != null) {
-            return builder.arity();
-        }
-        return -1;
+    /**
+     * Return the used EvaluationEnvironment.
+     * @return the used EvaluationEnvironment.
+     */
+    public EvaluationEnvironment getEnvironment() {
+        return environment;
     }
 
-    @Override
-    public String[] states() {
-        return states.keySet().toArray(new String[0]);
-    }
-
-    @Override
-    public T state(String name, double... parameters) {
-        StateBuilder<T> builder = states.get(name);
-        if (builder != null) {
-            return builder.build(parameters);
-        }
-        return null;
-    }
-
-    @Override
-    public T state(double... parameters) {
-        if (defaultStateBuilder != null) {
-            return defaultStateBuilder.build(parameters);
-        }
-        return null;
-    }
 }

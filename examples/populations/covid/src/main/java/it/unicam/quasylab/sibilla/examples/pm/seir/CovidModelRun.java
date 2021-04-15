@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.examples.pm.seir;
 
 import it.unicam.quasylab.sibilla.core.ExecutionEnvironment;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 
@@ -40,7 +41,9 @@ public class CovidModelRun {
 
 
     public static void main(String[] argv) throws IOException {
-        CovidDefinition def = new CovidDefinition();
+        PopulationModelDefinition def = new PopulationModelDefinition(CovidDefinition::generatePopulationRegistry,
+                CovidDefinition::getRules,
+                CovidDefinition::states);
         ExecutionEnvironment<PopulationState> ee = new ExecutionEnvironment<>(
                 new DefaultRandomGenerator(),
                 def.createModel(),

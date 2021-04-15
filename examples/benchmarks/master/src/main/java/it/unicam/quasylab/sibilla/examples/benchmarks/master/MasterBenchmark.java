@@ -1,5 +1,6 @@
 package it.unicam.quasylab.sibilla.examples.benchmarks.master;
 
+import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModel;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
@@ -29,7 +30,13 @@ public class MasterBenchmark {
         networkManager.writeObject(fstSerializer.serialize(type));
         String benchmarkName = (String) fstSerializer.deserialize(networkManager.readObject());
 
-        PopulationModelDefinition def = new ChordModel();
+        //PopulationModelDefinition def = new ChordModel();
+        PopulationModelDefinition def = new PopulationModelDefinition(
+                new EvaluationEnvironment(),
+                ChordModel::generatePopulationRegistry,
+                ChordModel::getRules,
+                ChordModel::getMeasures,
+                ChordModel::states);
         def.setParameter("N", 1000);
         PopulationModel model = def.createModel();
 

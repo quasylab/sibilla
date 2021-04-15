@@ -1,32 +1,32 @@
 package it.unicam.quasylab.sibilla.examples.pm.crowds;
 
+import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
+import it.unicam.quasylab.sibilla.core.models.ParametricValue;
+import it.unicam.quasylab.sibilla.core.models.StateSet;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
-public class ChordModel extends PopulationModelDefinition {
+public class ChordModel {
 
     public static double LAMBDA_S = 5.0;
     public static double P_F = 0.75;
     public static int DEFAULT_N = 2;
-    public final static int SAMPLINGS = 100;
-    public final static double DEADLINE = 10;
-    private final static int TASKS = 5;
-    private final static int REPLICA = 1000;
+    public static final int SAMPLINGS = 100;
+    public static final double DEADLINE = 10;
+    private static final int TASKS = 5;
+    private static final int REPLICA = 1000;
 
-    public ChordModel() {
-        super();
-        setParameter("N", DEFAULT_N);
-    }
 
-    @Override
-    protected PopulationRegistry generatePopulationRegistry() {
+    public static PopulationRegistry generatePopulationRegistry(EvaluationEnvironment ee) {
         PopulationRegistry reg = new PopulationRegistry();
-        int N = (int) getParameter("N");
+        int N = (int) ee.get("N");
         for (int i = 0; i < N; i++) {
             reg.register("A", i);
         }
@@ -40,10 +40,8 @@ public class ChordModel extends PopulationModelDefinition {
         return reg;
     }
 
-    @Override
-    protected List<PopulationRule> getRules() {
-        int N = (int) getParameter("N");
-        PopulationRegistry reg = getRegistry();
+    public static List<PopulationRule> getRules(EvaluationEnvironment ee, PopulationRegistry reg) {
+        int N = (int) ee.get("N");
         List<PopulationRule> rules = new LinkedList<>();
 
         // regole inserimento nel crowd
@@ -80,28 +78,21 @@ public class ChordModel extends PopulationModelDefinition {
         return rules;
     }
 
-    @Override
-    protected List<Measure<PopulationState>> getMeasures() {
-        int N = (int) getParameter("N");
-        PopulationRegistry reg = getRegistry();
-        LinkedList<Measure<PopulationState>> toReturn = new LinkedList<>();
-        toReturn.add(new SimpleMeasure<>("MESSAGES", s -> runningMessages(N, reg, s)));
+    public static Map<String,Measure<PopulationState>> getMeasures(EvaluationEnvironment ee, PopulationRegistry reg) {
+        int N = (int) ee.get("N");
+        HashMap<String,Measure<PopulationState>> toReturn = new HashMap<>();
+        toReturn.put("MESSAGES",new SimpleMeasure<>("MESSAGES", s -> runningMessages(N, reg, s)));
         return toReturn;
     }
 
-    @Override
-    protected void registerStates() {
-        setDefaultStateBuilder(new SimpleStateBuilder<>(0, args -> initialState((int) getParameter("N"), args)));
-    }
-
-    private PopulationState initialState(int N, double... parameters) {
-        PopulationRegistry reg = getRegistry();
+    public static StateSet<PopulationState> states(EvaluationEnvironment ee, PopulationRegistry reg) {
+        int N = (int) ee.get("N");
         Population[] pop = new Population[N + 1];
         pop[0] = new Population(reg.indexOf("M1"), 1);
         for (int i = 0; i < N; i++) {
             pop[i + 1] = new Population(reg.indexOf("A", i), 1);
         }
-        return new PopulationState(reg.size(), pop);
+        return StateSet.newStateSet(new PopulationState(reg.size(),pop));
 
     }
 

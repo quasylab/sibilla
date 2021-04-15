@@ -24,6 +24,7 @@
 
 package it.unicam.quasylab.sibilla.examples.pm.seir;
 
+import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
@@ -31,7 +32,7 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import java.util.LinkedList;
 import java.util.List;
 
-public class CovidAGDefinition extends PopulationModelDefinition {
+public class CovidAGDefinition {
 
 
     public final static int SCALE = 100;
@@ -59,20 +60,18 @@ public class CovidAGDefinition extends PopulationModelDefinition {
     private final static double PROB_A_G = 0.5;
     private final static double PROB_DEATH = 0.02;
 
-    @Override
-    protected PopulationRegistry generatePopulationRegistry() {
+    public static PopulationRegistry generatePopulationRegistry(EvaluationEnvironment environment) {
         return PopulationRegistry.createRegistry("S", "A", "G", "R", "D", "IG", "IA");
     }
 
-    @Override
-    protected List<PopulationRule> getRules() {
-        int S = getRegistry().indexOf("S");
-        int A = getRegistry().indexOf("A");;
-        int G = getRegistry().indexOf("G");;
-        int R = getRegistry().indexOf("R");;
-        int D = getRegistry().indexOf("D");;
-        int IG = getRegistry().indexOf("IG");;
-        int IA = getRegistry().indexOf("IA");;
+    public static List<PopulationRule> generateRules(EvaluationEnvironment environment, PopulationRegistry registry) {
+        int S = registry.indexOf("S");
+        int A = registry.indexOf("A");;
+        int G = registry.indexOf("G");;
+        int R = registry.indexOf("R");;
+        int D = registry.indexOf("D");;
+        int IG = registry.indexOf("IG");;
+        int IA = registry.indexOf("IA");;
         PopulationRule rule_S_A_A = new ReactionRule(
                 "S->A",
                 new Population[] { new Population(S), new Population(A)} ,
@@ -186,17 +185,7 @@ public class CovidAGDefinition extends PopulationModelDefinition {
         return rules;
     }
 
-    @Override
-    protected List<Measure<PopulationState>> getMeasures() {
-        return null;
-    }
-
-    @Override
-    protected void registerStates() {
-        setDefaultStateBuilder(this::initialState);
-    }
-
-    public PopulationState initialState(double... parameters) {
+    public static PopulationState initialState() {
         return new PopulationState( new int[] { INIT_S, INIT_A, INIT_G, INIT_R, INIT_D, INIT_IG , INIT_IA } );
     }
 

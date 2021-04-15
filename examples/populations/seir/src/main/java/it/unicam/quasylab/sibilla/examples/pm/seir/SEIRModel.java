@@ -48,12 +48,12 @@ public class SEIRModel {
 	private static final int REPLICA = 10;
 
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
-		SEIRModelDefinition def = new SEIRModelDefinition();
-		PopulationModel model = def.createModel();
-		SimulationEnvironment simulator = new SimulationEnvironment();
-		SamplingFunction<PopulationState> collection = model.getSamplingFunction(SAMPLINGS,DEADLINE/SAMPLINGS);
-		simulator.simulate(model,def.state(),collection,REPLICA,DEADLINE);
-		collection.printTimeSeries("data","seir_",".data");
+//		SEIRModelDefinition def = new SEIRModelDefinition();
+//		PopulationModel model = def.createModel();
+//		SimulationEnvironment simulator = new SimulationEnvironment();
+//		SamplingFunction<PopulationState> collection = model.getSamplingFunction(SAMPLINGS,DEADLINE/SAMPLINGS);
+//		simulator.simulate(model,def.state(),collection,REPLICA,DEADLINE);
+//		collection.printTimeSeries("data","seir_",".data");
 	}
 
 

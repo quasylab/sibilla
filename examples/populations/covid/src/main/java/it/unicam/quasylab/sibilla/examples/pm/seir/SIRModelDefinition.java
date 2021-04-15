@@ -24,11 +24,16 @@
 
 package it.unicam.quasylab.sibilla.examples.pm.seir;
 
+import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
+import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 
-public class SIRModelDefinition implements ModelDefinition<PopulationState> {
+import java.util.LinkedList;
+import java.util.List;
+
+public class SIRModelDefinition {
 
     public final static int S = 0;
     public final static int I = 1;
@@ -44,46 +49,15 @@ public class SIRModelDefinition implements ModelDefinition<PopulationState> {
     public final static double PROB_TRANSMISSION = 0.1;
     public final static double LAMBDA_R = 1 / 15.0;
 
-    @Override
-    public int stateArity() {
-        return 0;
+    public static PopulationRegistry createPopulationRegistry(EvaluationEnvironment environment) {
+        return PopulationRegistry.createRegistry("S", "I", "R");
     }
 
-    @Override
-    public int stateArity(String name) {
-        return 0;
-    }
-
-    @Override
-    public String[] getModelParameters() {
-        return new String[0];
-    }
-
-    @Override
-    public void setParameter(String name, double value) {
-
-    }
-
-    @Override
-    public String[] states() {
-        return new String[] { "init" };
-    }
-
-    @Override
-    public PopulationState state(String name, double... parameters) {
-        if (name.equals("init")) {
-            return state(parameters);
-        }
-        throw new IllegalArgumentException(String.format("State %s is unknown!", name));
-    }
-
-    @Override
-    public PopulationState state(double... parameters) {
+    public static PopulationState geneateState(double... args) {
         return new PopulationState(new int[] { INIT_S, INIT_I, INIT_R });
     }
 
-    @Override
-    public Model<PopulationState> createModel() {
+    public static List<PopulationRule> generateRules(EvaluationEnvironment environment, PopulationRegistry registry) {
         PopulationRule rule_S_I = new ReactionRule("S->I", new Population[] { new Population(S), new Population(I) },
                 new Population[] { new Population(I), new Population(I) },
                 (t, s) -> s.getOccupancy(S) * PROB_TRANSMISSION * LAMBDA_MEET * (s.getOccupancy(I) / N));
@@ -91,10 +65,10 @@ public class SIRModelDefinition implements ModelDefinition<PopulationState> {
         PopulationRule rule_I_R = new ReactionRule("I->R", new Population[] { new Population(I) },
                 new Population[] { new Population(R) }, (t, s) -> s.getOccupancy(I) * LAMBDA_R);
 
-        PopulationModel f = new PopulationModel(3);
-        f.addRule(rule_S_I);
-        f.addRule(rule_I_R);
-        return f;
+        LinkedList<PopulationRule> rules = new LinkedList<>();
+        rules.add(rule_S_I);
+        rules.add(rule_I_R);
+        return rules;
     }
 
 }

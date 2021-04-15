@@ -51,12 +51,12 @@ public class Main {
 	
 	
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException {
-		LeaderElectionDefinition def = new LeaderElectionDefinition();
-		SimulationEnvironment simulator = new SimulationEnvironment();
-		PopulationModel model = def.createModel();
-		SamplingFunction<PopulationState> collection = model.getSamplingFunction(SAMPLINGS,DEADLINE/SAMPLINGS);
-		simulator.simulate(model,def.state(),collection,REPLICA,DEADLINE);
-		collection.printTimeSeries("data","le_",".data");
+//		LeaderElectionDefinition def = new LeaderElectionDefinition();
+//		SimulationEnvironment simulator = new SimulationEnvironment();
+//		PopulationModel model = def.createModel();
+//		SamplingFunction<PopulationState> collection = model.getSamplingFunction(SAMPLINGS,DEADLINE/SAMPLINGS);
+//		simulator.simulate(model,def.state(),collection,REPLICA,DEADLINE);
+//		collection.printTimeSeries("data","le_",".data");
 	}
 	
 

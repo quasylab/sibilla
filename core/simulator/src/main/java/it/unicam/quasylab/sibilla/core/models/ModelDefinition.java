@@ -73,21 +73,21 @@ public interface ModelDefinition<S extends State> {
     String[] states();
 
     /**
-     * Create the state with the given name by using the given parameters.
+     * Create the state with the given name by using the given arguments.
      *
-     * @param parameters parameters to use in state creation.
-     * @return the default state associated the given parameters.
+     * @param args arguments to use in state creation.
+     * @return the default state associated the given arguments.
      */
-    S state(String name, double ... parameters);
+    S state(String name, double ... args);
 
     /**
      * Create the default state (that is the first one in the array) with
-     * the given parameters.
+     * the given arguments.
      *
-     * @param parameters parameters to use in state creation.
-     * @return the default state associated the given parameters.
+     * @param args arguments to use in state creation.
+     * @return the default state associated the given arguments.
      */
-    S state(double ... parameters);
+    S state(double ... args);
 
 
     /**

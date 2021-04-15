@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.examples.pm.seir;
 
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModel;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 
 import java.io.FileNotFoundException;
@@ -41,7 +42,9 @@ public class CovidReachability {
 
 
     public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
-        CovidDefinition def = new CovidDefinition();
+        PopulationModelDefinition def = new PopulationModelDefinition(CovidDefinition::generatePopulationRegistry,
+                CovidDefinition::getRules,
+                CovidDefinition::states);
         SimulationEnvironment simulator = new SimulationEnvironment();
         SimulationEnvironment.silent = false;
         double lambda = 3.75;

@@ -24,14 +24,19 @@
 
 package it.unicam.quasylab.sibilla.examples.pm.seir;
 
+import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
+import it.unicam.quasylab.sibilla.core.models.ParametricValue;
+import it.unicam.quasylab.sibilla.core.models.StateSet;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
-public class CovidDefinition extends PopulationModelDefinition {
+public class CovidDefinition {
 
     public final static int SCALE = 150;
     public final static int INIT_S = 99*SCALE;
@@ -51,14 +56,11 @@ public class CovidDefinition extends PopulationModelDefinition {
     private final static double PROB_DEATH = 0.02;
 
 
-    @Override
-    protected PopulationRegistry generatePopulationRegistry() {
+    public static PopulationRegistry generatePopulationRegistry(EvaluationEnvironment environment) {
         return PopulationRegistry.createRegistry("S","A","G","R","D");
     }
 
-    @Override
-    protected List<PopulationRule> getRules() {
-        PopulationRegistry registry = getRegistry();
+    public static List<PopulationRule> getRules(EvaluationEnvironment environment, PopulationRegistry registry) {
         int S = registry.indexOf("S");
         int A = registry.indexOf( "A");
         int G = registry.indexOf("G");
@@ -66,7 +68,7 @@ public class CovidDefinition extends PopulationModelDefinition {
         int D = registry.indexOf("D");
 
         LinkedList<PopulationRule> rules = new LinkedList<>();
-        double lambda = getParameter("lambdaMeet");
+        double lambda = environment.get("lambdaMeet");
         PopulationRule rule_S_A_A = new ReactionRule(
                 "S->A",
                 new Population[] { new Population(S), new Population(A)} ,
@@ -129,48 +131,38 @@ public class CovidDefinition extends PopulationModelDefinition {
         return rules;
     }
 
-    @Override
-    protected List<Measure<PopulationState>> getMeasures() {
-        return null;
+
+
+    public static StateSet<PopulationState> states(EvaluationEnvironment environment, PopulationRegistry registry) {
+        StateSet<PopulationState> states = new StateSet<>();
+        ParametricValue<PopulationState> state = defaultState(registry);
+        states.setDefaultState( state );
+        states.set("state", parametricState(registry));
+        return states;
     }
 
-    @Override
-    protected void registerStates() {
-        setDefaultStateBuilder(this::initialState);
-    }
-
-    public CovidDefinition() {
-        super();
-        setParameter("lambdaMeet",1.0);
-    }
-
-
-    @Override
-    public PopulationState state(String name, double... parameters) {
-        if (name.equals("init")) {
-            return state(parameters);
-        }
-        throw new IllegalArgumentException(String.format("State %s is unknown!",name));
-    }
-
-    public PopulationState initialState(double... parameters) {
-        PopulationRegistry registry = getRegistry();
+    public static ParametricValue<PopulationState> defaultState(PopulationRegistry registry) {
         int S = registry.indexOf("S");
         int A = registry.indexOf( "A");
         int G = registry.indexOf("G");
         int R = registry.indexOf("R");
         int D = registry.indexOf("D");
-        if (parameters.length != 5) {
-            return new PopulationState( new int[] { INIT_S, INIT_A, INIT_G, INIT_R, INIT_D } );
-        } else {
-            return new PopulationState( new int[] {
-                    (int) parameters[S],
-                    (int) parameters[A],
-                    (int) parameters[G],
-                    (int) parameters[R],
-                    (int) parameters[D] });
-        }
+        return new ParametricValue( new PopulationState( new int[] { INIT_S, INIT_A, INIT_G, INIT_R, INIT_D } ) );
     }
 
+
+    public static ParametricValue<PopulationState> parametricState(PopulationRegistry registry) {
+        int S = registry.indexOf("S");
+        int A = registry.indexOf( "A");
+        int G = registry.indexOf("G");
+        int R = registry.indexOf("R");
+        int D = registry.indexOf("D");
+        return new ParametricValue<>( new String[] { "s", "a", "g", "r", "d"}, args -> new PopulationState( new int[] {
+                    (int) args[S],
+                    (int) args[A],
+                    (int) args[G],
+                    (int) args[R],
+                    (int) args[D] }) );
+        }
 
 }

@@ -23,7 +23,9 @@
  */
 package it.unicam.quasylab.sibilla.examples.pm.seir;
 
+import it.unicam.quasylab.sibilla.core.models.ParametricValue;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModel;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
@@ -43,7 +45,10 @@ public class CovidModel {
 
 
     public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
-        CovidDefinition def = new CovidDefinition();
+        PopulationModelDefinition def = new PopulationModelDefinition(CovidDefinition::generatePopulationRegistry,
+                CovidDefinition::getRules,
+                CovidDefinition::states);
+
         SimulationEnvironment simulator = new SimulationEnvironment();
         def.setParameter("lambdaMeet",4);
         PopulationModel model = def.createModel();

@@ -27,6 +27,7 @@
 package it.unicam.quasylab.sibilla.core.simulator.tests.pm;
 
 import it.unicam.quasylab.sibilla.core.models.pm.*;
+import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingCollection;
@@ -34,6 +35,7 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.function.Function;
 
@@ -205,9 +207,9 @@ public class GossipUnicast {
 	}
 
 	private PopulationModel buildPopulationModel(int scale) {
-		PopulationModel m = new PopulationModel(6);
-		m.addRules(buildRules());
-		return m;
+//		PopulationModel m = new PopulationModel(6);
+//		m.addRules(buildRules());
+		return new PopulationModel(PopulationRegistry.createRegistry(6),buildRules(),new HashMap<>());
 	}
 
 	private PopulationState getInitState(int scale) {

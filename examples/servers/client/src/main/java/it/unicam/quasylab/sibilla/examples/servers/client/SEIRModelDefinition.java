@@ -26,6 +26,8 @@
 
 package it.unicam.quasylab.sibilla.examples.servers.client;
 
+import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
+import it.unicam.quasylab.sibilla.core.models.StateSet;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
@@ -33,7 +35,7 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SEIRModelDefinition extends PopulationModelDefinition {
+public class SEIRModelDefinition {
 
 
     public final static int INIT_S = 99;
@@ -47,14 +49,11 @@ public class SEIRModelDefinition extends PopulationModelDefinition {
     public final static double LAMBDA_R = 1 / 7.0;
     public final static double LAMBDA_DECAY = 1/30.0;
 
-    @Override
-    protected PopulationRegistry generatePopulationRegistry() {
+    public static PopulationRegistry generatePopulationRegistry(EvaluationEnvironment ee) {
         return PopulationRegistry.createRegistry("S", "E", "I", "R");
     }
 
-    @Override
-    protected List<PopulationRule> getRules() {
-        PopulationRegistry reg = getRegistry();
+    public static List<PopulationRule> getRules(EvaluationEnvironment ee, PopulationRegistry reg) {
         int S = reg.indexOf("S");
         int E = reg.indexOf("E");
         int I = reg.indexOf("I");
@@ -96,19 +95,10 @@ public class SEIRModelDefinition extends PopulationModelDefinition {
         return rules;
     }
 
-    @Override
-    protected List<Measure<PopulationState>> getMeasures() {
-        return null;
-    }
-
-    @Override
-    protected void registerStates() {
-        setDefaultStateBuilder(new SimpleStateBuilder<>(this::initialState));
-    }
 
 
-    public PopulationState initialState(double... parameters) {
-        return new PopulationState( new int[] { INIT_S, INIT_E, INIT_I, INIT_R } );
+    public static StateSet<PopulationState> initialState(EvaluationEnvironment ee, PopulationRegistry reg) {
+        return StateSet.newStateSet( new PopulationState( new int[] { INIT_S, INIT_E, INIT_I, INIT_R } ) );
     }
 
 

@@ -25,6 +25,7 @@ package it.unicam.quasylab.sibilla.core.models.pm.util;
 
 import it.unicam.quasylab.sibilla.core.models.pm.FractionOfSpecies;
 import it.unicam.quasylab.sibilla.core.models.pm.NumberOfSpecies;
+import it.unicam.quasylab.sibilla.core.models.pm.Population;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 
@@ -67,7 +68,7 @@ public class PopulationRegistry implements Serializable {
         return registry;
     }
 
-    public void register(String label, Object... values) {
+    public void register(String label, Object ... values) {
         Tuple t = new Tuple(label, values);
         if (!map.containsKey(t)) {
             map.put(t, count++);
@@ -98,6 +99,10 @@ public class PopulationRegistry implements Serializable {
 
     public PopulationState createPopulationState() {
         return new PopulationState(count);
+    }
+
+    public PopulationState createPopulationState( Population[] populations ) {
+        return new PopulationState(this.size(),populations);
     }
 
     public Measure<PopulationState> fractionMeasure(int i) {

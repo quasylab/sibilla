@@ -53,18 +53,16 @@ public class PopulationModel implements MarkovProcess<PopulationState> {
 
     private final PopulationRegistry registry;
 
-    private LinkedList<PopulationRule> rules;
+    private final List<PopulationRule> rules;
 
-    private Map<String, Measure<PopulationState>> measuresTable;
+    private final Map<String, Measure<PopulationState>> measuresTable;
 
-    public PopulationModel(int size) {
-        this(PopulationRegistry.createRegistry(size));
-    }
-
-    public PopulationModel(PopulationRegistry registry) {
+    public PopulationModel(PopulationRegistry registry,
+        List<PopulationRule> rules,
+        Map<String, Measure<PopulationState>> measuresTable) {
         this.registry = registry;
-        this.rules = new LinkedList<>();
-        this.measuresTable = new TreeMap<>();
+        this.rules = rules;
+        this.measuresTable = measuresTable;
     }
 
     @Override
@@ -88,14 +86,6 @@ public class PopulationModel implements MarkovProcess<PopulationState> {
 
     public static PopulationState vectorOf(int... species) {
         return new PopulationState(species);
-    }
-
-    public void addRule(PopulationRule rule) {
-        this.rules.add(rule);
-    }
-
-    public void addRules(Collection<PopulationRule> rules) {
-        this.rules.addAll(rules);
     }
 
     @Override

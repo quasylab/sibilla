@@ -29,7 +29,9 @@
  */
 package it.unicam.quasylab.sibilla.examples.pm.crowds;
 
+import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModel;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
@@ -40,53 +42,58 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
  */
 public class Main {
 
-    public static void main(String[] args) throws InterruptedException {
-        simulateChordModel(10,1000,1000,1000);
-        simulateCrowdModel(10,1000,1000,1000);
-        simulateMeshModel(5, 5,1000,1000,1000);
-        simulateTierModel(5, 5,1000,1000,1000);
-    }
-
-    private static void simulateChordModel(int N, double deadline, int replica, int samplings) throws InterruptedException {
-        ChordModel def = new ChordModel();
-        def.setParameter("N",N);
-        PopulationModel model = def.createModel();
-        SimulationEnvironment simulator = new SimulationEnvironment();
-        SamplingFunction<PopulationState> collection = model.getSamplingFunction(samplings,deadline/samplings);
-
-        simulator.simulate(model,def.state(),collection,replica,deadline);
-    }
-
-    private static void simulateCrowdModel(int N, double deadline, int replica, int samplings) throws InterruptedException {
-        CrowdDefinition def = new CrowdDefinition();
-        def.setParameter("N",N);
-        PopulationModel model = def.createModel();
-        SimulationEnvironment simulator = new SimulationEnvironment();
-        SamplingFunction<PopulationState> collection = model.getSamplingFunction(samplings,deadline/samplings);
-
-        simulator.simulate(model,def.state(),collection,replica,deadline);
-    }
-
-    private static void simulateMeshModel(int H, int N, double deadline, int replica, int samplings) throws InterruptedException {
-        MeshModel def = new MeshModel();
-        def.setParameter("N",N);
-        def.setParameter("H",H);
-        PopulationModel model = def.createModel();
-        SimulationEnvironment simulator = new SimulationEnvironment();
-        SamplingFunction<PopulationState> collection = model.getSamplingFunction(samplings,deadline/samplings);
-
-        simulator.simulate(model,def.state(),collection,replica,deadline);
-    }
-
-    private static void simulateTierModel(int H, int N, double deadline, int replica, int samplings) throws InterruptedException {
-        TierModel def = new TierModel();
-        def.setParameter("N",N);
-        def.setParameter("H",H);
-        PopulationModel model = def.createModel();
-        SimulationEnvironment simulator = new SimulationEnvironment();
-        SamplingFunction<PopulationState> collection = model.getSamplingFunction(samplings,deadline/samplings);
-
-        simulator.simulate(model,def.state(),collection,replica,deadline);
-    }
+//    public static void main(String[] args) throws InterruptedException {
+//        simulateChordModel(10,1000,1000,1000);
+//        simulateCrowdModel(10,1000,1000,1000);
+//        simulateMeshModel(5, 5,1000,1000,1000);
+//        simulateTierModel(5, 5,1000,1000,1000);
+//    }
+//
+//    private static void simulateChordModel(int N, double deadline, int replica, int samplings) throws InterruptedException {
+//        PopulationModelDefinition def = new PopulationModelDefinition(
+//                new EvaluationEnvironment(),
+//                ChordModel::generatePopulationRegistry,
+//                ChordModel::getRules,
+//                ChordModel::getMeasures,
+//                ChordModel::states);
+//        def.setParameter("N",(double) N);
+//        PopulationModel model = def.createModel();
+//        SimulationEnvironment simulator = new SimulationEnvironment();
+//        SamplingFunction<PopulationState> collection = model.getSamplingFunction(samplings,deadline/samplings);
+//
+//        simulator.simulate(model,def.state(),collection,replica,deadline);
+//    }
+//
+//    private static void simulateCrowdModel(int N, double deadline, int replica, int samplings) throws InterruptedException {
+//        CrowdDefinition def = new CrowdDefinition();
+//        def.setParameter("N",N);
+//        PopulationModel model = def.createModel();
+//        SimulationEnvironment simulator = new SimulationEnvironment();
+//        SamplingFunction<PopulationState> collection = model.getSamplingFunction(samplings,deadline/samplings);
+//
+//        simulator.simulate(model,def.state(),collection,replica,deadline);
+//    }
+//
+//    private static void simulateMeshModel(int H, int N, double deadline, int replica, int samplings) throws InterruptedException {
+//        MeshModel def = new MeshModel();
+//        def.setParameter("N",N);
+//        def.setParameter("H",H);
+//        PopulationModel model = def.createModel();
+//        SimulationEnvironment simulator = new SimulationEnvironment();
+//        SamplingFunction<PopulationState> collection = model.getSamplingFunction(samplings,deadline/samplings);
+//
+//        simulator.simulate(model,def.state(),collection,replica,deadline);
+//    }
+//
+//    private static void simulateTierModel(int H, int N, double deadline, int replica, int samplings) throws InterruptedException {
+//        TierModel def = new TierModel();
+//        def.setParameter("N",N);
+//        def.setParameter("H",H);
+//        PopulationModel model = def.createModel();
+//        SimulationEnvironment simulator = new SimulationEnvironment();
+//        SamplingFunction<PopulationState> collection = model.getSamplingFunction(samplings,deadline/samplings);
+//
+//        simulator.simulate(model,def.state(),collection,replica,deadline);
+//    }
 
 }

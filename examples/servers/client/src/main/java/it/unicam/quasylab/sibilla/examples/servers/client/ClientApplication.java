@@ -26,6 +26,8 @@
 
 package it.unicam.quasylab.sibilla.examples.servers.client;
 
+import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
+import it.unicam.quasylab.sibilla.core.models.StateSet;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModel;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.network.HostLoggerSupplier;
@@ -88,7 +90,9 @@ public class ClientApplication implements Serializable {
                                 keyStoreType, keyStorePath, trustStoreType, trustStorePath, masterAddress, masterPort,
                                 masterNetworkManagerType));
 
-                PopulationModelDefinition def = new SEIRModelDefinition();
+                PopulationModelDefinition def = new PopulationModelDefinition(SEIRModelDefinition::generatePopulationRegistry,
+                        SEIRModelDefinition::getRules,
+                        SEIRModelDefinition::initialState);
                 // def.setParameter("N",1000);
                 PopulationModel model = def.createModel();
 

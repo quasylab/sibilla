@@ -28,6 +28,8 @@ package it.unicam.quasylab.sibilla.core.models.pm;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * @author loreti
@@ -42,5 +44,20 @@ public interface PopulationRule extends Serializable {
 	 * @return null if the rule cannot be applied.
 	 */
 	PopulationTransition apply( RandomGenerator r , double now, PopulationState state );
-	
+
+
+	static Function<PopulationState,Double> fractionOf(int idx) {
+		return s -> s.getFraction(idx);
+	}
+
+	static Function<PopulationState,Double> numberOf(int idx) {
+		return s -> s.getOccupancy(idx);
+	}
+
+	static Function<PopulationState,Double> apply(
+			Function<PopulationState,Double> f1,
+			Function<PopulationState,Double> f2,
+			BiFunction<Double,Double,Double> op) {
+		return s-> op.apply(f1.apply(s),f2.apply(s));
+	}
 }

@@ -4,6 +4,10 @@
 package it.unicam.quasylab.sibilla.examples.pm.seir;
 
 import it.unicam.quasylab.sibilla.core.models.Model;
+import it.unicam.quasylab.sibilla.core.models.ParametricValue;
+import it.unicam.quasylab.sibilla.core.models.StateSet;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationModel;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
@@ -27,7 +31,9 @@ public class CovidIGModel {
 
     public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
 
-        CovidAGDefinition def = new CovidAGDefinition();
+        PopulationModelDefinition def = new PopulationModelDefinition(CovidAGDefinition::generatePopulationRegistry,
+                CovidAGDefinition::generateRules,
+                (ee,pr) -> StateSet.newStateSet(CovidAGDefinition.initialState()));
         SimulationEnvironment simulator = new SimulationEnvironment();
         Model<PopulationState> model = def.createModel();
         SamplingFunction<PopulationState> collection = model.selectSamplingFunction(SAMPLINGS,DEADLINE/SAMPLINGS);
