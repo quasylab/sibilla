@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.models;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -86,4 +87,7 @@ public class ParametricValue<S> implements Serializable {
         return builder.apply(args);
     }
 
+    public String getInfo() {
+        return Arrays.toString(this.arguments);
+    }
 }

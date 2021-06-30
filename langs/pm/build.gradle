@@ -24,7 +24,7 @@
  *
  */
 
-plugins{
+plugins {
     id 'antlr'
 }
 
@@ -38,6 +38,7 @@ test {
 
 dependencies {
     compile project(':core:simulator')
+    compile project(':langs:util')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
@@ -52,6 +53,3 @@ dependencies {
 generateGrammarSource {
     arguments += ["-visitor", "-long-messages"]
 }
-
-sourceCompatibility = '11'
-targetCompatibility = '11'

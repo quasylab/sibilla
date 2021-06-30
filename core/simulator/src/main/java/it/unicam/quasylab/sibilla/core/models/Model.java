@@ -54,17 +54,6 @@ public interface Model<S extends State> extends Serializable {
     TimeStep<S> next(RandomGenerator r, double time, S state);
 
     /**
-     * Returns the list of actions that are enabled when the process a a given time
-     * is in a given state.
-     *
-     * @param r     random generator used to sample needed random values.
-     * @param time  current time.
-     * @param state current state.
-     * @return list of enabled actions.
-     */
-    List<Action<S>> actions(RandomGenerator r, double time, S state);
-
-    /**
      * Returns the number of bytes needed to store model states.
      *
      * @return the number of bytes needed to store model states.
@@ -123,7 +112,7 @@ public interface Model<S extends State> extends Serializable {
      */
     default SamplingFunction<S> selectSamplingFunction(int samplings, double dt, String... measures) {
         if (measures.length == 0)
-            return null;
+            return new SamplingCollection<>();
         if (measures.length == 1) {
             Measure<S> m = getMeasure(measures[0]);
             if (m != null)
@@ -134,11 +123,19 @@ public interface Model<S extends State> extends Serializable {
                     .forEach(m -> collection.add(new StatisticSampling<S>(samplings, dt, m)));
             return collection;
         }
-        return null;
+        return new SamplingCollection<>();
     }
 
     default SamplingFunction<S> getSamplingFunction(int samplings, double dt) {
         return selectSamplingFunction(samplings, dt, measures());
+    }
+
+    default SamplingFunction<S> selectSamplingFunction(double deadline, double dt) {
+        return selectSamplingFunction(deadline,dt, measures());
+    }
+
+    default SamplingFunction<S> selectSamplingFunction(double deadline, double dt, String ... measures) {
+        return selectSamplingFunction((int) (deadline/dt),dt,measures);
     }
 
     default Map<String, Double> measuresOf(S state) {

@@ -23,6 +23,7 @@
 package it.unicam.quasylab.sibilla.langs.pm;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 
 import java.util.*;
 
@@ -39,6 +40,8 @@ public class BasicSymbolTable implements SymbolTable {
     private final HashMap<String,PopulationModelParser.Const_declarationContext> constants = new HashMap<>();
 
     private final HashMap<String,PopulationModelParser.Param_declarationContext> parameters = new HashMap<>();
+
+    private final HashMap<String,PopulationModelParser.Label_declarationContext> labels = new HashMap<>();
 
     private final HashMap<String,SymbolInfo> variables = new HashMap<>();
 
@@ -102,6 +105,13 @@ public class BasicSymbolTable implements SymbolTable {
     }
 
     @Override
+    public void addLabel(String name, PopulationModelParser.Label_declarationContext context) throws DuplicatedSymbolException {
+        checkAndThrowExceptionIfDuplicated(name,context);
+        labels.put(name,context);
+    }
+
+
+    @Override
     public String[] rules() {
         return rules.keySet().toArray(new String[0]);
     }
@@ -126,7 +136,14 @@ public class BasicSymbolTable implements SymbolTable {
         return measures.keySet().toArray(new String[0]);
     }
 
-    public String[] parameters() { return parameters.keySet().toArray(new String[0]); }
+    public String[] parameters() {
+        return parameters.keySet().toArray(new String[0]);
+    }
+
+    @Override
+    public String[] labels() {
+        return labels.keySet().toArray(new String[0]);
+    }
 
     @Override
     public int arity(String name) {
@@ -155,6 +172,9 @@ public class BasicSymbolTable implements SymbolTable {
     }
 
     @Override
+    public boolean isALabel(String name) { return labels.containsKey(name); }
+
+    @Override
     public boolean isAParameter(String name) {
         return parameters.containsKey(name);
     }
@@ -167,7 +187,7 @@ public class BasicSymbolTable implements SymbolTable {
     @Override
     public SymbolType getType(String name) {
         if (isAConst(name)||isAParameter(name)) {
-            return SymbolType.REAL;
+            return SymbolType.NUMBER;
         }
         SymbolInfo ctx = variables.get(name);
         if (ctx != null) {
@@ -190,6 +210,11 @@ public class BasicSymbolTable implements SymbolTable {
     }
 
     @Override
+    public boolean isDefined(String name) {
+        return getContext(name) != null;
+    }
+
+    @Override
     public PopulationModelParser.Species_declarationContext getSpeciesContext(String name) {
         return species.get(name);
     }
@@ -208,6 +233,44 @@ public class BasicSymbolTable implements SymbolTable {
     public PopulationModelParser.System_declarationContext getSystemContext(String name) {
         return systems.get(name);
     }
+
+    @Override
+    public PopulationModelParser.Const_declarationContext getConstantDeclarationContext(String name) {
+        return constants.get(name);
+    }
+
+    @Override
+    public PopulationModelParser.Param_declarationContext getParameterContext(String name) {
+        return parameters.get(name);
+    }
+
+    @Override
+    public PopulationModelParser.Label_declarationContext getLabelContext(String name) {
+        return labels.get(name);
+    }
+
+    @Override
+    public Set<String> checkLocalVariables(PopulationModelParser.Local_variablesContext local_variables) throws DuplicatedSymbolException {
+        Set<String> localVariables = new HashSet<>();
+        if (local_variables != null) {
+            for(PopulationModelParser.Local_variableContext lv: local_variables.variables) {
+                checkAndThrowExceptionIfDuplicated(lv.name.getText(),lv);
+                localVariables.add(lv.name.getText());
+            }
+        }
+        return localVariables;
+    }
+
+    @Override
+    public Set<String> checkLocalVariables(List<Token> args, ParserRuleContext ctx) throws DuplicatedSymbolException {
+        Set<String> localVariables = new HashSet<>();
+        for(Token lv: args) {
+            checkAndThrowExceptionIfDuplicated(lv.getText(),ctx);
+            localVariables.add(lv.getText());
+        }
+        return localVariables;
+    }
+
 
 //    private HashMap<String, SymbolInfo> symbolTable;
 //

@@ -27,6 +27,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
 
 /**
  * An EvaluationEnvironment is used to collect a set of parameters that are used in the generation of values
@@ -35,18 +36,33 @@ import java.util.TreeMap;
  */
 public class EvaluationEnvironment {
 
+
+    private final CachedValues constants;
     private final Map<String,Double> attributes;
     private final Map<String,Double> values;
     private final PropertyChangeSupport changer;
+    private boolean isChanged = false;
 
+
+
+    public EvaluationEnvironment() {
+        this(new CachedValues());
+    }
 
     /**
      * Creates an empty EvaluationEnvironment.
      */
-    public EvaluationEnvironment() {
+    public EvaluationEnvironment(CachedValues constants) {
         this.attributes = new TreeMap<>();
         this.values = new TreeMap<>();
         this.changer = new PropertyChangeSupport(this);
+        this.constants = constants;
+    }
+
+    public EvaluationEnvironment(Map<String, Double> values, CachedValues constants) {
+        this(constants);
+        this.attributes.putAll(values);
+        this.values.putAll(values);
     }
 
     /**
@@ -63,14 +79,15 @@ public class EvaluationEnvironment {
      * Associates a value to a given name.
      *
      * @param name name of a parameter.
-     * @param value value to associate.
+     * @param value value to associate.q
      */
     public synchronized void set(String name, double value) {
         if (!attributes.containsKey(name)) {
             throw new IllegalArgumentException("Parameter "+name+" is unknown.");
         }
-        double old = values.put(name,value);
+        Double old = values.put(name,value);
         changer.firePropertyChange(name,old,value);
+        this.isChanged = true;
     }
 
     /**
@@ -146,5 +163,34 @@ public class EvaluationEnvironment {
      */
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         changer.removePropertyChangeListener(listener);
+    }
+
+    /**
+     * Return the map associating each parameter with its current value.
+     *
+     * @return the map associating each parameter with its current value.
+     */
+    public Map<String, Double> getParameterMap() {
+        return new TreeMap<>(values);
+    }
+
+    /**
+     * Return a function used to resolve names.
+     *
+     * @return a function used to resolve names.
+     */
+    public Function<String, Double> getEvaluator() {
+        if (isChanged) {
+            constants.reset();
+            constants.compute();
+        }
+        return s -> {
+            double d = constants.get(s);
+            if (Double.isNaN(d)) {
+                return get(s);
+            } else {
+                return d;
+            }
+        };
     }
 }

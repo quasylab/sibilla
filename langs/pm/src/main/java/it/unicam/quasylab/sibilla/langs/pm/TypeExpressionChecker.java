@@ -32,7 +32,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TypeExpressionChecker implements PopulationModelVisitor<SymbolType> {
+public class TypeExpressionChecker extends PopulationModelBaseVisitor<SymbolType> {
 
     private SymbolTable table;
     private boolean populationAllowed;
@@ -71,19 +71,6 @@ public class TypeExpressionChecker implements PopulationModelVisitor<SymbolType>
         return true;
     }
 
-
-    public boolean isAnInteger(ParserRuleContext ctx) {
-        if (ctx == null) {
-            return true;
-        }
-        SymbolType t = ctx.accept(this);
-        if (!t.isInteger()) {
-            errors.add(ModelBuildingError.expectedInteger(t,ctx));
-            return false;
-        }
-        return true;
-    }
-
     public boolean isABoolean(ParserRuleContext ctx) {
         if (ctx == null) {
             return true;
@@ -98,97 +85,6 @@ public class TypeExpressionChecker implements PopulationModelVisitor<SymbolType>
     }
 
     @Override
-    public SymbolType visitModel(PopulationModelParser.ModelContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitElement(PopulationModelParser.ElementContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitSystem_declaration(PopulationModelParser.System_declarationContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitConst_declaration(PopulationModelParser.Const_declarationContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitSpecies_declaration(PopulationModelParser.Species_declarationContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitRange(PopulationModelParser.RangeContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitRule_declaration(PopulationModelParser.Rule_declarationContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitRulestatement(PopulationModelParser.RulestatementContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitFor_statement(PopulationModelParser.For_statementContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitWhen_statement(PopulationModelParser.When_statementContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitRule_body(PopulationModelParser.Rule_bodyContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitSpecies_pattern(PopulationModelParser.Species_patternContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitSpecies_pattern_element(PopulationModelParser.Species_pattern_elementContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitSpecies_expression(PopulationModelParser.Species_expressionContext ctx) {
-        return null;
-    }
-
-
-    @Override
-    public SymbolType visitMeasure_declaration(PopulationModelParser.Measure_declarationContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitParam_declaration(PopulationModelParser.Param_declarationContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitIntType(PopulationModelParser.IntTypeContext ctx) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitRealType(PopulationModelParser.RealTypeContext ctx) {
-        return null;
-    }
-
-    @Override
     public SymbolType visitNegationExpression(PopulationModelParser.NegationExpressionContext ctx) {
         isABoolean(ctx.arg);
         return SymbolType.BOOLEAN;
@@ -198,7 +94,7 @@ public class TypeExpressionChecker implements PopulationModelVisitor<SymbolType>
     public SymbolType visitExponentExpression(PopulationModelParser.ExponentExpressionContext ctx) {
         checkNumber(ctx.left);
         checkNumber(ctx.right);
-        return SymbolType.REAL;
+        return SymbolType.NUMBER;
     }
 
 
@@ -222,17 +118,21 @@ public class TypeExpressionChecker implements PopulationModelVisitor<SymbolType>
         isABoolean(ctx.guard);
         SymbolType t1 = ctx.thenBranch.accept(this);
         SymbolType t2 = ctx.elseBranch.accept(this);
-        if (!t1.isCompatible(t2)) {
-            errors.add(ModelBuildingError.typeError(t1,t2,ctx.thenBranch));
-            return t1;
-        } else {
-            return SymbolType.merge(t1,t2);
+        if (t1 == SymbolType.ERROR) {
+            return t2;
         }
+        if (t2 == SymbolType.ERROR) {
+            return t1;
+        }
+        if (t1!=t2) {
+            errors.add(ModelBuildingError.typeError(t1,t2,ctx.thenBranch));
+        }
+        return t1;
     }
 
     @Override
     public SymbolType visitIntValue(PopulationModelParser.IntValueContext ctx) {
-        return SymbolType.INT;
+        return SymbolType.NUMBER;
     }
 
     @Override
@@ -255,7 +155,7 @@ public class TypeExpressionChecker implements PopulationModelVisitor<SymbolType>
         if (!populationAllowed) {
             errors.add(ModelBuildingError.illegalPopulationExpression(ctx));
         }
-        return SymbolType.REAL;
+        return SymbolType.NUMBER;
     }
 
     @Override
@@ -272,7 +172,7 @@ public class TypeExpressionChecker implements PopulationModelVisitor<SymbolType>
 
     @Override
     public SymbolType visitRealValue(PopulationModelParser.RealValueContext ctx) {
-        return SymbolType.REAL;
+        return SymbolType.NUMBER;
     }
 
     @Override
@@ -284,9 +184,20 @@ public class TypeExpressionChecker implements PopulationModelVisitor<SymbolType>
 
     @Override
     public SymbolType visitMulDivExpression(PopulationModelParser.MulDivExpressionContext ctx) {
-        SymbolType t1 = checkNumber(ctx.left);
-        SymbolType t2 = checkNumber(ctx.right);
-        return SymbolType.merge(t1,t2);
+        return checkBinaryNumberOperation(ctx.left,ctx.right);
+    }
+
+    private SymbolType checkBinaryNumberOperation(PopulationModelParser.ExprContext left, PopulationModelParser.ExprContext right) {
+        SymbolType t1 = checkNumber(left);
+        SymbolType t2 = checkNumber(right);
+        if (!t1.isANumber()) {
+            errors.add(ModelBuildingError.typeError(SymbolType.NUMBER,t1,left));
+        }
+        if (!t2.isANumber()) {
+            errors.add(ModelBuildingError.typeError(SymbolType.NUMBER,t2,right));
+        }
+        return SymbolType.NUMBER;
+
     }
 
     @Override
@@ -294,14 +205,12 @@ public class TypeExpressionChecker implements PopulationModelVisitor<SymbolType>
         if (!populationAllowed) {
             errors.add(ModelBuildingError.illegalPopulationExpression(ctx));
         }
-        return SymbolType.REAL;
+        return SymbolType.NUMBER;
     }
 
     @Override
     public SymbolType visitAddSubExpression(PopulationModelParser.AddSubExpressionContext ctx) {
-        SymbolType t1 = checkNumber(ctx.left);
-        SymbolType t2 = checkNumber(ctx.right);
-        return SymbolType.merge(t1,t2);
+        return checkBinaryNumberOperation(ctx.left,ctx.right);
     }
 
     @Override
@@ -317,23 +226,4 @@ public class TypeExpressionChecker implements PopulationModelVisitor<SymbolType>
 //        return SymbolType.REAL;
 //    }
 
-    @Override
-    public SymbolType visit(ParseTree tree) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitChildren(RuleNode node) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitTerminal(TerminalNode node) {
-        return null;
-    }
-
-    @Override
-    public SymbolType visitErrorNode(ErrorNode node) {
-        return null;
-    }
 }

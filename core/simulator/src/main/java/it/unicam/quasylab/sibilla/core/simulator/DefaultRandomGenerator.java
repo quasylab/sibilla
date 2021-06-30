@@ -47,4 +47,5 @@ public class DefaultRandomGenerator extends AbstractRandomGenerator implements S
 		return random.nextDouble();
 	}
 
+
 }

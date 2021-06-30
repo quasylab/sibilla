@@ -8,14 +8,13 @@ plugins {
 group = 'it.unicam.quasylab.sibilla.examples.servers.master'
 
 version = '1.0.0'
-sourceCompatibility = '11'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile project(':core:network')
+    implementation project(':core:network')
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation('org.springframework.boot:spring-boot-starter-test') {

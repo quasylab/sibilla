@@ -1,10 +1,6 @@
 package it.unicam.quasylab.sibilla.examples.benchmarks.slave;
 
 
-import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
-import it.unicam.quasylab.sibilla.core.network.benchmark.computation.ComputationBenchmarkEnvironment;
-import it.unicam.quasylab.sibilla.examples.pm.seir.SEIRModelDefinition;
-
 public class ComputationBenchmark {
 
     public static void main(String[] args) {

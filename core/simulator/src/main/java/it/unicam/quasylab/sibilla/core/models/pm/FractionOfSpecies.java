@@ -28,16 +28,16 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 public class FractionOfSpecies implements Measure<PopulationState> {
 
     private final String name;
-    private final int speciesIndex;
+    private final int[] speciesIndexes;
 
-    public FractionOfSpecies(String name, int speciesIndex) {
+    public FractionOfSpecies(String name, int ... speciesIndexes) {
         this.name = name;
-        this.speciesIndex = speciesIndex;
+        this.speciesIndexes = speciesIndexes;
     }
 
     @Override
     public double measure(PopulationState t) {
-        return t.getFraction(speciesIndex);
+        return t.getFraction(speciesIndexes);
     }
 
     @Override

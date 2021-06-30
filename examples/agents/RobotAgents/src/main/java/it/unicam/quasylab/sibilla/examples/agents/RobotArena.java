@@ -24,7 +24,7 @@
 package it.unicam.quasylab.sibilla.examples.agents;
 
 import org.apache.commons.math3.random.RandomGenerator;
-import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.World;
+import it.unicam.quasylab.sibilla.core.models.agents.World;
 
 import java.util.LinkedList;
 

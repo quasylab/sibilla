@@ -5,7 +5,6 @@ plugins {
 
 group = 'it.unicam.quasylab.sibilla.examples.servers.slave'
 version = '1.0.0'
-sourceCompatibility = '11'
 
 repositories {
     mavenCentral()

@@ -6,32 +6,29 @@ package it.unicam.quasylab.sibilla.langs.pm;
 
 model   : element* EOF;
 
-element : const_declaration | species_declaration | rulestatement | param_declaration | measure_declaration | system_declaration ;
+element : const_declaration
+        | species_declaration
+        | rule_declaration
+        | param_declaration
+        | measure_declaration
+        | system_declaration
+        | label_declaration;
 
-system_declaration: 'system' name=ID ('(' args+=ID (',' args+=ID)* ')')? '='  species_pattern;
+system_declaration: 'system' name=ID ('(' args+=ID (',' args+=ID)* ')')? '='  species_pattern ';' ;
 
 const_declaration   : 'const' name=ID '=' expr ';';
 
-species_declaration : 'species' name=ID ('of' range ('*' range)* )?;
+species_declaration : 'species' name=ID ('of' range ('*' range)* )? ';';
 
 range : '[' min=expr ',' max=expr ']';
 
+label_declaration   : 'label' name=ID ((local_variables) (guard_expression)?)? '=' '{' species_expression (',' species_expression)* '}'
+                    ;
+
 rule_declaration    :
-    'rule' name=ID '{'
+    'rule' name=ID ((local_variables) (guard_expression)?)? '{'
         body=rule_body
     '}'
-    ;
-
-rulestatement :
-    for_statement | when_statement | rule_declaration | rule_body
-    ;
-
-for_statement :
-    'for' name=ID 'in' domain=range next=rulestatement
-    ;
-
-when_statement :
-    'when' guard=expr arg=rulestatement
     ;
 
 rule_body :
@@ -46,22 +43,23 @@ species_pattern :
     ;
 
 species_pattern_element:
-    species_expression ('[' size=expr ']')?
+    species_expression ( '<' size=expr '>')?
 ;
 
 
 species_expression:
-    name=ID ('<' expr (',' expr)* '>')?
+    name=ID ('[' expr (',' expr)* (local_variables)? (guard_expression)? ']')?
     ;
 
-measure_declaration : 'measure' name=ID '=' expr ';';
+local_variables: 'for' variables += local_variable ('and' variables += local_variable)*;
+
+local_variable: name=ID 'in' range;
+
+guard_expression: 'when' guard=expr;
+
+measure_declaration : 'measure' name=ID ((local_variables) (guard_expression)?)? '=' expr ';';
 
 param_declaration   : 'param' name=ID '=' expr ';';
-
-type :
-    'int' # intType
-    | 'real' # realType
-    ;
 
 expr    :
       left=expr op=('<'|'<='|'=='|'>='|'>') right=expr          # relationExpression
@@ -82,6 +80,7 @@ expr    :
     | '#' agent=species_expression                                       # populationSizeExpression
 //    | 'now'                                        # nowExpression
     | reference=ID                                 # referenceExpression
+//    | 'abs' '(' expr ')'
     ;
 
 

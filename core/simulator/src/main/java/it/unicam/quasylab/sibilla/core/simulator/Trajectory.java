@@ -31,13 +31,16 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.IntFunction;
+import java.util.stream.Collectors;
 
 /**
  * @author loreti
  */
-public class Trajectory<S extends State> implements Externalizable {
+public class Trajectory<S> implements Externalizable {
 
     private static final long serialVersionUID = -9039722623650234376L;
     private List<Sample<S>> data;
@@ -87,6 +90,11 @@ public class Trajectory<S extends State> implements Externalizable {
 
     public int size() {
         return data.size();
+    }
+
+    public IntFunction<S> getSteps() {
+        ArrayList<S> values = new ArrayList<>(data.stream().map(s -> s.getValue()).collect(Collectors.toList()));
+        return i -> values.get(i);
     }
 
     /**

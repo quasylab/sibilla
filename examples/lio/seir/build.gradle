@@ -1,0 +1,11 @@
+plugins {
+  id 'java'
+  id 'application'
+}
+
+
+dependencies {
+  compile project(':core:network')
+}
+
+mainClassName = 'quasylab.sibilla.examples.lio.seir.Main'

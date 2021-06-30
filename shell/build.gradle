@@ -1,0 +1,37 @@
+plugins {
+    id 'antlr'
+    id 'java'
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project(':core:simulator')
+    compile project(':core:runtime')
+    compile project(':langs:util')
+    compile project(':langs:pm')
+    compile project(':langs:lio')
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    antlr "org.antlr:antlr4:4.8" // use ANTLR version 4
+
+    compile group: 'org.antlr', name: 'ST4', version: '4.3'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+application {
+    mainClassName = "it.unicam.quasylab.sibilla.shell.SibillaShell"
+    applicationName = "sshell"
+}
+
+generateGrammarSource {
+    arguments += ["-visitor", "-long-messages"]
+}

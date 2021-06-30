@@ -1,9 +1,9 @@
 
 package it.unicam.quasylab.sibilla.examples.agents;
 
-import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentAction;
-import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.AgentBehaviour;
-import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.VariableMapping;
+import it.unicam.quasylab.sibilla.core.models.agents.AgentAction;
+import it.unicam.quasylab.sibilla.core.models.agents.AgentBehaviour;
+import it.unicam.quasylab.sibilla.core.models.agents.VariableMapping;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import static it.unicam.quasylab.sibilla.examples.agents.RoboticScenarioDefinition.*;

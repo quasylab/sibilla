@@ -23,11 +23,13 @@
 
 package it.unicam.quasylab.sibilla.langs.pm;
 
+import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
 public class ParseUtil {
 
+    public static final String SYNTAX_ERROR = "Syntax error at line %d (offset %d): %s";
     public static final String DUPLICATED_SYMBOL_ERROR_MESSAGE = "Symbol %s at line %d char %d is already defined at line %d char %d!";
     public static final String UNDEFINED_SYMBOL_ERROR_MESSAGE = "Unknown symbol %s at line %d char %d!";
     public static final String EXPRESSION_TYPE_ERROR_MESSAGE = "Type error at line %d char %d: expected %s is %s!";
@@ -35,6 +37,7 @@ public class ParseUtil {
     public static final String ILLEGAL_USE_OF_AGENT_IDENTIFIER_MESSAGE = "Illegal use of agent identifier %s at line %d char %d!";
     public static final String EXPECTED_BOOLEAN_MESSAGE = "Expression at line %d char %d: expected a boolean is %s!";
     public static final String ILLEGAL_POPULATION_EXPRESSION_MESSAGE = "Population expression is not allowed at line %d char %d!";
+    public static final String ILLEGAL_USE_OF_NAME_MESSAGE = "Name %s cannot be used at line %d char %d!";
     public static final String ILLEGAL_TIME_EXPRESSION_MESSAGE = "Time dependent expression is not allowed at line %d char %d!";
     public static final String UNDEFINED_AGENT_ERROR_MESSAGE = "Unknown agent %s at line %d char %d!";
     public static final String WRONG_NUMBER_OF_AGENT_PARAMETERS_MESSAGE = "Wrong number of agent parameters a line %d char %d (expected %d are %d)!";
@@ -43,9 +46,10 @@ public class ParseUtil {
     private static final String POPULATION_STATE_IDENTIFIER = "_state_";
     private static final String POPULATION_FRACTION_EXPRESSION = POPULATION_STATE_IDENTIFIER+".getFraction(%s)";
     private static final String SPECIES_FORMAT = "_SPECIES_%s_%s";
-    private static final String POPULATION_SIZE_EXPRESSION = POPULATION_STATE_IDENTIFIER+".getOccupancy(%s)";;
+    private static final String POPULATION_SIZE_EXPRESSION = POPULATION_STATE_IDENTIFIER+".getOccupancy(%s)";
     private static final String STATE_NAME = "_state_";
     private static final String MEASURE_PATTER = "computeMeasure_%s";
+    private static final String ILLEGAL_INTERVAL_MESSAGE = "Illegal interval %d>=%d at line %d char %d!";
 
 
     public static String getDuplicatedSymbolErrorMessage(String name, ParserRuleContext existing, ParserRuleContext duplicated) {
@@ -116,5 +120,17 @@ public class ParseUtil {
 
     public static String getMeasureName(String measure) {
         return String.format(MEASURE_PATTER,measure);
+    }
+
+    public static String syntaxErrorMessage(ParseError e) {
+        return String.format(SYNTAX_ERROR,e.getLine(),e.getOffset(),e.getMessage());
+    }
+
+    public static String illegalUseOfName(String name, PopulationModelParser.ReferenceExpressionContext ctx) {
+        return String.format(ILLEGAL_USE_OF_NAME_MESSAGE,name,ctx.start.getLine(),ctx.start.getCharPositionInLine());
+    }
+
+    public static String illegalInterval(int min, int max, PopulationModelParser.RangeContext range) {
+        return String.format(ILLEGAL_INTERVAL_MESSAGE,min,max,range.start.getLine(),range.start.getCharPositionInLine());
     }
 }

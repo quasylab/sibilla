@@ -82,7 +82,7 @@ public class SimulationTimeSeries {
 	}
 	
 	public void saveTo( String path ) throws FileNotFoundException {
-		File output = new File( path+"/"+name+".dat");
+		File output = new File( path+File.separator+"_"+name+".dat");
 		PrintStream ps = new PrintStream(output);
 		printTimeSeries(ps);
 		ps.close();
@@ -100,7 +100,25 @@ public class SimulationTimeSeries {
 		}
 	}
 
-	
+	public void writeToCSV(String outputFolder) throws FileNotFoundException {
+		writeToCSV(outputFolder,"","");
+	}
+
+	public void writeToCSV(String outputFolder, String prefix) throws FileNotFoundException {
+		writeToCSV(outputFolder,prefix,"");
+	}
+
+	public void writeToCSV(String outputFolder, String prefix, String postfix) throws FileNotFoundException {
+		writeToCSV(new File(outputFolder),prefix,postfix);
+	}
+
+	public void writeToCSV(File outputFolder, String prefix, String postfix) throws FileNotFoundException {
+		File output = new File(outputFolder,prefix+name+postfix+".csv");
+		PrintWriter writer = new PrintWriter(output);
+		writeToCSV(writer);
+		writer.close();
+	}
+
 	public void writeToCSV( StringWriter writer ) {
 		for( int i=0 ; i<data.length ; i++ ) {
 			writer.write(getTime(i)+";"+getMean(i)+";"+getStandardDeviation(i)+";"+getConfidenceInterval(i)+"\n");

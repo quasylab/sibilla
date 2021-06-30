@@ -24,15 +24,20 @@
 package it.unicam.quasylab.sibilla.langs.pm;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ModelGenerationException extends Throwable {
+
     private final List<ModelBuildingError> errors;
 
     public ModelGenerationException(List<ModelBuildingError> errors) {
+        super(errors.stream().map(ModelBuildingError::getMessage).collect(Collectors.joining("\n")));
         this.errors = errors;
     }
 
     public List<ModelBuildingError> getErrors() {
         return errors;
     }
+
+
 }

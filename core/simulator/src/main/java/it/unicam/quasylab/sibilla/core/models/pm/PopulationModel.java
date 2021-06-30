@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models.pm;
 
+import it.unicam.quasylab.sibilla.core.models.AbstractModel;
 import it.unicam.quasylab.sibilla.core.models.MarkovProcess;
 import it.unicam.quasylab.sibilla.core.models.StepFunction;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
@@ -47,7 +48,7 @@ import java.util.stream.IntStream;
  *
  * @author loreti
  */
-public class PopulationModel implements MarkovProcess<PopulationState> {
+public class PopulationModel extends AbstractModel<PopulationState> {
 
     private static final long serialVersionUID = 6871037109869821108L;
 
@@ -55,14 +56,12 @@ public class PopulationModel implements MarkovProcess<PopulationState> {
 
     private final List<PopulationRule> rules;
 
-    private final Map<String, Measure<PopulationState>> measuresTable;
-
     public PopulationModel(PopulationRegistry registry,
         List<PopulationRule> rules,
         Map<String, Measure<PopulationState>> measuresTable) {
+        super(measuresTable);
         this.registry = registry;
         this.rules = rules;
-        this.measuresTable = measuresTable;
     }
 
     @Override
@@ -125,31 +124,6 @@ public class PopulationModel implements MarkovProcess<PopulationState> {
             vector[i] = ByteBuffer.wrap(bais.readNBytes(4)).getInt();
         }
         return new PopulationState(vector);
-    }
-
-    @Override
-    public String[] measures() {
-        return measuresTable.keySet().toArray(new String[0]);
-    }
-
-    @Override
-    public double measure(String m, PopulationState state) {
-        Measure<PopulationState> measure = measuresTable.get(m);
-        if (measure == null) {
-            throw new IllegalArgumentException("Species " + m + " is unknown!");
-        }
-        return measure.measure(state);
-    }
-
-    @Override
-    public Measure<PopulationState> getMeasure(String m) {
-        return measuresTable.get(m);
-    }
-
-    public void addMeasures(List<Measure<PopulationState>> measures) {
-        if (measures != null) {
-            measures.forEach(m -> measuresTable.put(m.getName(), m));
-        }
     }
 
     public int indexOf(String label, Object... args) {

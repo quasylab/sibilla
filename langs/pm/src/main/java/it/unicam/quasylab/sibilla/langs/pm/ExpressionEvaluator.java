@@ -23,353 +23,81 @@
 
 package it.unicam.quasylab.sibilla.langs.pm;
 
-import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
-import it.unicam.quasylab.sibilla.core.models.MeasureFunction;
-import it.unicam.quasylab.sibilla.core.models.pm.Population;
-import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
-import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
+/**
+ * This visitor is used to evaluate expressions as double. Whenever an expression of the wrong
+ * type is considered, a Double.NaN is returned.
+ */
 public class ExpressionEvaluator extends PopulationModelBaseVisitor<Double> {
 
-    private final SymbolTable table;
-    private Map<String,Double> context;
-    private final EvaluationEnvironment environment;
-    private final HashMap<String,Double> doubleCache;
-    private final BooleanExpressionEvaluator booleanEvaluator;
-    private final DoubleExpressionEvaluator doubleEvaluator;
-    private final StatePredicateVisitor statePredicateVisitor;
-    private final StateExpressionVisitor stateExpressionVisitor;
-    private PopulationRegistry registry;
+    private final Function<String,Double> nameResolver;
 
-
-    public ExpressionEvaluator(SymbolTable table, Map<String, Double> context, EvaluationEnvironment environment) {
-        this.table = table;
-        this.context = context;
-        this.environment = environment;
-        this.doubleCache = new HashMap<>();
-        this.booleanEvaluator = new BooleanExpressionEvaluator();
-        this.doubleEvaluator = new DoubleExpressionEvaluator();
-        this.stateExpressionVisitor = new StateExpressionVisitor();
-        this.statePredicateVisitor = new StatePredicateVisitor();
+    public ExpressionEvaluator(Function<String,Double> nameResolver) {
+        this.nameResolver = nameResolver;
     }
 
-    public double evalDouble(ParseTree tree) {
-        return doubleEvaluator.visit(tree);
+
+    @Override
+    public Double visitExponentExpression(PopulationModelParser.ExponentExpressionContext ctx) {
+        return Math.pow(ctx.left.accept(this), ctx.right.accept(this));
     }
 
-    public int evalInt(ParseTree tree) {
-        return doubleEvaluator.visit(tree).intValue();
+    @Override
+    public Double visitReferenceExpression(PopulationModelParser.ReferenceExpressionContext ctx) {
+        return nameResolver.apply(ctx.reference.getText());
     }
 
-    public boolean evalBool(ParseTree tree) {
-        return booleanEvaluator.visit(tree);
+    @Override
+    public Double visitIntValue(PopulationModelParser.IntValueContext ctx) {
+        return Double.parseDouble(ctx.getText());
     }
 
-    public void setPopulationRegistry(PopulationRegistry registry) {
-        this.registry = registry;
+    @Override
+    public Double visitBracketExpression(PopulationModelParser.BracketExpressionContext ctx) {
+        return ctx.expr().accept(this);
     }
 
-    public Predicate<PopulationState> evalStatePredicate(ParseTree tree) {
-        if (tree == null) {
-            return s->true;
-        }
-        return statePredicateVisitor.visit(tree);
+    @Override
+    public Double visitRealValue(PopulationModelParser.RealValueContext ctx) {
+        return Double.parseDouble(ctx.getText());
     }
 
-    public MeasureFunction<PopulationState> evalStateFunction(ParseTree tree) {
-        return stateExpressionVisitor.visit(tree);
+    @Override
+    public Double visitIfThenElseExpression(PopulationModelParser.IfThenElseExpressionContext ctx) {
+        return (ctx.guard.accept(getBooleanExpressionEvaluator())?ctx.thenBranch.accept(this):ctx.elseBranch.accept(this));
     }
 
-    public Population evalPopulation(PopulationModelParser.Species_pattern_elementContext patternElement) {
-        int idx = evalSpeciesIndex(patternElement.species_expression());
-        int size = (patternElement.size==null?1:evalInt(patternElement.size));
-        return new Population(idx,size);
+    public BooleanExpressionEvaluator getBooleanExpressionEvaluator() {
+        return new BooleanExpressionEvaluator(this);
     }
 
-    public Population[] evalPopulationPattern(PopulationModelParser.Species_patternContext pattern) {
-        return pattern.species_pattern_element().stream().map(this::evalPopulation).toArray(i -> new Population[i]);
+    @Override
+    public Double visitMulDivExpression(PopulationModelParser.MulDivExpressionContext ctx) {
+        return PopulationModelGenerator.getOperator(ctx.op.getText()).applyAsDouble(ctx.left.accept(this),ctx.right.accept(this));
     }
 
-    private int evalSpeciesIndex(PopulationModelParser.Species_expressionContext species_expression) {
-        String name = species_expression.name.getText();
-        Object[] args = species_expression.expr().stream().map(this::evalInt).toArray();
-        return registry.indexOf(name,args);
+
+    @Override
+    public Double visitAddSubExpression(PopulationModelParser.AddSubExpressionContext ctx) {
+        return PopulationModelGenerator.getOperator(ctx.op.getText()).applyAsDouble(ctx.left.accept(this),ctx.right.accept(this));
     }
 
-    public PopulationRegistry getPopulationRegistry() {
-        return this.registry;
-    }
-
-    public PopulationState getState(double[] args, Map<String, Double> context, PopulationModelParser.Species_patternContext species_pattern) {
-        this.context = context;
-        Population[] populations = evalPopulationPattern(species_pattern);
-        this.context = null;
-        return registry.createPopulationState(populations);
-    }
-
-    private class BooleanExpressionEvaluator extends PopulationModelBaseVisitor<Boolean> {
-        @Override
-        protected Boolean defaultResult() {
-            return false;
-        }
-
-        @Override
-        public Boolean visitNegationExpression(PopulationModelParser.NegationExpressionContext ctx) {
-            return !visit(ctx.arg);
-        }
-
-        @Override
-        public Boolean visitTrueValue(PopulationModelParser.TrueValueContext ctx) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitRelationExpression(PopulationModelParser.RelationExpressionContext ctx) {
-            double left = doubleEvaluator.visit(ctx.left);
-            double right = doubleEvaluator.visit(ctx.right);
-            if (ctx.op.equals("<"))  { return left<right; }
-            if (ctx.op.equals("<=")) { return left<=right; }
-            if (ctx.op.equals("==")) { return left == right; }
-            if (ctx.op.equals("!=")) { return left != right; }
-            if (ctx.op.equals(">"))  { return left > right; }
-            if (ctx.op.equals(">=")) { return left >= right; }
-            return false;
-        }
-
-        @Override
-        public Boolean visitOrExpression(PopulationModelParser.OrExpressionContext ctx) {
-            return visit(ctx.left)||visit(ctx.right);
-        }
-
-        @Override
-        public Boolean visitIfThenElseExpression(PopulationModelParser.IfThenElseExpressionContext ctx) {
-            return (visit(ctx.guard)?visit(ctx.thenBranch):visit(ctx.elseBranch));
-        }
-
-        @Override
-        public Boolean visitFalseValue(PopulationModelParser.FalseValueContext ctx) {
-            return false;
-        }
-
-        @Override
-        public Boolean visitAndExpression(PopulationModelParser.AndExpressionContext ctx) {
-            return visit(ctx.left)&&visit(ctx.right);
+    @Override
+    public Double visitUnaryExpression(PopulationModelParser.UnaryExpressionContext ctx) {
+        if (ctx.op.getText().equals("-")) {
+            return -ctx.arg.accept(this);
+        } else {
+            return ctx.arg.accept(this);
         }
     }
 
-    private class DoubleExpressionEvaluator extends PopulationModelBaseVisitor<Double> {
-        @Override
-        public Double visitReferenceExpression(PopulationModelParser.ReferenceExpressionContext ctx) {
-            String id = ctx.reference.getText();
-            if (table.isAConst(id)) {
-                return getValueOfConstants(id);
-            }
-            if (table.isAParameter(id)) {
-                return (double) environment.get(id);
-            }
-            return context.getOrDefault(id,Double.NaN);
-        }
-
-        private Double getValueOfConstants(String id) {
-            Double value;
-            if (!doubleCache.containsKey(id)) {
-                value = this.visit(table.getContext(id));
-                doubleCache.put(id,value);
-            } else {
-                value = doubleCache.get(id);
-            }
-            return value;
-        }
-
-        @Override
-        public Double visitIfThenElseExpression(PopulationModelParser.IfThenElseExpressionContext ctx) {
-            if (booleanEvaluator.visit(ctx.guard)) {
-                return this.visit(ctx.thenBranch);
-            } else {
-                return this.visit(ctx.elseBranch);
-            }
-        }
-
-        @Override
-        public Double visitMulDivExpression(PopulationModelParser.MulDivExpressionContext ctx) {
-            double left = visit(ctx.left);
-            double right = visit(ctx.right);
-            if (ctx.op.getText().equals("*")) {
-                return visit(ctx.left)*visit(ctx.right);
-            }
-            if (ctx.op.getText().equals("/")) {
-                return left/right;
-            } else {
-                return (right==0.0?0.0:left/right);
-            }
-        }
-
-        @Override
-        public Double visitAddSubExpression(PopulationModelParser.AddSubExpressionContext ctx) {
-            double left = visit(ctx.left);
-            double right = visit(ctx.right);
-            if (ctx.op.getText().equals("+")) {
-                return left+right;
-            }
-            if (ctx.op.getText().equals("-")) {
-                return left-right;
-            } else {
-                return left%right;
-            }
-        }
-
-        @Override
-        public Double visitUnaryExpression(PopulationModelParser.UnaryExpressionContext ctx) {
-            if (ctx.op.getText().equals("-")) {
-                return -visit(ctx.arg);
-            } else {
-                return visit(ctx.arg);
-            }
-        }
-
-        @Override
-        public Double visitIntValue(PopulationModelParser.IntValueContext ctx) {
-            return Double.parseDouble(ctx.INTEGER().getText());
-        }
-
-        @Override
-        protected Double defaultResult() {
-            return Double.NaN;
-        }
-
-        @Override
-        public Double visitExponentExpression(PopulationModelParser.ExponentExpressionContext ctx) {
-            return Math.pow(visit(ctx.left),visit(ctx.right));
-        }
-
-        @Override
-        public Double visitRealValue(PopulationModelParser.RealValueContext ctx) {
-            return Double.parseDouble(ctx.REAL().getText());
-        }
+    public double evalDouble(PopulationModelParser.ExprContext expression) {
+        return expression.accept(this);
     }
 
-    public class StateExpressionVisitor extends PopulationModelBaseVisitor<MeasureFunction<PopulationState>> {
-        @Override
-        public MeasureFunction<PopulationState> visitExponentExpression(PopulationModelParser.ExponentExpressionContext ctx) {
-            MeasureFunction<PopulationState> base = visit(ctx.left);
-            MeasureFunction<PopulationState> exp = visit(ctx.right);
-            return s -> Math.pow(base.apply(s),exp.apply(s));
-        }
-
-        @Override
-        public MeasureFunction<PopulationState> visitIntValue(PopulationModelParser.IntValueContext ctx) {
-            int value = evalInt(ctx);
-            return s -> (double) value;
-        }
-
-        @Override
-        public MeasureFunction<PopulationState> visitPopulationFractionExpression(PopulationModelParser.PopulationFractionExpressionContext ctx) {
-            int idx = evalSpeciesIndex(ctx.species_expression());
-            return s -> s.getFraction(idx);
-        }
-
-        @Override
-        public MeasureFunction<PopulationState> visitRealValue(PopulationModelParser.RealValueContext ctx) {
-            double value = evalDouble(ctx);
-            return s -> value;
-        }
-
-        @Override
-        public MeasureFunction<PopulationState> visitMulDivExpression(PopulationModelParser.MulDivExpressionContext ctx) {
-            return applyBinary(visit(ctx.left),getOperator(ctx.op.getText()),visit(ctx.right));
-        }
-
-        @Override
-        public MeasureFunction<PopulationState> visitPopulationSizeExpression(PopulationModelParser.PopulationSizeExpressionContext ctx) {
-            int idx = evalSpeciesIndex(ctx.species_expression());
-            return s -> s.getOccupancy(idx);
-        }
-
-        @Override
-        public MeasureFunction<PopulationState> visitAddSubExpression(PopulationModelParser.AddSubExpressionContext ctx) {
-            return applyBinary(visit(ctx.left),getOperator(ctx.op.getText()),visit(ctx.right));
-        }
-
-        @Override
-        public MeasureFunction<PopulationState> visitUnaryExpression(PopulationModelParser.UnaryExpressionContext ctx) {
-            MeasureFunction<PopulationState> arg = visit(ctx.arg);
-            if (ctx.op.equals("-")) {
-                return s -> -arg.apply(s);
-            } else {
-                return arg;
-            }
-        }
+    public int evalInteger(PopulationModelParser.ExprContext expression) {
+        return (int) evalDouble(expression);
     }
 
-    private MeasureFunction<PopulationState> applyBinary(MeasureFunction<PopulationState> left, BiFunction<Double, Double, Double> op, MeasureFunction<PopulationState> right) {
-        return s -> op.apply(left.apply(s),right.apply(s));
-    }
-
-    private BiFunction<Double, Double, Double> getOperator(String op) {
-        if (op.equals("+")) {
-            return (x,y) -> x+y;
-        }
-        if (op.equals("-")) {
-            return (x,y) -> x-y;
-        }
-        if (op.equals("%")) {
-            return (x,y) -> x%y;
-        }
-        if (op.equals("*")) {
-            return (x,y) -> x*y;
-        }
-        if (op.equals("/")) {
-            return (x,y) -> x/y;
-        }
-        if (op.equals("//")) {
-            return (x,y) -> (y==0.0?0.0:x/y);
-        }
-        return null;
-     }
-
-    public class StatePredicateVisitor extends PopulationModelBaseVisitor<Predicate<PopulationState>> {
-        @Override
-        public Predicate<PopulationState> visitNegationExpression(PopulationModelParser.NegationExpressionContext ctx) {
-            return Predicate.not(visit(ctx.arg));
-        }
-
-        @Override
-        public Predicate<PopulationState> visitTrueValue(PopulationModelParser.TrueValueContext ctx) {
-            return s -> true;
-        }
-
-        @Override
-        public Predicate<PopulationState> visitOrExpression(PopulationModelParser.OrExpressionContext ctx) {
-            return visit(ctx.left).or(visit(ctx.right));
-        }
-
-        @Override
-        public Predicate<PopulationState> visitIfThenElseExpression(PopulationModelParser.IfThenElseExpressionContext ctx) {
-            Predicate<PopulationState> guard = visit(ctx.guard);
-            Predicate<PopulationState> thenBranch = visit(ctx.thenBranch);
-            Predicate<PopulationState> elseBranch = visit(ctx.elseBranch);
-            return s -> (guard.test(s)?thenBranch.test(s):elseBranch.test(s));
-        }
-
-        @Override
-        public Predicate<PopulationState> visitFalseValue(PopulationModelParser.FalseValueContext ctx) {
-            return s -> false;
-        }
-
-        @Override
-        public Predicate<PopulationState> visitAndExpression(PopulationModelParser.AndExpressionContext ctx) {
-            return visit(ctx.left).and(visit(ctx.right));
-        }
-
-
-    }
 }

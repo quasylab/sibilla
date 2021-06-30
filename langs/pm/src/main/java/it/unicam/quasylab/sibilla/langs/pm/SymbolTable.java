@@ -24,6 +24,10 @@
 package it.unicam.quasylab.sibilla.langs.pm;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+
+import java.util.List;
+import java.util.Set;
 
 public interface SymbolTable {
 
@@ -43,6 +47,8 @@ public interface SymbolTable {
 
     void addSystem(String name, PopulationModelParser.System_declarationContext context) throws DuplicatedSymbolException;
 
+    void addLabel(String name, PopulationModelParser.Label_declarationContext ctx) throws DuplicatedSymbolException;
+
     String[] rules();
 
     String[] constants();
@@ -55,6 +61,8 @@ public interface SymbolTable {
 
     String[] parameters();
 
+    String[] labels();
+
     int arity(String species);
 
     boolean isAMeasure(String name);
@@ -65,6 +73,8 @@ public interface SymbolTable {
 
     boolean isAConst(String name);
 
+    boolean isALabel(String name);
+
     boolean isAParameter(String name);
 
     boolean isAVariable(String name);
@@ -72,6 +82,8 @@ public interface SymbolTable {
     SymbolType getType(String name);
 
     ParserRuleContext getContext(String name);
+
+    boolean isDefined(String name);
 
     PopulationModelParser.Species_declarationContext getSpeciesContext(String name);
 
@@ -84,4 +96,14 @@ public interface SymbolTable {
     PopulationModelParser.Measure_declarationContext getMeasureContext(String measure);
 
     PopulationModelParser.System_declarationContext getSystemContext(String name);
+
+    PopulationModelParser.Const_declarationContext getConstantDeclarationContext(String name);
+
+    PopulationModelParser.Param_declarationContext getParameterContext(String name);
+
+    PopulationModelParser.Label_declarationContext getLabelContext(String name);
+
+    Set<String> checkLocalVariables(PopulationModelParser.Local_variablesContext local_variables) throws DuplicatedSymbolException;
+
+    Set<String> checkLocalVariables(List<Token> args, ParserRuleContext ctx) throws DuplicatedSymbolException;
 }

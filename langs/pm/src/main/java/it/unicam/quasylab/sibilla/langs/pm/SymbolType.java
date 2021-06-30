@@ -24,21 +24,12 @@
 package it.unicam.quasylab.sibilla.langs.pm;
 
 public enum SymbolType {
-    INT,
-    REAL,
+    NUMBER,
     BOOLEAN,
     ERROR;
 
-    public static SymbolType merge(SymbolType t1, SymbolType t2) {
-        switch (t1) {
-            case INT:  return ((t2==INT)||(t2==REAL)?t2:ERROR);
-            case REAL: return ((t2==INT)||(t2==REAL)?REAL:ERROR);
-            default:return (t2==t1?t1:ERROR);
-        }
-    }
-
     public boolean isANumber() {
-        return (this==ERROR)||(this==INT)||(this==REAL);
+        return (this==ERROR)||(this==NUMBER);
     }
 
     public boolean isABoolean() {
@@ -48,30 +39,16 @@ public enum SymbolType {
     @Override
     public String toString() {
         switch (this) {
-            case INT: return "int";
-            case REAL: return "real";
+            case NUMBER: return "number";
             case BOOLEAN: return "boolean";
             default:
                 return super.toString();
         }
     }
 
-    public boolean isCompatible(SymbolType t) {
-        if (this.isANumber()) {
-            return t.isANumber();
-        } else {
-            return this==t;
-        }
-    }
-
-    public boolean isInteger() {
-        return (this==INT)||(this==ERROR);
-    }
-
     public String javaType() {
         switch (this) {
-            case INT: return "int";
-            case REAL: return "double";
+            case NUMBER: return "double";
             case BOOLEAN: return "boolean";
             default: return "Object";
         }

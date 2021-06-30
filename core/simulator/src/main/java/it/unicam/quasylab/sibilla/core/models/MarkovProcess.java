@@ -34,7 +34,7 @@ import java.util.List;
  * This is a model implementing a Markov process. 
  * 
  */
-public interface MarkovProcess<S extends State> extends Model<S> {
+public interface MarkovProcess<S extends State> extends InteractiveModel<S> {
 
 	/**
 	 * Returns the transitions enabled in a given state at a given time. Each transition

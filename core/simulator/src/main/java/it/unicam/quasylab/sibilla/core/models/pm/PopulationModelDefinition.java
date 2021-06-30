@@ -100,11 +100,16 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
     }
 
     @Override
+    public boolean isAState(String name) {
+        return false;
+    }
+
+    @Override
     public int stateArity() {
         return getStates().arity();
     }
 
-    private StateSet<PopulationState> getStates() {
+    public StateSet<PopulationState> getStates() {
         if (states == null) {
             states = statesBuilder.apply(getEnvironment(),getRegistry());
         }
@@ -133,7 +138,7 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
 
     @Override
     public synchronized final PopulationModel createModel() {
-        if (model != null) {
+        if (model == null) {
             PopulationRegistry registry = getRegistry();
             List<PopulationRule> rules = getRules();
             Map<String,Measure<PopulationState>> measures = getMeasures();

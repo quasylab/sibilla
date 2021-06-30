@@ -37,7 +37,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import it.unicam.quasylab.sibilla.examples.pm.seir.CovidDefinition;
+import it.unicam.quasylab.sibilla.examples.lio.seir.CovidDefinition;
 
 import java.io.IOException;
 

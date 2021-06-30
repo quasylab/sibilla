@@ -1,0 +1,9 @@
+module "population"
+load "examples/seir/seir.pm"
+init "init"
+add measure all
+deadline 100
+dt 1.0
+replica 100
+simulate
+save output "./results" prefix "seir" postfix "__"

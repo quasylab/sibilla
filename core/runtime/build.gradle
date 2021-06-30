@@ -1,9 +1,6 @@
 apply plugin: 'maven-publish'
 apply plugin: 'java-library'
 
-sourceCompatibility = '11'
-targetCompatibility = '11'
-
 group = 'it.unicam.quasylab.sibilla.core.runtime'
 
 repositories {
@@ -12,10 +9,16 @@ repositories {
 
 dependencies {
     compile project(':core:simulator')
+    compile project(':langs:pm')
+    compile project(':langs:lio')
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }
 
+test {
+    useJUnitPlatform()
+}
 publishing {
     repositories {
         maven {

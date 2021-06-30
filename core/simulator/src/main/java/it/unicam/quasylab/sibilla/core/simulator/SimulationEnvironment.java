@@ -266,7 +266,7 @@ public class SimulationEnvironment implements Serializable {
 
 	}
 
-	public <S extends State> Trajectory<S> sampleTrajectory(RandomGenerator random, MarkovProcess<S> model, S state,
+	public <S extends State> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state,
 			double deadline) {
 		SimulationUnit<S> unit = new SimulationUnit<>(model, state, SamplePredicate.timeDeadlinePredicate(deadline),
 				s -> true);

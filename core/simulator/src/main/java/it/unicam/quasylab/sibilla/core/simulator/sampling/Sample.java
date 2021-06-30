@@ -33,7 +33,7 @@ import java.io.ObjectOutput;
 /**
  * @author loreti
  */
-public class Sample<S extends State> implements Externalizable {
+public class Sample<S> implements Externalizable {
 
     private static final long serialVersionUID = -2981890753216588999L;
 

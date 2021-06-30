@@ -97,5 +97,4 @@ public interface ModelDefinition<S extends State> {
      */
     Model<S> createModel();
 
-
 }

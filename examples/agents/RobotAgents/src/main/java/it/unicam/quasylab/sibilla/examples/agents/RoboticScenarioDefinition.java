@@ -23,7 +23,7 @@
 
 package it.unicam.quasylab.sibilla.examples.agents;
 
-import it.unicam.quasylab.sibilla.core.models.quasylab.sibilla.core.models.agents.*;
+import it.unicam.quasylab.sibilla.core.models.agents.*;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.HashMap;

@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
@@ -102,11 +103,35 @@ public class PopulationState implements State {
     }
 
     public double getOccupancy(int... idx) {
-        return IntStream.of(idx).boxed().map(i -> (double) populationVector[i]).reduce(0.0, (x, y) -> x + y);
+        return IntStream.of(idx).boxed().map(i -> (double) populationVector[i]).reduce(0.0, Double::sum);
     }
+
+    public double getOccupancy(List<Integer> indexes) {
+        return indexes.stream().map(i -> (double) populationVector[i]).reduce(0.0, Double::sum);
+    }
+
 
     public double getFraction(int idx) {
         return getOccupancy(idx) / population();
+    }
+
+    public double getFraction(int ... idx) {
+        return getOccupancy(idx) / population();
+    }
+
+    public double getFraction(List<Integer> indexes) {
+        return getOccupancy(indexes) / population();
+    }
+
+
+    public double getFraction(Predicate<Integer> p) {
+        double sum = 0.0;
+        for(int i=0; i<populationVector.length; i++) {
+            if (p.test(i)) {
+                sum += populationVector[i];
+            }
+        }
+        return sum/population();
     }
 
     // applies one update function

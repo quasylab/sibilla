@@ -33,14 +33,14 @@ import java.util.List;
  */
 public interface WeightedStructure<S> {
 
-	public double getTotalWeight();
+	double getTotalWeight();
 
-	public WeightedElement<S> select(double w);
+	WeightedElement<S> select(double w);
 
-	public WeightedStructure<S> add(double w, S s);
+	WeightedStructure<S> add(double w, S s);
 
-	public WeightedStructure<S> add(WeightedStructure<S> s);
+	WeightedStructure<S> add(WeightedStructure<S> s);
 
-	public List<WeightedElement<S>> getAll();
+	List<WeightedElement<S>> getAll();
 	
 }

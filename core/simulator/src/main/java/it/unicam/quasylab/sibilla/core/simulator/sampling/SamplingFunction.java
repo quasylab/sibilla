@@ -34,7 +34,7 @@ import java.util.function.Function;
  * @author loreti
  *
  */
-public interface SamplingFunction<S extends State> extends Serializable {
+public interface SamplingFunction<S> extends Serializable {
 
 	void sample(double time, S context);
 

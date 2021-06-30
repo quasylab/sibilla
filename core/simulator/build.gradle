@@ -49,10 +49,6 @@ dependencies {
 
 }
 
-sourceCompatibility = '11'
-targetCompatibility = '11'
-
-
 publishing {
     repositories {
         maven {

@@ -14,6 +14,8 @@ include 'core:simulator',
 		'core:runtime',
 		'langs:util',
 		'langs:pm',
+		'langs:lio',
+		'shell' ,
 		'gui:gui',
         'examples:populations:crowds',
 		'examples:populations:seir',
@@ -26,6 +28,6 @@ include 'core:simulator',
 		'examples:populations:taxis',
     	'examples:benchmarks:slave',
    	 	'examples:benchmarks:master',
-		'examples:agents:RobotAgents'
-findProject(':langs:util')?.name = 'util'
+		'examples:agents:RobotAgents',
+		'examples:lio:seir'
 

@@ -89,4 +89,14 @@ public class StateSet<T extends State> {
         return new StateSet<>(new ParametricValue<>(state));
     }
 
+    public boolean isDefined(String name) {
+        return index.containsKey(name);
+    }
+
+    public String getInfo(String name) {
+        if (index.containsKey(name)) {
+            return String.format("%s%s",name,index.get(name).getInfo());
+        }
+        return String.format("State %s is unknown",name);
+    }
 }

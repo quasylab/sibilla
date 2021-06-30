@@ -30,11 +30,11 @@ import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @author loreti
@@ -47,11 +47,13 @@ public class PopulationRegistry implements Serializable {
 
     private final Map<Tuple, Integer> map;
     private final ArrayList<Tuple> elements;
+    private final Map<String, int[]> labels;
 
     public PopulationRegistry() {
         this.count = 0;
         this.map = new HashMap<>();
         this.elements = new ArrayList<>();
+        this.labels = new HashMap<>();
     }
 
     public static PopulationRegistry createRegistry(int size) {
@@ -64,7 +66,7 @@ public class PopulationRegistry implements Serializable {
 
     public static PopulationRegistry createRegistry(String... species) {
         PopulationRegistry registry = new PopulationRegistry();
-        Arrays.stream(species).sequential().forEach(s -> registry.register(s));
+        Arrays.stream(species).sequential().forEach(registry::register);
         return registry;
     }
 
@@ -74,6 +76,24 @@ public class PopulationRegistry implements Serializable {
             map.put(t, count++);
             elements.add(t);
         }
+    }
+
+    public void addLabel(String label, int ... indexes) {
+        this.labels.put(label,indexes);
+    }
+
+    public int[] getLabel(String label) { return this.labels.get(label); }
+
+    public Set<Integer> getLabelSet(String label) {
+        int[] elements = labels.get(label);
+        if (elements != null) {
+            return IntStream.of(elements).boxed().collect(Collectors.toSet());
+        }
+        return new HashSet<>();
+    }
+
+    public Predicate<Integer> getLabelPredicate(String label) {
+        return getLabelSet(label)::contains;
     }
 
     public int indexOf(String label, Object... values) {
@@ -119,11 +139,24 @@ public class PopulationRegistry implements Serializable {
         return new NumberOfSpecies(String.format(NUMBER_OF_SPECIES_MEASURE_LABEL, stringOf(i)), i);
     }
 
+    public Measure<PopulationState> fractionLabelMeasure(String  label) {
+        return new FractionOfSpecies(String.format(FRACTION_OF_SPECIES_MEASURE_LABEL, label), labels.getOrDefault(label, new int[] {}));
+    }
+
+    public Measure<PopulationState> occupancyLabelMeasure(String  label) {
+        return new NumberOfSpecies(String.format(NUMBER_OF_SPECIES_MEASURE_LABEL, label), labels.getOrDefault(label, new int[] {}));
+    }
+
+    public boolean isALabel(String name) {
+        return labels.containsKey(name);
+    }
+
+
     private static class Tuple implements Serializable {
 
-        private String label;
+        private final String label;
 
-        private Object[] values;
+        private final Object[] values;
 
         public Tuple(String label, Object... values) {
             this.label = label;

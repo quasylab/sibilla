@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.langs.pm;
 
+import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
@@ -70,12 +71,29 @@ public class ModelBuildingError {
         return new ModelBuildingError(ParseUtil.getWrongNumberOfSpeciesParametersMessage(arity,ctx));
     }
 
-    public static ModelBuildingError expectedInteger(SymbolType t, ParserRuleContext ctx) {
-        return new ModelBuildingError(ParseUtil.getTypeErrorMessage(SymbolType.INT,t,ctx));
+    public static ModelBuildingError syntaxError(ParseError e) {
+        return new ModelBuildingError(ParseUtil.syntaxErrorMessage(e));
+    }
+
+    public static ModelBuildingError illegalUseOfName(String name, PopulationModelParser.ReferenceExpressionContext ctx) {
+        return new ModelBuildingError(ParseUtil.illegalUseOfName(name, ctx));
+    }
+
+    public static ModelBuildingError duplicatedName(String name, ParserRuleContext existing, ParserRuleContext duplicated) {
+        return new ModelBuildingError(ParseUtil.getDuplicatedSymbolErrorMessage(name,existing,duplicated));
     }
 
     public String getMessage() {
         return this.message;
     }
 
+    @Override
+    public int hashCode() {
+        return message.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return message;
+    }
 }
