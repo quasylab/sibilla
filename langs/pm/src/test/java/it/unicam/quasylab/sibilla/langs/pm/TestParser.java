@@ -237,13 +237,11 @@ public class TestParser {
         PopulationState state = reg.createPopulationState(pop);
         PopulationTransition transition = rule.apply(new DefaultRandomGenerator(),0.0, state);
         assertNotNull(transition);
-        assertEquals(0.5,transition.getRate());
-        assertEquals("s_to_e",transition.getName());
+        assertEquals(0.25,transition.getRate());
+        assertEquals("infection",transition.getName());
         PopulationState newState = state.apply( transition.apply(new DefaultRandomGenerator()) );
-        assertEquals(0,newState.getOccupancy(reg.indexOf("S")));
-        assertEquals(1,newState.getOccupancy(reg.indexOf("E")));
-        assertEquals(1,newState.getOccupancy(reg.indexOf("I")));
-        assertEquals(0,newState.getOccupancy(reg.indexOf("R")));
+        assertEquals(89,newState.getOccupancy(reg.indexOf("S")));
+        assertEquals(11,newState.getOccupancy(reg.indexOf("I")));
     }
 
     @Test
