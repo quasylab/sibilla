@@ -278,13 +278,13 @@ public class PopulationModelGenerator {
         return maps.stream().map(m -> getIndex(registry, combine(resolver, m), species, args)).collect(Collectors.toSet());
     }
 
-    public static Set<Integer> getIndexSet(PopulationRegistry registry, Function<String, Double> resolver, List<Map<String, Double>> maps, PopulationModelParser.Species_expressionContext se) {
-        List<Map<String,Double>> localMaps = PopulationModelGenerator.getMaps(resolver, se.local_variables(), se.guard_expression());
-        return PopulationModelGenerator.getIndexSet(registry,resolver,localMaps,se.name.getText(), se.expr());
+    public static Set<Integer> getIndexSet(PopulationRegistry registry, Function<String, Double> resolver, Map<String, Double> map, PopulationModelParser.Species_expressionContext se) {
+        List<Map<String,Double>> localMaps = PopulationModelGenerator.getMaps(combine(resolver,map), se.local_variables(), se.guard_expression());
+        return PopulationModelGenerator.getIndexSet(registry,combine(resolver,map),localMaps,se.name.getText(), se.expr());
     }
 
     public static List<Population> getPopulationList(PopulationRegistry registry, Function<String, Double> resolver, Map<String, Double> map, PopulationModelParser.Species_pattern_elementContext se) {
-        Set<Integer> indexSet = getIndexSet(registry, resolver, List.of(map), se.species_expression());
+        Set<Integer> indexSet = getIndexSet(registry, resolver, map, se.species_expression());
         int size ;
         if (se.expr() != null) {
             size = evalExpressionToInteger(combine(resolver,map),se.expr());

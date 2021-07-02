@@ -28,6 +28,7 @@ import it.unicam.quasylab.sibilla.core.models.StateSet;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -106,6 +107,54 @@ public class TestParser {
             "    }\n" +
             "    \n" +
             "    system init = S<startS>|I<startI>;\n";
+
+    public final String ENERGY_CODE ="param N = 3; /* User maximum consumption */\n" +
+            "param M = 5; /* Producer maximum capacity */\n" +
+            "\n" +
+            "species U of [0,N];\n" +
+            "species R of [0,N];\n" +
+            "species F of [0,N];\n" +
+            "species P of [0,M];\n" +
+            "/* species FP; */\n" +
+            "\n" +
+            "const malfunctionRate = 0.5;\n" +
+            "const repairRate = 0.5;\n" +
+            "const gainRate = 1.0;\n" +
+            "const releaseRate = 1.0;\n" +
+            "const failRequestRate = 0.5;\n" +
+            "const requestRate = 1.0; \n" +
+            "\n" +
+            "/*\n" +
+            "rule producer_malfunction for i in [0,M]{\n" +
+            "    P[i] -[ #P[i] * malfunctionRate ]-> FP\n" +
+            "}\n" +
+            "\n" +
+            "rule producer_repaired{\n" +
+            "    FP -[ #FP * repairRate ]-> P[M]\n" +
+            "}\n" +
+            "\n" +
+            "rule user_requests_service for i in [0,N]{\n" +
+            "    U[i] -[ #U[i]*requestRate ]-> U[i+1]\n" +
+            "}\n" +
+            "*/\n" +
+            "rule user_gains_service for i in [0,N-1] and j in [1,M]{\n" +
+            "    R[i]|P[j] -[ #R[i]*gainRate ]-> U[i+1]|P[j-1]\n" +
+            "}\n" +
+            "/*\n" +
+            "rule user_releases_service for i in [1,N] and j in [0,M-1]{\n" +
+            "    U[i]|P[j] -[ #U[i] * releaseRate * %P[j] ]-> U[i-1]|P[j+1]\n" +
+            "}\n" +
+            "\n" +
+            "rule failed_request for i in [0,N]{\n" +
+            "    R[i] -[ #R[i] * failRequestRate * %P[0] ]-> F[i]\n" +
+            "}\n" +
+            "\n" +
+            "rule failed_user_gains_service for i in [0,N-1] and j in [1,M]{\n" +
+            "    F[i]|P[j] -[ #F[i] * gainRate * %P[j] ]-> U[i+1]|P[j-1]\n" +
+            "}\n" +
+            "*/\n" +
+            "\n" +
+            "system init = U[0]|P[4];\n";
 
     @Test
     public void testParsingWrongData() throws ModelGenerationException {
@@ -273,6 +322,27 @@ public class TestParser {
         assertEquals(1,states.states().length);
         PopulationModelDefinition def = pmg.getPopulationModelDefinition();
         assertNotNull(def);
+    }
+
+    @Test
+    public void testParsingENERGYystem() throws ModelGenerationException {
+        PopulationModelGenerator pmg = new PopulationModelGenerator(ENERGY_CODE);
+        assertTrue(pmg.validate());
+        EvaluationEnvironment env = pmg.generateEvaluationEnvironment();
+        PopulationRegistry reg = pmg.generatePopulationRegistry(env);
+        assertEquals(14,reg.size());
+        List<PopulationRule> rules = pmg.generateRules(env,reg);
+        assertEquals(8, rules.size());
+        PopulationState state = reg.createPopulationState(new Population[] {
+                new Population(reg.indexOf("R",0),1),
+                new Population(reg.indexOf("P",1),1),
+                new Population(reg.indexOf("P",2),1),
+                new Population(reg.indexOf("P",3),1),
+                new Population(reg.indexOf("P",4),1),
+        });
+        PopulationTransition t = rules.get(0).apply(new DefaultRandomGenerator(),0.0,state);
+        assertNotNull(t);
+        assertTrue(t.getRate()>0);
     }
 
 }
