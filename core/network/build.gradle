@@ -8,10 +8,10 @@ repositories {
 }
 
 dependencies {
-    compile project(':core:simulator')
-    compile 'org.apache.commons:commons-lang3:3.11'
-    compile 'org.apache.commons:commons-io:1.3.2'
-    compile group: 'de.ruedigermoeller',name:'fst',version:'2.56'
+    api project(':core:simulator')
+    api 'org.apache.commons:commons-lang3:3.11'
+    api 'org.apache.commons:commons-io:1.3.2'
+    api group: 'de.ruedigermoeller',name:'fst',version:'2.56'
 }
 
 test {

@@ -9,18 +9,18 @@ repositories {
 }
 
 dependencies {
-    compile project(':core:simulator')
-    compile project(':core:runtime')
-    compile project(':langs:util')
-    compile project(':langs:pm')
-    compile project(':langs:lio')
+    implementation project(':core:simulator')
+    implementation project(':core:runtime')
+    implementation project(':langs:util')
+    implementation project(':langs:pm')
+    implementation project(':langs:lio')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 
     antlr "org.antlr:antlr4:4.8" // use ANTLR version 4
 
-    compile group: 'org.antlr', name: 'ST4', version: '4.3'
+    implementation group: 'org.antlr', name: 'ST4', version: '4.3'
 }
 
 test {
@@ -28,7 +28,7 @@ test {
 }
 
 application {
-    mainClassName = "it.unicam.quasylab.sibilla.shell.SibillaShell"
+    mainClass = "it.unicam.quasylab.sibilla.shell.SibillaShell"
     applicationName = "sshell"
 }
 

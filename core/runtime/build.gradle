@@ -8,9 +8,9 @@ repositories {
 }
 
 dependencies {
-    compile project(':core:simulator')
-    compile project(':langs:pm')
-    compile project(':langs:lio')
+    api project(':core:simulator')
+    api project(':langs:pm')
+    api project(':langs:lio')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'

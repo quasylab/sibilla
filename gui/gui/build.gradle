@@ -31,9 +31,9 @@ plugins {
 }
 
 dependencies {
-    compile project(':core:simulator')
-    compile project(':examples:populations:covid')
-    compile group: 'com.jfoenix', name: 'jfoenix', version: '9.0.8'
+    implementation project(':core:simulator')
+    implementation project(':examples:populations:covid')
+    implementation group: 'com.jfoenix', name: 'jfoenix', version: '9.0.8'
 }
 
 javafx {

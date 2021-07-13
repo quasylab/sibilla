@@ -5,7 +5,7 @@ plugins {
 
 
 dependencies {
-  compile project(':core:network')
+  implementation project(':core:network')
 }
 
 mainClassName = 'quasylab.sibilla.examples.lio.seir.Main'

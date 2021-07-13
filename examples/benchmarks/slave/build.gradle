@@ -11,9 +11,9 @@ repositories {
 }
 
 dependencies {
-    compile project(':core:network')
-    compile project(':examples:populations:crowds')
-    compile project(':examples:populations:seir')
+    implementation project(':core:network')
+    implementation project(':examples:populations:crowds')
+    implementation project(':examples:populations:seir')
 }
 
 mainClassName = 'quasylab.sibilla.examples.benchmarks.slave.SlaveBenchmark'

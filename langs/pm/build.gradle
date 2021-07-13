@@ -37,17 +37,17 @@ test {
 }
 
 dependencies {
-    compile project(':core:simulator')
-    compile project(':langs:util')
+    api project(':core:simulator')
+    api project(':langs:util')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 
-    implementation 'com.google.code.gson:gson:2.8.6'
+    api 'com.google.code.gson:gson:2.8.6'
 
     antlr "org.antlr:antlr4:4.8" // use ANTLR version 4
 
-    compile group: 'org.antlr', name: 'ST4', version: '4.3'
+    api group: 'org.antlr', name: 'ST4', version: '4.3'
 }
 
 generateGrammarSource {
