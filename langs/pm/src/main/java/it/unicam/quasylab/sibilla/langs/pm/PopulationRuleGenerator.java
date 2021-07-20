@@ -70,8 +70,8 @@ public class PopulationRuleGenerator extends PopulationModelBaseVisitor<List<Pop
     }
 
     public PopulationRule getRule(String name, Function<String,Double> evaluator, Map<String,Double> map, PopulationModelParser.Rule_bodyContext body) {
-        RateExpressionEvaluator exressiontEvaluator =  new RateExpressionEvaluator(PopulationModelGenerator.combine(evaluator,map), registry);
-        BiPredicate<Double,PopulationState> biPredicate = (body.guard==null?null:body.guard.accept(exressiontEvaluator.getPopulationPredicateEvaluator()));
+        RateExpressionEvaluator expressionEvaluator =  new RateExpressionEvaluator(PopulationModelGenerator.combine(evaluator,map), registry);
+        BiPredicate<Double,PopulationState> biPredicate = (body.guard==null?null:body.guard.accept(expressionEvaluator.getPopulationPredicateEvaluator()));
         Predicate<PopulationState> predicate = null;
         if (biPredicate != null) {
             predicate = s -> biPredicate.test(0.0,s);
@@ -81,7 +81,7 @@ public class PopulationRuleGenerator extends PopulationModelBaseVisitor<List<Pop
                 predicate,
                 PopulationModelGenerator.getPopulationArray(registry, evaluator, map, body.pre.species_pattern_element()),
                 PopulationModelGenerator.getPopulationArray(registry, evaluator, map, body.post.species_pattern_element()),
-                body.rate.accept(exressiontEvaluator)
+                body.rate.accept(expressionEvaluator)
         );
     }
 

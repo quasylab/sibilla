@@ -15,4 +15,4 @@ rule i_to_r {
     I -[ 1.0 ]-> R
 }
 
-system init = S[10]|I;
+system init = S<10>|I;

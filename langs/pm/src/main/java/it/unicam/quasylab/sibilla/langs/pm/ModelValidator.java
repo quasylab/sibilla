@@ -33,8 +33,6 @@ import java.util.stream.Collectors;
 
 public class ModelValidator extends PopulationModelBaseVisitor<Boolean> {
 
-    //TODO: Check circular dependencies
-    //TODO: Parameters can only depends on constants
     private final List<ModelBuildingError> errors;
     private final SymbolTable table;
 
@@ -56,14 +54,23 @@ public class ModelValidator extends PopulationModelBaseVisitor<Boolean> {
         return result;
     }
 
+    /*
+        try {
+            this.table.addSystem(ctx.name.getText(), ctx);
+            return checkSpeciesPattern(this.table.checkLocalVariables(ctx.args, ctx), ctx.species_pattern());
+        } catch (DuplicatedSymbolException e) {
+            this.errors.add(new ModelBuildingError(e.getMessage()));
+            return false;
+        }
+
+     */
+
     @Override
     public Boolean visitLabel_declaration(PopulationModelParser.Label_declarationContext ctx) {
         try {
             this.table.addLabel(ctx.name.getText(),ctx);
-            Set<String> localVariables = checkLocalVariables(ctx.local_variables());
-            return (localVariables != null)
-                    && checkGuardExpression(localVariables,ctx.guard_expression())
-                    && checkSpeciesExpressionList(localVariables, ctx.species_expression());
+            Set<String> localVariables = this.table.checkLocalVariables(ctx.args, ctx);
+            return checkSpeciesExpressionList(localVariables, ctx.species_expression());
         } catch (DuplicatedSymbolException e) {
             this.errors.add(new ModelBuildingError(e.getMessage()));
             return false;

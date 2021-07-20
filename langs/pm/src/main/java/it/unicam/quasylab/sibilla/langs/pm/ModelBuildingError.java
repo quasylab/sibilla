@@ -83,6 +83,14 @@ public class ModelBuildingError {
         return new ModelBuildingError(ParseUtil.getDuplicatedSymbolErrorMessage(name,existing,duplicated));
     }
 
+    public static ModelBuildingError illegalUseOfSpeciesTemplate(PopulationModelParser.Species_expressionContext ctx) {
+        return new ModelBuildingError(ParseUtil.getIllegalUseOfSpeciesTemplateMessage(ctx));
+    }
+
+    public static ModelBuildingError wrongNumberOfLabelParameters(int arity, PopulationModelParser.Species_expressionContext ctx) {
+        return new ModelBuildingError(ParseUtil.getWrongNumberOfLabelParametersMessage(arity,ctx));
+    }
+
     public String getMessage() {
         return this.message;
     }

@@ -22,8 +22,12 @@ species_declaration : 'species' name=ID ('of' range ('*' range)* )? ';';
 
 range : '[' min=expr ',' max=expr ']';
 
-label_declaration   : 'label' name=ID ((local_variables) (guard_expression)?)? '=' '{' species_expression (',' species_expression)* '}'
+
+label_declaration   : 'label' name=ID ('(' args+=ID (',' args+=ID)* ')')? '=' '{' species_expression (',' species_expression)* '}'
                     ;
+
+//label_declaration   : 'label' name=ID ((local_variables) (guard_expression)?)? '=' '{' species_expression (',' species_expression)* '}'
+//                    ;
 
 rule_declaration    :
     'rule' name=ID ((local_variables) (guard_expression)?)? '{'
@@ -62,12 +66,12 @@ measure_declaration : 'measure' name=ID ((local_variables) (guard_expression)?)?
 param_declaration   : 'param' name=ID '=' expr ';';
 
 expr    :
-      left=expr op=('<'|'<='|'=='|'>='|'>') right=expr          # relationExpression
-    | left=expr op=('&'|'&&') right=expr                      # andExpression
+      left=expr op=('&'|'&&') right=expr                      # andExpression
     | left=expr op=('|'|'||') right=expr                      # orExpression
     | left=expr '^' right=expr                                # exponentExpression
     | left=expr op=('*'|'/'|'//') right=expr               # mulDivExpression
     | left=expr op=('+'|'-'|'%') right=expr                   # addSubExpression
+    |  left=expr op=('<'|'<='|'=='|'>='|'>') right=expr          # relationExpression
     | '!' arg=expr                                     # negationExpression
     | guard=expr '?' thenBranch=expr ':' elseBranch=expr             # ifThenElseExpression
     | op=('-'|'+') arg=expr                            # unaryExpression

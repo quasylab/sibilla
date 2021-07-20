@@ -50,6 +50,8 @@ public class ParseUtil {
     private static final String STATE_NAME = "_state_";
     private static final String MEASURE_PATTER = "computeMeasure_%s";
     private static final String ILLEGAL_INTERVAL_MESSAGE = "Illegal interval %d>=%d at line %d char %d!";
+    private static final String ILLEGAL_USE_OF_SPECIES_TEMPLATE_MESSAGE = "Species template are not allowed at line %d char %d!";
+    private static final String WRONG_NUMBER_OF_LABEL_PARAMETERS_MESSAGE = "Wrong number of agent parameters a line %d char %d (expected %d are %d)!";;
 
 
     public static String getDuplicatedSymbolErrorMessage(String name, ParserRuleContext existing, ParserRuleContext duplicated) {
@@ -132,5 +134,13 @@ public class ParseUtil {
 
     public static String illegalInterval(int min, int max, PopulationModelParser.RangeContext range) {
         return String.format(ILLEGAL_INTERVAL_MESSAGE,min,max,range.start.getLine(),range.start.getCharPositionInLine());
+    }
+
+    public static String getIllegalUseOfSpeciesTemplateMessage(PopulationModelParser.Species_expressionContext ctx) {
+        return String.format(ILLEGAL_USE_OF_SPECIES_TEMPLATE_MESSAGE,ctx.start.getLine(),ctx.start.getCharPositionInLine());
+    }
+
+    public static String getWrongNumberOfLabelParametersMessage(int arity, PopulationModelParser.Species_expressionContext ctx) {
+        return String.format(WRONG_NUMBER_OF_LABEL_PARAMETERS_MESSAGE,ctx.start.getLine(),ctx.start.getCharPositionInLine(),arity,ctx.expr().size());
     }
 }

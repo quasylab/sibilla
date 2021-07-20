@@ -6,7 +6,7 @@ species B of [0,N]*[0,M];
 
 param movementRate = 1.0;
 
-rule go_up_A for i in [0,N] and j in [0,M] when i<N-1 {
+rule go_up_A for i in [0,N] and j in [0,M] when (i<(N-1)) {
     A[i,j] -[ movementRate*(1-(%A[i+1,j]+%B[i+1,j])) ]-> A[i+1,j]
 }
 

@@ -36,6 +36,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -84,7 +86,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
     }
 
     public synchronized void executeFile(String fileName) throws IOException {
-        File selectedFile = new File(currentDirectory, fileName);
+        File selectedFile = getFile(fileName);
         execute(CharStreams.fromFileName(selectedFile.getAbsolutePath()));
     }
 
@@ -150,15 +152,28 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
         return true;
     }
 
+
+    private File getFile(String fileName) {
+        Path p = Paths.get(fileName);
+        if (p.isAbsolute()) {
+            return p.toFile();
+        } else {
+            return new File(currentDirectory,fileName);
+        }
+    }
+
     @Override
     public Boolean visitLoad_command(SibillaScriptParser.Load_commandContext ctx) {
         try {
             String value = getStringContent(ctx.value.getText());
-            runtime.load(new File(currentDirectory, value));
-            showMessage(String.format(CODE_LOADED, value));
+            File target = getFile(value);
+            runtime.load(target);
+            showMessage(String.format(CODE_LOADED, target.getCanonicalPath()));
             return true;
         } catch (CommandExecutionException e) {
             printErrorMessages(e.getErrorMessages());
+        } catch (IOException e) {
+            showErrorMessage(e.getMessage());
         }
         return false;
     }
@@ -195,6 +210,17 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
             runtime.reset();
         }
         showMessage(OK_MESSAGE);
+        return true;
+    }
+
+    @Override
+    public Boolean visitLs_command(SibillaScriptParser.Ls_commandContext ctx) {
+        if (!currentDirectory.isDirectory()) {
+            return false;
+        }
+        for (String s: currentDirectory.list()) {
+            showMessage(s);
+        }
         return true;
     }
 
@@ -305,7 +331,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitCd_command(SibillaScriptParser.Cd_commandContext ctx) {
-        File newDir = new File(currentDirectory, getStringContent(ctx.name));
+        File newDir = getFile(getStringContent(ctx.name));
         if (!newDir.isDirectory()) {
             printErrorMessages(List.of(newDir.getAbsolutePath() + " is not a directory!"));
             return false;

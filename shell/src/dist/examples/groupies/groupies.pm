@@ -5,7 +5,7 @@ species CB;
 
 param lambda = 1.0;
 
-label typeA = {GA, CA};
+label typeA = {GA, CA}
 label typeB = {GB, CB}
 
 rule groupieChangeA {
@@ -24,6 +24,6 @@ rule celebrityChangeB {
     CA -[ #GB*lambda*%typeA ]-> CB
 }
 
-system allGroupiesA(N) = A#(N);
+system allGroupiesA(N) = GA<N>;
 
 

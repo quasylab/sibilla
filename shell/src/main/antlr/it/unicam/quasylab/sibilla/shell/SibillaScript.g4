@@ -35,6 +35,7 @@ command : module_command
         | run_command
         | cwd_command
         | cd_command
+        | ls_command
         | add_all_measures_command
         | remove_all_measures_command
         ;
@@ -117,6 +118,8 @@ simulate_command : 'simulate' (label=ID)?;
 run_command: 'run' name=STRING ;
 
 cwd_command : 'cwd' ;
+
+ls_command : 'ls' ;
 
 cd_command : 'cd' name=STRING;
 

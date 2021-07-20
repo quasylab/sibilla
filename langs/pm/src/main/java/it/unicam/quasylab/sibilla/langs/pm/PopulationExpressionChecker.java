@@ -52,8 +52,50 @@ public class PopulationExpressionChecker extends NumberExpressionChecker {
 
     @Override
     public Boolean visitSpecies_expression(PopulationModelParser.Species_expressionContext ctx) {
-        if (!checkSpeciesName(ctx.name)) { return false; }
-        if (!checkSpeciesArity(ctx)) { return false; }
+        String name = ctx.name.getText();
+        if (this.table.isASpecies(name)) {
+            return checkSpeciesInstantiation(ctx);
+        }
+        if (this.table.isALabel(name)) {
+            return checkUsageOfLabel(ctx);
+        }
+        this.errorList.add(ModelBuildingError.unknownAgent(ctx.name));
+        return false;
+    }
+
+    private boolean checkUsageOfLabel(PopulationModelParser.Species_expressionContext ctx) {
+        if ((ctx.local_variables() != null)||(ctx.guard_expression()!= null)) {
+            this.errorList.add(ModelBuildingError.illegalUseOfSpeciesTemplate(ctx));
+            return false;
+        }
+        if (!checkLabelArity(ctx)) {
+            return false;
+        }
+        NumberExpressionChecker checker = new NumberExpressionChecker(this.errorList, this.table,localVariables );
+        for(PopulationModelParser.ExprContext arg: ctx.expr()) {
+            if (!arg.accept(checker)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean checkLabelArity(PopulationModelParser.Species_expressionContext ctx) {
+        String species = ctx.name.getText();
+        int actualArity = ctx.expr().size();
+        int expected = this.table.getLabelContext(species).args.size();
+        if (actualArity != expected) {
+            this.errorList.add(ModelBuildingError.wrongNumberOfLabelParameters(expected,ctx));
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean checkSpeciesInstantiation(PopulationModelParser.Species_expressionContext ctx) {
+        if (!checkSpeciesArity(ctx)) {
+            return false;
+        }
         Set<String> localVariables = checkSpeciesVariables(ctx.local_variables());
         if (localVariables == null) { return false; }
         NumberExpressionChecker checker = new NumberExpressionChecker(this.errorList, this.table,localVariables );
@@ -78,15 +120,6 @@ public class PopulationExpressionChecker extends NumberExpressionChecker {
         int expected = this.table.getSpeciesContext(species).range().size();
         if (actualArity != expected) {
             this.errorList.add(ModelBuildingError.wrongNumberOfSpeciesParameters(expected,ctx));
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    private boolean checkSpeciesName(Token species) {
-        if (!this.table.isASpecies(species.getText())) {
-            this.errorList.add(ModelBuildingError.unknownAgent(species));
             return false;
         } else {
             return true;

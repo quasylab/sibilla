@@ -24,7 +24,9 @@
 package it.unicam.quasylab.sibilla.langs.pm;
 
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
+import it.unicam.quasylab.sibilla.core.models.ParametricValue;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import org.antlr.v4.runtime.Token;
 
 import java.util.HashSet;
 import java.util.List;
@@ -63,17 +65,22 @@ public class PopulationRegistryGenerator extends PopulationModelBaseVisitor<Popu
     @Override
     public PopulationRegistry visitLabel_declaration(PopulationModelParser.Label_declarationContext ctx) {
         String name = ctx.name.getText();
-        Function<String,Double> resolver = environment.getEvaluator();
-        List<Map<String,Double>> maps = PopulationModelGenerator.getMaps(resolver, ctx.local_variables());
-        maps = PopulationModelGenerator.filter(resolver,ctx.guard_expression(),maps);
-        Set<Integer> integers = new HashSet<>();
-        for (PopulationModelParser.Species_expressionContext se: ctx.species_expression()) {
-            List<Map<String,Double>> localMaps = PopulationModelGenerator.getMaps(resolver, se.local_variables(), maps);
-            localMaps = PopulationModelGenerator.filter(resolver,se.guard_expression(),localMaps);
-            integers.addAll(PopulationModelGenerator.getIndexSet(registry,resolver,localMaps,se.name.getText(), se.expr()));
-        }
-        registry.addLabel(name, integers.stream().mapToInt(i -> i).toArray());
+        String[] variables = ctx.args.stream().sequential().map(Token::getText).toArray(String[]::new);
+        registry.addLabel(name, new ParametricValue<>(variables, PopulationModelGenerator.getLabelFunction(variables,environment.getEvaluator(),ctx.species_expression())));
         return registry;
+//
+//
+//        Function<String,Double> resolver = environment.getEvaluator();
+//        List<Map<String,Double>> maps = PopulationModelGenerator.getMaps(resolver, ctx.local_variables());
+//        maps = PopulationModelGenerator.filter(resolver,ctx.guard_expression(),maps);
+//        Set<Integer> integers = new HashSet<>();
+//        for (PopulationModelParser.Species_expressionContext se: ctx.species_expression()) {
+//            List<Map<String,Double>> localMaps = PopulationModelGenerator.getMaps(resolver, se.local_variables(), maps);
+//            localMaps = PopulationModelGenerator.filter(resolver,se.guard_expression(),localMaps);
+//            integers.addAll(PopulationModelGenerator.getIndexSet(registry,resolver,localMaps,se.name.getText(), se.expr()));
+//        }
+//        registry.addLabel(name, integers.stream().mapToInt(i -> i).toArray());
+//        return registry;
     }
 
     @Override

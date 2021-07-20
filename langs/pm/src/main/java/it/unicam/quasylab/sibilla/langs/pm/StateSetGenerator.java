@@ -62,7 +62,7 @@ public class StateSetGenerator extends PopulationModelBaseVisitor<StateSet<Popul
 
     private ParametricValue<PopulationState> getStateBuilder(List<Token> args, PopulationModelParser.Species_patternContext species_pattern) {
         String[] variables = args.stream().sequential().map(Token::getText).toArray(String[]::new);
-        return new ParametricValue<>(variables,d -> getPopulationState(getMap(variables,d),species_pattern));
+        return new ParametricValue<>(variables,d -> getPopulationState(PopulationModelGenerator.getMap(variables,d),species_pattern));
     }
 
     @Override
@@ -75,10 +75,5 @@ public class StateSetGenerator extends PopulationModelBaseVisitor<StateSet<Popul
         return registry.createPopulationState(PopulationModelGenerator.getPopulationArray(registry,environment.getEvaluator(),map,species_pattern.species_pattern_element()));
     }
 
-    public Map<String,Double> getMap(String[] variables, double[] args) {
-        Map<String, Double> map = new HashMap<>();
-        IntStream.range(0,variables.length).sequential().forEach(i -> map.put(variables[i],args[i]));
-        return map;
-    }
 
 }

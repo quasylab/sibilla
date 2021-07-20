@@ -68,9 +68,7 @@ public class PopulationModelGenerator {
         this.source = source;
     }
 
-
-
-        public ParseTree getParseTree() {
+    public ParseTree getParseTree() {
         if (this.parseTree == null) {
             generateParseTree();
         }
@@ -255,7 +253,7 @@ public class PopulationModelGenerator {
         String name = agent.name.getText();
         int[] indexes;
         if (registry.isALabel(name)) {
-            indexes = registry.getLabel(name);
+            indexes = registry.evalLabel(name, agent.expr().stream().mapToDouble(e -> evalExpressionToInteger(resolver, e)).toArray());
         } else {
             indexes = PopulationModelGenerator.getIndexArray(registry,
                     resolver,
@@ -270,18 +268,51 @@ public class PopulationModelGenerator {
         return registry.indexOf(species, args.stream().map(e -> evalExpressionToInteger(resolver, e)).toArray());
     }
 
+    public static PopulationRegistry.Tuple getTuple(Function<String, Double> resolver, String species, List<PopulationModelParser.ExprContext> args) {
+        return new PopulationRegistry.Tuple(species, args.stream().map(e -> evalExpressionToInteger(resolver, e)).toArray());
+    }
+
+
     public static int[] getIndexArray(PopulationRegistry registry, Function<String, Double> resolver, List<Map<String,Double>> maps, String species, List<PopulationModelParser.ExprContext> args) {
         return maps.stream().mapToInt(m -> getIndex(registry, combine(resolver, m), species, args)).toArray();
     }
 
+
+
+
     public static Set<Integer> getIndexSet(PopulationRegistry registry, Function<String, Double> resolver, List<Map<String,Double>> maps, String species, List<PopulationModelParser.ExprContext> args) {
         return maps.stream().map(m -> getIndex(registry, combine(resolver, m), species, args)).collect(Collectors.toSet());
+    }
+
+    public static Set<PopulationRegistry.Tuple> getTupleSet(Function<String, Double> resolver, List<Map<String,Double>> maps, String species, List<PopulationModelParser.ExprContext> args) {
+        return maps.stream().map(m -> getTuple(combine(resolver, m), species, args)).collect(Collectors.toSet());
     }
 
     public static Set<Integer> getIndexSet(PopulationRegistry registry, Function<String, Double> resolver, Map<String, Double> map, PopulationModelParser.Species_expressionContext se) {
         List<Map<String,Double>> localMaps = PopulationModelGenerator.getMaps(combine(resolver,map), se.local_variables(), se.guard_expression());
         return PopulationModelGenerator.getIndexSet(registry,combine(resolver,map),localMaps,se.name.getText(), se.expr());
     }
+
+
+    public static Set<PopulationRegistry.Tuple> getTupleSet(Function<String, Double> resolver, PopulationModelParser.Species_expressionContext se) {
+        List<Map<String,Double>> localMaps = PopulationModelGenerator.getMaps(resolver, se.local_variables(), se.guard_expression());
+        return PopulationModelGenerator.getTupleSet(resolver,localMaps,se.name.getText(), se.expr());
+    }
+
+    public static Set<PopulationRegistry.Tuple> getTupleSet(Function<String, Double> resolver, List<PopulationModelParser.Species_expressionContext> seList) {
+        return seList.stream().map(se -> getTupleSet(resolver,se)).flatMap(Collection::stream).collect(Collectors.toSet());
+    }
+
+    public static PopulationRegistry.Tuple[] getTupleArray(Function<String, Double> resolver, List<PopulationModelParser.Species_expressionContext> seList) {
+        return getTupleSet(resolver, seList).toArray(new PopulationRegistry.Tuple[0]);
+    }
+
+
+    public static Function<double[],PopulationRegistry.Tuple[]> getLabelFunction(String[] variables, Function<String, Double> resolver, List<PopulationModelParser.Species_expressionContext> species_expression) {
+        return d -> getTupleArray(combine(resolver, PopulationModelGenerator.getMap(variables,d)),species_expression);
+    }
+
+
 
     public static List<Population> getPopulationList(PopulationRegistry registry, Function<String, Double> resolver, Map<String, Double> map, PopulationModelParser.Species_pattern_elementContext se) {
         Set<Integer> indexSet = getIndexSet(registry, resolver, map, se.species_expression());
@@ -329,4 +360,11 @@ public class PopulationModelGenerator {
         if (op.equals("//")) {return (x,y) -> (y==0.0?0.0:x/y); }
         return (x,y) -> Double.NaN;
     }
+
+    public static Map<String,Double> getMap(String[] variables, double[] args) {
+        Map<String, Double> map = new HashMap<>();
+        IntStream.range(0,variables.length).sequential().forEach(i -> map.put(variables[i],args[i]));
+        return map;
+    }
+
 }

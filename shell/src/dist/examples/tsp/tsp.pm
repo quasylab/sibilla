@@ -22,7 +22,7 @@ rule s0_to_su {
 
 param scale = 1.0;
 
-system balanced = S0[10*scale]|S1[10*scale]|SU[10*scale];
+system balanced = S0<10*scale>|S1<10*scale>|SU<10*scale>;
 
 
-system custom(s0,s1,su) = S0[s0]|S1[s1]|SU[su];
+system custom(s0,s1,su) = S0<s0>|S1<s1>|SU<su>;
