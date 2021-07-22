@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefHeight="600.0" prefWidth="1260.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unicam.quasylab.sibilla.view.gui.SibillaJavaFXMainController">
+  <children>
+    <MenuBar fx:id="mainMenuBar" VBox.vgrow="NEVER">
+      <menus>
+        <Menu mnemonicParsing="false" text="File">
+          <items>
+            <MenuItem mnemonicParsing="false" text="New" />
+            <MenuItem mnemonicParsing="false" text="Open…" />
+            <Menu mnemonicParsing="false" text="Open Recent" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="Close" />
+            <MenuItem mnemonicParsing="false" text="Save" />
+            <MenuItem mnemonicParsing="false" text="Save As…" />
+            <MenuItem mnemonicParsing="false" text="Revert" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="Preferences…" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="Quit" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Edit">
+          <items>
+            <MenuItem mnemonicParsing="false" text="Undo" />
+            <MenuItem mnemonicParsing="false" text="Redo" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="Cut" />
+            <MenuItem mnemonicParsing="false" text="Copy" />
+            <MenuItem mnemonicParsing="false" text="Paste" />
+            <MenuItem mnemonicParsing="false" text="Delete" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="Select All" />
+            <MenuItem mnemonicParsing="false" text="Unselect All" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+          <items>
+            <MenuItem mnemonicParsing="false" onAction="#helpButtonPressed" text="How to use Sibilla" />
+          </items>
+        </Menu>
+      </menus>
+    </MenuBar>
+    <SplitPane dividerPositions="0.29093799682034976, 0.6502384737678856" focusTraversable="true" prefHeight="575.0" prefWidth="1313.0" VBox.vgrow="ALWAYS">
+      <items>
+        <AnchorPane prefHeight="573.0" prefWidth="405.0">
+          <children>
+            <Label alignment="CENTER" layoutX="14.0" layoutY="14.0" minWidth="60.0" prefWidth="-1.0" style="&#10;" text="Module" textAlignment="CENTER" wrapText="false">
+              <font>
+                <Font size="18.0" fx:id="x1" />
+              </font>
+              <textFill>
+                <Color blue="0.624" green="0.624" red="0.624" fx:id="x2" />
+              </textFill>
+            </Label>
+                  <Label alignment="CENTER" layoutX="15.0" layoutY="288.0" minWidth="60.0" prefHeight="25.0" prefWidth="60.0" style="&#10;" text="Files" textAlignment="CENTER" wrapText="false">
+                     <font>
+                        <Font size="18.0" fx:id="x11" />
+                     </font>
+                     <textFill>
+                        <Color blue="0.624" green="0.624" red="0.624" fx:id="x21" />
+                     </textFill>
+                  </Label>
+                  <Separator layoutX="1.0" layoutY="282.0" prefHeight="6.0" prefWidth="361.0" />
+                  <AnchorPane layoutX="1.0" layoutY="41.0" prefHeight="241.0" prefWidth="319.0">
+                     <children>
+                        <ListView fx:id="moduleList" prefHeight="241.0" prefWidth="361.0" />
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane layoutX="1.0" layoutY="313.0" prefHeight="259.0" prefWidth="321.0">
+                     <children>
+                        <ListView fx:id="filesList" layoutY="8.0" prefHeight="251.0" prefWidth="361.0" />
+                     </children>
+                  </AnchorPane>
+                  <Button layoutX="182.0" layoutY="289.0" mnemonicParsing="false" onAction="#deleteButtonPressed" prefHeight="27.0" prefWidth="87.0" style="-fx-background-color: #00FF7F;" text="DELETE" />
+          </children>
+        </AnchorPane>
+        <ScrollPane prefHeight="573.0" prefWidth="465.0">
+          <content>
+            <AnchorPane id="Content" minHeight="-1.0" minWidth="-1.0" prefHeight="573.0" prefWidth="444.0">
+              <children>
+                <Label alignment="CENTER" font="$x1" layoutX="14.0" layoutY="14.0" style="&#10;" text="View" textAlignment="CENTER" textFill="$x2" wrapText="false" />
+                        <TextArea fx:id="rules" prefHeight="478.0" prefWidth="444.0" promptText="Write the rules here">
+                           <font>
+                              <Font size="18.0" />
+                           </font></TextArea>
+                        <Button layoutX="161.0" layoutY="531.0" mnemonicParsing="false" onAction="#createFileButtonPressed" prefHeight="27.0" prefWidth="121.0" style="-fx-background-color: #00FF7F;" text="CREATE FILE" />
+                        <TextField fx:id="fileName" layoutX="90.0" layoutY="490.0" prefHeight="25.0" prefWidth="267.0" promptText="File name" />
+              </children>
+            </AnchorPane>
+          </content>
+        </ScrollPane>
+        <AnchorPane prefHeight="573.0" prefWidth="373.0">
+          <children>
+                  <AnchorPane layoutY="1.0" prefHeight="47.0" prefWidth="315.0">
+                     <children>
+                        <Button layoutX="14.0" layoutY="10.0" mnemonicParsing="false" onAction="#moduleButtonPressed" prefHeight="27.0" prefWidth="112.0" style="-fx-background-color: #00FF7F;" text="MODULE" />
+                        <Button layoutX="158.0" layoutY="8.0" mnemonicParsing="false" onAction="#loadButtonPressed" prefHeight="27.0" prefWidth="87.0" style="-fx-background-color: #00FF7F;" text="LOAD" />
+                     </children>
+                  </AnchorPane>
+                  <Button layoutX="14.0" layoutY="272.0" mnemonicParsing="false" onAction="#simulateButtonPressed" prefHeight="27.0" prefWidth="112.0" style="-fx-background-color: #00FF7F;" text="SIMULATE" />
+                  <Button layoutX="271.0" layoutY="530.0" mnemonicParsing="false" onAction="#saveButtonPressed" prefHeight="27.0" prefWidth="112.0" style="-fx-background-color: #00FF7F;" text="SAVE" />
+                  <Label layoutX="297.0" layoutY="49.0" prefHeight="25.0" prefWidth="60.0" text="DEADLINE" textAlignment="CENTER" />
+                  <ChoiceBox fx:id="deadlineChoiceBox" layoutX="258.0" layoutY="74.0" prefHeight="25.0" prefWidth="137.0" />
+                  <Label layoutX="304.0" layoutY="182.0" prefHeight="25.0" prefWidth="46.0" text="REPLICA" textAlignment="CENTER" />
+                  <ChoiceBox fx:id="replicaChoiceBox" layoutX="258.0" layoutY="208.0" prefHeight="25.0" prefWidth="137.0" />
+                  <Label layoutX="316.0" layoutY="115.0" prefHeight="25.0" prefWidth="21.0" text="DT" textAlignment="CENTER" />
+                  <ChoiceBox fx:id="dtChoiceBox" layoutX="258.0" layoutY="141.0" prefHeight="25.0" prefWidth="137.0" />
+                  <TextArea fx:id="monitor" editable="false" layoutX="1.0" layoutY="309.0" prefHeight="201.0" prefWidth="437.0">
+                     <font>
+                        <Font name="System Italic" size="14.0" />
+                     </font></TextArea>
+          </children>
+        </AnchorPane>
+      </items>
+    </SplitPane>
+  </children>
+</VBox>

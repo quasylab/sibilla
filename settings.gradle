@@ -30,4 +30,5 @@ include 'core:simulator',
    	 	'examples:benchmarks:master',
 		'examples:agents:RobotAgents',
 		'examples:lio:seir'
+include 'view'
 
