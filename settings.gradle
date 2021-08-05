@@ -29,5 +29,8 @@ include 'core:simulator',
     	'examples:benchmarks:slave',
    	 	'examples:benchmarks:master',
 		'examples:agents:RobotAgents',
-		'examples:lio:seir'
+		'examples:lio:seir',
+		'yoda',
+		'langs:yoda'
+findProject(':langs:yoda')?.name = 'yoda'
 
