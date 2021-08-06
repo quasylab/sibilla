@@ -28,6 +28,7 @@ public class SibillaJavaFX extends Application implements View {
         VBox mainLayout = loader.load();
         Scene scene = new Scene(mainLayout);
         primaryStage.setScene(scene);
+        primaryStage.setMaximized(true);
         primaryStage.show();
     }
 

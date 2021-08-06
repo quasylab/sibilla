@@ -5,10 +5,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.IndexRange;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.TextArea;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
@@ -42,4 +40,6 @@ public class SibillaJavaFXHelpController implements Initializable {
         window.setScene(tableViewScene);
         window.show();
     }
+
+
 }
