@@ -8,7 +8,9 @@ model: element* EOF;
 
 element : constant_declaration
         | parameter_declaration
-        | agent_declaration;
+        | agent_declaration
+        | world_declaration
+        | system_declaration;
 
 //INITIALISATION PARAMETERS
 
@@ -19,7 +21,7 @@ parameter_declaration: 'param' name=ID '=' expr ';';
 //AGENT GRAMMAR
 
 agent_declaration: 'agent' name=ID '{'
-    'state list: ' state_declaration ('|' state_declaration)* ','
+    'state list:' state_declaration ('|' state_declaration)* ','
     'observation list:' observation_declaration ('|' observation_declaration)* ','
     'action list:' action_declaration ('|' action_declaration)*','
     'behaviour:' behaviour_declaration
@@ -50,27 +52,64 @@ behaviour_rule:
 
 def_behaviour_rule: 'default' action_name=ID ':' times=expr ';';
 
-//ENVIRONMENT GRAMMAR
+//WORLD GRAMMAR
 
-global_state_declaration: ; //TODO
+world_declaration: 'name' name=ID '{'
+    'global:' global_state_declaration
+    'sensing:' sensing_declaration
+    'environment' ev_environment_declaration
+    '};'
+    ;
 
-internal_objects_declaration:; //TODO
+global_state_declaration: '{'
+    internal_objects_declaration
+    '|'
+    agent_info_declaration
+    '};'
+    ;
 
-agent_info_declaration: ;//TODO
+agent_info_declaration: 'agent' name=ID '{'
+    name_var=ID ';' (name_var=ID';')*
+    '};' ;
 
-ev_environment_declaration: ;//TODO
+internal_objects_declaration: 'object' object_name=ID; //TODO
+
+sensing_declaration:'sensing''{'
+    (agent_sensing)*
+    '}';
+
+agent_sensing: name=ID'{'
+    (sensing_name=ID '=' gexpr)*
+    '}' ;
+
+ev_environment_declaration: 'environment' name=ID '=' '{'
+    //(environment_rule)?
+    def_environment_rule
+    '};'
+
+    ;//TODO
+
+environment_rule:;//TODO
+
+def_environment_rule:'default' env_rule=ID ':' times=expr ';';
 
 //SYSTEM CONFIG
 
-assignment_declaration:; //TODO
+assignment_declaration:
+    'let' name=ID '=' expr
+    ('and' name=ID '=' expr)*
+    'in'
+    ;
 
-
+collective_declaration:; //TODO
 
 system_declaration: 'system' name=ID '=' '{'
+    (assignment_declaration)?
+
 
     '}'  ;//TODO
 
-
+//UTIL
 
 expr    : INTEGER                                                   # integerValue
         | REAL                                                      # realValue
@@ -89,6 +128,14 @@ expr    : INTEGER                                                   # integerVal
         | guardExpr=expr '?' thenBranch=expr ':' elseBranch=expr    # ifthenelseExpression
         ;
 
+gexpr   : expr                                                      # expression
+        | parent=ID '.' son=ID                                      # attributeRef
+        | 'forall'                                                  # forall //TODO
+        | 'exists'                                                  # existsExpr //TODO
+        | 'min'                                                     # minimumExpr //TODO
+        | 'max'                                                     # maximumExpr //TODO
+        | 'it'                                                      # itself //TODO
+        ;
 
 
 fragment DIGIT  :   [0-9];
