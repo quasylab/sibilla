@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class SibillaJavaFXNewFileController implements Initializable {
+public class SibillaJavaFXNewFile implements Initializable {
 
     @FXML
     private TextField fileName;
@@ -33,7 +33,7 @@ public class SibillaJavaFXNewFileController implements Initializable {
     public void showTheStage(File file){
         filePath=file;
         try {
-            Parent tableViewParent = FXMLLoader.load(getClass().getResource("/view/newSibillaFile.fxml"));
+            Parent tableViewParent = FXMLLoader.load(getClass().getResource("/view/fxml/newSibillaFile.fxml"));
             Scene tableViewScene = new Scene(tableViewParent);
             window = new Stage();
             window.initModality(Modality.APPLICATION_MODAL);

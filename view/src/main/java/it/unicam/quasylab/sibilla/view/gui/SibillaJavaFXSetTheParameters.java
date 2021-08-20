@@ -1,7 +1,7 @@
 package it.unicam.quasylab.sibilla.view.gui;
 
 import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
-import it.unicam.quasylab.sibilla.shell.SibillaShellInterpreter;
+import it.unicam.quasylab.sibilla.view.controller.GUIController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -18,9 +18,6 @@ import java.util.ResourceBundle;
 
 public class SibillaJavaFXSetTheParameters implements Initializable {
     private static Stage window;
-
-    private static SibillaShellInterpreter sibillaShellInterpreter;
-
 
 
     @FXML
@@ -41,14 +38,12 @@ public class SibillaJavaFXSetTheParameters implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
     }
 
 
-    public void showTheStage(SibillaShellInterpreter shellInterpreter){
-        sibillaShellInterpreter=shellInterpreter;
+    public void showTheStage(){
         try {
-            Parent tableViewParent = FXMLLoader.load(getClass().getResource("/view/setTheParametersView.fxml"));
+            Parent tableViewParent = FXMLLoader.load(getClass().getResource("/view/fxml/setTheParametersView.fxml"));
             Scene tableViewScene = new Scene(tableViewParent);
             window =  new Stage();
             window.initModality(Modality.APPLICATION_MODAL);
@@ -67,9 +62,9 @@ public class SibillaJavaFXSetTheParameters implements Initializable {
             if(!deadline.getText().equals("")){
                 if(!dt.getText().equals("")){
                     if(!replica.getText().equals("")){
-                        sibillaShellInterpreter.getRuntime().setDeadline(Double.parseDouble(deadline.getText()));
-                        sibillaShellInterpreter.getRuntime().setDt(Double.parseDouble(dt.getText()));
-                        sibillaShellInterpreter.getRuntime().setReplica(Integer.parseInt(replica.getText()));
+                        GUIController.getInstance().getSibillaShellInterpreter().getRuntime().setDeadline(Double.parseDouble(deadline.getText()));
+                        GUIController.getInstance().getSibillaShellInterpreter().getRuntime().setDt(Double.parseDouble(dt.getText()));
+                        GUIController.getInstance().getSibillaShellInterpreter().getRuntime().setReplica(Integer.parseInt(replica.getText()));
                         window.close();
                     }else errorMessage.setText("ERROR: set a value to the Replica!");
                 }else errorMessage.setText("ERROR: set a value to the Dt!");

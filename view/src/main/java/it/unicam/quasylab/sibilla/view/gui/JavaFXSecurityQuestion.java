@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -17,7 +18,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class JavaFXSecurityQuestion implements Initializable {
-    private static Path path;
+    private static Path file;
     private static Stage window;
 
 
@@ -25,10 +26,10 @@ public class JavaFXSecurityQuestion implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
     }
 
-    public void showSecurityQuestion(Path path){
-        setPath(path);
+    public void showSecurityQuestion(Path filePath){
+        setPath(filePath);
         try {
-            Parent tableViewParent = FXMLLoader.load(getClass().getResource("/view/securityQuestion.fxml"));
+            Parent tableViewParent = FXMLLoader.load(getClass().getResource("/view/fxml/securityQuestion.fxml"));
             Scene tableViewScene = new Scene(tableViewParent);
             window =  new Stage();
             window.initModality(Modality.APPLICATION_MODAL);
@@ -40,13 +41,13 @@ public class JavaFXSecurityQuestion implements Initializable {
     }
 
     private void setPath(Path filePath){
-        path=filePath;
+        file=filePath;
     }
 
     @FXML
    public void yesButtonPressed(){
        try {
-           Files.deleteIfExists(path);
+           Files.deleteIfExists(file);
        } catch (IOException e) {
            e.printStackTrace();
        }
@@ -58,8 +59,8 @@ public class JavaFXSecurityQuestion implements Initializable {
         window.close();
    }
 
-   public boolean isDeleted(Path path){
-       return !Files.exists(path);
+   public boolean isDeleted(Path filePath){
+       return !Files.exists(filePath);
    }
 
 

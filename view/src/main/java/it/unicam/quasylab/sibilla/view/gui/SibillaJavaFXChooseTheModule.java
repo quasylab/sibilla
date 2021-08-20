@@ -1,7 +1,7 @@
 package it.unicam.quasylab.sibilla.view.gui;
 
 import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
-import it.unicam.quasylab.sibilla.shell.SibillaShellInterpreter;
+import it.unicam.quasylab.sibilla.view.controller.GUIController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -18,8 +18,6 @@ import java.util.ResourceBundle;
 public class SibillaJavaFXChooseTheModule implements Initializable {
     private static Stage window;
 
-    private static SibillaShellInterpreter sibillaShellInterpreter;
-
     @FXML
     private ListView<String> moduleList;
 
@@ -29,17 +27,15 @@ public class SibillaJavaFXChooseTheModule implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        sibillaShellInterpreter = new SibillaShellInterpreter();
-        moduleList.getItems().addAll(sibillaShellInterpreter.getRuntime().getModules());
+        moduleList.getItems().addAll(GUIController.getInstance().getSibillaShellInterpreter().getRuntime().getModules());//sibillaShellInterpreter.getRuntime().getModules());
         moduleList.getSelectionModel().clearSelection();
         chosenModule= null;
     }
 
 
-    public void showTheStage(SibillaShellInterpreter shellInterpreter){
-        sibillaShellInterpreter=shellInterpreter;
+    public void showTheStage(){
         try {
-            Parent tableViewParent = FXMLLoader.load(getClass().getResource("/view/chooseTheModuleView.fxml"));
+            Parent tableViewParent = FXMLLoader.load(getClass().getResource("/view/fxml/chooseTheModuleView.fxml"));
             Scene tableViewScene = new Scene(tableViewParent);
             window =  new Stage();
             window.initModality(Modality.APPLICATION_MODAL);
@@ -55,7 +51,7 @@ public class SibillaJavaFXChooseTheModule implements Initializable {
     public void chooseModuleOkButtonPressed(){
         try {
             chosenModule = moduleList.getSelectionModel().getSelectedItem();
-            sibillaShellInterpreter.getRuntime().loadModule(moduleList.getSelectionModel().getSelectedItem());
+            GUIController.getInstance().loadModule(moduleList.getSelectionModel().getSelectedItem());
             window.close();
         } catch (CommandExecutionException e) {
             e.printStackTrace();

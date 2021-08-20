@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class SibillaJavaFXHelpController implements Initializable {
+public class SibillaJavaFXHelp implements Initializable {
     private static final String RULES = "REGOLE PRINCIPALI:\n\n" +
             "1) Selezionare il modulo da caricare nella sezione \"Module\" e cliccare il tasto MODULE per caricarlo;\n\n" +
             "2) Selezionare il file da caricare nella sezione \"Files\" e cliccare il tasto LOAD per caricarlo;\n\n" +
@@ -34,7 +34,7 @@ public class SibillaJavaFXHelpController implements Initializable {
 
     @FXML
     public void returnButtonPressed() throws IOException {
-        Parent tableViewParent = FXMLLoader.load(getClass().getResource("/view/sibillaMainView.fxml"));
+        Parent tableViewParent = FXMLLoader.load(getClass().getResource("/view/fxml/SibillaMainView.fxml"));
         Scene tableViewScene = new Scene(tableViewParent);
         Stage window =  (Stage) helpMenuBar.getScene().getWindow();
         window.setScene(tableViewScene);

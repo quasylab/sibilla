@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="600.0" prefWidth="1260.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unicam.quasylab.sibilla.view.gui.SibillaJavaFXHelpController">
+<VBox prefHeight="600.0" prefWidth="1260.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unicam.quasylab.sibilla.view.gui.SibillaJavaFXHelp">
   <children>
     <MenuBar fx:id="helpMenuBar" VBox.vgrow="NEVER">
       <menus>
@@ -52,7 +52,7 @@
     </MenuBar>
     <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="487.0" prefWidth="733.0" VBox.vgrow="ALWAYS">
          <children>
-            <TextArea fx:id="rules" editable="false" prefHeight="574.0" prefWidth="1260.0" text="AAAAAAAAAAAAAAA">
+            <TextArea fx:id="rules" editable="false" prefHeight="574.0" prefWidth="1260.0">
                <font>
                   <Font name="System Italic" size="16.0" />
                </font></TextArea>
