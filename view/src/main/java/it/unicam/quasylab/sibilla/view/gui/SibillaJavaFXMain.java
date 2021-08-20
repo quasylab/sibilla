@@ -536,7 +536,7 @@ public class SibillaJavaFXMain implements Initializable {
             File file = treeViewProject.getSelectionModel().getSelectedItem().getValue();
          if(file.isFile() && !file.getName().endsWith(".sib")){
              deleteItem.setDisable(false);
-            }
+            }else deleteItem.setDisable(true);
         }else deleteItem.setDisable(true);
     }
 
