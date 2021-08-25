@@ -101,13 +101,18 @@ assignment_declaration:
     'in'
     ;
 
-collective_declaration:; //TODO
+collective_declaration:
+    '{'collective_body'}'; //TODO
+
+collective_body:
+               | 'for' name=ID 'in' group_name=ID '{'collective_body'}'
+               | 'if' expr_bool=expr '{'collective_body'}'('if' expr_bool=expr '{'collective_body'}')* ('else''{'collective_body'}')?
+               ;//TODO
 
 system_declaration: 'system' name=ID '=' '{'
     (assignment_declaration)?
-
-
-    '}'  ;//TODO
+    collective_declaration
+    '}';
 
 //UTIL
 
@@ -134,7 +139,7 @@ gexpr   : expr                                                      # expression
         | 'exists'                                                  # existsExpr //TODO
         | 'min'                                                     # minimumExpr //TODO
         | 'max'                                                     # maximumExpr //TODO
-        | 'it'                                                      # itself //TODO
+        | 'it.' ID                                                  # itself
         ;
 
 
