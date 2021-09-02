@@ -21,25 +21,25 @@ parameter_declaration: 'param' name=ID '=' expr ';';
 //AGENT GRAMMAR
 
 agent_declaration: 'agent' name=ID '{'
-    'state list:' state_declaration ('|' state_declaration)* ','
-    'observation list:' observation_declaration ('|' observation_declaration)* ','
-    'action list:' action_declaration ('|' action_declaration)*','
-    'behaviour:' behaviour_declaration
+    'state' '{'state_declaration ('|' state_declaration)* '}'','
+    'observations' '{'observation_declaration ('|' observation_declaration)* '}' ','
+    'actions' '{' action_declaration ('|' action_declaration)*'}'','
+    'behaviour' '{'behaviour_declaration'}'
     '};'
     ;
 
-state_declaration: 'state' name=ID '=' expr ';';
+state_declaration: name=ID '=' expr ';';
 
-observation_declaration: 'observation' name=ID '=' expr ';';
+observation_declaration: name=ID '=' expr ';';
 
-action_declaration: 'action' name=ID '{'
-    action_body('|' action_body)
+action_declaration: name=ID '{'
+    action_body(';' action_body)
     '};'
     ;
 
 action_body: state_name=ID '=' expr;
 
-behaviour_declaration: 'behaviour' name=ID '=' '{'
+behaviour_declaration: name=ID '=' '{'
     (behaviour_rule)*
     def_behaviour_rule
     '};'
@@ -54,9 +54,9 @@ def_behaviour_rule: 'default' action_name=ID ':' times=expr ';';
 
 //WORLD GRAMMAR
 
-world_declaration: 'name' name=ID '{'
-    'global:' global_state_declaration
-    'sensing:' sensing_declaration
+world_declaration: 'world' name=ID '{'
+    'global' global_state_declaration
+    'sensing' sensing_declaration
     'environment' ev_environment_declaration
     '};'
     ;
@@ -79,7 +79,7 @@ sensing_declaration:'sensing''{'
     '}';
 
 agent_sensing: name=ID'{'
-    (sensing_name=ID '=' gexpr)*
+    (sensing_name=ID '=' gexpr ';')*
     '}' ;
 
 ev_environment_declaration: 'environment' name=ID '=' '{'
@@ -104,12 +104,12 @@ assignment_declaration:
 collective_declaration:
     '{'collective_body'}'; //TODO
 
-collective_body:
+collective_body: name_collection=ID '{'collective_body'}'
                | 'for' name=ID 'in' group_name=ID '{'collective_body'}'
                | 'if' expr_bool=expr '{'collective_body'}'('if' expr_bool=expr '{'collective_body'}')* ('else''{'collective_body'}')?
                ;//TODO
 
-system_declaration: 'system' name=ID '=' '{'
+system_declaration: 'system' name=ID '{'
     (assignment_declaration)?
     collective_declaration
     '}';
