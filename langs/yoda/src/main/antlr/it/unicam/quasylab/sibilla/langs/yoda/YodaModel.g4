@@ -28,9 +28,9 @@ agent_declaration: 'agent' name=ID '{'
     '};'
     ;
 
-state_declaration: name=ID '=' expr ';';
+state_declaration: type name=ID ('=' expr)? ';';
 
-observation_declaration: name=ID '=' expr ';';
+observation_declaration: type name=ID ('=' expr)? ';';
 
 action_declaration: name=ID '{'
     action_body(';' action_body)
@@ -62,17 +62,19 @@ world_declaration: 'world' name=ID '{'
     ;
 
 global_state_declaration: '{'
-    internal_objects_declaration
-    '|'
-    agent_info_declaration
+    (global_field_declaration)+
     '};'
     ;
 
-agent_info_declaration: 'agent' name=ID '{'
-    name_var=ID ';' (name_var=ID';')*
-    '};' ;
+global_field_declaration:generic_field
+                        |agent_field
+                        ;
 
-internal_objects_declaration: 'object' object_name=ID; //TODO
+generic_field: type field_name=ID ';';
+
+agent_field: agent_name=ID '{'
+               type name_var=ID ';' (type name_var=ID';')*
+             '};' ;
 
 sensing_declaration:'sensing''{'
     (agent_sensing)*
@@ -142,6 +144,14 @@ gexpr   : expr                                                      # expression
         | 'it.' ID                                                  # itself
         ;
 
+type    : 'int'                                                     # integerNumber
+        | 'double'                                                  # doubleNumber
+        | 'real'                                                    # realNumber
+        | 'bool'                                                    # boolean
+        | 'char'                                                    # character
+        | 'String'                                                  # string
+        | 'array[' type ',' (type)* ']'                             # arrayMultipleTypes
+        ;
 
 fragment DIGIT  :   [0-9];
 fragment LETTER :   [a-zA-Z_];
@@ -149,7 +159,6 @@ fragment LETTER :   [a-zA-Z_];
 ID              :   LETTER (DIGIT|LETTER)*;
 INTEGER         :   DIGIT+;
 REAL            :   ((DIGIT* '.' DIGIT+)|DIGIT+ '.')(('E'|'e')('-')?DIGIT+)?;
-TYPE            :   ;
 
 COMMENT         : '/*' .*? '*/' -> channel(HIDDEN); // match anything between /* and */
 WS              : [ \r\t\u000C\n]+ -> channel(HIDDEN);
