@@ -33,11 +33,13 @@ state_declaration: type name=ID ('=' expr)? ';';
 observation_declaration: type name=ID ('=' expr)? ';';
 
 action_declaration: name=ID '{'
-    action_body(';' action_body)
+    action_body';'(action_body ';')
     '};'
     ;
 
-action_body: state_name=ID '=' expr;
+action_body: state_name=ID '=' expr
+           | agent_reference=ID'{'action_body'}'
+           ;
 
 behaviour_declaration: name=ID '=' '{'
     (behaviour_rule)*
@@ -55,9 +57,10 @@ def_behaviour_rule: 'default' action_name=ID ':' times=expr ';';
 //WORLD GRAMMAR
 
 world_declaration: 'world' name=ID '{'
-    'global' global_state_declaration
-    'sensing' sensing_declaration
-    'environment' ev_environment_declaration
+    'global' '{'global_state_declaration '}'
+    'sensing' '{'sensing_declaration'}'
+    'steps' '{'action_declaration'}'
+    'environment' '{'ev_environment_declaration'}'
     '};'
     ;
 
@@ -80,7 +83,7 @@ sensing_declaration:'sensing''{'
     (agent_sensing)*
     '}';
 
-agent_sensing: name=ID'{'
+agent_sensing: agent_name=ID'{'
     (sensing_name=ID '=' gexpr ';')*
     '}' ;
 
@@ -97,6 +100,11 @@ def_environment_rule:'default' env_rule=ID ':' times=expr ';';
 
 //SYSTEM CONFIG
 
+system_declaration: 'system' name=ID '{'
+    (assignment_declaration)?
+    collective_declaration
+    '}';
+
 assignment_declaration:
     'let' name=ID '=' expr
     ('and' name=ID '=' expr)*
@@ -110,11 +118,6 @@ collective_body: name_collection=ID '{'collective_body'}'
                | 'for' name=ID 'in' group_name=ID '{'collective_body'}'
                | 'if' expr_bool=expr '{'collective_body'}'('if' expr_bool=expr '{'collective_body'}')* ('else''{'collective_body'}')?
                ;//TODO
-
-system_declaration: 'system' name=ID '{'
-    (assignment_declaration)?
-    collective_declaration
-    '}';
 
 //UTIL
 
@@ -137,12 +140,14 @@ expr    : INTEGER                                                   # integerVal
 
 gexpr   : expr                                                      # expression
         | parent=ID '.' son=ID                                      # attributeRef
-        | 'forall'                                                  # forall //TODO
-        | 'exists'                                                  # existsExpr //TODO
-        | 'min'                                                     # minimumExpr //TODO
-        | 'max'                                                     # maximumExpr //TODO
+        | 'forall' name=ID':' name=ID '.' gexpr                     # forall //TODO
+        | 'exists' name=ID':' name=ID '.' gexpr                     # existsExpr //TODO
+        | 'min'    name=ID':' name=ID '.' gexpr                     # minimumExpr //TODO
+        | 'max'    name=ID':' name=ID '.' gexpr                     # maximumExpr //TODO
         | 'it.' ID                                                  # itself
         ;
+
+//le gexpr vanno ricontrollate
 
 type    : 'int'                                                     # integerNumber
         | 'double'                                                  # doubleNumber
