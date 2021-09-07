@@ -70,9 +70,7 @@ public class SibillaJavaFXChartsView implements Initializable {
         this.meanChart.getData().add(meanSeries);
         this.varianceChart.getData().add(varianceSeries);
         this.standardDeviationChart.getData().add(standardDeviationSeries);
-
     }
-
 
     public void showTheStage(File file){
         fileToPlot=file;
@@ -88,6 +86,4 @@ public class SibillaJavaFXChartsView implements Initializable {
             e.printStackTrace();
         }
     }
-
-
 }

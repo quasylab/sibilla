@@ -1,4 +1,4 @@
-package it.unicam.quasylab.sibilla.view.gui;
+/*package it.unicam.quasylab.sibilla.view.gui;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -46,11 +47,7 @@ public class JavaFXSecurityQuestion implements Initializable {
 
     @FXML
    public void yesButtonPressed(){
-       try {
-           Files.deleteIfExists(file);
-       } catch (IOException e) {
-           e.printStackTrace();
-       }
+       FileUtils.deleteQuietly(file.toFile());
        window.close();
    }
 
@@ -64,4 +61,4 @@ public class JavaFXSecurityQuestion implements Initializable {
    }
 
 
-}
+}*/

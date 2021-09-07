@@ -25,6 +25,7 @@ dependencies {
 
     implementation project(':core:runtime')
 
+    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
 
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:28.2-jre'
@@ -34,6 +35,9 @@ dependencies {
 
     // Use JUnit Jupiter Engine for testing.
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+    // JSon google API
+    implementation 'com.google.code.gson:gson:2.8.8'
 }
 
 application {

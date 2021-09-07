@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 import java.io.*;
 
 public class FilePersistenceManager implements PersistenceManager<String>{
-    public static final File DEFAULT_JSON_FILE = new File("view\\src\\main\\resources\\persistence\\JsonPersistence.json");
+    File DEFAULT_JSON_FILE = new File("view\\src\\main\\resources\\persistence\\ProjectLoadedPersistence.json");
     private Gson gson;
 
     public FilePersistenceManager(Gson gson) {

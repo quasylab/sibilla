@@ -1,4 +1,4 @@
-package it.unicam.quasylab.sibilla.view.gui;
+/*package it.unicam.quasylab.sibilla.view.gui;
 
 import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
 import it.unicam.quasylab.sibilla.view.controller.GUIController;
@@ -62,9 +62,9 @@ public class SibillaJavaFXSetTheParameters implements Initializable {
             if(!deadline.getText().equals("")){
                 if(!dt.getText().equals("")){
                     if(!replica.getText().equals("")){
-                        GUIController.getInstance().getSibillaShellInterpreter().getRuntime().setDeadline(Double.parseDouble(deadline.getText()));
-                        GUIController.getInstance().getSibillaShellInterpreter().getRuntime().setDt(Double.parseDouble(dt.getText()));
-                        GUIController.getInstance().getSibillaShellInterpreter().getRuntime().setReplica(Integer.parseInt(replica.getText()));
+                        GUIController.getInstance().getSibillaRuntime().setDeadline(Double.parseDouble(deadline.getText()));
+                        GUIController.getInstance().getSibillaRuntime().setDt(Double.parseDouble(dt.getText()));
+                        GUIController.getInstance().getSibillaRuntime().setReplica(Integer.parseInt(replica.getText()));
                         window.close();
                     }else errorMessage.setText("ERROR: set a value to the Replica!");
                 }else errorMessage.setText("ERROR: set a value to the Dt!");
@@ -86,4 +86,4 @@ public class SibillaJavaFXSetTheParameters implements Initializable {
 
 
 }
-
+*/

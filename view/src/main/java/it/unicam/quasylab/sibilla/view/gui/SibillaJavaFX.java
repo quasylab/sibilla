@@ -28,7 +28,7 @@ public class SibillaJavaFX extends Application implements View {
     }
 
     private void showMainStage() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/fxml/SibillaMainView.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/fxml/sibillaMainView.fxml"));
         VBox mainLayout = loader.load();
         Scene scene = new Scene(mainLayout);
         primaryStage.setScene(scene);

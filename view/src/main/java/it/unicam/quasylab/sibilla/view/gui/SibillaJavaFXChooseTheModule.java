@@ -1,4 +1,4 @@
-package it.unicam.quasylab.sibilla.view.gui;
+/*package it.unicam.quasylab.sibilla.view.gui;
 
 import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
 import it.unicam.quasylab.sibilla.view.controller.GUIController;
@@ -27,7 +27,7 @@ public class SibillaJavaFXChooseTheModule implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        moduleList.getItems().addAll(GUIController.getInstance().getSibillaShellInterpreter().getRuntime().getModules());//sibillaShellInterpreter.getRuntime().getModules());
+        moduleList.getItems().addAll(GUIController.getInstance().getSibillaRuntime().getModules());//sibillaShellInterpreter.getRuntime().getModules());
         moduleList.getSelectionModel().clearSelection();
         chosenModule= null;
     }
@@ -61,4 +61,4 @@ public class SibillaJavaFXChooseTheModule implements Initializable {
     public String getChosenModule(){ return chosenModule; }
 
 }
-
+*/

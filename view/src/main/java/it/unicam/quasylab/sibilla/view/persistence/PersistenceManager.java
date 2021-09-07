@@ -38,7 +38,6 @@ import java.io.IOException;
  * @param <T>
  */
 public interface PersistenceManager<T> {
-	
 	File DEFAULT_TXT_FILE = new File("view\\src\\main\\resources\\persistence\\JsonPersistence.txt");
 	
 	/**

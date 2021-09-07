@@ -8,11 +8,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
+
+import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class SibillaJavaFXHelp implements Initializable {
+public class SibillaJavaFXDocumentation {/*implements Initializable {
     private static final String RULES = "REGOLE PRINCIPALI:\n\n" +
             "1) Selezionare il modulo da caricare nella sezione \"Module\" e cliccare il tasto MODULE per caricarlo;\n\n" +
             "2) Selezionare il file da caricare nella sezione \"Files\" e cliccare il tasto LOAD per caricarlo;\n\n" +
@@ -39,6 +42,20 @@ public class SibillaJavaFXHelp implements Initializable {
         Stage window =  (Stage) helpMenuBar.getScene().getWindow();
         window.setScene(tableViewScene);
         window.show();
+    }*/
+
+    private static final String helpFile = "/documentation/SIBILLA__Getting_Started.pdf";
+
+    public void showHelpFile(){
+        if (Desktop.isDesktopSupported()) {
+            File myFile = new File(getClass().getResource(helpFile).getFile());
+            try {
+
+                Desktop.getDesktop().open(myFile);
+            } catch (IOException ex) {
+                // no application registered for PDFs
+            }
+        }
     }
 
 
