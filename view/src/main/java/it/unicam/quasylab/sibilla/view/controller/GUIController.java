@@ -39,18 +39,16 @@ public class GUIController {
 
     private File openedProject;
     private File builtFile;
-   // private String loadModule;
     private boolean projectLoaded;
     private boolean fileBuilt;
     private Settings lastSimulatedSettings;
-    //private boolean moduleLoaded;
     private Map<File, TextArea> modifiedFile;
     private Map<File, TableView<SibillaJavaFXMain.TableViewRow>> readOnlyFile;
 
-    private SibillaRuntime sibillaRuntime;
-    private FilePersistenceManager filePersistence;
+    private final SibillaRuntime sibillaRuntime;
+    private final FilePersistenceManager filePersistence;
+    private final SettingsPersistenceManager settingsPersistence;
     private SettingsLedger settingsLedger;
-    private SettingsPersistenceManager settingsPersistence;
 
     private static GUIController instance = null;
 
@@ -62,7 +60,6 @@ public class GUIController {
         settingsPersistence = new SettingsPersistenceManager();
 
         projectLoaded = false;
-        //moduleLoaded=false;
         builtFile=null;
         fileBuilt=false;
         modifiedFile = new HashMap<>();
@@ -84,11 +81,9 @@ public class GUIController {
     public void closeProject(){
         openedProject=null;
         builtFile=null;
-        //loadModule=null;
         modifiedFile.clear();
         readOnlyFile.clear();
         projectLoaded=false;
-        //moduleLoaded=false;
         fileBuilt=false;
     }
 
@@ -97,52 +92,12 @@ public class GUIController {
     }
 
 
-  /*  public void loadModule(String module) throws CommandExecutionException {
-        sibillaRuntime.loadModule(module);
-        this.loadModule=module;
-        this.moduleLoaded=true;
-    }
-
-    public String loadModule(File project) {
-        try {
-            if(getAllFiles(project.getPath()).stream().filter(p->p.toFile().getName().endsWith(".sib")).count() == 1){
-                for(Path path: getAllFiles(project.getPath())){
-                    if(path.toFile().getName().endsWith(".sib")){
-                        Scanner sc = new Scanner(path.toFile());
-                        while (sc.hasNextLine()){
-                            String string = sc.nextLine().toLowerCase();
-                            if (string.contains("module")) {
-                                string = string.replaceAll("module", "");
-                                string = string.replaceAll(" ", "");
-                                string = string.replaceAll("\"", "");
-                                loadModule(string);
-                                return string;
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (IOException | CommandExecutionException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }*/
-
-    /*public String getLoadModule(){
-        return this.loadModule;
-    }*/
-
     public void build(File file) throws CommandExecutionException {
         sibillaRuntime.load(file);
         this.builtFile=file;
         this.fileBuilt=true;
     }
 
-    /* public void loadFile(File file) throws CommandExecutionException {
-        sibillaRuntime.load(file);
-        this.loadFile=file;
-        this.fileLoaded=true;
-    }*/
 
     public File getBuiltFile(){
         return this.builtFile;
@@ -151,10 +106,6 @@ public class GUIController {
     public boolean isFileBuilt() {
         return this.fileBuilt;
     }
-
-    /*public File getLoadFile(){
-        return this.loadFile;
-    }*/
 
     public boolean isProjectLoaded(){
         return projectLoaded;
@@ -171,12 +122,6 @@ public class GUIController {
     public SibillaRuntime getSibillaRuntime(){
         return sibillaRuntime;
     }
-
-   /* public void processSibCommands(String...commands){
-        for(String command:commands) {
-            sibillaRuntime.execute(command);
-        }
-    }*/
 
 
     public void saveOpenedProject() throws IOException {
@@ -205,27 +150,6 @@ public class GUIController {
         this.settingsLedger = this.settingsPersistence.load();
         if(settingsLedger==null) this.settingsLedger = new SettingsLedger();
     }
-
-  /*  public double getDeadline(){
-        return this.sibillaRuntime.getDeadline();
-    }
-
-    public double getDt(){
-        return this.sibillaRuntime.getDt();
-    }
-
-    public int getReplica(){
-        return this.sibillaRuntime.getReplica();
-    }*/
-
-    /*public boolean isModuleLoaded(){
-        return this.moduleLoaded;
-    }*/
-
-   /* public boolean isFileLoaded(){
-        return this.fileLoaded;
-    }*/
-
 
 
    /* public void executeFile(String fileName) throws IOException {
@@ -322,16 +246,6 @@ public class GUIController {
         readOnlyFile.clear();
     }
 
-
-    /*public void createNewProject(File path, String module) throws IOException {
-        Files.createDirectories(path.toPath());
-        FileWriter fw1 = new FileWriter(path+"/"+path.getName()+".pm");
-        fw1.close();
-        FileWriter fw2 = new FileWriter(path+"/"+path.getName()+".sib");
-        fw2.write("module \""+module+"\"");
-        fw2.close();
-    }*/
-
     public void createNewDirectory(File path) throws IOException {
         Files.createDirectories(path.toPath());
     }
@@ -340,9 +254,6 @@ public class GUIController {
         FileWriter fw1 = new FileWriter(path+"/"+path.getName()+".pm");
         fw1.close();
     }
-
-
-
 
 
     /*public void refreshSibTextArea(){

@@ -10,6 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -24,6 +25,7 @@ public class SibillaJavaFX extends Application implements View {
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage=primaryStage;
         this.primaryStage.setTitle("Sibilla");
+        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/view/icon/unicam.png")));
         showMainStage();
     }
 
@@ -31,6 +33,7 @@ public class SibillaJavaFX extends Application implements View {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/fxml/sibillaMainView.fxml"));
         VBox mainLayout = loader.load();
         Scene scene = new Scene(mainLayout);
+        scene.getStylesheets().add(getClass().getResource("/view/style/main.css").toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
         primaryStage.show();
@@ -38,7 +41,7 @@ public class SibillaJavaFX extends Application implements View {
             Alert a = new Alert(Alert.AlertType.CONFIRMATION,
                     "Are you sure you want to quit?",
                     ButtonType.YES,
-                    ButtonType.NO);
+                    ButtonType.CANCEL);
             Optional<ButtonType> confirm = a.showAndWait();
 
             if (confirm.isPresent() && confirm.get() == ButtonType.YES) {
