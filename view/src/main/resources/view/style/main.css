@@ -1,8 +1,3 @@
-/*
-# per il singolo
-. per il tutto
-*/
-
 
 
 .button {
@@ -14,6 +9,7 @@
         -fx-background-insets: 0,1,1;
         -fx-text-fill: black;
         -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 3, 0.0 , 0 , 1 );
+        -fx-cursor: hand;
 }
 
 
@@ -95,6 +91,11 @@
 	-fx-background-radius: 4;
 }
 
+
+
+
+/****************    Tab-Pane    ****************/
+
 .tab-pane .tab-header-background {
 	-fx-background-color: #f4f4f4;
 }
@@ -128,12 +129,15 @@
 	-fx-border-color: #dddddd #dddddd white #dddddd;
 	-fx-background-color: white;
 }
+
 .tab-pane .tab-header-area .tab:selected .tab-label {
 	-fx-text-fill: #333333;
 }
+
 .tab-pane > .tab-content-area {
 	-fx-background-color: white;
 }
+
 
 .tab-pane .tab-header-area .tab .tab-label {
 	-fx-focus-color: transparent;
@@ -146,14 +150,22 @@
 .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button {
 	-fx-background-color: #337ab7;
 }
+
+
 .tab-pane > .tab-header-area > .headers-region > .tab:selected > .tab-container > .tab-close-button {
 	-fx-background-color: #333333;
 }
+
+
 .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button:hover {
 	-fx-background-color: red;
 	-fx-cursor: hand;
 }
 
+
+
+
+/****************    Scroll-Bar    ****************/
 .scroll-bar {
 	-fx-background-color: #fafafa;
 	-fx-background-radius: 0;
@@ -260,7 +272,10 @@
 	-fx-spacing: -1;
 }
 
-/*split pane*/
+
+
+
+/****************    Split-Pane    ****************/
 .split-pane > .split-pane-divider {
 	-fx-background-color: white;
 	-fx-border-color: #eeeeee;
@@ -280,7 +295,9 @@
 }
 
 
-/*    CheckBox     */
+
+
+/****************    CheckBox    ****************/
 .check-box > .box {
 	-fx-background-radius: 3;
 	-fx-padding: 0.166667em 0.166667em 0.25em 0.25em;
@@ -288,6 +305,7 @@
 	-fx-border-color: #0087cb;
 	-fx-border-radius: 3;
 	-fx-background-color: linear-gradient(to bottom, white, #e6e6e6);
+	-fx-cursor: hand;
 }
 
 .check-box > .box > .mark {
@@ -299,7 +317,6 @@
 
 
 .check-box {
-	/*-fx-label-padding: 0.2em 0.0em 0.0em 0.416667em; /* 0 0 0 5 */
 	-fx-text-fill: -fx-text-background-color;
 	-fx-padding: 0 0 6 0;
 	-fx-font-style: italic;
@@ -310,4 +327,12 @@
 }
 .check-box:selected > .box > .mark {
 	-fx-background-color: linear-gradient(to bottom, #0087cb, #0077b3);
+}
+
+
+/****************    Text-Area    ****************/
+#terminal {
+     -fx-text-inner-color: red;
+     -fx-font-weight: Bold;
+     -fx-font-size: 14
 }

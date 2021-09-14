@@ -419,7 +419,7 @@
               <items>
                 <AnchorPane maxWidth="600.0" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="300.0">
                      <children>
-                        <TextArea fx:id="infoTextArea" layoutX="-5.0" layoutY="14.0" prefHeight="87.0" prefWidth="216.0" AnchorPane.bottomAnchor="-2.0" AnchorPane.leftAnchor="-5.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="20.0">
+                        <TextArea fx:id="infoTextArea" editable="false" layoutX="-5.0" layoutY="14.0" prefHeight="87.0" prefWidth="216.0" AnchorPane.bottomAnchor="-2.0" AnchorPane.leftAnchor="-5.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="20.0">
                            <font>
                               <Font name="Bookshelf Symbol 7" size="14.0" />
                            </font>

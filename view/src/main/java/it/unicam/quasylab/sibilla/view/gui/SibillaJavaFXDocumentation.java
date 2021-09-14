@@ -15,34 +15,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class SibillaJavaFXDocumentation {/*implements Initializable {
-    private static final String RULES = "REGOLE PRINCIPALI:\n\n" +
-            "1) Selezionare il modulo da caricare nella sezione \"Module\" e cliccare il tasto MODULE per caricarlo;\n\n" +
-            "2) Selezionare il file da caricare nella sezione \"Files\" e cliccare il tasto LOAD per caricarlo;\n\n" +
-            "3) Impostare i parametri (Deadline, Dt, Replica) nelle sezioni dedicate e cliccare il tasto simulate per far partire la simulazione;\n\n" +
-            "4) Cliccare il tasto SAVE per salvare i risultati della simulazione nella cartella \"shell/build/install/sshell/bin/results\";\n\n\n\n\n"+
-            "REGOLE GENERALI:\n\n1) Se si vuole creare un file con nuove regole, scrivere le regole nella sezione dedicata e assegnare un nome al file,\n " +
-            "successivamente cliccare sul tasto CREATE FILE;\n\n"+
-            "2) Se si vuole eliminare un file, selezionare il file nella sezione dedicata \"Files\", successivamente cliccare sul tasto DELETE";
-
-    @FXML
-    TextArea rules;
-    @FXML
-    private MenuBar helpMenuBar;
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        rules.setText(RULES);
-    }
-
-    @FXML
-    public void returnButtonPressed() throws IOException {
-        Parent tableViewParent = FXMLLoader.load(getClass().getResource("/view/fxml/SibillaMainView.fxml"));
-        Scene tableViewScene = new Scene(tableViewParent);
-        Stage window =  (Stage) helpMenuBar.getScene().getWindow();
-        window.setScene(tableViewScene);
-        window.show();
-    }*/
+public class SibillaJavaFXDocumentation {
 
     private static final String helpFile = "/documentation/SIBILLA__Getting_Started.pdf";
 

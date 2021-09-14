@@ -1,16 +1,16 @@
 package it.unicam.quasylab.sibilla.view;
 
-import it.unicam.quasylab.sibilla.view.controller.Settings;
-import it.unicam.quasylab.sibilla.view.controller.SettingsLedger;
-import it.unicam.quasylab.sibilla.view.gui.SibillaJavaFX;
-import it.unicam.quasylab.sibilla.view.persistence.SettingsPersistenceManager;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import it.unicam.quasylab.sibilla.view.gui.SibillaJavaFX;
 import java.util.Objects;
 
+
+/**
+ * This is the GUI main class
+ *
+ * @author LorenzoSerini
+ *
+ */
 public class SibillaView {
     private final View view;
 

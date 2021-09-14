@@ -1,25 +1,23 @@
 package it.unicam.quasylab.sibilla.view.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class SettingsLedger {
+/**
+ * Allows to create a settings ledger
+ * @param <T> extends Settings
+ * @author LorenzoSerini
+ */
+public interface SettingsLedger <T extends Settings>{
 
-    private List<Settings> settingsList;
+    /**
+     * Returns settings list
+     * @return settings list
+     */
+    List<BasicSettings> getSettingsList();
 
-    public SettingsLedger(){
-        this.settingsList = new ArrayList<>();
-    }
-
-    public SettingsLedger(List<Settings> settingsList){
-        this.settingsList=settingsList;
-    }
-
-    public List<Settings> getSettingsList(){
-        return this.settingsList;
-    }
-
-    public void setSettingsList(List<Settings> settingsList){
-        this.settingsList=settingsList;
-    }
+    /**
+     * set setting list
+     * @param settingsList Settings list
+     */
+    void setSettingsList(List<BasicSettings> settingsList);
 }

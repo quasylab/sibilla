@@ -1,9 +1,9 @@
 package it.unicam.quasylab.sibilla.view.gui;
 
 import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
+import it.unicam.quasylab.sibilla.view.controller.BasicSettings;
+import it.unicam.quasylab.sibilla.view.controller.BasicSettingsLedger;
 import it.unicam.quasylab.sibilla.view.controller.GUIController;
-import it.unicam.quasylab.sibilla.view.controller.Settings;
-import it.unicam.quasylab.sibilla.view.controller.SettingsLedger;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -133,7 +133,6 @@ public class SibillaJavaFXMain implements Initializable {
                 }
         );
 
-
         treeViewModels.setCellFactory(new Callback<>() {
             public TreeCell<File> call(TreeView<File> tv) {
                 return new TreeCell<>() {
@@ -148,7 +147,6 @@ public class SibillaJavaFXMain implements Initializable {
                             }
                        }};}});
 
-        terminal.setStyle("-fx-text-inner-color: red;");
         this.appendTextOnTerminal(this.guiController.getTimeString() + INFO + CREATION_MESSAGE);
         try {
             guiController.loadOpenedFile();
@@ -158,15 +156,18 @@ public class SibillaJavaFXMain implements Initializable {
             } else disableItems();
         } catch (IOException e) {
             e.printStackTrace();
+            this.appendTextOnTerminal("ERROR: Loading Problems!\n"+e.getMessage());
         }
     }
+
+
 
     @FXML
     void buildButtonPressed(){
         Tab tab = monitorTabPane.getSelectionModel().getSelectedItem();
         if (tab.getText() != null) {
         try {
-            for (Path path : this.guiController.getAllFiles(this.guiController.getOpenedProject().getPath())) {//allFiles(this.guiController.getOpenedProject().getPath())){//this.openedFile.getPath())){
+            for (Path path : this.guiController.getAllFiles(this.guiController.getOpenedProject().getPath())) {
                 if (path.toFile().getName().equals(tab.getText())) {
                     this.guiController.saveAll(this.guiController.getOpenedProject().getPath());
                     if (guiController.isPmFile(path.toFile().getName())) {
@@ -183,12 +184,28 @@ public class SibillaJavaFXMain implements Initializable {
             }
         } catch (IOException | CommandExecutionException e) {
             e.printStackTrace();
+            this.appendTextOnTerminal("ERROR: Building File Problems\n"+e.getMessage());
         }
     } else {
         this.appendTextOnTerminal("File not selected.\n\n" +
                 "Select a file!");
     }
 }
+
+    @FXML
+    public void chartsButtonPressed() {
+        Tab tab = monitorTabPane.getSelectionModel().getSelectedItem();
+        try {
+            for (Path path : this.guiController.getAllFiles(this.guiController.getOpenedProject().getPath())) {
+                if (path.toFile().getName().equals(tab.getText())) {
+                    chartsViewController.showTheStage(path.toFile());
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.appendTextOnTerminal("ERROR: Charts File Problems");
+        }
+    }
 
 
     @FXML
@@ -249,6 +266,7 @@ public class SibillaJavaFXMain implements Initializable {
                         this.guiController.saveSettings();
                     } catch (IOException e) {
                         e.printStackTrace();
+                        this.appendTextOnTerminal("ERROR: Delete Simulation Case Problems!");
                     }
                 }
             }
@@ -257,7 +275,12 @@ public class SibillaJavaFXMain implements Initializable {
 
     @FXML
     void buildContextPressed() {
-        this.guiController.saveAll(this.guiController.getOpenedProject().getPath());
+        try {
+            this.guiController.saveAll(this.guiController.getOpenedProject().getPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.appendTextOnTerminal("ERROR: Save Environment Problems!\n"+e.getMessage());
+        }
         if (guiController.isPmFile(treeViewModels.getSelectionModel().getSelectedItem().getValue().getName())) {
             try {
                 this.guiController.build(treeViewModels.getSelectionModel().getSelectedItem().getValue());
@@ -269,25 +292,15 @@ public class SibillaJavaFXMain implements Initializable {
                 this.infoTextArea.appendText("-) File Built:          "+this.guiController.getBuiltFile().getName()+"\n\n");
             } catch (CommandExecutionException | IOException e) {
                 e.printStackTrace();
+                this.appendTextOnTerminal("ERROR: Building File Problems!\n"+e.getMessage());
+
             }
         }
         this.appendTextOnTerminal(this.guiController.getTimeString() + INFO + String.format(CODE_MESSAGE, treeViewModels.getSelectionModel().getSelectedItem().getValue().getName()));
     }
 
 
-    @FXML
-    public void chartsButtonPressed() {
-        Tab tab = monitorTabPane.getSelectionModel().getSelectedItem();
-        try {
-            for (Path path : this.guiController.getAllFiles(this.guiController.getOpenedProject().getPath())) {
-                if (path.toFile().getName().equals(tab.getText())) {
-                    chartsViewController.showTheStage(path.toFile());
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
 
     @FXML
     void chartsContextPressed() {
@@ -332,6 +345,7 @@ public class SibillaJavaFXMain implements Initializable {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            this.appendTextOnTerminal("ERROR: Coping File Problems\n"+e.getMessage());
         }
     }
 
@@ -384,7 +398,7 @@ public class SibillaJavaFXMain implements Initializable {
         treeViewSimulationCases.setOnMouseClicked(click -> {
             if (click.getClickCount() == 2 && click.getButton().equals(MouseButton.PRIMARY)) {
                 if(!treeViewSimulationCases.getSelectionModel().isEmpty()) {
-                    for (Settings settings : this.guiController.getSettings().getSettingsList()) {
+                    for (BasicSettings settings : this.guiController.getSettings().getSettingsList()) {
                         if (settings.getLabel().equals(treeViewSimulationCases.getSelectionModel().getSelectedItem().getValue())) {
                             this.settingsLabel.setText(settings.getLabel());
                             this.settingsModule.setValue(settings.getModule());
@@ -409,6 +423,8 @@ public class SibillaJavaFXMain implements Initializable {
         TextArea monitor = new TextArea();
         monitor.setFont(Font.font("Verdana", 14));
         Tab tab = new Tab(file.getName(), monitor);
+
+
         tab.setOnClosed(event -> {
                     this.guiController.getModifiedFile().get(file).clear();
                     this.guiController.getModifiedFile().remove(file);
@@ -424,6 +440,7 @@ public class SibillaJavaFXMain implements Initializable {
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            this.appendTextOnTerminal("ERROR: File Not Found Exception!\n"+e.getMessage());
         }
     }
 
@@ -434,6 +451,7 @@ public class SibillaJavaFXMain implements Initializable {
         TableColumn<TableViewRow, String> mean = new TableColumn<>("Mean");
         TableColumn<TableViewRow, String> variance = new TableColumn<>("Variance");
         TableColumn<TableViewRow, String> standardDeviation = new TableColumn<>("Standard Deviation");
+
         value.setMaxWidth(600);
         value.setStyle("-fx-font-weight: bold");
         mean.setStyle( "-fx-alignment: CENTER");
@@ -453,6 +471,7 @@ public class SibillaJavaFXMain implements Initializable {
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            this.appendTextOnTerminal("ERROR: File Not Found Exception!\n"+e.getMessage());
         }
         value.setCellValueFactory(new PropertyValueFactory<>("value"));
         mean.setCellValueFactory(new PropertyValueFactory<>("mean"));
@@ -487,6 +506,7 @@ public class SibillaJavaFXMain implements Initializable {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            this.appendTextOnTerminal("ERROR: Exit Failed!\n"+e.getMessage());
         }
     }
 
@@ -531,6 +551,7 @@ public class SibillaJavaFXMain implements Initializable {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            this.appendTextOnTerminal("ERROR: Creation Of a New Project Failed\n"+e.getMessage());
         }
         }
 
@@ -564,19 +585,21 @@ public class SibillaJavaFXMain implements Initializable {
         try {
             this.guiController.saveAs(dir);
             updateTreeViewModels(dir, null);
-            for(Settings settings:this.guiController.getSettings().getSettingsList()){
+            List<BasicSettings> newSettings = new ArrayList<>();
+            for(BasicSettings settings:this.guiController.getSettings().getSettingsList()){
                 for(Path path:this.guiController.getAllFiles(dir.getPath())){
                     if (settings.getFile().getName().equals(path.toFile().getName())){
-                        Settings nSettings = new Settings(path.toFile(),settings.getLabel(),settings.getModule());
+                        BasicSettings nSettings = new BasicSettings(path.toFile(),settings.getLabel(),settings.getModule());
                         nSettings.setParameters(settings.getParameters());
                         nSettings.setMeasures(settings.getMeasures());
                         nSettings.setDeadline(nSettings.getDeadline());
                         nSettings.setDt(nSettings.getDt());
                         nSettings.setReplica(nSettings.getReplica());
-                        this.guiController.getSettings().getSettingsList().add(nSettings);
+                        newSettings.add(nSettings);
                     }
                 }
                 }
+            this.guiController.getSettings().getSettingsList().addAll(newSettings);
             monitorTabPane.getTabs().clear();
             this.guiController.setOpenedProject(dir);
             if(this.guiController.isFileBuilt()) {
@@ -588,44 +611,51 @@ public class SibillaJavaFXMain implements Initializable {
                     }
                 }
             }
-            updateTreeViewSimulationCases(dir, this.guiController.getSettings());
+            updateTreeViewSimulationCases(this.guiController.getBuiltFile(), this.guiController.getSettings());
             this.monitorTabPane.getTabs().clear();
         } catch (IOException | CommandExecutionException e) {
             e.printStackTrace();
+            this.appendTextOnTerminal("ERROR: Save Failed\n"+e.getMessage());
         }
     }
 
     @FXML
     void saveItemPressed() {
-        this.guiController.saveAll(this.guiController.getOpenedProject().getPath());
+        try {
+            this.guiController.saveAll(this.guiController.getOpenedProject().getPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.appendTextOnTerminal("ERROR: Save Failed\n"+e.getMessage());
+        }
     }
 
     @FXML
-    void saveSettingsButtonPressed(){
+    public void saveSettingsButtonPressed(){
         if(checkSettings()) {
-            if(this.guiController.getSettings().getSettingsList().stream().noneMatch(p->p.getLabel().equals(getSettings().getLabel()))) {
-               saveSettings();
-            }else{
-                if(this.overwriteAlertMessage("Overwrite Results", "Are you sure you want to overwrite the simulation settings?", "Then change the label name")) {
+            try {
+                if (this.guiController.getSettings().getSettingsList().stream().noneMatch(p -> p.getLabel().equals(getSettings().getLabel()))) {
+                    saveSettings();
+                } else {
+                    if (this.overwriteAlertMessage("Overwrite Results", "Are you sure you want to overwrite the simulation settings?", "Then change the label name")) {
                         saveSettings();
+                    }
                 }
+            }catch (IOException e) {
+                e.printStackTrace();
+                this.appendTextOnTerminal("ERROR: Save Failed\n"+e.getMessage());
             }
         }
     }
 
-             private void saveSettings(){
+             private void saveSettings() throws IOException {
                  this.guiController.getSettings().getSettingsList().removeIf(settings -> settings.getLabel().equals(getSettings().getLabel()));
                  this.guiController.getSettings().getSettingsList().add(getSettings());
-                 try {
                      updateTreeViewSimulationCases(this.guiController.getBuiltFile(), this.guiController.getSettings());
                      this.guiController.saveSettings();
-                 } catch (IOException e) {
-                     e.printStackTrace();
-                 }
              }
 
     @FXML
-    void simulateButtonPressed() {
+    public void simulateButtonPressed() {
         if(checkSettings()){
             try {
                 if (this.guiController.getAllFiles(this.guiController.getOpenedProject().getPath()).stream().anyMatch(p -> p.toFile().getName().equals("results ("+this.getSettings().getLabel()+")"))){
@@ -633,14 +663,14 @@ public class SibillaJavaFXMain implements Initializable {
                         this.simulate();
                     }
                 }else this.simulate();
-            } catch (IOException e) {
+            } catch (IOException | CommandExecutionException e) {
                 e.printStackTrace();
+                this.appendTextOnTerminal("ERROR: Simulation Failed\n" + e.getMessage());
             }
-             }
+        }
          }
 
-         private void simulate(){
-             try {
+         private void simulate() throws IOException, CommandExecutionException {
                  this.guiController.simulate(Objects.requireNonNull(getSettings()));
                  this.infoTextArea.appendText("-) Module Loaded:       " + this.guiController.getLastSimulatedSettings().getModule() + "\n\n");
                  this.infoTextArea.appendText("-) File Loaded:          " + this.guiController.getBuiltFile().getName() + "\n\n");
@@ -660,9 +690,6 @@ public class SibillaJavaFXMain implements Initializable {
                  this.guiController.getSibillaRuntime().save(this.guiController.getLastSimulatedSettings().getFile().getParent() + "/results (" + this.getSettings().getLabel() + ")", this.getSettings().getLabel(), "__");
                  updateTreeViewModels(this.guiController.getOpenedProject(), null);
                  this.guiController.saveAll(this.guiController.getOpenedProject().getPath());
-             } catch (IOException | CommandExecutionException e) {
-                 e.printStackTrace();
-             }
          }
 
     @FXML
@@ -686,8 +713,8 @@ public class SibillaJavaFXMain implements Initializable {
 
 
 
-    private Settings getSettings() {
-            Settings settings = new Settings(this.guiController.getBuiltFile(), settingsLabel.getText(), settingsModule.getValue());
+    private BasicSettings getSettings() {
+        BasicSettings settings = new BasicSettings(this.guiController.getBuiltFile(), settingsLabel.getText(), settingsModule.getValue());
             settings.setDeadline(Double.parseDouble(deadline.getText()));
             settings.setReplica(Integer.parseInt(replica.getText()));
             settings.setDt(Double.parseDouble(dt.getText()));
@@ -809,9 +836,9 @@ public class SibillaJavaFXMain implements Initializable {
     }
 
 
-    private void updateTreeViewSimulationCases(File dir, SettingsLedger settingsLedger) throws IOException {
+    private void updateTreeViewSimulationCases(File dir, BasicSettingsLedger settingsLedger) throws IOException {
         TreeItem<String> root = new TreeItem<>(dir.getName(), new ImageView(folderIcon));
-            for (Settings settings : settingsLedger.getSettingsList()) {
+            for (BasicSettings settings : settingsLedger.getSettingsList()) {
                 if (dir.getPath().equals(settings.getFilePath())) {
                     root.getChildren().add(new TreeItem<>(settings.getLabel(), new ImageView(fileIcon)));
                 }
