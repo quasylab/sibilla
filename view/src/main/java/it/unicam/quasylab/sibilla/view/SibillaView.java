@@ -1,7 +1,9 @@
 package it.unicam.quasylab.sibilla.view;
 
 
-import it.unicam.quasylab.sibilla.view.gui.SibillaJavaFX;
+
+import it.unicam.quasylab.sibilla.view.gui.SibillaJavaFXView;
+
 import java.util.Objects;
 
 
@@ -47,7 +49,7 @@ public class SibillaView {
     /**
      * Creates a Sibilla view
      * @param code the graphics with which you want to launch the application
-     * @return SibillaView
+     * @return SibillaJavaFXView
      */
     public static SibillaView createSibilla(String code) {
         switch (SIBILLA_TYPE.valueOf(code.toUpperCase())) {
@@ -59,10 +61,10 @@ public class SibillaView {
 
     /**
      * Create a Basic Sibilla View
-     * @return SibillaView
+     * @return SibillaJavaFXView
      */
     public static SibillaView createBasicSibilla() {
-        return new SibillaView(new SibillaJavaFX());
+        return new SibillaView(new SibillaJavaFXView());
     }
 }
 

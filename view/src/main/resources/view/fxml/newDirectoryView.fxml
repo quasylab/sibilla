@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="152.0" prefWidth="344.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unicam.quasylab.sibilla.view.gui.SibillaJavaDirectoryView">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="152.0" prefWidth="344.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unicam.quasylab.sibilla.view.gui.NewDirectoryView">
    <children>
       <Label alignment="CENTER" layoutY="12.0" prefHeight="25.0" prefWidth="373.0" text="Directory Name" AnchorPane.bottomAnchor="114.66666666666667" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="-0.3333333333333144" AnchorPane.topAnchor="12.0">
          <font>

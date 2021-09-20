@@ -18,7 +18,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.Optional;
 
-public class SibillaJavaFX extends Application implements View {
+public class SibillaJavaFXView extends Application implements View {
     private Stage primaryStage;
 
     @Override

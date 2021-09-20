@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
-public class SibillaJavaFXChartsView implements Initializable {
+public class ChartsView implements Initializable {
 
     @FXML
     private LineChart<String,Double> meanChart;

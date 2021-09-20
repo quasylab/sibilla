@@ -1,11 +1,11 @@
 package it.unicam.quasylab.sibilla.view.persistence;
 
 import com.google.gson.Gson;
-import it.unicam.quasylab.sibilla.view.controller.BasicSettingsLedger;
+import it.unicam.quasylab.sibilla.view.controller.BasicBuildableLedger;
 
 import java.io.*;
 
-public class SettingsPersistenceManager implements PersistenceManager<BasicSettingsLedger> {
+public class SettingsPersistenceManager implements PersistenceManager<BasicBuildableLedger> {
     File DEFAULT_JSON_FILE = new File("view\\src\\main\\resources\\persistence\\SettingsPersistence.json");
     private Gson gson;
 
@@ -20,12 +20,12 @@ public class SettingsPersistenceManager implements PersistenceManager<BasicSetti
 
 
     @Override
-    public void save(BasicSettingsLedger settingsMemory, File file) throws IOException {
+    public void save(BasicBuildableLedger settingsMemory, File file) throws IOException {
         String gsonLed = gson.toJson(settingsMemory);
         wrapperSave(gsonLed, file);
     }
 
-    public void save(BasicSettingsLedger settingsMemory) throws IOException {
+    public void save(BasicBuildableLedger settingsMemory) throws IOException {
         this.save(settingsMemory, DEFAULT_JSON_FILE);
     }
 
@@ -36,12 +36,12 @@ public class SettingsPersistenceManager implements PersistenceManager<BasicSetti
     }
 
     @Override
-    public BasicSettingsLedger load(File file) throws IOException {
+    public BasicBuildableLedger load(File file) throws IOException {
         String gsonLed = wrapperLoad(file);
-        return gson.fromJson(gsonLed, BasicSettingsLedger.class);
+        return gson.fromJson(gsonLed, BasicBuildableLedger.class);
     }
 
-    public BasicSettingsLedger load() throws IOException {
+    public BasicBuildableLedger load() throws IOException {
         return this.load(DEFAULT_JSON_FILE);
     }
 

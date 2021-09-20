@@ -6,24 +6,22 @@ import java.util.Map;
 
 
 public class BasicSettings implements Settings{
-    private String filePath;
+   // private String filePath;
     private String label;
-    private String module;
     private Map<String, Double> parameters;
     private double deadline;
     private double dt;
     private int replica;
     private Map<String, Boolean> measures;
 
-    public BasicSettings(File file, String label, String module){
-        this.filePath=file.getPath();
+    public BasicSettings(File file, String label){
+      //  this.filePath=file.getPath();
         this.label=label;
-        this.module=module;
         this.parameters = new HashMap<>();
         this.measures = new HashMap<>();
     }
 
-    @Override
+   /* @Override
     public String getFilePath() {
         return filePath;
     }
@@ -34,7 +32,7 @@ public class BasicSettings implements Settings{
     @Override
     public void setFile(File file) {
         this.filePath = file.getPath();
-    }
+    }*/
 
     @Override
     public String getLabel() {
@@ -44,16 +42,6 @@ public class BasicSettings implements Settings{
     @Override
     public void setLabel(String label) {
         this.label = label;
-    }
-
-    @Override
-    public String getModule() {
-        return module;
-    }
-
-    @Override
-    public void setModule(String module) {
-        this.module = module;
     }
 
     @Override

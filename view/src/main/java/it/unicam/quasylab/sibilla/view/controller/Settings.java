@@ -1,6 +1,5 @@
 package it.unicam.quasylab.sibilla.view.controller;
 
-import java.io.File;
 import java.util.Map;
 
 /**
@@ -9,24 +8,24 @@ import java.util.Map;
  */
 public interface Settings {
 
-    /**
+    /*/**
      * returns the associated file
      * @return settings file
      */
-    String getFilePath();
+    /*String getFilePath();
 
     /**
      * returns the associated file
      * @return settings file
      */
-    File getFile();
+    /*File getFile();
 
 
     /**
      * set the settings file
      * @param file The settings file
      */
-    void setFile(File file);
+    //void setFile(File file);
 
     /**
      * returns the label name
@@ -39,18 +38,6 @@ public interface Settings {
      * @param label The label name
      */
     void setLabel(String label);
-
-    /**
-     * returns the associated module
-     * @return the associated module
-     */
-    String getModule();
-
-    /**
-     * set the associated module
-     * @param module The associated module
-     */
-    void setModule(String module);
 
 
     /**

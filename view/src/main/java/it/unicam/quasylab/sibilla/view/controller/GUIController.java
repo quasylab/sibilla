@@ -2,12 +2,13 @@ package it.unicam.quasylab.sibilla.view.controller;
 
 import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
 import it.unicam.quasylab.sibilla.core.runtime.SibillaRuntime;
-import it.unicam.quasylab.sibilla.view.gui.SibillaJavaFXMain;
+import it.unicam.quasylab.sibilla.view.gui.MainView;
 import it.unicam.quasylab.sibilla.view.persistence.FilePersistenceManager;
 import it.unicam.quasylab.sibilla.view.persistence.SettingsPersistenceManager;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 
+import java.awt.geom.IllegalPathStateException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -25,38 +26,36 @@ import java.util.stream.Stream;
  * Class containing fundamental methods for the GUI
  * @author LorenzoSerini
  */
-
 public class GUIController {
     public static final String INFO = "INFO: ";
     public static final String CREATION_MESSAGE = "Simulation environment created";
     public static final String CODE_MESSAGE =  "Code %s has been successfully loaded";
     public static final String SIMULATION_SUCCESSFUL = "Simulation successful";
-    public static final String SAVE_MESSAGE =  "save in %s OK!";
-    public static final String CREATED_SUCCESSFULLY_MESSAGE =  "File %s created successfully";
-    public static final String CREATED_ERROR_MESSAGE =  "File %s creation ERROR!";
-    public static final String DELETED_FILE_MESSAGE =  "File %s successfully deleted";
+    public static final String SAVE_MESSAGE =  "Save in %s OK!";
+    public static final String DELETED_FILE_MESSAGE =  "%s successfully deleted";
     public static final String CLOSE_PROJECT = "The %s project was successfully closed";
 
     private File openedProject;
-    private File builtFile;
+    private BuildableFile<BasicSettings> builtFile;
     private boolean projectLoaded;
     private boolean fileBuilt;
+    private File persistenceFile;
     private BasicSettings lastSimulatedSettings;
     private Map<File, TextArea> modifiedFile;
-    private Map<File, TableView<SibillaJavaFXMain.TableViewRow>> readOnlyFile;
+    private Map<File, TableView<MainView.TableViewRow>> readOnlyFile;
 
     private final SibillaRuntime sibillaRuntime;
-    private final FilePersistenceManager filePersistence;
+    private final FilePersistenceManager filePersistenceManager;
     private final SettingsPersistenceManager settingsPersistence;
-    private BasicSettingsLedger settingsLedger;
+    private BasicBuildableLedger buildableLedger;
 
     private static GUIController instance = null;
 
 
     private GUIController(){
         sibillaRuntime = new SibillaRuntime();
-        filePersistence = new FilePersistenceManager();
-        settingsLedger = new BasicSettingsLedger();
+        filePersistenceManager = new FilePersistenceManager();
+        buildableLedger = new BasicBuildableLedger();
         settingsPersistence = new SettingsPersistenceManager();
 
         projectLoaded = false;
@@ -77,9 +76,20 @@ public class GUIController {
      * Set the opened project
      * @param project The opened project
      */
-    public void setOpenedProject(File project) {
+    public void setOpenedProject(File project) throws IOException {
+        closeProject();
         openedProject=project;
         projectLoaded=true;
+        boolean jsonPersistence = false;
+        for(Path file:this.getAllFiles(project.getPath())){
+            if(isJsonFile(file.toFile().getName())) {
+                this.persistenceFile=file.toFile();
+                this.loadSettings();
+                jsonPersistence=true;
+                break;
+            }
+        }
+        if(!jsonPersistence) throw new IllegalPathStateException("persistence file not present!");
     }
 
     /**
@@ -92,6 +102,7 @@ public class GUIController {
         readOnlyFile.clear();
         projectLoaded=false;
         fileBuilt=false;
+        persistenceFile=null;
     }
 
     /**
@@ -109,9 +120,17 @@ public class GUIController {
      * @throws CommandExecutionException
      */
     public void build(File file) throws CommandExecutionException {
-        sibillaRuntime.load(file);
-        this.builtFile=file;
-        this.fileBuilt=true;
+        for(BuildableFile<BasicSettings> buildableFile:this.buildableLedger.getBuildableList()){
+            if(buildableFile.getFile().equals(file)){
+                this.sibillaRuntime.clear();
+                sibillaRuntime.loadModule(buildableFile.getModule());
+                sibillaRuntime.load(file);
+                this.builtFile=buildableFile;
+                this.fileBuilt=true;
+                break;
+            } else this.fileBuilt=false;
+        }
+        if(!fileBuilt) throw new CommandExecutionException("Build of the file "+file.getName()+"failed!");
     }
 
 
@@ -120,7 +139,9 @@ public class GUIController {
      * @return The built file
      */
     public File getBuiltFile(){
-        return this.builtFile;
+        if (fileBuilt) {
+            return this.builtFile.getFile();
+        }else return null;
     }
 
     /**
@@ -151,7 +172,7 @@ public class GUIController {
      * Returns text area associated to a read only files (es. csv files)
      * @return text area associated to a read only files
      */
-    public Map<File,TableView<SibillaJavaFXMain.TableViewRow>> getReadOnlyFile(){
+    public Map<File,TableView<MainView.TableViewRow>> getReadOnlyFile(){
         return readOnlyFile;
     }
 
@@ -171,8 +192,8 @@ public class GUIController {
      */
     public void saveOpenedProject() throws IOException {
         if(isProjectLoaded()){
-            filePersistence.save(getOpenedProject().getPath());
-        }else filePersistence.save(null);
+            filePersistenceManager.save(getOpenedProject().getPath());
+        }else filePersistenceManager.save(null);
     }
 
     /**
@@ -180,9 +201,9 @@ public class GUIController {
      * @throws IOException
      */
     public void loadOpenedFile() throws IOException {
-        if(filePersistence.load()!=null && Files.exists(Paths.get(filePersistence.load()))) {
-            this.openedProject = new File(filePersistence.load());
-            this.projectLoaded = true;
+        if(filePersistenceManager.load()!=null && Files.exists(Paths.get(filePersistenceManager.load()))) {
+            this.setOpenedProject(new File(filePersistenceManager.load()));
+            projectLoaded=true;
         }else projectLoaded=false;
     }
 
@@ -191,8 +212,11 @@ public class GUIController {
      * The settings ledger contains all settings saved
      * @return Settings ledger
      */
-    public BasicSettingsLedger getSettings(){
-        return this.settingsLedger;
+    public List<BasicSettings> getSettings(File buildableFile){
+        for(BuildableFile<BasicSettings> file:this.buildableLedger.getBuildableList()){
+            if (file.getFile().equals(buildableFile)) return file.getSettingsList();
+        }
+        return null;
     }
 
     /**
@@ -200,7 +224,7 @@ public class GUIController {
      * @throws IOException
      */
     public void saveSettings() throws IOException {
-       settingsPersistence.save(this.settingsLedger);
+        if(this.persistenceFile!=null) settingsPersistence.save(this.buildableLedger, this.persistenceFile);
     }
 
     /**
@@ -208,8 +232,19 @@ public class GUIController {
      * @throws IOException
      */
     public void loadSettings() throws IOException {
-        this.settingsLedger = this.settingsPersistence.load();
-        if(settingsLedger==null) this.settingsLedger = new BasicSettingsLedger();
+        if(persistenceFile!=null) this.buildableLedger = this.settingsPersistence.load(this.persistenceFile);
+        if(buildableLedger==null) this.buildableLedger = new BasicBuildableLedger();
+    }
+
+
+    /**
+     * It is used to delete data associated with files that no longer exist
+     */
+    public void refreshPersistenceFile() throws IOException {
+        if(persistenceFile!=null ) {
+            this.buildableLedger.getBuildableList().removeIf(buildableFile -> Files.notExists(buildableFile.getFile().toPath()));
+            saveSettings();
+        }
     }
 
 
@@ -302,21 +337,38 @@ public class GUIController {
      * @param toPath the file path to copy the files to
      * @throws IOException
      */
-    public void saveAs(File toPath) throws IOException {
+    public void saveAs(File toPath) throws IOException, CommandExecutionException {
         List<Path> destinations = copy(getOpenedProject(),toPath);
         Map<File,TextArea> newModifiedFile = new HashMap<>();
+        BasicBuildableLedger bb = new BasicBuildableLedger();
         for (Path pd:destinations) {
             for (File key:modifiedFile.keySet()){
-                if (key.getName().equals(pd.toFile().getName())){
-                    newModifiedFile.put(pd.toFile(),modifiedFile.get(key));
+                if (key.getName().equals(pd.toFile().getName())) newModifiedFile.put(pd.toFile(),modifiedFile.get(key));
+            }
+            for(BuildableFile<BasicSettings> buildableFile:buildableLedger.getBuildableList()){
+                if(buildableFile.getFile().getName().equals(pd.toFile().getName())){
+                    BuildableFile<BasicSettings> bf = new BuildableFile<>(pd.toFile(), buildableFile.getModule(), buildableFile.getSettingsList());
+                    bb.getBuildableList().add(bf);
                 }
             }
         }
+        File ff = getBuiltFile();
+        this.setOpenedProject(toPath);
         modifiedFile.clear();
+        buildableLedger=bb;
+        saveSettings();
         modifiedFile=newModifiedFile;
         saveAll(toPath.getPath());
         modifiedFile.clear();
         readOnlyFile.clear();
+        if(ff!=null){
+            for (Path path : getAllFiles(toPath.getPath())) {
+                if (ff.getName().equals(path.toFile().getName())) {
+                    build(path.toFile());
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -334,8 +386,27 @@ public class GUIController {
      * @throws IOException
      */
     public void createNewPmFile(File path) throws IOException {
-        FileWriter fw1 = new FileWriter(path+"/"+path.getName()+".pm");
+        FileWriter fw1 = new FileWriter(path.getPath()+"/"+path.getName()+".pm");
         fw1.close();
+    }
+
+    /**
+     * Create a new persistence file
+     * @param path directory path
+     * @param fileName file name
+     * @throws IOException
+     */
+    public void createNewPersistenceFile(File path, String fileName) throws IOException {
+            FileWriter fw1 = new FileWriter(path.getPath() + "/" + fileName + ".json");
+            fw1.close();
+    }
+
+    /**
+     * Returns buildable files list
+     * @return buildable files list
+     */
+    public List<BuildableFile<BasicSettings>> getBuildableFilesList(){
+        return this.buildableLedger.getBuildableList();
     }
 
 
@@ -361,10 +432,8 @@ public class GUIController {
      * @throws CommandExecutionException
      */
     public void simulate(BasicSettings settings) throws CommandExecutionException {
+        this.sibillaRuntime.reset();
         this.lastSimulatedSettings=settings;
-        this.sibillaRuntime.clear();
-        this.sibillaRuntime.loadModule(settings.getModule());
-        this.sibillaRuntime.load(this.builtFile);
         this.sibillaRuntime.setConfiguration("init");
         this.sibillaRuntime.setDeadline(settings.getDeadline());
         this.sibillaRuntime.setReplica(settings.getReplica());
@@ -411,6 +480,15 @@ public class GUIController {
     }
 
     /**
+     * If it's a json file return true else false
+     * @param fileName the file name
+     * @return If it's a json file return true else false
+     */
+    public boolean isJsonFile(String fileName){
+        return fileName.endsWith(".json");
+    }
+
+    /**
      * If it's a xlsx file return true else false
      * @param fileName the file name
      * @return If it's a xlsx file return true else false
@@ -419,5 +497,9 @@ public class GUIController {
         return fileName.endsWith(".xlsx");
     }
 
+
+    public void addNewBuildableFile(File buildableFile, String module){
+        this.buildableLedger.getBuildableList().add(new BuildableFile<>(buildableFile, module));
+    }
 }
 

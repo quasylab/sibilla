@@ -10,14 +10,12 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ResourceBundle;
 
-public class SibillaJavaDirectoryView implements Initializable {
+public class NewDirectoryView implements Initializable {
 
     @FXML
     private TextField packageName;
@@ -26,10 +24,13 @@ public class SibillaJavaDirectoryView implements Initializable {
 
     private static Stage window;
 
+    private NewFile sibillaJavaFXNewFile;
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        packageName.deselect();
+        sibillaJavaFXNewFile = new NewFile();
+
     }
 
     public void showTheStage(File file) {
@@ -50,8 +51,9 @@ public class SibillaJavaDirectoryView implements Initializable {
     public void presetButtonPressed(){
         try {
             Files.createDirectories(new File(filePath.getPath()+"/"+packageName.getText()).toPath());
-            FileWriter fw1 = new FileWriter(filePath.getPath()+"/"+packageName.getText() + "/"+packageName.getText()+ ".pm");
-            fw1.close();
+          //  FileWriter fw1 = new FileWriter(filePath.getPath()+"/"+packageName.getText() + "/"+packageName.getText()+ ".pm");
+           // fw1.close();
+            sibillaJavaFXNewFile.showTheStage(new File(filePath.getPath()+"/"+packageName.getText()));
             window.close();
         } catch (IOException e) {
             e.printStackTrace();

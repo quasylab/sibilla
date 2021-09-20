@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class SibillaJavaFXDocumentation {
+public class Documentation {
 
     private static final String helpFile = "/documentation/SIBILLA__Getting_Started.pdf";
 
