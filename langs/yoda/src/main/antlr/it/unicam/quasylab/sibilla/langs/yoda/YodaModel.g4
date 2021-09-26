@@ -94,7 +94,7 @@ sensing_declaration:'sensing''{'
     '}';
 
 agent_sensing: agent_name=ID'{'
-    (sensing_name=ID '=' gexpr )*
+    (sensing_name=ID '=' expr )*
     '}' ;
 
 ev_environment_declaration: 'environment' name=ID '=' '{'
@@ -150,10 +150,16 @@ expr    : INTEGER                                                   # integerVal
         | '[' fieldAssignment (',' fieldAssignment)* ']'            # recordExpression
         | 'U''['min=expr',' max=expr']'                             # weightedRandomExpression
         | 'rnd'                                                     # randomExpression
+        | parent=ID '.' son=ID                                      # attributeRef
+        | 'forall' name=ID 'in' group_name=ID ':' expr              # forallExpr
+        | 'exists' name=ID 'in' group_name=ID ':' expr              # existsExpr
+        | 'min'    name=ID 'in' group_name=ID ':' expr              # minimumExpr
+        | 'max'    name=ID 'in' group_name=ID ':' expr              # maximumExpr
+        | 'it.' ID                                                  # itself
         ;
 
 fieldAssignment : name=ID '=' expr;
-
+/*
 gexpr   : expr                                                      # expression
         | parent=ID '.' son=ID                                      # attributeRef
         | 'forall' name=ID 'in' group_name=ID ':' gexpr             # forallExpr
@@ -162,7 +168,7 @@ gexpr   : expr                                                      # expression
         | 'max'    name=ID 'in' group_name=ID ':' gexpr             # maximumExpr
         | 'it.' ID                                                  # itself
         ;
-
+*/
 
 type    : 'int'                                                     # integerNumber
         | 'double'                                                  # doubleNumber

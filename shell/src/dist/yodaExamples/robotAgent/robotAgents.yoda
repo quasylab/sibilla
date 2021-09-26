@@ -1,0 +1,98 @@
+const X = 3.0;
+const Y = 2.0;
+
+param uno=1.0;
+param due=2.0;
+param no_acc=0.0;
+param h=10.0;
+param l=10.0;
+param goal_area=11.0;
+
+agent Robot(real x, real y){
+	state {
+	   real dir_x<-x;
+            real dir_y<-y;
+	}
+	observations {bool north; bool south; bool east; bool west; bool goal},
+	actions {
+		     moveUp {
+			dir_y <- 1.0
+		     }
+		     moveDown{
+			dir_y <- -1.0
+	 	     }
+                      moveRight{
+			dir_x <- 1.0
+		     }
+		     ...
+	}
+
+	behaviour {deterministic_behaviour
+			{
+                  	 [north==false] -> moveUp:1;
+		 	 [north==true] -> moveRight:1;
+                  	 ...
+		 	 default standStill:1;
+			}
+	}
+}
+
+
+type point {
+   Int x;
+   Int y;
+}
+
+world Grid(..., obstacles) {
+	global {
+		int height;
+		int lenght;
+		array[point] obstacles <- obstacles;
+		Robot {
+			int pos_x;
+			int pos_y;
+		}
+	}
+	sensing {
+		Robot{
+			north = (exists p in obstacles : boolexpr)
+			south =
+			east =
+			west =
+			goal =
+		}
+	}
+	steps {
+		StepAction{
+			Robot{
+				x <- x+dir_x;
+				y <- y+dir_y;
+			}
+		}
+	}
+	environment {
+		default StepAction:1;
+	}
+
+}
+
+system DeterministicAgent(int na, int no, int width, int height, int area) {
+	let obstacles = distinct(no, [x = U[0,width], y=U[0, height]])
+	and agents = distinctFrom(na, [x = U[0,width], y = 0], obstacles)
+	in
+		Robotic_Scenario{
+			obstacles <- obstacles
+		}{
+			for a in agents{
+				Robot{
+					x <- p.x;
+					y <- p.y;
+					dirx <- 0;
+					diry <- 0;
+
+				}
+			}
+		}
+}
+
+
