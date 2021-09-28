@@ -2,8 +2,6 @@ package it.unicam.quasylab.sibilla.view.gui;
 
 
 
-import it.unicam.quasylab.sibilla.view.View;
-
 import it.unicam.quasylab.sibilla.view.controller.GUIController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

@@ -3,6 +3,7 @@ package it.unicam.quasylab.sibilla.view;
 
 
 import it.unicam.quasylab.sibilla.view.gui.SibillaJavaFXView;
+import it.unicam.quasylab.sibilla.view.gui.View;
 
 import java.util.Objects;
 

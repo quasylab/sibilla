@@ -1,4 +1,4 @@
-package it.unicam.quasylab.sibilla.view;
+package it.unicam.quasylab.sibilla.view.gui;
 
 /**
  * View Interface

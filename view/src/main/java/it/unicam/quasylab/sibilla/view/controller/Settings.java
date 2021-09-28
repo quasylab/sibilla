@@ -8,25 +8,6 @@ import java.util.Map;
  */
 public interface Settings {
 
-    /*/**
-     * returns the associated file
-     * @return settings file
-     */
-    /*String getFilePath();
-
-    /**
-     * returns the associated file
-     * @return settings file
-     */
-    /*File getFile();
-
-
-    /**
-     * set the settings file
-     * @param file The settings file
-     */
-    //void setFile(File file);
-
     /**
      * returns the label name
      * @return the label name

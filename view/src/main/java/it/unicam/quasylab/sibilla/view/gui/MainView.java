@@ -87,7 +87,6 @@ public class MainView implements Initializable {
 
     //Settings Scroll Pane
     @FXML private ScrollPane settingsScrollPane;
-    @FXML private GridPane measuresGridPane;
     @FXML private TextField settingsLabel;
     @FXML private TableView<ParametersRawTableView> parametersTable;
     @FXML private TableColumn<ParametersRawTableView, String> parameterColumn;
@@ -95,7 +94,9 @@ public class MainView implements Initializable {
     @FXML private TextField deadline;
     @FXML private TextField dt;
     @FXML private TextField replica;
-    private Map<CheckBox, String> measuresMap;
+    @FXML private ListView<String> allMeasures;
+    @FXML private ListView<String> addedMeasures;
+    @FXML private Label errorSettingsLabel;
 
     //Bottom Component
     @FXML private TextArea infoTextArea;
@@ -111,7 +112,6 @@ public class MainView implements Initializable {
         chartsViewController = new ChartsView();
         addedModuleView = new AddedModuleView();
 
-        this.measuresMap = new HashMap<>();
 
         settingsScrollPane.setDisable(true);
 
@@ -142,10 +142,10 @@ public class MainView implements Initializable {
                         setGraphic((empty || item == null) ? null : new ImageView(fileIcon));
                         if(item!=null&&item.isDirectory()&&!item.getName().endsWith(".sibilla")) setGraphic(new ImageView(folderIcon));
                         if(item!=null&&item.isDirectory()&&item.getName().endsWith(".sibilla")) setGraphic(new ImageView(sibillaFolder));
-                            if (item!=null && treeViewModels.getRoot().getValue() != null) {
-                                if (treeViewModels.getRoot().getValue().equals(item)) setText(item.getName() + " (" + item.getPath() + ")");
-                            }
-                       }};}});
+                        if (item!=null && treeViewModels.getRoot().getValue() != null) {
+                            if (treeViewModels.getRoot().getValue().equals(item)) setText(item.getName() + " (" + item.getPath() + ")");
+                        }
+                    }};}});
 
         this.appendTextOnTerminal(this.guiController.getTimeString() + INFO + CREATION_MESSAGE);
         try {
@@ -167,37 +167,37 @@ public class MainView implements Initializable {
     void buildButtonPressed(){
         Tab tab = monitorTabPane.getSelectionModel().getSelectedItem();
         if (tab.getText() != null) {
-        try {
-            for (Path path : this.guiController.getAllFiles(this.guiController.getOpenedProject().getPath())) {
-                if (path.toFile().getName().equals(tab.getText())) {
-                    this.guiController.saveAll(this.guiController.getOpenedProject().getPath());
-                    if (guiController.isPmFile(path.toFile().getName())) {
-                        if (guiController.getBuildableFilesList().stream().anyMatch(p->p.getFile().equals(path.toFile()))) {
-                            this.clearAllSettings();
-                            this.guiController.build(path.toFile());
-                            this.settingsScrollPane.setDisable(false);
-                            this.updateTreeViewSimulationCases(this.guiController.getBuiltFile(), this.guiController.getSettings(this.guiController.getBuiltFile()));
-                            this.parametersTable.getItems().clear();
-                            this.setParametersView();
-                            this.infoTextArea.clear();
-                            this.infoTextArea.appendText("-) File Built:          " + this.guiController.getBuiltFile().getName() + "\n\n");
-                            this.appendTextOnTerminal(this.guiController.getTimeString() + INFO + String.format(CODE_MESSAGE, tab.getText()));
-                        }else{
-                            addedModuleView.showTheStage(path.toFile());
-                            buildButtonPressed();
+            try {
+                for (Path path : this.guiController.getAllFiles(this.guiController.getOpenedProject().getPath())) {
+                    if (path.toFile().getName().equals(tab.getText())) {
+                        this.guiController.saveAll(this.guiController.getOpenedProject().getPath());
+                        if (guiController.isPmFile(path.toFile().getName())) {
+                            if (guiController.getBuildableFilesList().stream().anyMatch(p->p.getFile().equals(path.toFile()))) {
+                                this.clearAllSettings();
+                                this.guiController.build(path.toFile());
+                                this.settingsScrollPane.setDisable(false);
+                                this.updateTreeViewSimulationCases(this.guiController.getBuiltFile(), this.guiController.getSettings(this.guiController.getBuiltFile()));
+                                this.parametersTable.getItems().clear();
+                                this.setParametersView();
+                                this.infoTextArea.clear();
+                                this.infoTextArea.appendText("-) File Built:          " + this.guiController.getBuiltFile().getName() + "\n\n");
+                                this.appendTextOnTerminal(this.guiController.getTimeString() + INFO + String.format(CODE_MESSAGE, tab.getText()));
+                            }else{
+                                addedModuleView.showTheStage(path.toFile());
+                                buildButtonPressed();
+                            }
                         }
                     }
                 }
+            } catch (IOException | CommandExecutionException e) {
+                e.printStackTrace();
+                this.appendTextOnTerminal(guiController.getTimeString()+"ERROR: Building File Problems");
             }
-        } catch (IOException | CommandExecutionException e) {
-            e.printStackTrace();
-            this.appendTextOnTerminal(guiController.getTimeString()+"ERROR: Building File Problems");
+        } else {
+            this.appendTextOnTerminal("File not selected.\n\n" +
+                    "Select a file!");
         }
-    } else {
-        this.appendTextOnTerminal("File not selected.\n\n" +
-                "Select a file!");
     }
-}
 
     @FXML
     public void chartsButtonPressed() {
@@ -220,7 +220,7 @@ public class MainView implements Initializable {
         if(!treeViewModels.getSelectionModel().getSelectedItems().isEmpty()){
             if(treeViewModels.getSelectionModel().getSelectedItem().getValue().isFile()) {
                 if (guiController.isPmFile(treeViewModels.getSelectionModel().getSelectedItem().getValue().getName())) {
-                   newMenuContext.setDisable(true);
+                    newMenuContext.setDisable(true);
                     buildContext.setDisable(false);
                     chartsContext.setDisable(true);
                     copyContext.setDisable(false);
@@ -252,10 +252,10 @@ public class MainView implements Initializable {
     @FXML
     public void simulationContextMenuShown(){
         if(!treeViewSimulationCases.getSelectionModel().getSelectedItems().isEmpty()){
-               if(!treeViewSimulationCases.getRoot().getValue().equals(treeViewSimulationCases.getSelectionModel().getSelectedItem().getValue())){
-                   simulateContext.setDisable(false);
-                   deleteSimContext.setDisable(false);
-               }
+            if(!treeViewSimulationCases.getRoot().getValue().equals(treeViewSimulationCases.getSelectionModel().getSelectedItem().getValue())){
+                simulateContext.setDisable(false);
+                deleteSimContext.setDisable(false);
+            }
         }else{
             simulateContext.setDisable(true);
             deleteSimContext.setDisable(true);
@@ -267,17 +267,17 @@ public class MainView implements Initializable {
         if (!treeViewSimulationCases.getSelectionModel().getSelectedItem().getValue().isEmpty()) {
             String settingsLabel = treeViewSimulationCases.getSelectionModel().getSelectedItem().getValue();
             if(questionAlertMessage("Deleting","Are you sure you want to deleted " + settingsLabel + "?")){
-                    try {
-                        this.guiController.getSettings(this.guiController.getBuiltFile()).removeIf(settings -> settings.getLabel().equals(settingsLabel));
-                        updateTreeViewSimulationCases(this.guiController.getBuiltFile(), this.guiController.getSettings(this.guiController.getBuiltFile()));
-                        this.guiController.saveSettings();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        this.appendTextOnTerminal(guiController.getTimeString()+"ERROR: Delete Simulation Case Problems!");
-                    }
+                try {
+                    this.guiController.getSettings(this.guiController.getBuiltFile()).removeIf(settings -> settings.getLabel().equals(settingsLabel));
+                    updateTreeViewSimulationCases(this.guiController.getBuiltFile(), this.guiController.getSettings(this.guiController.getBuiltFile()));
+                    this.guiController.saveSettings();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    this.appendTextOnTerminal(guiController.getTimeString()+"ERROR: Delete Simulation Case Problems!");
                 }
             }
         }
+    }
 
 
     @FXML
@@ -322,17 +322,16 @@ public class MainView implements Initializable {
 
     @FXML
     void closeItemPressed() {
-            String projectName = this.guiController.getOpenedProject().getName();
-            this.guiController.closeProject();
-            this.clearAllSettings();
-            this.settingsScrollPane.setDisable(true);
-            this.infoTextArea.clear();
-            treeViewModels.setRoot(null);
-            treeViewSimulationCases.setRoot(null);
-            monitorTabPane.getTabs().clear();
-            this.clearAllSettings();
-            this.appendTextOnTerminal(this.guiController.getTimeString() + INFO + String.format(CLOSE_PROJECT, projectName));
-            disableItems();
+        String projectName = this.guiController.getOpenedProject().getName();
+        this.guiController.closeProject();
+        this.clearAllSettings();
+        this.settingsScrollPane.setDisable(true);
+        this.infoTextArea.clear();
+        treeViewModels.setRoot(null);
+        treeViewSimulationCases.setRoot(null);
+        monitorTabPane.getTabs().clear();
+        this.clearAllSettings();
+        this.appendTextOnTerminal(this.guiController.getTimeString() + INFO + String.format(CLOSE_PROJECT, projectName));
     }
 
 
@@ -409,27 +408,37 @@ public class MainView implements Initializable {
     @FXML
     public void doubleClickCasesPressed() {
         treeViewSimulationCases.setOnMouseClicked(click -> {
-            if (click.getClickCount() == 2 && click.getButton().equals(MouseButton.PRIMARY)) {
-                if(!treeViewSimulationCases.getSelectionModel().isEmpty()) {
-                    for (Settings settings : this.guiController.getSettings(this.guiController.getBuiltFile())) {
-                        if (settings.getLabel().equals(treeViewSimulationCases.getSelectionModel().getSelectedItem().getValue())) {
-                            this.settingsLabel.setText(settings.getLabel());
-                            this.deadline.setText(String.valueOf(settings.getDeadline()));
-                            this.replica.setText(String.valueOf(settings.getReplica()));
-                            this.dt.setText(String.valueOf(settings.getDt()));
-                            for(CheckBox checkBox:measuresMap.keySet()){
-                                if(settings.getMeasures().containsKey(checkBox.getText())) {
-                                    if (settings.getMeasures().get(measuresMap.get(checkBox)).equals(true)) {
-                                          checkBox.setSelected(true);
-                                    } else checkBox.setSelected(false);
-                                }else checkBox.setSelected(false);
+                    if (click.getClickCount() == 2 && click.getButton().equals(MouseButton.PRIMARY)) {
+                        if(!treeViewSimulationCases.getSelectionModel().isEmpty()) {
+                            for (Settings settings : this.guiController.getSettings(this.guiController.getBuiltFile())) {
+                                if (settings.getLabel().equals(treeViewSimulationCases.getSelectionModel().getSelectedItem().getValue())) {
+                                    this.settingsLabel.setText(settings.getLabel());
+                                    this.deadline.setText(String.valueOf(settings.getDeadline()));
+                                    this.replica.setText(String.valueOf(settings.getReplica()));
+                                    this.dt.setText(String.valueOf(settings.getDt()));
+
+                                    /*for(CheckBox checkBox:measuresMap.keySet()){
+                                        if(settings.getMeasures().containsKey(checkBox.getText())) {
+                                            if (settings.getMeasures().get(measuresMap.get(checkBox)).equals(true)) {
+                                                checkBox.setSelected(true);
+                                            } else checkBox.setSelected(false);
+                                        }else checkBox.setSelected(false);
+                                    }*/
+                                    allMeasures.getItems().clear();
+                                    addedMeasures.getItems().clear();
+                                    for(String measure:this.guiController.getSibillaRuntime().getMeasures()){
+                                        if(settings.getMeasures().containsKey(measure)) {
+                                            if (settings.getMeasures().get(measure).equals(true)) {
+                                                addedMeasures.getItems().add(measure);
+                                            } else allMeasures.getItems().add(measure);
+                                        }else allMeasures.getItems().add(measure);
+                                    }
+                                }
                             }
                         }
+
                     }
                 }
-
-                }
-            }
         );
     }
 
@@ -584,12 +593,12 @@ public class MainView implements Initializable {
 
     @FXML
     void newProjectItemPressed() {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Save");
-            Stage window = new Stage();
-            File dir = fileChooser.showSaveDialog(window);
-            if (dir != null) {
-                try {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save");
+        Stage window = new Stage();
+        File dir = fileChooser.showSaveDialog(window);
+        if (dir != null) {
+            try {
                 infoTextArea.clear();
                 terminal.clear();
                 this.clearAllSettings();
@@ -608,7 +617,7 @@ public class MainView implements Initializable {
                 this.appendTextOnTerminal(guiController.getTimeString() + "ERROR: Creation Of a New Project Failed");
             }
         }
-        }
+    }
 
 
     @FXML
@@ -626,6 +635,11 @@ public class MainView implements Initializable {
                 terminal.clear();
                 this.clearAllSettings();
                 settingsScrollPane.setDisable(true);
+                if(this.guiController.getAllFiles(file.getPath()).stream().noneMatch(p->p.toFile().getName().endsWith(".sibilla"))){
+                    File sibilla = new File(file + "/.sibilla");
+                    this.guiController.createNewDirectory(sibilla);
+                    this.guiController.createNewPersistenceFile(sibilla, "settings");
+                }
                 this.guiController.setOpenedProject(file);
                 updateTreeViewModels(file, null);
                 this.treeViewSimulationCases.setRoot(null);
@@ -634,13 +648,13 @@ public class MainView implements Initializable {
                 this.appendTextOnTerminal(guiController.getTimeString()+"ERROR: Persistence File Problem!");
             }
         } else {
-                this.appendTextOnTerminal(guiController.getTimeString()+"ERROR: Open Failed!");
-            }
+            this.appendTextOnTerminal(guiController.getTimeString()+"ERROR: Open Failed!");
+        }
     }
 
     @FXML
     void saveAsItemPressed() {
-       FileChooser fileChooser = new FileChooser();
+        FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save");
         Stage window = new Stage();
         fileChooser.setInitialFileName(this.guiController.getOpenedProject().getName());
@@ -677,6 +691,36 @@ public class MainView implements Initializable {
     }
 
     @FXML
+    public void addMeasure(){
+        if(!allMeasures.getSelectionModel().isEmpty()){
+            addedMeasures.getItems().add(allMeasures.getSelectionModel().getSelectedItem());
+            allMeasures.getItems().remove(allMeasures.getSelectionModel().getSelectedItem());
+            allMeasures.getSelectionModel().clearSelection();
+        }
+    }
+
+    @FXML
+    public void removeMeasure(){
+        if(!addedMeasures.getSelectionModel().isEmpty()){
+            allMeasures.getItems().add(addedMeasures.getSelectionModel().getSelectedItem());
+            addedMeasures.getItems().remove(addedMeasures.getSelectionModel().getSelectedItem());
+            addedMeasures.getSelectionModel().clearSelection();
+        }
+    }
+
+    @FXML
+    public void addAllMeasures(){
+        addedMeasures.getItems().addAll(allMeasures.getItems());
+        allMeasures.getItems().clear();
+    }
+
+    @FXML
+    public void removeAllMeasures(){
+        allMeasures.getItems().addAll(addedMeasures.getItems());
+        addedMeasures.getItems().clear();
+    }
+
+    @FXML
     public void saveSettingsButtonPressed(){
         if(checkSettings()) {
             try {
@@ -694,12 +738,12 @@ public class MainView implements Initializable {
         }
     }
 
-             private void saveSettings() throws IOException {
-                 this.guiController.getSettings(this.guiController.getBuiltFile()).removeIf(settings -> settings.getLabel().equals(getSettings().getLabel()));
-                 this.guiController.getSettings(this.guiController.getBuiltFile()).add(getSettings());
-                     updateTreeViewSimulationCases(this.guiController.getBuiltFile(), this.guiController.getSettings(this.guiController.getBuiltFile()));
-                     this.guiController.saveSettings();
-             }
+    private void saveSettings() throws IOException {
+        this.guiController.getSettings(this.guiController.getBuiltFile()).removeIf(settings -> settings.getLabel().equals(getSettings().getLabel()));
+        this.guiController.getSettings(this.guiController.getBuiltFile()).add(getSettings());
+        updateTreeViewSimulationCases(this.guiController.getBuiltFile(), this.guiController.getSettings(this.guiController.getBuiltFile()));
+        this.guiController.saveSettings();
+    }
 
     @FXML
     public void simulateButtonPressed() {
@@ -716,73 +760,64 @@ public class MainView implements Initializable {
                 this.appendTextOnTerminal(guiController.getTimeString()+"ERROR: Simulation Failed");
             }
         }
-         }
+    }
 
-         private void simulate() throws IOException, CommandExecutionException {
-                 this.guiController.simulate(Objects.requireNonNull(getSettings()));
-                 this.infoTextArea.appendText("------------------------------------------------------------------------------------------------------------\n");
-                 this.infoTextArea.appendText("-) File Loaded:          " + this.guiController.getBuiltFile().getName() + "\n\n");
-                 this.infoTextArea.appendText("-) Parameters Loaded:   " + this.guiController.getLastSimulatedSettings().getParameters() + "\n\n");
-                 this.infoTextArea.appendText("-) Deadline Value:      " + this.guiController.getLastSimulatedSettings().getDeadline() + "\n\n");
-                 this.infoTextArea.appendText("-) Dt Value:            " + this.guiController.getLastSimulatedSettings().getDt() + "\n\n");
-                 this.infoTextArea.appendText("-) Replica Value:       " + this.guiController.getLastSimulatedSettings().getReplica() + "\n\n");
-                 this.infoTextArea.appendText("-) MeasuresValue:       " + this.guiController.getLastSimulatedSettings().getMeasures() + "\n\n");
-                 this.infoTextArea.appendText("\n");
-                 if (this.guiController.getAllFiles(this.guiController.getBuiltFile().getParent()).stream().noneMatch(p -> p.toFile().getName().equals("results (" + this.getSettings().getLabel() + ")"))) {
-                     Path results = Paths.get(this.guiController.getBuiltFile().getParent() + "/results (" + this.getSettings().getLabel() + ")");
-                     Files.createDirectory(results);
-                 }else{
-                     for(Path path:this.guiController.getAllFiles(this.guiController.getBuiltFile().getParent() + "/results (" + this.getSettings().getLabel() + ")")){
-                         if(path.toFile().isFile()) Files.delete(path);
-                     }
-                 }
-                 this.guiController.getSibillaRuntime().save(this.guiController.getBuiltFile().getParent() + "/results (" + this.getSettings().getLabel() + ")", this.getSettings().getLabel(), "__");
-                 updateTreeViewModels(this.guiController.getOpenedProject(), null);
-                 this.guiController.saveAll(this.guiController.getOpenedProject().getPath());
-         }
+    private void simulate() throws IOException, CommandExecutionException {
+        this.guiController.simulate(Objects.requireNonNull(getSettings()));
+        this.infoTextArea.appendText("------------------------------------------------------------------------------------------------------------\n");
+        this.infoTextArea.appendText("-) File Loaded:          " + this.guiController.getBuiltFile().getName() + "\n\n");
+        this.infoTextArea.appendText("-) Parameters Loaded:   " + this.guiController.getLastSimulatedSettings().getParameters() + "\n\n");
+        this.infoTextArea.appendText("-) Deadline Value:      " + this.guiController.getLastSimulatedSettings().getDeadline() + "\n\n");
+        this.infoTextArea.appendText("-) Dt Value:            " + this.guiController.getLastSimulatedSettings().getDt() + "\n\n");
+        this.infoTextArea.appendText("-) Replica Value:       " + this.guiController.getLastSimulatedSettings().getReplica() + "\n\n");
+        this.infoTextArea.appendText("-) MeasuresValue:       " + this.guiController.getLastSimulatedSettings().getMeasures() + "\n\n");
+        this.infoTextArea.appendText("\n");
+        if (this.guiController.getAllFiles(this.guiController.getBuiltFile().getParent()).stream().noneMatch(p -> p.toFile().getName().equals("results (" + this.getSettings().getLabel() + ")"))) {
+            Path results = Paths.get(this.guiController.getBuiltFile().getParent() + "/results (" + this.getSettings().getLabel() + ")");
+            Files.createDirectory(results);
+        }else{
+            for(Path path:this.guiController.getAllFiles(this.guiController.getBuiltFile().getParent() + "/results (" + this.getSettings().getLabel() + ")")){
+                if(path.toFile().isFile()) Files.delete(path);
+            }
+        }
+        this.guiController.getSibillaRuntime().save(this.guiController.getBuiltFile().getParent() + "/results (" + this.getSettings().getLabel() + ")", this.getSettings().getLabel(), "__");
+        updateTreeViewModels(this.guiController.getOpenedProject(), null);
+        this.guiController.saveAll(this.guiController.getOpenedProject().getPath());
+    }
 
     @FXML
     public void clearSettingsButtonPressed(){
-        if(this.guiController.isFileBuilt())this.guiController.getSibillaRuntime().reset();
+        if(this.guiController.isFileBuilt()) this.guiController.getSibillaRuntime().reset();
         this.settingsLabel.clear();
         this.deadline.clear();
         this.dt.clear();
         this.replica.clear();
-        for(CheckBox checkBox:this.measuresMap.keySet()) checkBox.setSelected(false);
+        addedMeasures.getItems().clear();
+        allMeasures.getItems().clear();
+        errorSettingsLabel.setText("");
     }
 
 
+
     public void clearAllSettings(){
-       this.clearSettingsButtonPressed();
-       parametersTable.getItems().clear();
-       measuresMap.clear();
+        this.clearSettingsButtonPressed();
+        parametersTable.getItems().clear();
     }
 
 
 
     private BasicSettings getSettings() {
         BasicSettings settings = new BasicSettings(this.guiController.getBuiltFile(), settingsLabel.getText());
-            settings.setDeadline(Double.parseDouble(deadline.getText()));
-            settings.setReplica(Integer.parseInt(replica.getText()));
-            settings.setDt(Double.parseDouble(dt.getText()));
-            for (String key : this.guiController.getSibillaRuntime().getParameters()) {
-                settings.getParameters().put(key, this.guiController.getSibillaRuntime().getParameter(key));
-            }
-            for (CheckBox checkBox : measuresMap.keySet()) {
-                if (checkBox.isSelected()) {
-                    settings.getMeasures().put(checkBox.getText(), true);
-                } else settings.getMeasures().put(checkBox.getText(), false);
-            }
-            return settings;
-    }
+        settings.setDeadline(Double.parseDouble(deadline.getText()));
+        settings.setReplica(Integer.parseInt(replica.getText()));
+        settings.setDt(Double.parseDouble(dt.getText()));
+        for (String key : this.guiController.getSibillaRuntime().getParameters()) {
+            settings.getParameters().put(key, this.guiController.getSibillaRuntime().getParameter(key));
+        }
+        for(String measure:allMeasures.getItems()) settings.getMeasures().put(measure,false);
+        for(String measure:addedMeasures.getItems()) settings.getMeasures().put(measure,true);
 
-
-    private void disableItems() {
-
-    }
-
-    private void enableItems() {
-
+        return settings;
     }
 
     public static class TableViewRow{
@@ -876,46 +911,28 @@ public class MainView implements Initializable {
 
     private void updateTreeViewSimulationCases(File builtFile, List<BasicSettings> settingsList) throws IOException {
         TreeItem<String> root = new TreeItem<>(builtFile.getName(), new ImageView(folderIcon));
-            for (Settings settings : settingsList) {
-                    root.getChildren().add(new TreeItem<>(settings.getLabel(), new ImageView(fileIcon)));
-            }
+        for (Settings settings : settingsList) {
+            root.getChildren().add(new TreeItem<>(settings.getLabel(), new ImageView(fileIcon)));
+        }
         this.treeViewSimulationCases.setRoot(root);
         root.setExpanded(true);
     }
 
     private void setParametersView(){
         if(this.guiController.isFileBuilt()){
-         //parameters table settings
-        ObservableList<ParametersRawTableView> parametersTableData = FXCollections.observableArrayList();
-        for(String key:this.guiController.getSibillaRuntime().getParameters()) {
-            parametersTableData.add(new ParametersRawTableView(key, String.valueOf(this.guiController.getSibillaRuntime().getParameter(key))));
-        }
-        parameterColumn.setCellValueFactory(new PropertyValueFactory<>("parameter"));
-        valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
-        parametersTable.getItems().addAll(parametersTableData);
+            //parameters table settings
+            ObservableList<ParametersRawTableView> parametersTableData = FXCollections.observableArrayList();
+            for(String key:this.guiController.getSibillaRuntime().getParameters()) {
+                parametersTableData.add(new ParametersRawTableView(key, String.valueOf(this.guiController.getSibillaRuntime().getParameter(key))));
+            }
+            parameterColumn.setCellValueFactory(new PropertyValueFactory<>("parameter"));
+            valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
+            parametersTable.getItems().addAll(parametersTableData);
 
-        //measures settings
-        measuresMap.clear();
-        measuresGridPane.getChildren().clear();
-        CheckBox all = new CheckBox("Select All");
-        measuresGridPane.add(all,0,1);
-        for(int i=0;i<this.guiController.getSibillaRuntime().getMeasures().length;i++){
-            CheckBox checkBox = new CheckBox(this.guiController.getSibillaRuntime().getMeasures()[i]);
-            measuresGridPane.add(checkBox,0,i+2);
-            measuresMap.put(checkBox, this.guiController.getSibillaRuntime().getMeasures()[i]);
-        }
-
-            all.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-                if(all.isSelected()){
-                    for(CheckBox key:measuresMap.keySet()){
-                        key.setSelected(true);
-                    }
-                }else {
-                    for(CheckBox key:measuresMap.keySet()){
-                        key.setSelected(false);
-                    }
-                }
-            });
+            //measures settings
+            allMeasures.getItems().clear();
+            addedMeasures.getItems().clear();
+            allMeasures.getItems().addAll(this.guiController.getSibillaRuntime().getMeasures());
 
         }
     }
@@ -923,15 +940,16 @@ public class MainView implements Initializable {
     public boolean checkSettings(){
         if(!this.settingsLabel.getText().isEmpty()) {
             if (!deadline.getText().isEmpty()) {
-                    if (!dt.getText().isEmpty()) {
-                        if (!replica.getText().isEmpty()) {
-                            if (measuresMap.keySet().stream().anyMatch(CheckBox::isSelected)) {
-                                return true;
-                            }
-                    }
-                }
-            }
-        }
+                if (!dt.getText().isEmpty()) {
+                    if (!replica.getText().isEmpty()) {
+                        if(!addedMeasures.getItems().isEmpty()){
+                            errorSettingsLabel.setText("");
+                            return true;
+                        } else errorSettingsLabel.setText("ERROR: there are no measures to simulate");
+                    } else errorSettingsLabel.setText("ERROR: replica value is missing");
+                } else errorSettingsLabel.setText("ERROR: dt value is missing");
+            } else errorSettingsLabel.setText("ERROR: deadline value is missing");
+        } else errorSettingsLabel.setText("ERROR: settings name is missing");
         return false;
     }
 
@@ -939,10 +957,10 @@ public class MainView implements Initializable {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, message, ButtonType.YES, ButtonType.CANCEL);
         alert.setTitle(title);
         Optional<ButtonType> answer = alert.showAndWait();
-            if (answer.isPresent()&&answer.get() == ButtonType.YES) {
-                return true;
-            }
-            return false;
+        if (answer.isPresent()&&answer.get() == ButtonType.YES) {
+            return true;
+        }
+        return false;
     }
 
     private boolean overwriteAlertMessage(String title, String yesMessage, String noMessage){

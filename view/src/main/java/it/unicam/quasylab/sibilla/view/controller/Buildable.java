@@ -6,8 +6,8 @@ import java.util.List;
 
 public interface Buildable<T extends Settings>{
 
-    File getFile();
 
+    File getFile();
 
     /**
      * set the associated module
