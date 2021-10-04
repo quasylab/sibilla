@@ -83,7 +83,7 @@ global_field_declaration:generic_field
                         |agent_field
                         ;
 
-generic_field: type field_name=ID ';';
+generic_field: type field_name=ID ('<-' expr)? ';';
 
 agent_field: agent_name=ID '{'
                type name_var=ID ';' (type name_var=ID';')*
@@ -180,7 +180,9 @@ type    : 'int'                                                     # integerNum
       //  | type_declaration                                          # newType
         ;
 
-func    : 'generate''('')'
+func    : 'generate' '('
+            '[' name_value=ID '=' expr (',' name_value=ID '=' expr)* ']'
+            ')'
         | 'distinct' '('
             init_number=expr ',' '[' name_value=ID '=' expr (',' name_value=ID '=' expr)* ']'
             ')'
