@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Indentify a state where each agent is stored individually.
@@ -47,10 +48,13 @@ public class LIOIndividualState implements LIOState, IndexedState<Agent> {
      * @param agents array of agent names.
      */
     public LIOIndividualState(AgentsDefinition definition, String ... agents) {
+        this(definition, Stream.of(agents).mapToInt(definition::getAgentIndex).toArray());
+    }
+
+    public LIOIndividualState(AgentsDefinition definition, int ... agents) {
         this.definition = definition;
-        this.agents = new int[agents.length];
+        this.agents = agents;
         this.multiplicity = new int[definition.numberOfAgents()];
-        IntStream.range(0, agents.length).forEach(i -> this.agents[i] = definition.getAgent(agents[i]).getIndex());
         fillMultiplicity();
     }
 
@@ -84,25 +88,31 @@ public class LIOIndividualState implements LIOState, IndexedState<Agent> {
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
+    public void writeExternal(ObjectOutput out) {
         throw new IllegalStateException();
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException {
+    public void readExternal(ObjectInput in) {
         throw new IllegalStateException();
     }
 
     /**
-     * Returns the agent in position i.
+     * Return the agent in position i.
      *
-     * @param i
-     * @return
+     * @param i agent index.
+     * @return the agent in position i.
      */
     public Agent get(int i) {
         return definition.getAgent( agents[i] );
     }
 
+    /**
+     * Return the index of agent in position i.
+     *
+     * @param i agent index.
+     * @return the index of agent in position i.
+     */
     public int getIndexAt(int i) {
         return agents[i];
     }
