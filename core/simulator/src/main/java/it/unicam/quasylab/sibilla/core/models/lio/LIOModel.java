@@ -71,22 +71,12 @@ public class LIOModel<S extends LIOState> implements DiscreteModel<S> {
     }
 
     @Override
-    public byte[] serializeState(S state) throws IOException {
+    public byte[] byteOf(S state) throws IOException {
         return new byte[0];
     }
 
     @Override
-    public void serializeState(ByteArrayOutputStream toSerializeInto, S state) throws IOException {
-
-    }
-
-    @Override
-    public S deserializeState(byte[] bytes) throws IOException {
-        return null;
-    }
-
-    @Override
-    public S deserializeState(ByteArrayInputStream toDeserializeFrom) throws IOException {
+    public S fromByte(byte[] bytes) throws IOException {
         return null;
     }
 

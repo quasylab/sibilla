@@ -65,15 +65,17 @@ public interface Model<S extends State> extends Serializable {
      *
      * @param state the state to serialise.
      * @return the array of bytes representing the given state.
-     * @throws IOException this exception is thrown if the
      */
-    byte[] serializeState(S state) throws IOException;
+    byte[] byteOf(S state) throws IOException;
 
-    void serializeState(ByteArrayOutputStream toSerializeInto, S state) throws IOException;
-
-    S deserializeState(byte[] bytes) throws IOException;
-
-    S deserializeState(ByteArrayInputStream toDeserializeFrom) throws IOException;
+    /**
+     * Build a state from the given array of states.
+     *
+     * @param bytes bute arrau
+     * @return a state drepresented by the given array of states.
+     * @throws IOException
+     */
+    S fromByte(byte[] bytes) throws IOException;
 
     /**
      * Each model is associated with a set of measures. This method returns the

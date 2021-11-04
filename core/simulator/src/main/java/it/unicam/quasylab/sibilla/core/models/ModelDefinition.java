@@ -32,11 +32,39 @@ package it.unicam.quasylab.sibilla.core.models;
 public interface ModelDefinition<S extends State> {
 
     /**
+     * Reset the EvaluationEnvironment of the model to its default values.
+     */
+    void reset();
+
+    /**
+     * Reset the parameter name to its default value.
+     *
+     * @param name the name of parameter to reset.
+     */
+    void reset(String name);
+
+    /**
+     * Return the value associated with the given parameter.
+     *
+     * @param name name of parameter.
+     * @return the value associated with the given parameter.
+     */
+    double getParameterValue(String name);
+
+    /**
+     * Return the used EvaluationEnvironment.
+     * @return the used EvaluationEnvironment.
+     */
+    EvaluationEnvironment getEnvironment();
+
+    /**
      * Returns the number of parameters needed to build default initial state.
      *
      * @return the number of parameters needed to build default initial state.
      */
     int stateArity();
+
+    StateSet<S> getStates();
 
     /**
      * Returns the number of parameters needed to build initial state <code>name</code>.

@@ -87,15 +87,6 @@ public class LIOIndividualState implements LIOState, IndexedState<Agent> {
         return ((double) multiplicity[stateIndex])/size();
     }
 
-    @Override
-    public void writeExternal(ObjectOutput out) {
-        throw new IllegalStateException();
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) {
-        throw new IllegalStateException();
-    }
 
     /**
      * Return the agent in position i.

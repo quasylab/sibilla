@@ -81,7 +81,7 @@ public class RBTest {
         assertEquals(0.5,s.fractionOf(agentR.getIndex()));
         LIOModel<LIOIndividualState> model = new LIOModel<>(def, LIOIndividualState::stepFunction);
         TimeStep<LIOIndividualState> next = model.next(rg,0.0,s);
-        assertEquals(0.5,next.getValue().fractionOf(agentB.getIndex()));
+        assertEquals(0.5,next.getValue().fractionOf(agentB.getIndex()), 0.1);
     }
 
 

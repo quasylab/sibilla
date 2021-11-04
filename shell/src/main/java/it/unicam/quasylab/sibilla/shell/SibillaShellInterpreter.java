@@ -99,7 +99,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
         parser.addErrorListener(errorListener);
         SibillaScriptParser.ScriptContext parseTree = parser.script();
         if (errorListener.withErrors()) {
-            printScriptErrors(errorListener.getSyntaxErrorList());
+            printScriptErrors(errorListener.getSyntaxErrorList().getSyntaxErrorList());
         } else {
             this.visitScript(parseTree);
         }

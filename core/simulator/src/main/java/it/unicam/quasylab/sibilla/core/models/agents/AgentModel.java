@@ -71,22 +71,12 @@ public class AgentModel<W extends World> implements InteractiveModel<SystemState
     }
 
     @Override
-    public byte[] serializeState(SystemState<W> state) throws IOException {
+    public byte[] byteOf(SystemState<W> state) throws IOException {
         return new byte[0];
     }
 
     @Override
-    public void serializeState(ByteArrayOutputStream toSerializeInto, SystemState<W> state) throws IOException {
-
-    }
-
-    @Override
-    public SystemState<W> deserializeState(byte[] bytes) throws IOException {
-        return null;
-    }
-
-    @Override
-    public SystemState<W> deserializeState(ByteArrayInputStream toDeserializeFrom) throws IOException {
+    public SystemState<W> fromByte(byte[] bytes) throws IOException {
         return null;
     }
 

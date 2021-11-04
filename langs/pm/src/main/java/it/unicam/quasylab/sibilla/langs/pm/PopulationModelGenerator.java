@@ -82,7 +82,7 @@ public class PopulationModelGenerator {
         SibillaParseErrorListener errorListener = new SibillaParseErrorListener();
         parser.addErrorListener(errorListener);
         this.parseTree = parser.model();
-        for (ParseError e: errorListener.getSyntaxErrorList()) {
+        for (ParseError e: errorListener.getSyntaxErrorList().getSyntaxErrorList()) {
             this.errorList.add(ModelBuildingError.syntaxError(e));
         }
     }
