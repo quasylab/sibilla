@@ -156,7 +156,7 @@ public class PopulationModelGenerator {
             this.environment = new EvaluationEnvironment(eg.getParameters(), constants);
             return environment;
         }
-        return null;
+        return this.environment;
     }
 
     public static List<Integer> getValues(Function<String, Double> resolver, PopulationModelParser.RangeContext range) {

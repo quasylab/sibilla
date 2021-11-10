@@ -101,7 +101,7 @@ public class SamplingCollection<S extends State> implements SamplingFunction<S> 
 		return toReturn;
 	}
 
-	public void add(StatisticSampling<S> f) {
+	public void add(SamplingFunction<S> f) {
 		functions.add(f);
 	}
 }

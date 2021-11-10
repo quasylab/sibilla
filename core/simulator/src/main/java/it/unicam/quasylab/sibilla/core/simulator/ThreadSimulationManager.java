@@ -81,7 +81,9 @@ public class ThreadSimulationManager<S extends State> extends AbstractSimulation
                     if (t != null) {
                         handleTrajectory(t);
                     }
-                    //TODO: handle exception!
+                    if (e != null) {
+                        LOGGER.warning(e.getLocalizedMessage());
+                    }
                     taskCompleted(simulationTask);
                 }
         );

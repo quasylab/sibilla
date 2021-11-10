@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
+import java.util.function.Predicate;
+
 /**
  * This interface implements a factory that can be used to build a model according
  * to some parameters.
@@ -124,5 +126,23 @@ public interface ModelDefinition<S extends State> {
      * @return a model built from a given set of parameters.
      */
     Model<S> createModel();
+
+    /**
+     * Return the array of strings containing all the atomic propositions defined in the model.
+     *
+     * @return the array of strings containing all the atomic propositions defined in the model.
+     */
+    default String[] getPropositions() {
+        return new String[] {};
+    }
+
+    /**
+     * Return the atomic proposition, that is a predicate, associated with the given name.
+     *
+     * @return the atomic proposition, that is a predicate, associated with the given name.
+     */
+    default Predicate<S> getProposition(String name) {
+        return null;
+    }
 
 }

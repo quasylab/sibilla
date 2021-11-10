@@ -32,8 +32,7 @@ class SibillaShellInterpreterTest {
     @Test
     public void testLoadCommand() {
         SibillaShellInterpreter interpreter = new SibillaShellInterpreter();
-        interpreter.execute("module population");
-        interpreter.execute("load \"pippo\"");
+        interpreter.execute("run \"groupies.sib\"");
     }
 
 }

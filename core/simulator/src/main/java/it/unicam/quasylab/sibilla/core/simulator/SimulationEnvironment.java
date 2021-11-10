@@ -133,6 +133,7 @@ public class SimulationEnvironment implements Serializable {
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			simulationManager.simulate(unit);
 		}
+		//TODO: check if we have to add this code --> simulationManager.join();
 		simulationManager.shutdown();
 		LOGGER.info("The simulation has concluded with success");
 		if (monitor != null) {

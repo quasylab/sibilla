@@ -19,11 +19,11 @@ rule groupieChangeB {
 }
 
 rule celebrityChangeA {
-    CB -[ #CB*lambda*%typeB ]-> CA
+    CB -[ #GB*lambda*%typeB ]-> CA
 }
 
 rule celebrityChangeB {
-    CA -[ #CA*lambda*%typeA ]-> CB
+    CA -[ #GB*lambda*%typeA ]-> CB
 }
 
 system balancedGroupies = GA<N>|GB<N>;
@@ -32,6 +32,3 @@ system groupiesAndCelebrities = GA<N-1>|GB<N-1>|CA|CB;
 
 
 
-measure measureTypeA = %typeA;
-
-measure measureTypeB = %typeB;

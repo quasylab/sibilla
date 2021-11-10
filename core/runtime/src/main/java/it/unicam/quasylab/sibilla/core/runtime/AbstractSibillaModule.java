@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 
 public abstract class AbstractSibillaModule<S extends State> implements SibillaModule {
 
@@ -46,6 +47,7 @@ public abstract class AbstractSibillaModule<S extends State> implements SibillaM
     private StateSet<S> states;
     private S state;
     private Set<String> enabledMeasures;
+    private boolean summary = true;
     private SimulationEnvironment simulator = new SimulationEnvironment();
 
     protected void clearModuleState() {
@@ -120,13 +122,34 @@ public abstract class AbstractSibillaModule<S extends State> implements SibillaM
         checkForLoadedDefinition();
         loadModel();
         loadState();
-        SamplingFunction<S> samplingFunction = model.selectSamplingFunction(deadline, dt, enabledMeasures.toArray(new String[0]));
+        SamplingFunction<S> samplingFunction = model.selectSamplingFunction(summary, deadline, dt, enabledMeasures.toArray(new String[0]));
         try {
             simulator.simulate(monitor, rg, model, state, samplingFunction, replica, deadline);
             return samplingFunction.getSimulationTimeSeries(replica);
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    @Override
+    public double estimateReachability(String targetCondition, double time, double pError, double delta) {
+        checkForLoadedDefinition();
+        loadModel();
+        loadState();
+        //Predicate<S> targetPredicate = model.getCondition(targetCondition);
+        //return simulator.reachability(pError,delta,time, model, state, targetPredicate);
+        return 0.0;
+    }
+
+    @Override
+    public double estimateReachability(String transientCondition, String targetCondition, double time, double pError, double delta) {
+        checkForLoadedDefinition();
+        loadModel();
+        loadState();
+        //Predicate<S> transientPredicate = model.getCondition(transientCondition);
+        //Predicate<S> targetPredicate = model.getCondition(targetCondition);
+        //return simulator.reachability(pError,delta,time, model, state, transientPredicate, targetPredicate);
+        return 0.0;
     }
 
     @Override
@@ -208,6 +231,16 @@ public abstract class AbstractSibillaModule<S extends State> implements SibillaM
         loadModel();
         checkMeasures(measures);
         this.enabledMeasures.addAll(List.of(measures));
+    }
+
+    @Override
+    public void setSummaryStatistics(boolean summary) {
+        this.summary = summary;
+    }
+
+    @Override
+    public boolean isSummaryStatistics() {
+        return summary;
     }
 
     private void checkMeasures(String[] measures) {

@@ -25,18 +25,30 @@ package it.unicam.quasylab.sibilla.core.simulator.sampling;
 
 import it.unicam.quasylab.sibilla.core.models.State;
 
-import java.io.Serializable;
+import java.util.function.Predicate;
 
-/**
- * A measure is used to associate a sampling performed at a given time with a double value.
- *
- * @author loreti
- *
- */
-public interface Measure<S extends State> extends Serializable {
+public class FirstPassageTime<S extends State> implements Measure<S> {
 
-	double measure(S context);
+    private final String name;
+    private final Predicate<S> condition;
+    private double timeCounter;
+    private boolean satisfied;
 
-	String getName();
+    public FirstPassageTime(String name, Predicate<S> condition) {
+        this.name = name;
+        this.condition = condition;
+        this.timeCounter = 0.0;
+    }
 
+
+
+    @Override
+    public double measure(S context) {
+        return 0;
+    }
+
+    @Override
+    public String getName() {
+        return null;
+    }
 }
