@@ -10,8 +10,8 @@ element : constant_declaration
         | parameter_declaration
         | type_declaration
         | agent_declaration
-        | world_declaration
-        | system_declaration;
+        | system_declaration
+        | configuration_declaration;
 
 //INITIALISATION PARAMETERS
 
@@ -47,7 +47,7 @@ action_declaration: name=ID '{'
     ;
 
 action_body: state_name=ID '<-' expr
-           | agent_reference=ID'{'action_body'}'
+           | agent_reference=ID'{'(action_body)*'}'
            ;
 
 behaviour_declaration: name=ID '{'
@@ -59,18 +59,18 @@ behaviour_declaration: name=ID '{'
 behaviour_rule:
     '['guardExpr=expr('|' guardExpr=expr)*']'
     '->'
-    action_name=ID ':' times=expr ';';
+    action_name=ID ':' weight=expr ';';
 
-def_behaviour_rule: 'default' action_name=ID ':' times=expr ';';
+def_behaviour_rule: 'default' action_name=ID ':' weight=expr ';';
 
 //WORLD GRAMMAR
 
-world_declaration:
-    'world' name=ID '(' constr_params (','constr_params)* ')' '{'
+system_declaration:
+    'system' name=ID '(' constr_params (','constr_params)* ')' '{'
     'global' '{' global_state_declaration '}'
     'sensing' '{' sensing_declaration '}'
     'actions' '{' action_declaration '}'
-    'environment' '{'ev_environment_declaration'}'
+    'evolution' '{'env_evolution_declaration'}'
     '};'
     ;
 
@@ -79,37 +79,37 @@ global_state_declaration: '{'
     '};'
     ;
 
-global_field_declaration:generic_field
-                        |agent_field
+global_field_declaration:scene_field
+                        |hidden_field
                         ;
 
-generic_field: type field_name=ID ('<-' expr)? ';';
+scene_field: type field_name=ID ('<-' expr)? ';';
 
-agent_field: agent_name=ID '{'
+hidden_field: agent_name=ID '{'
                type name_var=ID ';' (type name_var=ID';')*
              '};' ;
 
-sensing_declaration:'sensing''{'
+sensing_declaration:'{'
     (agent_sensing)*
     '}';
 
 agent_sensing: agent_name=ID'{'
-    (sensing_name=ID '=' expr )*
+    (sensing_name=ID '<-' expr )*
     '}' ;
 
-ev_environment_declaration: 'environment' name=ID '=' '{'
+env_evolution_declaration: 'environment' name=ID '=' '{'
     //(environment_rule)?
-    def_environment_rule
+    def_env_evolution_rule
     '};'
     ;
 
 //environment_rule:;
 
-def_environment_rule:'default' env_rule=ID ':' times=expr ';';
+def_env_evolution_rule:'default' env_rule=ID ':' weight=expr ';';
 
 //SYSTEM CONFIG
 
-system_declaration: 'system' name=ID '{'
+configuration_declaration: 'configuration' name=ID '{'
     (assignment_declaration)?
     collective_declaration
     '}';
@@ -126,7 +126,9 @@ collective_declaration:
 collective_body: collection_name=ID '<-' expr ';'
                | collection_name=ID '{'collective_body*'}'
                | 'for' name=ID 'in' group_name=ID '{'collective_body'}'
-            //   | 'if' expr_bool=expr '{'collective_body'}'('if' expr_bool=expr '{'collective_body'}')* ('else''{'collective_body'}')?
+               | ('if' expr_bool=expr '{'collective_body'}')+
+                 //('if' expr_bool=expr '{'collective_body'}')*
+                 ('else''{'collective_body'}')?
                ;
 
 //UTIL
