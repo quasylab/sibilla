@@ -235,23 +235,23 @@ public class PopulationState implements State {
         return this.populationVector;
     }
 
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeInt(populationVector.length);
-        out.writeDouble(population);
-        for (int pop : populationVector) {
-            out.writeInt(pop);
-        }
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException {
-        int popVecLength = in.readInt();
-        this.population = in.readDouble();
-        int[] newPopVec = new int[popVecLength];
-        for (int i = 0; i < popVecLength; i++) {
-            newPopVec[i] = in.readInt();
-        }
-        this.populationVector = newPopVec;
-    }
+//    @Override
+//    public void writeExternal(ObjectOutput out) throws IOException {
+//        out.writeInt(populationVector.length);
+//        out.writeDouble(population);
+//        for (int pop : populationVector) {
+//            out.writeInt(pop);
+//        }
+//    }
+//
+//    @Override
+//    public void readExternal(ObjectInput in) throws IOException {
+//        int popVecLength = in.readInt();
+//        this.population = in.readDouble();
+//        int[] newPopVec = new int[popVecLength];
+//        for (int i = 0; i < popVecLength; i++) {
+//            newPopVec[i] = in.readInt();
+//        }
+//        this.populationVector = newPopVec;
+//    }
 }

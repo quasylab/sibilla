@@ -45,6 +45,38 @@ class SibillaRuntimeTest {
             "rule changeU1 { A1|AU -[ #A1*%AU*lambda ]-> A1|A1 }\n" +
             "system init = A0<10>|A1<10>|AU<10>;";
 
+    public final String CODE2 = "param N = 10;\n" +
+            "\n" +
+            "species GA;\n" +
+            "species GB;\n" +
+            "species CA;\n" +
+            "species CB;\n" +
+            "\n" +
+            "param lambda = 1.0;\n" +
+            "\n" +
+            "label typeA = {GA, CA}\n" +
+            "label typeB = {GB, CB}\n" +
+            "\n" +
+            "rule groupieChangeA {\n" +
+            "    GB -[ #GB*lambda*%typeA ]-> GA\n" +
+            "}\n" +
+            "\n" +
+            "rule groupieChangeB {\n" +
+            "    GA -[ #GA*lambda*%typeB ]-> GB\n" +
+            "}\n" +
+            "\n" +
+            "rule celebrityChangeA {\n" +
+            "    CB -[ #GB*lambda*%typeB ]-> CA\n" +
+            "}\n" +
+            "\n" +
+            "rule celebrityChangeB {\n" +
+            "    CA -[ #GB*lambda*%typeA ]-> CB\n" +
+            "}\n" +
+            "\n" +
+            "system balancedGroupies = GA<N>|GB<N>;\n" +
+            "\n" +
+            "system groupiesAndCelebrities = GA<N-1>|GB<N-1>|CA|CB;";
+
     @Test
     public void shouldSelectPopulationModule() throws CommandExecutionException {
         SibillaRuntime sr = new SibillaRuntime();
@@ -84,5 +116,18 @@ class SibillaRuntimeTest {
         sr.loadModule(PopulationModelModule.MODULE_NAME);
         return sr;
     }
+
+    @Test
+    public void shouldLoadAndSimulate() throws CommandExecutionException, LoadException {
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.load(CODE2);
+        sr.setConfiguration("balancedGroupies");
+        sr.addMeasure("#GB");
+        sr.setDeadline(100);
+        sr.setDt(1);
+        sr.simulate("test");
+        sr.printData("test");
+    }
+
 
 }

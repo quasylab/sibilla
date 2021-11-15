@@ -69,7 +69,7 @@ public interface Action<S> {
      * @param <S> type of states of Markov process.
      * @return the action associated to a transition in a markov process.
      */
-    static <S> Action<S> actionOfMarkovStepFunction(double now, double totalRate, double stepRate, S state, StepFunction<S> f) {
+    static <S> Action<S> actionOfContinuousTimeMarkovStepFunction(double now, double totalRate, double stepRate, S state, StepFunction<S> f) {
         return new Action<>() {
 
             @Override
@@ -79,8 +79,38 @@ public interface Action<S> {
 
             @Override
             public TimeStep<S> execute(RandomGenerator r) {
-                double dt = MarkovProcess.sampleExponentialDistribution(totalRate,r);
+                double dt = ContinuousTimeMarkovProcess.sampleExponentialDistribution(totalRate,r);
                 return new TimeStep<>(dt,f.step(r,now,dt));
+            }
+
+            @Override
+            public S revert() {
+                return state;
+            }
+        };
+    }
+
+    /**
+     * Utility method that is used to create the action associated to a transition in a markov process.
+     *
+     * @param now time when the transition is performed.
+     * @param probability action probability.
+     * @param state current state.
+     * @param f lazy function used to compute next state.
+     * @param <S> type of states of Markov process.
+     * @return the action associated to a transition in a markov process.
+     */
+    static <S> Action<S> actionOfDiscreteTimeMarkovStepFunction(double now, double probability, S state, StepFunction<S> f) {
+        return new Action<>() {
+
+            @Override
+            public double probability() {
+                return probability;
+            }
+
+            @Override
+            public TimeStep<S> execute(RandomGenerator r) {
+                return new TimeStep<>(1.0,f.step(r,now,1.0));
             }
 
             @Override

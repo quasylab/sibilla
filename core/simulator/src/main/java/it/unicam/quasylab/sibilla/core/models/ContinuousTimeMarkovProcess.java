@@ -34,7 +34,7 @@ import java.util.List;
  * This is a model implementing a Markov process. 
  * 
  */
-public interface MarkovProcess<S extends State> extends InteractiveModel<S> {
+public interface ContinuousTimeMarkovProcess<S extends State> extends InteractiveModel<S> {
 
 	/**
 	 * Returns the transitions enabled in a given state at a given time. Each transition
@@ -47,27 +47,27 @@ public interface MarkovProcess<S extends State> extends InteractiveModel<S> {
 	 * @param s current state.
 	 * @return the weighted structure with all the enabled transitions.
 	 */
-	WeightedStructure<StepFunction<S>> getTransitions(RandomGenerator r, double time, S s);
+	WeightedStructure<? extends StepFunction<S>> getTransitions(RandomGenerator r, double time, S s);
 
 	@Override
 	default TimeStep<S> next(RandomGenerator r, double time, S state) {
-		WeightedStructure<StepFunction<S>> activities = getTransitions(r, time, state);
+		WeightedStructure<? extends StepFunction<S>> activities = getTransitions(r, time, state);
 		double totalRate = activities.getTotalWeight();
 		if (totalRate == 0.0) {
 			return null;
 		}
 		double dt = sampleExponentialDistribution(totalRate,r);
 		double select = r.nextDouble() * totalRate;
-		WeightedElement<StepFunction<S>> wa = activities.select(select);
+		WeightedElement<? extends StepFunction<S>> wa = activities.select(select);
 		return new TimeStep<>(dt,wa.getElement().step(r,time,dt));
 	}
 
 	@Override
 	default List<Action<S>> actions(RandomGenerator r, double time, S state) {
-		WeightedStructure<StepFunction<S>> activities = getTransitions(r, time, state);
+		WeightedStructure<? extends StepFunction<S>> activities = getTransitions(r, time, state);
 		List<Action<S>> list = new LinkedList<>();
-		for (WeightedElement<StepFunction<S>> w: activities.getAll()) {
-			list.add(Action.actionOfMarkovStepFunction(time,activities.getTotalWeight(),w.getWeight(),state,w.getElement()));
+		for (WeightedElement<? extends StepFunction<S>> w: activities.getAll()) {
+			list.add(Action.actionOfContinuousTimeMarkovStepFunction(time,activities.getTotalWeight(),w.getWeight(),state,w.getElement()));
 		}
 		return list;
 	}

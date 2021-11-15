@@ -30,6 +30,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -39,11 +40,11 @@ public final class SibillaRuntime {
 
     private static final String UNKNOWN_MODULE_MESSAGE = "Module %s is unknown!";
     private static final String NO_MODULE_HAS_BEEN_LOADED =  "No module has been loaded!";
-    private Map<String,SibillaModule> moduleIndex = new TreeMap<>();
+    private final Map<String,SibillaModule> moduleIndex = new TreeMap<>();
     private SibillaModule currentModule;
-    private Map<String, List<SimulationTimeSeries>> simulations = new TreeMap<>();
+    private final Map<String, List<SimulationTimeSeries>> simulations = new TreeMap<>();
     private List<SimulationTimeSeries> lastSimulation;
-    private RandomGenerator rg = new DefaultRandomGenerator();
+    private final RandomGenerator rg = new DefaultRandomGenerator();
     private int replica = 1;
     private double deadline = Double.NaN;
     private double dt = Double.NaN;
@@ -277,6 +278,51 @@ public final class SibillaRuntime {
     }
 
     /**
+     * Use descriptive statistics.
+     */
+    public void useDescriptiveStatistics() {
+        this.currentModule.setSummaryStatistics(false);
+    }
+
+    /**
+     * Use summary statistics.
+     */
+    public void useSummaryStatistics() {
+        this.currentModule.setSummaryStatistics(true);
+    }
+
+    /**
+     * Return true if a descriptive statistics is used.
+     *
+     * @return true if a descriptive statistics is used.
+     */
+    public boolean isDescriptiveStatistics() {
+        return !this.currentModule.isSummaryStatistics();
+    }
+
+    /**
+     * Return true if a summary statistics is used.
+     *
+     * @return true if a summary statistics is used.
+     */
+    public boolean isSummaryStatistics() {
+        return this.currentModule.isSummaryStatistics();
+    }
+
+    /**
+     * Return a string that describes the kind of used statistics.
+     *
+     * @return a string that describes the kind of used statistics.
+     */
+    public String getStatistics() {
+       if (this.currentModule.isSummaryStatistics()) {
+           return "summary";
+       } else {
+           return "descriptive";
+       }
+    }
+
+    /**
      * Run a simulation and save results with the given label.
      */
     public void simulate(String label) throws CommandExecutionException {
@@ -440,5 +486,19 @@ public final class SibillaRuntime {
 
     public int getReplica() {
         return replica;
+    }
+
+    public String printData(String label) {
+        List<SimulationTimeSeries> series = this.simulations.get(label);
+        if (series != null) {
+            StringWriter sw = new StringWriter();
+            for (SimulationTimeSeries ts: series) {
+                sw.write(ts.getName()+"\n");
+                ts.writeToCSV(sw);
+            }
+            return sw.getBuffer().toString();
+        } else {
+            return "";
+        }
     }
 }

@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
+import java.util.function.Predicate;
+
 /**
  * This interface implements a factory that can be used to build a model according
  * to some parameters.
@@ -32,11 +34,39 @@ package it.unicam.quasylab.sibilla.core.models;
 public interface ModelDefinition<S extends State> {
 
     /**
+     * Reset the EvaluationEnvironment of the model to its default values.
+     */
+    void reset();
+
+    /**
+     * Reset the parameter name to its default value.
+     *
+     * @param name the name of parameter to reset.
+     */
+    void reset(String name);
+
+    /**
+     * Return the value associated with the given parameter.
+     *
+     * @param name name of parameter.
+     * @return the value associated with the given parameter.
+     */
+    double getParameterValue(String name);
+
+    /**
+     * Return the used EvaluationEnvironment.
+     * @return the used EvaluationEnvironment.
+     */
+    EvaluationEnvironment getEnvironment();
+
+    /**
      * Returns the number of parameters needed to build default initial state.
      *
      * @return the number of parameters needed to build default initial state.
      */
     int stateArity();
+
+    StateSet<S> getStates();
 
     /**
      * Returns the number of parameters needed to build initial state <code>name</code>.
@@ -96,5 +126,23 @@ public interface ModelDefinition<S extends State> {
      * @return a model built from a given set of parameters.
      */
     Model<S> createModel();
+
+    /**
+     * Return the array of strings containing all the atomic propositions defined in the model.
+     *
+     * @return the array of strings containing all the atomic propositions defined in the model.
+     */
+    default String[] getPropositions() {
+        return new String[] {};
+    }
+
+    /**
+     * Return the atomic proposition, that is a predicate, associated with the given name.
+     *
+     * @return the atomic proposition, that is a predicate, associated with the given name.
+     */
+    default Predicate<S> getProposition(String name) {
+        return null;
+    }
 
 }

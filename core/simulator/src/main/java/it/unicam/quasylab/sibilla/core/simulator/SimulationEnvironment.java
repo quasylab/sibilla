@@ -23,7 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.simulator;
 
-import it.unicam.quasylab.sibilla.core.models.MarkovProcess;
+import it.unicam.quasylab.sibilla.core.models.ContinuousTimeMarkovProcess;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.models.StatePredicate;
@@ -133,6 +133,7 @@ public class SimulationEnvironment implements Serializable {
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			simulationManager.simulate(unit);
 		}
+		//TODO: check if we have to add this code --> simulationManager.join();
 		simulationManager.shutdown();
 		LOGGER.info("The simulation has concluded with success");
 		if (monitor != null) {
@@ -279,8 +280,8 @@ public class SimulationEnvironment implements Serializable {
 		}
 	}
 
-	public <S extends State> Trajectory<S> sampleTrajectory(RandomGenerator random, MarkovProcess<S> model, S state,
-			double deadline, StatePredicate<? super S> reachPredicate) {
+	public <S extends State> Trajectory<S> sampleTrajectory(RandomGenerator random, ContinuousTimeMarkovProcess<S> model, S state,
+                                                            double deadline, StatePredicate<? super S> reachPredicate) {
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, state,
 				SamplePredicate.samplePredicate(deadline, reachPredicate), reachPredicate);
 		SimulationTask<S> simulationRun = new SimulationTask<>(random, unit);

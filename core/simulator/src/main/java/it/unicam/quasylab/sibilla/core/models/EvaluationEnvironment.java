@@ -57,6 +57,7 @@ public class EvaluationEnvironment {
         this.values = new TreeMap<>();
         this.changer = new PropertyChangeSupport(this);
         this.constants = constants;
+        this.constants.setEnvironment(this);
     }
 
     public EvaluationEnvironment(Map<String, Double> values, CachedValues constants) {

@@ -32,10 +32,7 @@ import it.unicam.quasylab.sibilla.core.models.pm.PopulationRule;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingCollection;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.StatisticSampling;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.*;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
@@ -203,7 +200,7 @@ public class GossipBroadcast {
 
 	private static StatisticSampling<PopulationState> getMeasure(int samplings, double deadline, String name,
 			Function<PopulationState, Double> m) {
-		return new StatisticSampling<PopulationState>(samplings, deadline / samplings, new Measure<PopulationState>() {
+		return new SummaryStatisticSampling<PopulationState>(samplings, deadline / samplings, new Measure<PopulationState>() {
 
 			@Override
 			public double measure(PopulationState t) {

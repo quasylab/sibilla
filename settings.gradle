@@ -15,6 +15,7 @@ include 'core:simulator',
 		'langs:util',
 		'langs:pm',
 		'langs:lio',
+		'langs:markov',
 		'shell' ,
 		'gui:gui',
         'examples:populations:crowds',
@@ -32,5 +33,5 @@ include 'core:simulator',
 		'examples:lio:seir',
 		'yoda',
 		'langs:yoda'
-findProject(':langs:yoda')?.name = 'yoda'
+		'examples:lio:rb'
 

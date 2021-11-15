@@ -102,16 +102,6 @@ public class SystemState<W extends World> implements State {
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-
-    }
-
-    @Override
     public String toString() {
         return "SystemState{" +
                 "world=" + world +
