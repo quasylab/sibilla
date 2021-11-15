@@ -42,7 +42,7 @@ public class LIOCountingState implements LIOState {
     /**
      * Create a new state with the given occupancy.
      *
-     * @param occupancy
+     * @param occupancy occupancy created state.
      */
     public LIOCountingState(int[] occupancy) {
         this.occupancy = Arrays.copyOf(occupancy,occupancy.length);
@@ -61,22 +61,10 @@ public class LIOCountingState implements LIOState {
         return ((double) occupancy[stateIndex])/size;
     }
 
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        throw new IllegalStateException();
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException {
-        throw new IllegalStateException();
-    }
-
     public static LIOCountingState stepFunction(RandomGenerator randomGenerator, double[][] matrix, LIOCountingState state) {
         int[] occupancy = new int[state.occupancy.length];
         IntStream.range(0, occupancy.length).forEach(s ->
-            IntStream.range(0, state.occupancy[s]).forEach(i -> {
-                occupancy[LIOState.doSample(randomGenerator,matrix[s],s)]++;
-            })
+            IntStream.range(0, state.occupancy[s]).forEach(i -> occupancy[LIOState.doSample(randomGenerator,matrix[s],s)]++)
         );
         return new LIOCountingState(occupancy);
     }

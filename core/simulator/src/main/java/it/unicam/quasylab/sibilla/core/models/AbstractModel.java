@@ -23,13 +23,12 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
-import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractModel<S extends State> implements MarkovProcess<S>  {
+public abstract class AbstractModel<S extends State> implements Model<S> {
     protected final Map<String, Measure<S>> measuresTable;
 
     public AbstractModel(Map<String, Measure<S>> measuresTable) {

@@ -24,7 +24,7 @@
 package it.unicam.quasylab.sibilla.core.models.pm;
 
 import it.unicam.quasylab.sibilla.core.models.AbstractModel;
-import it.unicam.quasylab.sibilla.core.models.MarkovProcess;
+import it.unicam.quasylab.sibilla.core.models.ContinuousTimeMarkovProcess;
 import it.unicam.quasylab.sibilla.core.models.StepFunction;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
@@ -48,7 +48,7 @@ import java.util.stream.IntStream;
  *
  * @author loreti
  */
-public class PopulationModel extends AbstractModel<PopulationState> {
+public class PopulationModel extends AbstractModel<PopulationState> implements ContinuousTimeMarkovProcess<PopulationState> {
 
     private static final long serialVersionUID = 6871037109869821108L;
 
@@ -93,31 +93,19 @@ public class PopulationModel extends AbstractModel<PopulationState> {
     }
 
     @Override
-    public byte[] serializeState(PopulationState state) throws IOException {
+    public byte[] byteOf(PopulationState state) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        serializeState(baos, state);
+        for (int vectorSingleValue : state.getPopulationVector()) {
+                baos.write(ByteBuffer.allocate(4).putInt(vectorSingleValue).array());
+        }
         byte[] toReturn = baos.toByteArray();
         baos.close();
         return toReturn;
     }
 
     @Override
-    public void serializeState(ByteArrayOutputStream toSerializeInto, PopulationState state) throws IOException {
-        for (int vectorSingleValue : state.getPopulationVector()) {
-            toSerializeInto.write(ByteBuffer.allocate(4).putInt(vectorSingleValue).array());
-        }
-    }
-
-    @Override
-    public PopulationState deserializeState(byte[] bytes) throws IOException {
+    public PopulationState fromByte(byte[] bytes) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        PopulationState deserialized = deserializeState(bais);
-        bais.close();
-        return deserialized;
-    }
-
-    @Override
-    public PopulationState deserializeState(ByteArrayInputStream bais) throws IOException {
         int length = registry.size();
         int[] vector = new int[length];
         for (int i = 0; i < length; i++) {

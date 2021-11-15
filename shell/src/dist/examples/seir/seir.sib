@@ -1,7 +1,7 @@
 module "population"
 load "examples/seir/seir.pm"
 init "init"
-add measure all
+add all measures
 deadline 100
 dt 1.0
 replica 100

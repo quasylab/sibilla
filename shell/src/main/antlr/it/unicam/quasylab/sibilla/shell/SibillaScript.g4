@@ -38,7 +38,16 @@ command : module_command
         | ls_command
         | add_all_measures_command
         | remove_all_measures_command
+        | descriptive_statistics
+        | summary_statistics
+        | show_statistics
         ;
+
+show_statistics: 'show' 'statistics';
+
+summary_statistics: 'summary' 'statistics';
+
+descriptive_statistics: 'descriptive' 'statistics';
 
 quit_command: 'quit';
 

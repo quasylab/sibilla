@@ -114,7 +114,7 @@ public final class AgentsDefinition {
      * @return the function associating each action with a probability value.
      */
     public ActionsProbability getActionProbability(LIOState state) {
-        Double probs[] = probabilityFunctions.stream().map(f -> f.apply(state)).toArray( i -> new Double[i]);
+        Double[] probs = probabilityFunctions.stream().map(f -> f.apply(state)).toArray(Double[]::new);
         return a -> probs[a.getIndex()];
     }
 
@@ -150,5 +150,20 @@ public final class AgentsDefinition {
      */
     public Agent getAgent(int i) {
         return agentIndex.get(i);
+    }
+
+    /**
+     * Returns the index of agent named <code>s</code>.
+     *
+     * @param s agent name.
+     * @return the index of agent named <code>s</code>.
+     */
+    public int getAgentIndex(String s) {
+        Agent a = getAgent(s);
+        if (a == null) {
+            return -1;
+        } else {
+            return a.getIndex();
+        }
     }
 }

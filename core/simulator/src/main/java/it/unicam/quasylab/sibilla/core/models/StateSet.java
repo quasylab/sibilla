@@ -28,7 +28,7 @@ import java.util.TreeMap;
 
 public class StateSet<T extends State> {
 
-    private Map<String,ParametricValue<T>> index;
+    private final Map<String,ParametricValue<T>> index;
     private ParametricValue<T> defaultState;
 
     public StateSet() {
@@ -99,4 +99,6 @@ public class StateSet<T extends State> {
         }
         return String.format("State %s is unknown",name);
     }
+
+
 }

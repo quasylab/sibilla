@@ -99,7 +99,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
         parser.addErrorListener(errorListener);
         SibillaScriptParser.ScriptContext parseTree = parser.script();
         if (errorListener.withErrors()) {
-            printScriptErrors(errorListener.getSyntaxErrorList());
+            printScriptErrors(errorListener.getSyntaxErrorList().getSyntaxErrorList());
         } else {
             this.visitScript(parseTree);
         }
@@ -438,5 +438,23 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
         return true;
     }
 
+    @Override
+    public Boolean visitShow_statistics(SibillaScriptParser.Show_statisticsContext ctx) {
+        showMessage(this.runtime.getStatistics());
+        return true;
+    }
 
+    @Override
+    public Boolean visitSummary_statistics(SibillaScriptParser.Summary_statisticsContext ctx) {
+        this.runtime.useSummaryStatistics();
+        showMessage(OK_MESSAGE);
+        return true;
+    }
+
+    @Override
+    public Boolean visitDescriptive_statistics(SibillaScriptParser.Descriptive_statisticsContext ctx) {
+        this.runtime.useDescriptiveStatistics();
+        showMessage(OK_MESSAGE);
+        return true;
+    }
 }

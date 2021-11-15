@@ -25,148 +25,85 @@ package it.unicam.quasylab.sibilla.core.simulator.sampling;
 
 import it.unicam.quasylab.sibilla.core.models.MeasureFunction;
 import it.unicam.quasylab.sibilla.core.models.State;
-import org.apache.commons.math3.distribution.TDistribution;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.io.FileNotFoundException;
-import java.io.PrintStream;
 import java.util.LinkedList;
 import java.util.function.Function;
 
+public abstract class StatisticSampling<S extends State> implements SamplingFunction<S> {
+    protected final Measure<S> measure;
+    protected final double dt;
+    private double last_measure;
+    private double next_time;
+    private int current_index;
+    private double new_measure;
 
-/**
- * @author loreti
- *
- */
-public class StatisticSampling<S extends State> implements SamplingFunction<S> {
+    public StatisticSampling(Measure<S> measure, double dt) {
+        this.measure = measure;
+        this.dt = dt;
+    }
 
-	private SummaryStatistics[] data;
-	private Measure<S> measure;
-	private double last_measure;
-	private double dt;
-	private double next_time;
-	private int current_index;
-	private double new_measure;
+    protected abstract void init();
 
-	public StatisticSampling(int samples, double dt, Measure<S> measure) {
-		this.data = new SummaryStatistics[samples];
-		this.measure = measure;
-		this.dt = dt;
-		init();
-	}
+    @Override
+    public synchronized void sample(double time, S context) {
+        this.new_measure = measure.measure(context);
+        if ((time >= this.next_time) && (this.current_index < getSize())) {
+            recordMeasure(time);
+        } else {
+            this.last_measure = this.new_measure;
+        }
+    }
 
-	private void init() {
-		for (int i = 0; i < data.length; i++) {
-			data[i] = new SummaryStatistics();
-		}
-	}
+    private void recordMeasure(double time) {
+        while ((this.next_time < time) && (this.current_index < getSize())) {
+            this.recordSample();
+        }
+        this.last_measure = this.new_measure;
+        if (this.next_time == time) {
+            this.recordSample();
+        }
+    }
 
-	@Override
-	public void sample(double time, S context) {
-		this.new_measure = measure.measure(context);
-		if ((time >= this.next_time) && (this.current_index < this.data.length)) {
-			recordMeasure(time);
-		} else {
-			this.last_measure = this.new_measure;
-		}
-	}
+    private void recordSample() {
+        recordSample(this.current_index++,this.last_measure);
+        this.next_time += this.dt;
+    }
 
-	private void recordMeasure(double time) {
-		while ((this.next_time<time)&&(this.current_index<this.data.length)) {
-			this.recordSample();
-		} 
-		this.last_measure = this.new_measure;		
-		if (this.next_time == time) {
-			this.recordSample();
-		}
-	}
-	
-	private void recordSample() {
-		this.data[this.current_index].addValue(this.last_measure);
-		this.current_index++;
-		this.next_time += this.dt;
-	}
-	
+    protected abstract void recordSample(int i, double last_measure);
 
-	@Override
-	public void end(double time) {
-		while (this.current_index < this.data.length) {
-			this.data[this.current_index].addValue(this.last_measure);
-			this.current_index++;
-			this.next_time += this.dt;
-		}
-	}
+    @Override
+    public synchronized void end(double time) {
+        while (this.current_index < getSize()) {
+            recordSample(this.current_index++, this.last_measure);
+            this.next_time += this.dt;
+        }
+    }
 
-	@Override
-	public void start() {
-		this.current_index = 0;
-		this.next_time = 0;
-	}
-	
-	public String getName() {
-		return measure.getName();
-	}
+    @Override
+    public void start() {
+        this.current_index = 0;
+        this.next_time = 0;
+    }
 
-	@Override
-	public void printTimeSeries(Function<String, String> nameFunction) throws FileNotFoundException {
-		printTimeSeries(nameFunction,';');
-	}
+    public String getName() {
+        return measure.getName();
+    }
 
-	@Override
-	public void printTimeSeries(Function<String, String> nameFunction, char separator) throws FileNotFoundException {
-		printTimeSeries(nameFunction,separator,0.05);
-	}
+    @Override
+    public abstract LinkedList<SimulationTimeSeries> getSimulationTimeSeries(int replications);
 
-	@Override
-	public void printTimeSeries(Function<String, String> nameFunction, char separator, double significance) throws FileNotFoundException {
-		String fileName = nameFunction.apply(this.getName());
-		PrintStream out = new PrintStream(fileName);
-		double time = 0.0;
-		for (int i = 0; i < this.data.length; i++) {
-			double ci = getConfidenceInterval(i,significance);
-			out.println(""+time + separator 
-					+ this.data[i].getMean() 
-					+ separator + ci);
-			time += dt;
-		}
-		out.close();
-	}
-	
-	
-	private double getConfidenceInterval(int i, double significance) {
-		TDistribution tDist = new TDistribution(this.data[i].getN());
-		double a = tDist.inverseCumulativeProbability(1.0 -significance/2);
-		return a*this.data[i].getStandardDeviation() / Math.sqrt(this.data[i].getN());
-	}
+    public abstract int getSize();
 
-	@Override
-	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries( int replications ) {
-		SimulationTimeSeries stt = new SimulationTimeSeries(measure.getName(), dt, replications, data);
-		LinkedList<SimulationTimeSeries> toReturn = new LinkedList<>();
-		toReturn.add(stt);
-		return toReturn;
-	}
+    @Override
+    public void printTimeSeries(Function<String, String> nameFunction) throws FileNotFoundException {
+        printTimeSeries(nameFunction,';');
+    }
 
-	public int getSize() {
-		return data.length;
-	}
-	
-	public static <S extends State> StatisticSampling<S> measure( String name, int samplings, double deadline, MeasureFunction<S> m) {
-		return new StatisticSampling<S>(samplings, deadline/samplings, 
-				new Measure<S>() {
+    @Override
+    public void printTimeSeries(Function<String, String> nameFunction, char separator) throws FileNotFoundException {
+        printTimeSeries(nameFunction,separator,0.05);
+    }
 
-			@Override
-			public double measure(S t) {
-				return m.apply( t );
-			}
-
-			@Override
-			public String getName() {
-				return name;
-			}
-
-		});
-		
-	}
 
 }

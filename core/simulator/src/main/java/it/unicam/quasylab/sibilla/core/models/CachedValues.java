@@ -77,4 +77,7 @@ public class CachedValues {
         return this.values.getOrDefault(s, Double.NaN);
     }
 
+    public synchronized void register(String name, Function<Function<String,Double>,Double> def) {
+        this.definitions.put(name, def);
+    }
 }

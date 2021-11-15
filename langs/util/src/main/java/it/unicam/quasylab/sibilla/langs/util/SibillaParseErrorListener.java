@@ -32,18 +32,26 @@ import java.util.List;
 
 public class SibillaParseErrorListener extends BaseErrorListener {
 
-    private final List<ParseError> errors = new LinkedList<>();
+    private final ErrorCollector errors;
+
+    public SibillaParseErrorListener() {
+        this(new ErrorCollector());
+    }
+
+    public SibillaParseErrorListener(ErrorCollector errors) {
+        this.errors = errors;
+    }
 
     public boolean withErrors() {
-        return !errors.isEmpty();
+        return errors.withErrors();
     }
 
     @Override
     public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-        errors.add(new ParseError(msg,line,charPositionInLine));
+        errors.record(new ParseError(msg,line,charPositionInLine));
     }
 
-    public List<ParseError> getSyntaxErrorList() {
+    public ErrorCollector getSyntaxErrorList() {
         return errors;
     }
 

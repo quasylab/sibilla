@@ -68,7 +68,10 @@ public class Trajectory<S> implements Externalizable {
             throw new IllegalArgumentException();
         }
         f.start();
-        this.data.stream().forEach(s -> f.sample(s.getTime(), s.getValue()));
+        for (Sample<S> s : this.data) {
+            f.sample(s.getTime(), s.getValue());
+        }
+        //this.data.stream().sequential().forEach(s -> f.sample(s.getTime(), s.getValue()));
         f.end(end);
     }
 
