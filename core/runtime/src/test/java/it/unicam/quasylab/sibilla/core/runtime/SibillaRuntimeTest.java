@@ -77,6 +77,40 @@ class SibillaRuntimeTest {
             "\n" +
             "system groupiesAndCelebrities = GA<N-1>|GB<N-1>|CA|CB;";
 
+    public static String GROUPIES = "species A;\n" +
+            "species B;\n" +
+            "\n" +
+            "const lambda = 1.0;\n" +
+            "const NA = 10;\n" +
+            "const NB = 10;\n" +
+            "\n" +
+            "rule a_to_b {\n" +
+            "    A -[ #A*lambda*%B ]-> B\n" +
+            "}\n" +
+            "\n" +
+            "rule b_to_a {\n" +
+            "    B -[ #B*lambda*%A ]-> A\n" +
+            "}\n" +
+            "\n" +
+            "system balanced = A<NA>|B<NB>;\n";
+
+    private static String CELEBRITIES = "species A;\n" +
+            "species B;\n" +
+            "\n" +
+            "const lambda = 1.0;\n" +
+            "const NA = 10;\n" +
+            "const NB = 10;\n" +
+            "\n" +
+            "rule a_to_b {\n" +
+            "    A -[ #A*lambda*(1-%B) ]-> B\n" +
+            "}\n" +
+            "\n" +
+            "rule b_to_a {\n" +
+            "    B -[ #B*lambda*(1-%A) ]-> A\n" +
+            "}\n" +
+            "\n" +
+            "system balanced = A<NA>|B<NB>;";
+
     @Test
     public void shouldSelectPopulationModule() throws CommandExecutionException {
         SibillaRuntime sr = new SibillaRuntime();
@@ -118,7 +152,7 @@ class SibillaRuntimeTest {
     }
 
     @Test
-    public void shouldLoadAndSimulate() throws CommandExecutionException, LoadException {
+    public void shouldLoadAndSimulate() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithModule();
         sr.load(CODE2);
         sr.setConfiguration("balancedGroupies");
@@ -129,5 +163,24 @@ class SibillaRuntimeTest {
         sr.printData("test");
     }
 
+    @Test
+    public void shouldBeBalanced() throws CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.load(GROUPIES);
+        sr.setConfiguration("balanced");
+        sr.setDeadline(100);
+        sr.setDt(1);
+        sr.simulate("test");
+        sr.printData("test");
+    }
+
+    @Test
+    public void shouldBeBalancedCelebrities() throws CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.load(CELEBRITIES);
+        sr.setConfiguration("balanced");
+        assertNotNull(sr.getMeasures());
+        assertEquals(4, sr.getMeasures().length);
+    }
 
 }

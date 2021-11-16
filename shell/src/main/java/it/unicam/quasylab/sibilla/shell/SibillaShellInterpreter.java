@@ -87,6 +87,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
 
     public synchronized void executeFile(String fileName) throws IOException {
         File selectedFile = getFile(fileName);
+        this.currentDirectory = selectedFile.getParentFile();
         execute(CharStreams.fromFileName(selectedFile.getAbsolutePath()));
     }
 

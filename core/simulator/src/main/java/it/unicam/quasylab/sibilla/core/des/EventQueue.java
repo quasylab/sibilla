@@ -21,20 +21,26 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.shell;
+package it.unicam.quasylab.sibilla.core.des;
 
-import org.junit.jupiter.api.Test;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.PriorityQueue;
 
-import static org.junit.jupiter.api.Assertions.*;
+public class EventQueue<S> {
 
-class SibillaShellInterpreterTest {
+    private final static int INITIAL_CAPACITY = 100;
 
-    @Test
-    public void testLoadCommand() {
-        SibillaShellInterpreter interpreter = new SibillaShellInterpreter();
-        String fileName = ClassLoader.getSystemClassLoader().getResource("./celebr.pm").getFile();
-        interpreter.execute("module ");
-        interpreter.execute("run \"groupies.sib\"");
+    private final PriorityQueue<Event<S>> scheduledEvents;
+    private final List<Event<S>> pendingEvents;
+    private double time = 0.0;
+
+    public EventQueue() {
+        this.scheduledEvents = new PriorityQueue<>(INITIAL_CAPACITY, new EventComparator<>());
+        this.pendingEvents = new LinkedList<>();
     }
+
+
+
 
 }

@@ -21,20 +21,14 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.shell;
+package it.unicam.quasylab.sibilla.core.des;
 
-import org.junit.jupiter.api.Test;
+import java.util.Comparator;
 
-import static org.junit.jupiter.api.Assertions.*;
+public class EventComparator<S> implements Comparator<Event<S>> {
 
-class SibillaShellInterpreterTest {
-
-    @Test
-    public void testLoadCommand() {
-        SibillaShellInterpreter interpreter = new SibillaShellInterpreter();
-        String fileName = ClassLoader.getSystemClassLoader().getResource("./celebr.pm").getFile();
-        interpreter.execute("module ");
-        interpreter.execute("run \"groupies.sib\"");
+    @Override
+    public int compare(Event<S> e1, Event<S> e2) {
+        return Double.compare(e1.getTime(),e2.getTime());
     }
-
 }

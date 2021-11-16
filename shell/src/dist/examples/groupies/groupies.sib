@@ -1,9 +1,8 @@
 module "population"
-cd "examples/groupies"
+cd "./examples/groupies/"
 load "groupies.pm"
-init "balancedGroupies"
-add measure "measureTypeA{}"
-add measure "measureTypeB{}"
+init "balanced"
+add all measures
 deadline 100
 dt 1.0
 replica 1000
@@ -12,8 +11,17 @@ save output "./results" prefix "groupies_summary_" postfix "__"
 descriptive statistics
 simulate
 save output "./results" prefix "groupies_descriptive_" postfix "__"
+load "groupies2.pm"
+init "balanced"
 summary statistics
-init "groupiesAndCelebrities"
+simulate
+save output "./results" prefix "groupies2_summary_" postfix "__"
+descriptive statistics
+simulate
+save output "./results" prefix "groupies2_descriptive_" postfix "__"
+load "celebr.pm"
+init "balanced"
+summary statistics
 simulate
 save output "./results" prefix "celebrities_summary_" postfix "__"
 descriptive statistics

@@ -1,6 +1,6 @@
 module "population"
 load "groupies.pm"
-init "balancedGroupies"
+init "balanced"
 add all measures
 deadline 100
 dt 1.0
@@ -10,7 +10,8 @@ save output "./results" prefix "groupies_summary_" postfix "__"
 descriptive statistics
 simulate
 save output "./results" prefix "groupies_descriptive_" postfix "__"
-init "groupiesAndCelebrities"
+load "celebr.pm"
+init "balanced"
 simulate
 save output "./results" prefix "celebrities_summary_" postfix "__"
 descriptive statistics

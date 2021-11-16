@@ -21,20 +21,7 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.shell;
+package it.unicam.quasylab.sibilla.core.des;
 
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-class SibillaShellInterpreterTest {
-
-    @Test
-    public void testLoadCommand() {
-        SibillaShellInterpreter interpreter = new SibillaShellInterpreter();
-        String fileName = ClassLoader.getSystemClassLoader().getResource("./celebr.pm").getFile();
-        interpreter.execute("module ");
-        interpreter.execute("run \"groupies.sib\"");
-    }
-
+public interface SimulationActivity<S> {
 }

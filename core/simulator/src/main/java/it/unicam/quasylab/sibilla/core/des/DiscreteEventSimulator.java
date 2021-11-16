@@ -21,20 +21,14 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.shell;
+package it.unicam.quasylab.sibilla.core.des;
 
-import org.junit.jupiter.api.Test;
+import it.unicam.quasylab.sibilla.core.models.State;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.PriorityQueue;
 
-class SibillaShellInterpreterTest {
+public class DiscreteEventSimulator<S> implements State {
 
-    @Test
-    public void testLoadCommand() {
-        SibillaShellInterpreter interpreter = new SibillaShellInterpreter();
-        String fileName = ClassLoader.getSystemClassLoader().getResource("./celebr.pm").getFile();
-        interpreter.execute("module ");
-        interpreter.execute("run \"groupies.sib\"");
-    }
+    private EventQueue<S> eventQueue;
 
 }
