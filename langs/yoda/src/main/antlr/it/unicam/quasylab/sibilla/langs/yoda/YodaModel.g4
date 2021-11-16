@@ -173,7 +173,6 @@ gexpr   : expr                                                      # expression
 */
 
 type    : 'int'                                                     # integerNumber
-        | 'double'                                                  # doubleNumber
         | 'real'                                                    # realNumber
         | 'bool'                                                    # boolean
         | 'char'                                                    # character
