@@ -144,7 +144,7 @@ expr    : INTEGER                                                   # integerVal
         | leftOp=expr oper=('*'|'/') rightOp=expr                   # multdivOperation
         | leftOp=expr oper=('%'|'//') rightOp=expr                  # additionalOperation
         | leftOp=expr '^' rightOp=expr                              # exponentOperation
-        | '!' argument=expr                                         # negation
+        | '!' argument=expr                                         # negationExpression
         | leftOp=expr oper=('&'|'&&') rightOp=expr                  # andExpression
         | leftOp=expr oper=('|'|'||') rightOp=expr                  # orExpression
         | leftOp=expr oper=('<'|'<='|'=='|'>='|'>') rightOp=expr    # relationExpression
@@ -153,11 +153,11 @@ expr    : INTEGER                                                   # integerVal
         | 'U''['min=expr',' max=expr']'                             # weightedRandomExpression
         | 'rnd'                                                     # randomExpression
         | parent=ID '.' son=ID                                      # attributeRef
-        | 'forall' name=ID 'in' group_name=ID ':' expr              # forallExpr
-        | 'exists' name=ID 'in' group_name=ID ':' expr              # existsExpr
-        | 'min'    name=ID 'in' group_name=ID ':' expr              # minimumExpr
-        | 'max'    name=ID 'in' group_name=ID ':' expr              # maximumExpr
-        | 'it.' ID                                                  # itself
+        | 'forall' name=ID 'in' group_name=ID ':' expr              # forallExpression
+        | 'exists' name=ID 'in' group_name=ID ':' expr              # existsExpression
+        | 'min'    name=ID 'in' group_name=ID ':' expr              # minimumExpression
+        | 'max'    name=ID 'in' group_name=ID ':' expr              # maximumExpression
+        | 'it.' ID                                                  # itselfRef
         ;
 
 fieldAssignment : name=ID '=' expr;

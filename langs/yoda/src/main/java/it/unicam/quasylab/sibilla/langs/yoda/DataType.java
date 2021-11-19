@@ -1,8 +1,5 @@
 package it.unicam.quasylab.sibilla.langs.yoda;
 
-import java.util.function.BinaryOperator;
-import java.util.function.DoubleBinaryOperator;
-import java.util.function.IntBinaryOperator;
 
 public enum DataType {
 
@@ -13,12 +10,30 @@ public enum DataType {
     STRING,
     NONE;
 
+    /**
+     * Check if the DataType is a number or not
+     *
+     * @return true if it is a number
+     */
     public boolean isANumber(){return (this==NONE)||(this==INTEGER)||(this==REAL);}
 
+    /**
+     * Check if the input DataType is a subtype of the one compared
+     *
+     * @param other the other type to be compared
+     * @return true if the other is a subtype of this
+     */
     public boolean isSubtypeOf (DataType other){
         return (this==NONE)||(other==NONE)||(this==other)||((this==REAL)&&(other==INTEGER))||((this==STRING)&&(other==CHAR));
     }
 
+    /**
+     * Merge two DataType inputs
+     *
+     * @param t1 the first data type
+     * @param t2 the second data type
+     * @return one of the two data type after being merged
+     */
     public static DataType merge(DataType t1, DataType t2) {
         if (t1==t2) {
             return t2;
