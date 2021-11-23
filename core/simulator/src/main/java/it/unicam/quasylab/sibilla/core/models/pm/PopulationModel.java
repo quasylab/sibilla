@@ -38,6 +38,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 /**
@@ -57,9 +58,10 @@ public class PopulationModel extends AbstractModel<PopulationState> implements C
     private final List<PopulationRule> rules;
 
     public PopulationModel(PopulationRegistry registry,
-        List<PopulationRule> rules,
-        Map<String, Measure<PopulationState>> measuresTable) {
-        super(measuresTable);
+                           List<PopulationRule> rules,
+                           Map<String, Measure<PopulationState>> measuresTable,
+                           Map<String, Predicate<PopulationState>> predicatesTable) {
+        super(measuresTable, predicatesTable);
         this.registry = registry;
         this.rules = rules;
     }

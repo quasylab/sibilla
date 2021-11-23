@@ -29,6 +29,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * Represents a <i>Stochastic Process</i>.
@@ -96,6 +97,22 @@ public interface Model<S extends State> extends Serializable {
      * @return the measure with name <code>m</code>.
      */
     Measure<S> getMeasure(String m);
+
+
+    /**
+     * Returns the predicate associated with the given name.
+     *
+     * @param name predicate name.
+     * @return the predicate associated with the given name.
+     */
+    Predicate<S> getPredicate(String name);
+
+    /**
+     * Returns the array containing the names of predicates defined in this model.
+     *
+     * @return the array containing the names of predicates defined in this model.
+     */
+    String[] predicates();
 
     /**
      * Returns the samplings that can be used to collect simulation data of the

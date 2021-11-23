@@ -33,43 +33,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
-public class PopulationMeasuresGenerator extends PopulationModelBaseVisitor<Map<String, Measure<PopulationState>>> {
+public class PopulationPredicatesGenerator extends PopulationModelBaseVisitor<Map<String, Predicate<PopulationState>>> {
 
-    private final Map<String, Measure<PopulationState>> measures;
+    private final Map<String, Predicate<PopulationState>> measures;
     private final EvaluationEnvironment environment;
     private final PopulationRegistry registry;
 
-    public PopulationMeasuresGenerator(EvaluationEnvironment environment, PopulationRegistry registry) {
+    public PopulationPredicatesGenerator(EvaluationEnvironment environment, PopulationRegistry registry) {
         this.environment = environment;
         this.registry = registry;
         this.measures = new HashMap<>();
     }
 
     @Override
-    public Map<String, Measure<PopulationState>> visitModel(PopulationModelParser.ModelContext ctx) {
+    public Map<String, Predicate<PopulationState>> visitModel(PopulationModelParser.ModelContext ctx) {
         ctx.element().forEach(e -> e.accept(this));
         return measures;
     }
 
     @Override
-    protected Map<String, Measure<PopulationState>> defaultResult() {
+    protected Map<String, Predicate<PopulationState>> defaultResult() {
         return measures;
     }
 
     @Override
-    public Map<String, Measure<PopulationState>> visitMeasure_declaration(PopulationModelParser.Measure_declarationContext ctx) {
+    public Map<String, Predicate<PopulationState>> visitPredicate_declaration(PopulationModelParser.Predicate_declarationContext ctx) {
         String name = ctx.name.getText();
         Function<String, Double> evaluator = environment.getEvaluator();
-        List<Map<String,Double>> maps = PopulationModelGenerator.getMaps(evaluator, ctx.local_variables(), ctx.guard_expression());
-        maps.stream().map(m -> getMeasure(name, evaluator, m, ctx.expr())).forEach(m -> measures.put(m.getName(), m));
+        measures.put(name, ctx.expr().accept(new PopulationExpressionEvaluator(evaluator, registry).getPopulationPredicateEvaluator()));
         return measures;
-    }
-
-    private Measure<PopulationState> getMeasure(String name, Function<String, Double> evaluator, Map<String, Double> m, PopulationModelParser.ExprContext expr) {
-        return new SimpleMeasure<>(name+m.toString(), expr.accept(
-                new PopulationExpressionEvaluator(PopulationModelGenerator.combine(evaluator, m), registry))
-        );
     }
 
 

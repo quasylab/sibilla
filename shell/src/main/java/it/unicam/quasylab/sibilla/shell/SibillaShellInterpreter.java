@@ -25,12 +25,14 @@ package it.unicam.quasylab.sibilla.shell;
 
 import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
 import it.unicam.quasylab.sibilla.core.runtime.SibillaRuntime;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -303,6 +305,53 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
         String[] measures = Arrays.stream(runtime.getMeasures()).map(s -> (runtime.isEnabledMeasure(s) ? s + " *" : s)).toArray(String[]::new);
         printInfo("List of available measures:", measures);
         return true;
+    }
+
+    @Override
+    public Boolean visitPredicates_command(SibillaScriptParser.Predicates_commandContext ctx) {
+        String[] predicates = Arrays.stream(runtime.getPredicates()).toArray(String[]::new);
+        printInfo("List of available predicates:", predicates);
+        return true;
+    }
+
+    @Override
+    public Boolean visitFirst_passage_time(SibillaScriptParser.First_passage_timeContext ctx) {
+        String predicateName = getStringContent(ctx.name.getText());
+        ShellSimulationMonitor monitor = null;
+        if (isInteractive) {
+            monitor = new ShellSimulationMonitor(output);
+        }
+        try {
+            showFirstPassageTimeResults(predicateName, runtime.firstPassageTime(monitor, predicateName) );
+            return true;
+        } catch (CommandExecutionException e) {
+            printErrorMessages(e.getErrorMessages());
+            return false;
+        }
+    }
+
+    private void showFirstPassageTimeResults(String name, FirstPassageTimeResults firstPassageTime) {
+        if (firstPassageTime.getTests()==0) {
+            printInfo("First passage time "+name+":", new String[] { "Tests = "+0});
+            return ;
+        }
+        long hits = firstPassageTime.getHits();
+        if (hits == 0) {
+            printInfo("First passage time "+name+":", new String[] { "Tests = "+firstPassageTime.getTests(),
+                "Hits = "+hits});
+            return ;
+        }
+        printInfo("First passage time "+name+":", new String[] { "Tests = "+firstPassageTime.getTests(),
+                "Hits = "+hits,
+                "Mean = "+firstPassageTime.getMean(),
+                "SD = "+firstPassageTime.getStandardDeviation(),
+                "MIN = "+firstPassageTime.getMin(),
+                "Q1 = "+firstPassageTime.getQ1(),
+                "Q2 = "+firstPassageTime.getQ2(),
+                "Q3 = "+firstPassageTime.getQ3(),
+                "MAX = "+firstPassageTime.getMax()
+        });
+
     }
 
     @Override

@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -163,5 +164,14 @@ public class Trajectory<S> implements Externalizable {
             samples.add((Sample) in.readObject());
         }
         this.data = samples;
+    }
+
+    public double firstPassageTime(Predicate<S> condition) {
+        for (Sample<S> sample : data) {
+            if (condition.test(sample.getValue())) {
+                return sample.getTime();
+            }
+        }
+        return Double.NaN;
     }
 }

@@ -39,6 +39,8 @@ public interface SymbolTable {
 
     void addMeasure(String name, PopulationModelParser.Measure_declarationContext context) throws DuplicatedSymbolException;
 
+    void addPredicate(String text, PopulationModelParser.Predicate_declarationContext ctx) throws DuplicatedSymbolException;
+
     void addSpecies(String name, PopulationModelParser.Species_declarationContext context) throws DuplicatedSymbolException;
 
     void addRule(String name, PopulationModelParser.Rule_declarationContext context) throws DuplicatedSymbolException;
@@ -106,4 +108,5 @@ public interface SymbolTable {
     Set<String> checkLocalVariables(PopulationModelParser.Local_variablesContext local_variables) throws DuplicatedSymbolException;
 
     Set<String> checkLocalVariables(List<Token> args, ParserRuleContext ctx) throws DuplicatedSymbolException;
+
 }

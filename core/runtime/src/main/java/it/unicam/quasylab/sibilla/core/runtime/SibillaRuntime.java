@@ -25,13 +25,13 @@ package it.unicam.quasylab.sibilla.core.runtime;
 
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.StringWriter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -45,7 +45,7 @@ public final class SibillaRuntime {
     private final Map<String, List<SimulationTimeSeries>> simulations = new TreeMap<>();
     private List<SimulationTimeSeries> lastSimulation;
     private final RandomGenerator rg = new DefaultRandomGenerator();
-    private int replica = 1;
+    private int replica = -1;
     private double deadline = Double.NaN;
     private double dt = Double.NaN;
 
@@ -341,6 +341,12 @@ public final class SibillaRuntime {
         }
     }
 
+    private void checkReplica() throws CommandExecutionException {
+        if (replica<1) {
+            throw new CommandExecutionException("No number of replicas has been set!");
+        }
+    }
+
     /**
      * Set simulation deadline.
      *
@@ -500,5 +506,15 @@ public final class SibillaRuntime {
         } else {
             return "";
         }
+    }
+
+    public String[] getPredicates() {
+        return currentModule.getPredicates();
+    }
+
+    public FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, String predicateName) throws CommandExecutionException {
+        checkDeadline();
+        checkReplica();
+        return currentModule.firstPassageTime(monitor,rg,replica,deadline,dt,predicateName);
     }
 }

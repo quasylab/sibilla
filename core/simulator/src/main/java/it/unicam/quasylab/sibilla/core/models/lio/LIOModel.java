@@ -30,6 +30,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.function.Predicate;
 
 /**
  * Identifies a model for a Langauge of Interactive Objects.
@@ -91,7 +92,17 @@ public class LIOModel<S extends LIOState> implements DiscreteModel<S> {
     }
 
     @Override
+    public String[] predicates() {
+        return new String[0];
+    }
+
+    @Override
     public Measure<S> getMeasure(String m) {
+        return null;
+    }
+
+    @Override
+    public Predicate<S> getPredicate(String m) {
         return null;
     }
 

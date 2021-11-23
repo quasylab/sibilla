@@ -78,15 +78,15 @@ public class SimulationEnvironment implements Serializable {
 	 *
 	 * @param model             model to simulate.
 	 * @param initialState      initial state.
-	 * @param sampling_function sampling functions to use.
+	 * @param consumer 			function used to collect data from the sampled trajectories.
 	 * @param iterations        number of interations.
 	 * @param deadline          simulation deadline.
 	 *
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
-	public <S extends State> void simulate(Model<S> model, S initialState, SamplingFunction<S> sampling_function,
+	public <S extends State> void simulate(Model<S> model, S initialState, Consumer<Trajectory<S>> consumer,
 			int iterations, double deadline) throws InterruptedException {
-		simulate(null, new DefaultRandomGenerator(), model, initialState, sampling_function, iterations, deadline);
+		simulate(null, new DefaultRandomGenerator(), model, initialState, consumer, iterations, deadline);
 	}
 
 	/**
@@ -97,15 +97,14 @@ public class SimulationEnvironment implements Serializable {
 	 * @param random            random generator used in the simulation.
 	 * @param model             model to simulate.
 	 * @param initialState      initial state.
-	 * @param sampling_function sampling functions to use.
+	 * @param consumer 			function used to collect data from the sampled trajectories.
 	 * @param iterations        number of interations.
 	 * @param deadline          simulation deadline.
 	 *
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
-	public <S extends State> void simulate(RandomGenerator random, Model<S> model, S initialState,
-			SamplingFunction<S> sampling_function, int iterations, double deadline) throws InterruptedException {
-		simulate(null, random, model, initialState, sampling_function, iterations, deadline);
+	public <S extends State> void simulate(RandomGenerator random, Model<S> model, S initialState, Consumer<Trajectory<S>> consumer, int iterations, double deadline) throws InterruptedException {
+		simulate(null, random, model, initialState, consumer, iterations, deadline);
 	}
 
 	/**
@@ -117,17 +116,17 @@ public class SimulationEnvironment implements Serializable {
 	 * @param random            random generator used in the simulation.
 	 * @param model             model to simulate.
 	 * @param initialState      initial state.
-	 * @param sampling_function sampling functions to use.
+	 * @param consumer 			function used to collect data from the sampled trajectories.
 	 * @param iterations        number of interations.
 	 * @param deadline          simulation deadline.
 	 *
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
 	public <S extends State> void simulate(SimulationMonitor monitor, RandomGenerator random, Model<S> model,
-			S initialState, SamplingFunction<S> sampling_function, int iterations, double deadline)
+			S initialState, Consumer<Trajectory<S>> consumer, int iterations, double deadline)
 			throws InterruptedException {
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, monitor,
-				trc -> trc.sample(sampling_function));
+				consumer);
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, initialState,
 				SamplePredicate.timeDeadlinePredicate(deadline));
 		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {

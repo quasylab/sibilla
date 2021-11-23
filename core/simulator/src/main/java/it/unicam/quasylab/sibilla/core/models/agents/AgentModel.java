@@ -33,6 +33,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 public class AgentModel<W extends World> implements InteractiveModel<SystemState<W>> {
@@ -93,5 +94,15 @@ public class AgentModel<W extends World> implements InteractiveModel<SystemState
     @Override
     public Measure<SystemState<W>> getMeasure(String m) {
         return null;
+    }
+
+    @Override
+    public Predicate<SystemState<W>> getPredicate(String name) {
+        return null;
+    }
+
+    @Override
+    public String[] predicates() {
+        return new String[0];
     }
 }

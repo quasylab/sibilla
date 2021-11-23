@@ -30,6 +30,8 @@ import it.unicam.quasylab.sibilla.core.models.StateSet;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -124,8 +126,25 @@ public abstract class AbstractSibillaModule<S extends State> implements SibillaM
         loadState();
         SamplingFunction<S> samplingFunction = model.selectSamplingFunction(summary, deadline, dt, enabledMeasures.toArray(new String[0]));
         try {
-            simulator.simulate(monitor, rg, model, state, samplingFunction, replica, deadline);
+            simulator.simulate(monitor, rg, model, state, samplingFunction::sample, replica, deadline);
             return samplingFunction.getSimulationTimeSeries(replica);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, RandomGenerator rg, int replica, double deadline, double dt, String predicateName) {
+        checkForLoadedDefinition();
+        loadModel();
+        loadState();
+        Predicate<S> predicate = model.getPredicate(predicateName);
+        if (predicate == null) {
+            throw new IllegalStateException("Predicate "+predicateName+" is unknown!");
+        }
+        FirstPassageTime<S> fpt = new FirstPassageTime<>(predicateName, predicate);
+        try {
+            simulator.simulate(monitor, rg, model, state, fpt, replica, deadline);
+            return fpt.getResults();
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
@@ -223,6 +242,13 @@ public abstract class AbstractSibillaModule<S extends State> implements SibillaM
         checkForLoadedDefinition();
         loadModel();
         return model.measures();
+    }
+
+    @Override
+    public String[] getPredicates() {
+        checkForLoadedDefinition();
+        loadModel();
+        return model.predicates();
     }
 
     @Override

@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.simulator.sampling;
 
 import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 
 import java.io.FileNotFoundException;
 import java.io.Serializable;
@@ -41,6 +42,10 @@ public interface SamplingFunction<S> extends Serializable {
 	void end(double time);
 
 	void start();
+
+	default void sample(Trajectory<S> trj) {
+		trj.sample(this);
+	}
 
 	default void printTimeSeries(Function<String, String> nameFunction) throws FileNotFoundException {
 		printTimeSeries(nameFunction,';');

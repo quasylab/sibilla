@@ -23,37 +23,52 @@
 
 package it.unicam.quasylab.sibilla.core.simulator.sampling;
 
-import it.unicam.quasylab.sibilla.core.models.State;
-import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import java.util.function.Consumer;
-import java.util.function.Predicate;
+public class FirstPassageTimeResults {
 
-public class FirstPassageTime<S extends State> implements Consumer<Trajectory<S>> {
 
-    private final String name;
-    private final Predicate<S> condition;
-    private DescriptiveStatistics values;
-    private int tests = 0;
+    private final int tests;
+    private final DescriptiveStatistics statistics;
 
-    public FirstPassageTime(String name, Predicate<S> condition) {
-        this.name = name;
-        this.condition = condition;
-        this.values = new DescriptiveStatistics();
+    public FirstPassageTimeResults(int tests, DescriptiveStatistics statistics) {
+        this.tests = tests;
+        this.statistics = statistics;
     }
 
-    @Override
-    public synchronized void accept(Trajectory<S> trajectory) {
-        tests++;
-        double time = trajectory.firstPassageTime(condition);
-        if (!Double.isNaN(time)) {
-            values.addValue(time);
-        }
+    public int getTests() {
+        return tests;
     }
 
-    public FirstPassageTimeResults getResults() {
-        return new FirstPassageTimeResults(tests, values);
+    public double getMin() {
+        return statistics.getMin();
     }
 
+    public double getMax() {
+        return statistics.getMax();
+    }
+
+    public double getQ1() {
+        return statistics.getPercentile(25);
+    }
+
+    public double getQ2() {
+        return statistics.getPercentile(50);
+    }
+
+    public double getQ3() {
+        return statistics.getPercentile(75);
+    }
+
+    public double getMean() {
+        return statistics.getMean();
+    }
+
+    public double getStandardDeviation() {
+        return statistics.getStandardDeviation();
+    }
+
+    public long getHits() {
+        return statistics.getN();
+    }
 }

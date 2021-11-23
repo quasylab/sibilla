@@ -350,7 +350,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
                     NetworkSimulationManager.getNetworkSimulationManagerFactory(simulationState, serializer.getType(), this.crSerializerType, client.getNetworkInfo()));
 
             sim.simulate(dataSet.getRandomGenerator(), dataSet.getModel(), dataSet.getModelInitialState(),
-                    dataSet.getModelSamplingFunction(), dataSet.getReplica(), dataSet.getDeadline());
+                    dataSet.getModelSamplingFunction()::sample, dataSet.getReplica(), dataSet.getDeadline());
             this.state.increaseExecutedSimulations();
         } catch (InterruptedException e) {
             LOGGER.severe(String.format("[%s] Simulation has been interrupted before its completion - Client: %s", e.getMessage(), client.getNetworkInfo().toString()));
