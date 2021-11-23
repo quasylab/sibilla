@@ -217,7 +217,7 @@ public class GossipBroadcast {
 	}
 
 	private PopulationModel buildPopulationModel(int scale) {
-		PopulationModel m = new PopulationModel(PopulationRegistry.createRegistry(6), buildRules(),new HashMap<>());
+		PopulationModel m = new PopulationModel(PopulationRegistry.createRegistry(6), buildRules(),new HashMap<>(), new HashMap<>());
 		return m;
 	}
 

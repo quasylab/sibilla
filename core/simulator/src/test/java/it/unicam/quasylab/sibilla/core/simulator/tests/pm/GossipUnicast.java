@@ -206,7 +206,7 @@ public class GossipUnicast {
 	private PopulationModel buildPopulationModel(int scale) {
 //		PopulationModel m = new PopulationModel(6);
 //		m.addRules(buildRules());
-		return new PopulationModel(PopulationRegistry.createRegistry(6),buildRules(),new HashMap<>());
+		return new PopulationModel(PopulationRegistry.createRegistry(6),buildRules(),new HashMap<>(), new HashMap<>());
 	}
 
 	private PopulationState getInitState(int scale) {

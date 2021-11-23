@@ -204,7 +204,7 @@ public class RBModel {
 	private PopulationModel buildPopulationModel(int scale) {
 //		PopulationModel m = new PopulationModel(4);
 //		m.addRules(buildRules());
-		return new PopulationModel(PopulationRegistry.createRegistry(4),buildRules(),new HashMap<>());
+		return new PopulationModel(PopulationRegistry.createRegistry(4),buildRules(),new HashMap<>(), new HashMap<>());
 	}
 
 	private PopulationState getInitState(int scale) {
