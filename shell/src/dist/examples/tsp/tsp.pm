@@ -28,3 +28,7 @@ system balanced = S0<1*scale>|S1<1*scale>|SU<8*scale>;
 system custom(s0,s1,su) = S0<s0>|S1<s1>|SU<su>;
 
 predicate consensus = (%S1==1.0)||(%S0==1.0);
+
+predicate win0 = (%S0==1.0);
+
+predicate win1 = (%S1==1.0);

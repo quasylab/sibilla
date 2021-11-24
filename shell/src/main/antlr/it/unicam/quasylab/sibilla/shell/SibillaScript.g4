@@ -43,7 +43,10 @@ command : module_command
         | show_statistics
         | predicates_command
         | first_passage_time
+        | reachability_command
         ;
+
+reachability_command: 'probreach' goal=STRING ('while' condition=STRING)? 'with' 'alpha' '='  alpha=REAL 'and' 'delta' '=' delta=REAL;
 
 first_passage_time: 'fpt' name=STRING;
 

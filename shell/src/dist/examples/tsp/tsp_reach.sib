@@ -1,0 +1,8 @@
+module "population"
+load "tsp.pm"
+set "scale" 1000.0
+init "balanced"
+deadline 100
+init "custom"(30.0,20.0,0.0)
+probreach "win0" with alpha=0.05 and delta=0.01
+probreach "win1" with alpha=0.05 and delta=0.01

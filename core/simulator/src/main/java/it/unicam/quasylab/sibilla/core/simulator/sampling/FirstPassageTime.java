@@ -34,7 +34,7 @@ public class FirstPassageTime<S extends State> implements Consumer<Trajectory<S>
 
     private final String name;
     private final Predicate<S> condition;
-    private DescriptiveStatistics values;
+    private final DescriptiveStatistics values;
     private int tests = 0;
 
     public FirstPassageTime(String name, Predicate<S> condition) {

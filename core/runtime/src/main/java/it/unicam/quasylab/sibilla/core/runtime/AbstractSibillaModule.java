@@ -151,24 +151,30 @@ public abstract class AbstractSibillaModule<S extends State> implements SibillaM
     }
 
     @Override
-    public double estimateReachability(String targetCondition, double time, double pError, double delta) {
+    public double estimateReachability(SimulationMonitor monitor, RandomGenerator rg,  String targetName, double time, double pError, double delta) {
         checkForLoadedDefinition();
         loadModel();
         loadState();
-        //Predicate<S> targetPredicate = model.getCondition(targetCondition);
-        //return simulator.reachability(pError,delta,time, model, state, targetPredicate);
-        return 0.0;
+        Predicate<S> targetPredicate = model.getPredicate(targetName);
+        try {
+            return simulator.reachability(monitor, rg, pError,delta,time, model, state, s -> true, targetPredicate::test);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e.getMessage());
+        }
     }
 
     @Override
-    public double estimateReachability(String transientCondition, String targetCondition, double time, double pError, double delta) {
+    public double estimateReachability(SimulationMonitor monitor, RandomGenerator rg, String transientCondition, String targetCondition, double time, double pError, double delta) {
         checkForLoadedDefinition();
         loadModel();
         loadState();
-        //Predicate<S> transientPredicate = model.getCondition(transientCondition);
-        //Predicate<S> targetPredicate = model.getCondition(targetCondition);
-        //return simulator.reachability(pError,delta,time, model, state, transientPredicate, targetPredicate);
-        return 0.0;
+        Predicate<S> transientPredicate = model.getPredicate(transientCondition);
+        Predicate<S> targetPredicate = model.getPredicate(targetCondition);
+        try {
+            return simulator.reachability(monitor, rg, pError,delta,time, model, state, transientPredicate::test, targetPredicate::test);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e.getMessage());
+        }
     }
 
     @Override

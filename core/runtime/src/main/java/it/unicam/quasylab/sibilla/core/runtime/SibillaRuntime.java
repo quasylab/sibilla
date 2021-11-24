@@ -517,4 +517,16 @@ public final class SibillaRuntime {
         checkReplica();
         return currentModule.firstPassageTime(monitor,rg,replica,deadline,dt,predicateName);
     }
+
+    public double computeProbReach(SimulationMonitor monitor, String goal, double alpha, double eps) throws CommandExecutionException {
+        checkDeadline();
+        return currentModule.estimateReachability(monitor, rg, goal, deadline, alpha, eps);
+    }
+
+    public double computeProbReach(SimulationMonitor monitor, String condition, String goal, double alpha, double eps) throws CommandExecutionException {
+        checkDeadline();
+        return currentModule.estimateReachability(monitor, rg, condition, goal, deadline, alpha, eps);
+    }
+
+
 }

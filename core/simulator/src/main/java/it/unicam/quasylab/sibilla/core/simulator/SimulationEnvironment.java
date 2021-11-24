@@ -236,9 +236,10 @@ public class SimulationEnvironment implements Serializable {
 			double errorProbability, double delta, double deadline, Model<S> model, S state,
 			StatePredicate<? super S> condition, StatePredicate<? super S> goal) throws InterruptedException {
 		ReachabilityTraceConsumer<S> traceConsumer = new ReachabilityTraceConsumer<>();
-		double n = Math.ceil(Math.log(2 / delta) / (2 * errorProbability));
+		double n = Math.ceil(Math.log(2 / errorProbability) / (2 * Math.pow(errorProbability,2)));
+		LOGGER.info("Computing reachability with "+(int) n+" iterations.");
 		SimulationUnit<S> unit = new SimulationUnit<>(model, state,
-				(t, s) -> (t >= deadline) || goal.check(s) || !condition.check(s), goal);
+				(t, s) -> (t > deadline) || goal.check(s) || !condition.check(s), goal);
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, monitor,
 				traceConsumer);
 

@@ -275,7 +275,7 @@ public interface SibillaModule {
      * @param delta estimation error.
      * @return the probability to reach a state satisfuing the target condition within time units-
      */
-    double estimateReachability(String targetCondition, double time, double pError, double delta);
+    double estimateReachability(SimulationMonitor monitor, RandomGenerator rg,  String targetCondition, double time, double pError, double delta);
 
 
     /**
@@ -291,5 +291,6 @@ public interface SibillaModule {
      * @param delta estimation error.
      * @return the probability to reach a state satisfuing the target condition within time units-
      */
-    double estimateReachability(String transientCondition, String targetCondition, double time, double pError, double delta);
+    double estimateReachability(SimulationMonitor monitor, RandomGenerator rg, String transientCondition, String targetCondition, double time, double pError, double delta);
+
 }

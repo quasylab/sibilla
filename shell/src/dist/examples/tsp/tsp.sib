@@ -7,4 +7,7 @@ deadline 100
 dt 1.0
 replica 100
 simulate
-save output "./results" prefix "tsp" postfix "__"
+save output "./results" prefix "tsp_100" postfix "__"
+set "scale" 200.00
+simulate
+save output "./results" prefix "tsp_200" postfix "__"

@@ -111,6 +111,37 @@ class SibillaRuntimeTest {
             "\n" +
             "system balanced = A<NA>|B<NB>;";
 
+    private final static String CDOE_TSP = "species S0;\n" +
+            "species S1;\n" +
+            "species SU;\n" +
+            "\n" +
+            "const meetRate = 1.0;\n" +
+            "\n" +
+            "rule su_to_s1 {\n" +
+            "    SU|S1 -[ #SU*meetRate*%S1 ]-> S1|S1\n" +
+            "}\n" +
+            "\n" +
+            "rule su_to_s0 {\n" +
+            "    SU|S0 -[ #SU*meetRate*%S0 ]-> S0|S0\n" +
+            "}\n" +
+            "\n" +
+            "rule s1_to_su {\n" +
+            "    S1|S0 -[ #S1*meetRate*%S0 ]-> SU|S0\n" +
+            "}\n" +
+            "\n" +
+            "rule s0_to_su {\n" +
+            "    S0|S1 -[ #S0*meetRate*%S1 ]-> SU|S1\n" +
+            "}\n" +
+            "\n" +
+            "param scale = 1.0;\n" +
+            "\n" +
+            "system balanced = S0<1*scale>|S1<1*scale>|SU<8*scale>;\n" +
+            "\n" +
+            "\n" +
+            "system custom(s0,s1,su) = S0<s0>|S1<s1>|SU<su>;\n" +
+            "\n" +
+            "predicate consensus = (%S1==1.0)||(%S0==1.0);";
+
     @Test
     public void shouldSelectPopulationModule() throws CommandExecutionException {
         SibillaRuntime sr = new SibillaRuntime();
@@ -183,4 +214,12 @@ class SibillaRuntimeTest {
         assertEquals(4, sr.getMeasures().length);
     }
 
+    @Test
+    public void shouldComputeReachProbability() throws CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.load(CDOE_TSP);
+        sr.setConfiguration("balanced");
+        sr.setDeadline(100.0);
+        assertEquals(1.0, sr.computeProbReach(null, "consensus", 0.1, 0.1));
+    }
 }

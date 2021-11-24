@@ -507,4 +507,28 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
         showMessage(OK_MESSAGE);
         return true;
     }
+
+    @Override
+    public Boolean visitReachability_command(SibillaScriptParser.Reachability_commandContext ctx) {
+        ShellSimulationMonitor monitor = null;
+        if (isInteractive) {
+            monitor = new ShellSimulationMonitor(output);
+        }
+        String targetPredicate = getStringContent(ctx.goal.getText());
+        double alpha = Double.parseDouble(ctx.alpha.getText());
+        double delta = Double.parseDouble(ctx.delta.getText());
+        try {
+            double prob = 0.0;
+            if (ctx.condition != null) {
+                prob = runtime.computeProbReach(monitor, getStringContent(ctx.condition.getText()), targetPredicate, alpha, delta);
+            } else {
+                prob = runtime.computeProbReach(monitor, targetPredicate, alpha, delta);
+            }
+            showMessage("\nProbability: "+prob);
+            return true;
+        } catch (CommandExecutionException e) {
+            printErrorMessages(e.getErrorMessages());
+            return false;
+        }
+    }
 }
