@@ -21,7 +21,7 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.langs.yoda;
+package it.unicam.quasylab.sibilla.core.models.yoda;
 
-public class ModelValidator {
+public interface YodaOmegaFunction {
 }

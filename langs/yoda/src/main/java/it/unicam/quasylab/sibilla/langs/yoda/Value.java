@@ -1,4 +1,27 @@
-	package it.unicam.quasylab.sibilla.langs.yoda;
+/*
+ * Sibilla:  a Java framework designed to support analysis of Collective
+ * Adaptive Systems.
+ *
+ *             Copyright (C) 2020.
+ *
+ * See the NOTICE file distributed with this work for additional information
+ * regarding copyright ownership.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *            http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+package it.unicam.quasylab.sibilla.langs.yoda;
 
 	import java.util.function.BiFunction;
 
@@ -179,7 +202,6 @@
 
 		Value FALSE = new BooleanValue(false);
 
-		//TODO
 		class IntegerValue implements Value{
 			private final int value;
 
@@ -193,70 +215,70 @@
 
 			@Override
 			public double getDoubleValue() {
-				return value;
+				return this.value;
 			}
 
 			@Override
 			public int getIntValue() {
-				return value;
+				return this.value;
 			}
 
 			@Override
 			public boolean getBooleanValue() {
-				return value>0;
+				return this.value>0;
 			}
 
 			@Override
 			public Value add(Value value) {
-				if (value.getType()==DataType.INTEGER){
-					return new IntegerValue(this.value+value.getIntValue());
-				}else {
-					return this.cast(value.getType()).add(value);
+				switch (value.getType()){
+					case INTEGER: return new IntegerValue(this.value+value.getIntValue());
+					case REAL: return this.cast(value.getType()).add(value);
+					default: return NONE;
 				}
 			}
 
 			@Override
 			public Value subtract(Value value) {
-				if (value.getType()==DataType.INTEGER){
-					return new IntegerValue(this.value-value.getIntValue());
-				}else {
-					return this.cast(value.getType()).subtract(value);
+				switch (value.getType()){
+					case INTEGER: return new IntegerValue(this.value-value.getIntValue());
+					case REAL: return this.cast(value.getType()).subtract(value);
+					default: return NONE;
 				}
 			}
 
 			@Override
 			public Value multiply(Value value) {
-				if(value.getType()==DataType.INTEGER){
-                    return new IntegerValue(this.value*value.getIntValue());
-				}else{
-					return this.cast(value.getType()).multiply(value);
+				switch (value.getType()){
+					case INTEGER: return new IntegerValue(this.value*value.getIntValue());
+					case REAL: return this.cast(value.getType()).multiply(value);
+					default: return NONE;
 				}
 			}
 
 			@Override
 			public Value divide(Value value) {
-                if(value.getType()==DataType.INTEGER){
-                    return new IntegerValue(this.value/value.getIntValue());
-                }else{
-                    return this.cast(value.getType()).divide(value);
-                }
+				switch (value.getType()){
+					case INTEGER: return new IntegerValue(this.value/value.getIntValue());
+					case REAL: return this.cast(value.getType()).divide(value);
+					default: return NONE;
+				}
 			}
 
 			@Override
 			public Value modulo(Value value) {
-                if(value.getType()==DataType.INTEGER){
-                    return new IntegerValue(this.value%value.getIntValue());
-                }else{
-                    return this.cast(value.getType()).modulo(value);
-                }
+				switch (value.getType()){
+					case INTEGER: return new IntegerValue(this.value%value.getIntValue());
+					case REAL: return this.cast(value.getType()).modulo(value);
+					default: return NONE;
+				}
 			}
 
 			@Override
 			public Value pow(Value value) {
-				if(value.getType()==DataType.INTEGER){
-					return new IntegerValue((int) Math.pow(this.value, value.getIntValue()));
-				}else {
-					return this.cast(value.getType()).pow(value);
+				switch (value.getType()){
+					case INTEGER: return new IntegerValue((int) Math.pow(this.value, value.getIntValue()));
+					case REAL: return this.cast(value.getType()).pow(value);
+					default: return NONE;
 				}
 			}
 
@@ -272,168 +294,145 @@
 
 		}
 
-		//TODO
 		class RealValue implements Value{
 			private final double value;
 
 			public RealValue(double value) { this.value = value; }
 
-
 			@Override
 			public DataType getType() {
-				return null;
+				return DataType.REAL;
 			}
 
 			@Override
 			public double getDoubleValue() {
-				return Value.super.getDoubleValue();
+				return this.value;
 			}
 
 			@Override
 			public int getIntValue() {
-				return Value.super.getIntValue();
+				return (int) this.value;
 			}
 
 			@Override
 			public boolean getBooleanValue() {
-				return Value.super.getBooleanValue();
+				return this.value>0;
 			}
 
 			@Override
 			public Value add(Value value) {
-				return Value.super.add(value);
+				switch (value.getType()) {
+					case REAL:
+					case INTEGER:
+						return new RealValue(this.value+value.getDoubleValue());
+					default:
+						return NONE;
+				}
 			}
 
 			@Override
 			public Value subtract(Value value) {
-				return Value.super.subtract(value);
+				switch (value.getType()) {
+					case REAL:
+					case INTEGER:
+						return new RealValue(this.value-getDoubleValue());
+					default:
+						return NONE;
+				}
 			}
 
 			@Override
 			public Value multiply(Value value) {
-				return Value.super.multiply(value);
+				switch (value.getType()) {
+					case REAL:
+					case INTEGER:
+						return new RealValue(this.value*value.getDoubleValue());
+					default:
+						return NONE;
+				}
 			}
 
 			@Override
 			public Value divide(Value value) {
-				return Value.super.divide(value);
+				switch (value.getType()) {
+					case REAL:
+					case INTEGER:
+						return new RealValue(this.value/value.getDoubleValue());
+					default:
+						return NONE;
+				}
 			}
 
 			@Override
 			public Value modulo(Value value) {
-				return Value.super.modulo(value);
+				switch (value.getType()) {
+					case REAL:
+					case INTEGER:
+						return new RealValue(this.value%value.getDoubleValue());
+					default:
+						return NONE;
+				}
 			}
 
 			@Override
 			public Value pow(Value value) {
-				return Value.super.pow(value);
+				switch (value.getType()) {
+					case REAL:
+					case INTEGER:
+						return new RealValue(Math.pow(this.value, value.getDoubleValue()));
+					default:
+						return NONE;
+				}
 			}
 
 			@Override
 			public Value minus() {
-				return Value.super.minus();
+				return new RealValue(-this.value);
 			}
 
 			@Override
 			public Value plus() {
-				return Value.super.plus();
-			}
-
-			@Override
-			public Value and(Value value) {
-				return Value.super.and(value);
-			}
-
-			@Override
-			public Value or(Value value) {
-				return Value.super.or(value);
-			}
-
-			@Override
-			public Value not() {
-				return Value.super.not();
+				return new RealValue(+this.value);
 			}
 		}
 
-		//TODO
-		class BooleanValue implements Value{
+		class BooleanValue implements Value {
+
 			private final boolean value;
 
-			public BooleanValue(boolean value) { this.value=value; }
+			public BooleanValue(boolean value) {
+				this.value = value;
+			}
 
 			@Override
 			public DataType getType() {
-				return null;
-			}
-
-			@Override
-			public double getDoubleValue() {
-				return Value.super.getDoubleValue();
-			}
-
-			@Override
-			public int getIntValue() {
-				return Value.super.getIntValue();
+				return DataType.BOOLEAN;
 			}
 
 			@Override
 			public boolean getBooleanValue() {
-				return Value.super.getBooleanValue();
-			}
-
-			@Override
-			public Value add(Value value) {
-				return Value.super.add(value);
-			}
-
-			@Override
-			public Value subtract(Value value) {
-				return Value.super.subtract(value);
-			}
-
-			@Override
-			public Value multiply(Value value) {
-				return Value.super.multiply(value);
-			}
-
-			@Override
-			public Value divide(Value value) {
-				return Value.super.divide(value);
-			}
-
-			@Override
-			public Value modulo(Value value) {
-				return Value.super.modulo(value);
-			}
-
-			@Override
-			public Value pow(Value value) {
-				return Value.super.pow(value);
-			}
-
-			@Override
-			public Value minus() {
-				return Value.super.minus();
-			}
-
-			@Override
-			public Value plus() {
-				return Value.super.plus();
+				return value;
 			}
 
 			@Override
 			public Value and(Value value) {
-				return Value.super.and(value);
+				if (value.getType() == DataType.BOOLEAN) {
+					return (!this.value?this:value);
+				}
+				return NONE;
 			}
 
 			@Override
 			public Value or(Value value) {
-				return Value.super.or(value);
+				if (value.getType() == DataType.BOOLEAN) {
+					return (this.value?this:value);
+				}
+				return NONE;
 			}
 
 			@Override
 			public Value not() {
-				return Value.super.not();
+				return (this.value?FALSE:TRUE);
 			}
 		}
 
