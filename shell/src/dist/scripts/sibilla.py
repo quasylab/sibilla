@@ -155,7 +155,7 @@ class SibillaRuntimeCc:
     def save(self, label: str, outputFolder: str, prefix: str, postfix: str):
         return self.__runtime.save(outputFolder, prefix, postfix)
 
-    #overflow
+    
     def setReplica(self, replica: int):
         self.__runtime.setReplica(replica)
 
@@ -309,7 +309,7 @@ class SibillaRuntimeSc:
     def save(self, label: str, output_folder: str, prefix: str, postfix: str):
         return self.__runtime.save(output_folder, prefix, postfix)
 
-    #overflow
+    
     def set_replica(self, replica: int):
         self.__runtime.setReplica(replica)
 
