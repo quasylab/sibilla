@@ -15,9 +15,9 @@ element : constant_declaration
 
 //INITIALISATION PARAMETERS
 
-constant_declaration: 'const' name=ID '=' expr ';';
+constant_declaration: 'const' name=ID '=' value=expr ';';
 
-parameter_declaration: 'param' name=ID '=' expr ';';
+parameter_declaration: 'param' name=ID '=' value=expr ';';
 
 type_declaration:'type' name=ID '{'
                         type var_name=ID (';'type var_name=ID)*

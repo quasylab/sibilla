@@ -23,5 +23,20 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 public class VariableMapping {
+
+    private Map<String,Double> map;
+
+    public VariableMapping(Map<String,Double> map){
+        this.map = map;
+    }
+
+    public VariableMapping(SetVariable ... variables){
+        this.map = new HashMap<>();
+        Arrays.stream(variables).sequential().forEach(s->map.put(s.getVariable(),s.getValue()));
+    }
 }

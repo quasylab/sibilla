@@ -24,4 +24,19 @@
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
 public class SetVariable {
+    public final String variable;
+    public final double value;
+
+    public SetVariable(String variable, double value) {
+        this.variable = variable;
+        this.value = value;
+    }
+
+    public String getVariable(){
+        return variable;
+    }
+
+    public double getValue() {
+        return value;
+    }
 }

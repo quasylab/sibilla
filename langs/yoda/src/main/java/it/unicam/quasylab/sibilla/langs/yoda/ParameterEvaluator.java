@@ -23,5 +23,34 @@
 
 package it.unicam.quasylab.sibilla.langs.yoda;
 
-public class ParameterEvaluator {
+import java.util.HashMap;
+import java.util.Map;
+
+public class ParameterEvaluator extends YodaModelBaseVisitor<Map<String,Double>> {
+
+    private final Map<String, Double> params;
+
+
+    public ParameterEvaluator() {
+        this.params = new HashMap<>();
+    }
+
+    @Override
+    public Map<String,Double> visitModel(YodaModelParser.ModelContext ctx){
+        for (YodaModelParser.ElementContext element : ctx.element()) {
+            element.accept(this);
+        }
+        return this.params;
+    }
+
+    @Override
+    public Map<String, Double> visitConstant_declaration(YodaModelParser.Constant_declarationContext ctx) {
+        return this.params;
+    }
+
+    @Override
+    public Map<String, Double> visitParameter_declaration(YodaModelParser.Parameter_declarationContext ctx) {
+        this.params.put(ctx.name.getText(), Double.parseDouble(ctx.value.getText()));
+        return this.params;
+    }
 }

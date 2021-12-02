@@ -23,5 +23,37 @@
 
 package it.unicam.quasylab.sibilla.langs.yoda;
 
+import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+
+import javax.xml.validation.Validator;
+import java.util.HashMap;
+import java.util.Map;
+
 public class ModelValidator {
+
+    private final ErrorCollector errorCollector;
+    private final Map<String, Token> table;
+    private final Map<String, DataType> types;
+
+
+    public ModelValidator(ErrorCollector errorCollector) {
+        this.errorCollector = errorCollector;
+        this.table = new HashMap<>();
+        this.types = new HashMap<>();
+    }
+
+    public boolean validate(ParseTree parseTree){
+        if (parseTree==null){
+            return false;
+        }
+        return parseTree.accept(new ValidatorVisitor());
+    }
+
+
+    public class ValidatorVisitor extends  YodaModelBaseVisitor<Boolean>{
+
+
+    }
 }

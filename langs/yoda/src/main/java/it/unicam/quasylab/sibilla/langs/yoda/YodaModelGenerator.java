@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.langs.yoda;
 
+import it.unicam.quasylab.sibilla.core.models.yoda.YodaDefinition;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
@@ -49,9 +50,6 @@ public class YodaModelGenerator {
     private boolean validated = false;
     private YodaModelParser.ModelContext parseTree;
 
-
-
-
     public YodaModelGenerator(CodePointCharStream source){ this.source = source; }
 
     public YodaModelGenerator(String string){ this(CharStreams.fromString(string));}
@@ -70,6 +68,23 @@ public class YodaModelGenerator {
         SibillaParseErrorListener errorListener = new SibillaParseErrorListener(errorCollector);
         parser.addErrorListener(errorListener);
         this.parseTree = parser.model();
+    }
 
+    public boolean validate(){
+        if (parseTree==null){
+            generateParseTree();
+        }
+        if (withErrors()){
+            return false;
+        }
+        if(!validated){
+            validated = true;
+            this.validator = new ModelValidator(this.errorCollector);
+            return this.validator.validate(getParseTree());
+        }
+        return true;
+    }
+
+    private boolean withErrors() {return true;
     }
 }
