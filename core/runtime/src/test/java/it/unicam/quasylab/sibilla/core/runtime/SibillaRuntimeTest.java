@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.runtime;
 
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -30,6 +31,14 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SibillaRuntimeTest {
+
+    public final String TEST_PARAM = "param lambda = 1.0;" +
+            "species A;" +
+            "species B;" +
+            "rule step { A -[ lambda ]-> B}\n" +
+            "system start = A;" +
+            "predicate done = #A == 0;";
+
 
     public final String CODE = "param lambda = 1.0;\n" +
             "param N1 = 10;\n" +
@@ -142,6 +151,8 @@ class SibillaRuntimeTest {
             "\n" +
             "predicate consensus = (%S1==1.0)||(%S0==1.0);";
 
+
+
     @Test
     public void shouldSelectPopulationModule() throws CommandExecutionException {
         SibillaRuntime sr = new SibillaRuntime();
@@ -224,4 +235,25 @@ class SibillaRuntimeTest {
         sr.setDeadline(100.0);
         assertEquals(1.0, sr.computeProbReach(null, "consensus", 0.1, 0.1));
     }
+
+    @Test
+    public void shouldChangeWithSet() throws CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.load(TEST_PARAM);
+        sr.setParameter("lambda", 2.0);
+        sr.setConfiguration("start");
+        sr.setDeadline(100.0);
+        sr.setReplica(500);
+        FirstPassageTimeResults res = sr.firstPassageTime(null, "done");
+        assertEquals(0.5, res.getMean(),0.1);
+        sr.setParameter("lambda", 1.0);
+        sr.setConfiguration("start");
+        res = sr.firstPassageTime(null, "done");
+        assertEquals(1.0, res.getMean(),0.1);
+        sr.setParameter("lambda", 3.0);
+        sr.setConfiguration("start");
+        res = sr.firstPassageTime(null, "done");
+        assertEquals(1.0/3.0, res.getMean(),0.1);
+    }
+
 }
