@@ -105,16 +105,13 @@ public class SummaryStatisticSampling<S extends State> extends StatisticSampling
 	}
 
 	@Override
-	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries( int replications ) {
-		SimulationTimeSeries stt = new SimulationTimeSeries(true, measure.getName(), dt, replications, data);
-		LinkedList<SimulationTimeSeries> toReturn = new LinkedList<>();
-		toReturn.add(stt);
-		return toReturn;
+	public int getSize() {
+		return data.length;
 	}
 
 	@Override
-	public int getSize() {
-		return data.length;
+	protected double[] getDataRow(int i) {
+		return new double[] { getTimeOfIndex(i), data[i].getMean(), data[i].getStandardDeviation(), getConfidenceInterval(i, 0.05)};
 	}
 
 }

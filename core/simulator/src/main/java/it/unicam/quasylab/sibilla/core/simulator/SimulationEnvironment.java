@@ -103,7 +103,7 @@ public class SimulationEnvironment implements Serializable {
 	 *
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
-	public <S extends State> void simulate(RandomGenerator random, Model<S> model, S initialState, Consumer<Trajectory<S>> consumer, int iterations, double deadline) throws InterruptedException {
+	public <S extends State> void simulate(RandomGenerator random, Model<S> model, S initialState, Consumer<Trajectory<S>> consumer, long iterations, double deadline) throws InterruptedException {
 		simulate(null, random, model, initialState, consumer, iterations, deadline);
 	}
 
@@ -123,13 +123,13 @@ public class SimulationEnvironment implements Serializable {
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
 	public <S extends State> void simulate(SimulationMonitor monitor, RandomGenerator random, Model<S> model,
-			S initialState, Consumer<Trajectory<S>> consumer, int iterations, double deadline)
+			S initialState, Consumer<Trajectory<S>> consumer, long iterations, double deadline)
 			throws InterruptedException {
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, monitor,
 				consumer);
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, initialState,
 				SamplePredicate.timeDeadlinePredicate(deadline));
-		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
+		for (long i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			simulationManager.simulate(unit);
 		}
 		//TODO: check if we have to add this code --> simulationManager.join();

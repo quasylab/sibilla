@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.core.simulator.sampling;
 import it.unicam.quasylab.sibilla.core.models.State;
 
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -64,8 +65,8 @@ public class SamplingLog<S extends State> implements SamplingFunction<S> {
 	}
 
 	@Override
-	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries( int replications) {
-		return new LinkedList<>();
+	public Map<String, double[][]> getSimulationTimeSeries() {
+		return Map.of();
 	}
 
 }

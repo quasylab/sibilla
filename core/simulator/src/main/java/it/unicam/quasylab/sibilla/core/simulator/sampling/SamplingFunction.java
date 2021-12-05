@@ -23,12 +23,11 @@
 
 package it.unicam.quasylab.sibilla.core.simulator.sampling;
 
-import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 
 import java.io.FileNotFoundException;
 import java.io.Serializable;
-import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -69,6 +68,6 @@ public interface SamplingFunction<S> extends Serializable {
 		printTimeSeries(dir,prefix,postfix,';',0.05);
 	}
 
-	List<SimulationTimeSeries> getSimulationTimeSeries(int replications);
+	Map<String, double[][]> getSimulationTimeSeries();
 
 }

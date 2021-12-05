@@ -28,6 +28,8 @@ import it.unicam.quasylab.sibilla.core.models.State;
 import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Function;
 
 /**
@@ -93,10 +95,10 @@ public class SamplingCollection<S extends State> implements SamplingFunction<S> 
 	}
 
 	@Override
-	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries( int replications) {
-		LinkedList<SimulationTimeSeries> toReturn = new LinkedList<>();
+	public Map<String, double[][]> getSimulationTimeSeries() {
+		TreeMap<String,double[][]> toReturn = new TreeMap<>();
 		for (SamplingFunction<S> f : functions) {
-			toReturn.addAll(f.getSimulationTimeSeries( replications ));
+			toReturn.putAll(f.getSimulationTimeSeries());
 		}
 		return toReturn;
 	}

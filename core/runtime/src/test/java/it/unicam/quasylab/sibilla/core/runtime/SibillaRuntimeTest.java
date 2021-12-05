@@ -170,6 +170,7 @@ class SibillaRuntimeTest {
         sr.load(CODE);
         sr.setConfiguration("init");
         sr.addAllMeasures();
+        sr.setReplica(1);
         sr.setDeadline(100);
         sr.setDt(1);
         sr.simulate("test");
@@ -189,6 +190,7 @@ class SibillaRuntimeTest {
         sr.setConfiguration("balancedGroupies");
         sr.addMeasure("#GB");
         sr.setDeadline(100);
+        sr.setReplica(1);
         sr.setDt(1);
         sr.simulate("test");
         sr.printData("test");
