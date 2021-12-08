@@ -194,7 +194,7 @@ public interface SibillaModule {
      * @param dt sampling interval.
      * @return
      */
-    List<SimulationTimeSeries> simulate(SimulationMonitor monitor, RandomGenerator rg, int replica, double deadline, double dt);
+    Map<String, double[][]> simulate(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt);
 
 
     /**
@@ -208,7 +208,7 @@ public interface SibillaModule {
      * @param predicateName
      * @return
      */
-    FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, RandomGenerator rg, int replica, double deadline, double dt, String predicateName);
+    FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt, String predicateName);
 
 
     /**

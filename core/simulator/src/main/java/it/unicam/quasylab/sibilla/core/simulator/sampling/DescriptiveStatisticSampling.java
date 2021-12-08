@@ -32,6 +32,7 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.function.Function;
 
 
@@ -117,17 +118,22 @@ public class DescriptiveStatisticSampling<S extends State> extends StatisticSamp
 	}
 
 
-	@Override
-	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries( int replications ) {
-		SimulationTimeSeries stt = new SimulationTimeSeries(false,measure.getName(), dt, replications, data);
-		LinkedList<SimulationTimeSeries> toReturn = new LinkedList<>();
-		toReturn.add(stt);
-		return toReturn;
-	}
 
 	@Override
 	public int getSize() {
 		return data.length;
+	}
+
+	@Override
+	protected double[] getDataRow(int i) {
+		return new double[] {getTimeOfIndex(i),
+				data[i].getMin(),
+				data[i].getPercentile(25),
+				data[i].getMean(),
+				data[i].getPercentile(50),
+				data[i].getPercentile(75),
+				data[i].getMax()
+		};
 	}
 
 }

@@ -426,7 +426,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
         try {
             runtime.save((ctx.name == null ? null : ctx.name.getText()), getStringContent(ctx.dir), getStringContent(ctx.prefix), getStringContent(ctx.postfix));
             return true;
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             printErrorMessages(List.of(e.getMessage()));
         } catch (CommandExecutionException e) {
             printErrorMessages(e.getErrorMessages());

@@ -69,6 +69,7 @@ public abstract class AbstractModelDefinition<T extends State> implements ModelD
     @Override
     public void setParameter(String name, double value) {
         environment.set(name,value);
+        clearCache();
     }
 
     /**

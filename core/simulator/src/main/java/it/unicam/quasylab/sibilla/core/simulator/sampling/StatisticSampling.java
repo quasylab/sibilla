@@ -23,11 +23,10 @@
 
 package it.unicam.quasylab.sibilla.core.simulator.sampling;
 
-import it.unicam.quasylab.sibilla.core.models.MeasureFunction;
 import it.unicam.quasylab.sibilla.core.models.State;
 
 import java.io.FileNotFoundException;
-import java.util.LinkedList;
+import java.util.Map;
 import java.util.function.Function;
 
 public abstract class StatisticSampling<S extends State> implements SamplingFunction<S> {
@@ -91,7 +90,9 @@ public abstract class StatisticSampling<S extends State> implements SamplingFunc
     }
 
     @Override
-    public abstract LinkedList<SimulationTimeSeries> getSimulationTimeSeries(int replications);
+    public Map<String,double[][]> getSimulationTimeSeries() {
+        return Map.of(measure.getName(), getData());
+    }
 
     public abstract int getSize();
 
@@ -105,5 +106,18 @@ public abstract class StatisticSampling<S extends State> implements SamplingFunc
         printTimeSeries(nameFunction,separator,0.05);
     }
 
+    public double getTimeOfIndex(int i) {
+        return i*dt;
+    }
+
+    public double[][] getData() {
+        double[][] data = new double[getSize()][];
+        for(int i=0; i<getSize(); i++) {
+            data[i] = getDataRow(i);
+        }
+        return data;
+    }
+
+    protected abstract double[] getDataRow(int i);
 
 }

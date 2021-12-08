@@ -27,7 +27,6 @@ import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.models.StateSet;
-import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
@@ -120,20 +119,20 @@ public abstract class AbstractSibillaModule<S extends State> implements SibillaM
     }
 
     @Override
-    public List<SimulationTimeSeries> simulate(SimulationMonitor monitor, RandomGenerator rg, int replica, double deadline, double dt) {
+    public Map<String, double[][]> simulate(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt) {
         checkForLoadedDefinition();
         loadModel();
         loadState();
         SamplingFunction<S> samplingFunction = model.selectSamplingFunction(summary, deadline, dt, enabledMeasures.toArray(new String[0]));
         try {
             simulator.simulate(monitor, rg, model, state, samplingFunction::sample, replica, deadline);
-            return samplingFunction.getSimulationTimeSeries(replica);
+            return samplingFunction.getSimulationTimeSeries();
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    public FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, RandomGenerator rg, int replica, double deadline, double dt, String predicateName) {
+    public FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt, String predicateName) {
         checkForLoadedDefinition();
         loadModel();
         loadState();
