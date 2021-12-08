@@ -104,7 +104,7 @@ class SibillaRuntime:
 
     @multimethod
     def simulate(self, label: str):
-        self.__runtime.simulate(label).to_dict()
+        return self.__runtime.simulate(label).to_dict()
 
     def use_descriptive_statistics(self):
         self.__runtime.useDescriptiveStatistics()
