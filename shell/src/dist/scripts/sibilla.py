@@ -12,7 +12,6 @@ import io
 SimulationMonitor = jnius.autoclass("it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor")
 ShellSimulationMonitor = jnius.autoclass("it.unicam.quasylab.sibilla.shell.ShellSimulationMonitor")
 System = jnius.autoclass("java.lang.System")
-File = jnius.autoclass("java.io.File")
 
 class Map(jnius.JavaClass, metaclass=jnius.MetaJavaClass):
     __javaclass__ = 'java/util/Map'
