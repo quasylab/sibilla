@@ -14,161 +14,14 @@ ShellSimulationMonitor = jnius.autoclass("it.unicam.quasylab.sibilla.shell.Shell
 System = jnius.autoclass("java.lang.System")
 File = jnius.autoclass("java.io.File")
 
-class SibillaRuntimeCc:
-    def __init__(self):
-        self.__runtime = jnius.autoclass("it.unicam.quasylab.sibilla.core.runtime.SibillaRuntime")()
+class Map(jnius.JavaClass, metaclass=jnius.MetaJavaClass):
+    __javaclass__ = 'java/util/Map'
+    entrySet = jnius.JavaMethod('()Ljava/util/Set;')
 
-    def initModules(self):
-        self.__runtime.initModules()
-    
-    def getModules(self):
-        return self.__runtime.getModules()
+    def to_dict(self):
+        return {e.getKey():e.getValue() for e in self.entrySet().toArray()}
 
-    def loadModule(self, name):
-        self.__runtime.loadModule(name)
-    
-    @multimethod
-    def load(self, file: File):
-        self.__runtime.load(file)
-
-    @multimethod
-    def load(self, code: str):
-        self.__runtime.load(code)
-    
-    def info(self):
-        return self.__runtime.info()
-    
-    def setParameter(self, name: str, value: float):
-        self.__runtime.setParameter(name, value)
-
-    def getParameter(self, name: str):
-        return self.__runtime.getParameter(name)
-
-    def getParameters(self):
-        return self.__runtime.getParameters()
-    
-    def getEvaluationEnvironment(self):
-        return self.__runtime.getEvaluationEnvironment()
-    
-    def clear(self):
-        self.__runtime.clear()
-
-    @multimethod
-    def reset(self):
-        self.__runtime.reset()
-
-    @multimethod
-    def reset(self, name: str):
-        self.__runtime.reset(name)
-
-    def getInitialConfigurations(self):
-        return self.__runtime.getInitialConfigurations()
-
-    def getConfigurationInfo(self, name: str):
-        return self.__runtime.getConfigurationInfo()
-
-    def setConfiguration(self, name: str, *args: float):
-        return self.__runtime.setConfiguration(name, *args)
-
-    def checkLoadedModule(self):
-        self.__runtime.checkLoadedModule()
-
-    def getMeasures(self):
-        return self.__runtime.getMeasures()
-
-    def isEnabledMeasure(self):
-        return self.__runtime.isEnabledMeasure()
-
-    def setMeasures(self, *measures: str):
-        return self.__runtime.setMeasures(*measures)
-
-    def addMeasure(self, name: str):
-        self.__runtime.addMeasure(name)
-
-    def removeMeasure(self, name: str):
-        self.__runtime.removeMeasure(name)
-
-    def addAllMeasures(self):
-        self.__runtime.addAllMeasures()
-
-    def removeAllMeasures(self):
-        self.__runtime.removeAllMeasures()
-
-    @multimethod
-    def simulate(self, monitor: SimulationMonitor, label: str):
-        self.__runtime.simulate(monitor, label)
-
-    @multimethod
-    def simulate(self, label: str):
-        self.__runtime.simulate(label)
-
-    def useDescriptiveStatistics(self):
-        self.__runtime.useDescriptiveStatistics()
-
-    def useSummaryStatistics(self):
-        self.__runtime.useSummaryStatistics()
-
-    def isDescriptiveStatistics(self):
-        return self.__runtime.isDescriptiveStatistics()
-
-    def isSummaryStatistics(self):
-        return self.__runtime.isSummaryStatistics()
-
-    def getStatistics(self):
-        return self.__runtime.getStatistics()
-
-    def checkDt(self):
-        self.__runtime.checkDt()
-
-    def checkDeadline(self):
-        self.__runtime.checkDeadline()
-
-    def setDeadline(self, deadline: float):
-        self.__runtime.setDeadline(deadline)
-
-    def getDeadline(self):
-        return self.__runtime.getDeadline()
-
-    def setDt(self, dt: float):
-        self.__runtime.setDt(dt)
-
-    def getModes(self):
-        return self.__runtime.getModes()
-
-    def setMode(self, name: str):
-        self.__runtime.setMode(name)
-
-    def getMode(self):
-        return self.__runtime.getMode()
-
-    def setSeed(self, seed: int):
-        self.__runtime.setSeed(seed)
-
-    def getSeed(self):
-        return self.__runtime.getSeed()
-
-    @multimethod
-    def save(self, outputFolder: str, prefix: str, postfix: str):
-        return self.__runtime.save(outputFolder, prefix, postfix)
-
-    @multimethod
-    def save(self, label: str, outputFolder: str, prefix: str, postfix: str):
-        return self.__runtime.save(outputFolder, prefix, postfix)
-
-    
-    def setReplica(self, replica: int):
-        self.__runtime.setReplica(replica)
-
-    def getDt(self):
-        return self.__runtime.getDt()
-
-    def getReplica(self):
-        return self.__runtime.getReplica()
-
-    def printData(label: str):
-        return self.__runtime.printData(label)
-
-class SibillaRuntimeSc:
+class SibillaRuntime:
     def __init__(self):
         self.__runtime = jnius.autoclass("it.unicam.quasylab.sibilla.core.runtime.SibillaRuntime")()
 
@@ -181,11 +34,9 @@ class SibillaRuntimeSc:
     def load_module(self, name):
         self.__runtime.loadModule(name)
     
-    @multimethod
-    def load(self, file: File):
-        self.__runtime.load(file)
+    def load_from_file(self, file_name: str):
+        self.__runtime.loadFromFile(file_name)
 
-    @multimethod
     def load(self, code: str):
         self.__runtime.load(code)
     
@@ -202,7 +53,7 @@ class SibillaRuntimeSc:
         return self.__runtime.getParameters()
     
     def get_evaluation_environment(self):
-        return self.__runtime.getEvaluationEnvironment()
+        return self.__runtime.getEvaluationEnvironment().to_dict()
     
     def clear(self):
         self.__runtime.clear()
@@ -230,8 +81,8 @@ class SibillaRuntimeSc:
     def get_measures(self):
         return self.__runtime.getMeasures()
 
-    def is_enabled_measure(self):
-        return self.__runtime.isEnabledMeasure()
+    def is_enabled_measure(self, name: str):
+        return self.__runtime.isEnabledMeasure(name)
 
     def set_measures(self, *measures: str):
         return self.__runtime.setMeasures(*measures)
@@ -250,11 +101,11 @@ class SibillaRuntimeSc:
 
     @multimethod
     def simulate(self, monitor: SimulationMonitor, label: str):
-        self.__runtime.simulate(monitor, label)
+        return self.__runtime.simulate(monitor, label).to_dict()
 
     @multimethod
     def simulate(self, label: str):
-        self.__runtime.simulate(label)
+        self.__runtime.simulate(label).to_dict()
 
     def use_descriptive_statistics(self):
         self.__runtime.useDescriptiveStatistics()
@@ -308,7 +159,6 @@ class SibillaRuntimeSc:
     @multimethod
     def save(self, label: str, output_folder: str, prefix: str, postfix: str):
         return self.__runtime.save(output_folder, prefix, postfix)
-
     
     def set_replica(self, replica: int):
         self.__runtime.setReplica(replica)
