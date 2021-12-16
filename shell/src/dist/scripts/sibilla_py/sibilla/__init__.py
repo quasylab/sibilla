@@ -1,11 +1,11 @@
+import os
 import jnius_config
 
-jnius_config.add_classpath("lib/*")
+SSHELL_PATH = os.environ.get('SSHELL_PATH', '')
+
+jnius_config.add_classpath(os.path.join(SSHELL_PATH, 'lib', '*'))
 
 import jnius
-
-SibillaRuntimeAuto = jnius.autoclass("it.unicam.quasylab.sibilla.core.runtime.SibillaRuntime")
-
 from multimethod import multimethod
 import io
 
