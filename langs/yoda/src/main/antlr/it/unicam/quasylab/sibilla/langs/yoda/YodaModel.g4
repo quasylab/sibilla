@@ -37,7 +37,7 @@ agent_declaration:
 
 constr_params: type? name=ID;
 
-state_declaration: type name=ID ('<-' expr)? ;
+state_declaration: type name=ID ('<-' value=expr)? ;
 
 observation_declaration: type name=ID ;
 
@@ -140,6 +140,7 @@ expr    : INTEGER                                                   # integerVal
         | reference=ID                                              # reference
         | '(' expr ')'                                              # exprBrackets
       //  | gexpr                                                     # gexprCall
+        | oper=('+'|'-') arg=expr                                   # unaryExpression
         | leftOp=expr oper=('+'|'-') rightOp=expr                   # addsubOperation
         | leftOp=expr oper=('*'|'/') rightOp=expr                   # multdivOperation
         | leftOp=expr oper=('%'|'//') rightOp=expr                  # additionalOperation

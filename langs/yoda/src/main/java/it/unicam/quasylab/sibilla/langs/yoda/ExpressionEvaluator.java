@@ -168,6 +168,11 @@ public class ExpressionEvaluator extends YodaModelBaseVisitor<Value> {
         return (ctx.guardExpr.accept(this).getBooleanValue()?ctx.thenBranch.accept(this):ctx.elseBranch.accept(this));
     }
 
+    @Override
+    public Value visitUnaryExpression(YodaModelParser.UnaryExpressionContext ctx) {
+        return Value.applySign(ctx.oper.getText(), ctx.arg.accept(this));
+    }
+
     //TODO
     @Override
     public Value visitRandomExpression(YodaModelParser.RandomExpressionContext ctx) {
