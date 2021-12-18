@@ -112,7 +112,7 @@ class SibillaRuntime:
     def use_summary_statistics(self):
         self.__runtime.useSummaryStatistics()
 
-    def isDescriptiveStatistics(self):
+    def is_descriptive_statistics(self):
         return self.__runtime.isDescriptiveStatistics()
 
     def is_summary_statistics(self):
