@@ -52,7 +52,10 @@ class SibillaRuntime:
         return self.__runtime.getParameters()
     
     def get_evaluation_environment(self):
-        return self.__runtime.getEvaluationEnvironment().to_dict()
+        try:
+            return self.__runtime.getEvaluationEnvironment().to_dict()
+        except jnius.JavaError:
+            print("Internal Error")
     
     def clear(self):
         self.__runtime.clear()
@@ -100,11 +103,17 @@ class SibillaRuntime:
 
     @multimethod
     def simulate(self, monitor: SimulationMonitor, label: str):
-        return self.__runtime.simulate(monitor, label).to_dict()
+        try:
+            return self.__runtime.simulate(monitor, label).to_dict()
+        except jnius.JavaError:
+            print("Internal Error")
 
     @multimethod
     def simulate(self, label: str):
-        return self.__runtime.simulate(label).to_dict()
+        try:
+            return self.__runtime.simulate(label).to_dict()
+        except jnius.JavaError:
+            print("Internal Error")
 
     def use_descriptive_statistics(self):
         self.__runtime.useDescriptiveStatistics()
