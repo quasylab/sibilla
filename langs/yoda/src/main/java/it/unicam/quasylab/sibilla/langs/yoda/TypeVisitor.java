@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.langs.yoda;
 
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.util.function.Function;
 
@@ -35,6 +36,10 @@ public class TypeVisitor extends YodaModelBaseVisitor<DataType>{
     public TypeVisitor(Function<String, DataType> table, ErrorCollector errorCollector) {
         this.table = table;
         this.errorCollector= errorCollector;
+    }
+
+    public static DataType getTypeOf (ErrorCollector errorCollector, Function<String, DataType> types, ParserRuleContext ctx){
+        return ctx.accept(new TypeVisitor(types,errorCollector));
     }
 
     public boolean checkType(DataType expected, YodaModelParser.ExprContext argument){

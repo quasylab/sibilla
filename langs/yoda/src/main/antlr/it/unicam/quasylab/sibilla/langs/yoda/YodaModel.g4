@@ -83,7 +83,7 @@ global_field_declaration:scene_field
                         |hidden_field
                         ;
 
-scene_field: type field_name=ID ('<-' expr)? ';';
+scene_field: type field_name=ID ('<-' value=expr)? ';';
 
 hidden_field: agent_name=ID '{'
                type name_var=ID ';' (type name_var=ID';')*
@@ -94,7 +94,7 @@ sensing_declaration:'{'
     '}';
 
 agent_sensing: agent_name=ID'{'
-    (sensing_name=ID '<-' expr )*
+    (sensing_name=ID '<-' value=expr )*
     '}' ;
 
 env_evolution_declaration: 'environment' name=ID '=' '{'
