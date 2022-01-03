@@ -30,27 +30,18 @@ import org.antlr.v4.runtime.Token;
 
 public class ParseUtil {
     private static final String DUPLICATED_ID_ERROR = "Identifier %s has been already used at line %d:%d.";
-    private static final String WRONG_TYPE_ERROR = "Wrong type! Expected %s actual is %s";
-    private static final String UNKNOWN_SYMBOL_ERROR = "Symbol %s can not be resolved";
     private static final String EXPECTED_NUMBER_ERROR = "Expected numeric type while is %s";
+    private static final String UNKNOWN_ACTION_ERROR = "Action %s can not be resolved";
+    private static final String UNKNOWN_AGENT_ERROR = "Agent or System %s can not be resolved";
+    private static final String UNKNOWN_SYMBOL_ERROR = "Symbol %s can not be resolved";
+    private static final String UNKNOWN_VARIABLE_ERROR = "Variable %s can not be resolved";
+    private static final String WRONG_TYPE_ERROR = "Wrong type! Expected %s actual is %s";
 
     public static ParseError duplicatedIdentifierError(String name, Token duplicated, Token original){
         return new ParseError(
                 String.format(DUPLICATED_ID_ERROR, name, original.getLine(), original.getCharPositionInLine()),
                 duplicated.getLine(),
                 duplicated.getCharPositionInLine());
-    }
-
-    public static ParseError wrongTypeError(DataType expected, DataType actual, YodaModelParser.ExprContext argument){
-        return new ParseError(
-                String.format(WRONG_TYPE_ERROR, expected, actual),
-                argument.start.getLine(),
-                argument.start.getCharPositionInLine());
-    }
-
-    //TODO
-    public static ParseError unknownSymbolError(){
-        return null;
     }
 
     public static ParseError expectedNumberError(DataType type, YodaModelParser.ExprContext exprContext) {
@@ -60,5 +51,48 @@ public class ParseUtil {
                 exprContext.start.getCharPositionInLine()
         );
     }
+
+    public static ParseError unknownActionError(String name, Token actionName){
+        return new ParseError(
+                String.format(UNKNOWN_ACTION_ERROR, name),
+                actionName.getLine(),
+                actionName.getCharPositionInLine()
+        );
+    }
+
+    public static ParseError unknownAgentError(String name, Token agentName){
+        return new ParseError(
+                String.format(UNKNOWN_AGENT_ERROR, name),
+                agentName.getLine(),
+                agentName.getCharPositionInLine()
+        );
+    }
+
+    public static ParseError unknownSymbolError(String name, ParserRuleContext ctx){
+        return new ParseError(
+                String.format(UNKNOWN_SYMBOL_ERROR, name),
+                ctx.start.getLine(),
+                ctx.start.getCharPositionInLine()
+        );
+    }
+
+    public static ParseError unknownVariableError(String name, Token variableName){
+        return new ParseError(
+                String.format(UNKNOWN_VARIABLE_ERROR, name),
+                variableName.getLine(),
+                variableName.getCharPositionInLine()
+        );
+    }
+
+    public static ParseError wrongTypeError(DataType expected, DataType actual, YodaModelParser.ExprContext argument){
+        return new ParseError(
+                String.format(WRONG_TYPE_ERROR, expected, actual),
+                argument.start.getLine(),
+                argument.start.getCharPositionInLine());
+    }
+
+
+
+
 
 }

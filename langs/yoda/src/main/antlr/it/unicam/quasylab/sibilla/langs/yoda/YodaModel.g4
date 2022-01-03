@@ -13,7 +13,7 @@ element : constant_declaration
         | system_declaration
         | configuration_declaration;
 
-//INITIALISATION PARAMETERS
+//PARAMETERS
 
 constant_declaration: 'const' name=ID '=' value=expr ';';
 
@@ -41,14 +41,18 @@ state_declaration: type name=ID ('<-' value=expr)? ;
 
 observation_declaration: type name=ID ;
 
-action_declaration: name=ID '{'
+action_declaration: action_name=ID '{'
     action_body(';'action_body)*
     '}'
     ;
 
-action_body: state_name=ID '<-' expr
-           | agent_reference=ID'{'(action_body)*'}'
+action_body: terminal_action_body
+           | agent_ref_action_body
            ;
+
+terminal_action_body: state_name=ID '<-' value=expr;
+
+agent_ref_action_body: agent_reference=ID'{'(terminal_action_body)*'}';
 
 behaviour_declaration: name=ID '{'
     (behaviour_rule)*
@@ -179,7 +183,7 @@ type    : 'int'                                                     # integerNum
         | 'char'                                                    # character
         | 'String'                                                  # string
         | 'array[' type (',' type)* ']'                             # arrayMultipleTypes
-      //  | type_declaration                                          # newType
+        | type_declaration                                          # newType
         ;
 
 func    : 'generate' '('
