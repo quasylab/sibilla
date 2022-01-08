@@ -23,60 +23,55 @@
 
 package it.unicam.quasylab.sibilla.core.simulator.sampling;
 
-import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import java.util.function.Consumer;
-import java.util.function.Predicate;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Supplier;
 
-public class FirstPassageTime<S extends State> implements Supplier<SamplingHandler<S>> {
+public class TrajectoryCollector<S> implements Supplier<SamplingHandler<S>> {
 
-    private final String name;
-    private final Predicate<S> condition;
-    private final DescriptiveStatistics values;
-    private int tests = 0;
+    private LinkedList<Trajectory<S>> trajectories;
 
-    public FirstPassageTime(String name, Predicate<S> condition) {
-        this.name = name;
-        this.condition = condition;
-        this.values = new DescriptiveStatistics();
+    public TrajectoryCollector() {
+        this.trajectories = new LinkedList<>();
     }
 
-    public synchronized FirstPassageTimeResults getResults() {
-        return new FirstPassageTimeResults(tests, values);
+    private synchronized void recordTrajectory(Trajectory<S> trajectory) {
+        this.trajectories.add(trajectory);
     }
 
-    private synchronized void testStart() {
-        this.tests++;
+    public List<Trajectory<S>> getTrajectories() {
+        return  new LinkedList<>(trajectories);
     }
 
-    private synchronized void addValue(double time) {
-        this.values.addValue(time);
+    public Trajectory<S> getTrajectory() {
+        return trajectories.poll();
     }
 
     @Override
     public SamplingHandler<S> get() {
-        return new SamplingHandler<>() {
+        return new SamplingHandler<S>() {
 
-            private boolean flag = false;
+            private Trajectory<S> trajectory = null;
 
             @Override
             public void start() {
-                testStart();
+                if (trajectory != null) {
+                    throw new IllegalStateException();//TODO: Add MEssage!
+                }
+                this.trajectory = new Trajectory<>();
             }
 
             @Override
             public void sample(double time, S state) {
-                if (condition.test(state)&&!flag) {
-                    addValue(time);
-                    flag = true;
-                }
+                this.trajectory.add(time, state);
             }
 
             @Override
-            public void end(double time) {}
+            public void end(double time) {
+                recordTrajectory(this.trajectory);
+            }
         };
     }
 }

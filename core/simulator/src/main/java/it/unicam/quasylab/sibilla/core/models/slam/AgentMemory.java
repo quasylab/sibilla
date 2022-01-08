@@ -23,6 +23,68 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
-//TODO: Complete
-public class AgentMemory {
+import java.util.Arrays;
+import java.util.function.IntFunction;
+
+/**
+ * Represents the memory of an agent.
+ */
+public final class AgentMemory {
+
+    private double now;
+
+    private final SlamValue[] content;
+
+    /**
+     * Creates a new memory with the given content.
+     *
+     * @param content memory content.
+     */
+    public AgentMemory(SlamValue ... content) {
+        this(0.0, content);
+    }
+
+    public AgentMemory(double now, SlamValue ... content) {
+        this.now = now;
+        this.content = content;
+    }
+
+    /**
+     * Returns the value of the variable associated with the given index. An {@link IndexOutOfBoundsException} is
+     * thrown if an invalid index is passed.
+     *
+     * @param idx variable index.
+     * @return the value of the variable associated with the given index.
+     */
+    public SlamValue getValue(int idx) {
+        return content[idx];
+    }
+
+    /**
+     * Returns the number of cells used in this memory.
+     *
+     * @return the number of cells used in this memory.
+     */
+    public synchronized int size() {
+        return content.length;
+    }
+
+    /**
+     * Sets the value of the given variable to the given value. An {@link IndexOutOfBoundsException} is
+     * thrown if an invalid index is passed.
+     * @param idx variable index.
+     * @param value  variable value.
+     */
+    public synchronized void set(int idx, SlamValue value) {
+        content[idx] = value;
+    }
+
+    public synchronized double now() {
+        return now;
+    }
+
+    public synchronized void recordTime(double dt) {
+        this.now += dt;
+    }
+
 }

@@ -125,7 +125,7 @@ public abstract class AbstractSibillaModule<S extends State> implements SibillaM
         loadState();
         SamplingFunction<S> samplingFunction = model.selectSamplingFunction(summary, deadline, dt, enabledMeasures.toArray(new String[0]));
         try {
-            simulator.simulate(monitor, rg, model, state, samplingFunction::sample, replica, deadline);
+            simulator.simulate(monitor, rg, model, state, samplingFunction::getSamplingHandler, replica, deadline);
             return samplingFunction.getSimulationTimeSeries();
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);

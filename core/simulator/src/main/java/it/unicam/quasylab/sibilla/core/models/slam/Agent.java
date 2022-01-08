@@ -23,8 +23,10 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
-import java.util.List;
-import java.util.Map;
+import org.apache.commons.math3.random.RandomGenerator;
+
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
 /**
@@ -35,14 +37,40 @@ import java.util.function.ToDoubleFunction;
  *     <li>a state, characterising agent behaviour.</li>
  * </ul>
  */
-public interface Agent {
+public final class Agent {
+
+    private final int agentId;
+    private final AgentVariable[] agentVariables;
+    private final AgentMemory agentMemory;
+    private AgentState state;
+    private final AgentDynamicFunction dynamicFunction;
+    private double schedulingTime;
+
+    public Agent(int agentId, AgentVariable[] agentVariables, AgentMemory agentMemory, AgentState state, AgentDynamicFunction dynamicFunction) {
+        this.agentId = agentId;
+        this.agentVariables = agentVariables;
+        this.agentMemory = agentMemory;
+        this.state = state;
+        this.dynamicFunction = dynamicFunction;
+    }
+
+    /**
+     * Returns an array containing all the variables in the agent state.
+     *
+     * @return an array containing all the variables in the agent state.
+     */
+    public AgentVariable[] getAgentVariables() {
+        return agentVariables;
+    }
 
     /**
      * Returns a mapping associating each variable with its value in the current agent memory.
      *
      * @return a mapping associating each variable with its value in the current agent memory.
      */
-    Map<String,Double> getAgentMemory();
+    public AgentMemory getAgentMemory() {
+        return agentMemory;
+    }
 
 
     /**
@@ -50,14 +78,18 @@ public interface Agent {
      *
      * @return agent state.
      */
-    AgentState getAgentState();
+    public AgentState getAgentState() {
+        return state;
+    }
 
     /**
      * Returns agent identifier.
      *
      * @return agent identifier.
      */
-    int agentId();
+    public int agentId() {
+        return agentId;
+    }
 
     /**
      * Evaluates the given expression with the agent memory.
@@ -66,7 +98,9 @@ public interface Agent {
      *
      * @return the evaluation of the expression with agent memory.
      */
-    double eval(ToDoubleFunction<AgentMemory> expr);
+    public double eval(ToDoubleFunction<AgentMemory> expr) {
+        return expr.applyAsDouble(agentMemory);
+    }
 
     /**
      * This method is executed to notify an agent that a new message has been received. The method returns the
@@ -75,16 +109,26 @@ public interface Agent {
      * @param msg received message.
      * @return list of messages that have been sent when as a consequence of the received message.
      */
-    List<PendingMessage> receive(AgentMessage msg);
+    public Optional<AgentStepResult> receive(RandomGenerator rg, DeliveredMessage msg) {
+        return state.onReceive(this.agentMemory, msg).map(f -> this.execute(rg, f));
+    }
 
+    private AgentStepResult execute(RandomGenerator rg, AgentStepFunction function) {
+        AgentStepEffect effect = function.apply(rg, agentMemory);
+        this.state = effect.getNextState();
+        this.schedulingTime = this.state.getSojournTimeFunction().applyAsDouble(rg, agentMemory);
+        return new AgentStepResult(this, effect.getDeliveredMessages());
+    }
 
     /**
      * This method is invoked trigger the execution of the agent step.
      *
-     * @param currentTime current time.
-     * @return list of messages that have been sent when the agent performs its step.
+     * @param rg random generator used to sample random values.
+     * @return the result of agent step.
      */
-    List<PendingMessage> execute(double currentTime);
+    public AgentStepResult execute(RandomGenerator rg) {
+        return execute(rg, this.state.getStepFunction());
+    }
 
 
     /**
@@ -92,5 +136,30 @@ public interface Agent {
      *
      * @return the time at which this agent will execute its step.
      */
-    double timeOfNextStep();
+    public double timeOfNextStep() {
+        return this.schedulingTime;
+    }
+
+    /**
+     * This method is invoked on the agent to notify that <code>t</code> time
+     * units are passed. An {@link IllegalStateException} is thrown whenever <code>t>this.timeOfNextStep()</code>.
+     *
+     * @param rg random generator used to sample random values.
+     * @param dt passed time units.
+     */
+    public void timeStep(RandomGenerator rg, double dt) {
+        this.dynamicFunction.update(rg, dt, agentMemory);
+        this.state.applyStateDynamic(rg,dt, agentMemory);
+        agentMemory.recordTime(dt);
+    }
+
+    /**
+     * Returns true if the agent memory of this agent satisfies the given predicate.
+     *
+     * @param p a predicate on agent memory.
+     * @return true if the agent memory of this agent satisfies the given predicate.
+     */
+    public boolean test(Predicate<AgentMemory> p) {
+        return p.test(agentMemory);
+    }
 }

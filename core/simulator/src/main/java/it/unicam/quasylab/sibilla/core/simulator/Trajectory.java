@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.core.simulator;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Sample;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class Trajectory<S> implements Externalizable {
     private long generationTime = -1;
 
     public Trajectory() {
-        this.data = new LinkedList<Sample<S>>();
+        this.data = new LinkedList<>();
     }
 
     public void add(double time, S value) {
@@ -64,7 +65,7 @@ public class Trajectory<S> implements Externalizable {
         this.data.add(new Sample<S>(time, value));
     }
 
-    public void sample(SamplingFunction<S> f) {
+    public void sample(SamplingHandler<S> f) {
         if (!Double.isFinite(start)) {
             throw new IllegalArgumentException();
         }

@@ -23,31 +23,32 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
-import org.apache.commons.math3.random.RandomGenerator;
-
-import java.util.Optional;
-
 /**
- * Identifies a model with deterministic time. In this kind of models, each step always
- * needs a single time unit.
+ * Instances of this class can be used to generate a trajectory starting from a given initial state.
  *
- * @param <S> type for the state of model.
+ * @param <S> the type of process states.
  */
-public interface DiscreteModel<S extends State> extends MarkovModel<S> {
+public interface SimulatorCursor<S extends State> {
 
     /**
-     * Samples possible next state when the process is in a given state at a given
-     * time. A random generator is passed to sample random values when needed.
+     * Returns the next simulation step.
      *
-     * @param r     random generator used to sample needed random values.
-     * @param time  current time.
-     * @param state current state.
-     * @return next state.
+     * @return the next simulation step.
      */
-    S sampleNextState(RandomGenerator r, double time, S state);
+    boolean step();
 
-    @Override
-    default Optional<TimeStep<S>> next(RandomGenerator r, double time, S state) {
-        return Optional.of(new TimeStep<>(1.0,sampleNextState(r,time,state)));
-    }
+    /**
+     * Returns the current state.
+     *
+     * @return the current state.
+     */
+    S currentState();
+
+    /**
+     * Returns current time.
+     *
+     * @return current time.
+     */
+    double time();
+
 }

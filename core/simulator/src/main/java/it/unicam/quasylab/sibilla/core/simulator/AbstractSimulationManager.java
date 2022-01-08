@@ -28,35 +28,22 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import java.beans.PropertyChangeEvent;
 import java.util.LinkedList;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public abstract class AbstractSimulationManager<S extends State> implements SimulationManager<S> {
 
     private final RandomGenerator random;
     private final SimulationMonitor monitor;
-    private final Consumer<Trajectory<S>> trajectoryConsumer;
     private final LinkedList<Long> executionTime = new LinkedList<>();
     private int counter = 0;
     private boolean running = true;
 
-    public AbstractSimulationManager(RandomGenerator random, SimulationMonitor monitor, Consumer<Trajectory<S>> trajectoryConsumer) {
+    public AbstractSimulationManager(RandomGenerator random, SimulationMonitor monitor) {
         this.random = random;
         this.monitor = monitor;
-        this.trajectoryConsumer = trajectoryConsumer;
         if (this.monitor != null) {
             this.monitor.registerPropertyChangeListener(this::manageSimulationMonitorEvent);
         }
-    }
-
-    /**
-     * Handles the trajectory given in input
-     *
-     * @param trj trajectory to be handled
-     */
-    protected synchronized void handleTrajectory(Trajectory<S> trj) {
-        this.executionTime.add(trj.getGenerationTime());
-        trajectoryConsumer.accept(trj);
     }
 
     private void manageSimulationMonitorEvent(PropertyChangeEvent propertyChangeEvent) {
@@ -110,14 +97,14 @@ public abstract class AbstractSimulationManager<S extends State> implements Simu
         setRunning(false);
     }
 
-    protected void notifyMonitorStartInteration(int iterationIndex) {
+    protected void notifyMonitorStartIteration(int iterationIndex) {
         SimulationMonitor monitor = getMonitor();
         if (monitor != null) {
             monitor.startIteration(iterationIndex);
         }
     }
 
-    protected void notifyMonitorEndInteration(int iterationIndex) {
+    protected void notifyMonitorEndIteration(int iterationIndex) {
         SimulationMonitor monitor = getMonitor();
         if (monitor != null) {
             monitor.endIteration(iterationIndex);

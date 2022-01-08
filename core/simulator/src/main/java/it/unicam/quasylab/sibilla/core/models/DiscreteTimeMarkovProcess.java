@@ -29,6 +29,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This is a model implementing a Markov process. 
@@ -50,14 +51,14 @@ public interface DiscreteTimeMarkovProcess<S extends State> extends InteractiveM
 	WeightedStructure<? extends StepFunction<S>> getTransitions(RandomGenerator r, double time, S s);
 
 	@Override
-	default TimeStep<S> next(RandomGenerator r, double time, S state) {
+	default Optional<TimeStep<S>> next(RandomGenerator r, double time, S state) {
 		WeightedStructure<? extends StepFunction<S>> activities = getTransitions(r, time, state);
 		double totalWeight = activities.getTotalWeight();
 		if (totalWeight == 0.0) {
-			return null;
+			return Optional.empty();
 		}
 		WeightedElement<? extends StepFunction<S>> wa = activities.select( r.nextDouble() * totalWeight);
-		return new TimeStep<>(1.0,wa.getElement().step(r,time,1.0));
+		return Optional.of(new TimeStep<>(1.0,wa.getElement().step(r,time,1.0)));
 	}
 
 	@Override

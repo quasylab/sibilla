@@ -24,12 +24,13 @@
 package it.unicam.quasylab.sibilla.core.simulator;
 
 import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 /**
@@ -42,34 +43,34 @@ public class ThreadSimulationManager<S extends State> extends AbstractSimulation
     private ExecutorService executor;
     private int pendingTasks = 0;
 
-    public ThreadSimulationManager(RandomGenerator random, SimulationMonitor monitor, Consumer<Trajectory<S>> consumer) {
-        this(Executors.newCachedThreadPool(), random, monitor, consumer);
+    public ThreadSimulationManager(RandomGenerator random, SimulationMonitor monitor) {
+        this(Executors.newCachedThreadPool(), random, monitor);
     }
 
-    public ThreadSimulationManager(ExecutorService executor, RandomGenerator random, SimulationMonitor monitor, Consumer<Trajectory<S>> consumer) {
-        super(random, monitor, consumer);
+    public ThreadSimulationManager(ExecutorService executor, RandomGenerator random, SimulationMonitor monitor) {
+        super(random, monitor);
         this.executor = executor;
     }
 
-    public static final SimulationManagerFactory getThreadSimulationManagerFacotry(ExecutorService executor) {
+    public static SimulationManagerFactory getThreadSimulationManagerFactory(ExecutorService executor) {
         return new SimulationManagerFactory() {
             @Override
-            public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random, SimulationMonitor monitor, Consumer<Trajectory<S>> consumer) {
-                return new ThreadSimulationManager<>(executor, random, monitor, consumer);
+            public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random, SimulationMonitor monitor) {
+                return new ThreadSimulationManager<>(executor, random, monitor);
             }
         };
     }
 
-    public static final SimulationManagerFactory getFixedThreadSimulationManagerFactory(int n) {
-        return getThreadSimulationManagerFacotry(Executors.newFixedThreadPool(n));
+    public static SimulationManagerFactory getFixedThreadSimulationManagerFactory(int n) {
+        return getThreadSimulationManagerFactory(Executors.newFixedThreadPool(n));
     }
 
-    public static final SimulationManagerFactory getCachedThreadSimulationManagerFactory() {
-        return getThreadSimulationManagerFacotry(Executors.newCachedThreadPool());
+    public static SimulationManagerFactory getCachedThreadSimulationManagerFactory() {
+        return getThreadSimulationManagerFactory(Executors.newCachedThreadPool());
     }
 
-    public static final SimulationManagerFactory getWorkStealingPoolSimulationManagerFactory() {
-        return getThreadSimulationManagerFacotry(Executors.newWorkStealingPool());
+    public static SimulationManagerFactory getWorkStealingPoolSimulationManagerFactory() {
+        return getThreadSimulationManagerFactory(Executors.newWorkStealingPool());
     }
 
 
@@ -78,9 +79,6 @@ public class ThreadSimulationManager<S extends State> extends AbstractSimulation
         this.pendingTasks++;
         CompletableFuture.supplyAsync(simulationTask, executor).whenComplete(
                 (t, e) -> {
-                    if (t != null) {
-                        handleTrajectory(t);
-                    }
                     if (e != null) {
                         LOGGER.warning(e.getLocalizedMessage());
                     }

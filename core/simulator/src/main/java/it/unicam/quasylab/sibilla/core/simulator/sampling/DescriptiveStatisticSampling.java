@@ -77,14 +77,11 @@ public class DescriptiveStatisticSampling<S extends State> extends StatisticSamp
 		}
 	}
 
-	@Override
-	protected synchronized void recordSample(int i, double v) {
-		this.data[i].addValue(v);
-	}
+
 
 
 	@Override
-	public void printTimeSeries(Function<String, String> nameFunction, char separator, double significance) throws FileNotFoundException {
+	public synchronized void printTimeSeries(Function<String, String> nameFunction, char separator, double significance) throws FileNotFoundException {
 
 		String fileName = nameFunction.apply(this.getName());
 		PrintStream out = new PrintStream(fileName);
@@ -120,12 +117,22 @@ public class DescriptiveStatisticSampling<S extends State> extends StatisticSamp
 
 
 	@Override
-	public int getSize() {
+	public synchronized int getSize() {
 		return data.length;
 	}
 
 	@Override
-	protected double[] getDataRow(int i) {
+	protected synchronized void recordValues(double[] values) {
+		if (values.length != data.length) {
+			throw new IllegalArgumentException();//TODO: Add Message!
+		}
+		for(int i=0; i<values.length; i++) {
+			data[i].addValue(values[i]);
+		}
+	}
+
+	@Override
+	protected synchronized double[] getDataRow(int i) {
 		return new double[] {getTimeOfIndex(i),
 				data[i].getMin(),
 				data[i].getPercentile(25),

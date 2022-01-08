@@ -23,6 +23,22 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
-//TODO: Complete
-public class PendingMessage {
+import org.apache.commons.math3.random.RandomGenerator;
+
+/**
+ * This functional interface is used to update the agent memory when time is passing.
+ */
+@FunctionalInterface
+public interface AgentDynamicFunction {
+
+    /**
+     * Updates the given memory by considering that <code>dt</code> time units are passed.
+     *
+     * @param rg random generator used to sample random values.
+     * @param dt time passed since the last update.
+     * @param memory current agent memory.
+     */
+    void update(RandomGenerator rg, double dt, AgentMemory memory);
+
+
 }

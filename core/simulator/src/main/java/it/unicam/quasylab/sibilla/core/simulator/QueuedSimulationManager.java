@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.simulator;
 
 import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Collection;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * A <code>SimulationManager</code> has the responsibility to coordinate
@@ -45,8 +47,8 @@ public abstract class QueuedSimulationManager<S extends State> extends AbstractS
     private int runningTasks = 0;
     private boolean running = true;
 
-    public QueuedSimulationManager(RandomGenerator random, SimulationMonitor monitor, Consumer<Trajectory<S>> trajectoryConsumer) {
-        super(random, monitor, trajectoryConsumer);
+    public QueuedSimulationManager(RandomGenerator random, SimulationMonitor monitor) {
+        super(random, monitor);
     }
 
     /**

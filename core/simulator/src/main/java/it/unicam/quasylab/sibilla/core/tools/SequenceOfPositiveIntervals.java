@@ -27,17 +27,19 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
- * Represents a trajectory that assumes boolean values. This is rendered as sequence of positive intervals, namely
- * the intervals where the signal assumes true values. Each trajectory starts
+ * Represents a sequence of (disjoint) unitary intervals. Each sequence has a start starts
  */
-public class BooleanTrajectory {
+public class SequenceOfPositiveIntervals {
 
     private final double start;
     private final double end;
-    private final LinkedList<PositiveInterval> intervals = new LinkedList<>();
+    private final LinkedList<UnitaryInterval> intervals = new LinkedList<>();
 
 
-    public BooleanTrajectory() {
+    /**
+     * Creates an empty sequence of positive intervals interval starting from <code>0.0</code> and ending in plus infinite.
+     */
+    public SequenceOfPositiveIntervals() {
         this(0.0);
     }
 
@@ -46,7 +48,7 @@ public class BooleanTrajectory {
      *
      * @param start a non negative value indicating the beginning of the trajectory.
      */
-    public BooleanTrajectory(double start) {
+    public SequenceOfPositiveIntervals(double start) {
         this(Math.max(0, start), Double.POSITIVE_INFINITY);
     }
 
@@ -56,7 +58,7 @@ public class BooleanTrajectory {
      * @param start beginning of the sequence.
      * @param end end of the sequence.
      */
-    public BooleanTrajectory(double start, double end) {
+    public SequenceOfPositiveIntervals(double start, double end) {
         this.start = start;
         this.end = end;
     }
@@ -111,7 +113,7 @@ public class BooleanTrajectory {
      * @return true if the interval has been added.
      */
     public synchronized boolean add(double from, double to) {
-        PositiveInterval interval = getPositiveInterval(from, to);
+        UnitaryInterval interval = getPositiveInterval(from, to);
         if (interval == null) {
             return false;
         }
@@ -126,18 +128,18 @@ public class BooleanTrajectory {
      * @return true if the interval has been added.
      */
     public synchronized boolean append(double from, double to) {
-        PositiveInterval interval = getPositiveInterval(from, to);
+        UnitaryInterval interval = getPositiveInterval(from, to);
         if (interval == null) {
             return false;
         }
         return doAppend(interval);
     }
 
-    private boolean doAdd(PositiveInterval interval) {
-        LinkedList<PositiveInterval> queue = new LinkedList<>();
-        PositiveInterval current = interval;
+    private boolean doAdd(UnitaryInterval interval) {
+        LinkedList<UnitaryInterval> queue = new LinkedList<>();
+        UnitaryInterval current = interval;
         while (!intervals.isEmpty()&&!interval.isBefore(intervals.peek())) {
-            PositiveInterval first = intervals.removeFirst();
+            UnitaryInterval first = intervals.removeFirst();
             if (interval.isAfter(current)) {
                 queue.add(first);
             } else {
@@ -151,11 +153,11 @@ public class BooleanTrajectory {
         return true;
     }
 
-    private boolean doAppend(PositiveInterval interval) {
-        LinkedList<PositiveInterval> queue = new LinkedList<>();
-        PositiveInterval current = interval;
+    private boolean doAppend(UnitaryInterval interval) {
+        LinkedList<UnitaryInterval> queue = new LinkedList<>();
+        UnitaryInterval current = interval;
         while (!intervals.isEmpty()&&!interval.isAfter(intervals.peekLast())) {
-            PositiveInterval last = intervals.removeLast();
+            UnitaryInterval last = intervals.removeLast();
             if (interval.isBefore(current)) {
                 queue.add(last);
             } else {
@@ -167,13 +169,13 @@ public class BooleanTrajectory {
         return true;
     }
 
-    private PositiveInterval getPositiveInterval(double from, double to) {
+    private UnitaryInterval getPositiveInterval(double from, double to) {
         double lowerBound = getInSignalValue(from);
         double upperBound = getInSignalValue(to);
         if (lowerBound>=upperBound) {
             return null;
         }
-        return new PositiveInterval(lowerBound, upperBound);
+        return new UnitaryInterval(lowerBound, upperBound);
     }
 
     private double getInSignalValue(double v) {
@@ -188,13 +190,13 @@ public class BooleanTrajectory {
      * @return the trajectory obtained by applying boolean conjunction of this trajectory with the one passed as
      * parameter.
      */
-    public BooleanTrajectory computeConjuction(BooleanTrajectory other) {
+    public SequenceOfPositiveIntervals computeConjuction(SequenceOfPositiveIntervals other) {
         if (other == null) { return this; }
-        BooleanTrajectory result = new BooleanTrajectory(Math.min(this.start, other.end), Math.max(this.end, other.end));
-        Iterator<PositiveInterval> thisIterator = this.intervals.iterator();
-        Iterator<PositiveInterval> otherIterator = other.intervals.iterator();
-        PositiveInterval thisCurrent = (thisIterator.hasNext()?thisIterator.next():null);
-        PositiveInterval otherCurrent = (otherIterator.hasNext()?otherIterator.next():null);
+        SequenceOfPositiveIntervals result = new SequenceOfPositiveIntervals(Math.min(this.start, other.end), Math.max(this.end, other.end));
+        Iterator<UnitaryInterval> thisIterator = this.intervals.iterator();
+        Iterator<UnitaryInterval> otherIterator = other.intervals.iterator();
+        UnitaryInterval thisCurrent = (thisIterator.hasNext()?thisIterator.next():null);
+        UnitaryInterval otherCurrent = (otherIterator.hasNext()?otherIterator.next():null);
         while ((thisCurrent!=null)&&(otherCurrent!=null)) {
             if (thisCurrent.isBefore(otherCurrent)) {
                 thisCurrent = (thisIterator.hasNext()?thisIterator.next():null);
@@ -205,7 +207,7 @@ public class BooleanTrajectory {
                 continue;
             }
 
-            result.doAppend(new PositiveInterval(Math.min(thisCurrent.lowerBound, otherCurrent.lowerBound), Math.max(thisCurrent.lowerBound, otherCurrent.upperBound)));
+            result.doAppend(new UnitaryInterval(Math.min(thisCurrent.lowerBound, otherCurrent.lowerBound), Math.max(thisCurrent.lowerBound, otherCurrent.upperBound)));
             thisCurrent = (thisIterator.hasNext()?thisIterator.next():null);
             otherCurrent = (otherIterator.hasNext()?otherIterator.next():null);
         }
@@ -220,13 +222,13 @@ public class BooleanTrajectory {
      * @return the trajectory obtained by applying boolean conjunction of this trajectory with the one passed as
      * parameter.
      */
-    public BooleanTrajectory computeDisjunction(BooleanTrajectory other) {
+    public SequenceOfPositiveIntervals computeDisjunction(SequenceOfPositiveIntervals other) {
         if (other == null) { return this; }
-        BooleanTrajectory result = new BooleanTrajectory(Math.min(this.start, other.end), Math.max(this.end, other.end));
-        Iterator<PositiveInterval> thisIterator = this.intervals.iterator();
-        Iterator<PositiveInterval> otherIterator = other.intervals.iterator();
-        PositiveInterval thisCurrent = (thisIterator.hasNext()?thisIterator.next():null);
-        PositiveInterval otherCurrent = (otherIterator.hasNext()?otherIterator.next():null);
+        SequenceOfPositiveIntervals result = new SequenceOfPositiveIntervals(Math.min(this.start, other.end), Math.max(this.end, other.end));
+        Iterator<UnitaryInterval> thisIterator = this.intervals.iterator();
+        Iterator<UnitaryInterval> otherIterator = other.intervals.iterator();
+        UnitaryInterval thisCurrent = (thisIterator.hasNext()?thisIterator.next():null);
+        UnitaryInterval otherCurrent = (otherIterator.hasNext()?otherIterator.next():null);
         while ((thisCurrent!=null)||(otherCurrent!=null)) {
             if ((thisCurrent!=null)&&(thisCurrent.isBefore(otherCurrent))) {
                 result.doAppend(thisCurrent);
@@ -250,7 +252,7 @@ public class BooleanTrajectory {
      * Represent an interval where a given property is true. All the intervals are closed on left, and
      * opened on right.
      */
-    public static class PositiveInterval {
+    public static class UnitaryInterval {
 
         private final double lowerBound;
         private final double upperBound;
@@ -261,7 +263,7 @@ public class BooleanTrajectory {
          * @param lowerBound lowerBound of the interval.
          * @param upperBound upperBound of the interval.
          */
-        public PositiveInterval(double lowerBound, double upperBound) {
+        public UnitaryInterval(double lowerBound, double upperBound) {
             if (lowerBound >= upperBound) {
                 throw new IllegalArgumentException("Lower bound must be less than upper bound.");
             }
@@ -275,7 +277,7 @@ public class BooleanTrajectory {
          * @param other an interval.
          * @return  true if this interval is before the one received as an input.
          */
-        public boolean isBefore(PositiveInterval other) {
+        public boolean isBefore(UnitaryInterval other) {
             return (other == null)||(this.upperBound <= other.lowerBound);
         }
 
@@ -285,7 +287,7 @@ public class BooleanTrajectory {
          * @param other an interval.
          * @return  true if this interval is after the one received as an input.
          */
-        public boolean isAfter(PositiveInterval other) {
+        public boolean isAfter(UnitaryInterval other) {
             return (other == null)||(this.lowerBound >= other.upperBound);
         }
 
@@ -295,7 +297,7 @@ public class BooleanTrajectory {
          * @param other an interval.
          * @return  true if this interval intersects the one received as an input.
          */
-        public boolean intersect(PositiveInterval other) {
+        public boolean intersect(UnitaryInterval other) {
             if (other == null) { return false; }
             double min = Math.max(this.lowerBound,other.lowerBound);
             double max = Math.max(this.upperBound, other.upperBound);
@@ -309,12 +311,12 @@ public class BooleanTrajectory {
          * @param other an interval.
          * @return the intersection of this interval with the one received as input.
          */
-        public PositiveInterval intersection(PositiveInterval other) {
+        public UnitaryInterval intersection(UnitaryInterval other) {
             if (other == null) { return null; }
             double min = Math.max(this.lowerBound,other.lowerBound);
             double max = Math.min(this.upperBound, other.upperBound);
             if (min < max) {
-                return new PositiveInterval(min, max);
+                return new UnitaryInterval(min, max);
             } else {
                 return null;
             }
@@ -327,13 +329,13 @@ public class BooleanTrajectory {
          * @param other an interval.
          * @return the intersection of this interval with the one received as input.
          */
-        public PositiveInterval merge(PositiveInterval other) {
+        public UnitaryInterval merge(UnitaryInterval other) {
             if (other == null) { return this; }
             if (!this.intersect(other)) { return null; }
             double min = Math.min(this.lowerBound,other.lowerBound);
             double max = Math.max(this.upperBound, other.upperBound);
             if (min < max) {
-                return new PositiveInterval(min, max);
+                return new UnitaryInterval(min, max);
             } else {
                 return null;
             }

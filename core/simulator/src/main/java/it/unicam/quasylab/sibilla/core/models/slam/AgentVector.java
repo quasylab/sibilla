@@ -21,33 +21,10 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.simulator;
+package it.unicam.quasylab.sibilla.core.models.slam;
 
-import it.unicam.quasylab.sibilla.core.models.State;
-import org.apache.commons.math3.random.RandomGenerator;
+public class AgentVector {
 
-/**
- * @author belenchia
- *
- */
-public class SequentialSimulationManager<S extends State> extends AbstractSimulationManager<S> {
 
-	public SequentialSimulationManager(RandomGenerator random, SimulationMonitor monitor) {
-		super(random, monitor);
-	}
 
-    @Override
-	protected synchronized void handleTask(SimulationTask<S> simulationTask) {
-		notifyMonitorStartIteration(simulationTask.getIndex());
-		simulationTask.get();
-		notifyMonitorEndIteration(simulationTask.getIndex());
-	}
-
-	@Override
-	public synchronized int pendingTasks() {
-		return 0;
-	}
-
-	@Override
-	public synchronized void join() { }
 }

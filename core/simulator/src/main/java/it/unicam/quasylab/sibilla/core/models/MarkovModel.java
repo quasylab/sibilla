@@ -27,13 +27,42 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Optional;
 
-/**
- * Identifies a model with deterministic time. In this kind of models, each step always
- * needs a single time unit.
- *
- * @param <S> type for the state of model.
- */
-public interface DiscreteModel<S extends State> extends MarkovModel<S> {
+public interface MarkovModel<S extends State> extends Model<S> {
+
+    /**
+     * Returns the simulator cursor assocated with the given initial state.
+     *
+     * @param initialState
+     */
+    default SimulatorCursor<S> createSimulationCursor(RandomGenerator r, S initialState) {
+        return new SimulatorCursor<>() {
+
+            private S current = initialState;
+            private double now = 0.0;
+
+            @Override
+            public boolean step() {
+                Optional<TimeStep<S>> optionalTimeStep = next(r, now, current);
+                optionalTimeStep.ifPresent(this::recordTimeStep);
+                return optionalTimeStep.isPresent();
+            }
+
+            @Override
+            public S currentState() {
+                return current;
+            }
+
+            @Override
+            public double time() {
+                return now;
+            }
+
+            private void recordTimeStep(TimeStep<S> step) {
+                this.current = step.getValue();
+                this.now += step.getTime();
+            }
+        };
+    }
 
     /**
      * Samples possible next state when the process is in a given state at a given
@@ -42,12 +71,7 @@ public interface DiscreteModel<S extends State> extends MarkovModel<S> {
      * @param r     random generator used to sample needed random values.
      * @param time  current time.
      * @param state current state.
-     * @return next state.
+     * @return process time step.
      */
-    S sampleNextState(RandomGenerator r, double time, S state);
-
-    @Override
-    default Optional<TimeStep<S>> next(RandomGenerator r, double time, S state) {
-        return Optional.of(new TimeStep<>(1.0,sampleNextState(r,time,state)));
-    }
+    Optional<TimeStep<S>> next(RandomGenerator r, double time, S state);
 }

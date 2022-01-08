@@ -28,21 +28,22 @@ package it.unicam.quasylab.sibilla.core.models.slam;
  */
 public class MessageTag {
 
-    public static final MessageTag EMPTY_TAG = new MessageTag(-1, "");
     private final String tagName;
+    private final SlamType[] args;
     private final int tagId;
 
     /**
      * Creates a new <code>MessageTag</code> with the given id and name. We have to guarnatee that
      * for any pair <code>m1</code> and <code>m2</code> of instances of of <code>MessageTag</code> we have that:
      * <code>m1.tagId==m2.tagId</code> if and only if <code>m1.tagName.equals(m2.tagName)</code>.
-     *
-     * @param tagId tag identifier;
+     *  @param tagId tag identifier;
      * @param tagName tag name.
+     * @param args
      */
-    public MessageTag(int tagId, String tagName) {
+    public MessageTag(int tagId, String tagName, SlamType[] args) {
         this.tagName = tagName;
         this.tagId = tagId;
+        this.args = args;
     }
 
     /**
@@ -62,6 +63,23 @@ public class MessageTag {
     public int getTagId() {
         return tagId;
     }
+
+    /**
+     * Returns the number of values associated with messages of this tag.
+     *
+     * @return the number of values associated with messages of  this tag.
+     */
+    public int getArity() { return args.length; }
+
+    /**
+     * Returns the data type of values in position <code>idx</code> of messages
+     * with this tag.
+     *
+     * @param idx an message index.
+     * @return the data type of values in position <code>idx</code> of messages
+     * with this tag.
+     */
+    public SlamType getTypeOf(int idx) { return this.args[idx]; }
 
     @Override
     public boolean equals(Object o) {

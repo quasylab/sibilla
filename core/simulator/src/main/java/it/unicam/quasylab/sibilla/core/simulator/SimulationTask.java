@@ -23,27 +23,28 @@
 
 package it.unicam.quasylab.sibilla.core.simulator;
 
+import it.unicam.quasylab.sibilla.core.models.SimulatorCursor;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.models.TimeStep;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
+import java.util.Optional;
+import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 /**
  * @author loreti
  *
  */
-public class SimulationTask<S extends State> implements Supplier<Trajectory<S>>, Serializable {
+public class SimulationTask<S extends State> implements Supplier<Long>, Serializable {
 
 	private static final long serialVersionUID = -504798938865475892L;
 
-	private double time;
-	private RandomGenerator random;
-	private SimulationUnit<S> unit;
-	private S currentState;
+	private final RandomGenerator random;
+	private final SimulationUnit<S> unit;
 	private SimulationStatus status;
-	private Trajectory<S> trajectory;
 	private long startTime = 0, elapsedTime = 0;
 
 	private final int index;
@@ -60,7 +61,6 @@ public class SimulationTask<S extends State> implements Supplier<Trajectory<S>>,
 	}
 
 	public void reset(){
-		time = 0;
 		status = SimulationStatus.INIT;
 		startTime = 0;
 		elapsedTime = 0;
@@ -71,19 +71,19 @@ public class SimulationTask<S extends State> implements Supplier<Trajectory<S>>,
 	}
 
 	@Override
-	public Trajectory<S> get() {
-		long startTime = System.nanoTime();
+	public Long get() {
 		running();
-		this.currentState = this.unit.getState();
-		this.trajectory = new Trajectory<>();
-		this.trajectory.add(time, currentState);
-		while (!unit.getStoppingPredicate().test(this.time, currentState)&&(!isCancelled())) {
-			step();
+		long start = System.currentTimeMillis();
+		SamplingHandler<S> handler = this.unit.getSamplingHandler();
+		SimulatorCursor<S> cursor = this.unit.getSimulationCursor(this.random);
+		handler.start();
+		handler.sample(cursor.time(), cursor.currentState());
+		while (!unit.getStoppingPredicate().test(cursor.time(),cursor.currentState())&&(!isCancelled())) {
+			step(handler, cursor);
 		}
-		this.trajectory.setSuccessful(this.unit.getReachPredicate().check(currentState));
+		handler.end(cursor.time());
 		completed(true);
-		this.trajectory.setGenerationTime(System.nanoTime()-startTime);
-		return this.getTrajectory();
+		return System.currentTimeMillis()-startTime;
 	}
 	
 	private synchronized void running() {
@@ -101,17 +101,12 @@ public class SimulationTask<S extends State> implements Supplier<Trajectory<S>>,
 		elapsedTime = System.nanoTime() - startTime;
 	}
 
-	private void step() {
-		TimeStep<S> step  =
-				this.unit.getModel().next(random,time,currentState);
-		if (step == null) {
+	private void step(SamplingHandler<S> handler, SimulatorCursor<S> cursor) {
+		if (cursor.step()) {
+			handler.sample(cursor.time(), cursor.currentState());
+		} else {
 			cancel();
-			return;
 		}
-		currentState = step.getValue();
-		time += step.getTime();
-		trajectory.add(time, currentState);
-
 	}
 
 	public synchronized void cancel() {
@@ -130,10 +125,6 @@ public class SimulationTask<S extends State> implements Supplier<Trajectory<S>>,
 
 	public synchronized boolean isCancelled() {
 		return (this.status==SimulationStatus.CANCELLED);
-	}
-
-	public Trajectory<S> getTrajectory() {
-		return trajectory;		
 	}
 
 	public long getElapsedTime(){

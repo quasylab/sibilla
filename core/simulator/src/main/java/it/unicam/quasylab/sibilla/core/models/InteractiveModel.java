@@ -26,11 +26,12 @@ package it.unicam.quasylab.sibilla.core.models;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Identify a Model that can be simulated intearctively
  */
-public interface InteractiveModel<S extends State> extends Model<S> {
+public interface InteractiveModel<S extends State> extends MarkovModel<S> {
 
     /**
      * Returns the list of actions that are enabled when the process a a given time

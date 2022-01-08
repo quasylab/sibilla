@@ -21,33 +21,31 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.simulator;
+package it.unicam.quasylab.sibilla.core.models.slam;
 
-import it.unicam.quasylab.sibilla.core.models.State;
-import org.apache.commons.math3.random.RandomGenerator;
+import java.util.List;
 
 /**
- * @author belenchia
- *
+ * This class represents the effects that are consequences of an agent step.
  */
-public class SequentialSimulationManager<S extends State> extends AbstractSimulationManager<S> {
+public class AgentStepEffect {
 
-	public SequentialSimulationManager(RandomGenerator random, SimulationMonitor monitor) {
-		super(random, monitor);
-	}
+    private final List<AgentMessage> deliveredMessages;
+    private final AgentState nextState;
 
-    @Override
-	protected synchronized void handleTask(SimulationTask<S> simulationTask) {
-		notifyMonitorStartIteration(simulationTask.getIndex());
-		simulationTask.get();
-		notifyMonitorEndIteration(simulationTask.getIndex());
-	}
 
-	@Override
-	public synchronized int pendingTasks() {
-		return 0;
-	}
+    public AgentStepEffect(AgentState nextState, List<AgentMessage> deliveredMessages) {
+        this.deliveredMessages = deliveredMessages;
+        this.nextState = nextState;
+    }
 
-	@Override
-	public synchronized void join() { }
+    public List<AgentMessage> getDeliveredMessages() {
+        return deliveredMessages;
+    }
+
+    public AgentState getNextState() {
+        return nextState;
+    }
+
+
 }

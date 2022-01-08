@@ -9,5 +9,6 @@ replica 100
 simulate
 save output "./results" prefix "tsp_100" postfix "__"
 set "scale" 200.00
+init "balanced"
 simulate
 save output "./results" prefix "tsp_200" postfix "__"

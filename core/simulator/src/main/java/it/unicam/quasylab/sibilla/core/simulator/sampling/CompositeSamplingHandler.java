@@ -21,33 +21,30 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.simulator;
+package it.unicam.quasylab.sibilla.core.simulator.sampling;
 
-import it.unicam.quasylab.sibilla.core.models.State;
-import org.apache.commons.math3.random.RandomGenerator;
+import java.util.List;
 
-/**
- * @author belenchia
- *
- */
-public class SequentialSimulationManager<S extends State> extends AbstractSimulationManager<S> {
+public class CompositeSamplingHandler<S> implements SamplingHandler<S> {
 
-	public SequentialSimulationManager(RandomGenerator random, SimulationMonitor monitor) {
-		super(random, monitor);
-	}
+    private final List<SamplingHandler<S>> handlers;
+
+    public CompositeSamplingHandler(List<SamplingHandler<S>> handlers) {
+        this.handlers = handlers;
+    }
 
     @Override
-	protected synchronized void handleTask(SimulationTask<S> simulationTask) {
-		notifyMonitorStartIteration(simulationTask.getIndex());
-		simulationTask.get();
-		notifyMonitorEndIteration(simulationTask.getIndex());
-	}
+    public synchronized void start() {
+        handlers.forEach(SamplingHandler::start);
+    }
 
-	@Override
-	public synchronized int pendingTasks() {
-		return 0;
-	}
+    @Override
+    public synchronized void sample(double time, S state) {
+        handlers.forEach(h -> h.sample(time, state));
+    }
 
-	@Override
-	public synchronized void join() { }
+    @Override
+    public synchronized void end(double time) {
+        handlers.forEach(h -> h.end(time));
+    }
 }

@@ -36,14 +36,10 @@ import java.util.function.Function;
  */
 public interface SamplingFunction<S> extends Serializable {
 
-	void sample(double time, S context);
-
-	void end(double time);
-
-	void start();
+	SamplingHandler<S> getSamplingHandler();
 
 	default void sample(Trajectory<S> trj) {
-		trj.sample(this);
+		trj.sample(getSamplingHandler());
 	}
 
 	default void printTimeSeries(Function<String, String> nameFunction) throws FileNotFoundException {

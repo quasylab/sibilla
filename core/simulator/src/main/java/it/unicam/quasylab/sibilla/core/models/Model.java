@@ -39,15 +39,11 @@ import java.util.function.Predicate;
 public interface Model<S extends State> extends Serializable {
 
     /**
-     * Samples possible next state when the process is in a given state at a given
-     * time. A random generator is passed to sample random values when needed.
+     * Returns the simulator cursor assocated with the given initial state.
      *
-     * @param r     random generator used to sample needed random values.
-     * @param time  current time.
-     * @param state current state.
-     * @return process time step.
+     * @param initialState starting state in the created cursor.
      */
-    TimeStep<S> next(RandomGenerator r, double time, S state);
+    SimulatorCursor<S> createSimulationCursor(RandomGenerator r, S initialState);
 
     /**
      * Returns the number of bytes needed to store model states.
