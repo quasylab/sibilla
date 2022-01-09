@@ -22,6 +22,7 @@
  */
 package it.unicam.quasylab.sibilla.core.models.pm;
 
+import it.unicam.quasylab.sibilla.core.models.ImmutableState;
 import it.unicam.quasylab.sibilla.core.models.State;
 
 import java.io.IOException;
@@ -42,7 +43,7 @@ import java.util.stream.IntStream;
  *
  * @author loreti
  */
-public class PopulationState implements State {
+public class PopulationState implements ImmutableState {
 
     private static final long serialVersionUID = -4973919753621170006L;
     /**

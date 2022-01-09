@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
+import org.apache.commons.math3.random.RandomGenerator;
+
 /**
  * Instances of this class can be used to generate a trajectory starting from a given initial state.
  *
@@ -31,24 +33,58 @@ package it.unicam.quasylab.sibilla.core.models;
 public interface SimulatorCursor<S extends State> {
 
     /**
-     * Returns the next simulation step.
+     * This method is invoked when the simulation run starts.
+     */
+    void start();
+
+    /**
+     * Returns the next simulation step. An {@link IllegalStateException} is thrown
+     * if the simulation is not started (see {@link SimulatorCursor#start()}).
      *
      * @return the next simulation step.
      */
     boolean step();
 
     /**
-     * Returns the current state.
+     * Returns the current state. A null value is returned
+     * if the simulation is not started (see {@link SimulatorCursor#start()}).
      *
      * @return the current state.
      */
     S currentState();
 
     /**
-     * Returns current time.
+     * Returns current time. A {@link Double#NaN} is returned
+     * if the simulation is not started (see {@link SimulatorCursor#start()}).
      *
      * @return current time.
      */
     double time();
+
+    /**
+     * Returns true if the cursor reached a terminal states, namely a state from which
+     * we cannot perform another step.
+     *
+     * @return true if the cursor reached a terminal states, namely a state from which
+     * we cannot perform another step.
+     */
+    boolean isTerminated();
+
+    /**
+     * Returns true if the simulation associated with this cursor is started.
+     *
+     * @return true if the simulation associated with this cursor is started.
+     */
+    boolean isStarted();
+
+    /**
+     * This method is used to restart the simulation from the initial configuration.
+     */
+    void restart(RandomGenerator rg);
+
+    /**
+     * This method is used to restart the simulation from the initial configuration.
+     */
+    void restart();
 
 }

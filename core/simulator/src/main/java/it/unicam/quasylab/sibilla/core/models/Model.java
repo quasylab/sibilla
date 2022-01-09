@@ -29,7 +29,9 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * Represents a <i>Stochastic Process</i>.
@@ -39,11 +41,19 @@ import java.util.function.Predicate;
 public interface Model<S extends State> extends Serializable {
 
     /**
-     * Returns the simulator cursor assocated with the given initial state.
+     * Returns the simulator cursor that starts from the given initial state.
      *
      * @param initialState starting state in the created cursor.
      */
     SimulatorCursor<S> createSimulationCursor(RandomGenerator r, S initialState);
+
+    /**
+     * Returns the simulator cursor that start from the initial state resulting from evaluation of
+     * the given function..
+     *
+     * @param initialStateBuilder function used to build the initial state.
+     */
+    SimulatorCursor<S> createSimulationCursor(RandomGenerator r, Function<RandomGenerator,S> initialStateBuilder);
 
     /**
      * Returns the number of bytes needed to store model states.

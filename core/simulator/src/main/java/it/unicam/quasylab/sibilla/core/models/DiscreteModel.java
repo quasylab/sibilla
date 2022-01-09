@@ -33,7 +33,7 @@ import java.util.Optional;
  *
  * @param <S> type for the state of model.
  */
-public interface DiscreteModel<S extends State> extends MarkovModel<S> {
+public interface DiscreteModel<S extends ImmutableState> extends MarkovModel<S> {
 
     /**
      * Samples possible next state when the process is in a given state at a given

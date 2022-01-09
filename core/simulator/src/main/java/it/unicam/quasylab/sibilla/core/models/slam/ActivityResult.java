@@ -29,20 +29,20 @@ import java.util.List;
  * Instances of this class represent the result of an agent step. This consists of a list of messages
  * and the agent that has performed the step.
  */
-public class AgentStepResult {
+public class ActivityResult {
 
-    private final List<AgentMessage> messages;
-    private final Agent sender;
+    private final List<AgentMessage> sentMessages;
+    private final Agent involvedAgent;
 
     /**
      * Creates a new instance of agent results.
      *
      * @param sender agent performing the step.
-     * @param messages list of sent messages.
+     * @param sentMessages list of sent messages.
      */
-    public AgentStepResult(Agent sender, List<AgentMessage> messages) {
-        this.sender = sender;
-        this.messages = messages;
+    public ActivityResult(Agent sender, List<AgentMessage> sentMessages) {
+        this.involvedAgent = sender;
+        this.sentMessages = sentMessages;
     }
 
     /**
@@ -50,8 +50,8 @@ public class AgentStepResult {
      *
      * @return the list of sent messages.
      */
-    public List<AgentMessage> getMessages() {
-        return messages;
+    public List<AgentMessage> getSentMessages() {
+        return sentMessages;
     }
 
     /**
@@ -60,7 +60,7 @@ public class AgentStepResult {
      * @return the agent performing the step.
      */
     public Agent getAgent() {
-        return sender;
+        return involvedAgent;
     }
 
 

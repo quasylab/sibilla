@@ -76,6 +76,7 @@ public class SimulationTask<S extends State> implements Supplier<Long>, Serializ
 		long start = System.currentTimeMillis();
 		SamplingHandler<S> handler = this.unit.getSamplingHandler();
 		SimulatorCursor<S> cursor = this.unit.getSimulationCursor(this.random);
+		cursor.start();
 		handler.start();
 		handler.sample(cursor.time(), cursor.currentState());
 		while (!unit.getStoppingPredicate().test(cursor.time(),cursor.currentState())&&(!isCancelled())) {
@@ -83,7 +84,7 @@ public class SimulationTask<S extends State> implements Supplier<Long>, Serializ
 		}
 		handler.end(cursor.time());
 		completed(true);
-		return System.currentTimeMillis()-startTime;
+		return System.currentTimeMillis()-start;
 	}
 	
 	private synchronized void running() {

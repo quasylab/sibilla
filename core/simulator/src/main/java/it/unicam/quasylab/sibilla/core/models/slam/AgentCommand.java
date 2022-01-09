@@ -25,11 +25,9 @@ package it.unicam.quasylab.sibilla.core.models.slam;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.*;
-import java.util.stream.DoubleStream;
 
 /**
  * This functional interface is used to represent a command executed by an action. This is a function that, given
@@ -44,10 +42,11 @@ public interface AgentCommand {
      * Executes an agent command and returns the list of messages sent by the agent.
      *
      * @param rg random generator used to sample random values.
+     * @param evaluator
      * @param memory agent memory where the command is executed.
      * @return the list of messages sent by the agent during the execution.
      */
-    List<AgentMessage> execute(RandomGenerator rg, AgentMemory memory);
+    List<AgentMessage> execute(RandomGenerator rg, GlobalStateExpressionEvaluator evaluator, AgentMemory memory);
 
     /**
      * Returns an agent command that sequentially exectues each of the commands received as arguments and returns
@@ -56,10 +55,10 @@ public interface AgentCommand {
      * @return the list of messages sent by the agent during the execution.
      */
     static AgentCommand combine(AgentCommand ... commands) {
-        return  (rg, m) ->  {
+        return (rg, evaluator, m) ->  {
             LinkedList<AgentMessage> messages = new LinkedList<>();
             for (AgentCommand c: commands) {
-                messages.addAll(c.execute(rg, m));
+                messages.addAll(c.execute(rg, evaluator, m));
             }
             return messages;
         };
@@ -77,10 +76,10 @@ public interface AgentCommand {
         if (weights.length != options.length) {
             throw new IllegalArgumentException();//TODO: Add Message!
         }
-        return (rg, m) -> {
+        return (rg, evaluator, m) -> {
             AgentCommand selected = Util.select(rg, m, weights, options);
             if (selected != null) {
-                return selected.execute(rg,m);
+                return selected.execute(rg, evaluator, m);
             } else {
                 return List.of();
             }
@@ -97,11 +96,11 @@ public interface AgentCommand {
      * @return the list of messages sent by the agent during the execution.
      */
     static AgentCommand ifThenElse(Predicate<AgentMemory> condition, AgentCommand thenCommand, AgentCommand elseCommand ) {
-        return  (rg, m) -> {
+        return (rg, evaluator, m) -> {
             if (condition.test(m)) {
-                return thenCommand.execute(rg,m);
+                return thenCommand.execute(rg, evaluator, m);
             } else {
-                return elseCommand.execute(rg, m);
+                return elseCommand.execute(rg, evaluator, m);
             }
         };
     }
@@ -122,7 +121,7 @@ public interface AgentCommand {
      * Is an agent command that does not execute any update on the memory and that does not
      * send any message.
      */
-    AgentCommand SKIP  = (rg,m) -> List.of();
+    AgentCommand SKIP  = (rg, evaluator, m) -> List.of();
 
     /**
      * Returns an agent command that updates the given memory by setting the variable with index <code>idx</code>
@@ -133,7 +132,7 @@ public interface AgentCommand {
      * @return an empty list.
      */
     static AgentCommand setCommand(int idx, BiFunction<RandomGenerator,AgentMemory,SlamValue> expr) {
-        return (rg,m) -> {
+        return (rg, evaluator, m) -> {
             m.set(idx, expr.apply(rg,m));
             return List.of();
         };
@@ -146,6 +145,6 @@ public interface AgentCommand {
      * @return the list containing the single sent message.
      */
     static AgentCommand send(BiFunction<RandomGenerator, AgentMemory, AgentMessage> message) {
-        return (rg, m) -> List.of(message.apply(rg,m));
+        return (rg, evaluator, m) -> List.of(message.apply(rg,m));
     }
 }

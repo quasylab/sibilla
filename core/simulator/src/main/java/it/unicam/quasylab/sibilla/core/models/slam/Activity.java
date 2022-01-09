@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
+import org.apache.commons.math3.random.RandomGenerator;
+
 /**
  * Represents an activity that is scheduled at a given time.
  */
@@ -53,6 +55,8 @@ public abstract class Activity implements Comparable<Activity> {
         return scheduledTime;
     }
 
+    public abstract void execute(RandomGenerator rg, SlamState state);
+
     public static class AgentStepActivity extends Activity {
 
         private final Agent scheduledAgent;
@@ -66,11 +70,15 @@ public abstract class Activity implements Comparable<Activity> {
             return this.scheduledAgent;
         }
 
+        @Override
+        public void execute(RandomGenerator rg, SlamState state) {
+            state.executeAgentStep(rg, scheduledAgent);
+        }
     }
 
     public static class MessageDeliveryActivity extends Activity {
 
-        private DeliveredMessage message;
+        private final DeliveredMessage message;
 
         public MessageDeliveryActivity(DeliveredMessage message) {
             super(message.getDeliveryTime());
@@ -81,6 +89,10 @@ public abstract class Activity implements Comparable<Activity> {
             return this.message;
         }
 
+        @Override
+        public void execute(RandomGenerator rg, SlamState state) {
+            state.deliverMessage(rg, message);
+        }
     }
 
 }

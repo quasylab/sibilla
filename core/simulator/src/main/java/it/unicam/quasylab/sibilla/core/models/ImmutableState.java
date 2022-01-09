@@ -23,26 +23,10 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
-import org.apache.commons.math3.random.RandomGenerator;
-
-import java.util.List;
-import java.util.Optional;
-
 /**
- * Identify a Model that can be simulated intearctively
+ * An immutable state is a {@link State} that is not updated along a simulation run.
+ * Namely, the result of a simulation step is a new object. Immutable states can be stored
+ * in data structures and elaborated at the end of a set of simulation runs.
  */
-public interface InteractiveModel<S extends ImmutableState> extends MarkovModel<S> {
-
-    /**
-     * Returns the list of actions that are enabled when the process a a given time
-     * is in a given state.
-     *
-     * @param r     random generator used to sample needed random values.
-     * @param time  current time.
-     * @param state current state.
-     * @return list of enabled actions.
-     */
-    List<Action<S>> actions(RandomGenerator r, double time, S state);
-
-
+public interface ImmutableState extends State {
 }

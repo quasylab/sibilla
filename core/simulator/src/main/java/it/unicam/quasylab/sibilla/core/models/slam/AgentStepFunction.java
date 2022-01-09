@@ -25,8 +25,6 @@ package it.unicam.quasylab.sibilla.core.models.slam;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.List;
-import java.util.Random;
 import java.util.function.ToDoubleBiFunction;
 
 /**
@@ -36,17 +34,17 @@ import java.util.function.ToDoubleBiFunction;
 @FunctionalInterface
 public interface AgentStepFunction {
 
-    AgentStepEffect apply(RandomGenerator rg, AgentMemory m);
+    AgentStepEffect apply(RandomGenerator rg, GlobalStateExpressionEvaluator evaluator, AgentMemory m);
 
     static AgentStepFunction step(AgentState state, AgentCommand command) {
-        return (rg, m) -> new AgentStepEffect(state, command.execute(rg, m));
+        return (rg, evaluator, m) -> new AgentStepEffect(state, command.execute(rg, evaluator, m));
     }
 
     static AgentStepFunction select(ToDoubleBiFunction<RandomGenerator,AgentMemory>[] weights, AgentStepFunction[] functions) {
-        return (rg, m) -> {
+        return (rg, evaluator, m) -> {
             AgentStepFunction selected = Util.select(rg, m, weights, functions);
             if (selected != null) {
-                return selected.apply(rg,m);
+                return selected.apply(rg, evaluator, m);
             } else {
                 return null;
             }

@@ -35,7 +35,7 @@ import java.util.Optional;
  * This is a model implementing a Markov process. 
  * 
  */
-public interface ContinuousTimeMarkovProcess<S extends State> extends InteractiveModel<S> {
+public interface ContinuousTimeMarkovProcess<S extends ImmutableState> extends InteractiveModel<S> {
 
 	/**
 	 * Returns the transitions enabled in a given state at a given time. Each transition

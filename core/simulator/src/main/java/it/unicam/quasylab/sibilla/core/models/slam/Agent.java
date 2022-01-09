@@ -109,15 +109,15 @@ public final class Agent {
      * @param msg received message.
      * @return list of messages that have been sent when as a consequence of the received message.
      */
-    public Optional<AgentStepResult> receive(RandomGenerator rg, DeliveredMessage msg) {
-        return state.onReceive(this.agentMemory, msg).map(f -> this.execute(rg, f));
+    public Optional<ActivityResult> receive(RandomGenerator rg, GlobalStateExpressionEvaluator evaluator, DeliveredMessage msg) {
+        return state.onReceive(this.agentMemory, msg).map(f -> this.execute(rg, evaluator, f));
     }
 
-    private AgentStepResult execute(RandomGenerator rg, AgentStepFunction function) {
-        AgentStepEffect effect = function.apply(rg, agentMemory);
+    private ActivityResult execute(RandomGenerator rg, GlobalStateExpressionEvaluator evaluator, AgentStepFunction function) {
+        AgentStepEffect effect = function.apply(rg, evaluator, agentMemory);
         this.state = effect.getNextState();
         this.schedulingTime = this.state.getSojournTimeFunction().applyAsDouble(rg, agentMemory);
-        return new AgentStepResult(this, effect.getDeliveredMessages());
+        return new ActivityResult(this, effect.getSentMessages());
     }
 
     /**
@@ -126,8 +126,8 @@ public final class Agent {
      * @param rg random generator used to sample random values.
      * @return the result of agent step.
      */
-    public AgentStepResult execute(RandomGenerator rg) {
-        return execute(rg, this.state.getStepFunction());
+    public ActivityResult execute(RandomGenerator rg, GlobalStateExpressionEvaluator evaluator) {
+        return execute(rg, evaluator, this.state.getStepFunction());
     }
 
 
@@ -141,15 +141,14 @@ public final class Agent {
     }
 
     /**
-     * This method is invoked on the agent to notify that <code>t</code> time
-     * units are passed. An {@link IllegalStateException} is thrown whenever <code>t>this.timeOfNextStep()</code>.
+     * This method is invoked on the agent to notify that <code>dt</code> time units are passed.
      *
      * @param rg random generator used to sample random values.
      * @param dt passed time units.
      */
     public void timeStep(RandomGenerator rg, double dt) {
         this.dynamicFunction.update(rg, dt, agentMemory);
-        this.state.applyStateDynamic(rg,dt, agentMemory);
+        this.state.applyStateDynamic(rg, dt, agentMemory);
         agentMemory.recordTime(dt);
     }
 

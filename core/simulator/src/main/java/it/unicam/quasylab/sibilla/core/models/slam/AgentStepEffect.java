@@ -30,17 +30,17 @@ import java.util.List;
  */
 public class AgentStepEffect {
 
-    private final List<AgentMessage> deliveredMessages;
+    private final List<AgentMessage> sentMessages;
     private final AgentState nextState;
 
 
-    public AgentStepEffect(AgentState nextState, List<AgentMessage> deliveredMessages) {
-        this.deliveredMessages = deliveredMessages;
+    public AgentStepEffect(AgentState nextState, List<AgentMessage> sentMessages) {
+        this.sentMessages = sentMessages;
         this.nextState = nextState;
     }
 
-    public List<AgentMessage> getDeliveredMessages() {
-        return deliveredMessages;
+    public List<AgentMessage> getSentMessages() {
+        return sentMessages;
     }
 
     public AgentState getNextState() {

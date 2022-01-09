@@ -35,7 +35,7 @@ public interface AgentDynamicFunction {
      * Updates the given memory by considering that <code>dt</code> time units are passed.
      *
      * @param rg random generator used to sample random values.
-     * @param dt time passed since the last update.
+     * @param dt passed time units.
      * @param memory current agent memory.
      */
     void update(RandomGenerator rg, double dt, AgentMemory memory);

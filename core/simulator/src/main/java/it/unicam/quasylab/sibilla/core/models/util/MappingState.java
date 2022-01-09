@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models.util;
 
+import it.unicam.quasylab.sibilla.core.models.ImmutableState;
 import it.unicam.quasylab.sibilla.core.models.State;
 
 import java.util.Arrays;
@@ -33,7 +34,7 @@ import java.util.function.ToIntFunction;
 /**
  * This is a utility class used to represent states where variables are mapped to values (double or integers).
  */
-public class MappingState implements State {
+public class MappingState implements ImmutableState {
 
     /**
      * Table used to index variables.

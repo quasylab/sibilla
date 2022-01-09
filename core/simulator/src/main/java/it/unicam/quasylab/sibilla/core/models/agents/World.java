@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.models.agents;
 
+import it.unicam.quasylab.sibilla.core.models.ImmutableState;
+
 public interface World {
 
 

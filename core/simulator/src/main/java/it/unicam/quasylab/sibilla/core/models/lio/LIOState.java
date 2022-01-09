@@ -23,13 +23,14 @@
 
 package it.unicam.quasylab.sibilla.core.models.lio;
 
+import it.unicam.quasylab.sibilla.core.models.ImmutableState;
 import it.unicam.quasylab.sibilla.core.models.State;
 import org.apache.commons.math3.random.RandomGenerator;
 
 /**
  * A LIOState indicates a state of a network of interactive objects.
  */
-public interface LIOState extends State {
+public interface LIOState extends ImmutableState {
 
     /**
      * Sample next agent state from given a row of probability transition matrix.

@@ -21,28 +21,22 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.models;
+package it.unicam.quasylab.sibilla.core.models.slam;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.List;
-import java.util.Optional;
-
 /**
- * Identify a Model that can be simulated intearctively
+ * This is a functional interface used to create a new agent from its id.
  */
-public interface InteractiveModel<S extends ImmutableState> extends MarkovModel<S> {
+@FunctionalInterface
+public interface AgentFactory {
 
     /**
-     * Returns the list of actions that are enabled when the process a a given time
-     * is in a given state.
+     * Returns a new agent with the given id.
      *
-     * @param r     random generator used to sample needed random values.
-     * @param time  current time.
-     * @param state current state.
-     * @return list of enabled actions.
+     * @param agentId agentId of the created agent.
+     * @return a new agent with the given id.
      */
-    List<Action<S>> actions(RandomGenerator r, double time, S state);
-
+    Agent getAgent(int agentId);
 
 }

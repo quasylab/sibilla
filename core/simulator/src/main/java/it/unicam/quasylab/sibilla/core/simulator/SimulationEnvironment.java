@@ -23,10 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.simulator;
 
-import it.unicam.quasylab.sibilla.core.models.ContinuousTimeMarkovProcess;
-import it.unicam.quasylab.sibilla.core.models.Model;
-import it.unicam.quasylab.sibilla.core.models.State;
-import it.unicam.quasylab.sibilla.core.models.StatePredicate;
+import it.unicam.quasylab.sibilla.core.models.*;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
@@ -297,7 +294,7 @@ public class SimulationEnvironment implements Serializable {
 		}
 	}
 
-	public <S extends State> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state,
+	public <S extends ImmutableState> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state,
 			double deadline) {
 		TrajectoryCollector<S> collector = new TrajectoryCollector<>();
 		SimulationUnit<S> unit = new SimulationUnit<>(model, state, collector, SamplePredicate.timeDeadlinePredicate(deadline),
@@ -312,8 +309,8 @@ public class SimulationEnvironment implements Serializable {
 		}
 	}
 
-	public <S extends State> Trajectory<S> sampleTrajectory(RandomGenerator random, ContinuousTimeMarkovProcess<S> model, S state,
-                                                            double deadline, StatePredicate<? super S> reachPredicate) {
+	public <S extends ImmutableState> Trajectory<S> sampleTrajectory(RandomGenerator random, ContinuousTimeMarkovProcess<S> model, S state,
+																	 double deadline, StatePredicate<? super S> reachPredicate) {
 		TrajectoryCollector<S> collector = new TrajectoryCollector<>();
 		SimulationUnit<S> unit = new SimulationUnit<S>(model, state, collector,
 				SamplePredicate.samplePredicate(deadline, reachPredicate), reachPredicate);

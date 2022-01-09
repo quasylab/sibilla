@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.tools;
 
 import it.unicam.quasylab.sibilla.core.models.DiscreteModel;
+import it.unicam.quasylab.sibilla.core.models.ImmutableState;
 import it.unicam.quasylab.sibilla.core.models.IndexedState;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
@@ -42,7 +43,7 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class DiscreteTimeAgentSMC<S extends State & IndexedState<A>,A> {
+public class DiscreteTimeAgentSMC<S extends ImmutableState & IndexedState<A>,A> {
 
     private final DiscreteModel<S> model;
     private final RandomGenerator rg;

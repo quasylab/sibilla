@@ -26,25 +26,38 @@ package it.unicam.quasylab.sibilla.core.models;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Optional;
+import java.util.function.Function;
 
-public interface MarkovModel<S extends State> extends Model<S> {
+public interface MarkovModel<S extends ImmutableState> extends Model<S> {
 
-    /**
-     * Returns the simulator cursor assocated with the given initial state.
-     *
-     * @param initialState
-     */
-    default SimulatorCursor<S> createSimulationCursor(RandomGenerator r, S initialState) {
+    @Override
+    default SimulatorCursor<S> createSimulationCursor(RandomGenerator r, Function<RandomGenerator, S> initialStateBuilder) {
         return new SimulatorCursor<>() {
 
-            private S current = initialState;
+            private RandomGenerator rg = r;
+            private S current = null;
             private double now = 0.0;
+            private boolean terminated = false;
+            private boolean started = false;
+
+            @Override
+            public void start() {
+                this.current = initialStateBuilder.apply(rg);
+                this.now = 0.0;
+                this.started = true;
+                this.terminated = false;
+            }
 
             @Override
             public boolean step() {
                 Optional<TimeStep<S>> optionalTimeStep = next(r, now, current);
-                optionalTimeStep.ifPresent(this::recordTimeStep);
-                return optionalTimeStep.isPresent();
+                if (optionalTimeStep.isPresent()) {
+                    recordTimeStep(optionalTimeStep.get());
+                    return true;
+                } else {
+                    terminated = true;
+                    return false;
+                }
             }
 
             @Override
@@ -57,11 +70,39 @@ public interface MarkovModel<S extends State> extends Model<S> {
                 return now;
             }
 
+            @Override
+            public boolean isTerminated() {
+                return terminated;
+            }
+
+            @Override
+            public boolean isStarted() {
+                return started;
+            }
+
+            @Override
+            public void restart(RandomGenerator rg) {
+                this.rg = rg;
+                this.current = null;
+                this.terminated = false;
+                this.started = false;
+            }
+
+            @Override
+            public void restart() {
+                restart(this.rg);
+            }
+
             private void recordTimeStep(TimeStep<S> step) {
                 this.current = step.getValue();
                 this.now += step.getTime();
             }
         };
+    }
+
+    @Override
+    default SimulatorCursor<S> createSimulationCursor(RandomGenerator r, S initialState) {
+        return createSimulationCursor(r, rg -> initialState);
     }
 
     /**
