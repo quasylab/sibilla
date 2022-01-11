@@ -72,7 +72,7 @@ class SibillaRuntime:
         return self.__runtime.getInitialConfigurations()
 
     def get_configuration_info(self, name: str):
-        return self.__runtime.getConfigurationInfo()
+        return self.__runtime.getConfigurationInfo(name)
 
     def set_configuration(self, name: str, *args: float):
         return self.__runtime.setConfiguration(name, *args)

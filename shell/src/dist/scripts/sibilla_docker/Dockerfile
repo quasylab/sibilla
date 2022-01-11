@@ -10,7 +10,7 @@ USER sibilla
 WORKDIR /home/sibilla
 
 # Cloning and building sibilla repository
-RUN git clone https://github.com/f-biondi/sibilla repository
+RUN git clone https://github.com/quasylab/sibilla.git repository
 WORKDIR repository
 RUN ./gradlew build && ./gradlew installDist
 ENV SSHELL_PATH="/home/sibilla/repository/shell/build/install/sshell"
