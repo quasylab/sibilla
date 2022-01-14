@@ -177,6 +177,6 @@ class SibillaRuntime:
     def get_replica(self):
         return self.__runtime.getReplica()
 
-    def print_data(label: str):
+    def print_data(self, label: str):
         return self.__runtime.printData(label)
 
