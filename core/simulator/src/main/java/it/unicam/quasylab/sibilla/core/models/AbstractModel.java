@@ -25,14 +25,23 @@ package it.unicam.quasylab.sibilla.core.models;
 
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public abstract class AbstractModel<S extends State> implements Model<S> {
     protected final Map<String, Measure<S>> measuresTable;
+    protected final Map<String, Predicate<S>> predicatesTable;
+
+    public AbstractModel(Map<String, Measure<S>> measuresTable, Map<String, Predicate<S>> predicatesTable) {
+        this.measuresTable = measuresTable;
+        this.predicatesTable = predicatesTable;
+    }
+
 
     public AbstractModel(Map<String, Measure<S>> measuresTable) {
-        this.measuresTable = measuresTable;
+        this(measuresTable, new HashMap<>());
     }
 
     public String[] measures() {
@@ -49,6 +58,16 @@ public abstract class AbstractModel<S extends State> implements Model<S> {
 
     public Measure<S> getMeasure(String m) {
         return measuresTable.get(m);
+    }
+
+    @Override
+    public Predicate<S> getPredicate(String name) {
+        return predicatesTable.get(name);
+    }
+
+    @Override
+    public String[] predicates() {
+        return predicatesTable.keySet().toArray(new String[0]);
     }
 
     public void addMeasures(List<Measure<S>> measures) {

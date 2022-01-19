@@ -25,12 +25,14 @@ package it.unicam.quasylab.sibilla.shell;
 
 import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
 import it.unicam.quasylab.sibilla.core.runtime.SibillaRuntime;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -87,6 +89,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
 
     public synchronized void executeFile(String fileName) throws IOException {
         File selectedFile = getFile(fileName);
+        this.currentDirectory = selectedFile.getParentFile();
         execute(CharStreams.fromFileName(selectedFile.getAbsolutePath()));
     }
 
@@ -305,6 +308,53 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
     }
 
     @Override
+    public Boolean visitPredicates_command(SibillaScriptParser.Predicates_commandContext ctx) {
+        String[] predicates = Arrays.stream(runtime.getPredicates()).toArray(String[]::new);
+        printInfo("List of available predicates:", predicates);
+        return true;
+    }
+
+    @Override
+    public Boolean visitFirst_passage_time(SibillaScriptParser.First_passage_timeContext ctx) {
+        String predicateName = getStringContent(ctx.name.getText());
+        ShellSimulationMonitor monitor = null;
+        if (isInteractive) {
+            monitor = new ShellSimulationMonitor(output);
+        }
+        try {
+            showFirstPassageTimeResults(predicateName, runtime.firstPassageTime(monitor, predicateName) );
+            return true;
+        } catch (CommandExecutionException e) {
+            printErrorMessages(e.getErrorMessages());
+            return false;
+        }
+    }
+
+    private void showFirstPassageTimeResults(String name, FirstPassageTimeResults firstPassageTime) {
+        if (firstPassageTime.getTests()==0) {
+            printInfo("First passage time "+name+":", new String[] { "Tests = "+0});
+            return ;
+        }
+        long hits = firstPassageTime.getHits();
+        if (hits == 0) {
+            printInfo("First passage time "+name+":", new String[] { "Tests = "+firstPassageTime.getTests(),
+                "Hits = "+hits});
+            return ;
+        }
+        printInfo("First passage time "+name+":", new String[] { "Tests = "+firstPassageTime.getTests(),
+                "Hits = "+hits,
+                "Mean = "+firstPassageTime.getMean(),
+                "SD = "+firstPassageTime.getStandardDeviation(),
+                "MIN = "+firstPassageTime.getMin(),
+                "Q1 = "+firstPassageTime.getQ1(),
+                "Q2 = "+firstPassageTime.getQ2(),
+                "Q3 = "+firstPassageTime.getQ3(),
+                "MAX = "+firstPassageTime.getMax()
+        });
+
+    }
+
+    @Override
     public Boolean visitAdd_measure_command(SibillaScriptParser.Add_measure_commandContext ctx) {
         runtime.addMeasure(getStringContent(ctx.name.getText()));
         showMessage(OK_MESSAGE);
@@ -376,7 +426,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
         try {
             runtime.save((ctx.name == null ? null : ctx.name.getText()), getStringContent(ctx.dir), getStringContent(ctx.prefix), getStringContent(ctx.postfix));
             return true;
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             printErrorMessages(List.of(e.getMessage()));
         } catch (CommandExecutionException e) {
             printErrorMessages(e.getErrorMessages());
@@ -456,5 +506,29 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
         this.runtime.useDescriptiveStatistics();
         showMessage(OK_MESSAGE);
         return true;
+    }
+
+    @Override
+    public Boolean visitReachability_command(SibillaScriptParser.Reachability_commandContext ctx) {
+        ShellSimulationMonitor monitor = null;
+        if (isInteractive) {
+            monitor = new ShellSimulationMonitor(output);
+        }
+        String targetPredicate = getStringContent(ctx.goal.getText());
+        double alpha = Double.parseDouble(ctx.alpha.getText());
+        double delta = Double.parseDouble(ctx.delta.getText());
+        try {
+            double prob = 0.0;
+            if (ctx.condition != null) {
+                prob = runtime.computeProbReach(monitor, getStringContent(ctx.condition.getText()), targetPredicate, alpha, delta);
+            } else {
+                prob = runtime.computeProbReach(monitor, targetPredicate, alpha, delta);
+            }
+            showMessage("\nProbability: "+prob);
+            return true;
+        } catch (CommandExecutionException e) {
+            printErrorMessages(e.getErrorMessages());
+            return false;
+        }
     }
 }

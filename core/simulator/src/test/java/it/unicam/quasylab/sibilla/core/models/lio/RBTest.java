@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.models.lio;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.DoublePredicate;
 import java.util.stream.IntStream;
 
@@ -80,7 +81,9 @@ public class RBTest {
         assertEquals(0.5,s.fractionOf(agentB.getIndex()));
         assertEquals(0.5,s.fractionOf(agentR.getIndex()));
         LIOModel<LIOIndividualState> model = new LIOModel<>(def, LIOIndividualState::stepFunction);
-        TimeStep<LIOIndividualState> next = model.next(rg,0.0,s);
+        Optional<TimeStep<LIOIndividualState>> oNext = model.next(rg,0.0,s);
+        assertTrue(oNext.isPresent());
+        TimeStep<LIOIndividualState> next = oNext.get();
         assertEquals(0.5,next.getValue().fractionOf(agentB.getIndex()), 0.1);
     }
 

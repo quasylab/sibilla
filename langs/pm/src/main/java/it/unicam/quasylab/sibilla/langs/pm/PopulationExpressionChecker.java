@@ -147,7 +147,7 @@ public class PopulationExpressionChecker extends NumberExpressionChecker {
     }
 
     @Override
-    protected BooleanExpressionChecker getBooleanExpressionChecker() {
+    public BooleanExpressionChecker getBooleanExpressionChecker() {
         return new PopulationPredicateChecker(this.errorList, this);
     }
 }

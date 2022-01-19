@@ -31,6 +31,8 @@ public class BasicSymbolTable implements SymbolTable {
 
     private final HashMap<String,PopulationModelParser.Measure_declarationContext> measures = new HashMap<>();
 
+    private final HashMap<String,PopulationModelParser.Predicate_declarationContext> predicates = new HashMap<>();
+
     private final HashMap<String,PopulationModelParser.Species_declarationContext> species = new HashMap<>();
 
     private final HashMap<String,PopulationModelParser.Rule_declarationContext> rules = new HashMap<>();
@@ -79,6 +81,12 @@ public class BasicSymbolTable implements SymbolTable {
     public void addMeasure(String name, PopulationModelParser.Measure_declarationContext context) throws DuplicatedSymbolException {
         checkAndThrowExceptionIfDuplicated(name,context);
         measures.put(name,context);
+    }
+
+    @Override
+    public void addPredicate(String name, PopulationModelParser.Predicate_declarationContext context) throws DuplicatedSymbolException {
+        checkAndThrowExceptionIfDuplicated(name,context);
+        predicates.put(name,context);
     }
 
     @Override

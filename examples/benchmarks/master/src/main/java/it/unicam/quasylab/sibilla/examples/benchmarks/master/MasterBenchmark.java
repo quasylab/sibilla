@@ -15,6 +15,7 @@ import it.unicam.quasylab.sibilla.examples.pm.crowds.ChordModel;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.HashMap;
 
 public class MasterBenchmark {
 
@@ -36,6 +37,7 @@ public class MasterBenchmark {
                 ChordModel::generatePopulationRegistry,
                 ChordModel::getRules,
                 ChordModel::getMeasures,
+                (e,r) -> new HashMap<>(),
                 ChordModel::states);
         def.setParameter("N", 1000);
         PopulationModel model = def.createModel();

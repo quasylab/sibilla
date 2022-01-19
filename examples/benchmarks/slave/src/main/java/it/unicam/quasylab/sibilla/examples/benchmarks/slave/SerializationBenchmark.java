@@ -17,6 +17,7 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.Sample;
 import it.unicam.quasylab.sibilla.examples.pm.crowds.ChordModel;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class SerializationBenchmark {
                 ChordModel::generatePopulationRegistry,
                 ChordModel::getRules,
                 ChordModel::getMeasures,
+                (e, r) -> new HashMap<>(),
                 ChordModel::states);
         def.setParameter("N",1000);
         PopulationModel model = def.createModel();

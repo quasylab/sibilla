@@ -23,16 +23,15 @@
 
 package it.unicam.quasylab.sibilla.core.simulator;
 
-import it.unicam.quasylab.sibilla.core.models.ContinuousTimeMarkovProcess;
-import it.unicam.quasylab.sibilla.core.models.Model;
-import it.unicam.quasylab.sibilla.core.models.State;
-import it.unicam.quasylab.sibilla.core.models.StatePredicate;
+import it.unicam.quasylab.sibilla.core.models.*;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.TrajectoryCollector;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 /**
@@ -64,7 +63,7 @@ public class SimulationEnvironment implements Serializable {
 	 * {@link SimulationManagerFactory}. The latter is used to instantiate the
 	 * {@link QueuedSimulationManager} used to handle the specific simulation.
 	 *
-	 * @param simulationManagerFactory
+	 * @param simulationManagerFactory factory function used to create the simulation manager.
 	 */
 	public SimulationEnvironment(SimulationManagerFactory simulationManagerFactory) {
 		this.simulationManagerFactory = simulationManagerFactory;
@@ -78,15 +77,15 @@ public class SimulationEnvironment implements Serializable {
 	 *
 	 * @param model             model to simulate.
 	 * @param initialState      initial state.
-	 * @param sampling_function sampling functions to use.
-	 * @param iterations        number of interations.
+	 * @param handlerSupplier 	supplier used to build the function used to collect data from the sampled trajectories.
+	 * @param iterations        number of iterations.
 	 * @param deadline          simulation deadline.
 	 *
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
-	public <S extends State> void simulate(Model<S> model, S initialState, SamplingFunction<S> sampling_function,
+	public <S extends State> void simulate(Model<S> model, S initialState, Supplier<SamplingHandler<S>> handlerSupplier,
 			int iterations, double deadline) throws InterruptedException {
-		simulate(null, new DefaultRandomGenerator(), model, initialState, sampling_function, iterations, deadline);
+		simulate(null, new DefaultRandomGenerator(), model, initialState, handlerSupplier, iterations, deadline);
 	}
 
 	/**
@@ -97,15 +96,14 @@ public class SimulationEnvironment implements Serializable {
 	 * @param random            random generator used in the simulation.
 	 * @param model             model to simulate.
 	 * @param initialState      initial state.
-	 * @param sampling_function sampling functions to use.
-	 * @param iterations        number of interations.
+	 * @param handlerSupplier 	supplier used to build the function used to collect data from the sampled trajectories.
+	 * @param iterations        number of iterations.
 	 * @param deadline          simulation deadline.
 	 *
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
-	public <S extends State> void simulate(RandomGenerator random, Model<S> model, S initialState,
-			SamplingFunction<S> sampling_function, int iterations, double deadline) throws InterruptedException {
-		simulate(null, random, model, initialState, sampling_function, iterations, deadline);
+	public <S extends State> void simulate(RandomGenerator random, Model<S> model, S initialState, Supplier<SamplingHandler<S>> handlerSupplier, long iterations, double deadline) throws InterruptedException {
+		simulate(null, random, model, initialState, handlerSupplier, iterations, deadline);
 	}
 
 	/**
@@ -117,20 +115,19 @@ public class SimulationEnvironment implements Serializable {
 	 * @param random            random generator used in the simulation.
 	 * @param model             model to simulate.
 	 * @param initialState      initial state.
-	 * @param sampling_function sampling functions to use.
-	 * @param iterations        number of interations.
+	 * @param handlerSupplier 	supplier used to create the function used to collect data from the sampled trajectories.
+	 * @param iterations        number of iterations.
 	 * @param deadline          simulation deadline.
 	 *
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
 	public <S extends State> void simulate(SimulationMonitor monitor, RandomGenerator random, Model<S> model,
-			S initialState, SamplingFunction<S> sampling_function, int iterations, double deadline)
+										   S initialState, Supplier<SamplingHandler<S>> handlerSupplier, long iterations, double deadline)
 			throws InterruptedException {
-		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, monitor,
-				trc -> trc.sample(sampling_function));
-		SimulationUnit<S> unit = new SimulationUnit<S>(model, initialState,
+		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, monitor);
+		SimulationUnit<S> unit = new SimulationUnit<>(model, initialState, handlerSupplier,
 				SamplePredicate.timeDeadlinePredicate(deadline));
-		for (int i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
+		for (long i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			simulationManager.simulate(unit);
 		}
 		//TODO: check if we have to add this code --> simulationManager.join();
@@ -236,57 +233,91 @@ public class SimulationEnvironment implements Serializable {
 	public <S extends State> double reachability(SimulationMonitor monitor, RandomGenerator random,
 			double errorProbability, double delta, double deadline, Model<S> model, S state,
 			StatePredicate<? super S> condition, StatePredicate<? super S> goal) throws InterruptedException {
-		ReachabilityTraceConsumer<S> traceConsumer = new ReachabilityTraceConsumer<>();
-		double n = Math.ceil(Math.log(2 / delta) / (2 * errorProbability));
-		SimulationUnit<S> unit = new SimulationUnit<>(model, state,
-				(t, s) -> (t >= deadline) || goal.check(s) || !condition.check(s), goal);
-		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, monitor,
-				traceConsumer);
+		ReachabilityChecker<S> reachabilityChecker = new ReachabilityChecker<S>(condition, goal);
+		double n = Math.ceil(Math.log(2 / delta) / (2 * Math.pow(errorProbability,2)));
+		LOGGER.info("Computing reachability with "+(int) n+" iterations.");
+		SimulationUnit<S> unit = new SimulationUnit<>(model, state, reachabilityChecker,
+				(t, s) -> (t > deadline) || goal.check(s) || !condition.check(s), goal);
+		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, monitor);
 
 		for (int i = 0; i < n; i++) {
 			simulationManager.simulate(unit);
 		}
 		simulationManager.shutdown();
-		return traceConsumer.counter / n;
+		return reachabilityChecker.numberOfSuccessful() / n;
 	}
 
-	private static class ReachabilityTraceConsumer<S extends State> implements Consumer<Trajectory<S>> {
+	private static class ReachabilityChecker<S extends State> implements Supplier<SamplingHandler<S>> {
 
 		private int counter = 0;
+		private final StatePredicate<? super S> goal;
+		private final StatePredicate<? super S> condition;
 
-		@Override
-		public void accept(Trajectory<S> t) {
-			if (t.isSuccessful()) {
+		public ReachabilityChecker(StatePredicate<? super S> condition, StatePredicate<? super S> goal) {
+			this.condition = condition;
+			this.goal = goal;
+		}
+
+		private synchronized void record(boolean doReach) {
+			if (doReach) {
 				counter++;
-			}
-			if (!silent) {
-				System.out.print(t.isSuccessful() ? '+' : '-');
-				System.out.flush();
 			}
 		}
 
+		public synchronized double numberOfSuccessful() {
+			return counter;
+		}
+
+		@Override
+		public SamplingHandler<S> get() {
+			return new SamplingHandler<S>() {
+
+				private boolean reached = false;
+				private boolean failed = false;
+
+				@Override
+				public void start() {
+
+				}
+
+				@Override
+				public void sample(double time, S state) {
+					failed = failed || (!condition.check(state)&&!goal.check(state));
+					reached = reached || goal.check(state);
+				}
+
+				@Override
+				public void end(double time) {
+					record(!failed&&reached);
+				}
+			};
+		}
 	}
 
-	public <S extends State> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state,
+	public <S extends ImmutableState> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state,
 			double deadline) {
-		SimulationUnit<S> unit = new SimulationUnit<>(model, state, SamplePredicate.timeDeadlinePredicate(deadline),
+		TrajectoryCollector<S> collector = new TrajectoryCollector<>();
+		SimulationUnit<S> unit = new SimulationUnit<>(model, state, collector, SamplePredicate.timeDeadlinePredicate(deadline),
 				s -> true);
 		SimulationTask<S> simulationRun = new SimulationTask<>(0, random, unit);
 		try {
-			return simulationRun.get();
+			simulationRun.get();
+			return collector.getTrajectory();
 		} catch (Exception e) {
 			LOGGER.severe(e.getMessage());
 			return null;
 		}
 	}
 
-	public <S extends State> Trajectory<S> sampleTrajectory(RandomGenerator random, ContinuousTimeMarkovProcess<S> model, S state,
-                                                            double deadline, StatePredicate<? super S> reachPredicate) {
-		SimulationUnit<S> unit = new SimulationUnit<S>(model, state,
+	public <S extends ImmutableState> Trajectory<S> sampleTrajectory(RandomGenerator random, ContinuousTimeMarkovProcess<S> model, S state,
+																	 double deadline, StatePredicate<? super S> reachPredicate) {
+		TrajectoryCollector<S> collector = new TrajectoryCollector<>();
+		SimulationUnit<S> unit = new SimulationUnit<S>(model, state, collector,
 				SamplePredicate.samplePredicate(deadline, reachPredicate), reachPredicate);
 		SimulationTask<S> simulationRun = new SimulationTask<>(random, unit);
 		try {
-			return simulationRun.get();
+			simulationRun.get();
+			return collector.getTrajectory();
 		} catch (Exception e) {
 			LOGGER.severe(e.getMessage());
 			return null;

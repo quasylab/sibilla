@@ -24,31 +24,59 @@
 package it.unicam.quasylab.sibilla.core.simulator.sampling;
 
 import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
-public class FirstPassageTime<S extends State> implements Measure<S> {
+public class FirstPassageTime<S extends State> implements Supplier<SamplingHandler<S>> {
 
     private final String name;
     private final Predicate<S> condition;
-    private double timeCounter;
-    private boolean satisfied;
+    private final DescriptiveStatistics values;
+    private int tests = 0;
 
     public FirstPassageTime(String name, Predicate<S> condition) {
         this.name = name;
         this.condition = condition;
-        this.timeCounter = 0.0;
+        this.values = new DescriptiveStatistics();
     }
 
+    public synchronized FirstPassageTimeResults getResults() {
+        return new FirstPassageTimeResults(tests, values);
+    }
 
+    private synchronized void testStart() {
+        this.tests++;
+    }
 
-    @Override
-    public double measure(S context) {
-        return 0;
+    private synchronized void addValue(double time) {
+        this.values.addValue(time);
     }
 
     @Override
-    public String getName() {
-        return null;
+    public SamplingHandler<S> get() {
+        return new SamplingHandler<>() {
+
+            private boolean flag = false;
+
+            @Override
+            public void start() {
+                testStart();
+            }
+
+            @Override
+            public void sample(double time, S state) {
+                if (condition.test(state)&&!flag) {
+                    addValue(time);
+                    flag = true;
+                }
+            }
+
+            @Override
+            public void end(double time) {}
+        };
     }
 }

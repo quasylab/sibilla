@@ -33,6 +33,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 public class AgentModel<W extends World> implements InteractiveModel<SystemState<W>> {
@@ -49,10 +51,10 @@ public class AgentModel<W extends World> implements InteractiveModel<SystemState
 
 
     @Override
-    public TimeStep<SystemState<W>> next(RandomGenerator r, double now, SystemState<W> state) {
+    public Optional<TimeStep<SystemState<W>>> next(RandomGenerator r, double now, SystemState<W> state) {
         AgentAction[] actions = new AgentAction[agents.length];
         IntStream.range(0,agents.length).forEach(i -> actions[i] = getAgentAction(r,now,i,state));
-        return new TimeStep<SystemState<W>>(1.0,environment.apply(r,state,actions));
+        return Optional.of(new TimeStep<SystemState<W>>(1.0,environment.apply(r,state,actions)));
     }
 
     private AgentAction getAgentAction(RandomGenerator r, double now, int i, SystemState<W> state) {
@@ -93,5 +95,15 @@ public class AgentModel<W extends World> implements InteractiveModel<SystemState
     @Override
     public Measure<SystemState<W>> getMeasure(String m) {
         return null;
+    }
+
+    @Override
+    public Predicate<SystemState<W>> getPredicate(String name) {
+        return null;
+    }
+
+    @Override
+    public String[] predicates() {
+        return new String[0];
     }
 }

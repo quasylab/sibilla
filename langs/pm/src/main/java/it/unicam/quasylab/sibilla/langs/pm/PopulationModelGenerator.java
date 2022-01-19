@@ -43,6 +43,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -100,6 +101,7 @@ public class PopulationModelGenerator {
                 this::generatePopulationRegistry,
                 this::generateRules,
                 this::generateMeasures,
+                this::generatePredicates,
                 this::generateStateSet
                 );
     }
@@ -129,6 +131,10 @@ public class PopulationModelGenerator {
     }
     private Map<String, Measure<PopulationState>> generateMeasures(EvaluationEnvironment environment, PopulationRegistry registry) {
         return this.getParseTree().accept(new PopulationMeasuresGenerator(environment, registry));
+    }
+
+    private Map<String, Predicate<PopulationState>> generatePredicates(EvaluationEnvironment environment, PopulationRegistry registry) {
+        return this.getParseTree().accept(new PopulationPredicatesGenerator(environment, registry));
     }
 
     public List<PopulationRule> generateRules(EvaluationEnvironment environment, PopulationRegistry registry) {

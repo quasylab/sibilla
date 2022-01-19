@@ -15,6 +15,7 @@ import it.unicam.quasylab.sibilla.core.network.util.NetworkUtils;
 import it.unicam.quasylab.sibilla.examples.pm.crowds.ChordModel;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 public class SlaveBenchmark {
 
@@ -38,6 +39,7 @@ public class SlaveBenchmark {
                 ChordModel::generatePopulationRegistry,
                 ChordModel::getRules,
                 ChordModel::getMeasures,
+                (e, r) -> new HashMap<>(),
                 ChordModel::states);
         def.setParameter("N", 1000);
         PopulationModel model = def.createModel();

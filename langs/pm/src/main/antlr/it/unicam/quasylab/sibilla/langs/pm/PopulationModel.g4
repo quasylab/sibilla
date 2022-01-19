@@ -12,7 +12,8 @@ element : const_declaration
         | param_declaration
         | measure_declaration
         | system_declaration
-        | label_declaration;
+        | label_declaration
+        | predicate_declaration;
 
 system_declaration: 'system' name=ID ('(' args+=ID (',' args+=ID)* ')')? '='  species_pattern ';' ;
 
@@ -62,6 +63,8 @@ local_variable: name=ID 'in' range;
 guard_expression: 'when' guard=expr;
 
 measure_declaration : 'measure' name=ID ((local_variables) (guard_expression)?)? '=' expr ';';
+
+predicate_declaration: 'predicate' name=ID '=' expr ';';
 
 param_declaration   : 'param' name=ID '=' expr ';';
 

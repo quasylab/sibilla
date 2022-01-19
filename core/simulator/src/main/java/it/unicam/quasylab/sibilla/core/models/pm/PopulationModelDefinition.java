@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 /**
@@ -45,6 +46,7 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
     private final Function<EvaluationEnvironment,PopulationRegistry> registryBuilder;
     private final BiFunction<EvaluationEnvironment,PopulationRegistry,List<PopulationRule>> rulesBuilder;
     private final BiFunction<EvaluationEnvironment,PopulationRegistry,Map<String,Measure<PopulationState>>> measuresBuilder;
+    private final BiFunction<EvaluationEnvironment,PopulationRegistry,Map<String, Predicate<PopulationState>>> predicatesBuilder;
     private final BiFunction<EvaluationEnvironment, PopulationRegistry, StateSet<PopulationState>> statesBuilder;
     //EvaluationEnvironment -> Populationregistry -> double[] ->
 
@@ -53,6 +55,7 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
     private Map<String,Measure<PopulationState>> measures;
     private PopulationModel model;
     private StateSet<PopulationState> states;
+    private Map<String, Predicate<PopulationState>> predicates;
 
     /**
      * Create a new PopulationModelDefinition with the given functions used to build the elements of a definition.
@@ -66,7 +69,7 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
             BiFunction<EvaluationEnvironment, PopulationRegistry, List<PopulationRule>> rulesBuilder,
             BiFunction<EvaluationEnvironment, PopulationRegistry, StateSet<PopulationState>> statesBuilder
     ) {
-        this(new EvaluationEnvironment(),registryBuilder,rulesBuilder,null, statesBuilder);
+        this(new EvaluationEnvironment(),registryBuilder,rulesBuilder,null, null, statesBuilder);
     }
 
     /**
@@ -82,11 +85,13 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
             Function<EvaluationEnvironment, PopulationRegistry> registryBuilder,
             BiFunction<EvaluationEnvironment, PopulationRegistry, List<PopulationRule>> rulesBuilder,
             BiFunction<EvaluationEnvironment, PopulationRegistry, Map<String, Measure<PopulationState>>> measuresBuilder,
+            BiFunction<EvaluationEnvironment, PopulationRegistry, Map<String, Predicate<PopulationState>>> predicatesBuilder,
             BiFunction<EvaluationEnvironment, PopulationRegistry, StateSet<PopulationState>> statesBuilder) {
         super(environment);
         this.registryBuilder = registryBuilder;
         this.rulesBuilder = rulesBuilder;
         this.measuresBuilder = measuresBuilder;
+        this.predicatesBuilder = predicatesBuilder;
         this.statesBuilder = statesBuilder;
     }
 
@@ -106,7 +111,8 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
             PopulationRegistry registry = getRegistry();
             List<PopulationRule> rules = getRules();
             Map<String,Measure<PopulationState>> measures = getMeasures();
-            model = new PopulationModel(registry,rules,measures);
+            Map<String,Predicate<PopulationState>> predicates = getPredicates();
+            model = new PopulationModel(registry,rules,measures, predicates);
         }
         return model;
     }
@@ -124,6 +130,16 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
             }
         }
         return measures;
+    }
+
+    private Map<String, Predicate<PopulationState>> getPredicates() {
+        if (predicates == null) {
+            predicates = new TreeMap<>();
+            if (predicatesBuilder != null) {
+                predicates.putAll(predicatesBuilder.apply(getEnvironment(),getRegistry()));
+            }
+        }
+        return predicates;
     }
 
     /**

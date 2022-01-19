@@ -41,7 +41,14 @@ command : module_command
         | descriptive_statistics
         | summary_statistics
         | show_statistics
+        | predicates_command
+        | first_passage_time
+        | reachability_command
         ;
+
+reachability_command: 'probreach' goal=STRING ('while' condition=STRING)? 'with' 'alpha' '='  alpha=REAL 'and' 'delta' '=' delta=REAL;
+
+first_passage_time: 'fpt' name=STRING;
 
 show_statistics: 'show' 'statistics';
 
@@ -95,6 +102,9 @@ dt_command : 'dt' (value=(REAL|INTEGER))?
         ;
 
 measures_command : 'measures'
+        ;
+
+predicates_command : 'predicates'
         ;
 
 add_measure_command : 'add' 'measure' name=STRING

@@ -58,7 +58,7 @@ public class SIRModel  {
 		collection.add(SummaryStatisticSampling.measure("S",SAMPLINGS,DEADLINE, s -> s.getFraction(SIRModelDefinition.S)));
 		collection.add(SummaryStatisticSampling.measure("I",SAMPLINGS,DEADLINE,s -> s.getFraction(SIRModelDefinition.I)));
 		collection.add(SummaryStatisticSampling.measure("R",SAMPLINGS,DEADLINE,s -> s.getFraction(SIRModelDefinition.R)));
-		simulator.simulate(def.createModel(),def.state(),collection,REPLICA,DEADLINE);
+		simulator.simulate(def.createModel(),def.state(),collection::getSamplingHandler,REPLICA,DEADLINE);
 		collection.printTimeSeries("data","sir_",".data");
 	}
 

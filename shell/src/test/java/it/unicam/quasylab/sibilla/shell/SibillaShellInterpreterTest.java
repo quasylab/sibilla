@@ -32,6 +32,8 @@ class SibillaShellInterpreterTest {
     @Test
     public void testLoadCommand() {
         SibillaShellInterpreter interpreter = new SibillaShellInterpreter();
+        String fileName = ClassLoader.getSystemClassLoader().getResource("./celebr.pm").getFile();
+        interpreter.execute("module ");
         interpreter.execute("run \"groupies.sib\"");
     }
 

@@ -27,9 +27,10 @@ import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.models.StateSet;
-import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -118,38 +119,61 @@ public abstract class AbstractSibillaModule<S extends State> implements SibillaM
     }
 
     @Override
-    public List<SimulationTimeSeries> simulate(SimulationMonitor monitor, RandomGenerator rg, int replica, double deadline, double dt) {
+    public Map<String, double[][]> simulate(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt) {
         checkForLoadedDefinition();
         loadModel();
         loadState();
         SamplingFunction<S> samplingFunction = model.selectSamplingFunction(summary, deadline, dt, enabledMeasures.toArray(new String[0]));
         try {
-            simulator.simulate(monitor, rg, model, state, samplingFunction, replica, deadline);
-            return samplingFunction.getSimulationTimeSeries(replica);
+            simulator.simulate(monitor, rg, model, state, samplingFunction::getSamplingHandler, replica, deadline);
+            return samplingFunction.getSimulationTimeSeries();
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt, String predicateName) {
+        checkForLoadedDefinition();
+        loadModel();
+        loadState();
+        Predicate<S> predicate = model.getPredicate(predicateName);
+        if (predicate == null) {
+            throw new IllegalStateException("Predicate "+predicateName+" is unknown!");
+        }
+        FirstPassageTime<S> fpt = new FirstPassageTime<>(predicateName, predicate);
+        try {
+            simulator.simulate(monitor, rg, model, state, fpt, replica, deadline);
+            return fpt.getResults();
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
     }
 
     @Override
-    public double estimateReachability(String targetCondition, double time, double pError, double delta) {
+    public double estimateReachability(SimulationMonitor monitor, RandomGenerator rg,  String targetName, double time, double pError, double delta) {
         checkForLoadedDefinition();
         loadModel();
         loadState();
-        //Predicate<S> targetPredicate = model.getCondition(targetCondition);
-        //return simulator.reachability(pError,delta,time, model, state, targetPredicate);
-        return 0.0;
+        Predicate<S> targetPredicate = model.getPredicate(targetName);
+        try {
+            return simulator.reachability(monitor, rg, pError,delta,time, model, state, s -> true, targetPredicate::test);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e.getMessage());
+        }
     }
 
     @Override
-    public double estimateReachability(String transientCondition, String targetCondition, double time, double pError, double delta) {
+    public double estimateReachability(SimulationMonitor monitor, RandomGenerator rg, String transientCondition, String targetCondition, double time, double pError, double delta) {
         checkForLoadedDefinition();
         loadModel();
         loadState();
-        //Predicate<S> transientPredicate = model.getCondition(transientCondition);
-        //Predicate<S> targetPredicate = model.getCondition(targetCondition);
-        //return simulator.reachability(pError,delta,time, model, state, transientPredicate, targetPredicate);
-        return 0.0;
+        Predicate<S> transientPredicate = model.getPredicate(transientCondition);
+        Predicate<S> targetPredicate = model.getPredicate(targetCondition);
+        try {
+            return simulator.reachability(monitor, rg, pError,delta,time, model, state, transientPredicate::test, targetPredicate::test);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e.getMessage());
+        }
     }
 
     @Override
@@ -223,6 +247,13 @@ public abstract class AbstractSibillaModule<S extends State> implements SibillaM
         checkForLoadedDefinition();
         loadModel();
         return model.measures();
+    }
+
+    @Override
+    public String[] getPredicates() {
+        checkForLoadedDefinition();
+        loadModel();
+        return model.predicates();
     }
 
     @Override

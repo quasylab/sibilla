@@ -29,12 +29,13 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This is a model implementing a Markov process. 
  * 
  */
-public interface ContinuousTimeMarkovProcess<S extends State> extends InteractiveModel<S> {
+public interface ContinuousTimeMarkovProcess<S extends ImmutableState> extends InteractiveModel<S> {
 
 	/**
 	 * Returns the transitions enabled in a given state at a given time. Each transition
@@ -50,16 +51,16 @@ public interface ContinuousTimeMarkovProcess<S extends State> extends Interactiv
 	WeightedStructure<? extends StepFunction<S>> getTransitions(RandomGenerator r, double time, S s);
 
 	@Override
-	default TimeStep<S> next(RandomGenerator r, double time, S state) {
+	default Optional<TimeStep<S>> next(RandomGenerator r, double time, S state) {
 		WeightedStructure<? extends StepFunction<S>> activities = getTransitions(r, time, state);
 		double totalRate = activities.getTotalWeight();
 		if (totalRate == 0.0) {
-			return null;
+			return Optional.empty();
 		}
 		double dt = sampleExponentialDistribution(totalRate,r);
 		double select = r.nextDouble() * totalRate;
 		WeightedElement<? extends StepFunction<S>> wa = activities.select(select);
-		return new TimeStep<>(dt,wa.getElement().step(r,time,dt));
+		return Optional.of(new TimeStep<>(dt,wa.getElement().step(r,time,dt)));
 	}
 
 	@Override

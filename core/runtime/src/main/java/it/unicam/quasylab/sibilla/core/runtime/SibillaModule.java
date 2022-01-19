@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.runtime;
 
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -140,11 +141,18 @@ public interface SibillaModule {
 
 
     /**
-     * Return the array of measures defined in the module.
+     * Returns the array of measures defined in the module.
      *
      * @return the array of measures defined in the module.
      */
     String[] getMeasures();
+
+    /**
+     * Returns the array of predicates defined in the module.
+     *
+     * @return the array of predicates defined in the module.
+     */
+    String[] getPredicates();
 
     /**
      * Set the measures to sample in a simulation.
@@ -186,7 +194,22 @@ public interface SibillaModule {
      * @param dt sampling interval.
      * @return
      */
-    List<SimulationTimeSeries> simulate(SimulationMonitor monitor, RandomGenerator rg, int replica, double deadline, double dt);
+    Map<String, double[][]> simulate(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt);
+
+
+    /**
+     * Estimates the first passage time to the given predicate.
+     *
+     * @param monitor
+     * @param rg
+     * @param replica
+     * @param deadline
+     * @param dt
+     * @param predicateName
+     * @return
+     */
+    FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt, String predicateName);
+
 
     /**
      * Return the module modes.
@@ -252,7 +275,7 @@ public interface SibillaModule {
      * @param delta estimation error.
      * @return the probability to reach a state satisfuing the target condition within time units-
      */
-    double estimateReachability(String targetCondition, double time, double pError, double delta);
+    double estimateReachability(SimulationMonitor monitor, RandomGenerator rg,  String targetCondition, double time, double pError, double delta);
 
 
     /**
@@ -268,5 +291,6 @@ public interface SibillaModule {
      * @param delta estimation error.
      * @return the probability to reach a state satisfuing the target condition within time units-
      */
-    double estimateReachability(String transientCondition, String targetCondition, double time, double pError, double delta);
+    double estimateReachability(SimulationMonitor monitor, RandomGenerator rg, String transientCondition, String targetCondition, double time, double pError, double delta);
+
 }

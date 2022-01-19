@@ -32,6 +32,7 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.function.Function;
 
 
@@ -76,14 +77,11 @@ public class DescriptiveStatisticSampling<S extends State> extends StatisticSamp
 		}
 	}
 
-	@Override
-	protected synchronized void recordSample(int i, double v) {
-		this.data[i].addValue(v);
-	}
+
 
 
 	@Override
-	public void printTimeSeries(Function<String, String> nameFunction, char separator, double significance) throws FileNotFoundException {
+	public synchronized void printTimeSeries(Function<String, String> nameFunction, char separator, double significance) throws FileNotFoundException {
 
 		String fileName = nameFunction.apply(this.getName());
 		PrintStream out = new PrintStream(fileName);
@@ -117,17 +115,32 @@ public class DescriptiveStatisticSampling<S extends State> extends StatisticSamp
 	}
 
 
+
 	@Override
-	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries( int replications ) {
-		SimulationTimeSeries stt = new SimulationTimeSeries(false,measure.getName(), dt, replications, data);
-		LinkedList<SimulationTimeSeries> toReturn = new LinkedList<>();
-		toReturn.add(stt);
-		return toReturn;
+	public synchronized int getSize() {
+		return data.length;
 	}
 
 	@Override
-	public int getSize() {
-		return data.length;
+	protected synchronized void recordValues(double[] values) {
+		if (values.length != data.length) {
+			throw new IllegalArgumentException();//TODO: Add Message!
+		}
+		for(int i=0; i<values.length; i++) {
+			data[i].addValue(values[i]);
+		}
+	}
+
+	@Override
+	protected synchronized double[] getDataRow(int i) {
+		return new double[] {getTimeOfIndex(i),
+				data[i].getMin(),
+				data[i].getPercentile(25),
+				data[i].getMean(),
+				data[i].getPercentile(50),
+				data[i].getPercentile(75),
+				data[i].getMax()
+		};
 	}
 
 }

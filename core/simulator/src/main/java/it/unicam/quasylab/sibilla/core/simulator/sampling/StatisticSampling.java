@@ -23,20 +23,15 @@
 
 package it.unicam.quasylab.sibilla.core.simulator.sampling;
 
-import it.unicam.quasylab.sibilla.core.models.MeasureFunction;
 import it.unicam.quasylab.sibilla.core.models.State;
 
 import java.io.FileNotFoundException;
-import java.util.LinkedList;
+import java.util.Map;
 import java.util.function.Function;
 
 public abstract class StatisticSampling<S extends State> implements SamplingFunction<S> {
     protected final Measure<S> measure;
     protected final double dt;
-    private double last_measure;
-    private double next_time;
-    private int current_index;
-    private double new_measure;
 
     public StatisticSampling(Measure<S> measure, double dt) {
         this.measure = measure;
@@ -45,55 +40,28 @@ public abstract class StatisticSampling<S extends State> implements SamplingFunc
 
     protected abstract void init();
 
-    @Override
-    public synchronized void sample(double time, S context) {
-        this.new_measure = measure.measure(context);
-        if ((time >= this.next_time) && (this.current_index < getSize())) {
-            recordMeasure(time);
-        } else {
-            this.last_measure = this.new_measure;
-        }
-    }
-
-    private void recordMeasure(double time) {
-        while ((this.next_time < time) && (this.current_index < getSize())) {
-            this.recordSample();
-        }
-        this.last_measure = this.new_measure;
-        if (this.next_time == time) {
-            this.recordSample();
-        }
-    }
-
-    private void recordSample() {
-        recordSample(this.current_index++,this.last_measure);
-        this.next_time += this.dt;
-    }
-
-    protected abstract void recordSample(int i, double last_measure);
-
-    @Override
-    public synchronized void end(double time) {
-        while (this.current_index < getSize()) {
-            recordSample(this.current_index++, this.last_measure);
-            this.next_time += this.dt;
-        }
-    }
-
-    @Override
-    public void start() {
-        this.current_index = 0;
-        this.next_time = 0;
-    }
-
     public String getName() {
         return measure.getName();
     }
 
     @Override
-    public abstract LinkedList<SimulationTimeSeries> getSimulationTimeSeries(int replications);
+    public Map<String,double[][]> getSimulationTimeSeries() {
+        return Map.of(measure.getName(), getData());
+    }
 
     public abstract int getSize();
+
+    protected abstract void recordValues(double[] values);
+
+    @Override
+    public SamplingHandler<S> getSamplingHandler() {
+        return new StatisticsCollector();
+    }
+
+    private double getDt() {
+        return dt;
+    }
+
 
     @Override
     public void printTimeSeries(Function<String, String> nameFunction) throws FileNotFoundException {
@@ -105,5 +73,66 @@ public abstract class StatisticSampling<S extends State> implements SamplingFunc
         printTimeSeries(nameFunction,separator,0.05);
     }
 
+    public double getTimeOfIndex(int i) {
+        return i*dt;
+    }
+
+    public double[][] getData() {
+        double[][] data = new double[getSize()][];
+        for(int i=0; i<getSize(); i++) {
+            data[i] = getDataRow(i);
+        }
+        return data;
+    }
+
+    protected abstract double[] getDataRow(int i);
+
+    protected class StatisticsCollector implements SamplingHandler<S> {
+            private final double[] values = new double[getSize()];
+            private double last_measure = Double.NaN;
+            private double next_time = 0;
+            private int current_index = 0;
+            private double new_measure = Double.NaN;
+
+        @Override
+            public synchronized void sample(double time, S context) {
+                this.new_measure = measure.measure(context);
+                if ((time >= this.next_time) && (this.current_index < getSize())) {
+                    recordMeasure(time);
+                } else {
+                    this.last_measure = this.new_measure;
+                }
+            }
+
+            private void recordMeasure(double time) {
+                while ((this.next_time < time) && (this.current_index < getSize())) {
+                    this.recordSample();
+                }
+                this.last_measure = this.new_measure;
+                if (this.next_time == time) {
+                    this.recordSample();
+                }
+            }
+
+            private void recordSample() {
+                this.values[this.current_index++] = this.last_measure;
+                this.next_time += getDt();
+            }
+
+            @Override
+            public synchronized void end(double time) {
+                while (this.current_index < getSize()) {
+                    recordSample();
+                }
+                recordValues(this.values);
+            }
+
+            @Override
+            public void start() {
+                if (this.current_index != 0) {
+                    throw new IllegalStateException();//TODO: Add message here!
+                }
+            }
+    }
 
 }

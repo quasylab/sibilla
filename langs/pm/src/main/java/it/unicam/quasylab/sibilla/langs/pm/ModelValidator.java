@@ -146,6 +146,18 @@ public class ModelValidator extends PopulationModelBaseVisitor<Boolean> {
     }
 
     @Override
+    public Boolean visitPredicate_declaration(PopulationModelParser.Predicate_declarationContext ctx) {
+        try {
+            table.addPredicate(ctx.name.getText(),ctx);
+            return ctx.expr().accept(new PopulationExpressionChecker(errors,getSymbolTable()).getBooleanExpressionChecker());
+        } catch (DuplicatedSymbolException e) {
+            errors.add(new ModelBuildingError(e.getMessage()));
+            return false;
+        }
+    }
+
+
+    @Override
     public Boolean visitRule_declaration(PopulationModelParser.Rule_declarationContext ctx) {
         try {
             this.table.addRule(ctx.name.getText(),ctx);

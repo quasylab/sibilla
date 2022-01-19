@@ -18,3 +18,5 @@
     }
 
     system init = S<startS>|I<startI>;
+
+    predicate allRecovered = (#S+#I==0);

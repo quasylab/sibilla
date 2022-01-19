@@ -26,10 +26,7 @@ package it.unicam.quasylab.sibilla.shell;
 import it.unicam.quasylab.sibilla.core.runtime.SibillaModule;
 import it.unicam.quasylab.sibilla.core.runtime.SibillaRuntime;
 
-import java.io.Console;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.*;
 
 public class SibillaShell {
@@ -44,9 +41,24 @@ public class SibillaShell {
     }
 
     public static void main(String[] args) {
-        System.out.println(Arrays.toString(args));
-        SibillaShell shell = new SibillaShell();
-        shell.interactive();
+        if (args.length == 0) {
+            System.out.println(Arrays.toString(args));
+            SibillaShell shell = new SibillaShell();
+            shell.interactive();
+        } else {
+            runFiles(args);
+        }
+    }
+
+    private static void runFiles(String[] files) {
+        SibillaShellInterpreter interpreter = new SibillaShellInterpreter(System.out,System.err,new SibillaRuntime(),true);
+        for (String f: files) {
+            try {
+                interpreter.executeFile(f);
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+            }
+        }
     }
 
     private void interactive() {

@@ -58,7 +58,7 @@ public class CovidIGModel {
         SimulationEnvironment simulator = new SimulationEnvironment();
         Model<PopulationState> model = def.createModel();
         SamplingFunction<PopulationState> collection = model.selectSamplingFunction(SAMPLINGS,DEADLINE/SAMPLINGS);
-        simulator.simulate(model,def.state(),collection,REPLICA,DEADLINE);
+        simulator.simulate(model,def.state(),collection::getSamplingHandler,REPLICA,DEADLINE);
         collection.printTimeSeries("data","sir_",".data");
     }
 

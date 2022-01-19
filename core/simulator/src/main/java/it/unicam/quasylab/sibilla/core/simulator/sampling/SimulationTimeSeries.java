@@ -37,11 +37,11 @@ public class SimulationTimeSeries {
 	private final StatisticalSummary[] data;
 	private final double dt;
 	private final String name;
-	private final int replications;
+	private final long replications;
 	private boolean summary = false;
 
 
-	public SimulationTimeSeries(boolean summary, String name , double dt , int replications , StatisticalSummary[] data ) {
+	public SimulationTimeSeries(boolean summary, String name , double dt , long replications , StatisticalSummary[] data ) {
 		this.name = name;
 		this.dt = dt;
 		this.data = data;
