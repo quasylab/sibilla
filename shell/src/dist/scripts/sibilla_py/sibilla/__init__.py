@@ -11,7 +11,7 @@ import io
 SimulationMonitor = jnius.autoclass("it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor")
 ShellSimulationMonitor = jnius.autoclass("it.unicam.quasylab.sibilla.shell.ShellSimulationMonitor")
 FirstPassageTimeResults = jnius.autoclass("it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults")
-JavaConsoleStringCatcher = jnius.autoclass("it.unicam.quasylab.sibilla.shell.ShellStreamInterceptor")
+ConsoleOutputCapturer = jnius.autoclass("it.unicam.quasylab.sibilla.shell.ConsoleOutputCapturer")
 System = jnius.autoclass("java.lang.System")
 
 class Map(jnius.JavaClass, metaclass=jnius.MetaJavaClass):
@@ -44,9 +44,11 @@ class SibillaRuntime:
         return self.__runtime.info()
     
     def set_parameter(self, name: str, value: float):
-        jcsc = JavaConsoleStringCatcher()
+        coc = ConsoleOutputCapturer()
+        coc.start()
         self.__runtime.setParameter(name, value)
-        print(jcsc.getConsoleStream())
+        console_output = coc.stop()
+        print(console_output)
 
     def get_parameter(self, name: str):
         return self.__runtime.getParameter(name)
