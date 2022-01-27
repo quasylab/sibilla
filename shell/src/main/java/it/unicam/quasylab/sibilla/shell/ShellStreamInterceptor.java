@@ -20,7 +20,6 @@ public class ShellStreamInterceptor {
     public String getConsoleStream(){
         // Put things back
         System.out.flush();
-        System.out.close();
         System.setOut(this.old);
         String console_until_now = this.baos.toString();
         //System.out.close();
