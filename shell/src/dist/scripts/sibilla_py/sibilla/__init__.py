@@ -6,12 +6,12 @@ SSHELL_PATH = os.environ.get('SSHELL_PATH', '')
 jnius_config.add_classpath(os.path.join(SSHELL_PATH, 'lib', '*'))
 
 import jnius
-#from multimethod import multimethod
 import io
 
 SimulationMonitor = jnius.autoclass("it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor")
 ShellSimulationMonitor = jnius.autoclass("it.unicam.quasylab.sibilla.shell.ShellSimulationMonitor")
 FirstPassageTimeResults = jnius.autoclass("it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults")
+JavaConsoleStringCatcher = jnius.autoclass("it.unicam.quasylab.sibilla.shell.ShellStreamInterceptor")
 System = jnius.autoclass("java.lang.System")
 
 class Map(jnius.JavaClass, metaclass=jnius.MetaJavaClass):
@@ -24,7 +24,6 @@ class Map(jnius.JavaClass, metaclass=jnius.MetaJavaClass):
 class SibillaRuntime:
     def __init__(self):
         self.__runtime = jnius.autoclass("it.unicam.quasylab.sibilla.core.runtime.SibillaRuntime")()
-        #self.__ftp_result = jnius.autoclass("it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults")()
 
     def init_modules(self):
         self.__runtime.initModules()
@@ -45,7 +44,9 @@ class SibillaRuntime:
         return self.__runtime.info()
     
     def set_parameter(self, name: str, value: float):
+        jcsc = JavaConsoleStringCatcher()
         self.__runtime.setParameter(name, value)
+        print(jcsc.getConsoleStream())
 
     def get_parameter(self, name: str):
         return self.__runtime.getParameter(name)
@@ -62,13 +63,11 @@ class SibillaRuntime:
     def clear(self):
         self.__runtime.clear()
 
-    #@multimethod
-    def reset_all(self):
-        self.__runtime.reset()
-
-    #@multimethod
-    def reset(self, name: str):
-        self.__runtime.reset(name)
+    def reset(self, name: str = None):
+        if str == None:
+            self.__runtime.reset()
+        else:
+            self.__runtime.reset(name)
 
     def get_initial_configurations(self):
         return self.__runtime.getInitialConfigurations()
@@ -103,19 +102,14 @@ class SibillaRuntime:
     def remove_all_measures(self):
         self.__runtime.removeAllMeasures()
 
-    #@multimethod
-    def simulate_with_monitor(self, monitor: SimulationMonitor, label: str):
+    def simulate(self, label: str, monitor: SimulationMonitor = None):
         try:
-            return self.__runtime.simulate(monitor, label).to_dict()
+            if monitor == None:
+                return self.__runtime.simulate(label).to_dict()
+            else:
+                return self.__runtime.simulate(monitor, label).to_dict()
         except jnius.JavaException:
-            print("Internal Error")
-
-    #@multimethod
-    def simulate(self, label: str):
-        try:
-            return self.__runtime.simulate(label).to_dict()
-        except jnius.JavaException:
-            print("Internal Error")
+            print("Internal Error") 
 
     def use_descriptive_statistics(self):
         self.__runtime.useDescriptiveStatistics()
@@ -161,15 +155,13 @@ class SibillaRuntime:
 
     def get_seed(self):
         return self.__runtime.getSeed()
-
-    #@multimethod
-    def save(self, output_folder: str, prefix: str, postfix: str):
-        return self.__runtime.save(output_folder, prefix, postfix)
-
-    #@multimethod
-    def save_using_label(self, label: str, output_folder: str, prefix: str, postfix: str):
-        return self.__runtime.save(output_folder, prefix, postfix)
     
+    def save(self, output_folder: str, prefix: str, postfix: str, label: str = None):
+        if label == None:
+            return self.__runtime.save(output_folder, prefix, postfix)
+        else:
+            return self.__runtime.save(label,output_folder, prefix, postfix)
+
     def set_replica(self, replica: int):
         self.__runtime.setReplica(replica)
 
@@ -184,8 +176,8 @@ class SibillaRuntime:
     
     def get_predicates(self):
         return self.__runtime()
-    
-    def firstPassageTime_with_monitor(self, monitor: SimulationMonitor, predicate_name: str):
+
+    def firstPassageTime(self, predicate_name: str,monitor: SimulationMonitor = None):
         fpt_result = self.__runtime.firstPassageTime(monitor,predicate_name)
         results = {}
         if fpt_result.getTests()==0:
@@ -205,40 +197,9 @@ class SibillaRuntime:
         results['q3'] = fpt_result.getQ3()
         results['max'] = fpt_result.getMax()
         return results
-    
-    def firstPassageTime(self, predicate_name: str):
-        fpt_result = self.__runtime.firstPassageTime(None,predicate_name)
-        results = {}
-        if fpt_result.getTests()==0:
-            results['test'] = 0
-            return results
-        if fpt_result.getHits()==0:
-            results['test'] = fpt_result.getTests()
-            results['hits'] = 0
-            return results
-        results['test'] = fpt_result.getTests()
-        results['hits'] = fpt_result.getHits()
-        results['mean'] = fpt_result.getMean()
-        results['sd'] = fpt_result.getStandardDeviation()
-        results['min'] = fpt_result.getMin()
-        results['q1'] = fpt_result.getQ1()
-        results['q2'] = fpt_result.getQ2()
-        results['q3'] = fpt_result.getQ3()
-        results['max'] = fpt_result.getMax()
-        return results
 
-    #@multimethod
-    def compute_prob_reach_with_monitor(self, monitor: SimulationMonitor, goal: str, delta:float = 0.01 , epsilon:float = 0.01):
+    def compute_prob_reach(self,goal: str, delta:float = 0.01 , epsilon:float = 0.01, monitor: SimulationMonitor=None):
         return self.__runtime.computeProbReach(monitor,goal,delta,epsilon)
-
-    #@multimethod
-    def compute_prob_reach_on_condition_with_monitor(self, monitor: SimulationMonitor,condition: str, goal: str, delta:float = 0.01 , epsilon:float = 0.01):
-        return self.__runtime.computeProbReach(monitor,condition,goal,delta,epsilon)
     
-    #@multimethod
-    def compute_prob_reach(self, goal: str, delta:float = 0.01 , epsilon:float = 0.01):
-        return self.__runtime.computeProbReach(None,goal,delta,epsilon)
-
-    #@multimethod
-    def compute_prob_reach_on_condition(self, condition: str, goal: str, delta:float = 0.01 , epsilon:float = 0.01):
-        return self.__runtime.computeProbReach(None,condition,goal,delta,epsilon)
+    def compute_prob_reach_on_condition(self, condition: str, goal: str, delta:float = 0.01 , epsilon:float = 0.01, monitor: SimulationMonitor=None):
+        return self.__runtime.computeProbReach(monitor,condition,goal,delta,epsilon)
