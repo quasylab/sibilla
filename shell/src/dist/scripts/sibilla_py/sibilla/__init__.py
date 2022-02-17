@@ -265,6 +265,8 @@ class SibillaDataPlotter():
     self.cols = plotly.colors.DEFAULT_PLOTLY_COLORS
     self.data_color_map = self.get_data_color_dict()
     self.plot_template = 'plotly_white'
+    #for ensamble
+    self.show_sd = False
 
   def set_light_theme(self):
     self.plot_template = 'plotly_white'
@@ -315,8 +317,9 @@ class SibillaDataPlotter():
   def show_all_plots(self):
     self.plot_to_show = 'all'
   
-  def show_ensamble_plot(self):
+  def show_ensamble_plot(self,show_sd : bool = False):
     self.plot_to_show = 'ensamble'
+    self.show_sd = show_sd
   
   def show_details_plot(self):
     self.plot_to_show = 'details'
@@ -367,7 +370,7 @@ class SibillaDataPlotter():
     #lower sd
     self.figure_measures_details.add_trace(
         go.Scatter(x=time_step, 
-                   y=lower_bound_ci,
+                   y=lower_bound_sd,
                    marker=dict(color="#444"), 
                    line=dict(width=0), 
                    mode='lines', 
@@ -387,7 +390,7 @@ class SibillaDataPlotter():
                    showlegend=False),
               row=subplot_row, 
               col=2)
-    #upper sd
+    #upper ci
     self.figure_measures_details.add_trace(
         go.Scatter(x=time_step, 
                    y=upper_bound_ci,
@@ -397,7 +400,7 @@ class SibillaDataPlotter():
                    showlegend=False),
               row=subplot_row, 
               col=2)
-    #lower sd
+    #lower ci
     self.figure_measures_details.add_trace(
         go.Scatter(x=time_step, 
                    y=lower_bound_ci,
@@ -410,7 +413,6 @@ class SibillaDataPlotter():
               row=subplot_row, 
               col=2)
     
-  
   def plot_subplot_ensamble(self,key):
     self.select_data_to_plot()
     current_color =  self.data_color_map[key]
@@ -423,6 +425,48 @@ class SibillaDataPlotter():
                                                        name = key,
                                                        line=dict(color=current_color)),
               row=1, col=1)
+  
+  def plot_subplot_ensamble_sd(self,key):
+    self.select_data_to_plot()
+    current_color =  self.data_color_map[key]
+    current_background = current_color
+    current_background = current_background.replace('rgb','rgba')
+    current_background = current_background.replace(')',', 0.2)')
+    measure_statistics = self.data[key]
+    measure_statistics_t = [[measure_statistics[j][i] for j in range(len(measure_statistics))] for i in range(len(measure_statistics[0]))]
+    time_step = measure_statistics_t[0]
+    mean = measure_statistics_t[1]
+    sd = measure_statistics_t[2]
+
+    upper_bound_sd = [x + y for x, y in zip(mean, sd)]
+    lower_bound_sd = [x - y for x, y in zip(mean, sd)]
+    
+    self.figure_measures_ensamble.add_trace(go.Scatter(x=time_step, 
+                                                       y=mean,
+                                                       name = key,
+                                                       line=dict(color=current_color)),
+              row=1, col=1)
+    self.figure_measures_ensamble.add_trace(
+        go.Scatter(
+            x=time_step, 
+            y=upper_bound_sd,
+            mode='lines',
+            marker=dict(color="#444"),
+            line=dict(width=0),
+            showlegend=False),
+        row=1, 
+        col=1)
+    self.figure_measures_ensamble.add_trace(
+        go.Scatter(x=time_step, 
+                   y=lower_bound_sd,
+                   marker=dict(color="#444"), 
+                   line=dict(width=0), 
+                   mode='lines', 
+                   fillcolor=current_background, 
+                   fill='tonexty', 
+                   showlegend=False),
+        row=1, 
+        col=1)
 
   def plot_measures_details(self):
     plot_title = "Measures with standard deviation and confience interval"
@@ -455,16 +499,19 @@ class SibillaDataPlotter():
                                                template=self.plot_template) 
     self.figure_measures_details.show()
 
-  def plot_ensable_measures(self):
+  def plot_ensamble_measures(self):
     plot_title = "Measures ensamble"
     self.select_data_to_plot()
     self.figure_measures_ensamble = make_subplots(rows=1, cols=1,
                          shared_xaxes=True,
-                         vertical_spacing=0.1,
-                         subplot_titles=("Plot 1"))
+                         vertical_spacing=0.1)
     
     for key in self.key_to_plot:
-      self.plot_subplot_ensamble(key)
+      if(self.show_sd):
+          self.plot_subplot_ensamble_sd(key)
+      else:
+          self.plot_subplot_ensamble(key)
+
     self.figure_measures_ensamble.update_layout(width=800,
                                                 title_text=plot_title)
     self.figure_measures_ensamble.update_layout(xaxis=dict(rangeslider=dict(visible=True)),
@@ -474,9 +521,9 @@ class SibillaDataPlotter():
   def plot_data(self):
     if self.plot_to_show == 'all':
       self.plot_measures_details()
-      self.plot_ensable_measures()
+      self.plot_ensamble_measures()
     if self.plot_to_show == 'ensamble':
-      self.plot_ensable_measures()
+      self.plot_ensamble_measures()
     if self.plot_to_show == 'details':
       self.plot_measures_details()
 
@@ -484,9 +531,9 @@ class SibillaSimulationResult():
     def __init__(self,results: dict) -> None:
         self.results = results
 
-    def plot(self):
+    def plot(self,show_sd : bool = False):
         sp = SibillaDataPlotter(self.results) 
-        sp.show_ensamble_plot()
+        sp.show_ensamble_plot(show_sd)
         sp.plot_data()
 
     def get_results(self):
