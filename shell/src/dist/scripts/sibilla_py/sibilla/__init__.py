@@ -278,8 +278,8 @@ class SibillaDataPlotter():
     self.cols = plotly.colors.DEFAULT_PLOTLY_COLORS
     self.data_color_map = self.get_data_color_dict()
     self.plot_template = 'plotly_white'
-    if(are_we_in_colab()):
-        if(is_dark_theme_colab):
+    if(self.are_we_in_colab()):
+        if(self.is_dark_theme_colab):
             self.plot_template = 'plotly_dark'
     #for ensamble
     self.show_sd = False
