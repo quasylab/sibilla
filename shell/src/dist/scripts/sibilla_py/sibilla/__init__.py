@@ -128,6 +128,7 @@ class SibillaRuntime:
 
     def remove_all_measures(self):
         self.__runtime.removeAllMeasures()
+    
 
     def simulate(self, label: str, monitor: SimulationMonitor = None):
         """
@@ -141,28 +142,25 @@ class SibillaRuntime:
         :rtype: dict
 
         """
-        profiler = Profiler()
+    
         try:
             if monitor == None:
-                #sp_1 = Profiler()
-                #res_1 = sp_1.execute(calc,6)
-
-                #results = self.__runtime.simulate(label).to_dict()
-                #simulation_results = SibillaSimulationResult(results)
-                #return simulation_results
-                results = profiler.execute(self.__runtime.simulate,label)
-                simulation_results = SibillaSimulationResult(results,profiler)
+                results = self.__runtime.simulate(label).to_dict()
+                simulation_results = SibillaSimulationResult(results)
                 return simulation_results
             else:
-                #results = self.__runtime.simulate(monitor, label).to_dict()
-                #simulation_results = SibillaSimulationResult(results)
-                #return simulation_results
-                results = profiler.execute(self.__runtime.simulate,monitor,label)
-                simulation_results = SibillaSimulationResult(results,profiler)
+                results = self.__runtime.simulate(monitor, label).to_dict()
+                simulation_results = SibillaSimulationResult(results)
                 return simulation_results
         except jnius.JavaException:
             print("Internal Error") 
 
+    def profiled_simulation(self, label: str, monitor: SimulationMonitor = None):
+        profiler = Profiler()
+        results = profiler.execute(self.simulate,label,monitor)
+        simulation_results = SibillaSimulationResult(results,profiler)
+        return simulation_results
+        
     def use_descriptive_statistics(self):
         self.__runtime.useDescriptiveStatistics()
 
@@ -282,8 +280,25 @@ class SibillaDataPlotter():
     self.cols = plotly.colors.DEFAULT_PLOTLY_COLORS
     self.data_color_map = self.get_data_color_dict()
     self.plot_template = 'plotly_white'
+    if(are_we_in_colab()):
+        if(is_dark_theme_colab):
+            self.plot_template = 'plotly_dark'
     #for ensamble
     self.show_sd = False
+
+  def are_we_in_colab(self):
+      try:
+          import google.colab
+          return True
+      except:
+          return False
+  
+  def is_dark_theme_colab(self) -> bool:
+      try:
+          from google.colab import output
+          return output.eval_js('document.documentElement.matches("[theme=dark]")')
+      except:
+          return False
 
   def set_light_theme(self):
     self.plot_template = 'plotly_white'
