@@ -290,6 +290,20 @@ class SibillaDataPlotter():
   def set_dark_theme(self):
     self.plot_template = 'plotly_dark'
 
+  def are_we_in_colab(self) -> bool:
+    try:
+      import google.colab
+      return True
+    except:
+      return False
+  
+  def is_dark_theme_colab(self) -> bool:
+    try:
+      from google.colab import output
+      return output.eval_js('document.documentElement.matches("[theme=dark]")')
+    except:
+      return False
+
   def get_data_color_dict(self):
     keys_measures = [(key) for key in self.data if key.startswith('#')]
     color_dict = { }
