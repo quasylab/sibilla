@@ -142,22 +142,25 @@ class SibillaRuntime:
         :rtype: dict
 
         """
-    
-        try:
-            if monitor == None:
-                results = self.__runtime.simulate(label).to_dict()
-                simulation_results = SibillaSimulationResult(results)
-                return simulation_results
-            else:
-                results = self.__runtime.simulate(monitor, label).to_dict()
-                simulation_results = SibillaSimulationResult(results)
-                return simulation_results
-        except jnius.JavaException:
-            print("Internal Error") 
 
-    def profiled_simulation(self, label: str, monitor: SimulationMonitor = None):
+        def simulate_runtime(label: str, monitor: SimulationMonitor = None):
+            results = None
+            try:
+                if monitor == None:
+                    results = self.__runtime.simulate(label).to_dict()
+                else:
+                    results = self.__runtime.simulate(monitor, label).to_dict()
+            except:
+                print('Internal Error')
+            
+            simulation_results = SibillaSimulationResult(results)
+            return simulation_results
+        
         profiler = Profiler()
-        return profiler.execute(self.simulate,label,monitor)
+        s_r = profiler.execute(simulate_runtime,label,monitor)
+        s_r.set_profiler(profiler)
+        return s_r
+
         
     def use_descriptive_statistics(self):
         self.__runtime.useDescriptiveStatistics()
@@ -692,6 +695,10 @@ class SibillaSimulationResult():
         else:
             self.time_enlapsed = 'Not profiled'
             self.time_enlapsed = 'Not profiled'
+    
+    def set_profiler(self,profiler : Profiler):
+        self.time_enlapsed = profiler.time_required
+        self.memory_used = profiler.max_memory - profiler.min_memory
 
     def plot(self,show_sd : bool = False):
         sp = SibillaDataPlotter(self.results) 
