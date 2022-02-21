@@ -275,7 +275,7 @@ class SibillaRuntime:
     def  __enter__(self):
         return self
     def __exit__(self, type, value, traceback):
-        self.clean()
+        self.clear()
 
 class SibillaDataPlotter():
 
