@@ -156,7 +156,7 @@ class SibillaRuntime:
             simulation_results = SibillaSimulationResult(results)
             return simulation_results
         
-        profiler = Profiler()
+        profiler = Profiler(running_message="Simulating")
         s_r = profiler.execute(simulate_runtime,label,monitor)
         s_r.set_profiler(profiler)
         return s_r
@@ -271,6 +271,11 @@ class SibillaRuntime:
         cls.set_dt(dt)
         cls.set_replica(replica)
         return cls
+    
+    def  __enter__(self):
+        return self
+    def __exit__(self, type, value, traceback):
+        self.clean()
 
 class SibillaDataPlotter():
 
@@ -564,7 +569,6 @@ class SibillaDataPlotter():
       self.plot_ensamble_measures()
     if self.plot_to_show == 'details':
       self.plot_measures_details()
-
 
 class Profiler:
 
