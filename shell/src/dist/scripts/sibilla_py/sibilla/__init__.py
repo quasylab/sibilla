@@ -117,6 +117,10 @@ class SibillaRuntime:
     def set_measures(self, *measures: str):
         return self.__runtime.setMeasures(*measures)
 
+    def add_measures(self, *args):
+        for measure in args:
+            self.add_measure(measure)
+
     def add_measure(self, name: str):
         self.__runtime.addMeasure(name)
 
