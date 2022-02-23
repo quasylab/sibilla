@@ -250,10 +250,17 @@ class SibillaRuntime:
     def evaluate_reachability(self,goal: str, delta:float = 0.01 , epsilon:float = 0.01, condition: str = None, monitor: SimulationMonitor=None):
 
         def reachability_runtime(goal : str, delta : float, epsilon : float, condition : str, monitor : SimulationMonitor = None):
+            
+            result = None
+            
             if condition == None:
-                return self.__runtime.computeProbReach(monitor,goal,delta,epsilon)
+                result = self.__runtime.computeProbReach(monitor,goal,delta,epsilon)
             else:
-                return self.__runtime.computeProbReach(monitor,condition,goal,delta,epsilon)
+                result = self.__runtime.computeProbReach(monitor,condition,goal,delta,epsilon)
+            
+            reachabiliy_result = SibillaReachabilityResult(result,goal,delta,epsilon,condition)
+            return reachabiliy_result
+
         
         message = 'Evaluating the reachability of ' + goal 
         
