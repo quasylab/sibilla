@@ -257,7 +257,7 @@ class SibillaRuntime:
         
         message = 'Evaluating the reachability of ' + goal 
         
-        if condition == None:
+        if condition != None:
             message += ' satisfying the condition ' + condition
     
         profiler = Profiler(running_message = message ,done_message = "The reachability evaluation has been successfully completed")
