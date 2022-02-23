@@ -105,6 +105,9 @@ class SibillaRuntime:
         self.current_configuration_args = args
         return self.__runtime.setConfiguration(name, *args)
 
+    #
+    # TODO : need to be removed
+    #
     def check_loaded_module(self):
         self.__runtime.checkLoadedModule()
 
@@ -160,7 +163,7 @@ class SibillaRuntime:
             simulation_results = SibillaSimulationResult(results)
             return simulation_results
         
-        profiler = Profiler(running_message="Simulating")
+        profiler = Profiler(running_message="Simulating",done_message="The simulation has been successfully completed")
         s_r = profiler.execute(simulate_runtime,label,monitor)
         s_r.set_profiler(profiler)
         return s_r
@@ -232,35 +235,40 @@ class SibillaRuntime:
     def get_predicates(self):
         return self.__runtime()
 
-    def firstPassageTime(self, predicate_name: str,monitor: SimulationMonitor = None):
-        fpt_result = self.__runtime.firstPassageTime(monitor,predicate_name)
-        results = {}
-        if fpt_result.getTests()==0:
-            results['test'] = 0
-            return results
-        if fpt_result.getHits()==0:
-            results['test'] = fpt_result.getTests()
-            results['hits'] = 0
-            return results
-        results['test'] = fpt_result.getTests()
-        results['hits'] = fpt_result.getHits()
-        results['mean'] = fpt_result.getMean()
-        results['sd'] = fpt_result.getStandardDeviation()
-        results['min'] = fpt_result.getMin()
-        results['q1'] = fpt_result.getQ1()
-        results['q2'] = fpt_result.getQ2()
-        results['q3'] = fpt_result.getQ3()
-        results['max'] = fpt_result.getMax()
-        return results
+    def evaluate_frist_passage_time(self, predicate_name: str,monitor: SimulationMonitor = None):
+        
+        def ftp_runtime( predicate_name: str,monitor: SimulationMonitor = None):
+            fpt_result_runtime = self.__runtime.firstPassageTime(monitor,predicate_name)
+            fpt_result = SibillaFristPassageTimeResult(fpt_result_runtime)
+            return fpt_result
+        
+        profiler = Profiler(running_message="Evaluating fpt",done_message="The ftp evaluation has been successfully completed")
+        fpt_r = profiler.execute(ftp_runtime, predicate_name, monitor)
+        fpt_r.set_profiler(profiler)
+        return fpt_r
 
-    def compute_prob_reach(self,goal: str, delta:float = 0.01 , epsilon:float = 0.01, monitor: SimulationMonitor=None):
-        return self.__runtime.computeProbReach(monitor,goal,delta,epsilon)
+    def evaluate_reachability(self,goal: str, delta:float = 0.01 , epsilon:float = 0.01, condition: str = None, monitor: SimulationMonitor=None):
+        
+        def reachability_runtime(self, goal : str, delta : float, epsilon : float, condition : str, monitor : SimulationMonitor):
+            if condition == None:
+                return self.__runtime.computeProbReach(monitor,goal,delta,epsilon)
+            else:
+                return self.__runtime.computeProbReach(monitor,condition,goal,delta,epsilon)
+        
+        message = 'Evaluating the reachability of ' + goal 
+        
+        if condition == None:
+            message += ' satisfying the condition ' + condition
     
-    def compute_prob_reach_on_condition(self, condition: str, goal: str, delta:float = 0.01 , epsilon:float = 0.01, monitor: SimulationMonitor=None):
-        return self.__runtime.computeProbReach(monitor,condition,goal,delta,epsilon)
+        profiler = Profiler(running_message = message ,done_message = "The reachability evaluation has been successfully completed")
+        r_r = profiler.execute(reachability_runtime, goal, delta, epsilon, condition, monitor)
+
 
     @classmethod
     def from_population_model(cls, file_path : str, configuration : str = None, deadline : int = 100, dt : float = 1.0, replica : int = 100):
+        #
+        # TODO check this method
+        #    
         cls.reset()
         cls.load_module("population")
         cls.load_from_file(file_path)
@@ -672,7 +680,7 @@ class Profiler:
     self.animation = self.snake_animation
   
   def __str__(self):
-    str_to_ret = '\n'
+    str_to_ret = ''
     if(self.function_name != None):
       str_to_ret += f'Function name : {self.function_name} \n'
       str_to_ret += f'Time required : {self.time_required} s \n'
@@ -695,6 +703,15 @@ class Profiler:
     return str_to_ret
 
 class SibillaSimulationResult():
+
+
+    # TODO
+    #
+    # could be useful to have all the data of 
+    # the simulation dt, deadline, replica ...
+    #
+
+
     def __init__(self,results: dict, profiler : Profiler = None) -> None:
         self.results = results
         if profiler != None :
@@ -713,5 +730,134 @@ class SibillaSimulationResult():
         sp.show_ensamble_plot(show_sd)
         sp.plot_data()
 
+    def plot_detailed(self):
+        sp = SibillaDataPlotter(self.results) 
+        sp.show_details_plot()
+        sp.plot_data()
+
     def get_results(self):
         return self.results
+
+class SibillaFristPassageTimeResult():
+
+    def __init__(self,fpt_result : FirstPassageTimeResults):
+        
+        self.dict_result ={}
+
+        if fpt_result.getTests()==0:
+            self.dict_result['test'] = 0
+            return
+        
+        if fpt_result.getHits()==0:
+            self.dict_result['test'] = fpt_result.getTests()
+            self.dict_result['hits'] = 0
+            return 
+        
+        self.dict_result['test'] = fpt_result.getTests()
+        self.dict_result['hits'] = fpt_result.getHits()
+        self.dict_result['mean'] = fpt_result.getMean()
+        self.dict_result['sd'] = fpt_result.getStandardDeviation()
+        self.dict_result['min'] = fpt_result.getMin()
+        self.dict_result['q1'] = fpt_result.getQ1()
+        self.dict_result['q2'] = fpt_result.getQ2()
+        self.dict_result['q3'] = fpt_result.getQ3()
+        self.dict_result['max'] = fpt_result.getMax()
+
+    def to_dictionary(self):
+        return self.dict_result()
+    
+    def set_profiler(self,profiler : Profiler):
+        self.time_enlapsed = profiler.time_required
+        self.memory_used = profiler.max_memory - profiler.min_memory
+
+    def __repr__(self):
+        repr_to_ret = ''
+        repr_to_ret += f'test : { self.dict_result["test"] } - '
+        
+        if self.dict_result['test'] == 0:
+            return repr_to_ret
+        
+        repr_to_ret += f'hits : { self.dict_result["hits"] } - '
+        
+        if self.dict_result['hits'] == 0:
+            return repr_to_ret
+        
+        repr_to_ret += f'mean : { self.dict_result["mean"] } - '
+        repr_to_ret += f'sd : { self.dict_result["sd"] } - '
+        repr_to_ret += f'min : { self.dict_result["min"] } - '
+        repr_to_ret += f'q1 : { self.dict_result["q1"] } - '
+        repr_to_ret += f'q2 : { self.dict_result["q2"] } - '
+        repr_to_ret += f'q3 : { self.dict_result["q3"] } - '
+        repr_to_ret += f'max : { self.dict_result["max"] } - '
+        
+        return repr_to_ret
+
+    def __str__(self):
+        str_to_ret = '\n'        
+        str_to_ret += f'Test : { self.dict_result["test"] } \n '
+
+        if self.dict_result['test'] == 0:
+            return str_to_ret
+        
+        str_to_ret +=  f'Hits : { self.dict_result["hits"] } \n '
+
+        if self.dict_result['hits'] == 0:
+            return str_to_ret
+        
+        rounded_mean = round(self.dict_result["mean"], 2)
+        str_to_ret += f'Mean : { rounded_mean } \n '
+
+        rounded_sd = round(self.dict_result["sd"], 2)
+        str_to_ret += f'SD   : { rounded_sd } \n '
+
+        rounded_min = round(self.dict_result["min"], 2)
+        str_to_ret += f'Min  : { rounded_min } \n '
+
+        rounded_q1 = round(self.dict_result["q1"], 2)
+        str_to_ret += f'Q1   : { rounded_q1 } \n '
+
+        rounded_q2 = round(self.dict_result["q2"], 2)
+        str_to_ret += f'Q2   : { rounded_q2 } \n '
+
+        rounded_q3 = round(self.dict_result["q3"], 2)
+        str_to_ret += f'Q3   : { rounded_q3 } \n '
+
+        rounded_max = round(self.dict_result["max"], 2)
+        str_to_ret += f'Max  : { rounded_max } \n '
+
+        return str_to_ret
+
+class SibillaReachabilityResult():
+
+    def __init__(self,reach_result , goal: str, delta : float , epsilon : float , condition : str = None) -> None: 
+        self.result = reach_result
+        self.goal = goal
+        self.delta = delta
+        self.epsilon = epsilon
+        self.condition = condition
+
+    def set_profiler(self,profiler : Profiler):
+        self.time_enlapsed = profiler.time_required
+    
+    def __repr__(self):
+        repr_to_ret = ''
+        repr_to_ret += f'probability : { self.result } - '
+        repr_to_ret += f'goal : { self.goal } - '
+        repr_to_ret += f'delta : { self.delta } - '
+        repr_to_ret += f'epsilon : { self.epsilon } - '
+        if self.condition != None:
+            repr_to_ret += f'condition : { self.condition } '
+        return repr_to_ret
+
+    def __str__(self) -> str:
+        str_to_ret = '\n' 
+
+        str_to_ret += f'Probability of reaching {self.goal} is \n'
+        str_to_ret += f'{self.result} \n'
+        if self.condition != None:
+             str_to_ret += f'Fulfilling condition : {self.goal} \n'
+        str_to_ret += '\n'
+        str_to_ret += f'error prob (epsilon) :  {self.epsilon}\n'
+        str_to_ret += f'error gap  (delta)   :  {self.delta}\n'
+
+        return str_to_ret

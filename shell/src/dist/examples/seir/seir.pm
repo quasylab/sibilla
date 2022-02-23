@@ -12,7 +12,7 @@ species I;
 species R;
 
 rule exposure {
-    S|I -[ #S *% I* lambdaMeet * lambdaExposure ]-> E|I
+    S|I -[ #S *%I* lambdaMeet * lambdaExposure ]-> E|I
 }
 rule infection {
     E -[ #E* lambdaInfection ]-> I
