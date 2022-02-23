@@ -248,9 +248,8 @@ class SibillaRuntime:
         return fpt_r
 
     def evaluate_reachability(self,goal: str, delta:float = 0.01 , epsilon:float = 0.01, condition: str = None, monitor: SimulationMonitor=None):
-        
-        a = 1
-        def reachability_runtime(self, goal : str, delta : float, epsilon : float, condition : str, monitor : SimulationMonitor = None):
+
+        def reachability_runtime(goal : str, delta : float, epsilon : float, condition : str, monitor : SimulationMonitor = None):
             if condition == None:
                 return self.__runtime.computeProbReach(monitor,goal,delta,epsilon)
             else:
@@ -263,6 +262,8 @@ class SibillaRuntime:
     
         profiler = Profiler(running_message = message ,done_message = "The reachability evaluation has been successfully completed")
         r_r = profiler.execute(reachability_runtime, goal, delta, epsilon, condition, monitor)
+        r_r.set_profiler(profiler)
+        return r_r
 
 
     @classmethod
