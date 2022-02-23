@@ -848,6 +848,9 @@ class SibillaReachabilityResult():
     def set_profiler(self,profiler : Profiler):
         self.time_enlapsed = profiler.time_required
     
+    def to_float(self):
+        return self.result
+
     def __repr__(self):
         repr_to_ret = ''
         repr_to_ret += f'probability : { self.result } - '
@@ -864,7 +867,7 @@ class SibillaReachabilityResult():
         str_to_ret += f'Probability of reaching {self.goal} is \n'
         str_to_ret += f'{self.result} \n'
         if self.condition != None:
-             str_to_ret += f'Fulfilling condition : {self.goal} \n'
+             str_to_ret += f'Fulfilling condition : {self.condition} \n'
         str_to_ret += '\n'
         str_to_ret += f'error prob (epsilon) :  {self.epsilon}\n'
         str_to_ret += f'error gap  (delta)   :  {self.delta}\n'
