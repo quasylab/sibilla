@@ -23,5 +23,10 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
-public class YodaBehaviour {
+import java.io.Serializable;
+
+public interface YodaBehaviour extends Serializable {
+
+
+
 }

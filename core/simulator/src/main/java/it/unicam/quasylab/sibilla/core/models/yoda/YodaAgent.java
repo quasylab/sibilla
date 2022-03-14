@@ -37,16 +37,16 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 public final class YodaAgent {
 
     private final int identifier;
-    //private final YodaLambda[] agentLocalState;
+    private final VariableMapping agentLocalState;
     //private final YodaLambda[] agentObservations;
-    private final YodaAction agentActions;
+    //private final YodaAction agentActions;
     private final YodaBehaviour agentBehaviour;
 
-    public YodaAgent(int identifier, YodaAction agentActions, YodaBehaviour agentBehaviour) {
+    public YodaAgent(int identifier, VariableMapping agentLocalState,  YodaBehaviour agentBehaviour) {
         this.identifier = identifier;
-        //this.agentLocalState = agentLocalState;
+        this.agentLocalState = agentLocalState;
         //this.agentObservations = agentObservations;
-        this.agentActions = agentActions;
+        //this.agentActions = agentActions;
         this.agentBehaviour = agentBehaviour;
     }
 
@@ -54,9 +54,8 @@ public final class YodaAgent {
         return identifier;
     }
 
-
-
-    public YodaAction getAgentActions() {
-        return agentActions;
+    public VariableMapping getAgentLocalState(){
+        return agentLocalState;
     }
+
 }
