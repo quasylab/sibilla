@@ -53,7 +53,7 @@ public class TimeStep<S> {
      */
     public TimeStep(double time, S value) {
         Objects.nonNull(value);
-        if (time<0) {
+        if (time<=0) {
             System.out.println("time : "+time);
             throw new IllegalArgumentException(SibillaMessages.createdTimeStepWithNonPositiveTime(time));
         }
