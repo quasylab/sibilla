@@ -28,6 +28,8 @@ package it.unicam.quasylab.sibilla.core.models.pm;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Predicate;
 
 /**
@@ -40,15 +42,13 @@ public class ReactionRule implements PopulationRule, Serializable {
 
 	private final Predicate<PopulationState> guard;
 
-	private final Population[] reactants;
+	private final Map<Integer, Integer> reactants;
 	
-	private final Population[] products;
-
 	private final RatePopulationFunction rateFunction;
 	
 	private final String name;
 
-	private Update update;
+	private final Update update;
 	
 	/**
 	 * @param reactants
@@ -62,21 +62,28 @@ public class ReactionRule implements PopulationRule, Serializable {
 	public ReactionRule(String name, Predicate<PopulationState> guard, Population[] reactants, Population[] products, RatePopulationFunction rateFunction) {
 		super();
 		this.guard = guard;
-		this.reactants = reactants;
-		this.products = products;
+		this.reactants = new HashMap<>();
 		this.rateFunction = rateFunction;
 		this.name = name;
 		this.update = new Update(name);
-		initDrift();
+		initReactants(reactants);
+		initDrift(reactants, products);
+	}
+
+	private void initReactants(Population[] reactants) {
+		for (Population p: reactants) {
+			int value = this.reactants.getOrDefault(p.getIndex(), 0);
+			this.reactants.put(p.getIndex(), value+p.getSize());
+		}
 	}
 
 
-	private void initDrift() {
-		for( int i=0 ; i<reactants.length ; i++ ) {
-			this.update.consume(reactants[i].getIndex(), reactants[i].getSize());
+	private void initDrift(Population[] reactants, Population[] products) {
+		for (Population reactant : reactants) {
+			this.update.consume(reactant.getIndex(), reactant.getSize());
 		}
-		for( int i=0 ; i<products.length ; i++ ) {
-			this.update.produce(products[i].getIndex(), products[i].getSize());
+		for (Population product : products) {
+			this.update.produce(product.getIndex(), product.getSize());
 		}
 	}
 
@@ -84,7 +91,7 @@ public class ReactionRule implements PopulationRule, Serializable {
 	public PopulationTransition apply(RandomGenerator r, double now, PopulationState state) {
 		if (isEnabled(state)) {
 			double rate = rateFunction.apply(now,state);
-			if (rate>0) {
+			if (rate>0&&Double.isFinite(rate)) {
 				return new PopulationTransition(
 						name, 
 						rate, 
@@ -99,8 +106,8 @@ public class ReactionRule implements PopulationRule, Serializable {
 		if ((guard != null)&&(!guard.test(state))) {
 			return false;
 		}
-		for( int i=0 ; i<reactants.length ; i++ ) {
-			if (state.getOccupancy(reactants[i].getIndex())<reactants[i].getSize()) {
+		for (Map.Entry<Integer, Integer> e: this.reactants.entrySet()) {
+			if (state.getOccupancy(e.getKey())<e.getValue()) {
 				return false;
 			}
 		}

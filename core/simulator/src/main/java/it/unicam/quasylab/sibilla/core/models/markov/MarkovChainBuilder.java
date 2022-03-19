@@ -42,6 +42,6 @@ import java.util.function.Function;
 @FunctionalInterface
 public interface MarkovChainBuilder<M extends MarkovChainModel> {
 
-    M apply(VariableTable variableTable, List<MappingStateUpdate> rules, Map<String, Measure<MappingState>> measuresTable);
+    M apply(VariableTable variableTable, List<MappingStateUpdate> rules, Map<String, Measure<? super MappingState>> measuresTable);
 
 }

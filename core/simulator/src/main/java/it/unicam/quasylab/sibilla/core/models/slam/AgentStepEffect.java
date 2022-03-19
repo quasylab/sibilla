@@ -31,10 +31,10 @@ import java.util.List;
 public class AgentStepEffect {
 
     private final List<AgentMessage> sentMessages;
-    private final AgentState nextState;
+    private final AgentBehaviouralState nextState;
 
 
-    public AgentStepEffect(AgentState nextState, List<AgentMessage> sentMessages) {
+    public AgentStepEffect(AgentBehaviouralState nextState, List<AgentMessage> sentMessages) {
         this.sentMessages = sentMessages;
         this.nextState = nextState;
     }
@@ -43,7 +43,7 @@ public class AgentStepEffect {
         return sentMessages;
     }
 
-    public AgentState getNextState() {
+    public AgentBehaviouralState getNextState() {
         return nextState;
     }
 

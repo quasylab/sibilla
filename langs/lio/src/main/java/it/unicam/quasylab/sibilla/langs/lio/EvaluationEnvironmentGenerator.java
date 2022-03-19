@@ -23,16 +23,15 @@
 
 package it.unicam.quasylab.sibilla.langs.lio;
 
-public class DuplicatedNameException extends Throwable {
-    public String getMessage() {
-        return null;
-    }
+import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 
-    public int getLine() {
-        return -1;
-    }
+/**
+ * This visitor is used to generate the EvaluationEnvironment associated with a given specification.
+ */
+public class EvaluationEnvironmentGenerator extends LIOModelBaseVisitor<EvaluationEnvironment> {
 
-    public int getCharPositionInLine() {
-        return -1;
-    }
+
+
+
+
 }

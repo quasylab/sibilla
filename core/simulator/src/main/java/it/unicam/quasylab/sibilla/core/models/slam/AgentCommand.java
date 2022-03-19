@@ -42,11 +42,11 @@ public interface AgentCommand {
      * Executes an agent command and returns the list of messages sent by the agent.
      *
      * @param rg random generator used to sample random values.
-     * @param evaluator
+     * @param evaluator object used to evaluate expressions at global level.
      * @param memory agent memory where the command is executed.
      * @return the list of messages sent by the agent during the execution.
      */
-    List<AgentMessage> execute(RandomGenerator rg, GlobalStateExpressionEvaluator evaluator, AgentMemory memory);
+    List<AgentMessage> execute(RandomGenerator rg, GlobalStateExpressionEvaluator evaluator, AgentStore memory);
 
     /**
      * Returns an agent command that sequentially exectues each of the commands received as arguments and returns
@@ -72,7 +72,7 @@ public interface AgentCommand {
      * @param options the array of commands to execute.
      * @return the list of messages sent by the agent during the execution.
      */
-    static AgentCommand select(ToDoubleBiFunction<RandomGenerator,AgentMemory>[] weights, AgentCommand[] options) {
+    static AgentCommand select(ToDoubleBiFunction<RandomGenerator, AgentStore>[] weights, AgentCommand[] options) {
         if (weights.length != options.length) {
             throw new IllegalArgumentException();//TODO: Add Message!
         }
@@ -95,7 +95,7 @@ public interface AgentCommand {
      * @param elseCommand command that is executed if the condition is false.
      * @return the list of messages sent by the agent during the execution.
      */
-    static AgentCommand ifThenElse(Predicate<AgentMemory> condition, AgentCommand thenCommand, AgentCommand elseCommand ) {
+    static AgentCommand ifThenElse(Predicate<AgentStore> condition, AgentCommand thenCommand, AgentCommand elseCommand ) {
         return (rg, evaluator, m) -> {
             if (condition.test(m)) {
                 return thenCommand.execute(rg, evaluator, m);
@@ -113,7 +113,7 @@ public interface AgentCommand {
      * @param thenCommand command that is executed if the condition is true.
      * @return the list of messages sent by the agent during the execution.
      */
-    static AgentCommand ifCommand(Predicate<AgentMemory> condition, AgentCommand thenCommand) {
+    static AgentCommand ifCommand(Predicate<AgentStore> condition, AgentCommand thenCommand) {
         return ifThenElse(condition, thenCommand, SKIP);
     }
 
@@ -124,16 +124,16 @@ public interface AgentCommand {
     AgentCommand SKIP  = (rg, evaluator, m) -> List.of();
 
     /**
-     * Returns an agent command that updates the given memory by setting the variable with index <code>idx</code>
+     * Returns an agent command that updates the given memory by setting the given variable
      * to the result of the evaluation of <code>expr</code>.
      *
-     * @param idx variable index.
+     * @param var variable to set.
      * @param expr epression.
      * @return an empty list.
      */
-    static AgentCommand setCommand(int idx, BiFunction<RandomGenerator,AgentMemory,SlamValue> expr) {
+    static AgentCommand setCommand(AgentVariable var, BiFunction<RandomGenerator, AgentStore,SlamValue> expr) {
         return (rg, evaluator, m) -> {
-            m.set(idx, expr.apply(rg,m));
+            m.set(var, expr.apply(rg,m));
             return List.of();
         };
     }
@@ -144,7 +144,7 @@ public interface AgentCommand {
      * @param message the expression used to obtain the message to send.
      * @return the list containing the single sent message.
      */
-    static AgentCommand send(BiFunction<RandomGenerator, AgentMemory, AgentMessage> message) {
+    static AgentCommand send(BiFunction<RandomGenerator, AgentStore, AgentMessage> message) {
         return (rg, evaluator, m) -> List.of(message.apply(rg,m));
     }
 }

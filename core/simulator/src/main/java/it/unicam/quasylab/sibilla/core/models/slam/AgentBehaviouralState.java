@@ -34,18 +34,18 @@ import java.util.function.ToDoubleBiFunction;
  * This class represents the definition of an agent state. Each state is identified by
  * a name and by an index.
  */
-public final class AgentState {
+public final class AgentBehaviouralState {
 
     private final String stateName;
 
     private final int stateIndex;
 
-    private ToDoubleBiFunction<RandomGenerator, AgentMemory> sojournTimeFunction;
+    private ToDoubleBiFunction<RandomGenerator, AgentStore> sojournTimeFunction;
 
     private final List<MessageHandler> messageHandlers;
 
     private AgentStepFunction step;
-    private AgentDynamicFunction dynamicFunction;
+    private AgentTimePassingFunction timePassingFunction;
 
     /**
      * Creates a new state with the given name and the given index.
@@ -53,7 +53,7 @@ public final class AgentState {
      * @param stateIndex index of the created state.
      * @param stateName name of the created state.
      */
-    public AgentState(int stateIndex, String stateName) {
+    public AgentBehaviouralState(int stateIndex, String stateName) {
         this.stateIndex = stateIndex;
         this.messageHandlers = new LinkedList<>();
         this.stateName = stateName;
@@ -82,7 +82,7 @@ public final class AgentState {
      *
      * @return the function used to compute the sojourn time.
      */
-    public ToDoubleBiFunction<RandomGenerator, AgentMemory> getSojournTimeFunction() {
+    public ToDoubleBiFunction<RandomGenerator, AgentStore> getSojournTimeFunction() {
         return sojournTimeFunction;
     }
 
@@ -91,7 +91,7 @@ public final class AgentState {
      *
      * @param sojournTimeFunction the function used to compute the sojourn time.
      */
-    public void setSoujournTimeFunction(ToDoubleBiFunction<RandomGenerator, AgentMemory> sojournTimeFunction) {
+    public void setSoujournTimeFunction(ToDoubleBiFunction<RandomGenerator, AgentStore> sojournTimeFunction) {
         this.sojournTimeFunction = sojournTimeFunction;
     }
 
@@ -112,7 +112,7 @@ public final class AgentState {
      * @param message received message.
      * @return the step function to execute when the message is received.
      */
-    public Optional<AgentStepFunction> onReceive(AgentMemory memory, DeliveredMessage message) {
+    public Optional<AgentStepFunction> onReceive(AgentStore memory, DeliveredMessage message) {
         for (MessageHandler mh : messageHandlers) {
             if (mh.getPredicate().test(memory, message)) {
                 return Optional.of(mh.getHandlingFunction().apply(message));
@@ -142,10 +142,10 @@ public final class AgentState {
     /**
      * Sets the function that is used to compute the agent dynamic in this state.
      *
-     * @param dynamicFunction the function that is used to compute the agent dynamic in this state.
+     * @param timePassingFunction the function that is used to compute the agent dynamic in this state.
      */
-    public void setAgentDynamicFunction(AgentDynamicFunction dynamicFunction) {
-        this.dynamicFunction = dynamicFunction;
+    public void setTimePassingFunction(AgentTimePassingFunction timePassingFunction) {
+        this.timePassingFunction = timePassingFunction;
     }
 
     /**
@@ -155,9 +155,9 @@ public final class AgentState {
      * @param dt passed time units.
      * @param agentMemory agent memory.
      */
-    public void applyStateDynamic(RandomGenerator rg, double dt, AgentMemory agentMemory) {
-        if (this.dynamicFunction != null) {
-            this.dynamicFunction.update(rg, dt, agentMemory);
+    public void applyStateDynamic(RandomGenerator rg, double dt, AgentStore agentMemory) {
+        if (this.timePassingFunction != null) {
+            this.timePassingFunction.update(rg, dt, agentMemory);
         }
     }
 }

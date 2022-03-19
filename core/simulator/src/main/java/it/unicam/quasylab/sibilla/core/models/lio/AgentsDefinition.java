@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 import java.util.stream.IntStream;
 
 /**
@@ -39,7 +40,7 @@ public final class AgentsDefinition {
     private final ArrayList<Agent> agentIndex;
     private final Map<String,Agent> agents;
     private final Map<String,AgentAction> actions;
-    private final ArrayList<Function<LIOState,Double>> probabilityFunctions;
+    private final ArrayList<ToDoubleFunction<LIOState>> probabilityFunctions;
 
 
     /**
@@ -87,9 +88,9 @@ public final class AgentsDefinition {
      * @param probabilityFunction probability function.
      * @return the new created action.
      */
-    public AgentAction addAction(String name, Function<LIOState,Double> probabilityFunction) {
+    public AgentAction addAction(String name, ToDoubleFunction<LIOState> probabilityFunction) {
         if (actions.containsKey(name)) {
-            throw new IllegalStateException("Dupicated action name "+name);
+            throw new IllegalStateException("Duplicated action name "+name);
         }
         AgentAction action = new AgentAction(name,actionCounter++);
         actions.put(name,action);
@@ -114,7 +115,7 @@ public final class AgentsDefinition {
      * @return the function associating each action with a probability value.
      */
     public ActionsProbability getActionProbability(LIOState state) {
-        Double[] probs = probabilityFunctions.stream().map(f -> f.apply(state)).toArray(Double[]::new);
+        double[] probs = probabilityFunctions.stream().mapToDouble(f -> f.applyAsDouble(state)).toArray();
         return a -> probs[a.getIndex()];
     }
 

@@ -31,16 +31,16 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 public abstract class AbstractModel<S extends State> implements Model<S> {
-    protected final Map<String, Measure<S>> measuresTable;
-    protected final Map<String, Predicate<S>> predicatesTable;
+    protected final Map<String, Measure<? super S>> measuresTable;
+    protected final Map<String, Predicate<? super S>> predicatesTable;
 
-    public AbstractModel(Map<String, Measure<S>> measuresTable, Map<String, Predicate<S>> predicatesTable) {
+    public AbstractModel(Map<String, Measure<? super S>> measuresTable, Map<String, Predicate<? super S>> predicatesTable) {
         this.measuresTable = measuresTable;
         this.predicatesTable = predicatesTable;
     }
 
 
-    public AbstractModel(Map<String, Measure<S>> measuresTable) {
+    public AbstractModel(Map<String, Measure<? super S>> measuresTable) {
         this(measuresTable, new HashMap<>());
     }
 
@@ -49,19 +49,20 @@ public abstract class AbstractModel<S extends State> implements Model<S> {
     }
 
     public double measure(String m, S state) {
-        Measure<S> measure = measuresTable.get(m);
+        Measure<? super S> measure = measuresTable.get(m);
         if (measure == null) {
             throw new IllegalArgumentException("Species " + m + " is unknown!");
         }
         return measure.measure(state);
     }
 
-    public Measure<S> getMeasure(String m) {
+    @Override
+    public Measure<? super S> getMeasure(String m) {
         return measuresTable.get(m);
     }
 
     @Override
-    public Predicate<S> getPredicate(String name) {
+    public Predicate<? super S> getPredicate(String name) {
         return predicatesTable.get(name);
     }
 

@@ -26,22 +26,22 @@ package it.unicam.quasylab.sibilla.core.models;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class StateSet<T extends State> {
+public class ParametricDataSet<T> {
 
     private final Map<String,ParametricValue<T>> index;
     private ParametricValue<T> defaultState;
 
-    public StateSet() {
+    public ParametricDataSet() {
         this.index = new TreeMap<>();
         this.defaultState = null;
     }
 
-    public StateSet(ParametricValue<T> defaultState) {
+    public ParametricDataSet(ParametricValue<T> defaultState) {
         this();
         this.defaultState = defaultState;
     }
 
-    public StateSet(ParametricValue<T> defaultState, Map<String,ParametricValue<T>> states) {
+    public ParametricDataSet(ParametricValue<T> defaultState, Map<String,ParametricValue<T>> states) {
         this(defaultState);
         this.index.putAll(states);
     }
@@ -85,8 +85,8 @@ public class StateSet<T extends State> {
         this.index.put(name, stateBuilder);
     }
 
-    public static <T extends State> StateSet<T> newStateSet(T state) {
-        return new StateSet<>(new ParametricValue<>(state));
+    public static <T> ParametricDataSet<T> newStateSet(T state) {
+        return new ParametricDataSet<>(new ParametricValue<>(state));
     }
 
     public boolean isDefined(String name) {

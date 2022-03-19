@@ -151,7 +151,57 @@ class SibillaRuntimeTest {
             "\n" +
             "predicate consensus = (%S1==1.0)||(%S0==1.0);";
 
-
+    private final static String TEST_SHMNGR = "param lambda = 2; \t\t/* arrival rate [60,30,12,6] || or customer arrive per [1,2,5,10] minute */\n" +
+            "param mu = 1; \t\t\t/* service rate [60,30,12,6] || or customer served per [1,2,5,10] minute */\n" +
+            "param maxQueueL = 5;\t/* Max length of the queue [5,10,25] */\n" +
+            "param samplingRate = 1;\t/* every minute should be equal to dt */\n" +
+            "\n" +
+            "species person;\n" +
+            "species newCustomer;\n" +
+            "species customer;\n" +
+            "species servedCustomer;\n" +
+            "species waitingCustomer;\n" +
+            "species rejectedCustomer;\n" +
+            "species salesClerk;\n" +
+            "species busySalesClerk;\n" +
+            "\n" +
+            "const queueLength = 0;\t\t\t\t/* Initial length of the queue of waiting customers*/\n" +
+            "const startPerson = 10000;\t\t\t/* Pool of persons available */\n" +
+            "const startNewCustomer = 0;\t \t\t/* Initial number of customers */\n" +
+            "const startCustomer = 0;\t \t\t/* Initial number of customers */\n" +
+            "const startrejectedCustomer = 0;\t/* Initial number of customers */\n" +
+            "const startWaitingCustomer = 0;\t\t/* Initial number of customers --> Queue Length*/\n" +
+            "const startServedCustomer = 0;\t\t/* Initial number of customers */\n" +
+            "const startClerks = 1;\t\t\t\t/* Initial number of sales clerks [1,2,5] */ \n" +
+            "const startBusySalesClerk = 0;\t\t/* Initial number of busy sales clerks*/ \n" +
+            "\n" +
+            "/* -1- Rule when entering the Shop - each iteration a person enters*/\n" +
+            "rule person_to_newCustomer {\n" +
+            "\tperson-[1]->newCustomer\n" +
+            "}\n" +
+            "\n" +
+            "/* -2- Rule when slots are available and no queue - customer only served if sales clerk available and no waiting customer*/\n" +
+            "rule newCustomer_to_customer{\n" +
+            "\tnewCustomer|salesClerk-[(#salesClerk>0?1:0)*(#waitingCustomer>0?0:1)]->customer|busySalesClerk\n" +
+            "}\n" +
+            "\n" +
+            "/* -3- Rule when no slots are available and queue possible - customer added to the queue if no clerk available and queue still with free spots  */ \n" +
+            "/* \t   Customer will be rejected in case the queue is full - FIFO applied */\n" +
+            "rule newCustomer_to_waitingCustomer{\n" +
+            "\tnewCustomer|newCustomer-[(#waitingCustomer<maxQueueL?1:0)*(#salesClerk==0?1:0)]->waitingCustomer|rejectedCustomer\n" +
+            "}\n" +
+            "\n" +
+            "/* -4- Rule when customer can leave the queue and is getting served - can only leave the queue if clerk is available*/\n" +
+            "rule waitingCustomer_to_customer{\n" +
+            "\twaitingCustomer|salesClerk-[(#salesClerk>0)?1:0]->customer|busySalesClerk\n" +
+            "}\n" +
+            "\n" +
+            "/* -5- Rule when the customer is completely served and sales clerk gets available */\n" +
+            "rule customer_to_servedCustomer {\n" +
+            "\tcustomer|customer|busySalesClerk|busySalesClerk-[lambda/(#salesClerk*mu)]->customer|servedCustomer|busySalesClerk|salesClerk\n" +
+            "}\n" +
+            "\n" +
+            "system shop=person<startPerson>|newCustomer<startNewCustomer>|customer<startCustomer>|salesClerk<startClerks>|servedCustomer<startServedCustomer>|waitingCustomer<startWaitingCustomer>|rejectedCustomer<startrejectedCustomer>|busySalesClerk<startBusySalesClerk>;";
 
     @Test
     public void shouldSelectPopulationModule() throws CommandExecutionException {
@@ -254,6 +304,17 @@ class SibillaRuntimeTest {
         sr.setConfiguration("start");
         res = sr.firstPassageTime(null, "done");
         assertEquals(1.0/3.0, res.getMean(),0.1);
+    }
+
+    @Test
+    public void testShopManager() throws CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.load(TEST_SHMNGR);
+        sr.setConfiguration("shop");
+        sr.setDeadline(100.0);
+        sr.setReplica(1);
+        sr.setDt(1);
+        sr.simulate("test");
     }
 
 }

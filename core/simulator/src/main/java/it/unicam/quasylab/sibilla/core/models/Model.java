@@ -41,13 +41,6 @@ import java.util.function.Supplier;
 public interface Model<S extends State> extends Serializable {
 
     /**
-     * Returns the simulator cursor that starts from the given initial state.
-     *
-     * @param initialState starting state in the created cursor.
-     */
-    SimulatorCursor<S> createSimulationCursor(RandomGenerator r, S initialState);
-
-    /**
      * Returns the simulator cursor that start from the initial state resulting from evaluation of
      * the given function..
      *
@@ -102,7 +95,7 @@ public interface Model<S extends State> extends Serializable {
      * @param m measure name.
      * @return the measure with name <code>m</code>.
      */
-    Measure<S> getMeasure(String m);
+    Measure<? super S> getMeasure(String m);
 
 
     /**
@@ -111,7 +104,7 @@ public interface Model<S extends State> extends Serializable {
      * @param name predicate name.
      * @return the predicate associated with the given name.
      */
-    Predicate<S> getPredicate(String name);
+    Predicate<? super S> getPredicate(String name);
 
     /**
      * Returns the array containing the names of predicates defined in this model.
@@ -119,6 +112,7 @@ public interface Model<S extends State> extends Serializable {
      * @return the array containing the names of predicates defined in this model.
      */
     String[] predicates();
+
 
     /**
      * Returns the samplings that can be used to collect simulation data of the
@@ -138,7 +132,7 @@ public interface Model<S extends State> extends Serializable {
      * Returns the samplings that can be used to collect simulation data of the
      * given measures.
      *
-     * @param summary true if summary statistics statistics is used.
+     * @param summary true if summary statistics is used.
      * @param samplings number of samplings to collect.
      * @param dt        time gap among two samplings.
      * @param measures  neames of measures to collect.
@@ -149,7 +143,7 @@ public interface Model<S extends State> extends Serializable {
         if (measures.length == 0)
             return new SamplingCollection<>();
         if (measures.length == 1) {
-            Measure<S> m = getMeasure(measures[0]);
+            Measure<? super S> m = getMeasure(measures[0]);
             if (m != null)
                 return getSamplingStatistic(summary, samplings, dt, m);
         } else {
@@ -161,7 +155,7 @@ public interface Model<S extends State> extends Serializable {
         return new SamplingCollection<>();
     }
 
-    default SamplingFunction<S> getSamplingStatistic(boolean summary, int samplings, double dt, Measure<S> m) {
+    default SamplingFunction<S> getSamplingStatistic(boolean summary, int samplings, double dt, Measure<? super S> m) {
         if (summary) {
             return new SummaryStatisticSampling<>(samplings, dt, m);
         } else {
@@ -196,4 +190,6 @@ public interface Model<S extends State> extends Serializable {
         }
         return toReturn;
     }
+
+
 }

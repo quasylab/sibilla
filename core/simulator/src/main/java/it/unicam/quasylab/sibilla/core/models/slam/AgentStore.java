@@ -23,41 +23,53 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
-import java.util.Arrays;
-import java.util.function.IntFunction;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents the memory of an agent.
  */
-public final class AgentMemory {
+public final class AgentStore {
 
     private double now;
 
-    private final SlamValue[] content;
+    private final Map<AgentVariable,SlamValue> content;
+
+    /**
+     * Creates an empty memory at time 0.
+     */
+    public AgentStore() {
+        this(Map.of());
+    }
 
     /**
      * Creates a new memory with the given content.
      *
      * @param content memory content.
      */
-    public AgentMemory(SlamValue ... content) {
+    public AgentStore(Map<AgentVariable, SlamValue> content) {
         this(0.0, content);
     }
 
-    public AgentMemory(double now, SlamValue ... content) {
+    /**
+     * Creates a new memory at the given time and given content-
+     * @param now current time.
+     * @param content initial content.
+     */
+    public AgentStore(double now, Map<AgentVariable, SlamValue> content) {
         this.now = now;
-        this.content = content;
+        this.content = new HashMap<>(content);
     }
 
     /**
-     * Returns the value of the variable associated with the given index. An {@link IndexOutOfBoundsException} is
-     * thrown if an invalid index is passed.
+     * Returns the value associated with the given variable in this memory. Value {@link SlamValue#NONE} is
+     * returned when the variable is not defined in this memory.
      *
-     * @param idx variable index.
+     * @param var variable.
      * @return the value of the variable associated with the given index.
      */
-    public SlamValue getValue(int idx) {
-        return content[idx];
+    public SlamValue getValue(AgentVariable var) {
+        return content.getOrDefault(var, SlamValue.NONE);
     }
 
     /**
@@ -66,17 +78,16 @@ public final class AgentMemory {
      * @return the number of cells used in this memory.
      */
     public synchronized int size() {
-        return content.length;
+        return content.size();
     }
 
     /**
-     * Sets the value of the given variable to the given value. An {@link IndexOutOfBoundsException} is
-     * thrown if an invalid index is passed.
-     * @param idx variable index.
+     * Assigns the given variable with the given value in memory.
+     * @param var variable to assign.
      * @param value  variable value.
      */
-    public synchronized void set(int idx, SlamValue value) {
-        content[idx] = value;
+    public synchronized void set(AgentVariable var, SlamValue value) {
+        content.put(var, value);
     }
 
     public synchronized double now() {
@@ -85,6 +96,7 @@ public final class AgentMemory {
 
     public synchronized void recordTime(double dt) {
         this.now += dt;
+
     }
 
 }

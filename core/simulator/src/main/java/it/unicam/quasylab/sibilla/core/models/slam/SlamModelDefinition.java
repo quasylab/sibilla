@@ -23,22 +23,27 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
+import it.unicam.quasylab.sibilla.core.models.AbstractModelDefinition;
+import it.unicam.quasylab.sibilla.core.models.Model;
+import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import org.apache.commons.math3.random.RandomGenerator;
 
-/**
- * This functional interface is used to update the agent memory when time is passing.
- */
-@FunctionalInterface
-public interface AgentDynamicFunction {
+import java.util.function.Function;
 
-    /**
-     * Updates the given memory by considering that <code>dt</code> time units are passed.
-     *
-     * @param rg random generator used to sample random values.
-     * @param dt passed time units.
-     * @param memory current agent memory.
-     */
-    void update(RandomGenerator rg, double dt, AgentMemory memory);
+public class SlamModelDefinition extends AbstractModelDefinition<SlamState> {
 
+    @Override
+    protected void clearCache() {
 
+    }
+
+    @Override
+    public ParametricDataSet<Function<RandomGenerator, SlamState>> getStates() {
+        return null;
+    }
+
+    @Override
+    public Model<SlamState> createModel() {
+        return null;
+    }
 }

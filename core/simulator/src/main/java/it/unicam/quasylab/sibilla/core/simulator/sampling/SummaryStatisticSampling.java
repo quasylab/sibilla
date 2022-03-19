@@ -62,7 +62,7 @@ public class SummaryStatisticSampling<S extends State> extends StatisticSampling
 
 
 
-	public SummaryStatisticSampling(int samples, double dt, Measure<S> measure) {
+	public SummaryStatisticSampling(int samples, double dt, Measure<? super S> measure) {
 		super(measure, dt);
 		this.data = new SummaryStatistics[samples];
 		init();
