@@ -23,10 +23,29 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
+import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
+import org.apache.commons.math3.random.RandomGenerator;
+
 import java.io.Serializable;
 
 public interface YodaBehaviour extends Serializable {
 
+    /**
+     * This method returns a distribution of possible actions
+     *
+     * @param rg a random generator
+     * @param currentInternalState the current internal state of the agent
+     * @param observations the available observations of the agent
+     * @return a distribution of possible actions
+     */
+    WeightedStructure<YodaAction> evaluate(RandomGenerator rg, YodaVariableMapping currentInternalState, YodaVariableMapping observations);
 
-
+    /**
+     * This method returns a single action from a distribution of actions
+     *
+     * @param rg a random generator
+     * @param actionsDistribution a distribution of actions derived from the behaviour evaluation
+     * @return a single action from a distribution of actions
+     */
+    YodaAction selectAction(RandomGenerator rg, WeightedStructure<YodaAction> actionsDistribution);
 }

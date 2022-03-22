@@ -25,10 +25,27 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 
 public interface YodaVariableMapping {
 
+    /**
+     * This method returns the value associated to an input variable
+     *
+     * @param variable the variable to search
+     * @return the value associated to an input variable
+     */
     YodaValue getValue(YodaVariable variable);
 
+    /**
+     * This method sets an input value to a certain input variable
+     *
+     * @param variable an input variable
+     * @param value an input value
+     */
     void setValue(YodaVariable variable, YodaValue value);
 
+    /**
+     * This method returns a copy of the original map
+     *
+     * @return a copy of the original map
+     */
     YodaVariableMapping copy();
 
 }

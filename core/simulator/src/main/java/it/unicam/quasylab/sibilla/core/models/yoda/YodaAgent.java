@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
+import org.apache.commons.math3.random.RandomGenerator;
+
 /**
  * The class <code>YodaAgent</code> represents the agents available in the simulation
  * Each one has the following components:
@@ -37,25 +39,51 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 public final class YodaAgent {
 
     private final int identifier;
-    private final VariableMapping agentLocalState;
-    //private final YodaLambda[] agentObservations;
-    //private final YodaAction agentActions;
+    private YodaVariableMapping agentLocalState;
     private final YodaBehaviour agentBehaviour;
 
-    public YodaAgent(int identifier, VariableMapping agentLocalState,  YodaBehaviour agentBehaviour) {
+    public YodaAgent(int identifier, YodaVariableMappingWrapper agentLocalState, YodaBehaviour agentBehaviour) {
         this.identifier = identifier;
         this.agentLocalState = agentLocalState;
-        //this.agentObservations = agentObservations;
-        //this.agentActions = agentActions;
         this.agentBehaviour = agentBehaviour;
     }
 
+    /**
+     * This method returns the identifier of the agent
+     *
+     * @return the identifier of the agent
+     */
     public int getIdentifier() {
         return identifier;
     }
 
-    public VariableMapping getAgentLocalState(){
+    /**
+     * This method returns the agent local state
+     *
+     * @return the agent local state
+     */
+    public YodaVariableMapping getAgentLocalState(){
         return agentLocalState;
     }
 
+    /**
+     * This method returns the agent behaviour
+     *
+     * @return the agent behaviour
+     */
+    public YodaBehaviour getAgentBehaviour() {
+        return agentBehaviour;
+    }
+
+    /**
+     * This method returns the updated state of this agent
+     *
+     * @param rg a random generator
+     * @param action the action that the agent should perform
+     * @return the updated state of this agent
+     */
+    public YodaVariableMapping update(RandomGenerator rg, YodaAction action){
+        YodaVariableMapping newState = action.performAction(rg, agentLocalState);
+        return agentLocalState = newState;
+    }
 }
