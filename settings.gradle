@@ -31,6 +31,7 @@ include 'core:simulator',
     	'examples:benchmarks:slave',
    	 	'examples:benchmarks:master',
 		'examples:agents:RobotAgents',
-		'examples:lio:seir',
+    'view',
+    'examples:lio:seir',
 		'examples:lio:rb'
 
