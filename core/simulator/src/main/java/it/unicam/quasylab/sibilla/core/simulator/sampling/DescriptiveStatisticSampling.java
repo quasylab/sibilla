@@ -64,7 +64,7 @@ public class DescriptiveStatisticSampling<S extends State> extends StatisticSamp
 
 
 
-	public DescriptiveStatisticSampling(int samples, double dt, Measure<S> measure) {
+	public DescriptiveStatisticSampling(int samples, double dt, Measure<? super S> measure) {
 		super(measure, dt);
 		this.data = new DescriptiveStatistics[samples];
 		init();

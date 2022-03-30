@@ -31,6 +31,7 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.TrajectoryCollector;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
@@ -73,37 +74,49 @@ public class SimulationEnvironment implements Serializable {
 	/**
 	 * Performs a given number of simulations of a given {@link Model} a new set of
 	 * simulations. Data are collected via a {@link SamplingFunction}. A monitor is
-	 * passed to control simulation.
+	 * passed to control simulation. The starting state of the simulation is obtained by
+	 * using the <code>initialStateSupplier</code> passed as argument.
 	 *
 	 * @param model             model to simulate.
-	 * @param initialState      initial state.
+	 * @param initialStateSupplier      initial state supplier.
 	 * @param handlerSupplier 	supplier used to build the function used to collect data from the sampled trajectories.
 	 * @param iterations        number of iterations.
 	 * @param deadline          simulation deadline.
 	 *
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
-	public <S extends State> void simulate(Model<S> model, S initialState, Supplier<SamplingHandler<S>> handlerSupplier,
-			int iterations, double deadline) throws InterruptedException {
-		simulate(null, new DefaultRandomGenerator(), model, initialState, handlerSupplier, iterations, deadline);
+	public <S extends State> void simulate(
+			Model<S> model,
+			Function<RandomGenerator,S> initialStateSupplier,
+			Supplier<SamplingHandler<S>> handlerSupplier,
+			int iterations,
+			double deadline) throws InterruptedException {
+		simulate(null, new DefaultRandomGenerator(), model, initialStateSupplier, handlerSupplier, iterations, deadline);
 	}
 
 	/**
 	 * Performs a given number of simulations of a given {@link Model} a new set of
 	 * simulations. Data are collected via a {@link SamplingFunction}. A monitor is
-	 * passed to control simulation.
+	 * passed to control simulation.The starting state of the simulation is obtained by
+	 * using the <code>initialStateSupplier</code> passed as argument.
 	 *
 	 * @param random            random generator used in the simulation.
 	 * @param model             model to simulate.
-	 * @param initialState      initial state.
+	 * @param initialStateSupplier      initial state supplier.
 	 * @param handlerSupplier 	supplier used to build the function used to collect data from the sampled trajectories.
 	 * @param iterations        number of iterations.
 	 * @param deadline          simulation deadline.
 	 *
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
-	public <S extends State> void simulate(RandomGenerator random, Model<S> model, S initialState, Supplier<SamplingHandler<S>> handlerSupplier, long iterations, double deadline) throws InterruptedException {
-		simulate(null, random, model, initialState, handlerSupplier, iterations, deadline);
+	public <S extends State> void simulate(
+			RandomGenerator random,
+			Model<S> model,
+			Function<RandomGenerator,S> initialStateSupplier,
+			Supplier<SamplingHandler<S>> handlerSupplier,
+			long iterations,
+			double deadline) throws InterruptedException {
+		simulate(null, random, model, initialStateSupplier, handlerSupplier, iterations, deadline);
 	}
 
 	/**
@@ -114,18 +127,24 @@ public class SimulationEnvironment implements Serializable {
 	 * @param monitor           monitor used to control simulation.
 	 * @param random            random generator used in the simulation.
 	 * @param model             model to simulate.
-	 * @param initialState      initial state.
+	 * @param initialStateSupplier      initial state supplier.
 	 * @param handlerSupplier 	supplier used to create the function used to collect data from the sampled trajectories.
 	 * @param iterations        number of iterations.
 	 * @param deadline          simulation deadline.
 	 *
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
-	public <S extends State> void simulate(SimulationMonitor monitor, RandomGenerator random, Model<S> model,
-										   S initialState, Supplier<SamplingHandler<S>> handlerSupplier, long iterations, double deadline)
+	public <S extends State> void simulate(
+			SimulationMonitor monitor,
+			RandomGenerator random,
+			Model<S> model,
+			Function<RandomGenerator,S> initialStateSupplier,
+			Supplier<SamplingHandler<S>> handlerSupplier,
+			long iterations,
+			double deadline)
 			throws InterruptedException {
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, monitor);
-		SimulationUnit<S> unit = new SimulationUnit<>(model, initialState, handlerSupplier,
+		SimulationUnit<S> unit = new SimulationUnit<>(model, initialStateSupplier, handlerSupplier,
 				SamplePredicate.timeDeadlinePredicate(deadline));
 		for (long i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			simulationManager.simulate(unit);
@@ -156,7 +175,7 @@ public class SimulationEnvironment implements Serializable {
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
 	public <S extends State> double reachability(double errorProbability, double delta, double deadline, Model<S> model,
-			S state, StatePredicate<? super S> goal) throws InterruptedException {
+			Function<RandomGenerator,S> state, StatePredicate<? super S> goal) throws InterruptedException {
 		return reachability(new DefaultRandomGenerator(), errorProbability, delta, deadline, model, state, s -> true,
 				goal);
 	}
@@ -180,7 +199,7 @@ public class SimulationEnvironment implements Serializable {
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
 	public <S extends State> double reachability(double errorProbability, double delta, double deadline, Model<S> model,
-			S state, StatePredicate<? super S> condition, StatePredicate<? super S> goal) throws InterruptedException {
+			Function<RandomGenerator,S> state, StatePredicate<? super S> condition, StatePredicate<? super S> goal) throws InterruptedException {
 		return reachability(new DefaultRandomGenerator(), errorProbability, delta, deadline, model, state, condition,
 				goal);
 	}
@@ -205,7 +224,7 @@ public class SimulationEnvironment implements Serializable {
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
 	public <S extends State> double reachability(RandomGenerator random, double errorProbability, double delta,
-			double deadline, Model<S> model, S state, StatePredicate<? super S> condition,
+			double deadline, Model<S> model, Function<RandomGenerator,S> state, StatePredicate<? super S> condition,
 			StatePredicate<? super S> goal) throws InterruptedException {
 		return reachability(null, random, errorProbability, delta, deadline, model, state, condition, goal);
 	}
@@ -231,7 +250,7 @@ public class SimulationEnvironment implements Serializable {
 	 * @throws InterruptedException is thrown when simulation is interrupted.
 	 */
 	public <S extends State> double reachability(SimulationMonitor monitor, RandomGenerator random,
-			double errorProbability, double delta, double deadline, Model<S> model, S state,
+			double errorProbability, double delta, double deadline, Model<S> model, Function<RandomGenerator,S> state,
 			StatePredicate<? super S> condition, StatePredicate<? super S> goal) throws InterruptedException {
 		ReachabilityChecker<S> reachabilityChecker = new ReachabilityChecker<S>(condition, goal);
 		double n = Math.ceil(Math.log(2 / delta) / (2 * Math.pow(errorProbability,2)));

@@ -30,10 +30,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 public abstract class StatisticSampling<S extends State> implements SamplingFunction<S> {
-    protected final Measure<S> measure;
+    protected final Measure<? super S> measure;
     protected final double dt;
 
-    public StatisticSampling(Measure<S> measure, double dt) {
+    public StatisticSampling(Measure<? super S> measure, double dt) {
         this.measure = measure;
         this.dt = dt;
     }

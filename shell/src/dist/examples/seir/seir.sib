@@ -1,9 +1,9 @@
 module "population"
 load "examples/seir/seir.pm"
-init "initial_2"
+init "init"
 add all measures
 deadline 100
-dt 0.5
+dt 1.0
 replica 100
 simulate
 save output "./results" prefix "seir" postfix "__"

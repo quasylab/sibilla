@@ -92,6 +92,17 @@ public class EvaluationEnvironment {
     }
 
     /**
+     * Adds a new parameter in the environment with the given value.
+     *
+     * @param name
+     * @param value
+     */
+    public synchronized void define(String name, double value) {
+        this.attributes.put(name, value);
+        this.values.put(name, value);
+    }
+
+    /**
      * Register a parameter with a given default value.
      *
      * @param name name of a parameter.
@@ -193,5 +204,9 @@ public class EvaluationEnvironment {
                 return d;
             }
         };
+    }
+
+    public boolean isDefined(String name) {
+        return attributes.containsKey(name)||constants.isDefined(name);
     }
 }

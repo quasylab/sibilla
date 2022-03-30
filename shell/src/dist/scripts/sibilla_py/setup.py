@@ -8,8 +8,7 @@ setup(
     install_requires=[
         'Cython',
         'pyjnius',
-        'memory_profiler',
-        'plotly',
+        'multimethod',
     ],
 )
 

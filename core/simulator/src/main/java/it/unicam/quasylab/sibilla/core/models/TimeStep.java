@@ -49,12 +49,11 @@ public class TimeStep<S> {
      * Creates a new time step with a specified length and value.
      *
      * @param time the length of time step. This value must be greater than 0.
-     * @param value the value at the end of time step. This must be a non null value.
+     * @param value the value at the end of time step. This must be a no null value.
      */
     public TimeStep(double time, S value) {
-        Objects.nonNull(value);
+        Objects.requireNonNull(value);
         if (time<=0) {
-            System.out.println("time : "+time);
             throw new IllegalArgumentException(SibillaMessages.createdTimeStepWithNonPositiveTime(time));
         }
         this.time = time;

@@ -48,22 +48,22 @@ class SibillaRuntime:
 
     def init_modules(self):
         self.__runtime.initModules()
-    
+
     def get_modules(self):
         return self.__runtime.getModules()
 
     def load_module(self, name):
         self.__runtime.loadModule(name)
-    
+
     def load_from_file(self, file_name: str):
         self.__runtime.loadFromFile(file_name)
 
     def load(self, code: str):
         self.__runtime.load(code)
-    
+
     def info(self):
         return self.__runtime.info()
-    
+
     def set_parameter(self, name: str, value: float, keep_configuration : bool = False, silent : bool = True):
         self.__runtime.setParameter(name, value)
         message = name  + ' changed to '+str(value)
@@ -78,13 +78,13 @@ class SibillaRuntime:
 
     def get_parameters(self):
         return self.__runtime.getParameters()
-    
+
     def get_evaluation_environment(self):
         try:
             return self.__runtime.getEvaluationEnvironment().to_dict()
         except jnius.JavaException:
             print("Internal Error")
-    
+
     def clear(self):
         self.__runtime.clear()
 
@@ -135,19 +135,16 @@ class SibillaRuntime:
 
     def remove_all_measures(self):
         self.__runtime.removeAllMeasures()
-    
+
 
     def simulate(self, label: str, monitor: SimulationMonitor = None):
         """
-        perform the simulation on a defined model, to call simulate 
+        perform the simulation on a defined model, to call simulate
         dt, deadline, must have been previously set
-
         :param str label: a label attributed to the simulation being performed
         :param SimulationMonitor monitor: a monitor for the simulation
-
         :return: the simulation statistics results
         :rtype: dict
-
         """
 
         def simulate_runtime(label: str, monitor: SimulationMonitor = None):
@@ -159,16 +156,16 @@ class SibillaRuntime:
                     results = self.__runtime.simulate(monitor, label).to_dict()
             except:
                 print('Internal Error')
-            
+
             simulation_results = SibillaSimulationResult(results)
             return simulation_results
-        
+
         profiler = Profiler(running_message="Simulating",done_message="The simulation has been successfully completed")
         s_r = profiler.execute(simulate_runtime,label,monitor)
         s_r.set_profiler(profiler)
         return s_r
 
-        
+
     def use_descriptive_statistics(self):
         self.__runtime.useDescriptiveStatistics()
 
@@ -213,7 +210,7 @@ class SibillaRuntime:
 
     def get_seed(self):
         return self.__runtime.getSeed()
-    
+
     def save(self, output_folder: str, prefix: str, postfix: str, label: str = None):
         if label == None:
             return self.__runtime.save(output_folder, prefix, postfix)
@@ -231,17 +228,17 @@ class SibillaRuntime:
 
     def print_data(self, label: str):
         return self.__runtime.printData(label)
-    
+
     def get_predicates(self):
         return self.__runtime()
 
     def evaluate_frist_passage_time(self, predicate_name: str,monitor: SimulationMonitor = None):
-        
+
         def ftp_runtime( predicate_name: str,monitor: SimulationMonitor = None):
             fpt_result_runtime = self.__runtime.firstPassageTime(monitor,predicate_name)
             fpt_result = SibillaFristPassageTimeResult(fpt_result_runtime)
             return fpt_result
-        
+
         profiler = Profiler(running_message="Evaluating fpt",done_message="The ftp evaluation has been successfully completed")
         fpt_r = profiler.execute(ftp_runtime, predicate_name, monitor)
         fpt_r.set_profiler(profiler)
@@ -250,23 +247,23 @@ class SibillaRuntime:
     def evaluate_reachability(self,goal: str, delta:float = 0.01 , epsilon:float = 0.01, condition: str = None, monitor: SimulationMonitor=None):
 
         def reachability_runtime(goal : str, delta : float, epsilon : float, condition : str, monitor : SimulationMonitor = None):
-            
+
             result = None
-            
+
             if condition == None:
                 result = self.__runtime.computeProbReach(monitor,goal,delta,epsilon)
             else:
                 result = self.__runtime.computeProbReach(monitor,condition,goal,delta,epsilon)
-            
+
             reachabiliy_result = SibillaReachabilityResult(result,goal,delta,epsilon,condition)
             return reachabiliy_result
 
-        
-        message = 'Evaluating the reachability of ' + goal 
-        
+
+        message = 'Evaluating the reachability of ' + goal
+
         if condition != None:
             message += ' satisfying the condition ' + condition
-    
+
         profiler = Profiler(running_message = message ,done_message = "The reachability evaluation has been successfully completed")
         r_r = profiler.execute(reachability_runtime, goal, delta, epsilon, condition, monitor)
         r_r.set_profiler(profiler)
@@ -277,7 +274,7 @@ class SibillaRuntime:
     def from_population_model(cls, file_path : str, configuration : str = None, deadline : int = 100, dt : float = 1.0, replica : int = 100):
         #
         # TODO check this method
-        #    
+        #
         cls.reset()
         cls.load_module("population")
         cls.load_from_file(file_path)
@@ -292,7 +289,7 @@ class SibillaRuntime:
         cls.set_dt(dt)
         cls.set_replica(replica)
         return cls
-    
+
     def  __enter__(self):
         return self
     def __exit__(self, type, value, traceback):
@@ -315,7 +312,7 @@ class SibillaDataPlotter():
 
   def set_light_theme(self):
     self.plot_template = 'plotly_white'
-  
+
   def set_dark_theme(self):
     self.plot_template = 'plotly_dark'
 
@@ -325,7 +322,7 @@ class SibillaDataPlotter():
       return True
     except:
       return False
-  
+
   def is_dark_theme_colab(self) -> bool:
     try:
       from google.colab import output
@@ -349,7 +346,7 @@ class SibillaDataPlotter():
       self.key_to_plot = [(key) for key in self.data if key.startswith('#')]
     else:
       self.key_to_plot = [(key) for key in self.data if key.startswith('%')]
-  
+
   def get_subplot_titles(self):
     subplot_titles =[]
     for key in self.key_to_plot:
@@ -369,24 +366,24 @@ class SibillaDataPlotter():
 
   def show_percentage(self):
     self.type_of_measures = 'percentage'
-  
+
   def show_quantities(self):
     self.type_of_measures = 'quantities'
-  
+
   def show_all_plots(self):
     self.plot_to_show = 'all'
-  
+
   def show_ensamble_plot(self,show_sd : bool = False):
     self.plot_to_show = 'ensamble'
     self.show_sd = show_sd
-  
+
   def show_details_plot(self):
     self.plot_to_show = 'details'
-  
+
   def plot_subplots_row(self,subplot_row,key):
     measure_statistics = self.data[key]
-    measure_statistics_t = [[measure_statistics[j][i] 
-                             for j in range(len(measure_statistics))] 
+    measure_statistics_t = [[measure_statistics[j][i]
+                             for j in range(len(measure_statistics))]
                             for i in range(len(measure_statistics[0]))]
 
     current_color =  self.data_color_map[key]
@@ -398,7 +395,7 @@ class SibillaDataPlotter():
     mean = measure_statistics_t[1]
     sd = measure_statistics_t[2]
     ci = measure_statistics_t[3]
-    
+
     upper_bound_sd = [x + y for x, y in zip(mean, sd)]
     lower_bound_sd = [x - y for x, y in zip(mean, sd)]
 
@@ -409,69 +406,69 @@ class SibillaDataPlotter():
 
     # mean line
     self.figure_measures_details.add_trace(
-        go.Scatter(x=time_step, 
+        go.Scatter(x=time_step,
                    y=mean,
                    line=dict(color=current_color),
                    showlegend=False),
-              row=subplot_row, 
+              row=subplot_row,
               col=1)
     #upper sd
     self.figure_measures_details.add_trace(
         go.Scatter(
-            x=time_step, 
+            x=time_step,
             y=upper_bound_sd,
             mode='lines',
             marker=dict(color="#444"),
             line=dict(width=0),
             showlegend=False),
-        row=subplot_row, 
+        row=subplot_row,
         col=1)
     #lower sd
     self.figure_measures_details.add_trace(
-        go.Scatter(x=time_step, 
+        go.Scatter(x=time_step,
                    y=lower_bound_sd,
-                   marker=dict(color="#444"), 
-                   line=dict(width=0), 
-                   mode='lines', 
-                   fillcolor=current_background, 
-                   fill='tonexty', 
+                   marker=dict(color="#444"),
+                   line=dict(width=0),
+                   mode='lines',
+                   fillcolor=current_background,
+                   fill='tonexty',
                    showlegend=False),
-        row=subplot_row, 
+        row=subplot_row,
         col=1)
-    
+
     #CONFIENCE INTERVAL
 
     # mean line
     self.figure_measures_details.add_trace(
-        go.Scatter(x=time_step, 
+        go.Scatter(x=time_step,
                    y=mean,
                    line=dict(color=current_color),
                    showlegend=False),
-              row=subplot_row, 
+              row=subplot_row,
               col=2)
     #upper ci
     self.figure_measures_details.add_trace(
-        go.Scatter(x=time_step, 
+        go.Scatter(x=time_step,
                    y=upper_bound_ci,
                    mode='lines',
                    marker=dict(color="#444"),
                    line=dict(width=0),
                    showlegend=False),
-              row=subplot_row, 
+              row=subplot_row,
               col=2)
     #lower ci
     self.figure_measures_details.add_trace(
-        go.Scatter(x=time_step, 
+        go.Scatter(x=time_step,
                    y=lower_bound_ci,
-                   marker=dict(color="#444"), 
-                   line=dict(width=0), 
-                   mode='lines', 
-                   fillcolor=current_background, 
-                   fill='tonexty', 
+                   marker=dict(color="#444"),
+                   line=dict(width=0),
+                   mode='lines',
+                   fillcolor=current_background,
+                   fill='tonexty',
                    showlegend=False),
-              row=subplot_row, 
+              row=subplot_row,
               col=2)
-    
+
   def plot_subplot_ensamble(self,key):
     self.select_data_to_plot()
     current_color =  self.data_color_map[key]
@@ -479,12 +476,12 @@ class SibillaDataPlotter():
     measure_statistics_t = [[measure_statistics[j][i] for j in range(len(measure_statistics))] for i in range(len(measure_statistics[0]))]
     time_step = measure_statistics_t[0]
     mean = measure_statistics_t[1]
-    self.figure_measures_ensamble.add_trace(go.Scatter(x=time_step, 
+    self.figure_measures_ensamble.add_trace(go.Scatter(x=time_step,
                                                        y=mean,
                                                        name = key,
                                                        line=dict(color=current_color)),
               row=1, col=1)
-  
+
   def plot_subplot_ensamble_sd(self,key,n):
     self.select_data_to_plot()
     current_color =  self.data_color_map[key]
@@ -499,8 +496,8 @@ class SibillaDataPlotter():
 
     upper_bound_sd = [x + y for x, y in zip(mean, sd)]
     lower_bound_sd = [x - y for x, y in zip(mean, sd)]
-    
-    self.figure_measures_ensamble.add_trace(go.Scatter(x=time_step, 
+
+    self.figure_measures_ensamble.add_trace(go.Scatter(x=time_step,
                                                        y=mean,
                                                        legendgroup=str(n),
                                                        showlegend=False,
@@ -509,26 +506,26 @@ class SibillaDataPlotter():
               row=1, col=1)
     self.figure_measures_ensamble.add_trace(
         go.Scatter(
-            x=time_step, 
+            x=time_step,
             y=upper_bound_sd,
             legendgroup=str(n),
             mode='lines',
             marker=dict(color="#444"),
             line=dict(width=0),
             showlegend=False),
-        row=1, 
+        row=1,
         col=1)
     self.figure_measures_ensamble.add_trace(
-        go.Scatter(x=time_step, 
+        go.Scatter(x=time_step,
                    y=lower_bound_sd,
                    name = key+' with sd',
                    legendgroup=str(n),
-                   marker=dict(color="#444"), 
-                   line=dict(width=0), 
-                   mode='lines', 
-                   fillcolor=current_background, 
+                   marker=dict(color="#444"),
+                   line=dict(width=0),
+                   mode='lines',
+                   fillcolor=current_background,
                    fill='tonexty'),
-        row=1, 
+        row=1,
         col=1)
 
   def plot_measures_details(self):
@@ -536,30 +533,30 @@ class SibillaDataPlotter():
     self.select_data_to_plot()
     titles = self.get_subplot_titles()
     row_number = len(self.key_to_plot)
-    
+
     y_axis_max = 1
     if self.type_of_measures == 'quantites':
       y_axis_max = self.get_total_quantities()
-    
+
     self.figure_measures_details = make_subplots(rows=row_number, cols=2,
                     shared_xaxes=True,
                     vertical_spacing=0.1)
-    
+
     self.figure_measures_details.update_yaxes(
-        range=[0,y_axis_max], 
-        constrain="domain", 
+        range=[0,y_axis_max],
+        constrain="domain",
         )
-    
+
     subplot_row = 1
 
     for key in self.key_to_plot:
       self.plot_subplots_row(subplot_row,key)
       subplot_row = subplot_row + 1
-    
-    self.figure_measures_details.update_layout(height=1000, 
-                                               width=800, 
+
+    self.figure_measures_details.update_layout(height=1000,
+                                               width=800,
                                                title_text=plot_title,
-                                               template=self.plot_template) 
+                                               template=self.plot_template)
     self.figure_measures_details.show()
 
   def plot_ensamble_measures(self):
@@ -594,7 +591,7 @@ class SibillaDataPlotter():
 class Profiler:
 
   def __init__(self, running_message : str = 'The function is running', done_message:str = 'Done!') -> None:
-      
+
       """
       :param running_message: a messagge shown during the function execution
       :param done_message: a message shown when the function is terminated
@@ -605,12 +602,12 @@ class Profiler:
       self.done_message = done_message
       self.animation = self.snake_animation
 
-      # Profilng instance variables 
-      self.function_name = None 
+      # Profilng instance variables
+      self.function_name = None
       self.time_required = None # second (s)
       self.min_memory = None    # mebibyte (MiB)
       self.max_memory = None    # mebibyte (MiB)
-      self.memory_used = None  # [ mebibyte ] (MiB) 
+      self.memory_used = None  # [ mebibyte ] (MiB)
 
       # where the return value of the function is stored
       self.result = None
@@ -619,19 +616,19 @@ class Profiler:
   def execute(self, fun_to_profile, *args, **kwargs):
     """
     execute a function passed as a parameter and return the result
-    the execution of the function is profiled by keeping track of the 
-    total time (in seconds) taken to execute and the memory used (in 
+    the execution of the function is profiled by keeping track of the
+    total time (in seconds) taken to execute and the memory used (in
     mebibyte )
     :param fun_to_profile : the function that we want to monitor
     :param *args : parameters of the function
     :param **kwargs : parameters of the function associated with a key value
-    
+
     :return: what would return the function under consideration
     """
 
     self.function_name = fun_to_profile.__name__
 
-    # check time and memory used to store the function 
+    # check time and memory used to store the function
     # and store them in the class instance variables
     def execute_profiling():
       tuple_to_pass = (fun_to_profile, args, kwargs)
@@ -641,8 +638,8 @@ class Profiler:
       self.min_memory = min(self.memory_used)
       self.max_memory = max(self.memory_used)
       return self.result
-    
-    # By profiling a certain function it is expected that the 
+
+    # By profiling a certain function it is expected that the
     # function is not immediate, therefore an animation is shown to
     # give the user feedback on the execution of the function
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -687,7 +684,7 @@ class Profiler:
 
   def set_snake_animation(self):
     self.animation = self.snake_animation
-  
+
   def __str__(self):
     str_to_ret = ''
     if(self.function_name != None):
@@ -699,7 +696,7 @@ class Profiler:
     else:
       str_to_ret += 'No functions have been profiled'
     return str_to_ret
-    
+
   def __repr__(self):
     str_to_ret = '\n'
     if(self.function_name != None):
@@ -716,7 +713,7 @@ class SibillaSimulationResult():
 
     # TODO
     #
-    # could be useful to have all the data of 
+    # could be useful to have all the data of
     # the simulation dt, deadline, replica ...
     #
 
@@ -729,18 +726,18 @@ class SibillaSimulationResult():
         else:
             self.time_enlapsed = 'Not profiled'
             self.time_enlapsed = 'Not profiled'
-    
+
     def set_profiler(self,profiler : Profiler):
         self.time_enlapsed = profiler.time_required
         self.memory_used = profiler.max_memory - profiler.min_memory
 
     def plot(self,show_sd : bool = False):
-        sp = SibillaDataPlotter(self.results) 
+        sp = SibillaDataPlotter(self.results)
         sp.show_ensamble_plot(show_sd)
         sp.plot_data()
 
     def plot_detailed(self):
-        sp = SibillaDataPlotter(self.results) 
+        sp = SibillaDataPlotter(self.results)
         sp.show_details_plot()
         sp.plot_data()
 
@@ -750,18 +747,18 @@ class SibillaSimulationResult():
 class SibillaFristPassageTimeResult():
 
     def __init__(self,fpt_result : FirstPassageTimeResults):
-        
+
         self.dict_result ={}
 
         if fpt_result.getTests()==0:
             self.dict_result['test'] = 0
             return
-        
+
         if fpt_result.getHits()==0:
             self.dict_result['test'] = fpt_result.getTests()
             self.dict_result['hits'] = 0
-            return 
-        
+            return
+
         self.dict_result['test'] = fpt_result.getTests()
         self.dict_result['hits'] = fpt_result.getHits()
         self.dict_result['mean'] = fpt_result.getMean()
@@ -774,7 +771,7 @@ class SibillaFristPassageTimeResult():
 
     def to_dictionary(self):
         return self.dict_result()
-    
+
     def set_profiler(self,profiler : Profiler):
         self.time_enlapsed = profiler.time_required
         self.memory_used = profiler.max_memory - profiler.min_memory
@@ -782,15 +779,15 @@ class SibillaFristPassageTimeResult():
     def __repr__(self):
         repr_to_ret = ''
         repr_to_ret += f'test : { self.dict_result["test"] } - '
-        
+
         if self.dict_result['test'] == 0:
             return repr_to_ret
-        
+
         repr_to_ret += f'hits : { self.dict_result["hits"] } - '
-        
+
         if self.dict_result['hits'] == 0:
             return repr_to_ret
-        
+
         repr_to_ret += f'mean : { self.dict_result["mean"] } - '
         repr_to_ret += f'sd : { self.dict_result["sd"] } - '
         repr_to_ret += f'min : { self.dict_result["min"] } - '
@@ -798,21 +795,21 @@ class SibillaFristPassageTimeResult():
         repr_to_ret += f'q2 : { self.dict_result["q2"] } - '
         repr_to_ret += f'q3 : { self.dict_result["q3"] } - '
         repr_to_ret += f'max : { self.dict_result["max"] } - '
-        
+
         return repr_to_ret
 
     def __str__(self):
-        str_to_ret = '\n'        
+        str_to_ret = '\n'
         str_to_ret += f'Test : { self.dict_result["test"] } \n '
 
         if self.dict_result['test'] == 0:
             return str_to_ret
-        
+
         str_to_ret +=  f'Hits : { self.dict_result["hits"] } \n '
 
         if self.dict_result['hits'] == 0:
             return str_to_ret
-        
+
         rounded_mean = round(self.dict_result["mean"], 2)
         str_to_ret += f'Mean : { rounded_mean } \n '
 
@@ -838,7 +835,7 @@ class SibillaFristPassageTimeResult():
 
 class SibillaReachabilityResult():
 
-    def __init__(self,reach_result , goal: str, delta : float , epsilon : float , condition : str = None) -> None: 
+    def __init__(self,reach_result , goal: str, delta : float , epsilon : float , condition : str = None) -> None:
         self.result = reach_result
         self.goal = goal
         self.delta = delta
@@ -847,7 +844,7 @@ class SibillaReachabilityResult():
 
     def set_profiler(self,profiler : Profiler):
         self.time_enlapsed = profiler.time_required
-    
+
     def to_float(self):
         return self.result
 
@@ -862,7 +859,7 @@ class SibillaReachabilityResult():
         return repr_to_ret
 
     def __str__(self) -> str:
-        str_to_ret = '\n' 
+        str_to_ret = '\n'
 
         str_to_ret += f'Probability of reaching {self.goal} is \n'
         str_to_ret += f'{self.result} \n'

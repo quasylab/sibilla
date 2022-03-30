@@ -1,28 +1,25 @@
-param lambdaMeet = 10.0; /* Meeting rate */
-param lambdaExposure = 1.00; /* rate of Exposure */
-param lambdaInfection = 2.00; /* rate of Infection */
-param lambdaRecovery = 0.5; /* rate of recovery */
+    param lambdaMeet = 1.0;      /* Meeting rate */
+    param probInfection = 0.25;  /* Probability of Infection */
+    param incubationRate = 1.0;  /* Incubation rate */
+    param recoverRate = 0.05;    /* Recovering rate */
 
-const startS = 99; /* Initial number of S agents */
-const startI = 1; /* Initial number of I agents */
+    const startS = 90;           /* Initial number of S agents */
+    const startI = 10;           /* Initial number of I agents */
 
-species S;
-species E;
-species I;
-species R;
+    species S;
+    species I;
+    species R;
 
-rule exposure {
-    S|I -[ #S *%I* lambdaMeet * lambdaExposure ]-> E|I
-}
-rule infection {
-    E -[ #E* lambdaInfection ]-> I
-}
-rule recovered {
-    I -[ #I* lambdaRecovery ]-> R
-}
+    rule infection {
+        S|I -[ #S*%I*lambdaMeet*probInfection ]-> E|I
+    }
 
-system initial_1 = S < startS >|I < startI >;
-system initial_2 = S < 98 >|I < 2 >;
+    rule incubation {
+        E -[ #E*incubationRate ]-> I
+    }
 
-predicate allRecovered = (# S +# E +# I ==0) ;
-predicate halfRecovered = (# S +# E +# I ==50) ;
+    rule recovered {
+        I -[ #I*recoverRate ]-> R
+    }
+
+    system init(scale) = S<startS*scale>|I<startI*scale>;

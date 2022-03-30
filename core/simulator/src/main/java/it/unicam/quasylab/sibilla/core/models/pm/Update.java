@@ -38,8 +38,8 @@ import java.util.Set;
 public class Update implements Serializable {
 
 	private static final long serialVersionUID = 5759358996259668600L;
-	private Map<Integer, Integer> update;
-	private String name;
+	private final Map<Integer, Integer> update;
+	private final String name;
 
 	public Update(String name) {
 		this.update = new HashMap<>();
@@ -83,4 +83,8 @@ public class Update implements Serializable {
 		return name + ":" + update.toString();
 	}
 
+
+	public String getName() {
+		return name;
+	}
 }
