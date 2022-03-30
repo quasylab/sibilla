@@ -70,7 +70,7 @@ public class SampleSerializer {
     public static <S extends State> void serialize(ByteArrayOutputStream toSerializeInto, Sample<S> sample, Model<S> model) throws IOException {
         double time = sample.getTime();
         toSerializeInto.write(ByteBuffer.allocate(8).putDouble(time).array());
-        toSerializeInto.write(model.serializeState(sample.getValue()));
+        toSerializeInto.write(model.byteOf(sample.getValue()));
     }
 
     /**
@@ -100,7 +100,7 @@ public class SampleSerializer {
      */
     public static <S extends State> Sample<S> deserialize(ByteArrayInputStream toDeserializeFrom, Model<S> model) throws IOException {
         double time = ByteBuffer.wrap(toDeserializeFrom.readNBytes(8)).getDouble();
-        S state = model.deserializeState(toDeserializeFrom.readNBytes(model.stateByteArraySize()));
+        S state = model.fromByte(toDeserializeFrom.readNBytes(model.stateByteArraySize()));
         return new Sample<>(time, state);
     }
 

@@ -25,10 +25,8 @@ package it.unicam.quasylab.sibilla.core.models.lio;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.Arrays;
+import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
 
 /**
@@ -42,7 +40,7 @@ public class LIOCountingState implements LIOState {
     /**
      * Create a new state with the given occupancy.
      *
-     * @param occupancy
+     * @param occupancy occupancy created state.
      */
     public LIOCountingState(int[] occupancy) {
         this.occupancy = Arrays.copyOf(occupancy,occupancy.length);
@@ -62,21 +60,25 @@ public class LIOCountingState implements LIOState {
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        throw new IllegalStateException();
+    public double fractionOf(IntPredicate predicate) {
+        return numberOf(predicate)/size;
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException {
-        throw new IllegalStateException();
+    public double numberOf(int stateIndex) {
+        return occupancy[stateIndex];
     }
 
-    public static LIOCountingState stepFunction(RandomGenerator randomGenerator, double[][] matrix, LIOCountingState state) {
-        int[] occupancy = new int[state.occupancy.length];
+    @Override
+    public double numberOf(IntPredicate predicate) {
+        return IntStream.range(0, occupancy.length).filter(predicate).sum();
+    }
+
+    @Override
+    public LIOState step(RandomGenerator randomGenerator, double[][] matrix) {
+        int[] occupancy = new int[this.occupancy.length];
         IntStream.range(0, occupancy.length).forEach(s ->
-            IntStream.range(0, state.occupancy[s]).forEach(i -> {
-                occupancy[LIOState.doSample(randomGenerator,matrix[s],s)]++;
-            })
+            IntStream.range(0, this.occupancy[s]).forEach(i -> occupancy[LIOState.doSample(randomGenerator,matrix[s],s)]++)
         );
         return new LIOCountingState(occupancy);
     }

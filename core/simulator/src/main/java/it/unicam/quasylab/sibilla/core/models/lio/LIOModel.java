@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models.lio;
 
+import it.unicam.quasylab.sibilla.core.models.AbstractModel;
 import it.unicam.quasylab.sibilla.core.models.DiscreteModel;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -30,39 +31,36 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * Identifies a model for a Langauge of Interactive Objects.
  *
- * @param <S> data type for model state.
  */
-public class LIOModel<S extends LIOState> implements DiscreteModel<S> {
+public class LIOModel<S extends LIOState> extends AbstractModel<S> implements DiscreteModel<S> {
 
     private final AgentsDefinition definitions;
-    private final LIONextStateFunction<S> stepFunction;
 
     /**
-     * Create a model that uses individual representations of agents.
+     * Creates a new model with the given definitions.
      *
      * @param definitions agent definitions.
-     * @return LIO model.
      */
-    public static LIOModel<LIOIndividualState> getLIOIndividualModel(AgentsDefinition definitions) {
-        return new LIOModel<>(definitions, LIOIndividualState::stepFunction);
+    public LIOModel(AgentsDefinition definitions) {
+        this(definitions, Map.of(), Map.of());
     }
 
-    public static LIOModel<LIOCountingState> getLIOCountingModel(AgentsDefinition definitions) {
-        return new LIOModel<>(definitions, LIOCountingState::stepFunction);
-    }
+
 
     /**
      * Create a model with the given definitions and step functions.
+     *
      * @param definitions agent definitions.
-     * @param stepFunction step funcitons.
      */
-    public LIOModel(AgentsDefinition definitions, LIONextStateFunction<S> stepFunction) {
+    public LIOModel(AgentsDefinition definitions, Map<String, Measure<? super S>> measures, Map<String, Predicate<? super S>> predicates) {
+        super(measures, predicates);
         this.definitions = definitions;
-        this.stepFunction = stepFunction;
     }
 
     @Override
@@ -71,42 +69,17 @@ public class LIOModel<S extends LIOState> implements DiscreteModel<S> {
     }
 
     @Override
-    public byte[] serializeState(S state) throws IOException {
+    public byte[] byteOf(LIOState state) throws IOException {
         return new byte[0];
     }
 
     @Override
-    public void serializeState(ByteArrayOutputStream toSerializeInto, S state) throws IOException {
-
-    }
-
-    @Override
-    public S deserializeState(byte[] bytes) throws IOException {
+    public S fromByte(byte[] bytes) throws IOException {
         return null;
     }
 
     @Override
-    public S deserializeState(ByteArrayInputStream toDeserializeFrom) throws IOException {
-        return null;
-    }
-
-    @Override
-    public String[] measures() {
-        return new String[0];
-    }
-
-    @Override
-    public double measure(String m, S state) {
-        return 0;
-    }
-
-    @Override
-    public Measure<S> getMeasure(String m) {
-        return null;
-    }
-
-    @Override
-    public S sampleNextState(RandomGenerator r, double time, S state) {
-        return stepFunction.step(r, definitions.getAgentProbabilityMatrix(state),state);
+    public LIOState sampleNextState(RandomGenerator r, double time, LIOState state) {
+        return state.step(r, definitions.getAgentProbabilityMatrix(state));
     }
 }

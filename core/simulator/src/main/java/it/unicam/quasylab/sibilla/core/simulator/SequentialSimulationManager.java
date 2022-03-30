@@ -26,23 +26,21 @@ package it.unicam.quasylab.sibilla.core.simulator;
 import it.unicam.quasylab.sibilla.core.models.State;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.function.Consumer;
-
 /**
  * @author belenchia
  *
  */
 public class SequentialSimulationManager<S extends State> extends AbstractSimulationManager<S> {
 
-	public SequentialSimulationManager(RandomGenerator random, SimulationMonitor monitor, Consumer<Trajectory<S>> trajectoryConsumer) {
-		super(random, monitor, trajectoryConsumer);
+	public SequentialSimulationManager(RandomGenerator random, SimulationMonitor monitor) {
+		super(random, monitor);
 	}
 
     @Override
 	protected synchronized void handleTask(SimulationTask<S> simulationTask) {
-		notifyMonitorStartInteration(simulationTask.getIndex());
-		handleTrajectory( simulationTask.get() );
-		notifyMonitorEndInteration(simulationTask.getIndex());
+		notifyMonitorStartIteration(simulationTask.getIndex());
+		simulationTask.get();
+		notifyMonitorEndIteration(simulationTask.getIndex());
 	}
 
 	@Override

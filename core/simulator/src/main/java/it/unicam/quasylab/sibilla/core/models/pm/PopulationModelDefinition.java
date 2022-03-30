@@ -25,9 +25,10 @@ package it.unicam.quasylab.sibilla.core.models.pm;
 
 import it.unicam.quasylab.sibilla.core.models.AbstractModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
-import it.unicam.quasylab.sibilla.core.models.StateSet;
+import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 /**
@@ -45,14 +47,16 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
     private final Function<EvaluationEnvironment,PopulationRegistry> registryBuilder;
     private final BiFunction<EvaluationEnvironment,PopulationRegistry,List<PopulationRule>> rulesBuilder;
     private final BiFunction<EvaluationEnvironment,PopulationRegistry,Map<String,Measure<PopulationState>>> measuresBuilder;
-    private final BiFunction<EvaluationEnvironment, PopulationRegistry, StateSet<PopulationState>> statesBuilder;
+    private final BiFunction<EvaluationEnvironment,PopulationRegistry,Map<String, Predicate<PopulationState>>> predicatesBuilder;
+    private final BiFunction<EvaluationEnvironment, PopulationRegistry, ParametricDataSet<Function<RandomGenerator,PopulationState>>> statesBuilder;
     //EvaluationEnvironment -> Populationregistry -> double[] ->
 
     private PopulationRegistry registry;
     private List<PopulationRule> rules;
-    private Map<String,Measure<PopulationState>> measures;
+    private Map<String,Measure<? super PopulationState>> measures;
     private PopulationModel model;
-    private StateSet<PopulationState> states;
+    private ParametricDataSet<Function<RandomGenerator,PopulationState>> states;
+    private Map<String, Predicate<? super PopulationState>> predicates;
 
     /**
      * Create a new PopulationModelDefinition with the given functions used to build the elements of a definition.
@@ -64,9 +68,9 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
     public PopulationModelDefinition(
             Function<EvaluationEnvironment, PopulationRegistry> registryBuilder,
             BiFunction<EvaluationEnvironment, PopulationRegistry, List<PopulationRule>> rulesBuilder,
-            BiFunction<EvaluationEnvironment, PopulationRegistry, StateSet<PopulationState>> statesBuilder
+            BiFunction<EvaluationEnvironment, PopulationRegistry, ParametricDataSet<Function<RandomGenerator,PopulationState>>> statesBuilder
     ) {
-        this(new EvaluationEnvironment(),registryBuilder,rulesBuilder,null, statesBuilder);
+        this(new EvaluationEnvironment(),registryBuilder,rulesBuilder,null, null, statesBuilder);
     }
 
     /**
@@ -82,11 +86,13 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
             Function<EvaluationEnvironment, PopulationRegistry> registryBuilder,
             BiFunction<EvaluationEnvironment, PopulationRegistry, List<PopulationRule>> rulesBuilder,
             BiFunction<EvaluationEnvironment, PopulationRegistry, Map<String, Measure<PopulationState>>> measuresBuilder,
-            BiFunction<EvaluationEnvironment, PopulationRegistry, StateSet<PopulationState>> statesBuilder) {
+            BiFunction<EvaluationEnvironment, PopulationRegistry, Map<String, Predicate<PopulationState>>> predicatesBuilder,
+            BiFunction<EvaluationEnvironment, PopulationRegistry, ParametricDataSet<Function<RandomGenerator,PopulationState>>> statesBuilder) {
         super(environment);
         this.registryBuilder = registryBuilder;
         this.rulesBuilder = rulesBuilder;
         this.measuresBuilder = measuresBuilder;
+        this.predicatesBuilder = predicatesBuilder;
         this.statesBuilder = statesBuilder;
     }
 
@@ -99,50 +105,15 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
         this.states = null;
     }
 
-    @Override
-    public boolean isAState(String name) {
-        return false;
-    }
-
-    @Override
-    public int stateArity() {
-        return getStates().arity();
-    }
-
-    public StateSet<PopulationState> getStates() {
-        if (states == null) {
-            states = statesBuilder.apply(getEnvironment(),getRegistry());
-        }
-        return states;
-    }
-
-    @Override
-    public int stateArity(String name) {
-        return getStates().arity(name);
-    }
-
-    @Override
-    public String[] states() {
-        return getStates().states();
-    }
-
-    @Override
-    public PopulationState state(String name, double... args) {
-        return getStates().state(name,args);
-    }
-
-    @Override
-    public PopulationState state(double... args) {
-        return getStates().get(args);
-    }
 
     @Override
     public synchronized final PopulationModel createModel() {
         if (model == null) {
             PopulationRegistry registry = getRegistry();
             List<PopulationRule> rules = getRules();
-            Map<String,Measure<PopulationState>> measures = getMeasures();
-            model = new PopulationModel(registry,rules,measures);
+            Map<String,Measure<? super PopulationState>> measures = getMeasures();
+            Map<String,Predicate<? super PopulationState>> predicates = getPredicates();
+            model = new PopulationModel(registry,rules,measures, predicates);
         }
         return model;
     }
@@ -152,7 +123,7 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
      *
      * @return the measures used in the model generated by using the current environment.
      */
-    private Map<String, Measure<PopulationState>> getMeasures() {
+    private Map<String, Measure<? super PopulationState>> getMeasures() {
         if (measures == null) {
             measures = getDefaultMeasure();
             if (measuresBuilder != null) {
@@ -160,6 +131,16 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
             }
         }
         return measures;
+    }
+
+    private Map<String, Predicate<? super PopulationState>> getPredicates() {
+        if (predicates == null) {
+            predicates = new TreeMap<>();
+            if (predicatesBuilder != null) {
+                predicates.putAll(predicatesBuilder.apply(getEnvironment(),getRegistry()));
+            }
+        }
+        return predicates;
     }
 
     /**
@@ -193,17 +174,24 @@ public class PopulationModelDefinition extends AbstractModelDefinition<Populatio
      *
      * @return
      */
-    private Map<String,Measure<PopulationState>> getDefaultMeasure() {
+    private Map<String,Measure<? super PopulationState>> getDefaultMeasure() {
         PopulationRegistry reg = getRegistry();
-        Map<String,Measure<PopulationState>> measures = new TreeMap<>();
-        IntStream.range(0,reg.size()).sequential().boxed().map(i -> reg.fractionMeasure(i)).
+        Map<String,Measure<? super PopulationState>> measures = new TreeMap<>();
+        IntStream.range(0,reg.size()).sequential().boxed().map(reg::fractionMeasure).
                 forEach(m -> measures.put(m.getName(),m));
-        IntStream.range(0,reg.size()).sequential().boxed().map(i -> reg.occupancyMeasure(i)).
+        IntStream.range(0,reg.size()).sequential().boxed().map(reg::occupancyMeasure).
                 forEach(m -> measures.put(m.getName(),m));
         return measures;
     }
 
 
+    @Override
+    public ParametricDataSet<Function<RandomGenerator, PopulationState>> getStates() {
+        if (states == null) {
+            states = statesBuilder.apply(getEnvironment(),getRegistry());
+        }
+        return states;
+    }
 
 
 }

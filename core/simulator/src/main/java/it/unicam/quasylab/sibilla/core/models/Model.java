@@ -23,17 +23,15 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
-import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingCollection;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.StatisticSampling;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.*;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * Represents a <i>Stochastic Process</i>.
@@ -43,15 +41,12 @@ import java.util.*;
 public interface Model<S extends State> extends Serializable {
 
     /**
-     * Samples possible next state when the process is in a given state at a given
-     * time. A random generator is passed to sample random values when needed.
+     * Returns the simulator cursor that start from the initial state resulting from evaluation of
+     * the given function..
      *
-     * @param r     random generator used to sample needed random values.
-     * @param time  current time.
-     * @param state current state.
-     * @return process time step.
+     * @param initialStateBuilder function used to build the initial state.
      */
-    TimeStep<S> next(RandomGenerator r, double time, S state);
+    SimulatorCursor<S> createSimulationCursor(RandomGenerator r, Function<RandomGenerator,S> initialStateBuilder);
 
     /**
      * Returns the number of bytes needed to store model states.
@@ -65,15 +60,17 @@ public interface Model<S extends State> extends Serializable {
      *
      * @param state the state to serialise.
      * @return the array of bytes representing the given state.
-     * @throws IOException this exception is thrown if the
      */
-    byte[] serializeState(S state) throws IOException;
+    byte[] byteOf(S state) throws IOException;
 
-    void serializeState(ByteArrayOutputStream toSerializeInto, S state) throws IOException;
-
-    S deserializeState(byte[] bytes) throws IOException;
-
-    S deserializeState(ByteArrayInputStream toDeserializeFrom) throws IOException;
+    /**
+     * Build a state from the given array of states.
+     *
+     * @param bytes bute arrau
+     * @return a state drepresented by the given array of states.
+     * @throws IOException
+     */
+    S fromByte(byte[] bytes) throws IOException;
 
     /**
      * Each model is associated with a set of measures. This method returns the
@@ -98,7 +95,24 @@ public interface Model<S extends State> extends Serializable {
      * @param m measure name.
      * @return the measure with name <code>m</code>.
      */
-    Measure<S> getMeasure(String m);
+    Measure<? super S> getMeasure(String m);
+
+
+    /**
+     * Returns the predicate associated with the given name.
+     *
+     * @param name predicate name.
+     * @return the predicate associated with the given name.
+     */
+    Predicate<? super S> getPredicate(String name);
+
+    /**
+     * Returns the array containing the names of predicates defined in this model.
+     *
+     * @return the array containing the names of predicates defined in this model.
+     */
+    String[] predicates();
+
 
     /**
      * Returns the samplings that can be used to collect simulation data of the
@@ -111,23 +125,50 @@ public interface Model<S extends State> extends Serializable {
      *         given measures.
      */
     default SamplingFunction<S> selectSamplingFunction(int samplings, double dt, String... measures) {
+        return selectSamplingFunction(false, samplings, dt, measures);
+    }
+
+    /**
+     * Returns the samplings that can be used to collect simulation data of the
+     * given measures.
+     *
+     * @param summary true if summary statistics is used.
+     * @param samplings number of samplings to collect.
+     * @param dt        time gap among two samplings.
+     * @param measures  neames of measures to collect.
+     * @return the samplings that can be used to collect simulation data of the
+     *         given measures.
+     */
+    default SamplingFunction<S> selectSamplingFunction(boolean summary, int samplings, double dt, String... measures) {
         if (measures.length == 0)
             return new SamplingCollection<>();
         if (measures.length == 1) {
-            Measure<S> m = getMeasure(measures[0]);
+            Measure<? super S> m = getMeasure(measures[0]);
             if (m != null)
-                return new StatisticSampling<>(samplings, dt, m);
+                return getSamplingStatistic(summary, samplings, dt, m);
         } else {
             SamplingCollection<S> collection = new SamplingCollection<>();
             Arrays.stream(measures).map(this::getMeasure).filter(Objects::nonNull).sequential()
-                    .forEach(m -> collection.add(new StatisticSampling<S>(samplings, dt, m)));
+                    .forEach(m -> collection.add(getSamplingStatistic(summary, samplings, dt, m)));
             return collection;
         }
         return new SamplingCollection<>();
     }
 
+    default SamplingFunction<S> getSamplingStatistic(boolean summary, int samplings, double dt, Measure<? super S> m) {
+        if (summary) {
+            return new SummaryStatisticSampling<>(samplings, dt, m);
+        } else {
+            return new DescriptiveStatisticSampling<>(samplings, dt, m);
+        }
+    }
+
     default SamplingFunction<S> getSamplingFunction(int samplings, double dt) {
-        return selectSamplingFunction(samplings, dt, measures());
+        return selectSamplingFunction(true, samplings, dt, measures());
+    }
+
+    default SamplingFunction<S> getSamplingFunction(boolean summary, int samplings, double dt) {
+        return selectSamplingFunction(summary, samplings, dt, measures());
     }
 
     default SamplingFunction<S> selectSamplingFunction(double deadline, double dt) {
@@ -135,7 +176,11 @@ public interface Model<S extends State> extends Serializable {
     }
 
     default SamplingFunction<S> selectSamplingFunction(double deadline, double dt, String ... measures) {
-        return selectSamplingFunction((int) (deadline/dt),dt,measures);
+        return selectSamplingFunction(true, deadline, dt, measures);
+    }
+
+    default SamplingFunction<S> selectSamplingFunction(boolean summary, double deadline, double dt, String ... measures) {
+        return selectSamplingFunction(summary, (int) (deadline/dt),dt,measures);
     }
 
     default Map<String, Double> measuresOf(S state) {
@@ -145,4 +190,6 @@ public interface Model<S extends State> extends Serializable {
         }
         return toReturn;
     }
+
+
 }

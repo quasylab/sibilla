@@ -24,11 +24,16 @@
 package it.unicam.quasylab.sibilla.core.simulator;
 
 import it.unicam.quasylab.sibilla.core.models.Model;
+import it.unicam.quasylab.sibilla.core.models.SimulatorCursor;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.models.StatePredicate;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplePredicate;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author loreti
@@ -43,19 +48,30 @@ public class SimulationUnit<S extends State> implements Serializable {
 
 	private Model<S> model;
 	
-	private S state;
+	private Function<RandomGenerator,S> state;
 	
 	private SamplePredicate<? super S> stoppingPredicate;
 	
 	private StatePredicate<? super S> reachPredicate;
 
-	public SimulationUnit(Model<S> model, S state, SamplePredicate<? super S> stoppingPredicate) {
-		this(model,state,stoppingPredicate,StatePredicate.TRUE);
+	private Supplier<SamplingHandler<S>> handlerSupplier;
+
+	public SimulationUnit(Model<S> model, Function<RandomGenerator,S> state, Supplier<SamplingHandler<S>> handlerSupplier, SamplePredicate<? super S> stoppingPredicate) {
+		this(model,state,handlerSupplier,stoppingPredicate,StatePredicate.TRUE);
 	}
 
-	public SimulationUnit(Model<S> model, S state, SamplePredicate<? super S> stoppingPredicate, StatePredicate<? super S> reachPredicate) {
+	public SimulationUnit(Model<S> model, S state, Supplier<SamplingHandler<S>> handlerSupplier, SamplePredicate<? super S> stoppingPredicate) {
+		this(model,state,handlerSupplier,stoppingPredicate,StatePredicate.TRUE);
+	}
+
+	public SimulationUnit(Model<S> model, S state, Supplier<SamplingHandler<S>> handlerSupplier, SamplePredicate<? super S> stoppingPredicate, StatePredicate<? super S> reachPredicate) {
+		this(model, rg -> state, handlerSupplier, stoppingPredicate, reachPredicate);
+	}
+
+	public SimulationUnit(Model<S> model, Function<RandomGenerator,S> state, Supplier<SamplingHandler<S>> handlerSupplier, SamplePredicate<? super S> stoppingPredicate, StatePredicate<? super S> reachPredicate) {
 		this.model = model;
 		this.state = state;
+		this.handlerSupplier = handlerSupplier;
 		this.stoppingPredicate = stoppingPredicate;
 		this.reachPredicate = reachPredicate;
 	}
@@ -64,8 +80,12 @@ public class SimulationUnit<S extends State> implements Serializable {
 		return model;
 	}
 
-	public S getState() {
+	public Function<RandomGenerator, S> getState() {
 		return state;
+	}
+
+	public SamplingHandler<S> getSamplingHandler() {
+		return handlerSupplier.get();
 	}
 
 	/**
@@ -82,7 +102,9 @@ public class SimulationUnit<S extends State> implements Serializable {
 	public StatePredicate<? super S> getReachPredicate() {
 		return reachPredicate;
 	}
-	
-	
-	
+
+
+    public SimulatorCursor<S> getSimulationCursor(RandomGenerator random) {
+		return this.model.createSimulationCursor(random, this.state);
+    }
 }

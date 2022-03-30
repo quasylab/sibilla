@@ -25,6 +25,7 @@ package it.unicam.quasylab.sibilla.core.models;
 
 import java.io.Externalizable;
 
-public interface State extends Externalizable {
+public interface State {
+
 
 }

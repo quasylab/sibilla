@@ -27,14 +27,13 @@ import it.unicam.quasylab.sibilla.core.models.*;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.File;
 import java.io.FileReader;
@@ -43,6 +42,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -82,7 +82,7 @@ public class PopulationModelGenerator {
         SibillaParseErrorListener errorListener = new SibillaParseErrorListener();
         parser.addErrorListener(errorListener);
         this.parseTree = parser.model();
-        for (ParseError e: errorListener.getSyntaxErrorList()) {
+        for (ParseError e: errorListener.getErrorCollector().getSyntaxErrorList()) {
             this.errorList.add(ModelBuildingError.syntaxError(e));
         }
     }
@@ -100,6 +100,7 @@ public class PopulationModelGenerator {
                 this::generatePopulationRegistry,
                 this::generateRules,
                 this::generateMeasures,
+                this::generatePredicates,
                 this::generateStateSet
                 );
     }
@@ -124,11 +125,15 @@ public class PopulationModelGenerator {
         return !this.errorList.isEmpty();
     }
 
-    public StateSet<PopulationState> generateStateSet(EvaluationEnvironment environment, PopulationRegistry registry) {
+    public ParametricDataSet<Function<RandomGenerator,PopulationState>> generateStateSet(EvaluationEnvironment environment, PopulationRegistry registry) {
         return this.getParseTree().accept(new StateSetGenerator(environment, registry));
     }
     private Map<String, Measure<PopulationState>> generateMeasures(EvaluationEnvironment environment, PopulationRegistry registry) {
         return this.getParseTree().accept(new PopulationMeasuresGenerator(environment, registry));
+    }
+
+    private Map<String, Predicate<PopulationState>> generatePredicates(EvaluationEnvironment environment, PopulationRegistry registry) {
+        return this.getParseTree().accept(new PopulationPredicatesGenerator(environment, registry));
     }
 
     public List<PopulationRule> generateRules(EvaluationEnvironment environment, PopulationRegistry registry) {
@@ -156,7 +161,7 @@ public class PopulationModelGenerator {
             this.environment = new EvaluationEnvironment(eg.getParameters(), constants);
             return environment;
         }
-        return null;
+        return this.environment;
     }
 
     public static List<Integer> getValues(Function<String, Double> resolver, PopulationModelParser.RangeContext range) {

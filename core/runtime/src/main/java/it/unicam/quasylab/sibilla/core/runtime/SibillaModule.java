@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.runtime;
 
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -140,11 +141,18 @@ public interface SibillaModule {
 
 
     /**
-     * Return the array of measures defined in the module.
+     * Returns the array of measures defined in the module.
      *
      * @return the array of measures defined in the module.
      */
     String[] getMeasures();
+
+    /**
+     * Returns the array of predicates defined in the module.
+     *
+     * @return the array of predicates defined in the module.
+     */
+    String[] getPredicates();
 
     /**
      * Set the measures to sample in a simulation.
@@ -186,7 +194,22 @@ public interface SibillaModule {
      * @param dt sampling interval.
      * @return
      */
-    List<SimulationTimeSeries> simulate(SimulationMonitor monitor, RandomGenerator rg, int replica, double deadline, double dt);
+    Map<String, double[][]> simulate(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt);
+
+
+    /**
+     * Estimates the first passage time to the given predicate.
+     *
+     * @param monitor
+     * @param rg
+     * @param replica
+     * @param deadline
+     * @param dt
+     * @param predicateName
+     * @return
+     */
+    FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt, String predicateName);
+
 
     /**
      * Return the module modes.
@@ -221,4 +244,53 @@ public interface SibillaModule {
      * @return true if the given measure is enabled.
      */
     boolean isEnabledMeasure(String name);
+
+    /**
+     * Set the kind of statics of collected data. If the parameter is true, summary statistics is used
+     * and in the results of simulation only mean and standard deviation are reported. When the parameter is false,
+     * descriptive statistics are used. In this case, for each collected measure are reported min value, max value,
+     * first, second and third quartile, mean and standard deviation. Note that, when descriptive statistics is
+     * used a larger amount of memory is needed.
+     *
+     * @param isSummary true if summary statistics are used, false for descriptive ones.
+     */
+    void setSummaryStatistics(boolean isSummary);
+
+
+    /**
+     * Return true if summary statistics are used and false when descriptive statistics are used.
+     *
+     * @return true if summary statistics are used and false when descriptive statistics are used.
+     */
+    boolean isSummaryStatistics();
+
+    /**
+     * Estimate the probability to reach a state satisfying the target condition within time units. A statistical
+     * model checking algorithm is used that guarantees that the difference between the obtained result and
+     * the exact one is greater than delta with a probability that is less or equal to p_error.
+     *
+     * @param targetCondition name of the condition representing the target state.
+     * @param time reaching time.
+     * @param pError error probability.
+     * @param delta estimation error.
+     * @return the probability to reach a state satisfuing the target condition within time units-
+     */
+    double estimateReachability(SimulationMonitor monitor, RandomGenerator rg,  String targetCondition, double time, double pError, double delta);
+
+
+    /**
+     * Estimate the probability to reach a state satisfying the target condition within time units while only state
+     * satisfying the transientCondition are traversed. A statistical
+     * model checking algorithm is used that guarantees that the difference between the obtained result and
+     * the exact one is greater than delta with a probability that is less or equal to p_error.
+     *
+     * @param transientCondition name of the condition representing the target state.
+     * @param targetCondition name of the condition representing the target state.
+     * @param time reaching time.
+     * @param pError error probability.
+     * @param delta estimation error.
+     * @return the probability to reach a state satisfuing the target condition within time units-
+     */
+    double estimateReachability(SimulationMonitor monitor, RandomGenerator rg, String transientCondition, String targetCondition, double time, double pError, double delta);
+
 }

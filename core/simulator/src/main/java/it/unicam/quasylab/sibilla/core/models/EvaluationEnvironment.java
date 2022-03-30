@@ -57,6 +57,7 @@ public class EvaluationEnvironment {
         this.values = new TreeMap<>();
         this.changer = new PropertyChangeSupport(this);
         this.constants = constants;
+        this.constants.setEnvironment(this);
     }
 
     public EvaluationEnvironment(Map<String, Double> values, CachedValues constants) {
@@ -88,6 +89,17 @@ public class EvaluationEnvironment {
         Double old = values.put(name,value);
         changer.firePropertyChange(name,old,value);
         this.isChanged = true;
+    }
+
+    /**
+     * Adds a new parameter in the environment with the given value.
+     *
+     * @param name
+     * @param value
+     */
+    public synchronized void define(String name, double value) {
+        this.attributes.put(name, value);
+        this.values.put(name, value);
     }
 
     /**
@@ -192,5 +204,9 @@ public class EvaluationEnvironment {
                 return d;
             }
         };
+    }
+
+    public boolean isDefined(String name) {
+        return attributes.containsKey(name)||constants.isDefined(name);
     }
 }

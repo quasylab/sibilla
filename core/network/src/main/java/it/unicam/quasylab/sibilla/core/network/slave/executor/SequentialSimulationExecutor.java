@@ -45,13 +45,14 @@ public class SequentialSimulationExecutor extends SimulationExecutor {
         LinkedList<Trajectory<?>> trajectories = new LinkedList<>();
         Model model = tasks.get(0).getUnit().getModel();
 
-        this.computationBenchmark.run(() -> {
-            for (int i = 0; i < tasks.size(); i++) {
-                Trajectory trajectory = tasks.get(i).get();
-                trajectories.add(trajectory);
-            }
-            return List.of((double) tasks.size());
-        });
+        //TODO: FIX!
+//        this.computationBenchmark.run(() -> {
+//            for (int i = 0; i < tasks.size(); i++) {
+//                Trajectory trajectory = tasks.get(i).get();
+//                trajectories.add(trajectory);
+//            }
+//            return List.of((double) tasks.size());
+//        });
 
         sendResult(new ComputationResult(trajectories), master, model);
 

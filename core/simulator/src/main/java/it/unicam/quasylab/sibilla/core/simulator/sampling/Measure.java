@@ -28,12 +28,14 @@ import it.unicam.quasylab.sibilla.core.models.State;
 import java.io.Serializable;
 
 /**
+ * A measure is used to associate a sampling performed at a given time with a double value.
+ *
  * @author loreti
  *
  */
 public interface Measure<S extends State> extends Serializable {
 
-	double measure(S t);
+	double measure(S context);
 
 	String getName();
 

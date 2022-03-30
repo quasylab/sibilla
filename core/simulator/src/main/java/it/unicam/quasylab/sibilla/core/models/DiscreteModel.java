@@ -25,13 +25,15 @@ package it.unicam.quasylab.sibilla.core.models;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.Optional;
+
 /**
  * Identifies a model with deterministic time. In this kind of models, each step always
  * needs a single time unit.
  *
  * @param <S> type for the state of model.
  */
-public interface DiscreteModel<S extends State> extends Model<S> {
+public interface DiscreteModel<S extends ImmutableState> extends MarkovModel<S> {
 
     /**
      * Samples possible next state when the process is in a given state at a given
@@ -45,7 +47,7 @@ public interface DiscreteModel<S extends State> extends Model<S> {
     S sampleNextState(RandomGenerator r, double time, S state);
 
     @Override
-    default TimeStep<S> next(RandomGenerator r, double time, S state) {
-        return new TimeStep<>(1.0,sampleNextState(r,time,state));
+    default Optional<TimeStep<S>> next(RandomGenerator r, double time, S state) {
+        return Optional.of(new TimeStep<>(1.0,sampleNextState(r,time,state)));
     }
 }

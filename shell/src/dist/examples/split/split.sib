@@ -1,0 +1,10 @@
+module "population"
+load "split.pm"
+set "scale" 1.0
+init "stateA"
+add all measures
+deadline 100
+dt 1.0
+replica 100
+simulate
+save output "./results" prefix "split" postfix "__"

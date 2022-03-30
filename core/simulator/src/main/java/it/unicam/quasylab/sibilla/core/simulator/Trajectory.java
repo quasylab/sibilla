@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.core.simulator;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Sample;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.IntFunction;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -50,7 +52,7 @@ public class Trajectory<S> implements Externalizable {
     private long generationTime = -1;
 
     public Trajectory() {
-        this.data = new LinkedList<Sample<S>>();
+        this.data = new LinkedList<>();
     }
 
     public void add(double time, S value) {
@@ -63,12 +65,15 @@ public class Trajectory<S> implements Externalizable {
         this.data.add(new Sample<S>(time, value));
     }
 
-    public void sample(SamplingFunction<S> f) {
+    public void sample(SamplingHandler<? super S> f) {
         if (!Double.isFinite(start)) {
             throw new IllegalArgumentException();
         }
         f.start();
-        this.data.stream().forEach(s -> f.sample(s.getTime(), s.getValue()));
+        for (Sample<S> s : this.data) {
+            f.sample(s.getTime(), s.getValue());
+        }
+        //this.data.stream().sequential().forEach(s -> f.sample(s.getTime(), s.getValue()));
         f.end(end);
     }
 
@@ -160,5 +165,14 @@ public class Trajectory<S> implements Externalizable {
             samples.add((Sample) in.readObject());
         }
         this.data = samples;
+    }
+
+    public double firstPassageTime(Predicate<S> condition) {
+        for (Sample<S> sample : data) {
+            if (condition.test(sample.getValue())) {
+                return sample.getTime();
+            }
+        }
+        return Double.NaN;
     }
 }

@@ -26,9 +26,9 @@ package it.unicam.quasylab.sibilla.core.simulator.sampling;
 import it.unicam.quasylab.sibilla.core.models.State;
 
 import java.io.FileNotFoundException;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author loreti
@@ -38,43 +38,20 @@ public class SamplingCollection<S extends State> implements SamplingFunction<S> 
 
 	private final LinkedList<SamplingFunction<S>> functions;
 
-	public SamplingCollection() {
-		this.functions = new LinkedList<SamplingFunction<S>>();
-	}
-
 	@SafeVarargs
 	public SamplingCollection(SamplingFunction<S>... functions) {
-		this();
-		for (SamplingFunction<S> f : functions) {
-			this.functions.add(f);
-		}
+		this(Arrays.stream(functions).collect(Collectors.toList()));
 	}
 
 
 	public SamplingCollection(Collection<? extends SamplingFunction<S>> functions) {
-		this();
-		this.functions.addAll(functions);
+		this.functions = new LinkedList<>(functions);
 	}
 
-	@Override
-	public void sample(double time, S context) {
-		for (SamplingFunction<S> f : functions) {
-			f.sample(time, context);
-		}
-	}
 
 	@Override
-	public void end(double time) {
-		for (SamplingFunction<S> f : functions) {
-			f.end(time);
-		}
-	}
-
-	@Override
-	public void start() {
-		for (SamplingFunction<S> f : functions) {
-			f.start();
-		}
+	public SamplingHandler<S> getSamplingHandler() {
+		return new CompositeSamplingHandler<>(this.functions.stream().map(SamplingFunction::getSamplingHandler).collect(Collectors.toList()));
 	}
 
 	@Override
@@ -93,15 +70,15 @@ public class SamplingCollection<S extends State> implements SamplingFunction<S> 
 	}
 
 	@Override
-	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries( int replications) {
-		LinkedList<SimulationTimeSeries> toReturn = new LinkedList<>();
+	public Map<String, double[][]> getSimulationTimeSeries() {
+		TreeMap<String,double[][]> toReturn = new TreeMap<>();
 		for (SamplingFunction<S> f : functions) {
-			toReturn.addAll(f.getSimulationTimeSeries( replications ));
+			toReturn.putAll(f.getSimulationTimeSeries());
 		}
 		return toReturn;
 	}
 
-	public void add(StatisticSampling<S> f) {
+	public void add(SamplingFunction<S> f) {
 		functions.add(f);
 	}
 }

@@ -25,48 +25,51 @@ package it.unicam.quasylab.sibilla.langs.pm;
 
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.ParametricValue;
-import it.unicam.quasylab.sibilla.core.models.StateSet;
+import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import org.antlr.v4.runtime.Token;
+import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
+import java.util.function.Function;
 
-public class StateSetGenerator extends PopulationModelBaseVisitor<StateSet<PopulationState>> {
+public class StateSetGenerator extends PopulationModelBaseVisitor<ParametricDataSet<Function<RandomGenerator,PopulationState>>> {
 
-    private final StateSet<PopulationState> stateSet;
+    private final ParametricDataSet<Function<RandomGenerator,PopulationState>> stateSet;
     private final EvaluationEnvironment environment;
     private final PopulationRegistry registry;
 
     public StateSetGenerator(EvaluationEnvironment environment, PopulationRegistry registry) {
         this.environment = environment;
         this.registry = registry;
-        this.stateSet = new StateSet<>();
+        this.stateSet = new ParametricDataSet<>();
     }
 
 
     @Override
-    public StateSet<PopulationState> visitModel(PopulationModelParser.ModelContext ctx) {
+    public ParametricDataSet<Function<RandomGenerator,PopulationState>> visitModel(PopulationModelParser.ModelContext ctx) {
         ctx.element().forEach(e -> e.accept(this));
         return stateSet;
     }
 
     @Override
-    public StateSet<PopulationState> visitSystem_declaration(PopulationModelParser.System_declarationContext ctx) {
+    public ParametricDataSet<Function<RandomGenerator,PopulationState>> visitSystem_declaration(PopulationModelParser.System_declarationContext ctx) {
         stateSet.set(ctx.name.getText(), getStateBuilder(ctx.args,ctx.species_pattern()));
         return stateSet;
     }
 
-    private ParametricValue<PopulationState> getStateBuilder(List<Token> args, PopulationModelParser.Species_patternContext species_pattern) {
+    private ParametricValue<Function<RandomGenerator,PopulationState>> getStateBuilder(List<Token> args, PopulationModelParser.Species_patternContext species_pattern) {
         String[] variables = args.stream().sequential().map(Token::getText).toArray(String[]::new);
-        return new ParametricValue<>(variables,d -> getPopulationState(PopulationModelGenerator.getMap(variables,d),species_pattern));
+        return new ParametricValue<>(variables,d -> {
+                PopulationState state = getPopulationState(PopulationModelGenerator.getMap(variables,d),species_pattern);
+                return rg -> state;
+        });
     }
 
     @Override
-    protected StateSet<PopulationState> defaultResult() {
+    protected ParametricDataSet<Function<RandomGenerator,PopulationState>> defaultResult() {
         return stateSet;
     }
 

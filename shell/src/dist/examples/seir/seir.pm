@@ -1,18 +1,25 @@
-species S;
-species E;
-species I;
-species R;
+    param lambdaMeet = 1.0;      /* Meeting rate */
+    param probInfection = 0.25;  /* Probability of Infection */
+    param incubationRate = 1.0;  /* Incubation rate */
+    param recoverRate = 0.05;    /* Recovering rate */
 
-rule s_to_e {
-    S|I -[ 1.0*%I ]-> E|I
-}
+    const startS = 90;           /* Initial number of S agents */
+    const startI = 10;           /* Initial number of I agents */
 
-rule e_to_i {
-    E -[ 1.0 ]-> I
-}
+    species S;
+    species I;
+    species R;
 
-rule i_to_r {
-    I -[ 1.0 ]-> R
-}
+    rule infection {
+        S|I -[ #S*%I*lambdaMeet*probInfection ]-> E|I
+    }
 
-system init = S<10>|I;
+    rule incubation {
+        E -[ #E*incubationRate ]-> I
+    }
+
+    rule recovered {
+        I -[ #I*recoverRate ]-> R
+    }
+
+    system init(scale) = S<startS*scale>|I<startI*scale>;

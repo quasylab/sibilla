@@ -78,30 +78,30 @@ public abstract class ComputationBenchmarkEnvironment<S extends it.unicam.quasyl
 
     public void run() {
         LOGGER.info(String.format("STARTING %s COMPUTATION BENCHMARK", getMainLabel()));
-
-        for (int j = 1; j <= repetitions; j++) {
-            AtomicInteger currentRepetition = new AtomicInteger(j);
-            while (tasksCount < threshold) {
-                tasksCount += step;
-
-                SimulationUnit<S> unit = new SimulationUnit<S>(model.createModel(), model.state(),
-                        SamplePredicate.timeDeadlinePredicate(DEADLINE));
-
-                List<SimulationTask<S>> tasks = new ArrayList<>();
-                for (int i = 0; i < tasksCount; i++) {
-                    tasks.add(new SimulationTask<>(i, new DefaultRandomGenerator(), unit));
-                }
-                NetworkTask<S> task = new NetworkTask<>(tasks);
-
-                mainBenchmarkUnit.run(() -> {
-                    LOGGER.info("-----------------------------------------------");
-                    LOGGER.info(String.format("[%d] Computing [%d] tasks", currentRepetition.get(), tasksCount));
-                    compute(task);
-                    LOGGER.info(String.format("[%d] Trajectories computed [%d]", currentRepetition.get(), tasksCount));
-                    return List.of((double) tasksCount);
-                });
-            }
-        }
+//FIXME!
+//        for (int j = 1; j <= repetitions; j++) {
+//            AtomicInteger currentRepetition = new AtomicInteger(j);
+//            while (tasksCount < threshold) {
+//                tasksCount += step;
+//
+//                SimulationUnit<S> unit = new SimulationUnit<S>(model.createModel(), model.state(),
+//                        SamplePredicate.timeDeadlinePredicate(DEADLINE));
+//
+//                List<SimulationTask<S>> tasks = new ArrayList<>();
+//                for (int i = 0; i < tasksCount; i++) {
+//                    tasks.add(new SimulationTask<>(i, new DefaultRandomGenerator(), unit));
+//                }
+//                NetworkTask<S> task = new NetworkTask<>(tasks);
+//
+//                mainBenchmarkUnit.run(() -> {
+//                    LOGGER.info("-----------------------------------------------");
+//                    LOGGER.info(String.format("[%d] Computing [%d] tasks", currentRepetition.get(), tasksCount));
+//                    compute(task);
+//                    LOGGER.info(String.format("[%d] Trajectories computed [%d]", currentRepetition.get(), tasksCount));
+//                    return List.of((double) tasksCount);
+//                });
+//            }
+//        }
     }
 
     public enum Type {

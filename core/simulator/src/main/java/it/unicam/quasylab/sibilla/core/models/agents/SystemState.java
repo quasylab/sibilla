@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models.agents;
 
+import it.unicam.quasylab.sibilla.core.models.ImmutableState;
 import it.unicam.quasylab.sibilla.core.models.State;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ import java.io.ObjectOutput;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class SystemState<W extends World> implements State {
+public class SystemState<W extends World> implements ImmutableState {
 
     /**
      * Global variables describing the global system state.
@@ -99,16 +100,6 @@ public class SystemState<W extends World> implements State {
 
     public VariableMapping getInfo(int a) {
         return agentInfo[a];
-    }
-
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-
-    }
-
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-
     }
 
     @Override

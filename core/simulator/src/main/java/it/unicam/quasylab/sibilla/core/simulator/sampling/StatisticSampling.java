@@ -23,150 +23,116 @@
 
 package it.unicam.quasylab.sibilla.core.simulator.sampling;
 
-import it.unicam.quasylab.sibilla.core.models.MeasureFunction;
 import it.unicam.quasylab.sibilla.core.models.State;
-import org.apache.commons.math3.distribution.TDistribution;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.util.LinkedList;
+import java.util.Map;
 import java.util.function.Function;
 
+public abstract class StatisticSampling<S extends State> implements SamplingFunction<S> {
+    protected final Measure<? super S> measure;
+    protected final double dt;
 
-/**
- * @author loreti
- *
- */
-public class StatisticSampling<S extends State> implements SamplingFunction<S> {
+    public StatisticSampling(Measure<? super S> measure, double dt) {
+        this.measure = measure;
+        this.dt = dt;
+    }
 
-	private SummaryStatistics[] data;
-	private Measure<S> measure;
-	private double last_measure;
-	private double dt;
-	private double next_time;
-	private int current_index;
-	private double new_measure;
+    protected abstract void init();
 
-	public StatisticSampling(int samples, double dt, Measure<S> measure) {
-		this.data = new SummaryStatistics[samples];
-		this.measure = measure;
-		this.dt = dt;
-		init();
-	}
+    public String getName() {
+        return measure.getName();
+    }
 
-	private void init() {
-		for (int i = 0; i < data.length; i++) {
-			data[i] = new SummaryStatistics();
-		}
-	}
+    @Override
+    public Map<String,double[][]> getSimulationTimeSeries() {
+        return Map.of(measure.getName(), getData());
+    }
 
-	@Override
-	public void sample(double time, S context) {
-		this.new_measure = measure.measure(context);
-		if ((time >= this.next_time) && (this.current_index < this.data.length)) {
-			recordMeasure(time);
-		} else {
-			this.last_measure = this.new_measure;
-		}
-	}
+    public abstract int getSize();
 
-	private void recordMeasure(double time) {
-		while ((this.next_time<time)&&(this.current_index<this.data.length)) {
-			this.recordSample();
-		} 
-		this.last_measure = this.new_measure;		
-		if (this.next_time == time) {
-			this.recordSample();
-		}
-	}
-	
-	private void recordSample() {
-		this.data[this.current_index].addValue(this.last_measure);
-		this.current_index++;
-		this.next_time += this.dt;
-	}
-	
+    protected abstract void recordValues(double[] values);
 
-	@Override
-	public void end(double time) {
-		while (this.current_index < this.data.length) {
-			this.data[this.current_index].addValue(this.last_measure);
-			this.current_index++;
-			this.next_time += this.dt;
-		}
-	}
+    @Override
+    public SamplingHandler<S> getSamplingHandler() {
+        return new StatisticsCollector();
+    }
 
-	@Override
-	public void start() {
-		this.current_index = 0;
-		this.next_time = 0;
-	}
-	
-	public String getName() {
-		return measure.getName();
-	}
+    private double getDt() {
+        return dt;
+    }
 
-	@Override
-	public void printTimeSeries(Function<String, String> nameFunction) throws FileNotFoundException {
-		printTimeSeries(nameFunction,';');
-	}
 
-	@Override
-	public void printTimeSeries(Function<String, String> nameFunction, char separator) throws FileNotFoundException {
-		printTimeSeries(nameFunction,separator,0.05);
-	}
+    @Override
+    public void printTimeSeries(Function<String, String> nameFunction) throws FileNotFoundException {
+        printTimeSeries(nameFunction,';');
+    }
 
-	@Override
-	public void printTimeSeries(Function<String, String> nameFunction, char separator, double significance) throws FileNotFoundException {
-		String fileName = nameFunction.apply(this.getName());
-		PrintStream out = new PrintStream(fileName);
-		double time = 0.0;
-		for (int i = 0; i < this.data.length; i++) {
-			double ci = getConfidenceInterval(i,significance);
-			out.println(""+time + separator 
-					+ this.data[i].getMean() 
-					+ separator + ci);
-			time += dt;
-		}
-		out.close();
-	}
-	
-	
-	private double getConfidenceInterval(int i, double significance) {
-		TDistribution tDist = new TDistribution(this.data[i].getN());
-		double a = tDist.inverseCumulativeProbability(1.0 -significance/2);
-		return a*this.data[i].getStandardDeviation() / Math.sqrt(this.data[i].getN());
-	}
+    @Override
+    public void printTimeSeries(Function<String, String> nameFunction, char separator) throws FileNotFoundException {
+        printTimeSeries(nameFunction,separator,0.05);
+    }
 
-	@Override
-	public LinkedList<SimulationTimeSeries> getSimulationTimeSeries( int replications ) {
-		SimulationTimeSeries stt = new SimulationTimeSeries(measure.getName(), dt, replications, data);
-		LinkedList<SimulationTimeSeries> toReturn = new LinkedList<>();
-		toReturn.add(stt);
-		return toReturn;
-	}
+    public double getTimeOfIndex(int i) {
+        return i*dt;
+    }
 
-	public int getSize() {
-		return data.length;
-	}
-	
-	public static <S extends State> StatisticSampling<S> measure( String name, int samplings, double deadline, MeasureFunction<S> m) {
-		return new StatisticSampling<S>(samplings, deadline/samplings, 
-				new Measure<S>() {
+    public double[][] getData() {
+        double[][] data = new double[getSize()][];
+        for(int i=0; i<getSize(); i++) {
+            data[i] = getDataRow(i);
+        }
+        return data;
+    }
 
-			@Override
-			public double measure(S t) {
-				return m.apply( t );
-			}
+    protected abstract double[] getDataRow(int i);
 
-			@Override
-			public String getName() {
-				return name;
-			}
+    protected class StatisticsCollector implements SamplingHandler<S> {
+            private final double[] values = new double[getSize()];
+            private double last_measure = Double.NaN;
+            private double next_time = 0;
+            private int current_index = 0;
+            private double new_measure = Double.NaN;
 
-		});
-		
-	}
+        @Override
+            public synchronized void sample(double time, S context) {
+                this.new_measure = measure.measure(context);
+                if ((time >= this.next_time) && (this.current_index < getSize())) {
+                    recordMeasure(time);
+                } else {
+                    this.last_measure = this.new_measure;
+                }
+            }
+
+            private void recordMeasure(double time) {
+                while ((this.next_time < time) && (this.current_index < getSize())) {
+                    this.recordSample();
+                }
+                this.last_measure = this.new_measure;
+                if (this.next_time == time) {
+                    this.recordSample();
+                }
+            }
+
+            private void recordSample() {
+                this.values[this.current_index++] = this.last_measure;
+                this.next_time += getDt();
+            }
+
+            @Override
+            public synchronized void end(double time) {
+                while (this.current_index < getSize()) {
+                    recordSample();
+                }
+                recordValues(this.values);
+            }
+
+            @Override
+            public void start() {
+                if (this.current_index != 0) {
+                    throw new IllegalStateException();//TODO: Add message here!
+                }
+            }
+    }
 
 }

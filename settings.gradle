@@ -15,6 +15,8 @@ include 'core:simulator',
 		'langs:util',
 		'langs:pm',
 		'langs:lio',
+		'langs:markov',
+		'langs:slam',
 		'shell' ,
 		'gui:gui',
         'examples:populations:crowds',
@@ -29,6 +31,7 @@ include 'core:simulator',
     	'examples:benchmarks:slave',
    	 	'examples:benchmarks:master',
 		'examples:agents:RobotAgents',
-		'examples:lio:seir'
-include 'view'
+    'view',
+    'examples:lio:seir',
+		'examples:lio:rb'
 

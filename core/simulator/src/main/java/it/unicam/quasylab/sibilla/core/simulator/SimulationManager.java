@@ -36,7 +36,7 @@ public interface SimulationManager<S extends State> {
      *
      * @param unit simulation unit to execute.
      */
-    void simulate(SimulationUnit<S> unit);
+     void simulate(SimulationUnit<S> unit);
 
     /**
      * Returns the number of simulation tasks that are currently executed and are

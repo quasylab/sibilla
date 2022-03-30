@@ -1,0 +1,14 @@
+module "population"
+load "tsp.pm"
+set "scale" 100.0
+init "balanced"
+add all measures
+deadline 100
+dt 1.0
+replica 100
+simulate
+save output "./results" prefix "tsp_100" postfix "__"
+set "scale" 200.00
+init "balanced"
+simulate
+save output "./results" prefix "tsp_200" postfix "__"

@@ -29,6 +29,7 @@ import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationTask;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationUnit;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.TrajectoryCollector;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.File;
@@ -141,9 +142,11 @@ public class RoboticScenario {
     private  Trajectory<SystemState<RobotArena>> getTrajectory(AgentModelBuilder<RobotArena> def, double deadline) {
         AgentModel<RobotArena> model = def.getAgentModel();
         SystemState<RobotArena> state = def.getState();
-        SimulationUnit<SystemState<RobotArena>> simulationUnit = new SimulationUnit<SystemState<RobotArena>>(model,state,(t, s) -> t>=deadline);
+        TrajectoryCollector<SystemState<RobotArena>> collector = new TrajectoryCollector<>();
+        SimulationUnit<SystemState<RobotArena>> simulationUnit = new SimulationUnit<SystemState<RobotArena>>(model,state,collector,(t, s) -> t>=deadline);
         SimulationTask<SystemState<RobotArena>> task = new SimulationTask<>(rg,simulationUnit);
-        return task.get();
+        task.get();
+        return collector.getTrajectory();
     }
 
 

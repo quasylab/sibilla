@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.simulator.sampling;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
 
 import java.io.*;
@@ -33,17 +34,19 @@ import java.io.*;
  */
 public class SimulationTimeSeries {
 
-	private StatisticalSummary[] data;
-	private double dt;
-	private String name;
-	private int replications;
-	
-	
-	public SimulationTimeSeries( String name , double dt , int replications , StatisticalSummary[] data ) {
+	private final StatisticalSummary[] data;
+	private final double dt;
+	private final String name;
+	private final long replications;
+	private boolean summary = false;
+
+
+	public SimulationTimeSeries(boolean summary, String name , double dt , long replications , StatisticalSummary[] data ) {
 		this.name = name;
 		this.dt = dt;
 		this.data = data;
 		this.replications = replications;
+		this.summary = summary;
 	}
 	
 	public String getName() {
@@ -69,7 +72,40 @@ public class SimulationTimeSeries {
 		}
 		return getMean( i );
 	}
-	
+
+	public double getMax(int i) {
+		return data[i].getMax();
+	}
+
+	public double getMin(int i) {
+		return data[i].getMin();
+	}
+
+	public double getMedian(int i) {
+		if (data[i] instanceof DescriptiveStatistics) {
+			return ((DescriptiveStatistics) data[i]).getPercentile(50);
+		} else {
+			return Double.NaN;
+		}
+	}
+
+	public double getQ1(int i) {
+		if (data[i] instanceof DescriptiveStatistics) {
+			return ((DescriptiveStatistics) data[i]).getPercentile(25);
+		} else {
+			return Double.NaN;
+		}
+	}
+
+	public double getQ3(int i) {
+		if (data[i] instanceof DescriptiveStatistics) {
+			return ((DescriptiveStatistics) data[i]).getPercentile(75);
+		} else {
+			return Double.NaN;
+		}
+	}
+
+
 	public StatisticalSummary[] getData() {
 		return data;
 	}
@@ -121,15 +157,30 @@ public class SimulationTimeSeries {
 
 	public void writeToCSV( StringWriter writer ) {
 		for( int i=0 ; i<data.length ; i++ ) {
-			writer.write(getTime(i)+";"+getMean(i)+";"+getStandardDeviation(i)+";"+getConfidenceInterval(i)+"\n");
+			writer.write(getCSVRow(i, ',')+"\n");
 			writer.flush();
 		}
 	}
 
 	public void writeToCSV( PrintWriter writer ) {
 		for( int i=0 ; i<data.length ; i++ ) {
-			writer.println(getTime(i)+";"+getMean(i)+";"+getStandardDeviation(i)+";"+getConfidenceInterval(i));
+			writer.println(getCSVRow(i,','));
 			writer.flush();
+		}
+	}
+
+	public String getCSVRow(int i, char separator) {
+		if (this.summary) {
+			return String.format("%f%c%f%c%f%c%f",getTime(i),separator,getMean(i),separator,getStandardDeviation(i),separator,getConfidenceInterval(i));
+		} else {
+			return String.format("%f%c%f%c%f%c%f%c%f%c%f%c%f",
+					getTime(i), separator,
+					getMin(i), separator,
+					getQ1(i), separator,
+					getMean(i), separator,
+					getMedian(i), separator,
+					getQ3(i), separator,
+					getMax(i));
 		}
 	}
 }

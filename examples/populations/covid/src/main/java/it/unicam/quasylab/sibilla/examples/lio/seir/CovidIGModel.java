@@ -27,14 +27,16 @@
 package it.unicam.quasylab.sibilla.examples.lio.seir;
 
 import it.unicam.quasylab.sibilla.core.models.Model;
-import it.unicam.quasylab.sibilla.core.models.StateSet;
+import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.FileNotFoundException;
 import java.net.UnknownHostException;
+import java.util.function.Function;
 
 /**
  * @author loreti
@@ -54,11 +56,11 @@ public class CovidIGModel {
 
         PopulationModelDefinition def = new PopulationModelDefinition(CovidAGDefinition::generatePopulationRegistry,
                 CovidAGDefinition::generateRules,
-                (ee,pr) -> StateSet.newStateSet(CovidAGDefinition.initialState()));
+                (ee,pr) -> ParametricDataSet.newStateSet(rg -> CovidAGDefinition.initialState()));
         SimulationEnvironment simulator = new SimulationEnvironment();
         Model<PopulationState> model = def.createModel();
         SamplingFunction<PopulationState> collection = model.selectSamplingFunction(SAMPLINGS,DEADLINE/SAMPLINGS);
-        simulator.simulate(model,def.state(),collection,REPLICA,DEADLINE);
+        simulator.simulate(model,def.state(),collection::getSamplingHandler,REPLICA,DEADLINE);
         collection.printTimeSeries("data","sir_",".data");
     }
 

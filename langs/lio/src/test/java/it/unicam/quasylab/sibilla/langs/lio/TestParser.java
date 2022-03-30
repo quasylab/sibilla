@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestParser {
 
     public final String CODE1 =
-            "const alpha = 0.25;\n" +
+                    "const alpha = 0.25;\n" +
                     "const beta = 0.25;\n" +
                     "action toRed = alpha;\n" +
                     "action toBlue = beta;\n" +
@@ -49,72 +49,78 @@ public class TestParser {
 
     public final String CODE2 =
             "const alpha = 0.25;\n" +
-                    "const alpha = 0.25;\n";
+            "const alpha = 0.25;\n";
 
     @Test
-    @Disabled
     public void codeOneShouldBeParsed() {
         assertNotNull(getParseTree(CODE1));
     }
 
     @Test
-    @Disabled
-    public void aSymbolTableShouldBeObtainedFromCode1() {
-        ParseTree tree = getParseTree(CODE1);
-        SymbolTable table = getSymbolTable(getParseTree(CODE1));
-        assertEquals(7,table.getNames().size());
+    public void codeTwoShouldBeParsed() {
+        assertNotNull(getParseTree(CODE1));
     }
 
-    @Test
-    @Disabled
-    public void noErrorShouldBeInTheSymbolTableObtainedFromCode1() {
-        ParseTree tree = getParseTree(CODE1);
-        SymbolCollector collector = new SymbolCollector();
-        collector.visit(tree);
-        assertTrue(collector.getErrors().isEmpty());
-    }
-
-    @Test
-    @Disabled
-    public void oneErrorShouldBeInTheSymbolTableObtainedFromCode2() {
-        ParseTree tree = getParseTree(CODE2);
-        SymbolCollector collector = new SymbolCollector();
-        collector.visit(tree);
-        assertEquals(1,collector.getErrors().size());
-    }
-
-    @Test
-    @Disabled
-    public void allTheExceptedNamesShouldBeInTheSymbolTableOfCode1() {
-        ParseTree tree = getParseTree(CODE1);
-        SymbolTable table = getSymbolTable(getParseTree(CODE1));
-        assertEquals(7,table.size());
-        assertTrue(table.isAConstant("alpha"),"alpha should be a constant");
-        assertTrue(table.isAConstant("beta"),"beta should be a constant");
-        assertTrue(table.isAnAction("toRed"),"toRed should be an action");
-        assertTrue(table.isAnAction("toBlue"),"toBlue should be an action");
-        assertTrue(table.isAState("B"),"B should be a state");
-        assertTrue(table.isAState("R"),"R should be a statte");
-        assertTrue(table.isASystem("test"),"test should be a system");
-    }
-
-    @Test
-    @Disabled
-    public void codeOneShouldPassChecking() {
-        ParseTree tree = getParseTree(CODE1);
-        SymbolTable table = getSymbolTable(getParseTree(CODE1));
-        ModelCorrectnessChecker checker = new ModelCorrectnessChecker(table);
-        boolean flag = tree.accept(checker);
-        assertTrue(checker.getErrors().isEmpty());
-    }
-
-
-    private SymbolTable getSymbolTable(ParseTree tree) {
-        SymbolCollector collector = new SymbolCollector();
-        collector.visit(tree);
-        return collector.getSymbolTable();
-    }
-
+//
+//    @Test
+//    @Disabled
+//    public void aSymbolTableShouldBeObtainedFromCode1() {
+//        ParseTree tree = getParseTree(CODE1);
+//        SymbolTable table = getSymbolTable(getParseTree(CODE1));
+//        assertEquals(7,table.getNames().size());
+//    }
+//
+//    @Test
+//    @Disabled
+//    public void noErrorShouldBeInTheSymbolTableObtainedFromCode1() {
+//        ParseTree tree = getParseTree(CODE1);
+//        SymbolCollector collector = new SymbolCollector();
+//        collector.visit(tree);
+//        assertTrue(collector.getErrors().isEmpty());
+//    }
+//
+//    @Test
+//    @Disabled
+//    public void oneErrorShouldBeInTheSymbolTableObtainedFromCode2() {
+//        ParseTree tree = getParseTree(CODE2);
+//        SymbolCollector collector = new SymbolCollector();
+//        collector.visit(tree);
+//        assertEquals(1,collector.getErrors().size());
+//    }
+//
+//    @Test
+//    @Disabled
+//    public void allTheExceptedNamesShouldBeInTheSymbolTableOfCode1() {
+//        ParseTree tree = getParseTree(CODE1);
+//        SymbolTable table = getSymbolTable(getParseTree(CODE1));
+//        assertEquals(7,table.size());
+//        assertTrue(table.isAConstant("alpha"),"alpha should be a constant");
+//        assertTrue(table.isAConstant("beta"),"beta should be a constant");
+//        assertTrue(table.isAnAction("toRed"),"toRed should be an action");
+//        assertTrue(table.isAnAction("toBlue"),"toBlue should be an action");
+//        assertTrue(table.isAState("B"),"B should be a state");
+//        assertTrue(table.isAState("R"),"R should be a statte");
+//        assertTrue(table.isASystem("test"),"test should be a system");
+//    }
+//
+//    @Test
+//    @Disabled
+//    public void codeOneShouldPassChecking() {
+//        ParseTree tree = getParseTree(CODE1);
+//        SymbolTable table = getSymbolTable(getParseTree(CODE1));
+//        ModelCorrectnessChecker checker = new ModelCorrectnessChecker(table);
+//        boolean flag = tree.accept(checker);
+//        assertTrue(checker.getErrors().isEmpty());
+//    }
+//
+//
+//    private SymbolTable getSymbolTable(ParseTree tree) {
+//        SymbolCollector collector = new SymbolCollector();
+//        collector.visit(tree);
+//        return collector.getSymbolTable();
+//    }
+//
+//
 
     private ParseTree getParseTree(String code) {
         LIOModelLexer lexer = new LIOModelLexer(CharStreams.fromString(code));

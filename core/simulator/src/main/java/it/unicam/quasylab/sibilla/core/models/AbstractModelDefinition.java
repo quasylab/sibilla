@@ -23,8 +23,12 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
+import org.apache.commons.math3.random.RandomGenerator;
+
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
 
 /**
  * This class provides basic features for handling a ModelDefinition.
@@ -67,6 +71,7 @@ public abstract class AbstractModelDefinition<T extends State> implements ModelD
     @Override
     public void setParameter(String name, double value) {
         environment.set(name,value);
+        clearCache();
     }
 
     /**
@@ -74,29 +79,18 @@ public abstract class AbstractModelDefinition<T extends State> implements ModelD
      */
     protected abstract void clearCache();
 
-    /**
-     * Reset the EvaluationEnvironment of the model to its default values.
-     */
+    @Override
     public synchronized void reset() {
         environment.reset();
     }
 
-    /**
-     * Reset the parameter name to its default value.
-     *
-     * @param name the name of parameter to reset.
-     */
+    @Override
     public synchronized void reset(String name) {
         environment.reset(name);
     }
 
-    /**
-     * Return the value associated with the given parameter.
-     *
-     * @param name name of parameter.
-     * @return the value associated with the given parameter.
-     */
-    public double getValue(String name) {
+    @Override
+    public double getParameterValue(String name) {
         return environment.get(name);
     }
 
@@ -110,13 +104,38 @@ public abstract class AbstractModelDefinition<T extends State> implements ModelD
         return environment.getDefault(name);
     }
 
-    /**
-     * Return the used EvaluationEnvironment.
-     * @return the used EvaluationEnvironment.
-     */
+    @Override
     public EvaluationEnvironment getEnvironment() {
         return environment;
     }
 
-    public abstract boolean isAState(String name);
+    public boolean isAState(String name) {
+        return getStates().isDefined(name);
+    }
+
+    @Override
+    public int stateArity() {
+        return getStates().arity();
+    }
+
+    @Override
+    public int stateArity(String name) {
+        return getStates().arity(name);
+    }
+
+    @Override
+    public String[] states() {
+        return getStates().states();
+    }
+
+    @Override
+    public Function<RandomGenerator,T> state(String name, double... args) {
+        return getStates().state(name,args);
+    }
+
+    @Override
+    public Function<RandomGenerator,T> state(double... args) {
+        return getStates().get(args);
+    }
+
 }

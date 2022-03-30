@@ -23,23 +23,23 @@
 
 package it.unicam.quasylab.sibilla.core;
 
-import it.unicam.quasylab.sibilla.core.models.Model;
-import it.unicam.quasylab.sibilla.core.models.State;
-import it.unicam.quasylab.sibilla.core.models.TimeStep;
+import it.unicam.quasylab.sibilla.core.models.*;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
  * An execution environment has the responsibility to interactively execute
  * a given model.
  */
-public class ExecutionEnvironment<S extends State> {
+public class ExecutionEnvironment<S extends ImmutableState> {
 
     private RandomGenerator rg;
-    private Model<S> model;
+    private InteractiveModel<S> model;
     private LinkedList<TimeStep<S>> history;
     private boolean completed = false;
     private double time;
@@ -54,12 +54,23 @@ public class ExecutionEnvironment<S extends State> {
      * @param model model to execute.
      * @param init
      */
-    public ExecutionEnvironment(RandomGenerator rg, Model<S> model, S init) {
+    public ExecutionEnvironment(RandomGenerator rg, InteractiveModel<S> model, S init) {
         this.model = model;
         this.history = new LinkedList<>();
         this.time = 0.0;
         this.currentState = init;
         this.rg = rg;
+    }
+
+    /**
+     * Create a new ExecutionEnvironment that can be used to execute a given model
+     * starting from a specific state.
+     *
+     * @param model model to execute.
+     * @param init
+     */
+    public ExecutionEnvironment(RandomGenerator rg, InteractiveModel<S> model, Function<RandomGenerator,S> init) {
+        this(rg, model, init.apply(rg));
     }
 
     /**
@@ -77,8 +88,9 @@ public class ExecutionEnvironment<S extends State> {
      * @return false if current state is a deadlock state, true otherwise.
      */
     public boolean step() {
-        TimeStep<S> step = model.next(rg,time,currentState);
-        if (step != null) {
+        Optional<TimeStep<S>> oStep = model.next(rg,time,currentState);
+        if (oStep.isPresent()) {
+            TimeStep<S> step = oStep.get();
             this.history.add(new TimeStep<S>(step.getTime(),currentState));
             this.currentState = step.getValue();
             this.time += step.getTime();

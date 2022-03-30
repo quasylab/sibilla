@@ -41,12 +41,14 @@ import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
 import it.unicam.quasylab.sibilla.core.network.slave.SlaveCommand;
 import it.unicam.quasylab.sibilla.core.network.slave.SlaveState;
 import it.unicam.quasylab.sibilla.core.simulator.*;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -102,14 +104,13 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      * Creates a NetworkSimulationManager with the parameters given in input
      *
      * @param random          RandomGenerator used in the simulation
-     * @param consumer
      * @param monitor         TODO
      * @param simulationState state of the simulation that is being executed
      */
-    public NetworkSimulationManager(RandomGenerator random, Consumer<Trajectory<S>> consumer, SimulationMonitor monitor,
+    public NetworkSimulationManager(RandomGenerator random, SimulationMonitor monitor,
                                     SimulationState simulationState, SerializerType serializerType,
                                     ComputationResultSerializerType crSerializerType, NetworkInfo clientInfo) {
-        super(random, monitor, consumer);// TODO: Gestire parametro Monitor
+        super(random, monitor);// TODO: Gestire parametro Monitor
         this.clientInfo = clientInfo;
         this.LOGGER = HostLoggerSupplier.getInstance().getLogger();
         this.serializer = Serializer.getSerializer(serializerType);
@@ -156,8 +157,8 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         return new SimulationManagerFactory() {
             @Override
             public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random,
-                                                                               SimulationMonitor monitor, Consumer<Trajectory<S>> consumer) {
-                return new NetworkSimulationManager<>(random, consumer, monitor, simulationState,
+                                                                               SimulationMonitor monitor) {
+                return new NetworkSimulationManager<>(random, monitor, simulationState,
                         serializerType, crSerializerType, clientInfo);
             }
         };
@@ -295,7 +296,8 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
             LOGGER.info(String.format("Timeout did not occurred for slave: %s", server.getNetworkInfo().toString()));
             enqueueServer(server);
             simulationState.decreaseRunningServers();
-            value.getResults().forEach(this::handleTrajectory);
+            //FIXME!
+            //value.getResults().forEach(this::handleTrajectory);
         }
     }
 

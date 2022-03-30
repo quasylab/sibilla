@@ -4,61 +4,79 @@ grammar LIOModel;
 package it.unicam.quasylab.sibilla.langs.lio;
 }
 
-model       : element* EOF;
+model       : (modelContent+=element)* EOF;
 
-element     : action
-            | constant
-            | state
-            | system
-            | param
+element     : elementAction
+            | elementConstant
+            | elementState
+            | elementSystem
+            | elementParam
+            | elementMeasure
+            | elementAtomic
+            | elementPredicate
             ;
 
-param       : 'param' name=ID '=' value=expr ';'
+elementParam:
+            'param' name=ID '=' value=expr ';'
             ;
 
-constant    : ('constant'|'const') name=ID '='  value=expr ';'
+elementConstant:
+            ('constant'|'const') name=ID '='  value=expr ';'
             ;
 
-action      : 'action' name=ID '=' probability=expr ';'
+elementAction:
+            'action' name=ID '=' probability=expr ';'
             ;
 
-state       : 'state' name=ID '{'
-                    (steps+=step ('+' steps+=step)*)?
-               '}'
+elementState:
+            'state' name=ID '{'
+                (steps+=agentStep ('+' steps+=agentStep)*)?
+            '}'
             ;
 
-step        : performedAction=ID '.' nextState=ID
+elementMeasure:
+            'measure' name=ID '=' value=expr ';'
             ;
 
-system      : 'system' name=ID ('('args += ID (',' args += ID)* ')')? '=' population += agent_expr ('|' population+=agent_expr)* ';'
+elementAtomic:
+            'atomic' name=ID '=' '{' states += ID (',' states += ID)* '}' ';'
             ;
 
-agent_expr  : name=ID ('[' size=expr ']')?
+elementPredicate:
+            'predicate' name=ID '=' value=expr ';'
             ;
 
-expr    :
-      left=expr op=('<'|'<='|'=='|'>='|'>') right=expr          # relationExpression
-    | left=expr op=('&'|'&&') right=expr                      # andExpression
-    | left=expr op=('|'|'||') right=expr                      # orExpression
-    | left=expr '^' right=expr                                # exponentExpression
-    | left=expr op=('*'|'/'|'//') right=expr               # mulDivExpression
-    | left=expr op=('+'|'-'|'%') right=expr                   # addSubExpression
-    | '!' arg=expr                                     # negationExpression
-    | guard=expr '?' thenBranch=expr ':' elseBranch=expr             # ifThenElseExpression
-    | op=('-'|'+') arg=expr                            # unaryExpression
-    | '(' expr ')'                                     # bracketExpression
-    | INTEGER                                      # intValue
-    | REAL                                         # realValue
-    | 'false'                                      # falseValue
-    | 'true'                                       # trueValue
-    | '%' agent=ID                                       # populationFractionExpression
-    | '#' agent=ID                                       # populationSizeExpression
-//    | 'now'                                        # nowExpression
-    | reference=ID                                 # referenceExpression
-    ;
+agentStep:
+            performedAction=ID '.' nextState=ID
+            ;
 
+elementSystem:
+            'system' name=ID ('('args += ID (',' args += ID)* ')')? '=' population += agentExpression ('|' population+=agentExpression)* ';'
+            ;
 
+agentExpression:
+            name=ID ('[' size=expr ']')?
+            ;
 
+expr:
+            left=expr op=('<'|'<='|'=='|'>='|'>') right=expr          # expressionRelation
+            | left=expr op=('&'|'&&') right=expr                        # expressionConjunction
+            | left=expr op=('|'|'||') right=expr                        # expressionDisjunction
+            | left=expr '^' right=expr                                  # expressionPower
+            | left=expr op=('*'|'/'|'//') right=expr                    # expressionMulDiv
+            | left=expr op=('+'|'-'|'%') right=expr                     # expressionSumDiff
+            | '!' arg=expr                                              # expressionNegation
+            | guard=expr '?' thenBranch=expr ':' elseBranch=expr        # expressionIfThenElse
+            | op=('-'|'+') arg=expr                                     # expressionUnary
+            | '(' expr ')'                                              # expressionBracket
+            | INTEGER                                                   # expressionInteger
+            | REAL                                                      # expressionReal
+            | 'false'                                                   # expressionFalse
+            | 'true'                                                    # expressionTrue
+            | '%' agent=ID                                              # expressionFractionOfAgents
+            | '#' agent=ID                                              # expressionNumberOfAgents
+            | reference=ID                                              # expressionReference
+            ;
 
 
 fragment DIGIT  :   [0-9];

@@ -63,7 +63,7 @@ public class PopulationMeasuresGenerator extends PopulationModelBaseVisitor<Map<
         Function<String, Double> evaluator = environment.getEvaluator();
         List<Map<String,Double>> maps = PopulationModelGenerator.getMaps(evaluator, ctx.local_variables(), ctx.guard_expression());
         maps.stream().map(m -> getMeasure(name, evaluator, m, ctx.expr())).forEach(m -> measures.put(m.getName(), m));
-        return super.visitMeasure_declaration(ctx);
+        return measures;
     }
 
     private Measure<PopulationState> getMeasure(String name, Function<String, Double> evaluator, Map<String, Double> m, PopulationModelParser.ExprContext expr) {

@@ -25,26 +25,27 @@ package it.unicam.quasylab.sibilla.core.runtime;
 
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public final class SibillaRuntime {
 
     private static final String UNKNOWN_MODULE_MESSAGE = "Module %s is unknown!";
     private static final String NO_MODULE_HAS_BEEN_LOADED =  "No module has been loaded!";
-    private Map<String,SibillaModule> moduleIndex = new TreeMap<>();
+    private final Map<String,SibillaModule> moduleIndex = new TreeMap<>();
     private SibillaModule currentModule;
-    private Map<String, List<SimulationTimeSeries>> simulations = new TreeMap<>();
-    private List<SimulationTimeSeries> lastSimulation;
-    private RandomGenerator rg = new DefaultRandomGenerator();
-    private int replica = 1;
+    private final Map<String, Map<String,double[][]>> simulations = new TreeMap<>();
+    private Map<String,double[][]> lastSimulation;
+    private final RandomGenerator rg = new DefaultRandomGenerator();
+    private long replica = 1;
     private double deadline = Double.NaN;
     private double dt = Double.NaN;
 
@@ -90,6 +91,16 @@ public final class SibillaRuntime {
      */
     public void load(File file) throws CommandExecutionException {
         currentModule.load(file);
+    }
+
+    /**
+     * Loads a specification from the give file.
+     *
+     * @param fileName file name.
+     * @throws CommandExecutionException
+     */
+    public void loadFromFile(String fileName) throws CommandExecutionException {
+        currentModule.load(new File(fileName));
     }
 
     /**
@@ -267,20 +278,67 @@ public final class SibillaRuntime {
     /**
      * Run a simulation and save results with the given label.
      */
-    public void simulate(SimulationMonitor monitor, String label) throws CommandExecutionException {
+    public Map<String, double[][]>  simulate(SimulationMonitor monitor, String label) throws CommandExecutionException {
         checkDeadline();
         checkDt();
         lastSimulation = currentModule.simulate(monitor,rg,replica,deadline,dt);
         if (label != null) {
             simulations.put(label, lastSimulation);
         }
+        return lastSimulation;
+    }
+
+    /**
+     * Use descriptive statistics.
+     */
+    public void useDescriptiveStatistics() {
+        this.currentModule.setSummaryStatistics(false);
+    }
+
+    /**
+     * Use summary statistics.
+     */
+    public void useSummaryStatistics() {
+        this.currentModule.setSummaryStatistics(true);
+    }
+
+    /**
+     * Return true if a descriptive statistics is used.
+     *
+     * @return true if a descriptive statistics is used.
+     */
+    public boolean isDescriptiveStatistics() {
+        return !this.currentModule.isSummaryStatistics();
+    }
+
+    /**
+     * Return true if a summary statistics is used.
+     *
+     * @return true if a summary statistics is used.
+     */
+    public boolean isSummaryStatistics() {
+        return this.currentModule.isSummaryStatistics();
+    }
+
+    /**
+     * Return a string that describes the kind of used statistics.
+     *
+     * @return a string that describes the kind of used statistics.
+     */
+    public String getStatistics() {
+       if (this.currentModule.isSummaryStatistics()) {
+           return "summary";
+       } else {
+           return "descriptive";
+       }
     }
 
     /**
      * Run a simulation and save results with the given label.
+     * @return
      */
-    public void simulate(String label) throws CommandExecutionException {
-        simulate(null,label);
+    public Map<String, double[][]> simulate(String label) throws CommandExecutionException {
+        return simulate(null,label);
     }
 
     private void checkDt() throws CommandExecutionException {
@@ -292,6 +350,12 @@ public final class SibillaRuntime {
     private void checkDeadline() throws CommandExecutionException {
         if (Double.isNaN(deadline)) {
             throw new CommandExecutionException("No simulation deadline has been set!");
+        }
+    }
+
+    private void checkReplica() throws CommandExecutionException {
+        if (replica<1) {
+            throw new CommandExecutionException("No number of replicas has been set!");
         }
     }
 
@@ -382,43 +446,43 @@ public final class SibillaRuntime {
      * in the given output format. The name of each save file, having extension .csv,
      * consists of the string prefix, the name of the series, and the postfix.
      *
-     * @param outputFolder output folder.
-     * @param prefix prefix file name.
-     * @param postfix
-     * @throws FileNotFoundException
+     * @param outputFolder fodler where data are saved
+     * @param prefix prefix of generated file names
+     * @param postfix postix of generate file names
+     * @throws IOException if an error while saving data occurs
+     * @throws CommandExecutionException if an error occurred while executing this method
      */
-    public void save(String outputFolder, String prefix, String postfix) throws FileNotFoundException, CommandExecutionException {
+    public void save(String outputFolder, String prefix, String postfix) throws IOException, CommandExecutionException {
+        CSVWriter writer = new CSVWriter(outputFolder, prefix, postfix);
         if (lastSimulation != null) {
-            for (SimulationTimeSeries ts: lastSimulation) {
-                ts.writeToCSV(outputFolder, prefix, postfix);
-            }
+            writer.write(lastSimulation);
         } else {
             throw new CommandExecutionException("No simulation is avabilable!");
         }
     }
 
     /**
-     * Save last result to a given folder. Data files, in CSV format, are stored
+     * Saves the results associated with the given label to the given folder. Data files, in CSV format, are stored
      * in the given output format. The name of each save file, having extension .csv,
      * consists of the string prefix, the name of the series, and the postfix.
      *
-     * @param outputFolder output folder.
-     * @param prefix prefix file name.
-     * @param postfix
-     * @throws FileNotFoundException
+     * @param outputFolder fodler where data are saved
+     * @param prefix prefix of generated file names
+     * @param postfix postix of generate file names
+     * @throws IOException if an error while saving data occurs
+     * @throws CommandExecutionException if an error occurred while executing this method
      */
-    public void save(String label, String outputFolder, String prefix, String postfix) throws FileNotFoundException, CommandExecutionException {
+    public void save(String label, String outputFolder, String prefix, String postfix) throws IOException, CommandExecutionException {
         if (outputFolder == null) { outputFolder = System.getProperty("user.dir"); }
         if (prefix == null) { prefix = ""; }
         if (postfix == null) { postfix = ""; }
         if (label == null) {
             save(outputFolder,prefix,postfix);
         } else {
-            List<SimulationTimeSeries> series = this.simulations.get(label);
+            Map<String, double[][]> series = this.simulations.get(label);
             if (series != null) {
-                for (SimulationTimeSeries ts: series) {
-                    ts.writeToCSV(outputFolder, prefix, postfix);
-                }
+                CSVWriter writer = new CSVWriter(outputFolder, prefix, postfix);
+                writer.write(series);
             } else {
                 throw new CommandExecutionException("Simulation "+label+" is unknown!");
             }
@@ -430,7 +494,7 @@ public final class SibillaRuntime {
      *
      * @param replica the number of replications.
      */
-    public void setReplica(int replica) {
+    public void setReplica(long replica) {
         this.replica = replica;
     }
 
@@ -438,7 +502,45 @@ public final class SibillaRuntime {
         return dt;
     }
 
-    public int getReplica() {
+    public long getReplica() {
         return replica;
     }
+
+    public String printData(String label) {
+        Map<String, double[][]> series = this.simulations.get(label);
+        if (series != null) {
+            StringWriter sw = new StringWriter();
+            for (Map.Entry<String, double[][]> ts: series.entrySet()) {
+                sw.write(ts.getKey()+"\n");
+                sw.write(CSVWriter.getCSVString(ts.getValue()));
+            }
+            return sw.getBuffer().toString();
+        } else {
+            return "";
+        }
+    }
+
+    public String[] getPredicates() {
+        return currentModule.getPredicates();
+    }
+
+    public FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, String predicateName) throws CommandExecutionException {
+        checkDeadline();
+        checkReplica();
+        return currentModule.firstPassageTime(monitor,rg,replica,deadline,dt,predicateName);
+    }
+
+    public double computeProbReach(SimulationMonitor monitor, String goal, double alpha, double eps) throws CommandExecutionException {
+        checkDeadline();
+        return currentModule.estimateReachability(monitor, rg, goal, deadline, alpha, eps);
+    }
+
+    public double computeProbReach(SimulationMonitor monitor, String condition, String goal, double alpha, double eps) throws CommandExecutionException {
+        checkDeadline();
+        return currentModule.estimateReachability(monitor, rg, condition, goal, deadline, alpha, eps);
+    }
+
+
+
+
 }

@@ -1,0 +1,20 @@
+module "population"
+load "groupies.pm"
+init "balanced"
+add all measures
+deadline 100
+dt 1.0
+replica 100
+simulate
+save output "./results" prefix "groupies_summary_" postfix "__"
+descriptive statistics
+simulate
+save output "./results" prefix "groupies_descriptive_" postfix "__"
+load "celebr.pm"
+init "balanced"
+simulate
+save output "./results" prefix "celebrities_summary_" postfix "__"
+descriptive statistics
+simulate
+save output "./results" prefix "celebrities_descriptive_" postfix "__"
+

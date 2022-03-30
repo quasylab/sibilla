@@ -344,13 +344,13 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
      *
      * @param dataSet containing all the simulation oriented datas.
      */
-    private void submitSimulations(TCPNetworkManager client, SimulationDataSet dataSet, SimulationState simulationState) {
+    private void submitSimulations(TCPNetworkManager client, SimulationDataSet<State> dataSet, SimulationState simulationState) {
         try {
             SimulationEnvironment sim = new SimulationEnvironment(
                     NetworkSimulationManager.getNetworkSimulationManagerFactory(simulationState, serializer.getType(), this.crSerializerType, client.getNetworkInfo()));
 
-            sim.simulate(dataSet.getRandomGenerator(), dataSet.getModel(), dataSet.getModelInitialState(),
-                    dataSet.getModelSamplingFunction(), dataSet.getReplica(), dataSet.getDeadline());
+            sim.simulate(dataSet.getRandomGenerator(), dataSet.getModel(), rg -> dataSet.getModelInitialState(),
+                    dataSet.getModelSamplingFunction()::getSamplingHandler, dataSet.getReplica(), dataSet.getDeadline());
             this.state.increaseExecutedSimulations();
         } catch (InterruptedException e) {
             LOGGER.severe(String.format("[%s] Simulation has been interrupted before its completion - Client: %s", e.getMessage(), client.getNetworkInfo().toString()));

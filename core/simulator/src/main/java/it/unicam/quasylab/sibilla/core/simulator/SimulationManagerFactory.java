@@ -24,9 +24,11 @@
 package it.unicam.quasylab.sibilla.core.simulator;
 
 import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author loreti
@@ -35,6 +37,6 @@ import java.util.function.Consumer;
 @FunctionalInterface
 public interface SimulationManagerFactory {
 	
-	<S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random, SimulationMonitor monitor, Consumer<Trajectory<S>> consumer);
+	<S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random, SimulationMonitor monitor);
 
 }

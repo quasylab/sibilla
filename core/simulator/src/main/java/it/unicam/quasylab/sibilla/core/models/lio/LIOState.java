@@ -23,13 +23,16 @@
 
 package it.unicam.quasylab.sibilla.core.models.lio;
 
+import it.unicam.quasylab.sibilla.core.models.ImmutableState;
 import it.unicam.quasylab.sibilla.core.models.State;
 import org.apache.commons.math3.random.RandomGenerator;
+
+import java.util.function.IntPredicate;
 
 /**
  * A LIOState indicates a state of a network of interactive objects.
  */
-public interface LIOState extends State {
+public interface LIOState extends ImmutableState {
 
     /**
      * Sample next agent state from given a row of probability transition matrix.
@@ -76,5 +79,48 @@ public interface LIOState extends State {
     default double fractionOf(Agent a) {
         return fractionOf(a.getIndex());
     }
+
+    /**
+     * Returns the fraction of agents in a state satisfying the given predicate.
+     *
+     * @param predicate state predicate.
+     * @return  the fraction of agents in a state satisfying the given predicate.
+     */
+    double fractionOf(IntPredicate predicate);
+
+    /**
+     * Return the number of agents in the given state.
+     *
+     * @param stateIndex state index.
+     * @return the number of agents in the given state.
+     */
+    double numberOf(int stateIndex);
+
+    /**
+     * Return the number of agents in the given state.
+     *
+     * @param a agent state.
+     * @return the number of agents in the given state.
+     */
+    default double numberOf(Agent a) { return numberOf(a.getIndex()); }
+
+    /**
+     * Returns the number of agents in a state satisfying the given predicate.
+     *
+     * @param predicate state predicate.
+     * @return  the number of agents in a state satisfying the given predicate.
+     */
+    double numberOf(IntPredicate predicate);
+
+    /**
+     * Given a random generator and the probability matrix, this method returns a sampling of next
+     * state.
+     *
+     * @param randomGenerator random generator
+     * @param matrix probability matrix
+     * @return a sampling of next state.
+     */
+    LIOState step(RandomGenerator randomGenerator, double[][] matrix);
+
 
 }

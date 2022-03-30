@@ -26,12 +26,12 @@
  */
 package it.unicam.quasylab.sibilla.examples.lio.seir;
 
-import it.unicam.quasylab.sibilla.core.models.StateSet;
+import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingCollection;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.StatisticSampling;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SummaryStatisticSampling;
 
 import java.io.FileNotFoundException;
 import java.net.UnknownHostException;
@@ -50,14 +50,14 @@ public class SIRModel  {
 		PopulationModelDefinition def = new PopulationModelDefinition(
 				SIRModelDefinition::createPopulationRegistry,
 				SIRModelDefinition::generateRules,
-				(ee,pr) -> StateSet.newStateSet(SIRModelDefinition.geneateState())
+				(ee,pr) -> ParametricDataSet.newStateSet(rg -> SIRModelDefinition.geneateState())
 		);
 		SimulationEnvironment simulator = new SimulationEnvironment();
 		SamplingCollection<PopulationState> collection = new SamplingCollection<>();
-		collection.add(StatisticSampling.measure("S",SAMPLINGS,DEADLINE,s -> s.getFraction(SIRModelDefinition.S)));
-		collection.add(StatisticSampling.measure("I",SAMPLINGS,DEADLINE,s -> s.getFraction(SIRModelDefinition.I)));
-		collection.add(StatisticSampling.measure("R",SAMPLINGS,DEADLINE,s -> s.getFraction(SIRModelDefinition.R)));
-		simulator.simulate(def.createModel(),def.state(),collection,REPLICA,DEADLINE);
+		collection.add(SummaryStatisticSampling.measure("S",SAMPLINGS,DEADLINE, s -> s.getFraction(SIRModelDefinition.S)));
+		collection.add(SummaryStatisticSampling.measure("I",SAMPLINGS,DEADLINE,s -> s.getFraction(SIRModelDefinition.I)));
+		collection.add(SummaryStatisticSampling.measure("R",SAMPLINGS,DEADLINE,s -> s.getFraction(SIRModelDefinition.R)));
+		simulator.simulate(def.createModel(),def.state(),collection::getSamplingHandler,REPLICA,DEADLINE);
 		collection.printTimeSeries("data","sir_",".data");
 	}
 

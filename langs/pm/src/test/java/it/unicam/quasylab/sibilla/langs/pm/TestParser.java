@@ -24,14 +24,15 @@
 package it.unicam.quasylab.sibilla.langs.pm;
 
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
-import it.unicam.quasylab.sibilla.core.models.StateSet;
+import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
-import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -155,6 +156,37 @@ public class TestParser {
             "*/\n" +
             "\n" +
             "system init = U[0]|P[4];\n";
+
+    private final static String CDOE_TSP = "species S0;\n" +
+            "species S1;\n" +
+            "species SU;\n" +
+            "\n" +
+            "const meetRate = 1.0;\n" +
+            "\n" +
+            "rule su_to_s1 {\n" +
+            "    SU|S1 -[ #SU*meetRate*%S1 ]-> S1|S1\n" +
+            "}\n" +
+            "\n" +
+            "rule su_to_s0 {\n" +
+            "    SU|S0 -[ #SU*meetRate*%S0 ]-> S0|S0\n" +
+            "}\n" +
+            "\n" +
+            "rule s1_to_su {\n" +
+            "    S1|S0 -[ #S1*meetRate*%S0 ]-> SU|S0\n" +
+            "}\n" +
+            "\n" +
+            "rule s0_to_su {\n" +
+            "    S0|S1 -[ #S0*meetRate*%S1 ]-> SU|S1\n" +
+            "}\n" +
+            "\n" +
+            "param scale = 1.0;\n" +
+            "\n" +
+            "system balanced = S0<1*scale>|S1<1*scale>|SU<8*scale>;\n" +
+            "\n" +
+            "\n" +
+            "system custom(s0,s1,su) = S0<s0>|S1<s1>|SU<su>;\n" +
+            "\n" +
+            "predicate consensus = (%S1==1.0)||(%S0==1.0);";
 
     @Test
     public void testParsingWrongData() throws ModelGenerationException {
@@ -299,7 +331,7 @@ public class TestParser {
         assertTrue(pmg.validate());
         EvaluationEnvironment env = new EvaluationEnvironment();
         PopulationRegistry reg = pmg.generatePopulationRegistry(env);
-        StateSet<PopulationState> states = pmg.generateStateSet(env,reg);
+        ParametricDataSet<Function<RandomGenerator, PopulationState>> states = pmg.generateStateSet(env,reg);
         assertEquals(1,states.states().length);
     }
 
@@ -318,7 +350,7 @@ public class TestParser {
         EvaluationEnvironment env = new EvaluationEnvironment();
         PopulationRegistry reg = pmg.generatePopulationRegistry(env);
         assertEquals(3,reg.size());
-        StateSet<PopulationState> states = pmg.generateStateSet(env,reg);
+        ParametricDataSet<Function<RandomGenerator, PopulationState>> states = pmg.generateStateSet(env,reg);
         assertEquals(1,states.states().length);
         PopulationModelDefinition def = pmg.getPopulationModelDefinition();
         assertNotNull(def);
@@ -343,6 +375,19 @@ public class TestParser {
         PopulationTransition t = rules.get(0).apply(new DefaultRandomGenerator(),0.0,state);
         assertNotNull(t);
         assertTrue(t.getRate()>0);
+    }
+
+    @Test
+    public void testThreeStatesProtocol() throws ModelGenerationException {
+        PopulationModelGenerator pmg = new PopulationModelGenerator(CDOE_TSP);
+        assertTrue(pmg.validate());
+        EvaluationEnvironment env = pmg.generateEvaluationEnvironment();
+        PopulationRegistry reg = pmg.generatePopulationRegistry(env);
+        PopulationModelDefinition def = pmg.getPopulationModelDefinition();
+        PopulationModel model = def.createModel();
+        PopulationState state = def.state("balanced").apply(new DefaultRandomGenerator());
+        //model.getTransitions()
+
     }
 
 }

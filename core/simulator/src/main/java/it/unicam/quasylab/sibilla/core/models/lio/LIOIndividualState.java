@@ -29,7 +29,9 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Indentify a state where each agent is stored individually.
@@ -47,10 +49,13 @@ public class LIOIndividualState implements LIOState, IndexedState<Agent> {
      * @param agents array of agent names.
      */
     public LIOIndividualState(AgentsDefinition definition, String ... agents) {
+        this(definition, Stream.of(agents).mapToInt(definition::getAgentIndex).toArray());
+    }
+
+    public LIOIndividualState(AgentsDefinition definition, int ... agents) {
         this.definition = definition;
-        this.agents = new int[agents.length];
+        this.agents = agents;
         this.multiplicity = new int[definition.numberOfAgents()];
-        IntStream.range(0, agents.length).forEach(i -> this.agents[i] = definition.getAgent(agents[i]).getIndex());
         fillMultiplicity();
     }
 
@@ -84,25 +89,37 @@ public class LIOIndividualState implements LIOState, IndexedState<Agent> {
     }
 
     @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        throw new IllegalStateException();
+    public double fractionOf(IntPredicate predicate) {
+        return numberOf(predicate)/size();
     }
 
     @Override
-    public void readExternal(ObjectInput in) throws IOException {
-        throw new IllegalStateException();
+    public double numberOf(int stateIndex) {
+        return multiplicity[stateIndex];
     }
 
+    @Override
+    public double numberOf(IntPredicate predicate) {
+        return IntStream.range(0,multiplicity.length).filter(predicate).mapToDouble(i -> multiplicity[i]).sum();
+    }
+
+
     /**
-     * Returns the agent in position i.
+     * Return the agent in position i.
      *
-     * @param i
-     * @return
+     * @param i agent index.
+     * @return the agent in position i.
      */
     public Agent get(int i) {
         return definition.getAgent( agents[i] );
     }
 
+    /**
+     * Return the index of agent in position i.
+     *
+     * @param i agent index.
+     * @return the index of agent in position i.
+     */
     public int getIndexAt(int i) {
         return agents[i];
     }
@@ -113,19 +130,19 @@ public class LIOIndividualState implements LIOState, IndexedState<Agent> {
      *
      * @param randomGenerator a random generator
      * @param probabilityMatrix a probability transition matrix
-     * @param state current state
      * @return next state
      */
-    public static LIOIndividualState stepFunction(RandomGenerator randomGenerator, double[][] probabilityMatrix, LIOIndividualState state) {
-        int[] agents = new int[state.agents.length];
-        int[] multiplicity = new int[state.multiplicity.length];
+    @Override
+    public LIOState step(RandomGenerator randomGenerator, double[][] probabilityMatrix) {
+        int[] agents = new int[this.agents.length];
+        int[] multiplicity = new int[this.multiplicity.length];
         for(int i=0 ;i<agents.length;i++) {
 //        IntStream.of(0,agents.length).forEach( i -> {
-            int self = state.getIndexAt(i);
+            int self = this.getIndexAt(i);
             int next = LIOState.doSample(randomGenerator,probabilityMatrix[self],self);
             agents[i] = next;
             multiplicity[next] += 1;
         }//);
-        return new LIOIndividualState(state.definition,agents,multiplicity);
+        return new LIOIndividualState(this.definition,agents,multiplicity);
     }
 }

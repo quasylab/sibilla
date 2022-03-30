@@ -1,0 +1,7 @@
+module "population"
+load "tsp.pm"
+set "scale" 10.0
+init "balanced"
+deadline 100
+replica 100
+fpt "consensus"
