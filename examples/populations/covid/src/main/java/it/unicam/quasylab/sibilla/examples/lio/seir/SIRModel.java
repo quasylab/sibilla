@@ -26,11 +26,12 @@
  */
 package it.unicam.quasylab.sibilla.examples.lio.seir;
 
-import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
+import it.unicam.quasylab.sibilla.core.models.StateSet;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingCollection;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.StatisticSampling;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SummaryStatisticSampling;
 
 import java.io.FileNotFoundException;
@@ -50,7 +51,7 @@ public class SIRModel  {
 		PopulationModelDefinition def = new PopulationModelDefinition(
 				SIRModelDefinition::createPopulationRegistry,
 				SIRModelDefinition::generateRules,
-				(ee,pr) -> ParametricDataSet.newStateSet(rg -> SIRModelDefinition.geneateState())
+				(ee,pr) -> StateSet.newStateSet(SIRModelDefinition.geneateState())
 		);
 		SimulationEnvironment simulator = new SimulationEnvironment();
 		SamplingCollection<PopulationState> collection = new SamplingCollection<>();

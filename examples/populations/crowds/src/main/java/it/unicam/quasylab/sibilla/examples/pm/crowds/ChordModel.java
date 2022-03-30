@@ -1,18 +1,17 @@
 package it.unicam.quasylab.sibilla.examples.pm.crowds;
 
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
-import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
+import it.unicam.quasylab.sibilla.core.models.ParametricValue;
+import it.unicam.quasylab.sibilla.core.models.StateSet;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
-import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 public class ChordModel {
 
@@ -86,14 +85,14 @@ public class ChordModel {
         return toReturn;
     }
 
-    public static ParametricDataSet<Function<RandomGenerator,PopulationState>> states(EvaluationEnvironment ee, PopulationRegistry reg) {
+    public static StateSet<PopulationState> states(EvaluationEnvironment ee, PopulationRegistry reg) {
         int N = (int) ee.get("N");
         Population[] pop = new Population[N + 1];
         pop[0] = new Population(reg.indexOf("M1"), 1);
         for (int i = 0; i < N; i++) {
             pop[i + 1] = new Population(reg.indexOf("A", i), 1);
         }
-        return ParametricDataSet.newStateSet(rg -> new PopulationState(reg.size(),pop));
+        return StateSet.newStateSet(new PopulationState(reg.size(),pop));
 
     }
 

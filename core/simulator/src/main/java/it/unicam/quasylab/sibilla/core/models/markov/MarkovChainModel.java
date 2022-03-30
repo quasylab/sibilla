@@ -44,7 +44,7 @@ public abstract class MarkovChainModel extends AbstractModel<MappingState> {
     private final VariableTable stateVariables;
     protected final List<MappingStateUpdate> rules;
 
-    protected MarkovChainModel(VariableTable stateVariables, List<MappingStateUpdate> rules, Map<String, Measure<? super MappingState>> measuresTable) {
+    protected MarkovChainModel(VariableTable stateVariables, List<MappingStateUpdate> rules, Map<String, Measure<MappingState>> measuresTable) {
         super(measuresTable);
         this.rules = rules;
         this.stateVariables = stateVariables;

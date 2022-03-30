@@ -349,7 +349,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
             SimulationEnvironment sim = new SimulationEnvironment(
                     NetworkSimulationManager.getNetworkSimulationManagerFactory(simulationState, serializer.getType(), this.crSerializerType, client.getNetworkInfo()));
 
-            sim.simulate(dataSet.getRandomGenerator(), dataSet.getModel(), rg -> dataSet.getModelInitialState(),
+            sim.simulate(dataSet.getRandomGenerator(), dataSet.getModel(), dataSet.getModelInitialState(),
                     dataSet.getModelSamplingFunction()::getSamplingHandler, dataSet.getReplica(), dataSet.getDeadline());
             this.state.increaseExecutedSimulations();
         } catch (InterruptedException e) {

@@ -34,13 +34,13 @@ import java.util.function.ToDoubleBiFunction;
 @FunctionalInterface
 public interface AgentStepFunction {
 
-    AgentStepEffect apply(RandomGenerator rg, GlobalStateExpressionEvaluator evaluator, AgentStore m);
+    AgentStepEffect apply(RandomGenerator rg, GlobalStateExpressionEvaluator evaluator, AgentMemory m);
 
-    static AgentStepFunction step(AgentBehaviouralState state, AgentCommand command) {
+    static AgentStepFunction step(AgentState state, AgentCommand command) {
         return (rg, evaluator, m) -> new AgentStepEffect(state, command.execute(rg, evaluator, m));
     }
 
-    static AgentStepFunction select(ToDoubleBiFunction<RandomGenerator, AgentStore>[] weights, AgentStepFunction[] functions) {
+    static AgentStepFunction select(ToDoubleBiFunction<RandomGenerator,AgentMemory>[] weights, AgentStepFunction[] functions) {
         return (rg, evaluator, m) -> {
             AgentStepFunction selected = Util.select(rg, m, weights, functions);
             if (selected != null) {

@@ -24,15 +24,14 @@
 package it.unicam.quasylab.sibilla.langs.pm;
 
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
-import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
+import it.unicam.quasylab.sibilla.core.models.StateSet;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
+import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -331,7 +330,7 @@ public class TestParser {
         assertTrue(pmg.validate());
         EvaluationEnvironment env = new EvaluationEnvironment();
         PopulationRegistry reg = pmg.generatePopulationRegistry(env);
-        ParametricDataSet<Function<RandomGenerator, PopulationState>> states = pmg.generateStateSet(env,reg);
+        StateSet<PopulationState> states = pmg.generateStateSet(env,reg);
         assertEquals(1,states.states().length);
     }
 
@@ -350,7 +349,7 @@ public class TestParser {
         EvaluationEnvironment env = new EvaluationEnvironment();
         PopulationRegistry reg = pmg.generatePopulationRegistry(env);
         assertEquals(3,reg.size());
-        ParametricDataSet<Function<RandomGenerator, PopulationState>> states = pmg.generateStateSet(env,reg);
+        StateSet<PopulationState> states = pmg.generateStateSet(env,reg);
         assertEquals(1,states.states().length);
         PopulationModelDefinition def = pmg.getPopulationModelDefinition();
         assertNotNull(def);
@@ -385,7 +384,7 @@ public class TestParser {
         PopulationRegistry reg = pmg.generatePopulationRegistry(env);
         PopulationModelDefinition def = pmg.getPopulationModelDefinition();
         PopulationModel model = def.createModel();
-        PopulationState state = def.state("balanced").apply(new DefaultRandomGenerator());
+        PopulationState state = def.state("balanced");
         //model.getTransitions()
 
     }

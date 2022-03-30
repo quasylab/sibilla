@@ -27,14 +27,13 @@
 package it.unicam.quasylab.sibilla.examples.servers.client;
 
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
-import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
+import it.unicam.quasylab.sibilla.core.models.StateSet;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
-import org.apache.commons.math3.random.RandomGenerator;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Function;
 
 public class SEIRModelDefinition {
 
@@ -98,8 +97,8 @@ public class SEIRModelDefinition {
 
 
 
-    public static ParametricDataSet<Function<RandomGenerator,PopulationState>> initialState(EvaluationEnvironment ee, PopulationRegistry reg) {
-        return ParametricDataSet.newStateSet( rg -> new PopulationState( new int[] { INIT_S, INIT_E, INIT_I, INIT_R } ) );
+    public static StateSet<PopulationState> initialState(EvaluationEnvironment ee, PopulationRegistry reg) {
+        return StateSet.newStateSet( new PopulationState( new int[] { INIT_S, INIT_E, INIT_I, INIT_R } ) );
     }
 
 

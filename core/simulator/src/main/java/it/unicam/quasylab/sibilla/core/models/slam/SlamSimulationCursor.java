@@ -32,12 +32,8 @@ public class SlamSimulationCursor implements SimulatorCursor<SlamState> {
 
     private RandomGenerator rg;
     private SlamState currentState = null;
-    private final Function<RandomGenerator, SlamState> initialStateSupplier;
+    private Function<RandomGenerator,SlamState> initialStateSupplier;
 
-    public SlamSimulationCursor(RandomGenerator rg, Function<RandomGenerator, SlamState> initialStateSupplier) {
-        this.rg = rg;
-        this.initialStateSupplier = initialStateSupplier;
-    }
 
     @Override
     public void start() {

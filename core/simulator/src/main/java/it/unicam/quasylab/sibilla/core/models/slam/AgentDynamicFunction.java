@@ -25,25 +25,20 @@ package it.unicam.quasylab.sibilla.core.models.slam;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.ToDoubleBiFunction;
-import java.util.stream.DoubleStream;
+/**
+ * This functional interface is used to update the agent memory when time is passing.
+ */
+@FunctionalInterface
+public interface AgentDynamicFunction {
 
-public class Util {
+    /**
+     * Updates the given memory by considering that <code>dt</code> time units are passed.
+     *
+     * @param rg random generator used to sample random values.
+     * @param dt passed time units.
+     * @param memory current agent memory.
+     */
+    void update(RandomGenerator rg, double dt, AgentMemory memory);
 
 
-    public static <T> T select(RandomGenerator rg, AgentMemory m, ToDoubleBiFunction<RandomGenerator, AgentMemory>[] weights, T[] options) {
-        double[] actualWeights = Arrays.stream(weights).mapToDouble(f -> f.applyAsDouble(rg, m)).toArray();
-        double totalWeight = DoubleStream.of(actualWeights).sum();
-        double selected = rg.nextDouble()*totalWeight;
-        for(int i=0; i<actualWeights.length; i++) {
-            if (selected<actualWeights[i]) {
-                return options[i];
-            } else {
-                selected -= actualWeights[i];
-            }
-        }
-        return null;
-    }
 }

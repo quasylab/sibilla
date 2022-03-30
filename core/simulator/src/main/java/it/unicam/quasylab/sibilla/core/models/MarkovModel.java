@@ -100,14 +100,7 @@ public interface MarkovModel<S extends ImmutableState> extends Model<S> {
         };
     }
 
-
-    /**
-     * Returns the simulator cursor starting its execution from the given initial state.
-     *
-     * @param r random generator to use in the simulation
-     * @param initialState initial state
-     * @return the simulator cursor starting its execution from the given initial state.
-     */
+    @Override
     default SimulatorCursor<S> createSimulationCursor(RandomGenerator r, S initialState) {
         return createSimulationCursor(r, rg -> initialState);
     }

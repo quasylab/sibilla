@@ -25,14 +25,15 @@ package it.unicam.quasylab.sibilla.examples.lio.seir;
 
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.ParametricValue;
-import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
+import it.unicam.quasylab.sibilla.core.models.StateSet;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
-import org.apache.commons.math3.random.RandomGenerator;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class CovidDefinition {
 
@@ -131,40 +132,36 @@ public class CovidDefinition {
 
 
 
-    public static ParametricDataSet<Function<RandomGenerator,PopulationState>> states(EvaluationEnvironment environment, PopulationRegistry registry) {
-        ParametricDataSet<Function<RandomGenerator,PopulationState>> states = new ParametricDataSet<>();
-        ParametricValue<Function<RandomGenerator,PopulationState>> state = defaultState(registry);
+    public static StateSet<PopulationState> states(EvaluationEnvironment environment, PopulationRegistry registry) {
+        StateSet<PopulationState> states = new StateSet<>();
+        ParametricValue<PopulationState> state = defaultState(registry);
         states.setDefaultState( state );
         states.set("state", parametricState(registry));
         return states;
     }
 
-    public static ParametricValue<Function<RandomGenerator,PopulationState>> defaultState(PopulationRegistry registry) {
+    public static ParametricValue<PopulationState> defaultState(PopulationRegistry registry) {
         int S = registry.indexOf("S");
         int A = registry.indexOf( "A");
         int G = registry.indexOf("G");
         int R = registry.indexOf("R");
         int D = registry.indexOf("D");
-        PopulationState state = new PopulationState( new int[] { INIT_S, INIT_A, INIT_G, INIT_R, INIT_D } );
-        return new ParametricValue<>( rg -> state );
+        return new ParametricValue( new PopulationState( new int[] { INIT_S, INIT_A, INIT_G, INIT_R, INIT_D } ) );
     }
 
 
-    public static ParametricValue<Function<RandomGenerator,PopulationState>> parametricState(PopulationRegistry registry) {
+    public static ParametricValue<PopulationState> parametricState(PopulationRegistry registry) {
         int S = registry.indexOf("S");
         int A = registry.indexOf( "A");
         int G = registry.indexOf("G");
         int R = registry.indexOf("R");
         int D = registry.indexOf("D");
-        return new ParametricValue<>( new String[] { "s", "a", "g", "r", "d"}
-                , args -> {
-                    PopulationState state = new PopulationState( new int[] {
-                        (int) args[S], (int) args[A],
+        return new ParametricValue<>( new String[] { "s", "a", "g", "r", "d"}, args -> new PopulationState( new int[] {
+                    (int) args[S],
+                    (int) args[A],
                     (int) args[G],
                     (int) args[R],
-                    (int) args[D] });
-            return rg -> state;
-        } );
+                    (int) args[D] }) );
         }
 
 }

@@ -27,6 +27,9 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class SibillaParseErrorListener extends BaseErrorListener {
 
     private final ErrorCollector errors;
@@ -48,7 +51,7 @@ public class SibillaParseErrorListener extends BaseErrorListener {
         errors.record(new ParseError(msg,line,charPositionInLine));
     }
 
-    public ErrorCollector getErrorCollector() {
+    public ErrorCollector getSyntaxErrorList() {
         return errors;
     }
 

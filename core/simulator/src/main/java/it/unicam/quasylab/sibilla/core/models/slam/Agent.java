@@ -25,7 +25,6 @@ package it.unicam.quasylab.sibilla.core.models.slam;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
@@ -41,23 +40,27 @@ import java.util.function.ToDoubleFunction;
 public final class Agent {
 
     private final int agentId;
-
-    private final int agetPrototypeId;
-
-    private final AgentStore agentMemory;
-    private AgentBehaviouralState state;
-    private final AgentTimePassingFunction timePassingFunction;
-    private final PerceptionFunction perceptionFunction;
+    private final AgentVariable[] agentVariables;
+    private final AgentMemory agentMemory;
+    private AgentState state;
+    private final AgentDynamicFunction dynamicFunction;
     private double schedulingTime;
 
-    public Agent(int agentId, int agetPrototypeId, AgentStore agentMemory, AgentBehaviouralState state, AgentTimePassingFunction timePassingFunction, PerceptionFunction perceptionFunction
-    ) {
+    public Agent(int agentId, AgentVariable[] agentVariables, AgentMemory agentMemory, AgentState state, AgentDynamicFunction dynamicFunction) {
         this.agentId = agentId;
-        this.agetPrototypeId = agetPrototypeId;
+        this.agentVariables = agentVariables;
         this.agentMemory = agentMemory;
         this.state = state;
-        this.timePassingFunction = timePassingFunction;
-        this.perceptionFunction = perceptionFunction;
+        this.dynamicFunction = dynamicFunction;
+    }
+
+    /**
+     * Returns an array containing all the variables in the agent state.
+     *
+     * @return an array containing all the variables in the agent state.
+     */
+    public AgentVariable[] getAgentVariables() {
+        return agentVariables;
     }
 
     /**
@@ -65,7 +68,7 @@ public final class Agent {
      *
      * @return a mapping associating each variable with its value in the current agent memory.
      */
-    public AgentStore getAgentMemory() {
+    public AgentMemory getAgentMemory() {
         return agentMemory;
     }
 
@@ -75,7 +78,7 @@ public final class Agent {
      *
      * @return agent state.
      */
-    public AgentBehaviouralState getAgentState() {
+    public AgentState getAgentState() {
         return state;
     }
 
@@ -95,7 +98,7 @@ public final class Agent {
      *
      * @return the evaluation of the expression with agent memory.
      */
-    public double eval(ToDoubleFunction<AgentStore> expr) {
+    public double eval(ToDoubleFunction<AgentMemory> expr) {
         return expr.applyAsDouble(agentMemory);
     }
 
@@ -144,7 +147,7 @@ public final class Agent {
      * @param dt passed time units.
      */
     public void timeStep(RandomGenerator rg, double dt) {
-        this.timePassingFunction.update(rg, dt, agentMemory);
+        this.dynamicFunction.update(rg, dt, agentMemory);
         this.state.applyStateDynamic(rg, dt, agentMemory);
         agentMemory.recordTime(dt);
     }
@@ -155,33 +158,7 @@ public final class Agent {
      * @param p a predicate on agent memory.
      * @return true if the agent memory of this agent satisfies the given predicate.
      */
-    public boolean test(Predicate<AgentStore> p) {
+    public boolean test(Predicate<AgentMemory> p) {
         return p.test(agentMemory);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Agent agent = (Agent) o;
-        return agentId == agent.agentId;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(agentId);
-    }
-
-    /**
-     * Returns the integer identifying the prototype used to create this agent.
-     *
-     * @return the integer identifying the agent type.
-     */
-    public int getAgentPrototype() {
-        return agetPrototypeId;
-    }
-
-    public void perceive(RandomGenerator rg, SlamState slamState) {
-        this.perceptionFunction.perceive(rg,slamState,agentMemory);
     }
 }

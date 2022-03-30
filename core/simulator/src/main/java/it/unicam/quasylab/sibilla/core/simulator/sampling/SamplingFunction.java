@@ -38,7 +38,7 @@ public interface SamplingFunction<S> extends Serializable {
 
 	SamplingHandler<S> getSamplingHandler();
 
-	default void sample(Trajectory<? extends S> trj) {
+	default void sample(Trajectory<S> trj) {
 		trj.sample(getSamplingHandler());
 	}
 

@@ -43,7 +43,7 @@ public class CovidModelRun {
         PopulationModelDefinition def = new PopulationModelDefinition(CovidDefinition::generatePopulationRegistry,
                 CovidDefinition::getRules,
                 CovidDefinition::states);
-        ExecutionEnvironment<PopulationState> ee = new ExecutionEnvironment<PopulationState>(
+        ExecutionEnvironment<PopulationState> ee = new ExecutionEnvironment<>(
                 new DefaultRandomGenerator(),
                 def.createModel(),
                 def.state()

@@ -65,7 +65,7 @@ public class Trajectory<S> implements Externalizable {
         this.data.add(new Sample<S>(time, value));
     }
 
-    public void sample(SamplingHandler<? super S> f) {
+    public void sample(SamplingHandler<S> f) {
         if (!Double.isFinite(start)) {
             throw new IllegalArgumentException();
         }

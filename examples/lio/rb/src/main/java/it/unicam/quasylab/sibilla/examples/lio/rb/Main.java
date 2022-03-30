@@ -93,7 +93,7 @@ public class Main {
 
 	private static void runAndPrint(int scale, int step, int replica, String label, BiFunction<Integer,AgentsDefinition,DiscreteTimePathChecker<LIOIndividualState, Boolean>> builder) {
 		AgentsDefinition def = getAgentDefinition();
-		LIOModel<LIOIndividualState> model = new LIOModel<>(def);
+		LIOModel<LIOIndividualState> model = new LIOModel<>(def, LIOIndividualState::stepFunction);
 		DiscreteTimePathChecker<LIOIndividualState, Boolean> f = builder.apply(scale,def);
 		LIOIndividualState initial = getInitialState(def, scale);
 		DiscreteTimeAgentSMC<LIOIndividualState,Agent> smc = new DiscreteTimeAgentSMC<>(model,LIOIndividualState[]::new);
@@ -105,7 +105,7 @@ public class Main {
 	private static void runAllChecking( ) {
 		StringBuilder output = new StringBuilder();
 		AgentsDefinition def = getAgentDefinition();
-		LIOModel<LIOIndividualState> model = new LIOModel<>(def);
+		LIOModel<LIOIndividualState> model = new LIOModel<>(def, LIOIndividualState::stepFunction);
 
 		for( int scale: SCALES) {
 			Map<String, DiscreteTimePathChecker<LIOIndividualState, Boolean>> map = getFormulas(scale,def);

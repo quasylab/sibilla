@@ -21,31 +21,18 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.models.slam;
+package it.unicam.quasylab.sibilla.langs.lio;
 
-import java.util.List;
-
-/**
- * This class represents the effects that are consequences of an agent step.
- */
-public class AgentStepEffect {
-
-    private final List<AgentMessage> sentMessages;
-    private final AgentState nextState;
-
-
-    public AgentStepEffect(AgentState nextState, List<AgentMessage> sentMessages) {
-        this.sentMessages = sentMessages;
-        this.nextState = nextState;
+public class DuplicatedNameException extends Throwable {
+    public String getMessage() {
+        return null;
     }
 
-    public List<AgentMessage> getSentMessages() {
-        return sentMessages;
+    public int getLine() {
+        return -1;
     }
 
-    public AgentState getNextState() {
-        return nextState;
+    public int getCharPositionInLine() {
+        return -1;
     }
-
-
 }

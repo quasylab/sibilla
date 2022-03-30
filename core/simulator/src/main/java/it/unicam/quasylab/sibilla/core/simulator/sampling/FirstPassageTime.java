@@ -34,11 +34,11 @@ import java.util.function.Supplier;
 public class FirstPassageTime<S extends State> implements Supplier<SamplingHandler<S>> {
 
     private final String name;
-    private final Predicate<? super S> condition;
+    private final Predicate<S> condition;
     private final DescriptiveStatistics values;
     private int tests = 0;
 
-    public FirstPassageTime(String name, Predicate<? super S> condition) {
+    public FirstPassageTime(String name, Predicate<S> condition) {
         this.name = name;
         this.condition = condition;
         this.values = new DescriptiveStatistics();

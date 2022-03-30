@@ -25,13 +25,14 @@ package it.unicam.quasylab.sibilla.core.models.slam;
 
 import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Describes how a given message received by an agent can be handled.
  */
 public class MessageHandler {
 
-    private final BiPredicate<AgentStore,DeliveredMessage> predicate;
+    private final BiPredicate<AgentMemory,DeliveredMessage> predicate;
     private final Function<DeliveredMessage, AgentStepFunction> handlingFunction;
 
     /**
@@ -43,7 +44,7 @@ public class MessageHandler {
      * @param predicate predicate used to check if the message must be handled or not.
      * @param handlingFunction a function used to generate the step function that is consequent to the received message.
      */
-    public MessageHandler(BiPredicate<AgentStore,DeliveredMessage> predicate, Function<DeliveredMessage, AgentStepFunction> handlingFunction) {
+    public MessageHandler(BiPredicate<AgentMemory,DeliveredMessage> predicate, Function<DeliveredMessage, AgentStepFunction> handlingFunction) {
         this.predicate = predicate;
         this.handlingFunction = handlingFunction;
     }
@@ -53,7 +54,7 @@ public class MessageHandler {
      *
      * @return the predicate used to select received messages.
      */
-    public BiPredicate<AgentStore,DeliveredMessage> getPredicate() {
+    public BiPredicate<AgentMemory,DeliveredMessage> getPredicate() {
         return predicate;
     }
 

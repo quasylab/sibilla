@@ -23,9 +23,6 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
-import org.apache.commons.math3.random.RandomGenerator;
-
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -69,7 +66,7 @@ public interface ModelDefinition<S extends State> {
      */
     int stateArity();
 
-    ParametricDataSet<Function<RandomGenerator,S>> getStates();
+    StateSet<S> getStates();
 
     /**
      * Returns the number of parameters needed to build initial state <code>name</code>.
@@ -111,7 +108,7 @@ public interface ModelDefinition<S extends State> {
      * @param args arguments to use in state creation.
      * @return the default state associated the given arguments.
      */
-    Function<RandomGenerator,S> state(String name, double ... args);
+    S state(String name, double ... args);
 
     /**
      * Create the default state (that is the first one in the array) with
@@ -120,7 +117,7 @@ public interface ModelDefinition<S extends State> {
      * @param args arguments to use in state creation.
      * @return the default state associated the given arguments.
      */
-    Function<RandomGenerator,S> state(double ... args);
+    S state(double ... args);
 
 
     /**

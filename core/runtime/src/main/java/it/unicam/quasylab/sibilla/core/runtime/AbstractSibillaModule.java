@@ -23,13 +23,16 @@
 
 package it.unicam.quasylab.sibilla.core.runtime;
 
+import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.models.StateSet;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.List;
@@ -38,21 +41,29 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Predicate;
 
-public abstract class AbstractSibillaModule implements SibillaModule {
+public abstract class AbstractSibillaModule<S extends State> implements SibillaModule {
 
-    protected ModuleEngine<?> moduleEngine;
+    private ModelDefinition<S> modelDefinition;
+    private Model<S> model;
+    private StateSet<S> states;
+    private S state;
     private Set<String> enabledMeasures;
     private boolean summary = true;
-    private final SimulationEnvironment simulator = new SimulationEnvironment();
+    private SimulationEnvironment simulator = new SimulationEnvironment();
 
+    protected void clearModuleState() {
+        this.model = null;
+        this.state = null;
+        this.enabledMeasures = new TreeSet<>();
+        this.states = null;
+    }
 
-    protected final void setModelDefinition(ModelDefinition<?> moduleEngine) {
-        this.moduleEngine = new ModuleEngine<>(moduleEngine);
-        this.clear();
+    public void setModelDefinition(ModelDefinition<S> modelDefinition) {
+        this.modelDefinition = modelDefinition;
     }
 
     private void checkForLoadedDefinition() {
-        if (moduleEngine == null) {
+        if (modelDefinition == null) {
             throw new IllegalStateException("No model has been loaded!");
         }
     }
@@ -60,30 +71,33 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     @Override
     public void setParameter(String name, double value) {
         checkForLoadedDefinition();
-        this.moduleEngine.setParameter(name, value);
+        this.modelDefinition.setParameter(name, value);
+        clearModuleState();
     }
 
     @Override
     public double getParameter(String name) {
         checkForLoadedDefinition();
-        return this.moduleEngine.getParameter(name);
+        return this.modelDefinition.getParameterValue(name);
     }
 
     @Override
     public String[] getParameters() {
         checkForLoadedDefinition();
-        return this.moduleEngine.getParameters();
+        return this.modelDefinition.getModelParameters();
     }
 
     @Override
     public Map<String, Double> getEvaluationEnvironment() {
         checkForLoadedDefinition();
-        return this.moduleEngine.getEnvironment();
+        return this.modelDefinition.getEnvironment().getParameterMap();
     }
 
     @Override
     public void addMeasure(String name) {
         checkForLoadedDefinition();
+        loadModel();
+        checkMeasure(name);
         this.enabledMeasures.add(name);
     }
 
@@ -95,7 +109,8 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     @Override
     public void addAllMeasures() {
         checkForLoadedDefinition();
-        this.enabledMeasures.addAll(List.of(moduleEngine.getMeasures()));
+        loadModel();
+        this.enabledMeasures.addAll(List.of(model.measures()));
     }
 
     @Override
@@ -106,25 +121,59 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     @Override
     public Map<String, double[][]> simulate(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt) {
         checkForLoadedDefinition();
-        return moduleEngine.simulate(this.simulator, monitor, rg, replica, deadline, dt, this.enabledMeasures.toArray(new String[0]),summary);
+        loadModel();
+        loadState();
+        SamplingFunction<S> samplingFunction = model.selectSamplingFunction(summary, deadline, dt, enabledMeasures.toArray(new String[0]));
+        try {
+            simulator.simulate(monitor, rg, model, state, samplingFunction::getSamplingHandler, replica, deadline);
+            return samplingFunction.getSimulationTimeSeries();
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
-    @Override
     public FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt, String predicateName) {
         checkForLoadedDefinition();
-        return moduleEngine.firstPassageTime(simulator, monitor, rg, replica, deadline, dt, predicateName);
+        loadModel();
+        loadState();
+        Predicate<S> predicate = model.getPredicate(predicateName);
+        if (predicate == null) {
+            throw new IllegalStateException("Predicate "+predicateName+" is unknown!");
+        }
+        FirstPassageTime<S> fpt = new FirstPassageTime<>(predicateName, predicate);
+        try {
+            simulator.simulate(monitor, rg, model, state, fpt, replica, deadline);
+            return fpt.getResults();
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override
-    public double estimateReachability(SimulationMonitor monitor, RandomGenerator rg,  String targetCondition, double time, double pError, double delta) {
+    public double estimateReachability(SimulationMonitor monitor, RandomGenerator rg,  String targetName, double time, double pError, double delta) {
         checkForLoadedDefinition();
-        return moduleEngine.estimateReachability(simulator, monitor, rg, targetCondition, time, pError, delta);
+        loadModel();
+        loadState();
+        Predicate<S> targetPredicate = model.getPredicate(targetName);
+        try {
+            return simulator.reachability(monitor, rg, pError,delta,time, model, state, s -> true, targetPredicate::test);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e.getMessage());
+        }
     }
 
     @Override
     public double estimateReachability(SimulationMonitor monitor, RandomGenerator rg, String transientCondition, String targetCondition, double time, double pError, double delta) {
         checkForLoadedDefinition();
-        return moduleEngine.estimateReachability(simulator, monitor, rg, transientCondition, targetCondition, time, pError, delta);
+        loadModel();
+        loadState();
+        Predicate<S> transientPredicate = model.getPredicate(transientCondition);
+        Predicate<S> targetPredicate = model.getPredicate(targetCondition);
+        try {
+            return simulator.reachability(monitor, rg, pError,delta,time, model, state, transientPredicate::test, targetPredicate::test);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e.getMessage());
+        }
     }
 
     @Override
@@ -134,28 +183,28 @@ public abstract class AbstractSibillaModule implements SibillaModule {
 
     @Override
     public void clear() {
-        if (this.moduleEngine != null) {
-            this.moduleEngine.clear();
-        }
-        this.enabledMeasures = new TreeSet<>();
+        this.model = null;
+        clearModuleState();
     }
 
     @Override
     public void reset() {
         checkForLoadedDefinition();
-        this.moduleEngine.reset();
+        modelDefinition.reset();
+        clearModuleState();
     }
 
     @Override
     public void reset(String name) {
         checkForLoadedDefinition();
-        moduleEngine.reset(name);
+        modelDefinition.reset(name);
+        clearModuleState();
     }
 
     @Override
     public String[] getInitialConfigurations() {
         checkForLoadedDefinition();
-        return this.moduleEngine.getInitialConfigurations();
+        return this.modelDefinition.states();
     }
 
 
@@ -163,29 +212,55 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     @Override
     public String getConfigurationInfo(String name) {
         checkForLoadedDefinition();
-        return this.moduleEngine.getConfigurationInfo(name);
+        loadModel();
+        loadStates();
+        return states.getInfo(name);
     }
 
     @Override
     public boolean setConfiguration(String name, double... args) {
-        return moduleEngine.setConfiguration(name, args);
+        checkForLoadedDefinition();
+        loadModel();
+        loadStates();
+        if (!states.isDefined(name)) {
+            throw new IllegalStateException("Unknown configuration "+name);
+        }
+        if (states.arity(name)!=args.length) {
+            throw new IllegalStateException(String.format("Wrong number of parameters for state %s (expected %d are %d)",name,states.arity(name),args.length));
+        }
+        state = states.state(name, args);
+        return true;
+    }
+
+    private void loadStates() {
+        states = modelDefinition.getStates();
+    }
+
+    private void loadModel() {
+        if (model == null) {
+            model = modelDefinition.createModel();
+        }
     }
 
     @Override
     public String[] getMeasures() {
         checkForLoadedDefinition();
-        return moduleEngine.getMeasures();
+        loadModel();
+        return model.measures();
     }
 
     @Override
     public String[] getPredicates() {
         checkForLoadedDefinition();
-        return moduleEngine.getPredicates();
+        loadModel();
+        return model.predicates();
     }
 
     @Override
     public void setMeasures(String... measures) {
         checkForLoadedDefinition();
+        loadModel();
+        checkMeasures(measures);
         this.enabledMeasures.addAll(List.of(measures));
     }
 
@@ -199,4 +274,21 @@ public abstract class AbstractSibillaModule implements SibillaModule {
         return summary;
     }
 
+    private void checkMeasures(String[] measures) {
+        for (String m: measures) {
+            checkMeasure(m);
+        }
+    }
+
+    private void checkMeasure(String m) {
+        if (model.getMeasure(m) == null) {
+            throw new IllegalStateException("Unknown measure "+m+".");
+        }
+    }
+
+    private void loadState() {
+        if (state == null) {
+            state = modelDefinition.state();
+        }
+    }
 }

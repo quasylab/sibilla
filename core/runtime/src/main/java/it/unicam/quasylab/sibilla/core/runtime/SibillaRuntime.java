@@ -278,7 +278,7 @@ public final class SibillaRuntime {
     /**
      * Run a simulation and save results with the given label.
      */
-    public Map<String, double[][]>  simulate(SimulationMonitor monitor, String label) throws CommandExecutionException {
+    public Map<String, double[][]> simulate(SimulationMonitor monitor, String label) throws CommandExecutionException {
         checkDeadline();
         checkDt();
         lastSimulation = currentModule.simulate(monitor,rg,replica,deadline,dt);

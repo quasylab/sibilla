@@ -39,7 +39,7 @@ public interface GlobalStateExpressionEvaluator {
      * @param expr the expression to evaluate.
      * @return the min value among all the evaluations.
      */
-    double getMinOf(ToDoubleFunction<AgentStore> expr);
+    double getMinOf(ToDoubleFunction<AgentMemory> expr);
 
     /**
      * Evaluates the expression on all the agents satisfying the given predicate and return the min value.
@@ -48,7 +48,7 @@ public interface GlobalStateExpressionEvaluator {
      * @param filter filter used to select agents.
      * @return the min value among all the evaluations.
      */
-    double getMinOf(ToDoubleFunction<AgentStore> expr, Predicate<Agent> filter);
+    double getMinOf(ToDoubleFunction<AgentMemory> expr, Predicate<Agent> filter);
 
     /**
      * Evaluates the expression on all the agents satisfying the given predicate and return the max value.
@@ -56,7 +56,7 @@ public interface GlobalStateExpressionEvaluator {
      * @param expr the expression to evaluate.
      * @return the max value among all the evaluations.
      */
-    double getMaxOf(ToDoubleFunction<AgentStore> expr);
+    double getMaxOf(ToDoubleFunction<AgentMemory> expr);
 
     /**
      * Evaluates the expression on all the agents satisfying the given predicate and return the max value.
@@ -65,7 +65,7 @@ public interface GlobalStateExpressionEvaluator {
      * @param filter filter used to select agents.
      * @return the max value among all the evaluations.
      */
-    double getMaxOf(ToDoubleFunction<AgentStore> expr, Predicate<Agent> filter);
+    double getMaxOf(ToDoubleFunction<AgentMemory> expr, Predicate<Agent> filter);
 
     /**
      * Evaluates the expression on all the agents satisfying the given predicate and return the mean value.
@@ -73,7 +73,7 @@ public interface GlobalStateExpressionEvaluator {
      * @param expr expression to evaluate.
      * @return the mean value among all the evaluations.
      */
-    double getMeanOf(ToDoubleFunction<AgentStore> expr);
+    double getMeanOf(ToDoubleFunction<AgentMemory> expr);
 
     /**
      * Evaluates the expression on all the agents satisfying the given predicate and return the mean value.
@@ -82,7 +82,7 @@ public interface GlobalStateExpressionEvaluator {
      * @param filter filter used to select agents.
      * @return the mean value among all the evaluations.
      */
-    double getMeanOf(ToDoubleFunction<AgentStore> expr, Predicate<Agent> filter);
+    double getMeanOf(ToDoubleFunction<AgentMemory> expr, Predicate<Agent> filter);
 
     /**
      * Checks if there exists an agent satisfying the given predicate.

@@ -47,7 +47,7 @@ public class CTMCModel extends MarkovChainModel implements ContinuousTimeMarkovP
      * @param rules function used to induce transition probability.
      * @param measuresTable declared measures.
      */
-    public CTMCModel(VariableTable stateVariables, List<MappingStateUpdate> rules, Map<String, Measure<? super MappingState>> measuresTable) {
+    public CTMCModel(VariableTable stateVariables, List<MappingStateUpdate> rules, Map<String, Measure<MappingState>> measuresTable) {
         super(stateVariables, rules, measuresTable);
     }
 

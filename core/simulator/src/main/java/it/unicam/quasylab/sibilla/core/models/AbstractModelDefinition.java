@@ -24,11 +24,9 @@
 package it.unicam.quasylab.sibilla.core.models;
 
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
-import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Function;
 
 /**
  * This class provides basic features for handling a ModelDefinition.
@@ -129,12 +127,12 @@ public abstract class AbstractModelDefinition<T extends State> implements ModelD
     }
 
     @Override
-    public Function<RandomGenerator,T> state(String name, double... args) {
+    public T state(String name, double... args) {
         return getStates().state(name,args);
     }
 
     @Override
-    public Function<RandomGenerator,T> state(double... args) {
+    public T state(double... args) {
         return getStates().get(args);
     }
 

@@ -55,7 +55,6 @@ public interface SlamValue {
         }
     }
 
-
     SlamType getType();
 
     /**
@@ -65,7 +64,7 @@ public interface SlamValue {
      * @return the cast of this value to the given {@link SlamType}.
      */
     default SlamValue cast(SlamType type) {
-        return type.cast(this);
+        return NONE;
     }
 
     /**
@@ -436,25 +435,6 @@ public interface SlamValue {
         return NONE;
     }
 
-    default SlamValue lessThan(SlamValue other) { return NONE; }
-
-    default SlamValue lessOrEqualThan(SlamValue other) { return NONE; }
-
-    default SlamValue equalTo(SlamValue other) { return NONE; }
-
-    default SlamValue notEqualTo(SlamValue other) { return NONE; }
-
-    default SlamValue greaterOrEqualThan(SlamValue other) { return NONE; }
-
-    default SlamValue greaterThan(SlamValue other) { return NONE; }
-
-    default SlamValue minus() { return NONE; }
-
-    default SlamValue plus() { return NONE; }
-
-    default SlamValue zeroDiv(SlamValue other) { return NONE; }
-
-    default double toDouble() { return Double.NaN; }
 
     class NoneValue implements SlamValue {
 
@@ -624,81 +604,6 @@ public interface SlamValue {
             IntegerValue that = (IntegerValue) o;
             return value == that.value;
         }
-
-        @Override
-        public SlamValue lessThan(SlamValue other) {
-            if (other.getType() == SlamType.INTEGER_TYPE) {
-                return (this.value<((IntegerValue) other).value?SlamValue.TRUE:SlamValue.FALSE);
-            }
-            return SlamValue.NONE;
-        }
-
-        @Override
-        public SlamValue lessOrEqualThan(SlamValue other) {
-            if (other.getType() == SlamType.INTEGER_TYPE) {
-                return (this.value<=((IntegerValue) other).value?SlamValue.TRUE:SlamValue.FALSE);
-            }
-            return SlamValue.NONE;
-        }
-
-        @Override
-        public SlamValue equalTo(SlamValue other) {
-            if (other.getType() == SlamType.INTEGER_TYPE) {
-                return (this.value==((IntegerValue) other).value?SlamValue.TRUE:SlamValue.FALSE);
-            }
-            return SlamValue.NONE;
-        }
-
-        @Override
-        public SlamValue notEqualTo(SlamValue other) {
-            if (other.getType() == SlamType.INTEGER_TYPE) {
-                return (this.value!=((IntegerValue) other).value?SlamValue.TRUE:SlamValue.FALSE);
-            }
-            return SlamValue.NONE;
-        }
-
-        @Override
-        public SlamValue greaterOrEqualThan(SlamValue other) {
-            if (other.getType() == SlamType.INTEGER_TYPE) {
-                return (this.value>=((IntegerValue) other).value?SlamValue.TRUE:SlamValue.FALSE);
-            }
-            return SlamValue.NONE;
-        }
-
-        @Override
-        public SlamValue greaterThan(SlamValue other) {
-            if (other.getType() == SlamType.INTEGER_TYPE) {
-                return (this.value>((IntegerValue) other).value?SlamValue.TRUE:SlamValue.FALSE);
-            }
-            return SlamValue.NONE;
-        }
-
-        @Override
-        public SlamValue minus() {
-            return new IntegerValue(-value);
-        }
-
-        @Override
-        public SlamValue plus() {
-            return this;
-        }
-
-        @Override
-        public SlamValue zeroDiv(SlamValue other) {
-            if (other.getType()==SlamType.INTEGER_TYPE) {
-                IntegerValue otherInteger = (IntegerValue) other;
-                if (otherInteger.value == 0) {
-                    return new IntegerValue(0);
-                }
-                return doApply((x,y) -> x/y, otherInteger);
-            }
-            return NONE;
-        }
-
-        @Override
-        public double toDouble() {
-            return this.value;
-        }
     }
 
     class RealValue implements SlamValue {
@@ -823,82 +728,6 @@ public interface SlamValue {
         public SlamValue intValue() {
             return INT_VALUE.apply((int) value);
         }
-
-        @Override
-        public SlamValue lessThan(SlamValue other) {
-            if (other.getType() == SlamType.REAL_TYPE) {
-                return (this.value<((RealValue) other).value?SlamValue.TRUE:SlamValue.FALSE);
-            }
-            return SlamValue.NONE;
-        }
-
-        @Override
-        public SlamValue lessOrEqualThan(SlamValue other) {
-            if (other.getType() == SlamType.REAL_TYPE) {
-                return (this.value<=((RealValue) other).value?SlamValue.TRUE:SlamValue.FALSE);
-            }
-            return SlamValue.NONE;
-        }
-
-        @Override
-        public SlamValue equalTo(SlamValue other) {
-            if (other.getType() == SlamType.REAL_TYPE) {
-                return (this.value==((RealValue) other).value?SlamValue.TRUE:SlamValue.FALSE);
-            }
-            return SlamValue.NONE;
-        }
-
-        @Override
-        public SlamValue notEqualTo(SlamValue other) {
-            if (other.getType() == SlamType.REAL_TYPE) {
-                return (this.value!=((RealValue) other).value?SlamValue.TRUE:SlamValue.FALSE);
-            }
-            return SlamValue.NONE;
-        }
-
-        @Override
-        public SlamValue greaterOrEqualThan(SlamValue other) {
-            if (other.getType() == SlamType.REAL_TYPE) {
-                return (this.value>=((RealValue) other).value?SlamValue.TRUE:SlamValue.FALSE);
-            }
-            return SlamValue.NONE;
-        }
-
-        @Override
-        public SlamValue greaterThan(SlamValue other) {
-            if (other.getType() == SlamType.REAL_TYPE) {
-                return (this.value>((RealValue) other).value?SlamValue.TRUE:SlamValue.FALSE);
-            }
-            return SlamValue.NONE;
-        }
-
-        @Override
-        public SlamValue minus() {
-            return new RealValue(-value);
-        }
-
-        @Override
-        public SlamValue plus() {
-            return this;
-        }
-
-        @Override
-        public SlamValue zeroDiv(SlamValue other) {
-            if (other.getType()==SlamType.REAL_TYPE) {
-                RealValue otherReal = (RealValue) other;
-                if (otherReal.value == 0.0) {
-                    return new RealValue(0);
-                }
-                return doApply((x,y) -> x/y, otherReal);
-            }
-            return NONE;
-        }
-
-        @Override
-        public double toDouble() {
-            return this.value;
-        }
-
     }
 
     class ListValue implements SlamValue {

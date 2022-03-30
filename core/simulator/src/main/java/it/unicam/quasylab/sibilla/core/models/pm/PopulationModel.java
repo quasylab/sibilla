@@ -59,8 +59,8 @@ public class PopulationModel extends AbstractModel<PopulationState> implements C
 
     public PopulationModel(PopulationRegistry registry,
                            List<PopulationRule> rules,
-                           Map<String, Measure<? super PopulationState>> measuresTable,
-                           Map<String, Predicate<? super PopulationState>> predicatesTable) {
+                           Map<String, Measure<PopulationState>> measuresTable,
+                           Map<String, Predicate<PopulationState>> predicatesTable) {
         super(measuresTable, predicatesTable);
         this.registry = registry;
         this.rules = rules;

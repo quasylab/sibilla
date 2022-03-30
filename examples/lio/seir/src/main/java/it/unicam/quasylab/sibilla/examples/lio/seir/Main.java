@@ -68,7 +68,7 @@ public class Main {
 
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
 		AgentsDefinition def = getAgentDefinition();
-		LIOModel<LIOIndividualState> model = new LIOModel<>(def);
+		LIOModel<LIOIndividualState> model = new LIOModel<>(def, LIOIndividualState::stepFunction);
 		LIOIndividualState initial = getInitialState(def, 100000);
 		SimulationEnvironment se = new SimulationEnvironment();
 		Trajectory<LIOIndividualState> trj = se.sampleTrajectory(new DefaultRandomGenerator(),model,initial,100);

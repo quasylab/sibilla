@@ -80,8 +80,4 @@ public class CachedValues {
     public synchronized void register(String name, Function<Function<String,Double>,Double> def) {
         this.definitions.put(name, def);
     }
-
-    public boolean isDefined(String name) {
-        return this.definitions.containsKey(name);
-    }
 }

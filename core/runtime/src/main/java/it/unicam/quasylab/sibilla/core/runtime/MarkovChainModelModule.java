@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class MarkovChainModelModule extends AbstractSibillaModule {
+public class MarkovChainModelModule extends AbstractSibillaModule<MappingState> {
 
     public final static String MODULE_NAME = "markov_chains";
 

@@ -25,8 +25,10 @@ package it.unicam.quasylab.sibilla.core.models.lio;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.Arrays;
-import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
 
 /**
@@ -59,26 +61,10 @@ public class LIOCountingState implements LIOState {
         return ((double) occupancy[stateIndex])/size;
     }
 
-    @Override
-    public double fractionOf(IntPredicate predicate) {
-        return numberOf(predicate)/size;
-    }
-
-    @Override
-    public double numberOf(int stateIndex) {
-        return occupancy[stateIndex];
-    }
-
-    @Override
-    public double numberOf(IntPredicate predicate) {
-        return IntStream.range(0, occupancy.length).filter(predicate).sum();
-    }
-
-    @Override
-    public LIOState step(RandomGenerator randomGenerator, double[][] matrix) {
-        int[] occupancy = new int[this.occupancy.length];
+    public static LIOCountingState stepFunction(RandomGenerator randomGenerator, double[][] matrix, LIOCountingState state) {
+        int[] occupancy = new int[state.occupancy.length];
         IntStream.range(0, occupancy.length).forEach(s ->
-            IntStream.range(0, this.occupancy[s]).forEach(i -> occupancy[LIOState.doSample(randomGenerator,matrix[s],s)]++)
+            IntStream.range(0, state.occupancy[s]).forEach(i -> occupancy[LIOState.doSample(randomGenerator,matrix[s],s)]++)
         );
         return new LIOCountingState(occupancy);
     }

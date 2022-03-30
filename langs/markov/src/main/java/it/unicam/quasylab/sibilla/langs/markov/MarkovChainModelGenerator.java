@@ -26,7 +26,7 @@ package it.unicam.quasylab.sibilla.langs.markov;
 import it.unicam.quasylab.sibilla.core.models.CachedValues;
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.ParametricValue;
-import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
+import it.unicam.quasylab.sibilla.core.models.StateSet;
 import it.unicam.quasylab.sibilla.core.models.markov.CTMCModel;
 import it.unicam.quasylab.sibilla.core.models.markov.DTMCModel;
 import it.unicam.quasylab.sibilla.core.models.markov.MappingStateUpdate;
@@ -42,7 +42,6 @@ import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.File;
 import java.io.FileReader;
@@ -145,11 +144,11 @@ public class MarkovChainModelGenerator {
         return getParseTree().accept(new ParameterEvaluator());
     }
 
-    public ParametricDataSet<Function<RandomGenerator, MappingState>> getStates(EvaluationEnvironment resolver, VariableTable table) {
+    public StateSet<MappingState> getStates(EvaluationEnvironment resolver, VariableTable table) {
         return getParseTree().accept(new StateGeneratorVisitor(resolver.getEvaluator(), table, validator::getTypeOf));
     }
 
-    public Map<String, Measure<? super MappingState>> getMeasures(EvaluationEnvironment env, VariableTable variables) {
+    public Map<String, Measure<MappingState>> getMeasures(EvaluationEnvironment env, VariableTable variables) {
         return getParseTree().accept(new MeasureGenerator(env.getEvaluator(), variables));
     }
 
@@ -200,12 +199,12 @@ public class MarkovChainModelGenerator {
 
 
 
-    private class StateGeneratorVisitor extends MarkovChainModelBaseVisitor<ParametricDataSet<Function<RandomGenerator, MappingState>>> {
+    private class StateGeneratorVisitor extends MarkovChainModelBaseVisitor<StateSet<MappingState>> {
 
         private final Function<String, Double> resolver;
         private final VariableTable table;
         private final Function<String, DataType> types;
-        private ParametricDataSet<Function<RandomGenerator, MappingState>> stateSet;
+        private StateSet<MappingState> stateSet;
 
         public StateGeneratorVisitor(Function<String, Double> resolver, VariableTable table, Function<String,DataType> types) {
             this.resolver = resolver;
@@ -214,19 +213,19 @@ public class MarkovChainModelGenerator {
         }
 
         @Override
-        public ParametricDataSet<Function<RandomGenerator, MappingState>> visitModel(MarkovChainModelParser.ModelContext ctx) {
+        public StateSet<MappingState> visitModel(MarkovChainModelParser.ModelContext ctx) {
             return ctx.state_declaration().accept(this);
         }
 
         @Override
-        public ParametricDataSet<Function<RandomGenerator, MappingState>> visitSingle_declaration(MarkovChainModelParser.Single_declarationContext ctx) {
-            return new ParametricDataSet<>(generateParametricValue(ctx.variables().vars.stream().map(Token::getText).toArray(String[]::new), ctx.assignments()));
+        public StateSet<MappingState> visitSingle_declaration(MarkovChainModelParser.Single_declarationContext ctx) {
+            return new StateSet<>(generateParametricValue(ctx.variables().vars.stream().map(Token::getText).toArray(String[]::new), ctx.assignments()));
         }
 
-        private ParametricValue<Function<RandomGenerator, MappingState>> generateParametricValue(String[] vars, MarkovChainModelParser.AssignmentsContext assignments) {
+        private ParametricValue<MappingState> generateParametricValue(String[] vars, MarkovChainModelParser.AssignmentsContext assignments) {
             Map<String, Integer> index = getIndex(vars);
             Map<String, ToIntFunction<double[]>> values = getVariableInitializers(index, assignments.variable_assignment());
-            return new ParametricValue<>(vars, args -> (rg -> table.getMappingStateOf(apply(args, values))));
+            return new ParametricValue<>(vars, args -> table.getMappingStateOf(apply(args, values)));
         }
 
         private Map<String, Integer> apply(double[] args, Map<String, ToIntFunction<double[]>> values) {
@@ -251,10 +250,10 @@ public class MarkovChainModelGenerator {
 
 
         @Override
-        public ParametricDataSet<Function<RandomGenerator, MappingState>> visitMultiple_declarations(MarkovChainModelParser.Multiple_declarationsContext ctx) {
-            ParametricDataSet<Function<RandomGenerator, MappingState>> result = new ParametricDataSet<>();
+        public StateSet<MappingState> visitMultiple_declarations(MarkovChainModelParser.Multiple_declarationsContext ctx) {
+            StateSet<MappingState> result = new StateSet<>();
             for (MarkovChainModelParser.Init_declarationsContext decl : ctx.init_declarations()) {
-                ParametricValue<Function<RandomGenerator, MappingState>> parValue = generateParametricValue(decl.variables().vars.stream().map(Token::getText).toArray(String[]::new), decl.assignments());
+                ParametricValue<MappingState> parValue = generateParametricValue(decl.variables().vars.stream().map(Token::getText).toArray(String[]::new), decl.assignments());
                 result.set(decl.name.getText(), parValue);
                 if (decl.defaultToken != null) {
                     result.setDefaultState(parValue);
@@ -373,12 +372,12 @@ public class MarkovChainModelGenerator {
         }
     }
 
-    private class MeasureGenerator extends MarkovChainModelBaseVisitor<Map<String, Measure<? super MappingState>>> {
+    private class MeasureGenerator extends MarkovChainModelBaseVisitor<Map<String, Measure<MappingState>>> {
 
 
         private final Function<String, Double> resolver;
         private final VariableTable variables;
-        private final TreeMap<String, Measure<? super MappingState>> measures;
+        private final TreeMap<String, Measure<MappingState>> measures;
 
         public MeasureGenerator(Function<String, Double> resolver, VariableTable variables) {
             this.resolver = resolver;
@@ -387,7 +386,7 @@ public class MarkovChainModelGenerator {
         }
 
         @Override
-        public Map<String, Measure<? super MappingState>> visitModel(MarkovChainModelParser.ModelContext ctx) {
+        public Map<String, Measure<MappingState>> visitModel(MarkovChainModelParser.ModelContext ctx) {
             for (MarkovChainModelParser.Measure_declarationContext m : ctx.measure_declaration()) {
                 m.accept(this);
             }
@@ -395,7 +394,7 @@ public class MarkovChainModelGenerator {
         }
 
         @Override
-        public Map<String, Measure<? super MappingState>> visitMeasure_declaration(MarkovChainModelParser.Measure_declarationContext ctx) {
+        public Map<String, Measure<MappingState>> visitMeasure_declaration(MarkovChainModelParser.Measure_declarationContext ctx) {
             String name = ctx.name.getText();
             ToDoubleFunction<MappingState> measureFunction = StateExpressionEvaluator.evalToDoubleFunction(validator::getTypeOf, resolver, variables, ctx.expr());
             measures.put(name, new SimpleMeasure<>(name, measureFunction::applyAsDouble));
