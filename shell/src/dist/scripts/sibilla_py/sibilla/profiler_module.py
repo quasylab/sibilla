@@ -52,7 +52,7 @@ class Profiler:
       try:
         self.memory_used, self.result = memory_usage(tuple_to_pass,retval=True,interval= 0.001)
       except:
-        print('ERROR : Something went wrong...')
+          self.done_message = 'ERROR : Something went wrong...'
     
       self.time_required = time.process_time() - t
       self.min_memory = min(self.memory_used)
