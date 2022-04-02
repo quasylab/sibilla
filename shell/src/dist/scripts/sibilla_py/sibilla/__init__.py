@@ -1,6 +1,7 @@
-from .sibilla_runtime import SibillaRuntime, Map, SibillaReachabilityResult, SibillaFristPassageTimeResult, SibillaReachabilityResult
 from .plotting_module import SibillaDataPlotter
 from .profiler_module import Profiler
+from .sibilla_runtime import SibillaRuntime, Map, SibillaReachabilityResult, SibillaFristPassageTimeResult, SibillaReachabilityResult
+
 
 __all__= (
     SibillaRuntime,

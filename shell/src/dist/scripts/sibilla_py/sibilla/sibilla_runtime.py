@@ -1,6 +1,4 @@
 from logging import exception
-from .plotting_module import SibillaDataPlotter
-from .profiler_module import Profiler
 import os
 import jnius_config
 
@@ -10,6 +8,9 @@ jnius_config.add_classpath(os.path.join(SSHELL_PATH, 'lib', '*'))
 
 import jnius
 import io
+
+from .plotting_module import SibillaDataPlotter
+from .profiler_module import Profiler
 
 SimulationMonitor = jnius.autoclass("it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor")
 ShellSimulationMonitor = jnius.autoclass("it.unicam.quasylab.sibilla.shell.ShellSimulationMonitor")
@@ -27,7 +28,7 @@ class SibillaRuntime:
 
     def __init__(self):
         self.__runtime = jnius.autoclass("it.unicam.quasylab.sibilla.core.runtime.SibillaRuntime")()
-        self.current_module = 'NOT SETTE'
+        self.current_module = 'NOT SET'
 
     def init_modules(self):
         self.__runtime.initModules()
