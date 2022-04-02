@@ -51,9 +51,10 @@ class Profiler:
       t = time.process_time()
       try:
         self.memory_used, self.result = memory_usage(tuple_to_pass,retval=True,interval= 0.001)
-      except:
-          self.done_message = 'ERROR : Something went wrong...'
-    
+      except Exception as error:
+          self.done_message = 'ERROR : Something went wrong...' + repr(error)
+          sys.exit(1)
+          
       self.time_required = time.process_time() - t
       self.min_memory = min(self.memory_used)
       self.max_memory = max(self.memory_used)
