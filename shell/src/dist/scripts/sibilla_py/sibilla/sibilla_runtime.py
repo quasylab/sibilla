@@ -1,12 +1,13 @@
 from logging import exception
 import os
-import jnius
-import io
 import jnius_config
 
 SSHELL_PATH = os.environ.get('SSHELL_PATH', '')
 
 jnius_config.add_classpath(os.path.join(SSHELL_PATH, 'lib', '*'))
+
+import jnius
+import io
 
 SimulationMonitor = jnius.autoclass("it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor")
 ShellSimulationMonitor = jnius.autoclass("it.unicam.quasylab.sibilla.shell.ShellSimulationMonitor")
