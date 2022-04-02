@@ -1,4 +1,6 @@
 from logging import exception
+from .plotting_module import SibillaDataPlotter
+from .profiler_module import Profiler
 import os
 import jnius_config
 
