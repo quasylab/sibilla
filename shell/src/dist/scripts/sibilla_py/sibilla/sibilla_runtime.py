@@ -133,13 +133,17 @@ class SibillaRuntime:
 
         def simulate_runtime(label: str, monitor: SimulationMonitor = None):
             results = None
-            try:
-                if monitor == None:
-                    results = self.__runtime.simulate(label).to_dict()
-                else:
-                    results = self.__runtime.simulate(monitor, label).to_dict()
-            except:
-                print('Internal Error')
+            if monitor == None:
+                results = self.__runtime.simulate(label).to_dict()
+            else:
+                results = self.__runtime.simulate(monitor, label).to_dict()
+            #try:
+            #    if monitor == None:
+            #        results = self.__runtime.simulate(label).to_dict()
+            #    else:
+            #        results = self.__runtime.simulate(monitor, label).to_dict()
+            #except:
+            #    print('Internal Error')
 
             simulation_results = SibillaSimulationResult(results)
             return simulation_results
