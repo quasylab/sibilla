@@ -26,8 +26,6 @@
 
 package it.unicam.quasylab.sibilla.examples.servers.client;
 
-import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
-import it.unicam.quasylab.sibilla.core.models.StateSet;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModel;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.network.HostLoggerSupplier;
@@ -96,7 +94,7 @@ public class ClientApplication implements Serializable {
                 // def.setParameter("N",1000);
                 PopulationModel model = def.createModel();
 
-                new ClientSimulationEnvironment(RANDOM_GENERATOR, def, model, def.state(),
+                new ClientSimulationEnvironment<>(RANDOM_GENERATOR, def, model, def.state().apply(RANDOM_GENERATOR),
                                 model.getSamplingFunction(SAMPLINGS, DEADLINE / SAMPLINGS), REPLICA, DEADLINE,
                                 masterServerInfo, SerializerType.FST, submitRepetitions);
 

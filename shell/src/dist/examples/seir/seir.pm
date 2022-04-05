@@ -26,3 +26,4 @@ system initial_2 = S < 98 >|I < 2 >;
 
 predicate allRecovered = (# S +# E +# I ==0) ;
 predicate halfRecovered = (# S +# E +# I ==50) ;
+

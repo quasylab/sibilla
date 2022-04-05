@@ -26,14 +26,13 @@ package it.unicam.quasylab.sibilla.core.models.slam;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.ToDoubleBiFunction;
 import java.util.stream.DoubleStream;
 
 public class Util {
 
 
-    public static <T> T select(RandomGenerator rg, AgentMemory m, ToDoubleBiFunction<RandomGenerator, AgentMemory>[] weights, T[] options) {
+    public static <T> T select(RandomGenerator rg, AgentStore m, ToDoubleBiFunction<RandomGenerator, AgentStore>[] weights, T[] options) {
         double[] actualWeights = Arrays.stream(weights).mapToDouble(f -> f.applyAsDouble(rg, m)).toArray();
         double totalWeight = DoubleStream.of(actualWeights).sum();
         double selected = rg.nextDouble()*totalWeight;

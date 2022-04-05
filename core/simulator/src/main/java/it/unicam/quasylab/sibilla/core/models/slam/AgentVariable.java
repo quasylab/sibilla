@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
+import java.util.Objects;
+
 /**
  * Instances of this class are used to represent the info associated with an
  * agent variable. Each variable is identified by:
@@ -75,5 +77,18 @@ public final class AgentVariable {
      */
     public SlamType getType() {
         return type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AgentVariable that = (AgentVariable) o;
+        return getIndex() == that.getIndex();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getIndex());
     }
 }

@@ -30,6 +30,21 @@ import java.util.function.Function;
  */
 public interface SlamType {
 
+    static SlamType getTypeOf(String type) {
+        switch (type) {
+            case "int":     return SlamType.INTEGER_TYPE;
+            case "real":    return SlamType.REAL_TYPE;
+            case "boolean": return SlamType.BOOLEAN_TYPE;
+            default:        return SlamType.NONE_TYPE;
+        }
+    }
+
+    boolean isComparable();
+
+    boolean canCastTo(SlamType resultType);
+
+    boolean isNumericType();
+
     enum SlamCodeType {
         NONE,
         BOOLEAN,
@@ -63,6 +78,42 @@ public interface SlamType {
      */
     SlamCodeType code();
 
+    abstract class AbstractType implements SlamType {
+
+        @Override
+        public int hashCode() {
+            return super.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof SlamType) {
+                return this.code() == ((SlamType) obj).code();
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return this.code().toString();
+        }
+
+        @Override
+        public boolean isComparable() {
+            return false;
+        }
+
+        @Override
+        public boolean canCastTo(SlamType resultType) {
+            return false;
+        }
+
+        @Override
+        public boolean isNumericType() {
+            return false;
+        }
+    }
 
     /**
      * Returns the type of elements of the elements in this type.
@@ -73,7 +124,7 @@ public interface SlamType {
         return NONE_TYPE;
     }
 
-    final class NoneType implements SlamType {
+    final class NoneType extends AbstractType {
 
         private NoneType() {}
 
@@ -89,7 +140,7 @@ public interface SlamType {
 
     }
 
-    final class BooleanType implements SlamType {
+    final class BooleanType extends AbstractType {
 
         private BooleanType() {}
 
@@ -111,7 +162,7 @@ public interface SlamType {
     }
 
 
-    class IntegerType implements SlamType {
+    class IntegerType extends AbstractType {
 
 
         @Override
@@ -129,7 +180,7 @@ public interface SlamType {
         }
     }
 
-    class RealType implements SlamType {
+    class RealType extends AbstractType {
         @Override
         public SlamValue cast(SlamValue value) {
             switch (value.getType().code()) {
@@ -145,7 +196,7 @@ public interface SlamType {
         }
     }
 
-    class ListType implements SlamType {
+    class ListType extends AbstractType {
 
         private final SlamType contentType;
 

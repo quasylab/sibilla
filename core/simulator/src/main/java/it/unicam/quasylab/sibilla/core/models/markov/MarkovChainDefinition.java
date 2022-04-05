@@ -27,6 +27,7 @@ import it.unicam.quasylab.sibilla.core.models.*;
 import it.unicam.quasylab.sibilla.core.models.util.MappingState;
 import it.unicam.quasylab.sibilla.core.models.util.VariableTable;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.List;
 import java.util.Map;
@@ -36,23 +37,23 @@ import java.util.function.Function;
 public class MarkovChainDefinition<M extends MarkovChainModel> extends AbstractModelDefinition<MappingState> {
 
     private final MarkovChainBuilder<M> modelBuilder;
-    private final BiFunction<EvaluationEnvironment, VariableTable, StateSet<MappingState>> stateSetBuilder;
+    private final BiFunction<EvaluationEnvironment, VariableTable, ParametricDataSet<Function<RandomGenerator, MappingState>>> stateSetBuilder;
     private final Function<EvaluationEnvironment, VariableTable> variablesBuilder;
     private final BiFunction<EvaluationEnvironment, VariableTable, List<MappingStateUpdate>> rulesBuilder;
-    private final BiFunction<EvaluationEnvironment, VariableTable, Map<String, Measure<MappingState>>> measureBuilder;
+    private final BiFunction<EvaluationEnvironment, VariableTable, Map<String, Measure<? super MappingState>>> measureBuilder;
     private Model<MappingState> model;
-    private Map<String, Measure<MappingState>> measures;
-    private StateSet<MappingState> states;
+    private Map<String, Measure<? super MappingState>> measures;
+    private ParametricDataSet<Function<RandomGenerator, MappingState>> states;
     private VariableTable variables;
     private List<MappingStateUpdate> rules;
 
     public MarkovChainDefinition(
             EvaluationEnvironment environment,
-            BiFunction<EvaluationEnvironment, VariableTable, StateSet<MappingState>> stateSetBuilder,
+            BiFunction<EvaluationEnvironment, VariableTable, ParametricDataSet<Function<RandomGenerator, MappingState>>> stateSetBuilder,
             MarkovChainBuilder<M> modelBuilder,
             Function<EvaluationEnvironment, VariableTable> variablesBuilder,
             BiFunction<EvaluationEnvironment, VariableTable, List<MappingStateUpdate>> rulesBuilder,
-            BiFunction<EvaluationEnvironment, VariableTable, Map<String, Measure<MappingState>>> measureBuilder) {
+            BiFunction<EvaluationEnvironment, VariableTable, Map<String, Measure<? super MappingState>>> measureBuilder) {
         super(environment);
         this.modelBuilder = modelBuilder;
         this.stateSetBuilder = stateSetBuilder;
@@ -72,7 +73,7 @@ public class MarkovChainDefinition<M extends MarkovChainModel> extends AbstractM
     }
 
     @Override
-    public StateSet<MappingState> getStates() {
+    public ParametricDataSet<Function<RandomGenerator, MappingState>> getStates() {
         if (states == null) {
             states = stateSetBuilder.apply(getEnvironment(),getVariables());
         }
@@ -102,7 +103,7 @@ public class MarkovChainDefinition<M extends MarkovChainModel> extends AbstractM
         return variables;
     }
 
-    private Map<String, Measure<MappingState>> getMeasures() {
+    private Map<String, Measure<? super MappingState>> getMeasures() {
         if (measures == null) {
             measures = measureBuilder.apply(getEnvironment(),getVariables());
         }

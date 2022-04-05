@@ -29,6 +29,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -59,6 +60,17 @@ public class ExecutionEnvironment<S extends ImmutableState> {
         this.time = 0.0;
         this.currentState = init;
         this.rg = rg;
+    }
+
+    /**
+     * Create a new ExecutionEnvironment that can be used to execute a given model
+     * starting from a specific state.
+     *
+     * @param model model to execute.
+     * @param init
+     */
+    public ExecutionEnvironment(RandomGenerator rg, InteractiveModel<S> model, Function<RandomGenerator,S> init) {
+        this(rg, model, init.apply(rg));
     }
 
     /**

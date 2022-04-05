@@ -63,32 +63,32 @@ public final class SlamState implements State, GlobalStateExpressionEvaluator {
     }
 
     @Override
-    public synchronized double getMinOf(ToDoubleFunction<AgentMemory> expr) {
+    public synchronized double getMinOf(ToDoubleFunction<AgentStore> expr) {
         return agents.values().stream().mapToDouble(a -> a.eval(expr)).min().orElse(Double.NaN);
     }
 
     @Override
-    public synchronized double getMinOf(ToDoubleFunction<AgentMemory> expr, Predicate<Agent> filter) {
+    public synchronized double getMinOf(ToDoubleFunction<AgentStore> expr, Predicate<Agent> filter) {
         return agents.values().stream().filter(filter).mapToDouble(a -> a.eval(expr)).min().orElse(Double.NaN);
     }
 
     @Override
-    public synchronized double getMaxOf(ToDoubleFunction<AgentMemory> expr) {
+    public synchronized double getMaxOf(ToDoubleFunction<AgentStore> expr) {
         return agents.values().stream().mapToDouble(a -> a.eval(expr)).max().orElse(Double.NaN);
     }
 
     @Override
-    public synchronized double getMaxOf(ToDoubleFunction<AgentMemory> expr, Predicate<Agent> filter) {
+    public synchronized double getMaxOf(ToDoubleFunction<AgentStore> expr, Predicate<Agent> filter) {
         return agents.values().stream().filter(filter).mapToDouble(a -> a.eval(expr)).max().orElse(Double.NaN);
     }
 
     @Override
-    public synchronized double getMeanOf(ToDoubleFunction<AgentMemory> expr) {
+    public synchronized double getMeanOf(ToDoubleFunction<AgentStore> expr) {
         return agents.values().stream().mapToDouble(a -> a.eval(expr)).average().orElse(Double.NaN);
     }
 
     @Override
-    public synchronized double getMeanOf(ToDoubleFunction<AgentMemory> expr, Predicate<Agent> filter) {
+    public synchronized double getMeanOf(ToDoubleFunction<AgentStore> expr, Predicate<Agent> filter) {
         return agents.values().stream().filter(filter).mapToDouble(a -> a.eval(expr)).average().orElse(Double.NaN);
     }
 
@@ -112,7 +112,8 @@ public final class SlamState implements State, GlobalStateExpressionEvaluator {
             throw new IllegalStateException();//TODO: Add Message!
         }
         if (dt > 0) {
-            agents.values().forEach(a -> a.timeStep(rg, time));
+            agents.values().forEach(a -> a.timeStep(rg, dt));
+            agents.values().forEach(a -> a.perceive(rg, this));
             now = time;
         }
     }
