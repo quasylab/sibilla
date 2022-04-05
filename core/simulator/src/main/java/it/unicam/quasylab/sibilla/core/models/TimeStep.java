@@ -56,6 +56,8 @@ public class TimeStep<S> {
         if (time<=0) {
             throw new IllegalArgumentException(SibillaMessages.createdTimeStepWithNonPositiveTime(time));
         }
+        this.time = time;
+        this.value = value;
     }
 
     /**
