@@ -30,8 +30,9 @@ include 'core:simulator',
 		'examples:populations:taxis',
     	'examples:benchmarks:slave',
    	 	'examples:benchmarks:master',
-		'examples:agents:RobotAgents',
     'view',
     'examples:lio:seir',
 		'examples:lio:rb'
 
+/* 		'examples:agents:RobotAgents',
+*/
