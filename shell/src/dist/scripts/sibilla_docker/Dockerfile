@@ -1,8 +1,8 @@
 FROM python:3
 
-# Installing jdk11
-RUN apt-get update && apt-get upgrade
-RUN apt-get install -y openjdk-11-jdk
+# Installing jdk17
+RUN apt-get update -y && apt-get upgrade -y
+RUN apt-get install -y openjdk-17-jdk
 
 # Adding new user
 RUN adduser sibilla --disabled-password --gecos ""
