@@ -248,7 +248,8 @@ class SibillaDataPlotter:
 
     self.figure_measures_details = make_subplots(rows=row_number, cols=2,
                     shared_xaxes=True,
-                    vertical_spacing=0.1)
+                    vertical_spacing=0.1,
+                    subplot_titles=(titles))
 
     self.figure_measures_details.update_yaxes(
         range=[0,y_axis_max],
