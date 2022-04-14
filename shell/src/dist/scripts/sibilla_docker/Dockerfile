@@ -1,8 +1,8 @@
 FROM python:3
 
-# Installing jdk17
+# Installing jdk11
 RUN apt-get update -y && apt-get upgrade -y
-RUN apt-get install -y openjdk-17-jdk
+RUN apt-get install -y openjdk-11-jdk
 
 # Adding new user
 RUN adduser sibilla --disabled-password --gecos ""
@@ -23,9 +23,9 @@ USER sibilla
 COPY --chown=sibilla:sibilla workspace /home/sibilla/workspace
 WORKDIR /home/sibilla/workspace
 EXPOSE 8888
-ENTRYPOINT /home/sibilla/.local/bin/jupyter lab \ 
+ENTRYPOINT /home/sibilla/.local/bin/jupyter lab \
 --ip=* \
---no-browser \ 
+--no-browser \
 --notebook-dir=/home/sibilla/workspace \
---ServerApp.token='' \ 
+--ServerApp.token='' \
 --ServerApp.password=''

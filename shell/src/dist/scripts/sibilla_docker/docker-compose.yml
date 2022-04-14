@@ -2,4 +2,4 @@ services:
     jupyterlab:
         build: .
         ports:
-            - "180:8888"
+            - "8888:8888"
