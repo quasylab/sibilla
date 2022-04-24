@@ -32,6 +32,7 @@ include 'core:simulator',
    	 	'examples:benchmarks:master',
     'view',
     'examples:lio:seir',
+
 		'examples:lio:rb'
 
 /* 		'examples:agents:RobotAgents',
