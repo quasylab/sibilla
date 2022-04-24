@@ -49,7 +49,7 @@ public class DTMCModel extends MarkovChainModel implements DiscreteTimeMarkovPro
      * @param rules function used to induce transition probability.
      * @param measuresTable declared measures.
      */
-    public DTMCModel(VariableTable stateVariables, List<MappingStateUpdate> rules, Map<String, Measure<MappingState>> measuresTable) {
+    public DTMCModel(VariableTable stateVariables, List<MappingStateUpdate> rules, Map<String, Measure<? super MappingState>> measuresTable) {
         super(stateVariables, rules, measuresTable);
     }
 

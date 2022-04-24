@@ -1,0 +1,5 @@
+services:
+    jupyterlab:
+        build: .
+        ports:
+            - "8888:8888"

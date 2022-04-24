@@ -32,10 +32,8 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
@@ -102,7 +100,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
         parser.addErrorListener(errorListener);
         SibillaScriptParser.ScriptContext parseTree = parser.script();
         if (errorListener.withErrors()) {
-            printScriptErrors(errorListener.getSyntaxErrorList().getSyntaxErrorList());
+            printScriptErrors(errorListener.getErrorCollector().getSyntaxErrorList());
         } else {
             this.visitScript(parseTree);
         }

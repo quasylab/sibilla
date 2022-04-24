@@ -23,29 +23,17 @@
 
 package it.unicam.quasylab.sibilla.core.runtime;
 
-import it.unicam.quasylab.sibilla.core.models.StateSet;
-import it.unicam.quasylab.sibilla.core.models.pm.PopulationModel;
-import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
-import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
-import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 import it.unicam.quasylab.sibilla.langs.pm.ModelBuildingError;
 import it.unicam.quasylab.sibilla.langs.pm.ModelGenerationException;
 import it.unicam.quasylab.sibilla.langs.pm.PopulationModelGenerator;
-import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 
-public class PopulationModelModule extends AbstractSibillaModule<PopulationState> {
+public class PopulationModelModule extends AbstractSibillaModule {
 
     public final static String MODULE_NAME = "population";
 
