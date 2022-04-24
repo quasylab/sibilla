@@ -22,7 +22,10 @@
  */
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
-
+/**
+ * The class <code>YodaVariable</code> represents
+ * a variable handled by YodaAgents
+ */
 public class YodaVariable {
 
     private final String name;

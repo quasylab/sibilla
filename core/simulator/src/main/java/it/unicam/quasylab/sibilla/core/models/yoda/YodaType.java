@@ -26,7 +26,8 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 import java.util.function.Function;
 
 /**
- * The interface <code>YodaType</code> represents the types handled by a Yoda Agent
+ * The interface <code>YodaType</code> represents
+ * the types handled by a Yoda Agent
  */
 public interface YodaType {
 

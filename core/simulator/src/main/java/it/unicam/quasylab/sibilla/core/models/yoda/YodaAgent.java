@@ -23,29 +23,52 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
+import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
 import org.apache.commons.math3.random.RandomGenerator;
 
 /**
- * The class <code>YodaAgent</code> represents the agents available in the simulation
+ * The class <code>YodaAgent</code> represents
+ * the agents available in the simulation
  * Each one has the following components:
  * <ul>
+ *     <li>a unique identifier</li>
+ *     <li>a unique name string</li>
  *     <li>a local state containing the information known to the agent</li>
+ *     <li>a external state containing the information unknown to the agent</li>
  *     <li>a set of observations done by the agent</li>
- *     <li>a set of actions, that the agent can execute</li>
- *     <li>a behaviour that</li>
+ *     <li>a behaviour that select the actions</li>
+ *     <li>a OmegaFunction to determine the observations</li>
+ *     <li>a AgentInfoUpdateFunction to update the external state of the agent</li>
  * </ul>
  *
  */
 public final class YodaAgent {
 
     private final int identifier;
+    private final String name;
     private YodaVariableMapping agentLocalState;
+    private YodaVariableMapping agentExternalInfo;
+    private YodaVariableMapping agentObservations;
     private final YodaBehaviour agentBehaviour;
+    private final OmegaFunction omegaFunction;
+    private final AgentInfoUpdateFunction agentInfoUpdateFunction;
 
-    public YodaAgent(int identifier, YodaVariableMappingWrapper agentLocalState, YodaBehaviour agentBehaviour) {
+    public YodaAgent(int identifier,
+                     String name,
+                     YodaVariableMapping agentLocalState,
+                     YodaVariableMapping agentExternalInfo,
+                     YodaVariableMapping agentObservations,
+                     YodaBehaviour agentBehaviour,
+                     OmegaFunction omegaFunction,
+                     AgentInfoUpdateFunction agentInfoUpdateFunction) {
         this.identifier = identifier;
+        this.name = name;
         this.agentLocalState = agentLocalState;
+        this.agentExternalInfo = agentExternalInfo;
+        this.agentObservations = agentObservations;
         this.agentBehaviour = agentBehaviour;
+        this.omegaFunction = omegaFunction;
+        this.agentInfoUpdateFunction = agentInfoUpdateFunction;
     }
 
     /**
@@ -58,12 +81,39 @@ public final class YodaAgent {
     }
 
     /**
+     * This method returns the name of the agent
+     *
+     * @return the name of the agent
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
      * This method returns the agent local state
      *
      * @return the agent local state
      */
     public YodaVariableMapping getAgentLocalState(){
         return agentLocalState;
+    }
+
+    /**
+     * This method returns the global information of the agent
+     *
+     * @return the global information of the agent
+     */
+    public YodaVariableMapping getAgentExternalInfo() {
+        return agentExternalInfo;
+    }
+
+    /**
+     * This method returns the agent observations
+     *
+     * @return the agent observations
+     */
+    public YodaVariableMapping getAgentObservations() {
+        return agentObservations;
     }
 
     /**
@@ -76,14 +126,43 @@ public final class YodaAgent {
     }
 
     /**
-     * This method returns the updated state of this agent
+     * This method makes an agent step
+     *
+     * @param rg a random generator
+     */
+    public void step(RandomGenerator rg){
+        WeightedStructure<YodaAction> actionSet = agentBehaviour.evaluate(rg, agentLocalState, agentObservations);
+        YodaAction selectedAction = agentBehaviour.selectAction(rg, actionSet);
+        updateState(rg, selectedAction);
+    }
+
+    /**
+     * This method updates the state of this agent
      *
      * @param rg a random generator
      * @param action the action that the agent should perform
-     * @return the updated state of this agent
      */
-    public YodaVariableMapping update(RandomGenerator rg, YodaAction action){
+    public void updateState(RandomGenerator rg, YodaAction action){
         YodaVariableMapping newState = action.performAction(rg, agentLocalState);
-        return agentLocalState = newState;
+        this.agentLocalState = newState;
+    }
+
+    /**
+     * This method updates the global information of this agents
+     *
+     * @param rg a random generator
+     */
+    void updateInfo(RandomGenerator rg){
+        this.agentExternalInfo = this.agentInfoUpdateFunction.compute(rg, this.agentLocalState, this.agentExternalInfo);
+    }
+
+    /**
+     * This method updates the agent's observations set
+     *
+     * @param rg a random generator
+     * @param system a YodaSystem
+     */
+    void computeObservations(RandomGenerator rg, YodaSystem system) {
+        this.agentObservations = omegaFunction.compute(rg, system, this);
     }
 }

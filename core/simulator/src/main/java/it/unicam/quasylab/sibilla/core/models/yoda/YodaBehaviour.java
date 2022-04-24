@@ -27,8 +27,34 @@ import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
+import java.util.List;
 
+/**
+ * The interface <code>YodaBehaviour</code> represents
+ * the behaviour allowing the agent to choose any available action
+ */
 public interface YodaBehaviour extends Serializable {
+
+    /**
+     * This method returns the name of the behaviour
+     *
+     * @return the name of the behaviour
+     */
+    String getName();
+
+    /**
+     * This method returns the identifier of the behaviour
+     *
+     * @return the identifier of the behaviour
+     */
+    int getId();
+
+    /**
+     * This method returns all the available actions for a certain agent
+     *
+     * @return all the available actions for a certain agent
+     */
+    List<YodaAction> getAvailableActions();
 
     /**
      * This method returns a distribution of possible actions
@@ -45,7 +71,13 @@ public interface YodaBehaviour extends Serializable {
      *
      * @param rg a random generator
      * @param actionsDistribution a distribution of actions derived from the behaviour evaluation
-     * @return a single action from a distribution of actions
+     * @return a single action from a distribution of actions if actionsDistribution is more than zero or null if actionsDistribution is not more than zero
      */
-    YodaAction selectAction(RandomGenerator rg, WeightedStructure<YodaAction> actionsDistribution);
+    default YodaAction selectAction(RandomGenerator rg, WeightedStructure<YodaAction> actionsDistribution) {
+        if (actionsDistribution.getTotalWeight()>0) {
+            return actionsDistribution.select(actionsDistribution.getTotalWeight()*rg.nextDouble()).getElement();
+        } else {
+            return null;
+        }
+    }
 }

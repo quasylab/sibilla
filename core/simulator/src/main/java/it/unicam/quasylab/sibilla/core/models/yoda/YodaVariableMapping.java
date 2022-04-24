@@ -23,7 +23,13 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
-public interface YodaVariableMapping {
+import java.io.Serializable;
+
+/**
+ * The interface <code>YodaVariableMapping</code> represents
+ * the mapping between a variable and a value
+ */
+public interface YodaVariableMapping extends Serializable {
 
     /**
      * This method returns the value associated to an input variable

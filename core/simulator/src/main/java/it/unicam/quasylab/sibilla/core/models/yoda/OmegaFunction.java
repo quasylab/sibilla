@@ -25,29 +25,11 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.io.Serializable;
-
 /**
- * The interface <code>YodaAction</code> represents
- * the action done by agents in a system
- *
+ * The interface <code>OmegaFunction</code> represents
+ * a functional interface computing the observations of an agent
  */
-public interface YodaAction extends Serializable {
-
-    /**
-     * This method returns the name of this action
-     *
-     * @return the name of this action
-     */
-    String getName();
-
-    /**
-     * This method returns the new internal state of an agent after performing an action
-     *
-     * @param rg a random generator
-     * @param currentState the agent current internal state
-     * @return the new internal state of an agent after performing an action
-     */
-    YodaVariableMapping performAction(RandomGenerator rg, YodaVariableMapping currentState);
-
+@FunctionalInterface
+public interface OmegaFunction {
+    YodaVariableMapping compute(RandomGenerator rg, YodaSystem system, YodaAgent agent);
 }
