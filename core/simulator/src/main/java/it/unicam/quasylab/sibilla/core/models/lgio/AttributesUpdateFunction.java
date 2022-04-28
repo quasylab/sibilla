@@ -20,33 +20,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-/**
- * 
- */
-package it.unicam.quasylab.sibilla.core.simulator.util;
 
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.stream.Collector;
+package it.unicam.quasylab.sibilla.core.models.lgio;
 
-/**
- * @author loreti
- *
- */
-public interface WeightedStructure<S> {
+import org.apache.commons.math3.random.RandomGenerator;
 
-	double getTotalWeight();
-
-	WeightedElement<S> select(double w);
-
-	WeightedStructure<S> add(double w, S s);
-
-	WeightedStructure<S> add(WeightedStructure<S> s);
-
-	List<WeightedElement<S>> getAll();
-
-	static <S> Collector<WeightedElement<S>, ?, WeightedStructure<S>> collector() {
-		return Collector.of(WeightedLinkedList::new, (we, wlist) -> {wlist.add(we);}, WeightedStructure::add);
-	}
-
+@FunctionalInterface
+public interface AttributesUpdateFunction {
+    AgentAttributes apply(RandomGenerator rg, AgentAttributes attributes);
 }

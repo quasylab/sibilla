@@ -20,33 +20,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-/**
- * 
- */
-package it.unicam.quasylab.sibilla.core.simulator.util;
 
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.stream.Collector;
+package it.unicam.quasylab.sibilla.core.models.lgio;
 
-/**
- * @author loreti
- *
- */
-public interface WeightedStructure<S> {
+public class AgentStep {
 
-	double getTotalWeight();
+    private final AttributesUpdateFunction attributeUpdateFunction;
+    private final AgentBehaviour nextBehaviour;
 
-	WeightedElement<S> select(double w);
+    public AgentStep(AttributesUpdateFunction attributeUpdateFunction, AgentBehaviour nextBehaviour) {
+        this.attributeUpdateFunction = attributeUpdateFunction;
+        this.nextBehaviour = nextBehaviour;
+    }
 
-	WeightedStructure<S> add(double w, S s);
+    public AgentStep(AgentBehaviour nextBehaviour) {
+        this(new AttributeUpdateFunctionClass(), nextBehaviour);
+    }
 
-	WeightedStructure<S> add(WeightedStructure<S> s);
+    public AttributesUpdateFunction getAttributeUpdateFunction() {
+        return attributeUpdateFunction;
+    }
 
-	List<WeightedElement<S>> getAll();
-
-	static <S> Collector<WeightedElement<S>, ?, WeightedStructure<S>> collector() {
-		return Collector.of(WeightedLinkedList::new, (we, wlist) -> {wlist.add(we);}, WeightedStructure::add);
-	}
-
+    public AgentBehaviour getNextBehaviour() {
+        return nextBehaviour;
+    }
 }
