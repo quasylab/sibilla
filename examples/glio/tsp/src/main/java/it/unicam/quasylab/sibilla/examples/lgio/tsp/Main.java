@@ -102,7 +102,7 @@ public class Main {
 	}
 
 	public static ActionProbabilityFunction probabilityFunction() {
-
+		return null;
 	}
 
 
