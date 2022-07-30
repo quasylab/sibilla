@@ -1,0 +1,39 @@
+agent kid {
+    state{
+        knowledge {
+            int dirx;
+            bool throw;
+        }
+        information {
+            int hp;
+            int posx;
+            bool otherDefeated:
+        }
+    }
+    observations {
+        int distance;
+    }
+    actions {
+        moveRight {dirx <- 1; throw <- false} |
+        moveLeft {dirx <- -1; throw <- false} |
+        throwSuccess {throw <- true;}         |
+        throwFail {throw <- false;}           |
+        wait | stop | rtf
+    }
+    behaviour {
+        [hp == 0] -> { rtf : 1 ;}                          |
+        [otherDefeated == true] -> { stop : 1;}            |
+        [posx == 0] -> {moveRight : 1;}                    |
+        [posx == 9] -> {moveLeft : 1;}                      |
+        [] -> {};                      |
+        [] -> {};                      |
+        [] -> {};                      |
+        default {wait : 1 ;}
+    }
+}
+
+system arena {
+    scene {}
+    sensing {}
+    evolution {}
+}
