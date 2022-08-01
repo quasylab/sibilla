@@ -1,39 +1,69 @@
-agent kid {
+param na = 2;
+param width = 9;
+param hpMax = 5;
+
+agent Kid {
     state{
         knowledge {
             int dirx;
-            bool throw;
+            int throw;
         }
         information {
             int hp;
             int posx;
-            bool otherDefeated:
         }
     }
     observations {
         int distance;
+        int hitValue;
     }
     actions {
-        moveRight {dirx <- 1; throw <- false} |
-        moveLeft {dirx <- -1; throw <- false} |
-        throwSuccess {throw <- true;}         |
-        throwFail {throw <- false;}           |
+        moveRight {dirx <- 1; throw <- 0} |
+        moveLeft {dirx <- -1; throw <- 0} |
+        throwSuccess {throw <- 1;}         |
+        throwFail {throw <- 0;}           |
         wait | stop | rtf
     }
     behaviour {
         [hp == 0] -> { rtf : 1 ;}                          |
         [otherDefeated == true] -> { stop : 1;}            |
         [posx == 0] -> {moveRight : 1;}                    |
-        [posx == 9] -> {moveLeft : 1;}                      |
-        [] -> {};                      |
-        [] -> {};                      |
-        [] -> {};                      |
+        [posx == 9] -> {moveLeft : 1;}                     |
+        [distance > 4] -> {moveRight : 1; moveLeft : 1; throwSuccess : 0.5; throwFail : 1.5;};  |
+        [distance > 2] -> {moveRight : 1; moveLeft : 1; throwSuccess : 1; throwFail : 1;};      |
+        [distance <= 2] -> {moveRight : 1; moveLeft : 1; throwSuccess : 1.5; throwFail : 0.5;}; |
         default {wait : 1 ;}
     }
 }
 
-system arena {
+system Arena {
     scene {}
-    sensing {}
-    evolution {}
+    sensing {
+        Kid {
+            distance <- (abs(k.posx - posx)) for k in Kid;
+            hitValue <- (k.throw) for k in Kid;
+            otherDefeated <- (k.hp == 0) for k in Kid;
+        }
+    }
+    evolution {
+        Kid{
+            hp <- hp - hitValue;
+            posx <- posx + dirx;
+        }
+    }
+}
+
+configuration SnowFight {
+    let agInit = distinct(na, x = U[0,width])
+    in
+    Arena {
+        for a in agInit {
+            Kid {
+                dirx <- 0;
+                posx <- a.x;
+                hp <- hpMax;
+                throw <- 0;
+            }
+        }
+    }
 }
