@@ -1,0 +1,79 @@
+param height = 10;
+param length = 10;
+param no = 10;
+param na = 3;
+
+type point {
+    int x; int y;
+}
+
+agent Robot {
+    state {
+        knowledge {
+            int dirx; int diry;
+        }
+        information {
+            int x; int y;
+        }
+    }
+    observations {
+        bool north; bool south; bool east; bool west; bool goal;
+    }
+    actions {
+        moveNorth {diry <- 1}   |
+        moveSouth {diry <- -1}  |
+        moveEast {dirx <- 1}    |
+        moveWest {dirx <- -1}   |
+        stop | wait
+    }
+    behaviour {
+        [north == false] -> {moveNorth : 1;}                |
+        [north == true && east == true] -> {moveWest : 1;}  |
+        [north == true] -> {moveEast : 1;}                  |
+        [goal == true] -> {stop : 1;}                       |
+        default {wait : 1;}
+    }
+}
+
+system Grid {
+    scene {
+        array[point] obstacles;
+    }
+    sensing {
+        Robot {
+            north <- exists o.y==y+1 for o in obstacles;
+            south <- exists o.y==y-1 for o in obstacles;
+            east <- x==length-1 || exists o.x==x+1 for o in obstacles;
+            west <- x==0 || exists o.x==x-1 for o in obstacles;
+            goal <- y==height+1;
+        }
+    }
+    evolution {
+        Robot {
+           x <- x + dirx;
+           y <- y + diry;
+        }
+    }
+}
+
+configuration RoboticScenario {
+    let obInit = distinct(no, [x = U[0,width], y=U[0, height]])
+    and agInit = distinctFrom(na, [x = U[0,width], y = 0], obstacles)
+    in
+    Grid {
+        for o in obInit {
+            obstacles{
+                x <- o.x;
+                y <- o.y;
+            }
+        }
+        for a in agInit {
+            Robot {
+                x <- a.x;
+                y <- a.y;
+                dirx <- 0;
+                diry <- 0;
+            }
+        }
+    }
+}
