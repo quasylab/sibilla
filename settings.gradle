@@ -12,6 +12,7 @@ rootProject.name = 'it.unicam.quasylab.sibilla'
 include 'core:simulator',
 		'core:network',
 		'core:runtime',
+		'core:optimization',
 		'langs:util',
 		'langs:pm',
 		'langs:lio',
@@ -40,3 +41,6 @@ include 'core:simulator',
 
 /* 		'examples:agents:RobotAgents',
 */
+include 'core:optimization'
+findProject(':core:optimization')?.name = 'optimization'
+
