@@ -25,4 +25,17 @@ class HyperRectangleTest {
         }
     }
 
+    @Test
+    void testScalingHyperRectangle() {
+        HyperRectangle hr = new HyperRectangle(
+                new Interval(-10,10),
+                new Interval(-20,20),
+                new Interval(-2,2)
+        );
+        HyperRectangle hrScaled = hr.getScaledCopy(0.5);
+        System.out.println(hr);
+        System.out.println(hrScaled);
+        assertTrue(hr.equals(hrScaled));
+    }
+
 }

@@ -2,7 +2,9 @@ package it.unicam.quasylab.sibilla.core.optimization.sampling;
 
 
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
+import static it.unicam.quasylab.sibilla.core.optimization.Constants.*;
 
 /**
  * A simple class that represent an interval between two numbers
@@ -19,22 +21,23 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class Interval {
     private final String id;
-    private final double lowerBound;
-    private final double upperBound;
+    private double lowerBound;
+    private double upperBound;
     private final boolean isContinuous;
-    private final double length;
+    private double length;
+    private final double center;
     private static final AtomicLong idCounter = new AtomicLong();
 
     public Interval(String id, double lowerBound, double upperBound, boolean isContinuous )
     {
         if (lowerBound >= upperBound)
-            throw new IllegalArgumentException("the lower bound ( "+lowerBound+ " ) " +
-                    "must be smaller than the upper bound ( "+ upperBound+ " )");
+            throw new IllegalArgumentException(EXCEPT_LOWER_BIGGER_THAN_UPPER);
         this.id = id;
         this.isContinuous = isContinuous;
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
         this.length = upperBound-lowerBound;
+        this.center = upperBound - length/2;
     }
 
     public Interval(String id, double lowerBound, double upperBound){
@@ -42,7 +45,7 @@ public class Interval {
     }
 
     public Interval( double lowerBound, double upperBound ){
-        this("V"+String.valueOf(idCounter.getAndIncrement()),lowerBound,upperBound);
+        this(DEFAULT_INTERVAL_ID+ idCounter.getAndIncrement(),lowerBound,upperBound);
     }
     public String getId() {
         return id;
@@ -60,6 +63,20 @@ public class Interval {
         return length;
     }
 
+    public void scale(double scaleFactor){
+        this.length = this.length * scaleFactor;
+        this.upperBound = this.center + this.length/2;
+        this.lowerBound = this.center - this.length/2;
+    }
+
+    public double getRandomValue(){
+        Random random = new Random();
+        return random.nextDouble() * (upperBound - lowerBound) + lowerBound;
+    }
+
+    public boolean contains(double value){
+        return value >= this.lowerBound && value <= this.upperBound;
+    }
     @Override
     public String toString() {
         String valueType = isContinuous ? "Continuous" : "Discrete";
@@ -83,5 +100,6 @@ public class Interval {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 }
 

@@ -9,7 +9,7 @@ import tech.tablesaw.api.Table;
  *
  * @author      Lorenzo Matteucci (lorenzo.matteucci@unicam.it)
  */
-public class RandomSampling implements SamplingMethod{
+public class RandomSampling implements SamplingStrategy {
     @Override
     public Table getSampleTable(int numberOfSamples, HyperRectangle hr) {
         DoubleColumn[] columns = new DoubleColumn[hr.getDimensionality()];

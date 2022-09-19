@@ -20,7 +20,7 @@ import java.util.stream.DoubleStream;
  *
  * @author      Lorenzo Matteucci
  */
-public class FullFactorialSampling implements SamplingMethod{
+public class FullFactorialSampling implements SamplingStrategy {
 
     /**
      *
