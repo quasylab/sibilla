@@ -2,6 +2,7 @@ package it.unicam.quasylab.sibilla.core.optimization.sampling;
 
 import org.junit.jupiter.api.Test;
 
+import static it.unicam.quasylab.sibilla.core.optimization.Constants.EXCEPT_LOWER_BIGGER_THAN_UPPER;
 import static org.junit.jupiter.api.Assertions.*;
 /**
  * Test for Interval class
@@ -18,9 +19,7 @@ class IntervalTest {
         try {
             Interval i = new Interval(id,lowerBound,upperBound);
         }catch (IllegalArgumentException ex){
-            String errorMessage = "the lower bound ( "+lowerBound+ " ) " +
-                    "must be smaller than the upper bound ( "+ upperBound+ " )";
-            assertEquals(errorMessage, ex.getMessage());
+            assertEquals(EXCEPT_LOWER_BIGGER_THAN_UPPER, ex.getMessage());
         }
     }
 

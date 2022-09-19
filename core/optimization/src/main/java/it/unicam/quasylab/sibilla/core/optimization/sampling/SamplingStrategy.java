@@ -10,8 +10,8 @@ import java.util.Random;
  *
  * @author      Lorenzo Matteucci
  */
-public interface SamplingMethod {
-    final Random random = new Random();
+public interface SamplingStrategy {
+     Random random = new Random();
     /**
      * methods used to generate sets of points in a hyper-rectangle, it could be used
      * either for training or for prediction.
@@ -22,6 +22,6 @@ public interface SamplingMethod {
      * @return the samples' table of type <a href=https://github.com/jtablesaw/tablesaw">Table</a>
      * @see    <a href=https://jtablesaw.github.io/tablesaw/gettingstarted.html">tablesaw</a>
      */
-    public Table getSampleTable(int numberOfSamples, HyperRectangle hyperRectangle );
+     Table getSampleTable(int numberOfSamples, HyperRectangle hyperRectangle );
 }
 

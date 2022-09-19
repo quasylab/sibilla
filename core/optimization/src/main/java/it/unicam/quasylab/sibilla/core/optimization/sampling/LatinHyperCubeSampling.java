@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
  * @author      Lorenzo Matteucci (lorenzo.matteucci@unicam.it)
  */
 
-public class LatinHyperCubeSampling implements SamplingMethod{
+public class LatinHyperCubeSampling implements SamplingStrategy {
 
     @Override
     public Table getSampleTable(int numberOfSamples, HyperRectangle hr) {
