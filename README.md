@@ -21,6 +21,9 @@ Full documentation of Sibilla can be found in the [Wiki](https://github.com/quas
 
 # Functionalities
 
+- *Simulation*: The tool permits simulating stochastic processes modelled via different specification languages.
+- *Reachability Analysis*: The tool permits estimating the probability that a given set of states (identified by a condition) can be reached within a given amount of time by passing through states satisfying a given predicate.
+- *First Passage Time*: The tool permits to estimate the average amount of time needed by a model to reach a given set of states.
 
 # How To Use
 To start using Sibilla, follow the guide available in the wiki
