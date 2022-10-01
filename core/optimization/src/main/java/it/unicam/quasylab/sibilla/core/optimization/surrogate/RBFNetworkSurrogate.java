@@ -4,13 +4,14 @@ import smile.base.rbf.RBF;
 import smile.data.DataFrame;
 import smile.data.formula.Formula;
 import smile.regression.RBFNetwork;
-import smile.validation.CrossValidation;
 import smile.validation.RegressionMetrics;
 
 import java.util.Properties;
 
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.DEFAULT_COLUMN_RESULT_NAME;
 
+//TODO: learn of to predict with RBFNetwork and complete the surrogate and remove the suppress warnings
+@SuppressWarnings("all")
 public class RBFNetworkSurrogate implements Surrogate{
 
 
@@ -36,7 +37,6 @@ public class RBFNetworkSurrogate implements Surrogate{
 
     @Override
     public double predict(Double[] x) {
-        double[] res = this.rbfNetwork.predict(x);
         return 0;
     }
 
@@ -53,7 +53,7 @@ public class RBFNetworkSurrogate implements Surrogate{
     }
 
     @Override
-    public RegressionMetrics getSurrogateMetrics() {
+    public RegressionMetrics getMetrics() {
         return null;
     }
 }

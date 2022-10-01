@@ -25,8 +25,8 @@ public class ParticleSwarmOptimization implements OptimizationStrategy {
     public ParticleSwarmOptimization(Function<Map<String,Double>,Double> functionToOptimize, HyperRectangle searchSpace, Properties properties){
         this(functionToOptimize,
                 searchSpace,
-                Integer.parseInt(properties.getProperty("iteration","1000")),
-                Integer.parseInt(properties.getProperty("particlesNumber","1000")),
+                Integer.parseInt(properties.getProperty("iteration","100")),
+                Integer.parseInt(properties.getProperty("particlesNumber","100")),
                 Double.parseDouble(properties.getProperty("inertia","0.72984")),
                 Double.parseDouble(properties.getProperty("selfConfidence","1.49617")),
                 Double.parseDouble(properties.getProperty("swarmConfidence","1.49617"))
@@ -36,8 +36,8 @@ public class ParticleSwarmOptimization implements OptimizationStrategy {
         this(functionToOptimize,
                 constraints,
                 searchSpace,
-                Integer.parseInt(properties.getProperty("iteration","1000")),
-                Integer.parseInt(properties.getProperty("particlesNumber","1000")),
+                Integer.parseInt(properties.getProperty("iteration","100")),
+                Integer.parseInt(properties.getProperty("particlesNumber","100")),
                 Double.parseDouble(properties.getProperty("inertia","0.72984")),
                 Double.parseDouble(properties.getProperty("selfConfidence","1.49617")),
                 Double.parseDouble(properties.getProperty("swarmConfidence","1.49617"))
@@ -113,7 +113,6 @@ public class ParticleSwarmOptimization implements OptimizationStrategy {
         return new Swarm(this.numOfParticles,this.searchSpace,this.fitnessFunction,this.penaltyValue,this.evaluationCriteria);
     }
 
-    //TODO : Could be parallelized, gBest should be synchronized
     private void performIteration(){
         for (int i = 0; i < iteration; i++) {
             for (Particle particle : this.swarm.getParticles()) {
@@ -126,8 +125,11 @@ public class ParticleSwarmOptimization implements OptimizationStrategy {
                     particle.setPBest(particle.getPosition());
                 if(currentBetterThanGBest)
                     swarm.setGBest(particle.getPosition());
+                System.out.println("gBest" +swarm.getGBest() +"iteration : "+ i);
+
             }
         }
+
     }
 
     private void updateVelocityOf(Particle particle){
@@ -154,5 +156,6 @@ public class ParticleSwarmOptimization implements OptimizationStrategy {
         }
         this.fitnessFunction.addConstraints(constraints);
     }
+
 
 }

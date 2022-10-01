@@ -8,6 +8,8 @@ public class Particle {
     private final Map<String,Double> velocity;
     private Map<String,Double> pBest;
 
+    private double pBestEvaluation;
+
     public Particle(Map<String,Double> position,
                     Map<String,Double> velocity,
                     Map<String,Double> pBest){
@@ -30,5 +32,13 @@ public class Particle {
 
     public void setPBest(Map<String, Double> pBest) {
         this.pBest = pBest;
+    }
+
+    public double getpBestEvaluation() {
+        return pBestEvaluation;
+    }
+
+    public void setpBestEvaluation(double pBestEvaluation) {
+        this.pBestEvaluation = pBestEvaluation;
     }
 }
