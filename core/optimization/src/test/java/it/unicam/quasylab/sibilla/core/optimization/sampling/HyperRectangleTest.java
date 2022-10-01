@@ -2,6 +2,9 @@ package it.unicam.quasylab.sibilla.core.optimization.sampling;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -33,9 +36,51 @@ class HyperRectangleTest {
                 new Interval(-2,2)
         );
         HyperRectangle hrScaled = hr.getScaledCopy(0.5);
-        System.out.println(hr);
-        System.out.println(hrScaled);
-        assertTrue(hr.equals(hrScaled));
+        assertNotEquals(hr, hrScaled);
+    }
+
+    @Test
+    void testChangeCenter(){
+        HyperRectangle hr = new HyperRectangle(
+                new Interval(-10,10),
+                new Interval(-20,20),
+                new Interval(-2,2)
+        );
+        double[] aPoint = {-1.0,-11.0,1.0};
+        assertTrue(hr.couldContain(aPoint));
+        double[] newCenter = {10.0,20.0,2.0};
+        hr.changeCenter(newCenter);
+        assertFalse(hr.couldContain(aPoint));
+    }
+
+    @Test
+    void testChangeCenterMap(){
+        HyperRectangle hr = new HyperRectangle(
+                new Interval("A",-10,10),
+                new Interval("B",-20,20),
+                new Interval("C",-2,2)
+        );
+
+        Map<String,Double> aPoint = new HashMap<>();
+        aPoint.put("A",-1.0);
+        aPoint.put("B",-11.0);
+        aPoint.put("C",1.0);
+
+        assertTrue(hr.couldContain(aPoint));
+
+        Map<String,Double> newCenter = new HashMap<>();
+        newCenter.put("A",10.0);
+        newCenter.put("B",20.0);
+        newCenter.put("C",2.0);
+
+        hr.changeCenter(newCenter);
+
+        assertFalse(hr.couldContain(aPoint));
+    }
+
+    @Test
+    void testCouldContain(){
+
     }
 
 }

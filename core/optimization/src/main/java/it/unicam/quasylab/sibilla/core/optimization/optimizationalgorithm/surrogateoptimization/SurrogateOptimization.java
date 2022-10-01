@@ -1,14 +1,11 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.surrogateoptimization;
 
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategy;
+import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategyFactory;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.LatinHyperCubeSampling;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.SamplingStrategy;
-import it.unicam.quasylab.sibilla.core.optimization.surrogate.RandomForestSurrogate;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.Surrogate;
+import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateFactory;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.TrainingSet;
-import smile.validation.RegressionMetrics;
-import tech.tablesaw.api.Table;
 
 import java.util.List;
 import java.util.Map;
@@ -18,48 +15,78 @@ import java.util.function.Predicate;
 
 public class SurrogateOptimization implements OptimizationStrategy {
 
-    Function<Map<String,Double>,Double> functionToOptimize;
-    List<Predicate<Map<String,Double>>> constraints;
-    OptimizationStrategy optimizationStrategy;
-    Surrogate surrogate;
-    TrainingSet trainingSet;
-    SamplingStrategy samplingStrategy;
-    RegressionMetrics metrics;
+    final private String surrogateName;
+    final private String optimizationName;
+    final private String samplingName;
+    final private int trainingSetSize;
+    final private Function<Map<String,Double>,Double> functionToBeSurrogate;
+    final private List<Predicate<Map<String,Double>>> constraints;
+    final private HyperRectangle searchSpace;
+    final private Properties properties;
 
-    public SurrogateOptimization(OptimizationStrategy optimizationStrategy,
-                                 Surrogate surrogate,
-                                 SamplingStrategy samplingStrategy,
-                                 int trainingSetSize,
-                                 Function<Map<String,Double>, Double> functionToOptimize,
+    public SurrogateOptimization(Function<Map<String,Double>,Double> functionToBeSurrogate,
                                  List<Predicate<Map<String,Double>>> constraints,
                                  HyperRectangle searchSpace,
-                                 Properties surrogateProprieties,
-                                 Properties optimizationAlgorithmProperties){
+                                 Properties properties){
+        this(
+                properties.getProperty("surrogate.optimization.surrogate.name","rfr"),
+                properties.getProperty("surrogate.optimization.optimization.name","pso"),
+                properties.getProperty("surrogate.optimization.sampling.name","lhs"),
+                Integer.parseInt(properties.getProperty("surrogate.optimization.training.set.size","1000")),
+                functionToBeSurrogate,
+                constraints,
+                searchSpace,
+                properties
+        );
+       }
 
-        if(optimizationStrategy instanceof SurrogateOptimization)
-            throw new IllegalArgumentException("cannot use surrogate optimization as an optimization strategy in a surrogate optimization");
-        this.functionToOptimize = functionToOptimize;
+    public SurrogateOptimization(String surrogateName,
+                                 String optimizationName,
+                                 String samplingName,
+                                 int trainingSetSize,
+                                 Function<Map<String, Double>, Double> functionToBeSurrogate,
+                                 List<Predicate<Map<String, Double>>> constraints,
+                                 HyperRectangle searchSpace,
+                                 Properties properties) {
+        this.surrogateName = surrogateName;
+        this.optimizationName = optimizationName;
+        this.samplingName = samplingName;
+        this.trainingSetSize = trainingSetSize;
+        this.functionToBeSurrogate = functionToBeSurrogate;
         this.constraints = constraints;
-        this.optimizationStrategy = optimizationStrategy;
-        this.trainingSet = new TrainingSet(samplingStrategy.getSampleTable(trainingSetSize, searchSpace), functionToOptimize);
-        this.surrogate = surrogate;
-
-
+        this.searchSpace = searchSpace;
+        this.properties = properties;
     }
+
+
+    private Function<Map<String,Double>,Double> generateSurrogateFunction(){
+        TrainingSet ts = new TrainingSet(this.searchSpace,this.samplingName,this.trainingSetSize,this.functionToBeSurrogate);
+        Surrogate surrogate = SurrogateFactory.getSurrogate(this.surrogateName,this.properties);
+        surrogate.fit(ts);
+        return map -> surrogate.predict(map.values().toArray(new Double[0]));
+    }
+
     @Override
     public Map<String, Double> minimize() {
-        trainSurrogate();
-        return null;
+        return OptimizationStrategyFactory.getOConstrainedOptimizationStrategy(
+                this.optimizationName,
+                this.generateSurrogateFunction(),
+                this.constraints,
+                this.searchSpace,
+                this.properties)
+                .minimize();
     }
 
     @Override
     public Map<String, Double> maximize() {
-        trainSurrogate();
-        return null;
+        return OptimizationStrategyFactory.getOConstrainedOptimizationStrategy(
+                        this.optimizationName,
+                        this.generateSurrogateFunction(),
+                        this.constraints,
+                        this.searchSpace,
+                        this.properties)
+                .maximize();
     }
 
-    public void trainSurrogate(){
-        this.surrogate.fit(trainingSet);
-        this.metrics = surrogate.getSurrogateMetrics();
-    }
+
 }

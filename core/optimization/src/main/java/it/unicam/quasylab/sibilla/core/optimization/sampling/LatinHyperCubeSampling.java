@@ -22,7 +22,6 @@ import java.util.stream.IntStream;
  */
 
 public class LatinHyperCubeSampling implements SamplingStrategy {
-
     @Override
     public Table getSampleTable(int numberOfSamples, HyperRectangle hr) {
         int[][] shuffledMatrix = getShuffledMatrix(hr.getDimensionality(),numberOfSamples);
@@ -36,8 +35,6 @@ public class LatinHyperCubeSampling implements SamplingStrategy {
         }
         return Table.create().addColumns(columns);
     }
-
-
     private int[][] getShuffledMatrix(int row, int column){
         int[][] shuffledMatrix = new int[row][column];
         int[] orderedArray = IntStream.range(1,column+1).toArray();

@@ -254,7 +254,7 @@ public class SimulationEnvironment implements Serializable {
 			StatePredicate<? super S> condition, StatePredicate<? super S> goal) throws InterruptedException {
 		ReachabilityChecker<S> reachabilityChecker = new ReachabilityChecker<S>(condition, goal);
 		double n = Math.ceil(Math.log(2 / delta) / (2 * Math.pow(errorProbability,2)));
-		LOGGER.info("Computing reachability with "+(int) n+" iterations.");
+		//LOGGER.info("Computing reachability with "+(int) n+" iterations.");
 		SimulationUnit<S> unit = new SimulationUnit<>(model, state, reachabilityChecker,
 				(t, s) -> (t > deadline) || goal.check(s) || !condition.check(s), goal);
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, monitor);

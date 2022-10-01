@@ -28,9 +28,17 @@ public class FitnessFunction {
 
     public double evaluate(Map<String,Double> parameters){
         if(constraints != null){
-            boolean anyConstrainViolated = constraints.stream().anyMatch( p -> !p.test(parameters) );
-            if(anyConstrainViolated)
-                return penaltyValue;
+
+            //boolean anyConstrainViolated = constraints.stream().anyMatch( p -> !p.test(parameters) );
+
+            for (Predicate<Map<String,Double>> constraint : this.constraints) {
+                if(!constraint.test(parameters)){
+                    return penaltyValue;
+                }
+            }
+
+//            if(anyConstrainViolated)
+//                return penaltyValue;
         }
         return fitnessFunction.apply(parameters);
     }

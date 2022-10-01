@@ -1,26 +1,30 @@
 package it.unicam.quasylab.sibilla.core.optimization.surrogate;
-
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategy;
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.pso.ParticleSwarmOptimization;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
-
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.function.Function;
 
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.EXCEPT_NO_SUCH_SURROGATE;
-
+/**
+ * Provides static methods for the creation of Surrogates.
+ *
+ * @author      Lorenzo Matteucci
+ */
 public class SurrogateFactory {
-
+    /**
+     * Produces a surrogate given the name of it and its properties
+     *
+     * @author      Lorenzo Matteucci
+     */
     public static Surrogate getSurrogate(String surrogateName, Properties properties){
         if(surrogateName.equals("rfr"))
             return new RandomForestSurrogate(properties);
         else
-            throw new IllegalArgumentException(EXCEPT_NO_SUCH_SURROGATE + " : "+ surrogateName);
+            throw new IllegalArgumentException(EXCEPT_NO_SUCH_SURROGATE + " : "
+                    + surrogateName + "\n the available surrogates are: \n"+
+                    getSurrogatesList().stream().reduce("",(a,b)-> a + b + "\n"));
     }
 
-    public static String[]  getSurrogatesList(){
-        return  new String[]{"rfr"};
+    public static List<String> getSurrogatesList(){
+        return  Arrays.stream(new String[]{"rfr"}).toList();
     }
 }

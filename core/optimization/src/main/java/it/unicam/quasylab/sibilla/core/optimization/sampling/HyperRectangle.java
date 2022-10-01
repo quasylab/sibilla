@@ -9,7 +9,7 @@ import static it.unicam.quasylab.sibilla.core.optimization.Constants.*;
  *
  * @author      Lorenzo Matteucci
  */
-public class HyperRectangle implements Cloneable{
+public class HyperRectangle{
 
     final private Interval[] intervals;
 
@@ -26,6 +26,14 @@ public class HyperRectangle implements Cloneable{
 
     public Interval[] getIntervals() {
         return this.intervals;
+    }
+
+    public Map<String,Interval> getIntervalsAsMap(){
+        Map<String,Interval> map = new HashMap<>();
+        for (Interval i: this.intervals) {
+            map.put(i.getId(),i);
+        }
+        return map;
     }
 
     public Map<String,Interval> getIntervalsMappedByID(){
@@ -45,14 +53,48 @@ public class HyperRectangle implements Cloneable{
     }
 
     public boolean couldContain(Map<String,Double> values){
-        boolean isContainable = false;
-
-        if (values.size()!=intervals.length){
-            for (var entry : values.entrySet()) {
-                System.out.println(entry.getKey() + "/" + entry.getValue());
+        boolean isContainable = true;
+        if(values.size() != this.intervals.length)
+            return false;
+        Map<String,Interval> intervalMap = getIntervalsAsMap();
+        for (String k :values.keySet()) {
+            if(!intervalMap.get(k).contains(values.get(k))){
+                isContainable= false;
+                break;
             }
         }
         return isContainable;
+    }
+
+    public boolean couldContain(double[] values){
+        boolean isContainable = true;
+        if(values.length != this.intervals.length)
+            return false;
+        for (int i = 0; i < intervals.length; i++) {
+            if(!intervals[i].contains(values[i])){
+                isContainable= false;
+                break;
+            }
+        }
+        return isContainable;
+    }
+
+    public void changeCenter(double[] newCenterArray){
+        if(newCenterArray.length != intervals.length)
+            throw new IllegalArgumentException("the array passed as parameter must have a size equal " +
+                    "to the number of intervals of the hyper-rectangle");
+        for (int i = 0; i < intervals.length; i++) {
+            this.intervals[i].changeCenter(newCenterArray[i]);
+        }
+    }
+
+    public void changeCenter(Map<String,Double> newCenterMap){
+        if(newCenterMap.size() != intervals.length)
+            throw new IllegalArgumentException("the array passed as parameter must have a size equal " +
+                    "to the number of intervals of the hyper-rectangle");
+        for (Interval i:this.intervals) {
+            i.changeCenter(newCenterMap.get(i.getId()));
+        }
     }
 
     private boolean allIDsAreUnique(Interval ... intervals){

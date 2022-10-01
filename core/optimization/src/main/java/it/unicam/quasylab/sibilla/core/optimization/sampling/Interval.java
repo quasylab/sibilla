@@ -25,7 +25,7 @@ public class Interval {
     private double upperBound;
     private final boolean isContinuous;
     private double length;
-    private final double center;
+    private double center;
     private static final AtomicLong idCounter = new AtomicLong();
 
     public Interval(String id, double lowerBound, double upperBound, boolean isContinuous )
@@ -62,18 +62,20 @@ public class Interval {
     public double length() {
         return length;
     }
-
     public void scale(double scaleFactor){
         this.length = this.length * scaleFactor;
         this.upperBound = this.center + this.length/2;
         this.lowerBound = this.center - this.length/2;
     }
-
     public double getRandomValue(){
         Random random = new Random();
         return random.nextDouble() * (upperBound - lowerBound) + lowerBound;
     }
-
+    public void changeCenter(double newCenter){
+        this.center = newCenter;
+        this.lowerBound = newCenter-this.length/2;
+        this.upperBound = newCenter+this.length/2;
+    }
     public boolean contains(double value){
         return value >= this.lowerBound && value <= this.upperBound;
     }
@@ -93,13 +95,16 @@ public class Interval {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Interval interval = (Interval) o;
-        return Objects.equals(id, interval.id);
+        return Double.compare(interval.lowerBound, lowerBound) == 0 &&
+                Double.compare(interval.upperBound, upperBound) == 0 &&
+                isContinuous == interval.isContinuous &&
+                Double.compare(interval.length, length) == 0 &&
+                Double.compare(interval.center, center) == 0 &&
+                id.equals(interval.id);
     }
-
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, lowerBound, upperBound, isContinuous, length, center);
     }
-
 }
 

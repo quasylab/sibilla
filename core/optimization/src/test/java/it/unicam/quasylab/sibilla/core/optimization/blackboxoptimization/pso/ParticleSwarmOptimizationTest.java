@@ -13,9 +13,14 @@ import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static it.unicam.quasylab.sibilla.core.optimization.Constants.ROSENBROCK_FUNCTION;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
+/**
+ * Test for Particle Swarm Optimization
+ *
+ * @author      Lorenzo Matteucci
+ */
 class ParticleSwarmOptimizationTest {
 
     private boolean beingInRange(double value, double beginRange ,double endRange){
@@ -295,32 +300,11 @@ class ParticleSwarmOptimizationTest {
     }
 
 
-    /**
-     * In mathematical optimization, the Rosenbrock function is a non-convex function,
-     * introduced by Howard H. Rosenbrock in 1960, which is used as a performance test
-     * problem for optimization algorithms.
-     *
-     * <b> MINIMA : </b> has exactly one minimum for N=3 (at (1, 1, 1)) and
-     * exactly two minima for 4 <= N <= 7 the global minimum of all ones
-     * and a local minimum near (-1,1, ... ,1).
-     *
-     * @see    <a href=https://en.wikipedia.org/wiki/Rosenbrock_function">Rosenbrock_function</a>
-     */
-
-    @Disabled("Disabled : very time consuming")
+    //@Disabled("Disabled : very time consuming")
     @Test
     public void testRosenbrockFunction(){
 
-        Function<Map<String,Double>,Double> functionToOptimize = (
-                map -> {
-                    String[] keyList = map.keySet().toArray(new String[0]);
-                    double sum = 0.0;
-                    for (int i = 0; i < keyList.length - 1 ; i++){
-                        sum += 100 * Math.pow(map.get(keyList[i+1]) - Math.pow(map.get(keyList[i]),2),2)+Math.pow((1-map.get(keyList[i])),2);
-                    }
-                    return sum;
-                }
-        );
+        Function<Map<String,Double>,Double> functionToOptimize = ROSENBROCK_FUNCTION;
 
         HyperRectangle searchSpace = new HyperRectangle(
                 new Interval("x1",-10.0,10.0),
@@ -330,7 +314,7 @@ class ParticleSwarmOptimizationTest {
 
         Properties psoProperties = new Properties();
         psoProperties.setProperty("iteration", "1000");
-        psoProperties.setProperty("particlesNumber", "10000");
+        psoProperties.setProperty("particlesNumber", "1000");
         ParticleSwarmOptimization pso = new ParticleSwarmOptimization(functionToOptimize, searchSpace, psoProperties);
 
         pso.setSearchSpaceAsConstraints();
@@ -366,27 +350,10 @@ class ParticleSwarmOptimizationTest {
         psoProperties.setProperty("particlesNumber", "10000");
         ParticleSwarmOptimization pso = new ParticleSwarmOptimization(functionToOptimize,constraints, searchSpace, psoProperties);
 
-        //pso.setSearchSpaceAsConstraints();
-
         Map<String,Double> minimizingValues = pso.minimize();
         System.out.println(minimizingValues.toString());
     }
 
-    @Test
-    public void testSetSearchSpaceAsConstraints(){
-
-        Function<Map<String,Double>,Double> functionToOptimize = map -> Math.cos(map.get("x")) * Math.cos(map.get("y"));
-
-        HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("x",0.15,3.0)
-        );
-
-        Properties psoProperties = new Properties();
-        psoProperties.setProperty("iteration", "1000");
-        psoProperties.setProperty("particlesNumber", "10000");
-        ParticleSwarmOptimization pso = new ParticleSwarmOptimization(functionToOptimize, searchSpace, psoProperties);
-
-    }
 
 
 

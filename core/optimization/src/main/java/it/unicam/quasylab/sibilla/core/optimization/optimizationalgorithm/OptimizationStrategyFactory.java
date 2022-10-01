@@ -11,15 +11,6 @@ import static it.unicam.quasylab.sibilla.core.optimization.Constants.EXCEPT_NO_S
 
 public class OptimizationStrategyFactory {
 
-    public static OptimizationStrategy getOptimizationStrategy(String optimizationStrategyName,
-                                                        Function<Map<String,Double>,Double> functionToOptimize,
-                                                        HyperRectangle searchSpace,
-                                                        Properties properties){
-       if(optimizationStrategyName.equals("pso"))
-           return new ParticleSwarmOptimization(functionToOptimize,searchSpace,properties);
-       else
-           throw new IllegalArgumentException(EXCEPT_NO_SUCH_OPTIMIZATION_ALGORITHM + " : "+ optimizationStrategyName);
-    }
 
     public static OptimizationStrategy getOConstrainedOptimizationStrategy(String optimizationStrategyName,
                                                                     Function<Map<String,Double>,Double> functionToOptimize,
@@ -29,10 +20,12 @@ public class OptimizationStrategyFactory {
         if(optimizationStrategyName.equals("pso"))
             return new ParticleSwarmOptimization(functionToOptimize,constraints,searchSpace,properties);
         else
-            throw new IllegalArgumentException(EXCEPT_NO_SUCH_OPTIMIZATION_ALGORITHM + " : "+ optimizationStrategyName);
+            throw new IllegalArgumentException(EXCEPT_NO_SUCH_OPTIMIZATION_ALGORITHM + " : "
+                    + optimizationStrategyName + "\n the available optimization algorithms are: \n"+
+                    getOptimizationStrategiesNameList().stream().reduce("",(a,b)-> a + b + "\n"));
     }
 
-    public static String[] getOptimizationStrategiesNameList(){
-        return new String[]{"pso"};
+    public static List<String>getOptimizationStrategiesNameList(){
+        return Arrays.stream(new String[]{"pso"}).toList();
     }
 }
