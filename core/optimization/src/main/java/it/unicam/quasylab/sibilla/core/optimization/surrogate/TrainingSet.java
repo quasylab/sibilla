@@ -14,7 +14,6 @@ import static it.unicam.quasylab.sibilla.core.optimization.Constants.*;
 public class TrainingSet extends Table {
     private Function<Map<String,Double>,Double> function;
     private HyperRectangle searchSpace;
-
     private String resultColumnName;
 
     public TrainingSet(HyperRectangle searchSpace, String samplingStrategyName,int trainingSetSize, Function<Map<String,Double>,Double> function){

@@ -1,44 +1,57 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.pso;
 
 import java.util.Map;
-
+import java.util.stream.Collectors;
+/**
+ *
+ * A class that represents a particle in
+ * particle swarm optimization
+ *
+ * @author Lorenzo Matteucci
+ */
 public class Particle {
 
     private final Map<String,Double> position;
     private final Map<String,Double> velocity;
-    private Map<String,Double> pBest;
+    private double fitness;
+    private Particle particleBest;
 
-    private double pBestEvaluation;
-
-    public Particle(Map<String,Double> position,
-                    Map<String,Double> velocity,
-                    Map<String,Double> pBest){
+    Particle(Map<String,Double> position,Map<String,Double> velocity){
         this.position = position;
         this.velocity = velocity;
-        this.pBest = pBest;
-    }
-
-    public Map<String, Double> getVelocity() {
-        return velocity;
     }
 
     public Map<String, Double> getPosition() {
         return position;
     }
 
-    public Map<String, Double> getPBest() {
-        return pBest;
+    public Map<String, Double> getVelocity() {
+        return velocity;
     }
 
-    public void setPBest(Map<String, Double> pBest) {
-        this.pBest = pBest;
+    public Particle getParticleBest() {
+        return particleBest;
     }
 
-    public double getpBestEvaluation() {
-        return pBestEvaluation;
+    public double getFitness() {
+        return fitness;
     }
 
-    public void setpBestEvaluation(double pBestEvaluation) {
-        this.pBestEvaluation = pBestEvaluation;
+    public void setFitness(double fitness) {
+        this.fitness = fitness;
+    }
+
+    public void setParticleBest(Particle particleBest) {
+        this.particleBest = particleBest.getCopy();
+    }
+    public Particle getCopy(){
+        Particle particle = new Particle(getMapCopy(this.position),getMapCopy(this.velocity));
+        particle.setFitness(this.fitness);
+        return particle;
+    }
+
+    private Map<String,Double> getMapCopy(Map<String,Double> map){
+        return map.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

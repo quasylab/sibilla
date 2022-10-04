@@ -1,11 +1,11 @@
 package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 import smile.validation.RegressionMetrics;
 /**
- * class representing a surrogate model, each surrogate must be able to:
+ * An object representing a surrogate model, each surrogate must be able to:
  * <ul>
  *     <li>Predict</li>
  *     <li>Be trained</li>
- *     <li>Have metrics</li>
+ *     <li>Return metrics</li>
  * </ul>
  *
  * @author      Lorenzo Matteucci

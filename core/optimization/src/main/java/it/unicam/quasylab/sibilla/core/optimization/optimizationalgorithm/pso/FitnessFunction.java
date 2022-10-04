@@ -3,53 +3,35 @@ package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.pso;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
+/**
+ *
+ * A fitness function is a particular type of objective function that
+ * is used to summarise, as a single figure of merit, how close a given
+ * design solution is to achieving the set aims. Fitness functions are
+ * used in genetic programming and genetic algorithms to guide simulations
+ * towards optimal design solutions.
+ *
+ * @author      Lorenzo Matteucci
+ */
 public class FitnessFunction {
-
     private final Function<Map<String,Double>,Double> fitnessFunction;
-    private List<Predicate<Map<String,Double>>> constraints;
-    private double penaltyValue;
-
-    public FitnessFunction(Function<Map<String,Double>,Double> fitnessFunction){
-        this(fitnessFunction,null,0.0);
-    }
-
-    public FitnessFunction(Function<Map<String,Double>,Double> fitnessFunction,List<Predicate<Map<String,Double>>> constraints){
-        this(fitnessFunction,constraints,0.0);
-    }
-
+    private final List<Predicate<Map<String,Double>>> constraints;
+    private final double penaltyValue;
     public FitnessFunction(Function<Map<String,Double>,Double> fitnessFunction, List<Predicate<Map<String,Double>>> constraints, double penaltyValue){
         this.fitnessFunction = fitnessFunction;
-        this.constraints = constraints;
+        this.constraints = Optional.ofNullable(constraints).orElse(new ArrayList<>());
         this.penaltyValue = penaltyValue;
     }
 
     public double evaluate(Map<String,Double> parameters){
-        if(constraints != null){
-
-            //boolean anyConstrainViolated = constraints.stream().anyMatch( p -> !p.test(parameters) );
-
-            for (Predicate<Map<String,Double>> constraint : this.constraints) {
-                if(!constraint.test(parameters)){
-                    return penaltyValue;
-                }
-            }
-
-//            if(anyConstrainViolated)
-//                return penaltyValue;
+        if(constraints.size()>0){
+            if(constraints.stream().anyMatch( p -> !p.test(parameters)))
+                return penaltyValue;
         }
         return fitnessFunction.apply(parameters);
     }
 
-    public void setPenaltyValue(double penaltyValue) {
-        this.penaltyValue = penaltyValue;
-    }
-
-    public void addConstraints( List<Predicate<Map<String,Double>>> constraints){
-        if(this.constraints == null)
-            this.constraints = new ArrayList<>();
-        this.constraints.addAll(constraints);
-    }
 }
