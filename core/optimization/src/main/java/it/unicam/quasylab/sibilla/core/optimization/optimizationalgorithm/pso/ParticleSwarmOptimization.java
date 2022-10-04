@@ -8,109 +8,69 @@ import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
-
+/**
+ *
+ * A class that represents a particle in
+ * particle swarm optimization
+ *
+ * @author Lorenzo Matteucci
+ */
 public class ParticleSwarmOptimization implements OptimizationStrategy {
-
-    private double inertia = 0.72984;
-    private double selfConfidence = 1.49617;
-    private double swarmConfidence = 1.49617;
-    private final int numOfParticles;
+    private final Function<Map<String,Double>,Double> functionToOptimize;
+    private final List<Predicate<Map<String,Double>>> constraints;
+    private final HyperRectangle searchSpace;
+    private final double inertia;
+    private final double selfConfidence;
+    private final double swarmConfidence;
+    private final int numberOfParticles;
+    private final int iteration;
     private double penaltyValue;
     private BiPredicate<Double,Double> evaluationCriteria;
-    private final FitnessFunction fitnessFunction;
-    private final HyperRectangle searchSpace;
-    private final int iteration;
+    private FitnessFunction fitnessFunction;
     private Swarm swarm;
 
-    public ParticleSwarmOptimization(Function<Map<String,Double>,Double> functionToOptimize, HyperRectangle searchSpace, Properties properties){
-        this(functionToOptimize,
-                searchSpace,
-                Integer.parseInt(properties.getProperty("iteration","100")),
-                Integer.parseInt(properties.getProperty("particlesNumber","100")),
-                Double.parseDouble(properties.getProperty("inertia","0.72984")),
-                Double.parseDouble(properties.getProperty("selfConfidence","1.49617")),
-                Double.parseDouble(properties.getProperty("swarmConfidence","1.49617"))
-        );
-    }
-    public ParticleSwarmOptimization(Function<Map<String,Double>,Double> functionToOptimize, List<Predicate<Map<String,Double>>> constraints, HyperRectangle searchSpace, Properties properties){
-        this(functionToOptimize,
-                constraints,
-                searchSpace,
-                Integer.parseInt(properties.getProperty("iteration","100")),
-                Integer.parseInt(properties.getProperty("particlesNumber","100")),
-                Double.parseDouble(properties.getProperty("inertia","0.72984")),
-                Double.parseDouble(properties.getProperty("selfConfidence","1.49617")),
-                Double.parseDouble(properties.getProperty("swarmConfidence","1.49617"))
-        );
-    }
-    public ParticleSwarmOptimization(Function<Map<String, Double>, Double> functionToOptimize, List<Predicate<Map<String, Double>>> constraints, HyperRectangle searchSpace, int iteration, int particlesNumber, double inertia, double selfConfidence, double swarmConfidence) {
-        this.fitnessFunction = new FitnessFunction(functionToOptimize,constraints);
-        this.searchSpace = searchSpace;
-        this.iteration = iteration;
-        this.numOfParticles = particlesNumber;
-        this.inertia = inertia;
-        this.selfConfidence = selfConfidence;
-        this.swarmConfidence = swarmConfidence;
-    }
-    public ParticleSwarmOptimization(
-            Function<Map<String,Double>,Double> fitnessFunction,
-            HyperRectangle searchSpace,
-            int iteration,
-            int numOfParticles){
-        this.fitnessFunction = new FitnessFunction(fitnessFunction);
-        this.searchSpace = searchSpace;
-        this.iteration = iteration;
-        this.numOfParticles = numOfParticles;
-    }
-    public ParticleSwarmOptimization(
-            Function<Map<String,Double>,Double> fitnessFunction,
-            List<Predicate<Map<String,Double>>> constraints,
-            HyperRectangle searchSpace,
-            int iteration,
-            int numOfParticles){
-        this.fitnessFunction = new FitnessFunction(fitnessFunction,constraints);
-        this.searchSpace = searchSpace;
-        this.iteration = iteration;
-        this.numOfParticles = numOfParticles;
-    }
-    public ParticleSwarmOptimization(
-            Function<Map<String, Double>, Double> functionToOptimize,
-            HyperRectangle searchSpace,
-            int iteration,
-            int particlesNumber,
-            double inertia,
-            double selfConfidence,
-            double swarmConfidence) {
-        this.fitnessFunction = new FitnessFunction(functionToOptimize);
-        this.searchSpace = searchSpace;
-        this.iteration = iteration;
-        this.numOfParticles = particlesNumber;
-        this.inertia = inertia;
-        this.selfConfidence = selfConfidence;
-        this.swarmConfidence = swarmConfidence;
+    public ParticleSwarmOptimization(Function<Map<String,Double>,Double> functionToOptimize,
+                                     List<Predicate<Map<String,Double>>> constraints,
+                                     HyperRectangle searchSpace,
+                                     Properties properties){
 
+        this.functionToOptimize = functionToOptimize;
+        this.constraints = Optional.ofNullable(constraints).orElse(new ArrayList<>());
+        this.searchSpace = searchSpace;
+
+        this.inertia = Double.parseDouble(properties.getProperty("pso.inertia","0.72984"));
+        this.selfConfidence = Double.parseDouble(properties.getProperty("pso.self.confidence","1.49617"));
+        this.swarmConfidence = Double.parseDouble(properties.getProperty("pso.swarm.confidence","1.49617"));
+
+        this.numberOfParticles = Integer.parseInt(properties.getProperty("pso.particles.number","100"));
+        this.iteration = Integer.parseInt(properties.getProperty("pso.iteration","100"));
     }
-
-
-    public Map<String,Double> maximize(){
-        this.penaltyValue = Double.MIN_VALUE;
+    @Override
+    public Map<String, Double> minimize() {
+        this.penaltyValue = Double.POSITIVE_INFINITY;
         this.evaluationCriteria = (x, y) -> x < y;
-        this.swarm = generateSwarm();
+        this.fitnessFunction = new FitnessFunction(this.functionToOptimize, this.constraints, this.penaltyValue);
+        this.swarm = getPopulatedSwarm();
         performIteration();
-        return swarm.getGBest();
+        return this.swarm.getGlobalBest().getPosition();
     }
 
-    public Map<String,Double> minimize(){
-        this.penaltyValue = Double.MAX_VALUE;
+    @Override
+    public Map<String, Double> maximize() {
+        this.penaltyValue = Double.NEGATIVE_INFINITY;
         this.evaluationCriteria = (x, y) -> x > y;
-        this.swarm = generateSwarm();
+        this.fitnessFunction = new FitnessFunction(this.functionToOptimize, this.constraints, this.penaltyValue);
+        this.swarm = getPopulatedSwarm();
         performIteration();
-        return swarm.getGBest();
+        return this.swarm.getGlobalBest().getPosition();
     }
 
-    private Swarm generateSwarm(){
-        fitnessFunction.setPenaltyValue(this.penaltyValue);
-        return new Swarm(this.numOfParticles,this.searchSpace,this.fitnessFunction,this.penaltyValue,this.evaluationCriteria);
+    public void setSearchSpaceAsConstraints(){
+        List<Predicate<Map<String,Double>>> constraints = new ArrayList<>();
+        for (Interval i :searchSpace.getIntervals()) {
+            constraints.add( map -> i.getLowerBound() <= map.get(i.getId()) && map.get(i.getId()) <= i.getUpperBound() );
+        }
+        this.constraints.addAll(constraints);
     }
 
     private void performIteration(){
@@ -118,26 +78,59 @@ public class ParticleSwarmOptimization implements OptimizationStrategy {
             for (Particle particle : this.swarm.getParticles()) {
                 updateVelocityOf(particle);
                 updatePositionOf(particle);
-                double currentFitness = fitnessFunction.evaluate(particle.getPosition());
-                boolean currentBetterThanPBest = evaluationCriteria.test(fitnessFunction.evaluate(particle.getPBest()),currentFitness);
-                boolean currentBetterThanGBest = evaluationCriteria.test(fitnessFunction.evaluate(swarm.getGBest()),currentFitness);
+                double currentFitness = particle.getFitness();
+                double pBest = particle.getParticleBest().getFitness();
+                double gBest = swarm.getGlobalBest().getFitness();
+                boolean currentBetterThanPBest = evaluationCriteria.test(currentFitness,pBest);
+                boolean currentBetterThanGBest = evaluationCriteria.test(currentFitness,gBest);
                 if(currentBetterThanPBest)
-                    particle.setPBest(particle.getPosition());
+                    particle.setParticleBest(particle);
                 if(currentBetterThanGBest)
-                    swarm.setGBest(particle.getPosition());
-                System.out.println("gBest" +swarm.getGBest() +"iteration : "+ i);
-
+                    swarm.setGlobalBest(particle);
             }
         }
 
+    }
+
+    private Swarm getPopulatedSwarm(){
+        Swarm newSwarm = new Swarm(getParticleList());
+        Particle gBestParticle = newSwarm.getParticles().get(0);
+        for (Particle p :newSwarm.getParticles()) {
+            if(!this.evaluationCriteria.test(gBestParticle.getFitness(),p.getFitness()))
+                gBestParticle = p;
+        }
+        newSwarm.setGlobalBest(gBestParticle);
+        return newSwarm;
+    }
+
+
+    private List<Particle> getParticleList(){
+        ArrayList<Particle> particles = new ArrayList<>();
+
+        for (int i = 0; i < this.numberOfParticles; i++) {
+            Map<String,Double> position = new HashMap<>();
+            Map<String,Double> velocity = new HashMap<>();
+            for (Interval interval : this.searchSpace.getIntervals()) {
+                position.put(interval.getId(), interval.getRandomValue());
+                velocity.put(interval.getId(), interval.getRandomValue() * 0.25);
+            }
+            Particle p = new Particle(position,velocity);
+            p.setFitness(this.fitnessFunction.evaluate(position));
+            particles.add(p);
+        }
+
+        Random rand = new Random();
+        particles.forEach(particle -> particle.setParticleBest(particles.get(rand.nextInt(particles.size()))));
+
+        return particles;
     }
 
     private void updateVelocityOf(Particle particle){
         Random r = new Random();
         for (String valueName: particle.getVelocity().keySet()) {
             double newValue = inertia * particle.getVelocity().get(valueName) +
-                    r.nextDouble() * selfConfidence * ( particle.getPBest().get(valueName) - particle.getPosition().get(valueName)) +
-                    r.nextDouble() * swarmConfidence * (swarm.getGBest().get(valueName) - particle.getPosition().get(valueName));
+                    r.nextDouble() * selfConfidence * ( particle.getParticleBest().getPosition().get(valueName) - particle.getPosition().get(valueName)) +
+                    r.nextDouble() * swarmConfidence * (swarm.getGlobalBest().getPosition().get(valueName) - particle.getPosition().get(valueName));
             particle.getVelocity().put(valueName, newValue);
         }
     }
@@ -147,15 +140,6 @@ public class ParticleSwarmOptimization implements OptimizationStrategy {
             double currentValue = particle.getPosition().get(valueName);
             particle.getPosition().put(valueName,currentValue + particle.getVelocity().get(valueName));
         }
+        particle.setFitness(this.fitnessFunction.evaluate(particle.getPosition()));
     }
-
-    public void setSearchSpaceAsConstraints(){
-        List<Predicate<Map<String,Double>>> constraints = new ArrayList<>();
-        for (Interval i :searchSpace.getIntervals()) {
-            constraints.add( map -> i.getLowerBound() <= map.get(i.getId()) && map.get(i.getId()) <= i.getUpperBound() );
-        }
-        this.fitnessFunction.addConstraints(constraints);
-    }
-
-
 }

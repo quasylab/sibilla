@@ -3,17 +3,14 @@ package it.unicam.quasylab.sibilla.core.optimization.blackboxoptimization.pso;
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.pso.ParticleSwarmOptimization;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.ROSENBROCK_FUNCTION;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -26,6 +23,97 @@ class ParticleSwarmOptimizationTest {
     private boolean beingInRange(double value, double beginRange ,double endRange){
         return value >= beginRange && value <= endRange;
     }
+
+    @Test
+    void minimizeSimpleFunctionWithConstraints(){
+
+        // SEARCH SPACE
+        HyperRectangle searchSpace = new HyperRectangle(
+                new Interval("x",200.0,400.0),
+                new Interval("y",0.03, 3.0),
+                new Interval("w",1.0,10.0)
+        );
+
+        // FUNCTION
+        Function<Map<String,Double>,Double> myFunction = (
+                stringDoubleMap -> {
+                    double x = stringDoubleMap.get("x");
+                    double y = stringDoubleMap.get("y");
+                    double w = stringDoubleMap.get("w");
+                    double z;
+                    boolean conditionOnX = x >= 200 && x <= 400;
+                    boolean conditionOnY = y >= 0.03 && y <= 3.0;
+                    boolean conditionOnW = w >= 1.0 && w <= 10.0;
+                    if( conditionOnX && conditionOnY && conditionOnW )
+                        z = 111.0;
+                    else
+                        z = 55.0;
+                    return z;
+                }
+        );
+
+        List<Predicate<Map<String,Double>>> constraints = new ArrayList<>();
+        constraints.add( map -> {
+            boolean xConstraint = map.get("x") >= 200 && map.get("x") <= 400;
+            boolean yConstraint = map.get("y") >= 0.03 && map.get("y") <= 3.0;
+            boolean wConstraint = map.get("w") >= 1.0 && map.get("w") <= 10.0;
+            return xConstraint && yConstraint && wConstraint;
+        });
+
+        Properties properties = new Properties();
+
+        properties.put("pso.particles.number","5");
+        properties.put("pso.iteration","3");
+
+        ParticleSwarmOptimization pso = new ParticleSwarmOptimization(myFunction,constraints,searchSpace,properties);
+        Map<String,Double> solution = pso.minimize();
+        double result = myFunction.apply(solution);
+        System.out.println("SOLUTION" + solution);
+        assertEquals(111.0, result);
+    }
+
+    @Test
+    void minimizeSimpleFunctionSearchSpaceAsConstraints(){
+
+        // SEARCH SPACE
+        HyperRectangle searchSpace = new HyperRectangle(
+                new Interval("x",200.0,400.0),
+                new Interval("y",0.03, 3.0),
+                new Interval("w",1.0,10.0)
+        );
+
+        // FUNCTION
+        Function<Map<String,Double>,Double> myFunction = (
+                stringDoubleMap -> {
+                    double x = stringDoubleMap.get("x");
+                    double y = stringDoubleMap.get("y");
+                    double w = stringDoubleMap.get("w");
+                    double z;
+                    boolean conditionOnX = x >= 200 && x <= 400;
+                    boolean conditionOnY = y >= 0.03 && y <= 3.0;
+                    boolean conditionOnW = w >= 1.0 && w <= 10.0;
+                    if( conditionOnX && conditionOnY && conditionOnW )
+                        z = 111.0;
+                    else
+                        z = 55.0;
+                    return z;
+                }
+        );
+
+
+        Properties properties = new Properties();
+
+        properties.put("pso.particles.number","100");
+        properties.put("pso.iteration","100");
+
+        ParticleSwarmOptimization pso = new ParticleSwarmOptimization(myFunction,null,searchSpace,properties);
+        pso.setSearchSpaceAsConstraints();
+        Map<String,Double> solution = pso.minimize();
+        double result = myFunction.apply(solution);
+
+        assertEquals(111.0, result);
+    }
+
     /**
      * simple function : <b> 7 * ( x * y )/(e^(x^2+y^2)) </b> minimization
      *
@@ -40,7 +128,7 @@ class ParticleSwarmOptimizationTest {
     @Test
     void minimizeFunction() {
 
-        Function<Map<String,Double>,Double> functionToOptimize_1 = (
+        Function<Map<String,Double>,Double> functionToOptimize = (
                 stringDoubleMap -> {
                     double x = stringDoubleMap.get("x");
                     double y = stringDoubleMap.get("y");
@@ -48,21 +136,13 @@ class ParticleSwarmOptimizationTest {
                 }
         );
 
-        HyperRectangle searchSpace_1 = new HyperRectangle(
+        HyperRectangle searchSpace = new HyperRectangle(
                 new Interval("x",-2.0,2.0),
                 new Interval("y",-2.0,2.0)
         );
 
-        int psoIteration = 500;
-        int numParticles = 500;
-
-        Map<String,Double> minimizingValues =
-                new ParticleSwarmOptimization(
-                        functionToOptimize_1,
-                        searchSpace_1,
-                        psoIteration,
-                        numParticles )
-                        .minimize();
+        Map<String,Double> minimizingValues = new ParticleSwarmOptimization(functionToOptimize,null,searchSpace,new Properties())
+                .minimize();
 
         boolean isLocalMinima1 = beingInRange(minimizingValues.get("x"),-0.95, -0.55) &&
                 beingInRange(minimizingValues.get("y"),0.55, 0.95);
@@ -76,7 +156,7 @@ class ParticleSwarmOptimizationTest {
     @Test
     void maximizeFunction() {
 
-        Function<Map<String,Double>,Double> functionToOptimize_1 = (
+        Function<Map<String,Double>,Double> functionToOptimize = (
                 stringDoubleMap -> {
                     double x = stringDoubleMap.get("x");
                     double y = stringDoubleMap.get("y");
@@ -84,21 +164,13 @@ class ParticleSwarmOptimizationTest {
                 }
         );
 
-        HyperRectangle searchSpace_1 = new HyperRectangle(
+        HyperRectangle searchSpace = new HyperRectangle(
                 new Interval("x",-2.0,2.0),
                 new Interval("y",-2.0,2.0)
         );
 
-        int psoIteration = 500;
-        int numParticles = 500;
-
-        Map<String,Double> maximizingValues =
-                new ParticleSwarmOptimization(
-                        functionToOptimize_1,
-                        searchSpace_1,
-                        psoIteration,
-                        numParticles )
-                        .maximize();
+        Map<String,Double> maximizingValues = new ParticleSwarmOptimization(functionToOptimize,null,searchSpace,new Properties())
+                .maximize();
 
         boolean isLocalMaxima1 = beingInRange(maximizingValues.get("x"),-0.95, -0.55) &&
                 beingInRange(maximizingValues.get("y"),-0.95, -0.55);
@@ -113,7 +185,7 @@ class ParticleSwarmOptimizationTest {
      * @see    <a href=https://www.researchgate.net/publication/336121050_Structural_Design_Optimization_Based_on_the_Moving_Baseline_Strategy">Structural Design Optimization Based on the Moving Baseline Strategy</a>
      */
     @Test
-    @Disabled("Disabled : very time consuming")
+    //@Disabled("Disabled : very time consuming")
     void minimizeFunctionWithConstraint() {
 
         Function<Map<String,Double>,Double> functionToOptimize = (
@@ -156,31 +228,24 @@ class ParticleSwarmOptimizationTest {
                 }
         );
 
-        HyperRectangle searchSpace_1 = new HyperRectangle(
+        HyperRectangle searchSpace = new HyperRectangle(
                 new Interval("x1",-10.0,10.0),
                 new Interval("x2",-10.0,10.0)
         );
 
-        int psoIteration = 1000;
-        int numParticles = 1000;
 
-        Map<String,Double> minimizingValues =
-                new ParticleSwarmOptimization(
-                        functionToOptimize,
-                        constraints,
-                        searchSpace_1,
-                        psoIteration,
-                        numParticles )
-                        .minimize();
+        Map<String,Double> minimizingValues = new ParticleSwarmOptimization(functionToOptimize,constraints,searchSpace,new Properties())
+                .minimize();
 
-        System.out.println(minimizingValues.get("x1"));
-        System.out.println(minimizingValues.get("x2"));
-        System.out.println("---");
-        System.out.println(functionToOptimize.apply(minimizingValues));
+        HyperRectangle rightZone = new HyperRectangle(
+                new Interval("x1",0.9,1.4),
+                new Interval("x2",3.0,4.0)
+        );
 
+        assertTrue(rightZone.couldContain(minimizingValues));
     }
 
-    @Disabled("Disabled : very time consuming")
+    //@Disabled("Disabled : very time consuming")
     @Test
     void minimizeMultidimensionalFunctionWithConstraint() {
 
@@ -264,7 +329,7 @@ class ParticleSwarmOptimizationTest {
                 }
         );
 
-        HyperRectangle searchSpace_1 = new HyperRectangle(
+        HyperRectangle searchSpace = new HyperRectangle(
                 new Interval("x1",-10.0,10.0),
                 new Interval("x2",-10.0,10.0),
                 new Interval("x3",-10.0,10.0),
@@ -274,37 +339,18 @@ class ParticleSwarmOptimizationTest {
                 new Interval("x7",-10.0,10.0)
         );
 
-        int psoIteration = 100;
-        int numParticles = 10000;
+        Map<String,Double> minimizingValues = new ParticleSwarmOptimization(functionToOptimize,constraints,searchSpace,new Properties())
+                .minimize();
 
-        Map<String,Double> minimizingValues =
-                new ParticleSwarmOptimization(
-                        functionToOptimize,
-                        constraints,
-                        searchSpace_1,
-                        psoIteration,
-                        numParticles )
-                        .minimize();
-
-        System.out.println(minimizingValues.get("x1"));
-        System.out.println(minimizingValues.get("x2"));
-        System.out.println(minimizingValues.get("x3"));
-        System.out.println(minimizingValues.get("x4"));
-        System.out.println(minimizingValues.get("x5"));
-        System.out.println(minimizingValues.get("x6"));
-        System.out.println(minimizingValues.get("x7"));
-        System.out.println("--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---");
-        System.out.println(functionToOptimize.apply(minimizingValues));
-        System.out.println("--- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---");
+        double min = functionToOptimize.apply(minimizingValues);
+        assertTrue(min>650 && min<700);
 
     }
 
 
-    //@Disabled("Disabled : very time consuming")
+//    //@Disabled("Disabled : very time consuming")
     @Test
     public void testRosenbrockFunction(){
-
-        Function<Map<String,Double>,Double> functionToOptimize = ROSENBROCK_FUNCTION;
 
         HyperRectangle searchSpace = new HyperRectangle(
                 new Interval("x1",-10.0,10.0),
@@ -313,47 +359,23 @@ class ParticleSwarmOptimizationTest {
         );
 
         Properties psoProperties = new Properties();
-        psoProperties.setProperty("iteration", "1000");
-        psoProperties.setProperty("particlesNumber", "1000");
-        ParticleSwarmOptimization pso = new ParticleSwarmOptimization(functionToOptimize, searchSpace, psoProperties);
+        psoProperties.setProperty("pso.iteration", "1000");
+        psoProperties.setProperty("pso.particles.number", "1000");
+        ParticleSwarmOptimization pso =  new ParticleSwarmOptimization(ROSENBROCK_FUNCTION,null,searchSpace,psoProperties);
 
         pso.setSearchSpaceAsConstraints();
 
         Map<String,Double> minimizingValues = pso.minimize();
         System.out.println(minimizingValues.toString());
-    }
 
-    @Test
-    @Disabled("Disabled : very time consuming")
-    public void testCorrectFunctioningOfConstraints(){
-
-        Function<Map<String,Double>,Double> functionToOptimize = map -> Math.cos(map.get("x")) * Math.cos(map.get("y"));
-
-        HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("x",-100.0,100.0),
-                new Interval("y",-100.0,100.0)
+        HyperRectangle rightZone = new HyperRectangle(
+                new Interval("x1",0.5,1.5),
+                new Interval("x2",0.5,1.5),
+                new Interval("x3",0.5,1.5)
         );
 
-        List<Predicate<Map<String,Double>>> constraints = new ArrayList<>();
-
-
-        constraints.add(
-                map -> {
-                    boolean x1 = 2 <= map.get("x") && map.get("x") <= 4;
-                    boolean x2 = -2 <= map.get("y") && map.get("y") <= 2;
-                    return x1 && x2;
-                }
-        );
-
-        Properties psoProperties = new Properties();
-        psoProperties.setProperty("iteration", "1000");
-        psoProperties.setProperty("particlesNumber", "10000");
-        ParticleSwarmOptimization pso = new ParticleSwarmOptimization(functionToOptimize,constraints, searchSpace, psoProperties);
-
-        Map<String,Double> minimizingValues = pso.minimize();
-        System.out.println(minimizingValues.toString());
+        assertTrue(rightZone.couldContain(minimizingValues));
     }
-
 
 
 

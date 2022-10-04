@@ -4,12 +4,10 @@ package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.surro
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategy;
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategyFactory;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -83,6 +81,14 @@ public class SurrogateOptimizationAdaptiveSearchSpace implements OptimizationStr
             maxIterationResampling--;
         }
         return trainingSet;
+    }
+
+    public void setSearchSpaceAsConstraints(){
+        List<Predicate<Map<String,Double>>> constraints = new ArrayList<>();
+        for (Interval i :searchSpace.getIntervals()) {
+            constraints.add( map -> i.getLowerBound() <= map.get(i.getId()) && map.get(i.getId()) <= i.getUpperBound() );
+        }
+        this.constraints.addAll(constraints);
     }
 
 

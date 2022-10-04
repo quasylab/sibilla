@@ -3,18 +3,28 @@ package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.surro
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategy;
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategyFactory;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.Surrogate;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateFactory;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.TrainingSet;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * Surrogate optimization attempts to find a global minimum of an objective function using
+ * few objective function evaluations.
+ * A surrogate of the function is constructed using
+ * few objective function evaluations, then the optimization algorithm is
+ * applied to the surrogate
+ *
+ * @author Lorenzo Matteucci
+ */
 public class SurrogateOptimization implements OptimizationStrategy {
-
     final private String surrogateName;
     final private String optimizationName;
     final private String samplingName;
@@ -61,8 +71,15 @@ public class SurrogateOptimization implements OptimizationStrategy {
 
     private Function<Map<String,Double>,Double> generateSurrogateFunction(){
         TrainingSet ts = new TrainingSet(this.searchSpace,this.samplingName,this.trainingSetSize,this.functionToBeSurrogate);
+        System.out.println("Std Dev : " + ts.getResultSD());
+        System.out.println("Mean    : " + ts.getResultMean());
         Surrogate surrogate = SurrogateFactory.getSurrogate(this.surrogateName,this.properties);
         surrogate.fit(ts);
+        System.out.println("--- --- --- --- --- --- --- --- --- --- --- --- --- --- ---");
+        System.out.println(surrogate.getMetrics().toString());
+        ts.write().csv("/Users/lorenzomatteucci/phd/trainingSet/ts.csv");
+        TrainingSet test = new TrainingSet(this.searchSpace,"ffs",15,map -> surrogate.predict(map.values().toArray(new Double[0])));
+        test.write().csv("/Users/lorenzomatteucci/phd/trainingSet/test.csv");
         return map -> surrogate.predict(map.values().toArray(new Double[0]));
     }
 
@@ -86,6 +103,14 @@ public class SurrogateOptimization implements OptimizationStrategy {
                         this.searchSpace,
                         this.properties)
                 .maximize();
+    }
+
+    public void setSearchSpaceAsConstraints(){
+        List<Predicate<Map<String,Double>>> constraints = new ArrayList<>();
+        for (Interval i :searchSpace.getIntervals()) {
+            constraints.add( map -> i.getLowerBound() <= map.get(i.getId()) && map.get(i.getId()) <= i.getUpperBound() );
+        }
+        this.constraints.addAll(constraints);
     }
 
 
