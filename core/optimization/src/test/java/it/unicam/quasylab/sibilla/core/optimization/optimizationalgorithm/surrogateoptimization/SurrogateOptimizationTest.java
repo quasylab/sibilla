@@ -1,23 +1,15 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.surrogateoptimization;
 
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategy;
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategyFactory;
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.pso.ParticleSwarmOptimization;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
-import it.unicam.quasylab.sibilla.core.optimization.surrogate.TrainingSet;
 import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
 import it.unicam.quasylab.sibilla.core.runtime.PopulationModelModule;
 import it.unicam.quasylab.sibilla.core.runtime.SibillaRuntime;
-import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.Test;
 
-import java.io.PrintStream;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.ROSENBROCK_FUNCTION;
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,8 +35,6 @@ class SurrogateOptimizationTest {
                 new Interval("y",-2.0,2.0)
         );
 
-//        Map<String,Double> minimizingValues = new ParticleSwarmOptimization(functionToOptimize,null,searchSpace,new Properties())
-//                .minimize();
 
         Properties properties = new Properties();
         properties.put("pso.particles.number","1000");
@@ -63,7 +53,6 @@ class SurrogateOptimizationTest {
     @Test
     void minimize() {
         // FUNCTION TO BE OPTIMIZED
-        Function<Map<String,Double>,Double> functionToOptimize = ROSENBROCK_FUNCTION;
 
         // CONSTRAINTS
         List<Predicate<Map<String,Double>>> constraints = new ArrayList<>();
@@ -79,12 +68,12 @@ class SurrogateOptimizationTest {
         Properties properties = new Properties();
         properties.put("pso.particles.number","1000");
         properties.put("surrogate.optimization.training.set.size","10000");
-        SurrogateOptimization so = new SurrogateOptimization(functionToOptimize,constraints,searchSpace,properties);
+        SurrogateOptimization so = new SurrogateOptimization(ROSENBROCK_FUNCTION,constraints,searchSpace,properties);
         System.out.println(so.minimize());
     }
 
     @Test
-    void sibillaTest() throws CommandExecutionException {
+    void sibillaTest() {
 
         String CODE = """
                 param beta = 1.0;\s
@@ -107,13 +96,13 @@ class SurrogateOptimizationTest {
                 sr.setParameter("gamma",map.get("gamma"));
                 int time = map.get("timeUnits").intValue();
                 sr.setDeadline(time);//map.get("timeUnits"));
-                sr.setReplica(100);
-                sr.setDt(0.5);
+                sr.setReplica(10);
+                sr.setDt(1.0);
                 sr.setConfiguration("init");
-                result = sr.computeProbReach(null,"allRecovered",0.1,0.1);
+                result = sr.computeProbReach(null,"allRecovered",0.1,0.01);
                 sr.reset();
             } catch (CommandExecutionException e) {
-                throw new IllegalArgumentException("time probrably srew up");
+                throw new IllegalArgumentException("Something wrong is happening with Sibilla");
             }
             return result;
         };
@@ -134,18 +123,9 @@ class SurrogateOptimizationTest {
                 new Interval("timeUnits",100.0,120.0)
         );
         Properties properties = new Properties();
-//        properties.put("particlesNumber","20");
-//        properties.put("iteration","100");
-//        properties.put("surrogate.optimization.training.set.size","10000");
 
-//        OptimizationStrategy o = OptimizationStrategyFactory.getOConstrainedOptimizationStrategy("pso",sibillaFunction,constraints,searchSpace,properties);
-//        Map<String, Double> minimizingValues = o.minimize();
-//        System.out.println(minimizingValues);
-//        System.out.println(sibillaFunction.apply(minimizingValues));
-
-
-        properties.put("pso.particles.number","1000");
-        properties.put("surrogate.optimization.training.set.size","10000");
+        properties.put("pso.particles.number","100");
+        properties.put("surrogate.optimization.training.set.size","1000");
         SurrogateOptimization so = new SurrogateOptimization(sibillaFunction,constraints,searchSpace,properties);
         Map<String, Double> minimizingValues = so.minimize();
         System.out.println("value that minimize : " + minimizingValues);
