@@ -107,9 +107,9 @@ public class RandomForestSurrogate implements Surrogate{
         DataFrame trainingSetDataFrame = trainingSet.smile().toDataFrame();
         this.randomForest = RandomForest.fit(this.formula,
                 trainingSetDataFrame,
-                Integer.parseInt(this.properties.getProperty("surrogate.random.forest.trees", "500")),
+                Integer.parseInt(this.properties.getProperty("surrogate.random.forest.trees", "1000")),
                 Integer.parseInt(this.properties.getProperty("surrogate.random.forest.mtry", "0")),
-                Integer.parseInt(this.properties.getProperty("surrogate.random.forest.depth", "20")),
+                Integer.parseInt(this.properties.getProperty("surrogate.random.forest.depth", "200")),
                 Integer.parseInt(this.properties.getProperty("surrogate.random.forest.nodes", String.valueOf(trainingSetDataFrame.size() / 5))),
                 Integer.parseInt(this.properties.getProperty("surrogate.random.forest.size", "5")),
                 Double.parseDouble(this.properties.getProperty("surrogate.random.forest.rate", "1.0"))
