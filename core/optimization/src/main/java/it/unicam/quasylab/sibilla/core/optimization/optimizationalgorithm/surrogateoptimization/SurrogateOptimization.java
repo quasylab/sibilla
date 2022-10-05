@@ -71,15 +71,15 @@ public class SurrogateOptimization implements OptimizationStrategy {
 
     private Function<Map<String,Double>,Double> generateSurrogateFunction(){
         TrainingSet ts = new TrainingSet(this.searchSpace,this.samplingName,this.trainingSetSize,this.functionToBeSurrogate);
-        System.out.println("Std Dev : " + ts.getResultSD());
-        System.out.println("Mean    : " + ts.getResultMean());
+//        System.out.println("Std Dev : " + ts.getResultSD());
+//        System.out.println("Mean    : " + ts.getResultMean());
         Surrogate surrogate = SurrogateFactory.getSurrogate(this.surrogateName,this.properties);
         surrogate.fit(ts);
-        System.out.println("--- --- --- --- --- --- --- --- --- --- --- --- --- --- ---");
-        System.out.println(surrogate.getMetrics().toString());
-        ts.write().csv("/Users/lorenzomatteucci/phd/trainingSet/ts.csv");
-        TrainingSet test = new TrainingSet(this.searchSpace,"ffs",15,map -> surrogate.predict(map.values().toArray(new Double[0])));
-        test.write().csv("/Users/lorenzomatteucci/phd/trainingSet/test.csv");
+//        System.out.println("--- --- --- --- --- --- --- --- --- --- --- --- --- --- ---");
+//        System.out.println(surrogate.getMetrics().toString());
+//        ts.write().csv("/Users/lorenzomatteucci/phd/trainingSet/ts.csv");
+//        TrainingSet test = new TrainingSet(this.searchSpace,"ffs",15,map -> surrogate.predict(map.values().toArray(new Double[0])));
+//        test.write().csv("/Users/lorenzomatteucci/phd/trainingSet/test.csv");
         return map -> surrogate.predict(map.values().toArray(new Double[0]));
     }
 

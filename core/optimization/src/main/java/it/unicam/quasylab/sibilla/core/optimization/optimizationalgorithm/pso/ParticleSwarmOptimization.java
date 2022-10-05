@@ -87,10 +87,12 @@ public class ParticleSwarmOptimization implements OptimizationStrategy {
                     particle.setParticleBest(particle);
                 if(currentBetterThanGBest)
                     swarm.setGlobalBest(particle);
-            }
-        }
 
+            }
+
+        }
     }
+
 
     private Swarm getPopulatedSwarm(){
         Swarm newSwarm = new Swarm(getParticleList());
