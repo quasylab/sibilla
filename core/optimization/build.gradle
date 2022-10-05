@@ -1,0 +1,48 @@
+apply plugin: 'maven-publish'
+apply plugin: 'java-library'
+
+group = 'it.unicam.quasylab.sibilla.core.optimization'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    implementation group: 'tech.tablesaw', name: 'tablesaw-core', version: '0.43.1'
+    implementation group: 'com.github.haifengl', name: 'smile-core', version: '2.6.0'
+
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.13.3'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.13.3'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.13.3'
+    implementation project(':core:runtime')
+    //testImplementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7'
+
+}
+
+test {
+    useJUnitPlatform()
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/quasylab/sibilla")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            groupId = "it.unicam.quasylab.sibilla.core"
+            artifactId = "optimization"
+            from(components.java)
+        }
+    }
+}
