@@ -54,7 +54,7 @@ public interface Surrogate {
      *  represents the proportion of the variance in the dependent variable
      *  which is explained by the linear regression model. It is a scale-free
      *  score i.e. irrespective of the values being small or large,
-     *  the value of R square will be less than onethe closer to 1 the better
+     *  the value of R square will be less than one the closer to 1 the better
      *  Is a measure of the ratio of variability that your model can capture
      *  vs the natural variability in the target variable.
      *
@@ -62,5 +62,6 @@ public interface Surrogate {
      * @see <a href="https://medium.com/analytics-vidhya/mae-mse-rmse-coefficient-of-determination-adjusted-r-squared-which-metric-is-better-cd0326a5697e">Useful website</a>
      * @return   the surrogate metrics
      */
-    RegressionMetrics getMetrics();
+    SurrogateMetrics getInSampleMetrics();
+    SurrogateMetrics getOutOfSampleMetrics(TrainingSet outOfSampleTrainingSet);
 }

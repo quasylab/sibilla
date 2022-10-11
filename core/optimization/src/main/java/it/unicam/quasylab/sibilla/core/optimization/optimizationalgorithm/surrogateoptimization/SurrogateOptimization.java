@@ -34,6 +34,8 @@ public class SurrogateOptimization implements OptimizationStrategy {
     final private HyperRectangle searchSpace;
     final private Properties properties;
 
+    private Function<Map<String,Double>,Double> surrogate;
+
     public SurrogateOptimization(Function<Map<String,Double>,Double> functionToBeSurrogate,
                                  List<Predicate<Map<String,Double>>> constraints,
                                  HyperRectangle searchSpace,

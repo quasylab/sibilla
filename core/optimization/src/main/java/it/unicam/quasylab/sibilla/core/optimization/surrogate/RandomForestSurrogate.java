@@ -4,7 +4,6 @@ import smile.data.DataFrame;
 import smile.data.Tuple;
 import smile.data.formula.Formula;
 import smile.regression.RandomForest;
-import smile.validation.RegressionMetrics;
 
 import java.util.Properties;
 
@@ -18,6 +17,16 @@ public class RandomForestSurrogate implements Surrogate{
     private RandomForest randomForest;
     private Properties properties;
     private final Formula formula;
+    private double fitTime;
+    private TrainingSet trainingSet;
+
+    private int numberOfTrees;
+    private int mtry;
+    private int maxDepth;
+    private int maxNodes;
+    private int nodeSize;
+    private double subSample;
+
     /**
      * The constructor of the random regression forest tree, default properties and formula
      * are used
@@ -31,7 +40,7 @@ public class RandomForestSurrogate implements Surrogate{
      *
      * @param properties the properties of the Random Forest Regression:
      *                   <ul>
-     *                      <li> <code>Surrogate.RandomForest.ntrees</code> the number of trees.
+     *                      <li> <code>Surrogate.RandomForest.trees</code> the number of trees.
      *                      <li> <code>Surrogate.RandomForest.mtry</code> the number of input variables
      *                         to be used to determine the decision at a node of the tree.
      *                         p/3 generally give good performance, where p is the number of variables.
@@ -52,7 +61,7 @@ public class RandomForestSurrogate implements Surrogate{
      *
      * @param properties the properties of the Random Forest Regression:
      *                   <ul>
-     *                      <li> <code>Surrogate.RandomForest.ntrees</code> the number of trees.
+     *                      <li> <code>Surrogate.RandomForest.trees</code> the number of trees.
      *                      <li> <code>Surrogate.RandomForest.mtry</code> the number of input variables
      *                         to be used to determine the decision at a node of the tree.
      *                         p/3 generally give good performance, where p is the number of variables.
@@ -75,7 +84,7 @@ public class RandomForestSurrogate implements Surrogate{
      *
      * @param properties the properties of the Random Forest Regression:
      *                   <ul>
-     *                      <li> <code>Surrogate.RandomForest.ntrees</code> the number of trees.
+     *                      <li> <code>Surrogate.RandomForest.trees</code> the number of trees.
      *                      <li> <code>Surrogate.RandomForest.mtry</code> the number of input variables
      *                         to be used to determine the decision at a node of the tree.
      *                         p/3 generally give good performance, where p is the number of variables.
@@ -92,9 +101,6 @@ public class RandomForestSurrogate implements Surrogate{
         this.properties = properties;
     }
 
-    public Properties getProperties() {
-        return properties;
-    }
 
     @Override
     public double predict(Double[] x) {
@@ -104,19 +110,40 @@ public class RandomForestSurrogate implements Surrogate{
 
     @Override
     public void fit(TrainingSet trainingSet) {
+        this.trainingSet = trainingSet;
         DataFrame trainingSetDataFrame = trainingSet.smile().toDataFrame();
-        this.randomForest = RandomForest.fit(this.formula,
-                trainingSetDataFrame,
-                Integer.parseInt(this.properties.getProperty("surrogate.random.forest.trees", "1000")),
-                Integer.parseInt(this.properties.getProperty("surrogate.random.forest.mtry", "0")),
-                Integer.parseInt(this.properties.getProperty("surrogate.random.forest.depth", "200")),
-                Integer.parseInt(this.properties.getProperty("surrogate.random.forest.nodes", String.valueOf(trainingSetDataFrame.size() / 5))),
-                Integer.parseInt(this.properties.getProperty("surrogate.random.forest.size", "5")),
-                Double.parseDouble(this.properties.getProperty("surrogate.random.forest.rate", "1.0"))
-                );
+
+        this.numberOfTrees = Integer.parseInt(this.properties.getProperty("surrogate.random.forest.trees", "500"));
+        this.mtry = Integer.parseInt(this.properties.getProperty("surrogate.random.forest.mtry", String.valueOf(Math.max(trainingSetDataFrame.ncols()/3, 1))));
+        this.maxDepth = Integer.parseInt(this.properties.getProperty("surrogate.random.forest.depth", "200"));
+        this.maxNodes = Integer.parseInt(this.properties.getProperty("surrogate.random.forest.nodes", String.valueOf(trainingSetDataFrame.size() / 5)));
+        this.nodeSize = Integer.parseInt(this.properties.getProperty("surrogate.random.forest.size", "5"));
+        this.subSample = Double.parseDouble(this.properties.getProperty("surrogate.random.forest.rate", "1.0"));
+
+        long start = System.nanoTime();
+        this.randomForest = RandomForest.fit(this.formula, trainingSetDataFrame, this.numberOfTrees, this.mtry, this.maxDepth, this.maxNodes, this.nodeSize, this.subSample);
+        this.fitTime = (System.nanoTime() - start) / 1E6;
     }
 
-    public RegressionMetrics getMetrics(){
-        return this.randomForest.metrics();
+    @Override
+    public SurrogateMetrics getInSampleMetrics() {
+        return new SurrogateMetrics(this,this.trainingSet,this.fitTime);
+    }
+
+    @Override
+    public SurrogateMetrics getOutOfSampleMetrics(TrainingSet outOfSampleTrainingSet) {
+        return new SurrogateMetrics(this,outOfSampleTrainingSet,this.fitTime);
+    }
+
+    @Override
+    public String toString() {
+        String str = "\n Model : Random Forest Regression ";
+        str += "\n  - number of trees      : "+this.numberOfTrees;
+        str += "\n  - mtry                 : "+this.mtry;
+        str += "\n  - max trees depth      : "+this.maxDepth;
+        str += "\n  - max nodes            : "+this.maxNodes;
+        str += "\n  - nodes size           : "+this.nodeSize;
+        str += "\n  - subSample            : "+this.subSample;
+        return str;
     }
 }

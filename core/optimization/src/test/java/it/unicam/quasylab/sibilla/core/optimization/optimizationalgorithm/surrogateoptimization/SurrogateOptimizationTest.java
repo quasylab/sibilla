@@ -1,5 +1,7 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.surrogateoptimization;
 
+import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategy;
+import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategyFactory;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
 import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
@@ -53,27 +55,49 @@ class SurrogateOptimizationTest {
     @Test
     void minimize() {
         // FUNCTION TO BE OPTIMIZED
+        // ROSENBROCK_FUNCTION
 
         // CONSTRAINTS
         List<Predicate<Map<String,Double>>> constraints = new ArrayList<>();
 
         // SEARCH SPACE
         HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("x1",-10.0,10.0),
-                new Interval("x2",-10.0,10.0),
-                new Interval("x3",-10.0,10.0)
+                new Interval("x1",-5.0,5.0),
+                new Interval("x2",-5.0,5.0),
+                new Interval("x3",-5.0,5.0)
         );
 
 
         Properties properties = new Properties();
-        properties.put("pso.particles.number","1000");
-        properties.put("surrogate.optimization.training.set.size","10000");
+        properties.put("pso.particles.number","100");
+        properties.put("surrogate.optimization.training.set.size","1000");
         SurrogateOptimization so = new SurrogateOptimization(ROSENBROCK_FUNCTION,constraints,searchSpace,properties);
-        System.out.println(so.minimize());
+
+        Map<String,Double> solutionFromSO =so.minimize();
+        //System.out.println(so.minimize());
+
+        OptimizationStrategy o = OptimizationStrategyFactory.getOConstrainedOptimizationStrategy("pso",ROSENBROCK_FUNCTION
+        ,new ArrayList<>(),searchSpace,properties);
+
+        Map<String,Double> solutionFromO = o.minimize();
+        //System.out.println(o.minimize());
+
+        Map<String,Double> real_optimal_solution = new HashMap<>();
+        real_optimal_solution.put("x1",1.0);
+        real_optimal_solution.put("x2",1.0);
+        real_optimal_solution.put("x3",1.0);
+
+        String results = "Rosenbrock function \n " +
+                "True minima : "+
+                "{x1=1.0, x2=1.0, x3=1.0} -> " + ROSENBROCK_FUNCTION.apply(real_optimal_solution)+"\n"+
+                solutionFromSO + " -> "+ ROSENBROCK_FUNCTION.apply(solutionFromSO)+"\n"+
+                solutionFromO + " -> "+ ROSENBROCK_FUNCTION.apply(solutionFromO);
+
+        System.out.println(results);
     }
 
     @Test
-    void sibillaTest() {
+    void sibillaTestSIR() {
 
         String CODE = """
                 param beta = 1.0;\s
@@ -132,6 +156,20 @@ class SurrogateOptimizationTest {
         System.out.println("result : "+ sibillaFunction.apply(minimizingValues));
 
 
+    }
+
+    @Test
+    void testSibillaProkaryoticGeneExpression(){
+        String CODE = """
+                param beta = 1.0;\s
+                param gamma = 1.0;\s
+                species S;\s
+                species I;\s
+                species R;\s
+                rule infection { S|I -[ #S*#I*beta ]-> I|I }
+                rule immunisation { I -[ #I*gamma ]-> R }
+                system init = S<95>|I<5>|R<0>;
+                predicate allRecovered = (#I ==0) ;""";
     }
 
 
