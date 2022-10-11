@@ -39,7 +39,7 @@ class RandomForestSurrogateTest {
         RandomForestSurrogate rfr = new RandomForestSurrogate();
         rfr.fit(trainingSet);
         System.out.println("metrics 1 ");
-        System.out.println(rfr.getMetrics().toString());
+        System.out.println(rfr.getInSampleMetrics().toString());
 
         Properties newProp = new Properties();
         newProp.put("surrogate.random.forest.trees","1000");
@@ -48,7 +48,7 @@ class RandomForestSurrogateTest {
         rfr.setProperties(newProp);
         rfr.fit(trainingSet);
         System.out.println("metrics 2 ");
-        System.out.println(rfr.getMetrics().toString());
+        System.out.println(rfr.getInSampleMetrics().toString());
     }
 
     @Test
@@ -66,7 +66,7 @@ class RandomForestSurrogateTest {
         RandomForestSurrogate rfr = new RandomForestSurrogate();
         rfr.fit(trainingSet);
         System.out.println("metrics 1 ");
-        System.out.println(rfr.getMetrics().toString());
+        System.out.println(rfr.getInSampleMetrics().toString());
 
         Properties newProp = new Properties();
         newProp.put("surrogate.random.forest.trees","1000");
@@ -75,7 +75,7 @@ class RandomForestSurrogateTest {
         rfr.setProperties(newProp);
         rfr.fit(trainingSet);
         System.out.println("metrics 2 ");
-        System.out.println(rfr.getMetrics().toString());
+        System.out.println(rfr.getInSampleMetrics().toString());
     }
 
 

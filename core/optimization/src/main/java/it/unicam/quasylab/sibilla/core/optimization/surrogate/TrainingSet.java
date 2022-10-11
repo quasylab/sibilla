@@ -12,9 +12,9 @@ import java.util.function.Function;
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.*;
 
 public class TrainingSet extends Table {
-    private Function<Map<String,Double>,Double> function;
-    private HyperRectangle searchSpace;
-    private String resultColumnName;
+    private final Function<Map<String,Double>,Double> function;
+    private final HyperRectangle searchSpace;
+    private final String resultColumnName;
 
     public TrainingSet(HyperRectangle searchSpace, String samplingStrategyName,int trainingSetSize, Function<Map<String,Double>,Double> function){
         this(searchSpace,samplingStrategyName,trainingSetSize,function,DEFAULT_COLUMN_RESULT_NAME);
@@ -87,20 +87,20 @@ public class TrainingSet extends Table {
         return mode;
     }
 
-    public TrainingSet dropNumberOfResultRowsEqualTo(double value, int numberOfRowToDrop){
-        if(numberOfRowToDrop>= this.rowCount())
-            throw new IllegalArgumentException("you cannot drop more rows than the training set contains ");
-        List<Integer> rowToDropList = new LinkedList<>();
-        for (int i = 0; i < numberOfRowToDrop; i++) {
-            if(this.getResultColumn().get(i) == value)
-                rowToDropList.add(i);
-        }
-        return new TrainingSet( dropRows( rowToDropList.stream().mapToInt(i->i).toArray()),
-                this.getSearchSpace(),
-                this.getFunction(),
-                this.getResultColumnName()
-        );
-    }
+//    public TrainingSet dropNumberOfResultRowsEqualTo(double value, int numberOfRowToDrop){
+//        if(numberOfRowToDrop>= this.rowCount())
+//            throw new IllegalArgumentException("you cannot drop more rows than the training set contains ");
+//        List<Integer> rowToDropList = new LinkedList<>();
+//        for (int i = 0; i < numberOfRowToDrop; i++) {
+//            if(this.getResultColumn().get(i) == value)
+//                rowToDropList.add(i);
+//        }
+//        return new TrainingSet( dropRows( rowToDropList.stream().mapToInt(i->i).toArray()),
+//                this.getSearchSpace(),
+//                this.getFunction(),
+//                this.getResultColumnName()
+//        );
+//    }
 
 
     public double getResultMean(){

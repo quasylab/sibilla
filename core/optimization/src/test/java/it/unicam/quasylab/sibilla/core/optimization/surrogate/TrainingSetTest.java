@@ -118,4 +118,31 @@ class TrainingSetTest {
 
     }
 
+//    @Test
+//    void testDropNumberOfResultRowsEqualTo(){
+//        HyperRectangle searchSpace = new HyperRectangle(
+//                new Interval("x",-2.0,2.0),
+//                new Interval("y",-5.0,5.0)
+//        );
+//
+//
+//        Function<Map<String,Double>,Double> function_0 = (
+//                map -> 0.0
+//        );
+//
+//        Function<Map<String,Double>,Double> function_1 = (
+//                map -> 1.0
+//        );
+//
+//
+//        TrainingSet ts_0 = new TrainingSet(searchSpace,"rs",500,function_0);
+//        TrainingSet ts_1 = new TrainingSet(searchSpace,"rs",500,function_1);
+//
+//        TrainingSet merged = ts_0.appendTrainingSet(ts_1);
+//
+//        TrainingSet mergedWithDrop = merged.dropNumberOfResultRowsEqualTo(1.0,250);
+//
+//        assertEquals(750, mergedWithDrop.rowCount());
+//    }
+
 }
