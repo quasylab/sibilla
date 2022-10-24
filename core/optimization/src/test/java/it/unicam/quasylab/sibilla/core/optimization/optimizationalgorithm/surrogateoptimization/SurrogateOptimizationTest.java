@@ -2,6 +2,7 @@ package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.surro
 
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategy;
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategyFactory;
+import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.pso.ParticleSwarmOptimization;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
 import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
@@ -158,9 +159,15 @@ class SurrogateOptimizationTest {
 
     }
 
+    /**
+     * configuration (a)
+     * time --> varies in [ 100.0 , 120.0 ]
+     * beta --> varies in [ 0.005 , 0.3 ]
+     */
     @Test
-    void testSibillaProkaryoticGeneExpression(){
-        String CODE = """
+    void testNetworkEpidemicsConfigurationA() throws CommandExecutionException {
+
+        String CODE_SIR = """
                 param beta = 1.0;\s
                 param gamma = 1.0;\s
                 species S;\s
@@ -170,6 +177,62 @@ class SurrogateOptimizationTest {
                 rule immunisation { I -[ #I*gamma ]-> R }
                 system init = S<95>|I<5>|R<0>;
                 predicate allRecovered = (#I ==0) ;""";
+
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.load(CODE_SIR);
+
+        Function<Map<String,Double>,Double> reachabilityTerminationEpidemics = map ->{
+            double result;
+            try {
+                sr.setParameter("beta",map.get("beta"));
+                int time = map.get("timeUnits").intValue();
+                sr.setDeadline(time);
+                sr.setReplica(20);
+                sr.setDt(0.5);
+                sr.setConfiguration("init");
+                result = sr.computeProbReach(null,"allRecovered",0.1,0.01);
+                sr.reset();
+            } catch (CommandExecutionException e) {
+                throw new IllegalArgumentException("Something wrong is happening with Sibilla");
+            }
+            return result;
+        };
+
+        List<Predicate<Map<String,Double>>> constraints = new ArrayList<>();
+
+        constraints.add( map -> map.get("beta") >= 0.005 && map.get("beta") <=0.3);
+        constraints.add( map -> map.get("timeUnits") >= 100.0 && map.get("timeUnits") <=120.0);
+
+        // SEARCH SPACE
+        HyperRectangle searchSpace = new HyperRectangle(
+                new Interval("beta",0.005,0.3),
+                new Interval("timeUnits",100.0,120.0)
+        );
+
+        Properties properties = new Properties();
+
+        properties.put("pso.particles.number","100");
+        properties.put("surrogate.optimization.training.set.size","1000");
+
+        SurrogateOptimization so = new SurrogateOptimization(
+                reachabilityTerminationEpidemics,
+                constraints,
+                searchSpace,
+                properties
+        );
+        Map<String, Double> minimizingValues = so.minimize();
+
+//        OptimizationStrategy o = new ParticleSwarmOptimization(
+//                reachabilityTerminationEpidemics,
+//                constraints,
+//                searchSpace,
+//                properties
+//        );
+//        Map<String, Double> minimizingValues = o.minimize();
+
+        System.out.println("value that minimize : " + minimizingValues);
+        System.out.println("result : "+ reachabilityTerminationEpidemics.apply(minimizingValues));
+
     }
 
 
