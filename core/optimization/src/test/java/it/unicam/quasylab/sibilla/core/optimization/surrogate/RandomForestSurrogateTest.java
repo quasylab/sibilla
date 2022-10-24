@@ -18,7 +18,6 @@ class RandomForestSurrogateTest {
 
     @Test
     void testTrainingAndPredict(){
-
         Function<Map<String,Double>,Double> functionToLearn = (
                 stringDoubleMap -> {
                     double x = stringDoubleMap.get("x");
@@ -26,7 +25,6 @@ class RandomForestSurrogateTest {
                     return 7 * ( x * y )/(Math.pow(Math.E,(Math.pow(x,2)+Math.pow(y,2))));
                 }
         );
-
         TrainingSet trainingSet = new TrainingSet(
                 new HyperRectangle(
                         new Interval("x",-2.0,2.0),

@@ -43,8 +43,6 @@ public class EvaluationEnvironment {
     private final PropertyChangeSupport changer;
     private boolean isChanged = false;
 
-
-
     public EvaluationEnvironment() {
         this(new CachedValues());
     }

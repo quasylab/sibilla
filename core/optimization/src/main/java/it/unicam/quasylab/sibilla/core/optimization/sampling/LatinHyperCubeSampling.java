@@ -28,7 +28,8 @@ public class LatinHyperCubeSampling implements SamplingStrategy {
         DoubleColumn[] columns = new DoubleColumn[hr.getDimensionality()];
         for (int i = 0; i < hr.getDimensionality(); i++) {
             double[] columnArray = new double[numberOfSamples];
-            for (int j = 0; j <numberOfSamples ; j++) {double val = hr.getInterval(i).getLowerBound() + ((shuffledMatrix[i][j] - random.nextDouble())/(numberOfSamples)) * (hr.getInterval(i).getUpperBound() - hr.getInterval(i).getLowerBound() );
+            for (int j = 0; j <numberOfSamples ; j++) {
+                double val = hr.getInterval(i).getLowerBound() + ((shuffledMatrix[i][j] - random.nextDouble())/(numberOfSamples)) * (hr.getInterval(i).getUpperBound() - hr.getInterval(i).getLowerBound() );
                 columnArray[j] = hr.getInterval(i).isContinuous() ? val : Math.round(val);
             }
             columns[i] = DoubleColumn.create(hr.getInterval(i).getId(),columnArray);

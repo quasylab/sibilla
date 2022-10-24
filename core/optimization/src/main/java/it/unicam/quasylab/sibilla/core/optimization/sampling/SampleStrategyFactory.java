@@ -16,8 +16,7 @@ public class SampleStrategyFactory {
             return new FullFactorialSampling();
         if(samplingStrategyName.equals("rs"))
             return new RandomSampling();
-        else
-            throw new IllegalArgumentException(EXCEPT_NO_SUCH_SAMPLING_STRATEGY + " : "
+        throw new IllegalArgumentException(EXCEPT_NO_SUCH_SAMPLING_STRATEGY + " : "
                     + samplingStrategyName + "\n the available sampling strategies are: \n"+
                     getSamplingStrategiesNameList().stream().reduce("",(a,b)-> a + b + "\n"));
     }
