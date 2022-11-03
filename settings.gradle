@@ -31,10 +31,13 @@ include 'core:simulator',
 		'examples:populations:taxis',
     	'examples:benchmarks:slave',
    	 	'examples:benchmarks:master',
-    'view',
-    'examples:lio:seir',
+    	'view',
+    	'examples:lio:seir',
 		'examples:lio:rb',
-		'examples:glio:tsp'
+		'examples:glio:tsp',
+		'examples:yoda:roboticScenario',
+		'langs:yoda',
+		'examples:lio:rb'
 
 /* 		'examples:agents:RobotAgents',
 */
