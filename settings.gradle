@@ -17,6 +17,7 @@ include 'core:simulator',
 		'langs:lio',
 		'langs:markov',
 		'langs:slam',
+		//'langs:yoda',
 		'shell' ,
 		'gui:gui',
         'examples:populations:crowds',
@@ -30,13 +31,10 @@ include 'core:simulator',
 		'examples:populations:taxis',
     	'examples:benchmarks:slave',
    	 	'examples:benchmarks:master',
-		'examples:yoda:roboticScenario',
-    	'view',
-    	'examples:lio:seir',
-		'langs:yoda'
-
-		'examples:lio:rb'
+    'view',
+    'examples:lio:seir',
+		'examples:lio:rb',
+		'examples:glio:tsp'
 
 /* 		'examples:agents:RobotAgents',
 */
-
