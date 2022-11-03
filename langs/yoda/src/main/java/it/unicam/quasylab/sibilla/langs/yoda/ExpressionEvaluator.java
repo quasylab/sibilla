@@ -23,8 +23,6 @@
 
 package it.unicam.quasylab.sibilla.langs.yoda;
 
-import org.apache.commons.math3.analysis.function.Exp;
-
 import java.util.function.Function;
 
 public class ExpressionEvaluator extends YodaModelBaseVisitor<Value> {
@@ -103,11 +101,13 @@ public class ExpressionEvaluator extends YodaModelBaseVisitor<Value> {
         return null;
     }
 
+    /*
     //TODO
     @Override
     public Value visitRecordExpression(YodaModelParser.RecordExpressionContext ctx) {
         return null;
     }
+    */
 
     @Override
     public Value visitOrExpression(YodaModelParser.OrExpressionContext ctx) {

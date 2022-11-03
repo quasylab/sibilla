@@ -94,7 +94,7 @@ public interface YodaType {
         public YodaValue cast(YodaValue value) {
             switch (value.getType().code()){
                 case INTEGER: return value;
-                case REAL: return value.integerValue();
+                case REAL: return (YodaValue.IntegerValue) value;
                 default: return YodaValue.NONE;
             }
         }
@@ -114,7 +114,7 @@ public interface YodaType {
         public YodaValue cast(YodaValue value) {
             switch (value.getType().code()){
                 case REAL: return value;
-                case INTEGER: return value.realValue();
+                case INTEGER: return (YodaValue.RealValue) value;
                 default: return  YodaValue.NONE;
             }
         }

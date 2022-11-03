@@ -23,8 +23,11 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
+import it.unicam.quasylab.sibilla.core.models.ImmutableState;
 import org.apache.commons.math3.random.RandomGenerator;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The class <code>YodaSystem</code> represents
@@ -36,16 +39,18 @@ import java.util.List;
  *     <li>a GlobalStateUpdateFunction updating the global state</li>
  * </ul>
  */
-public class YodaSystem {
+public class YodaSystemState<S extends YodaScene> implements ImmutableState {
 
-    private YodaVariableMapping globalState;
+    private final YodaVariableMapping globalState;
     private final List<YodaAgent> agents;
     private final GlobalStateUpdateFunction globalStateUpdateFunction;
+    private final S scene;
 
-    public YodaSystem(YodaVariableMapping globalState, List<YodaAgent> agents, GlobalStateUpdateFunction globalStateUpdateFunction) {
+    public YodaSystemState(YodaVariableMapping globalState, List<YodaAgent> agents, S scene, GlobalStateUpdateFunction globalStateUpdateFunction) {
         this.globalState = globalState;
         this.agents = agents;
         this.globalStateUpdateFunction = globalStateUpdateFunction;
+        this.scene = scene;
     }
 
     /**
@@ -67,6 +72,26 @@ public class YodaSystem {
     }
 
     /**
+     * This method return a single YodaValue mapped to a variable of an agent with an index
+     *
+     * @param i an index
+     * @param variable the variable we need to search
+     * @return return a single YodaValue mapped to a variable of an agent with an index
+     */
+    public YodaValue getAgentsInfo(int i, YodaVariable variable) {
+        return agents.get(i).getAgentInformation().getValue(variable);
+    }
+
+    /**
+     * This method returns the scene used in the system
+     *
+     * @return the scene used in the system
+     */
+    public S getScene() {
+        return scene;
+    }
+
+    /**
      * This method executes all the necessary methods to update the system
      *
      * @param rg a random generator
@@ -78,13 +103,19 @@ public class YodaSystem {
         updateGlobalState(rg);      //The system updates its global state
     }
 
+    public YodaSystemState<S> next(RandomGenerator rg) {
+        List<YodaAgent> newAgents = this.agents.stream().map(a -> a.next(rg, this)).collect(Collectors.toList());
+        YodaVariableMapping newGlobal = this.globalStateUpdateFunction.compute(rg, newAgents, this.globalState);
+        return new YodaSystemState<>(newGlobal, newAgents, this.scene, this.globalStateUpdateFunction);
+    }
+
     /**
      * This method computes all the possible observations in the system for each agent
      *
      * @param rg a random generator
      */
     private void produceAllObservations(RandomGenerator rg) {
-        this.agents.stream().forEach(a -> a.computeObservations(rg, this));
+        agents.stream().forEach(a -> a.computeObservations(rg, this));
     }
 
     /**
@@ -93,7 +124,7 @@ public class YodaSystem {
      * @param rg a random generator
      */
     private void stepAllAgents(RandomGenerator rg) {
-        this.agents.stream().forEach(a -> a.step(rg));
+        agents.stream().forEach(a -> a.step(rg));
     }
 
     /**
@@ -102,7 +133,7 @@ public class YodaSystem {
      * @param rg a random generator
      */
     public void updateAllAgentInfo(RandomGenerator rg) {
-        this.agents.stream().forEach(a -> a.updateInfo(rg));
+        agents.stream().forEach(a -> a.updateInfo(rg));
     }
 
     /**
@@ -111,6 +142,6 @@ public class YodaSystem {
      * @param rg a random generator
      */
     public void updateGlobalState(RandomGenerator rg) {
-        this.globalState = this.globalStateUpdateFunction.compute(rg, this.agents, this.globalState);
+        globalStateUpdateFunction.compute(rg, agents, globalState);
     }
 }

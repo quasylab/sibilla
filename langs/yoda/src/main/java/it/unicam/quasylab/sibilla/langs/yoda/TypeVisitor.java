@@ -112,11 +112,15 @@ public class TypeVisitor extends YodaModelBaseVisitor<DataType>{
         return null;
     }
 
+    /*
     //TODO
     @Override
     public DataType visitRecordExpression(YodaModelParser.RecordExpressionContext ctx) {
         return null;
     }
+     */
+
+
 
     @Override
     public DataType visitOrExpression(YodaModelParser.OrExpressionContext ctx) {

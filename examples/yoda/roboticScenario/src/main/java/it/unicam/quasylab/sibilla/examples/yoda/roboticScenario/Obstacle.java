@@ -21,15 +21,27 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.models.yoda;
+package it.unicam.quasylab.sibilla.examples.yoda.roboticScenario;
 
-import org.apache.commons.math3.random.RandomGenerator;
+public class Obstacle {
 
-/**
- * The interface <code>OmegaFunction</code> represents
- * a functional interface computing the observations of an agent
- */
-@FunctionalInterface
-public interface OmegaFunction {
-    YodaVariableMapping compute(RandomGenerator rg, YodaSystemState system, YodaAgent agent);
+    private final int posx;
+    private final int posy;
+
+    public Obstacle(int posx, int posy) {
+        this.posx = posx;
+        this.posy = posy;
+    }
+
+    public int getPosx(){
+        return posx;
+    }
+
+    public int getPosy() {
+        return posy;
+    }
+
+    public boolean isPlacedAt (int posx, int posy) {
+        return (this.posx == posx)&&(this.posy == posy);
+    }
 }

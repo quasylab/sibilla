@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
+import it.unicam.quasylab.sibilla.core.models.yoda.util.BehaviouralStepFunction;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -42,12 +43,15 @@ public interface YodaBehaviour extends Serializable {
      */
     String getName();
 
+    /*
     /**
      * This method returns the identifier of the behaviour
      *
      * @return the identifier of the behaviour
-     */
+     *
     int getId();
+     */
+
 
     /**
      * This method returns all the available actions for a certain agent
@@ -79,5 +83,26 @@ public interface YodaBehaviour extends Serializable {
         } else {
             return null;
         }
+    }
+
+    static YodaBehaviour behaviourOf(String name,
+                                     List<YodaAction> actionList,
+                                     BehaviouralStepFunction<RandomGenerator, YodaVariableMapping, YodaVariableMapping, WeightedStructure<YodaAction>> bf) {
+        return new YodaBehaviour() {
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public List<YodaAction> getAvailableActions() {
+                return actionList;
+            }
+
+            @Override
+            public WeightedStructure<YodaAction> evaluate(RandomGenerator rg, YodaVariableMapping currentInternalState, YodaVariableMapping observations) {
+                return bf.apply(rg, currentInternalState, observations);
+            }
+        };
     }
 }

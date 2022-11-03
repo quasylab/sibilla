@@ -46,7 +46,7 @@ public class ConstantsEvaluator extends YodaModelBaseVisitor<CachedValues>{
     }
 
     @Override
-    public CachedValues visitConstant_declaration(YodaModelParser.Constant_declarationContext ctx) {
+    public CachedValues visitConstantDeclaration(YodaModelParser.ConstantDeclarationContext ctx) {
         DataType cType=types.apply(ctx.name.getText());
         if (DataType.INTEGER==cType){
             constants.register(ctx.name.getText(), f->(double) ExpressionEvaluator.evalInteger(types, f, ctx.expr()));
@@ -58,7 +58,7 @@ public class ConstantsEvaluator extends YodaModelBaseVisitor<CachedValues>{
     }
 
     @Override
-    public CachedValues visitParameter_declaration(YodaModelParser.Parameter_declarationContext ctx) {
+    public CachedValues visitParameterDeclaration(YodaModelParser.ParameterDeclarationContext ctx) {
         return this.constants;
     }
 }

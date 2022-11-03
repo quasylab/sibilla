@@ -37,6 +37,8 @@ public class ParseUtil {
     private static final String UNKNOWN_VARIABLE_ERROR = "Variable %s can not be resolved";
     private static final String WRONG_TYPE_ERROR = "Wrong type! Expected %s actual is %s";
 
+    private static final String UNKNOWN_ENTITY_ERROR = "Agent or Variable %s can not be resolved";
+
     public static ParseError duplicatedIdentifierError(String name, Token duplicated, Token original){
         return new ParseError(
                 String.format(DUPLICATED_ID_ERROR, name, original.getLine(), original.getCharPositionInLine()),
@@ -91,7 +93,13 @@ public class ParseUtil {
                 argument.start.getCharPositionInLine());
     }
 
-
+    public static ParseError unknownEntityError(String name, Token variableName){
+        return new ParseError(
+                String.format(UNKNOWN_ENTITY_ERROR, name),
+                variableName.getLine(),
+                variableName.getCharPositionInLine()
+        );
+    }
 
 
 

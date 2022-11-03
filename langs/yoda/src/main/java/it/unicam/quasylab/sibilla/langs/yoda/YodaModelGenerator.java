@@ -23,7 +23,7 @@
 
 package it.unicam.quasylab.sibilla.langs.yoda;
 
-import it.unicam.quasylab.sibilla.core.models.yoda.YodaDefinition;
+//import it.unicam.quasylab.sibilla.core.models.yoda.YodaDefinition;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
 import org.antlr.v4.runtime.CharStreams;

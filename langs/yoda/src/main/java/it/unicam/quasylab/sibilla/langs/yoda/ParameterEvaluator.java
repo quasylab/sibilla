@@ -44,12 +44,12 @@ public class ParameterEvaluator extends YodaModelBaseVisitor<Map<String,Double>>
     }
 
     @Override
-    public Map<String, Double> visitConstant_declaration(YodaModelParser.Constant_declarationContext ctx) {
+    public Map<String, Double> visitConstantDeclaration(YodaModelParser.ConstantDeclarationContext ctx) {
         return this.params;
     }
 
     @Override
-    public Map<String, Double> visitParameter_declaration(YodaModelParser.Parameter_declarationContext ctx) {
+    public Map<String, Double> visitParameterDeclaration(YodaModelParser.ParameterDeclarationContext ctx) {
         this.params.put(ctx.name.getText(), Double.parseDouble(ctx.value.getText()));
         return this.params;
     }

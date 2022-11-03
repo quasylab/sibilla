@@ -21,15 +21,23 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.models.yoda;
+package it.unicam.quasylab.sibilla.core.models.yoda.util;
 
+import it.unicam.quasylab.sibilla.core.models.yoda.YodaAction;
+import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariableMapping;
+import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.List;
+
 /**
- * The interface <code>OmegaFunction</code> represents
- * a functional interface computing the observations of an agent
+ *
+ * @param <RG>
+ * @param <F>
+ * @param <S>
+ * @param <R>
  */
 @FunctionalInterface
-public interface OmegaFunction {
-    YodaVariableMapping compute(RandomGenerator rg, YodaSystemState system, YodaAgent agent);
+public interface BehaviouralStepFunction<RG, F, S, R> {
+    WeightedStructure<YodaAction> apply(RandomGenerator rg, YodaVariableMapping state, YodaVariableMapping observations);
 }

@@ -25,6 +25,7 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.*;
 import java.util.stream.IntStream;
 
@@ -68,6 +69,14 @@ public interface YodaValue {
         }
     }
 
+    static YodaValue integerOf(int v){
+        return new IntegerValue(v);
+    }
+
+    static YodaValue realOf(double v) {
+        return new RealValue(v);
+    }
+
     /**
      * This method returns the type of the value
      *
@@ -99,8 +108,8 @@ public interface YodaValue {
      *
      * @return the integer representation of this value
      */
-    default YodaValue integerValue(){
-        return NONE;
+    default Optional<IntegerValue> integerValue(){
+        return Optional.empty();
     }
 
     /**
@@ -108,8 +117,8 @@ public interface YodaValue {
      *
      * @return
      */
-    default YodaValue realValue(){
-        return NONE;
+    default Optional<RealValue> realValue(){
+        return Optional.empty();
     }
 
     /**
@@ -474,11 +483,6 @@ public interface YodaValue {
             return YodaValue.super.cast(type);
         }
 
-        //TODO
-        @Override
-        public YodaValue isTrue() {
-            return YodaValue.super.isTrue();
-        }
 
         @Override
         public YodaValue negation() {
@@ -515,6 +519,10 @@ public interface YodaValue {
             this.value=value;
         }
 
+        public int value() {
+            return value;
+        }
+
         private IntegerValue doApply(IntUnaryOperator operator){return new IntegerValue(operator.applyAsInt(this.value));}
 
         private IntegerValue doApply(IntBinaryOperator operator, IntegerValue other){
@@ -538,13 +546,8 @@ public interface YodaValue {
         }
 
         @Override
-        public YodaValue integerValue() {
-            return this;
-        }
-
-        @Override
-        public YodaValue realValue() {
-            return REAL_VALUE.apply(this.value);
+        public Optional<IntegerValue> integerValue() {
+            return Optional.of(this);
         }
 
         @Override
@@ -732,14 +735,10 @@ public interface YodaValue {
             return getBooleanOf(value);
         }
 
-        @Override
-        public YodaValue integerValue() {
-            return INTEGER_VALUE.apply((int) value);
-        }
 
         @Override
-        public YodaValue realValue() {
-            return this;
+        public Optional<RealValue> realValue() {
+            return Optional.of(this);
         }
 
         @Override

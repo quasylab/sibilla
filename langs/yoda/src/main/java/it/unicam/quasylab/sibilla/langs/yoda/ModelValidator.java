@@ -85,7 +85,7 @@ public class ModelValidator {
 
         private final Set<String> agentSysList = new HashSet<>();
         private final Set<String> stateList = new HashSet<>();
-        private final Set<String> observationVariables = new HashSet<>();
+        //private final Set<String> observationList = new HashSet<>();
         private boolean stateVariablesAllowed = false;
         private final Set<String> actionList = new HashSet<>();
         private final Set<String> behavList = new HashSet<>();
@@ -111,7 +111,7 @@ public class ModelValidator {
         }
 
         @Override
-        public Boolean visitConstant_declaration(YodaModelParser.Constant_declarationContext ctx) {
+        public Boolean visitConstantDeclaration(YodaModelParser.ConstantDeclarationContext ctx) {
             this.stateVariablesAllowed=false;
             if (checkAndRecord(ctx.name)&&ctx.expr().accept(this)){
                 types.put(ctx.name.getText(), TypeVisitor.getTypeOf(errorCollector, ModelValidator.this::getTypesOf, ctx.expr()));
@@ -123,70 +123,71 @@ public class ModelValidator {
 
         //TODO
         @Override
-        public Boolean visitParameter_declaration(YodaModelParser.Parameter_declarationContext ctx) {
+        public Boolean visitParameterDeclaration(YodaModelParser.ParameterDeclarationContext ctx) {
             return null;
         }
 
         //TODO
         @Override
-        public Boolean visitType_declaration(YodaModelParser.Type_declarationContext ctx) {
+        public Boolean visitTypeDeclaration(YodaModelParser.TypeDeclarationContext ctx) {
             return null;
         }
 
         @Override
-        public Boolean visitAgent_declaration(YodaModelParser.Agent_declarationContext ctx) {
+        public Boolean visitAgentDeclaration(YodaModelParser.AgentDeclarationContext ctx) {
             boolean flag = true;
-            if (checkAndRecord(ctx.name)){
-                agentSysList.add(ctx.name.getText());
+            if (checkAndRecord(ctx.agentName)){
+                agentSysList.add(ctx.agentName.getText());
                 flag = true;
             } else {
                 return false;
             }
-            for (YodaModelParser.Constr_paramsContext constr_paramsContext : ctx.constr_params()){
-                flag &= constr_paramsContext.accept(this);
+            flag &= ctx.knowledgeDeclaration().accept(this);
+            flag &= ctx.informationDeclaration().accept(this);
+            flag &= ctx.observationDeclaration().accept(this);
+            for (YodaModelParser.ActionBodyContext actionBodyContext : ctx.actionBody()) {
+                flag &= actionBodyContext.accept(this);
             }
-            for (YodaModelParser.State_declarationContext state_declarationContext : ctx.state_declaration()){
-                flag &= state_declarationContext.accept(this);
-            }
-            for (YodaModelParser.Observation_declarationContext observation_declarationContext : ctx.observation_declaration()){
-                flag &= observation_declarationContext.accept(this);
-            }
-            for (YodaModelParser.Action_declarationContext action_declarationContext : ctx.action_declaration()){
-                flag &= action_declarationContext.accept(this);
-            }
-            flag &= ctx.behaviour_declaration().accept(this);
+            flag &= ctx.behaviourDeclaration().accept(this);
             return flag;
+
+
         }
 
         @Override
-        public Boolean visitConstr_params(YodaModelParser.Constr_paramsContext ctx) {
-            return null;
-        }
-
-        //TODO
-        // vogliamo lasciare tutto in REAL?
-        @Override
-        public Boolean visitState_declaration(YodaModelParser.State_declarationContext ctx) {
+        public Boolean visitKnowledgeDeclaration(YodaModelParser.KnowledgeDeclarationContext ctx) {
             boolean flag = true;
-            //check type function
-            if (checkAndRecord(ctx.name)){
-                types.put(ctx.name.getText(), DataType.REAL);
-                stateList.add(ctx.name.getText());
-                flag = true;
-            }else{
-                return false;
+            for (YodaModelParser.NewFieldContext newFieldContext : ctx.newField()) {
+                flag &= newFieldContext.accept(this);
             }
-            flag = (ctx.value == null)||checkType(ctx.value, DataType.REAL);
+            return flag;
+        }
+
+        @Override
+        public Boolean visitInformationDeclaration(YodaModelParser.InformationDeclarationContext ctx) {
+            boolean flag = true;
+            for (YodaModelParser.NewFieldContext newFieldContext : ctx.newField()) {
+                flag &= newFieldContext.accept(this);
+            }
+            return flag;
+        }
+
+        @Override
+        public Boolean visitObservationDeclaration(YodaModelParser.ObservationDeclarationContext ctx) {
+            boolean flag = true;
+            for (YodaModelParser.NewFieldContext newFieldContext : ctx.newField()) {
+                flag &= newFieldContext.accept(this);
+            }
             return flag;
         }
 
         //TODO
         @Override
-        public Boolean visitObservation_declaration(YodaModelParser.Observation_declarationContext ctx) {
-            //check type function
-            if (checkAndRecord(ctx.name)){
-                types.put(ctx.name.getText(), DataType.BOOLEAN);
-                observationVariables.add(ctx.name.getText());
+        public Boolean visitNewField(YodaModelParser.NewFieldContext ctx) {
+            //Check e save del type
+            if (checkAndRecord(ctx.fieldName)){
+                //inserimento nella map di types con string e
+                stateList.add(ctx.fieldName.getText());
                 return true;
             }else{
                 return false;
@@ -194,29 +195,214 @@ public class ModelValidator {
         }
 
         @Override
-        public Boolean visitAction_declaration(YodaModelParser.Action_declarationContext ctx) {
+        public Boolean visitActionBody(YodaModelParser.ActionBodyContext ctx) {
             boolean flag = true;
-            if (checkAndRecord(ctx.action_name)){
-                actionList.add(ctx.action_name.getText());
-                flag=true;
+            if (checkAndRecord(ctx.actionName)){
+                actionList.add(ctx.actionName.getText());
+                flag &= true;
             } else {
                 return false;
             }
-            for (YodaModelParser.Action_bodyContext action_bodyContext : ctx.action_body()){
-                flag &= action_bodyContext.accept(this);
+            for (YodaModelParser.FieldUpdateContext fieldUpdateContext : ctx.fieldUpdate()){
+                flag &= fieldUpdateContext.accept(this);
             }
             return flag;
         }
 
         @Override
-        public Boolean visitTerminal_action_body(YodaModelParser.Terminal_action_bodyContext ctx) {
-            String name = ctx.state_name.getText();
-            if (!stateList.contains(name)){
-                errorCollector.record(ParseUtil.unknownVariableError(name, ctx.state_name));
+        public Boolean visitFieldUpdate(YodaModelParser.FieldUpdateContext ctx) {
+            String name = ctx.fieldName.getText();
+            if(!stateList.contains(name)){
+                errorCollector.record(ParseUtil.unknownVariableError(name, ctx.fieldName));
                 return false;
             }
             return ctx.expr().accept(this) & (checkType(ctx.value, DataType.REAL)||checkType(ctx.value, DataType.INTEGER));
         }
+
+        @Override
+        public Boolean visitBehaviourDeclaration(YodaModelParser.BehaviourDeclarationContext ctx) {
+            boolean flag = true;
+            for (YodaModelParser.RuleDeclarationContext ruleDeclarationContext : ctx.ruleDeclaration()) {
+                flag &= ruleDeclarationContext.accept(this);
+            }
+            flag &= ctx.defaultRule().accept(this);
+            return flag;
+        }
+
+        @Override
+        public Boolean visitRuleDeclaration(YodaModelParser.RuleDeclarationContext ctx) {
+            boolean flag = true;
+            flag &= ctx.expr().accept(this) & (checkType(ctx.boolExpr, DataType.BOOLEAN));
+            for (YodaModelParser.WeightedRuleContext weightedRuleContext : ctx.weightedRule()) {
+                flag &= weightedRuleContext.accept(this);
+            }
+            return flag;
+        }
+
+        @Override
+        public Boolean visitDefaultRule(YodaModelParser.DefaultRuleContext ctx) {
+            boolean flag = true;
+            for (YodaModelParser.WeightedRuleContext weightedRuleContext : ctx.weightedRule()) {
+                flag &= weightedRuleContext.accept(this);
+            }
+            return flag;
+        }
+
+        @Override
+        public Boolean visitWeightedRule(YodaModelParser.WeightedRuleContext ctx) {
+            String name = ctx.actionName.getText();
+            if (!actionList.contains(name)) {
+                errorCollector.record(ParseUtil.unknownActionError(name, ctx.actionName));
+                return false;
+            }
+            return ctx.expr().accept(this) & (checkType(ctx.weight, DataType.REAL)||checkType(ctx.weight, DataType.INTEGER));
+        }
+
+
+        @Override
+        public Boolean visitSystemDeclaration(YodaModelParser.SystemDeclarationContext ctx) {
+            boolean flag = true;
+            if (checkAndRecord(ctx.name)) {
+                agentSysList.add(ctx.name.getText());
+                flag = true;
+            } else {
+                return false;
+            }
+            for (YodaModelParser.NewFieldContext newFieldContext : ctx.newField()) {
+                flag &= newFieldContext.accept(this);
+            }
+            flag &= (ctx.assignmentTemp()==null || ctx.assignmentTemp().accept(this));
+            for (YodaModelParser.AgentSensingContext agentSensingContext : ctx.agentSensing()) {
+                flag &= agentSensingContext.accept(this);
+            }
+            for (YodaModelParser.EvolutionDeclarationContext evolutionDeclarationContext : ctx.evolutionDeclaration()) {
+                flag &= evolutionDeclarationContext.accept(this);
+            }
+            return flag;
+        }
+
+        //TODO
+        @Override
+        public Boolean visitAssignmentTemp(YodaModelParser.AssignmentTempContext ctx) {
+            return null;
+        }
+
+        //TODO
+        @Override
+        public Boolean visitSelectionBlock(YodaModelParser.SelectionBlockContext ctx) {
+            return null;
+        }
+
+        @Override
+        public Boolean visitAgentSensing(YodaModelParser.AgentSensingContext ctx) {
+            boolean flag = true;
+            String name = ctx.agentName.getText();
+            if (!agentSysList.contains(name)) {
+                errorCollector.record(ParseUtil.unknownAgentError(name, ctx.agentName));
+                return false;
+            }
+            for (YodaModelParser.FieldUpdateContext fieldUpdateContext : ctx.fieldUpdate()) {
+                flag &= fieldUpdateContext.accept(this);
+            }
+            return flag;
+        }
+
+        @Override
+        public Boolean visitEvolutionDeclaration(YodaModelParser.EvolutionDeclarationContext ctx) {
+            boolean flag = true;
+            String name = ctx.entityName.getText();
+            if (!agentSysList.contains(name) || !stateList.contains(name)) {
+                errorCollector.record(ParseUtil.unknownEntityError(name, ctx.entityName));
+                return false;
+            }
+            for (YodaModelParser.FieldUpdateContext fieldUpdateContext : ctx.fieldUpdate()) {
+                flag &= fieldUpdateContext.accept(this);
+            }
+            return flag;
+        }
+
+        //TODO
+        @Override
+        public Boolean visitConfigurationDeclaration(YodaModelParser.ConfigurationDeclarationContext ctx) {
+            return super.visitConfigurationDeclaration(ctx);
+        }
+
+        //TODO
+        @Override
+        public Boolean visitAssignmentDeclaration(YodaModelParser.AssignmentDeclarationContext ctx) {
+            return super.visitAssignmentDeclaration(ctx);
+        }
+
+        //TODO
+        @Override
+        public Boolean visitCollectiveDeclaration(YodaModelParser.CollectiveDeclarationContext ctx) {
+            return super.visitCollectiveDeclaration(ctx);
+        }
+
+        //TODO
+        @Override
+        public Boolean visitFieldInit(YodaModelParser.FieldInitContext ctx) {
+            return super.visitFieldInit(ctx);
+        }
+
+        /*
+                                                                                        //TODO
+                                                                                        // vogliamo lasciare tutto in REAL?
+                                                                                        @Override
+                                                                                        public Boolean visitState_declaration(YodaModelParser.State_declarationContext ctx) {
+                                                                                            boolean flag = true;
+                                                                                            //check type function
+                                                                                            if (checkAndRecord(ctx.name)){
+                                                                                                types.put(ctx.name.getText(), DataType.REAL);
+                                                                                                stateList.add(ctx.name.getText());
+                                                                                                flag = true;
+                                                                                            }else{
+                                                                                                return false;
+                                                                                            }
+                                                                                            flag = (ctx.value == null)||checkType(ctx.value, DataType.REAL);
+                                                                                            return flag;
+                                                                                        }
+
+                                                                                        //TODO
+                                                                                        @Override
+                                                                                        public Boolean visitObservation_declaration(YodaModelParser.Observation_declarationContext ctx) {
+                                                                                            //check type function
+                                                                                            if (checkAndRecord(ctx.name)){
+                                                                                                types.put(ctx.name.getText(), DataType.BOOLEAN);
+                                                                                                observationVariables.add(ctx.name.getText());
+                                                                                                return true;
+                                                                                            }else{
+                                                                                                return false;
+                                                                                            }
+                                                                                        }
+
+
+                                                                                        @Override
+                                                                                        public Boolean visitAction_declaration(YodaModelParser.Action_declarationContext ctx) {
+                                                                                            boolean flag = true;
+                                                                                            if (checkAndRecord(ctx.action_name)){
+                                                                                                actionList.add(ctx.action_name.getText());
+                                                                                                flag=true;
+                                                                                            } else {
+                                                                                                return false;
+                                                                                            }
+                                                                                            for (YodaModelParser.Action_bodyContext action_bodyContext : ctx.action_body()){
+                                                                                                flag &= action_bodyContext.accept(this);
+                                                                                            }
+                                                                                            return flag;
+                                                                                        }
+
+
+
+                                                                                        @Override
+                                                                                        public Boolean visitTerminal_action_body(YodaModelParser.Terminal_action_bodyContext ctx) {
+                                                                                            String name = ctx.state_name.getText();
+                                                                                            if (!stateList.contains(name)){
+                                                                                                errorCollector.record(ParseUtil.unknownVariableError(name, ctx.state_name));
+                                                                                                return false;
+                                                                                            }
+                                                                                            return ctx.expr().accept(this) & (checkType(ctx.value, DataType.REAL)||checkType(ctx.value, DataType.INTEGER));
+                                                                                        }
 
         @Override
         public Boolean visitAgent_ref_action_body(YodaModelParser.Agent_ref_action_bodyContext ctx) {
@@ -400,6 +586,6 @@ public class ModelValidator {
         @Override
         public Boolean visitCollective_body(YodaModelParser.Collective_bodyContext ctx) {
             return null;
-        }
+        }*/
     }
 }

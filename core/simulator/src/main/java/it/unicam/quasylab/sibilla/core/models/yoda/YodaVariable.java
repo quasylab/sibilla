@@ -33,7 +33,7 @@ public class YodaVariable {
     private final YodaType type;
 
 
-    public YodaVariable(String name, int idx, YodaType type) {
+    public YodaVariable(int idx, String name, YodaType type) {
         this.name = name;
         this.idx = idx;
         this.type = type;

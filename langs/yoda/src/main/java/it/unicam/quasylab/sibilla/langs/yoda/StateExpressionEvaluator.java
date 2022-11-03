@@ -172,11 +172,13 @@ public class StateExpressionEvaluator extends YodaModelBaseVisitor<LazyValue<Map
         return LazyValue.IfThenElse(guard, thenBranch, elseBranch);
     }
 
+    /*
     //TODO
     @Override
     public LazyValue<MappingState> visitRecordExpression(YodaModelParser.RecordExpressionContext ctx) {
         return null;
     }
+     */
 
     //TODO
     @Override
