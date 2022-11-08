@@ -45,26 +45,27 @@ public class RobotDefinition {
 
     private static YodaVariableMapping computeOmega(RandomGenerator rg, YodaSystemState yodaSystemState, YodaAgent yodaAgent) {
         YodaVariableMapping agentPos = yodaAgent.getAgentInformation();
-        YodaVariableMapping observations = yodaAgent.getAgentObservations();
+        YodaVariableMapping newObservations = yodaAgent.getAgentObservations().copy();
         YodaScene scene = yodaSystemState.getScene();
         int x = agentPos.getValue(RobotState.POSX_VAR).integerValue().map(YodaValue.IntegerValue::value).orElse(0);
         int y = agentPos.getValue(RobotState.POSY_VAR).integerValue().map(YodaValue.IntegerValue::value).orElse(0);
-        observations.setValue(RobotObservation.NORTH_VAR, new YodaValue.BooleanValue(scene.thereIsSomething(x, y+1)));
-        observations.setValue(RobotObservation.SOUTH_VAR, new YodaValue.BooleanValue(scene.thereIsSomething(x, y-1)));
-        observations.setValue(RobotObservation.EAST_VAR, new YodaValue.BooleanValue(scene.thereIsSomething(x+1, y)));
-        observations.setValue(RobotObservation.WEST_VAR, new YodaValue.BooleanValue(scene.thereIsSomething(x-1, y)));
-        observations.setValue(RobotObservation.GOAL_VAR, new YodaValue.BooleanValue(y == scene.getHeightInt()));
-        return observations;
+        newObservations.setValue(RobotObservation.NORTH_VAR, new YodaValue.BooleanValue(scene.thereIsSomething(x, y+1)));
+        newObservations.setValue(RobotObservation.SOUTH_VAR, new YodaValue.BooleanValue(scene.thereIsSomething(x, y-1)));
+        newObservations.setValue(RobotObservation.EAST_VAR, new YodaValue.BooleanValue(scene.thereIsSomething(x+1, y)));
+        newObservations.setValue(RobotObservation.WEST_VAR, new YodaValue.BooleanValue(scene.thereIsSomething(x-1, y)));
+        newObservations.setValue(RobotObservation.GOAL_VAR, new YodaValue.BooleanValue(y == scene.getHeightInt()));
+        return newObservations;
     }
 
     private static YodaVariableMapping computeInfoUpdate(RandomGenerator randomGenerator, YodaVariableMapping knowledge, YodaVariableMapping information) {
+        YodaVariableMapping newInfo = information.copy();
         int posX = information.getValue(RobotState.POSX_VAR).integerValue().map(YodaValue.IntegerValue::value).orElse(0);
         int posY = information.getValue(RobotState.POSY_VAR).integerValue().map(YodaValue.IntegerValue::value).orElse(0);
         int accX = knowledge.getValue(RobotState.ACCX_VAR).integerValue().map(YodaValue.IntegerValue::value).orElse(0);
         int accY = knowledge.getValue(RobotState.ACCY_VAR).integerValue().map(YodaValue.IntegerValue::value).orElse(0);
-        information.setValue(RobotState.POSX_VAR, new YodaValue.IntegerValue(posX + accX));
-        information.setValue(RobotState.POSY_VAR, new YodaValue.IntegerValue(posY + accY));
-        return information;
+        newInfo.setValue(RobotState.POSX_VAR, new YodaValue.IntegerValue(posX + accX));
+        newInfo.setValue(RobotState.POSY_VAR, new YodaValue.IntegerValue(posY + accY));
+        return newInfo;
     }
 
 

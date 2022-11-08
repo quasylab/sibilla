@@ -25,6 +25,7 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.*;
 import java.util.stream.IntStream;
@@ -509,6 +510,19 @@ public interface YodaValue {
             }
             return NONE;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BooleanValue that = (BooleanValue) o;
+            return value == that.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
+        }
     }
 
     class IntegerValue implements YodaValue {
@@ -705,6 +719,19 @@ public interface YodaValue {
         public YodaValue atan() {
             return NONE;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            IntegerValue that = (IntegerValue) o;
+            return value == that.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
+        }
     }
 
     class RealValue implements YodaValue{
@@ -877,6 +904,19 @@ public interface YodaValue {
         @Override
         public YodaValue atan() {
             return doApply(Math::atan);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            RealValue realValue = (RealValue) o;
+            return Double.compare(realValue.value, value) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
         }
     }
 

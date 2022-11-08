@@ -168,10 +168,10 @@ public final class YodaAgent {
 
     public YodaAgent next(RandomGenerator rg, YodaSystemState<?> state) {
         YodaVariableMapping newObservations = this.omegaFunction.compute(rg, state, this);
-        WeightedStructure<YodaAction> actionSet = agentBehaviour.evaluate(rg, agentKnowledge, newObservations);
-        YodaAction selectedAction = agentBehaviour.selectAction(rg, actionSet);
-        YodaVariableMapping newKnowledge = selectedAction.performAction(rg, agentKnowledge);
-        YodaVariableMapping newInfo = this.agentInfoUpdateFunction.compute(rg, newKnowledge, agentInformation);
+        WeightedStructure<YodaAction> actionSet = this.agentBehaviour.evaluate(rg, this.agentKnowledge, newObservations);
+        YodaAction selectedAction = this.agentBehaviour.selectAction(rg, actionSet);
+        YodaVariableMapping newKnowledge = selectedAction.performAction(rg, this.agentKnowledge);
+        YodaVariableMapping newInfo = this.agentInfoUpdateFunction.compute(rg, newKnowledge, this.agentInformation);
         return new YodaAgent(this.identifier, this.name, newKnowledge, newInfo, newObservations, this.agentBehaviour, this.omegaFunction, this.agentInfoUpdateFunction);
     }
 }

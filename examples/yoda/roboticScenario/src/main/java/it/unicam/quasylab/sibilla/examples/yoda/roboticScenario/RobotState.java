@@ -38,7 +38,7 @@ public class RobotState implements YodaVariableMapping {
     public static YodaVariable ACCX_VAR = new YodaVariable(2, "accX", YodaType.INTEGER_TYPE);
     public static YodaVariable ACCY_VAR = new YodaVariable(3, "accY", YodaType.INTEGER_TYPE);
 
-    public static YodaValue POSX_VAL = YodaValue.integerOf(0);
+    public static YodaValue POSX_VAL = YodaValue.integerOf(5);
     public static YodaValue POSY_VAL = YodaValue.integerOf(0);
     public static YodaValue ACCX_VAL = YodaValue.integerOf(0);
     public static YodaValue ACCY_VAL = YodaValue.integerOf(0);

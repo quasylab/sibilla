@@ -42,6 +42,8 @@ public class RobotScenarioDefinition implements YodaModelBuilder<Grid> {
 
     public Grid grid;
 
+    public YodaSystemState<Grid> yodaSysState;
+
     public RobotScenarioDefinition(String label, int width, int height, int numberOfObstacles, List<YodaAgent> agents, RandomGenerator rg) {
         this.label = label;
         this.width = width;

@@ -56,14 +56,15 @@ public class RobotBehaviour {
 
         if (observations.getValue(RobotObservation.GOAL_VAR).equals(YodaValue.TRUE)){
             possibleActions.add(1.0, RobotAction.STAND_STILL);
+            return possibleActions;
         }
-        if (observations.getValue(NORTH_VAR).equals(YodaValue.FALSE)) {
+        if (observations.getValue(RobotObservation.NORTH_VAR).equals(YodaValue.FALSE)) {
             possibleActions.add(1.0, RobotAction.GO_NORTH);
         }
-        if (observations.getValue(NORTH_VAR).equals(YodaValue.TRUE) && observations.getValue(EAST_VAR).equals(YodaValue.FALSE)) {
+        if (observations.getValue(RobotObservation.NORTH_VAR).equals(YodaValue.TRUE) && observations.getValue(RobotObservation.EAST_VAR).equals(YodaValue.FALSE)) {
             possibleActions.add(1.0, RobotAction.GO_EAST);
         }
-        if (observations.getValue(NORTH_VAR).equals(YodaValue.TRUE) && observations.getValue(EAST_VAR).equals(YodaValue.TRUE)){
+        if (observations.getValue(RobotObservation.NORTH_VAR).equals(YodaValue.TRUE) && observations.getValue(RobotObservation.EAST_VAR).equals(YodaValue.TRUE)){
             possibleActions.add(1.0, RobotAction.GO_WEST);
         }
         return possibleActions;

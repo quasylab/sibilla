@@ -105,8 +105,11 @@ public class YodaSystemState<S extends YodaScene> implements ImmutableState {
 
     public YodaSystemState<S> next(RandomGenerator rg) {
         List<YodaAgent> newAgents = this.agents.stream().map(a -> a.next(rg, this)).collect(Collectors.toList());
-        YodaVariableMapping newGlobal = this.globalStateUpdateFunction.compute(rg, newAgents, this.globalState);
-        return new YodaSystemState<>(newGlobal, newAgents, this.scene, this.globalStateUpdateFunction);
+        if (globalStateUpdateFunction!=null){
+            YodaVariableMapping newGlobal = this.globalStateUpdateFunction.compute(rg, newAgents, this.globalState);
+            return new YodaSystemState<>(newGlobal, newAgents, this.scene, this.globalStateUpdateFunction);
+        }
+        return new YodaSystemState<>(this.globalState, newAgents, this.scene, null);
     }
 
     /**

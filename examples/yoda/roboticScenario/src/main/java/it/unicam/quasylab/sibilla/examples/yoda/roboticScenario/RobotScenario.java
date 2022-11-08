@@ -23,10 +23,7 @@
 
 package it.unicam.quasylab.sibilla.examples.yoda.roboticScenario;
 
-import it.unicam.quasylab.sibilla.core.models.yoda.YodaAgent;
-import it.unicam.quasylab.sibilla.core.models.yoda.YodaModel;
-import it.unicam.quasylab.sibilla.core.models.yoda.YodaModelBuilder;
-import it.unicam.quasylab.sibilla.core.models.yoda.YodaSystemState;
+import it.unicam.quasylab.sibilla.core.models.yoda.*;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationTask;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationUnit;
@@ -53,6 +50,7 @@ public class RobotScenario {
     public static void main(String[] args) throws  InterruptedException, FileNotFoundException {
         RobotScenario robotScenario = new RobotScenario(new DefaultRandomGenerator());
         robotScenario.startSimulation("Test1", 10, 10, 10, AGENTS, 100, 100.0);
+        //robotScenario.startSimulation("Test2", 10, 50, 150, AGENTS, 100, 100.0);
     }
 
 
@@ -89,8 +87,11 @@ public class RobotScenario {
             printWriter.printf("%f", t.getTime());
             YodaSystemState<Grid> scenario = t.getValue();
             for(int i=0; i<scenario.getAgents().size(); i++){
-                printWriter.printf(";%f;%f", scenario.getAgentsInfo(i, RobotState.POSX_VAR), scenario.getAgentsInfo(i, RobotState.POSY_VAR));
+                int posx = scenario.getAgentsInfo(i, RobotState.POSX_VAR).integerValue().map(YodaValue.IntegerValue::value).orElse(0);
+                int posy = scenario.getAgentsInfo(i, RobotState.POSY_VAR).integerValue().map(YodaValue.IntegerValue::value).orElse(0);
+                printWriter.printf(";%d;%d ", posx, posy);
             }
+            printWriter.printf("\n");
         });
         printWriter.flush();
         printWriter.close();

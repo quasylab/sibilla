@@ -78,7 +78,7 @@ public interface YodaBehaviour extends Serializable {
      * @return a single action from a distribution of actions if actionsDistribution is more than zero or null if actionsDistribution is not more than zero
      */
     default YodaAction selectAction(RandomGenerator rg, WeightedStructure<YodaAction> actionsDistribution) {
-        if (actionsDistribution.getTotalWeight()>0) {
+        if (actionsDistribution.getTotalWeight()>0.0) {
             return actionsDistribution.select(actionsDistribution.getTotalWeight()*rg.nextDouble()).getElement();
         } else {
             return null;
