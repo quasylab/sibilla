@@ -55,7 +55,6 @@ public class FullFactorialSampling implements SamplingStrategy {
         return setsOfPointsPerDimension;
     }
 
-
     private Table getTableFromSetOfList(Set<List<Double>> set,HyperRectangle hr){
         int numberOfColumn = set.iterator().next().size();
         DoubleColumn[] columnList = new DoubleColumn[numberOfColumn];
@@ -68,7 +67,6 @@ public class FullFactorialSampling implements SamplingStrategy {
                 columnList[i].append(hr.getInterval(i).isContinuous() ? value : Math.round(value));
             }
         }
-
         return Table.create(columnList).dropDuplicateRows();
     }
 

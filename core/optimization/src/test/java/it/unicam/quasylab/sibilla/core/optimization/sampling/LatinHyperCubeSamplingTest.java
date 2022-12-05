@@ -14,9 +14,9 @@ class LatinHyperCubeSamplingTest {
     @Test
     void testNumberOfRowAndColumn() {
         HyperRectangle hr = new HyperRectangle(
-                new Interval(1.0,10.0),
-                new Interval(1.0,10.0),
-                new Interval(1.0,10.0)
+                new ContinuousInterval(1.0,10.0),
+                new ContinuousInterval(1.0,10.0),
+                new ContinuousInterval(1.0,10.0)
         );
         int numberOfSamples = 50;
         Table sampleSet = new LatinHyperCubeSampling().getSampleTable(numberOfSamples,hr);

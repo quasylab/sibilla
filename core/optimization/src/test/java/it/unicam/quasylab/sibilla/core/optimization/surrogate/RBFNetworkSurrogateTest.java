@@ -1,5 +1,6 @@
 package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 
+import it.unicam.quasylab.sibilla.core.optimization.sampling.ContinuousInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
 import org.junit.jupiter.api.Test;
@@ -20,8 +21,8 @@ class RBFNetworkSurrogateTest {
         Function<Map<String,Double>,Double> funToOpt = map -> Math.sin(5*map.get("x")) *Math.cos(5*map.get("y"))/5;
 
         HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("x",-2.0,2.0),
-                new Interval("y",-2.0,2.0)
+                new ContinuousInterval("x",-2.0,2.0),
+                new ContinuousInterval("y",-2.0,2.0)
         );
 
         TrainingSet ts = new TrainingSet(searchSpace,"lhs",10000,funToOpt);

@@ -15,10 +15,10 @@ class FullFactorialSamplingTest {
     @Test
     void testNumberOfSamplesOverContinuousInterval() {
         HyperRectangle hr = new HyperRectangle(
-                new Interval(1.0,10.0),
-                new Interval(1.0,10.0),
-                new Interval(1.0,10.0),
-                new Interval(1.0,10.0)
+                new ContinuousInterval(1.0,10.0),
+                new ContinuousInterval(1.0,10.0),
+                new ContinuousInterval(1.0,10.0),
+                new ContinuousInterval(1.0,10.0)
         );
         int numberOfSamplesPerDimension = 3;
         Table sampleSet = new FullFactorialSampling().getSampleTable(3,hr);
@@ -31,16 +31,16 @@ class FullFactorialSamplingTest {
     @Test
     void testNumberOfSamplesOverMixedInterval() {
         HyperRectangle hrMixed = new HyperRectangle(
-                new Interval("v1",1,25,false),
-                new Interval("v2",-40,65),
-                new Interval("v3",-130,200),
-                new Interval("v4",-1,1,false)
+                new DiscreteStepInterval("v4",-1,1,1.0),
+                new ContinuousInterval("v2",-40,65),
+                new ContinuousInterval("v3",-130,200),
+                new DiscreteStepInterval("v4",-1,1,1.0)
         );
         HyperRectangle hrAllContinuous = new HyperRectangle(
-                new Interval("v1",1,25),
-                new Interval("v2",-40,65),
-                new Interval("v3",-130,200),
-                new Interval("v4",-1,1)
+                new ContinuousInterval("v1",1,25),
+                new ContinuousInterval("v2",-40,65),
+                new ContinuousInterval("v3",-130,200),
+                new ContinuousInterval("v4",-1,1)
         );
         int numberOfSamplesPerDimension = 3;
         Table sampleSetMix = new FullFactorialSampling().getSampleTable(3,hrMixed);

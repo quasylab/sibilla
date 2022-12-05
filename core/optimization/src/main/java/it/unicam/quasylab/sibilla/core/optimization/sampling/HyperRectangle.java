@@ -106,7 +106,7 @@ public class HyperRectangle{
     public HyperRectangle getCopy(){
         return new HyperRectangle(
                 Arrays.stream(this.intervals)
-                .map( i-> new Interval(i.getId(),i.getLowerBound(),i.getUpperBound(),i.isContinuous()))
+                .map(Interval::getDeepCopy)
                 .toArray(Interval[]::new)
         );
     }

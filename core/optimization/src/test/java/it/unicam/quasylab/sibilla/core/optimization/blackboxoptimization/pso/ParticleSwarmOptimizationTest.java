@@ -1,6 +1,7 @@
 package it.unicam.quasylab.sibilla.core.optimization.blackboxoptimization.pso;
 
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.pso.ParticleSwarmOptimization;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.ContinuousInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
 import org.junit.jupiter.api.Test;
@@ -29,9 +30,9 @@ class ParticleSwarmOptimizationTest {
 
         // SEARCH SPACE
         HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("x",200.0,400.0),
-                new Interval("y",0.03, 3.0),
-                new Interval("w",1.0,10.0)
+                new ContinuousInterval("x",200.0,400.0),
+                new ContinuousInterval("y",0.03, 3.0),
+                new ContinuousInterval("w",1.0,10.0)
         );
 
         // FUNCTION
@@ -77,9 +78,9 @@ class ParticleSwarmOptimizationTest {
 
         // SEARCH SPACE
         HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("x",200.0,400.0),
-                new Interval("y",0.03, 3.0),
-                new Interval("w",1.0,10.0)
+                new ContinuousInterval("x",200.0,400.0),
+                new ContinuousInterval("y",0.03, 3.0),
+                new ContinuousInterval("w",1.0,10.0)
         );
 
         // FUNCTION
@@ -137,8 +138,8 @@ class ParticleSwarmOptimizationTest {
         );
 
         HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("x",-2.0,2.0),
-                new Interval("y",-2.0,2.0)
+                new ContinuousInterval("x",-2.0,2.0),
+                new ContinuousInterval("y",-2.0,2.0)
         );
 
         Map<String,Double> minimizingValues = new ParticleSwarmOptimization(functionToOptimize,null,searchSpace,new Properties())
@@ -165,8 +166,8 @@ class ParticleSwarmOptimizationTest {
         );
 
         HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("x",-2.0,2.0),
-                new Interval("y",-2.0,2.0)
+                new ContinuousInterval("x",-2.0,2.0),
+                new ContinuousInterval("y",-2.0,2.0)
         );
 
         Map<String,Double> maximizingValues = new ParticleSwarmOptimization(functionToOptimize,null,searchSpace,new Properties())
@@ -229,8 +230,8 @@ class ParticleSwarmOptimizationTest {
         );
 
         HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("x1",-10.0,10.0),
-                new Interval("x2",-10.0,10.0)
+                new ContinuousInterval("x1",-10.0,10.0),
+                new ContinuousInterval("x2",-10.0,10.0)
         );
 
 
@@ -238,8 +239,8 @@ class ParticleSwarmOptimizationTest {
                 .minimize();
 
         HyperRectangle rightZone = new HyperRectangle(
-                new Interval("x1",0.9,1.4),
-                new Interval("x2",3.0,4.0)
+                new ContinuousInterval("x1",0.9,1.4),
+                new ContinuousInterval("x2",3.0,4.0)
         );
 
         assertTrue(rightZone.couldContain(minimizingValues));
@@ -330,13 +331,13 @@ class ParticleSwarmOptimizationTest {
         );
 
         HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("x1",-10.0,10.0),
-                new Interval("x2",-10.0,10.0),
-                new Interval("x3",-10.0,10.0),
-                new Interval("x4",-10.0,10.0),
-                new Interval("x5",-10.0,10.0),
-                new Interval("x6",-10.0,10.0),
-                new Interval("x7",-10.0,10.0)
+                new ContinuousInterval("x1",-10.0,10.0),
+                new ContinuousInterval("x2",-10.0,10.0),
+                new ContinuousInterval("x3",-10.0,10.0),
+                new ContinuousInterval("x4",-10.0,10.0),
+                new ContinuousInterval("x5",-10.0,10.0),
+                new ContinuousInterval("x6",-10.0,10.0),
+                new ContinuousInterval("x7",-10.0,10.0)
         );
 
         Map<String,Double> minimizingValues = new ParticleSwarmOptimization(functionToOptimize,constraints,searchSpace,new Properties())
@@ -353,9 +354,9 @@ class ParticleSwarmOptimizationTest {
     public void testRosenbrockFunction(){
 
         HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("x1",-10.0,10.0),
-                new Interval("x2",-10.0,10.0),
-                new Interval("x3",-10.0,10.0)
+                new ContinuousInterval("x1",-10.0,10.0),
+                new ContinuousInterval("x2",-10.0,10.0),
+                new ContinuousInterval("x3",-10.0,10.0)
         );
 
         Properties psoProperties = new Properties();
@@ -369,9 +370,9 @@ class ParticleSwarmOptimizationTest {
         System.out.println(minimizingValues.toString());
 
         HyperRectangle rightZone = new HyperRectangle(
-                new Interval("x1",0.5,1.5),
-                new Interval("x2",0.5,1.5),
-                new Interval("x3",0.5,1.5)
+                new ContinuousInterval("x1",0.5,1.5),
+                new ContinuousInterval("x2",0.5,1.5),
+                new ContinuousInterval("x3",0.5,1.5)
         );
 
         assertTrue(rightZone.couldContain(minimizingValues));
