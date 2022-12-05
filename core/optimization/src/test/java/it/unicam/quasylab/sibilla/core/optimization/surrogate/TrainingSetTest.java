@@ -1,5 +1,7 @@
 package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 
+import it.unicam.quasylab.sibilla.core.optimization.sampling.ContinuousInterval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.DiscreteStepInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
 import org.junit.jupiter.api.Test;
@@ -21,8 +23,8 @@ class TrainingSetTest {
     @Test
     void testTrainingSet(){
         HyperRectangle hr = new HyperRectangle(
-                new Interval("x",0.0,5.0),
-                new Interval("y",5.0,10.0)
+                new ContinuousInterval("x",0.0,5.0),
+                new ContinuousInterval("y",5.0,10.0)
         );
         Function<Map<String,Double>,Double> function = (
                 stringDoubleMap -> stringDoubleMap.get("x") + stringDoubleMap.get("y")
@@ -40,8 +42,8 @@ class TrainingSetTest {
     @Test
     void testSummary(){
         HyperRectangle hr = new HyperRectangle(
-                new Interval("x",0.0,5.0),
-                new Interval("y",5.0,10.0)
+                new ContinuousInterval("x",0.0,5.0),
+                new ContinuousInterval("y",5.0,10.0)
         );
         Function<Map<String,Double>,Double> function = (
                 map -> map.get("x") + map.get("y")
@@ -54,7 +56,7 @@ class TrainingSetTest {
     @Test
     void testMode(){
         HyperRectangle hr = new HyperRectangle(
-                new Interval("x",0.0,1.0)
+                new ContinuousInterval("x",0.0,1.0)
         );
         Function<Map<String,Double>,Double> function = ( map -> map.get("x") > 0.8 ? 0.0 : 1.0 );
         TrainingSet ts = new TrainingSet(hr,"rs",50,function);
@@ -64,7 +66,7 @@ class TrainingSetTest {
     @Test
     void testModeSDis0(){
         HyperRectangle hr = new HyperRectangle(
-                new Interval("x",0.0,1.0)
+                new ContinuousInterval("x",0.0,1.0)
         );
         Function<Map<String,Double>,Double> function = ( map -> 1.0 );
         TrainingSet ts = new TrainingSet(hr,"rs",50,function);
@@ -75,13 +77,13 @@ class TrainingSetTest {
     @Test
     void testFilter(){
         HyperRectangle searchSpace1 = new HyperRectangle(
-                new Interval("x",-20.0,20.0),
-                new Interval("y",-50.0,50.0)
+                new ContinuousInterval("x",-20.0,20.0),
+                new ContinuousInterval("y",-50.0,50.0)
         );
 
         HyperRectangle searchSpace2 = new HyperRectangle(
-                new Interval("x",-10.0,10.0),
-                new Interval("y",-25.0,25.0)
+                new ContinuousInterval("x",-10.0,10.0),
+                new ContinuousInterval("y",-25.0,25.0)
         );
         Function<Map<String,Double>,Double> function = (
                 map -> map.get("x") + map.get("y")
@@ -94,8 +96,8 @@ class TrainingSetTest {
     @Test
     void appendTrainingSet(){
         HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("x",-2.0,2.0,false),
-                new Interval("y",-5.0,5.0,false)
+                new DiscreteStepInterval("x",-2.0,2.0,1.0),
+                new DiscreteStepInterval("y",-5.0,5.0,1.0)
         );
 
         Function<Map<String,Double>,Double> function = (

@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.core.models;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 import java.util.function.Function;
 
@@ -36,12 +37,12 @@ import java.util.function.Function;
  */
 public class EvaluationEnvironment {
 
-
     private final CachedValues constants;
     private final Map<String,Double> attributes;
     private final Map<String,Double> values;
     private final PropertyChangeSupport changer;
     private boolean isChanged = false;
+
 
     public EvaluationEnvironment() {
         this(new CachedValues());

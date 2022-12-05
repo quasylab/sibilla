@@ -3,6 +3,7 @@ package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.surro
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategy;
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategyFactory;
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.pso.ParticleSwarmOptimization;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.ContinuousInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
 import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
@@ -34,8 +35,8 @@ class SurrogateOptimizationTest {
         );
 
         HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("x",-2.0,2.0),
-                new Interval("y",-2.0,2.0)
+                new ContinuousInterval("x",-2.0,2.0),
+                new ContinuousInterval("y",-2.0,2.0)
         );
 
 
@@ -63,9 +64,9 @@ class SurrogateOptimizationTest {
 
         // SEARCH SPACE
         HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("x1",-5.0,5.0),
-                new Interval("x2",-5.0,5.0),
-                new Interval("x3",-5.0,5.0)
+                new ContinuousInterval("x1",-5.0,5.0),
+                new ContinuousInterval("x2",-5.0,5.0),
+                new ContinuousInterval("x3",-5.0,5.0)
         );
 
 
@@ -143,9 +144,9 @@ class SurrogateOptimizationTest {
 
         // SEARCH SPACE
         HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("beta",0.005,0.3),
-                new Interval("gamma",0.005, 0.2),
-                new Interval("timeUnits",100.0,120.0)
+                new ContinuousInterval("beta",0.005,0.3),
+                new ContinuousInterval("gamma",0.005, 0.2),
+                new ContinuousInterval("timeUnits",100.0,120.0)
         );
         Properties properties = new Properties();
 
@@ -205,8 +206,8 @@ class SurrogateOptimizationTest {
 
         // SEARCH SPACE
         HyperRectangle searchSpace = new HyperRectangle(
-                new Interval("beta",0.005,0.3),
-                new Interval("timeUnits",100.0,120.0)
+                new ContinuousInterval("beta",0.005,0.3),
+                new ContinuousInterval("timeUnits",100.0,120.0)
         );
 
         Properties properties = new Properties();

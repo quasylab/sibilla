@@ -98,7 +98,8 @@ public class CSVWriter {
      * @return the row of a CSV file resulting from the given array of double
      */
     public static String getCSVRow(double[] row) {
-        return Arrays.stream(row).boxed().map(d -> String.format("%f",d)).collect(Collectors.joining(", "));
+        return Arrays.stream(row).boxed().map(d -> String.format(java.util.Locale.US,"%f", d)).collect(Collectors.joining(", "));
+        //return Arrays.stream(row).boxed().map(d -> String.format("%f",d)).collect(Collectors.joining(", "));
     }
 
     /**

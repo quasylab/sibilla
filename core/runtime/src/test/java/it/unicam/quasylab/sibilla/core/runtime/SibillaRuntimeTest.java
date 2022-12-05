@@ -317,4 +317,49 @@ class SibillaRuntimeTest {
         sr.simulate("test");
     }
 
+//    @Test
+//    public void testSIR() throws CommandExecutionException {
+//
+//         String TEST_SIR = """
+//            param rate_meeting = 1.0;
+//            param rateSI = 2.0;
+//            param rateIR = rateSI / 8 ;
+//            param rateRI = rateSI / 4 ;
+//            param rateRS = rateSI / 8 ;
+//
+//            species S;
+//            species I;
+//            species R;
+//
+//            /*  infection of a susceptible */
+//            rule rule_SI {
+//              S|I -[ #S * %I * rate_meeting * rateSI ]-> I|I
+//            }
+//
+//            /*  recovery of the infected */
+//            rule rule_SI {
+//              I -[ #I * rateIR ]-> R
+//            }
+//
+//            /*  infection of a recovered */
+//            rule rule_RI {
+//              R|I -[#R * %I * rate_meeting * rateRI ]-> I|I
+//            }
+//
+//
+//            /*  the recovered returns susceptible */
+//            rule rule_SI {
+//              R -[ #R * rateRS ]-> S
+//            }
+//
+//            system intitial = S < 990 > | I < I >;
+//
+//            predicate infection_spread_under_40 = ( %I <= 40);
+//            """;
+//
+//
+//        SibillaRuntime sr = getRuntimeWithModule();
+//        sr.load(TEST_SIR);
+//    }
+
 }

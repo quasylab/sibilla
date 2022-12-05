@@ -111,7 +111,7 @@ public class RandomForestSurrogate implements Surrogate{
     @Override
     public void fit(TrainingSet trainingSet) {
         this.trainingSet = trainingSet;
-        DataFrame trainingSetDataFrame = trainingSet.smile().toDataFrame();
+        DataFrame trainingSetDataFrame = this.trainingSet.smile().toDataFrame();
 
         this.numberOfTrees = Integer.parseInt(this.properties.getProperty("surrogate.random.forest.trees", "500"));
         this.mtry = Integer.parseInt(this.properties.getProperty("surrogate.random.forest.mtry", String.valueOf(Math.max(trainingSetDataFrame.ncols()/3, 1))));

@@ -17,7 +17,7 @@ class IntervalTest {
         double lowerBound = 5.5;
         double upperBound = 1.5;
         try {
-            Interval i = new Interval(id,lowerBound,upperBound);
+            Interval i = new ContinuousInterval(id,lowerBound,upperBound);
         }catch (IllegalArgumentException ex){
             assertEquals(EXCEPT_LOWER_BIGGER_THAN_UPPER, ex.getMessage());
         }
@@ -25,8 +25,8 @@ class IntervalTest {
 
     @Test
     void testDifferentIdPerDifferentIntervals() {
-        Interval i1 = new Interval(2,4);
-        Interval i2 = new Interval(1,8);
+        Interval i1 = new ContinuousInterval(2,4);
+        Interval i2 = new ContinuousInterval(1,8);
         assertNotEquals(i1.getId(), i2.getId());
     }
 

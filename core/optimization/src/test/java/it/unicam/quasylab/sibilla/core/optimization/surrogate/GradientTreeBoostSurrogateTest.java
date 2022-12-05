@@ -4,18 +4,16 @@ import it.unicam.quasylab.sibilla.core.optimization.sampling.ContinuousInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
 import org.junit.jupiter.api.Test;
-import static it.unicam.quasylab.sibilla.core.optimization.Constants.*;
 
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.Function;
-/**
- * Test for Random Forest Surrogate
- *
- * @author      Lorenzo Matteucci
- */
-@SuppressWarnings({"UnusedDeclaration"})
-class RandomForestSurrogateTest {
+
+import static it.unicam.quasylab.sibilla.core.optimization.Constants.EGG_HOLDER_FUNCTION;
+import static org.junit.jupiter.api.Assertions.*;
+
+class GradientTreeBoostSurrogateTest {
+
 
     @Test
     void testTrainingAndPredict(){
@@ -35,19 +33,11 @@ class RandomForestSurrogateTest {
                 1000,
                 functionToLearn)
                 ;
-        RandomForestSurrogate rfr = new RandomForestSurrogate();
+        GradientTreeBoostSurrogate rfr = new GradientTreeBoostSurrogate();
         rfr.fit(trainingSet);
         System.out.println("metrics 1 ");
         System.out.println(rfr.getInSampleMetrics().toString());
 
-        Properties newProp = new Properties();
-        newProp.put("surrogate.random.forest.trees","1000");
-        newProp.put("surrogate.random.forest.depth","100");
-        newProp.put("not.surrogate.properties","100");
-        rfr.setProperties(newProp);
-        rfr.fit(trainingSet);
-        System.out.println("metrics 2 ");
-        System.out.println(rfr.getInSampleMetrics().toString());
     }
 
     @Test
@@ -76,8 +66,6 @@ class RandomForestSurrogateTest {
         System.out.println("metrics 2 ");
         System.out.println(rfr.getInSampleMetrics().toString());
     }
-
-
 
 
 }
