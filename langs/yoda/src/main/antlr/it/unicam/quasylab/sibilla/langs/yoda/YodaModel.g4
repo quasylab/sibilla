@@ -6,8 +6,6 @@ package it.unicam.quasylab.sibilla.langs.yoda;
 
 model: element* EOF;
 
-
-
 element : constantDeclaration
         | parameterDeclaration
         | typeDeclaration
@@ -22,10 +20,11 @@ constantDeclaration: 'const' name = ID '=' value=expr ';';
 parameterDeclaration: 'param' name=ID '=' value=expr ';';
 
 typeDeclaration:
-    'type' name=ID '{'
-        (type varName=ID ';')+
+    'type' typeName=ID '{'
+        typeBody
     '}';
 
+typeBody: (fields += fieldDeclaration (';' fields += fieldDeclaration)*)? ;
 
 //AGENT GRAMMAR
 
@@ -37,15 +36,15 @@ agentDeclaration:
         'behaviour' '{'behaviourDeclaration'}'
     '}';
 
-knowledgeDeclaration: 'knowledge' '{' (newField)* '}';
+knowledgeDeclaration: 'knowledge' '{' (fields += fieldDeclaration (';' fields += fieldDeclaration)*)? '}';
 
-informationDeclaration: 'information' '{' (newField)* '}';
+informationDeclaration: 'information' '{' (fields += fieldDeclaration (';' fields += fieldDeclaration)*)? '}';
 
-observationDeclaration: (newField)* ;
+observationDeclaration: 'observations' '{' (fields += fieldDeclaration (';' fields += fieldDeclaration)*)?  '}';
 
 newField: type fieldName=ID ';' ;
 
-actionBody: actionName=ID '{' (fieldUpdate)+ '}'
+actionBody: actionName=ID '{' (fieldUpdate)* '}'
           | 'wait'    //the agent waits a turn
           | 'stop'    //the agent stops
           | 'rtf'     //the agent return to the Force
@@ -71,9 +70,9 @@ systemDeclaration:
     '}'
 ;
 
-assignmentTemp: 'let' tempName=ID '=' selectionBlock ('and' selectionBlock)*;
+assignmentTemp: 'let' tempName=ID '{' (blocks += selectionBlock (';' blocks += selectionBlock)*)? '}';
 
-selectionBlock: 'select' agentName=ID 'in' agentTypeName=ID 'that' expr;
+selectionBlock: 'select' name=ID 'in' groupName=ID 'that' expr;
 
 agentSensing: agentName=ID '{' (fieldUpdate)* '}';
 
@@ -82,73 +81,80 @@ evolutionDeclaration: entityName=ID '{' (fieldUpdate)* '}';
 //CONFIG GRAMMAR
 
 configurationDeclaration: 'configuration' name=ID '{'
-    assignmentDeclaration
-    '{'(collectiveDeclaration)*'}'
+    (collectionDeclaration)?
+    systemName=ID ('[' (sceneField += fieldInit (',' sceneField += fieldInit)*)?  ']')? '{'(collectiveDeclaration)*'}'
     '}';
 
-assignmentDeclaration:
-    'let' name=ID '=' func
-    ('and' name=ID '=' func)*
-    'in' systemName=ID
+collectionDeclaration:
+    'let' collections+=collectionAssignment
+    ('and' collections+=collectionAssignment)*
+    'in'
     ;
 
-collectiveDeclaration: collectionName=ID '{' (fieldInit)* '}'
-                     | 'for' name=ID 'in' groupName=ID '{' collectiveDeclaration '}'
-                     | ('if' expr_bool=expr '{'collectiveDeclaration'}')+
-                       ('else''{'collectiveDeclaration'}')?
+collectionAssignment:  collectionName=ID '=' func;
+
+collectiveDeclaration: collectionName=ID '{' (fieldInit)* '}'                               #collectiveTerminal
+                     | 'for' name=ID 'in' groupName=ID '{' collectiveDeclaration '}'        #collectiveFor
+                     | ('if' exprBool=expr '{'collectiveDeclaration'}')+
+                       ('else''{'collectiveDeclaration'}')?                                 #collectiveIfElse
 ;
 
 fieldInit: fieldName=ID '=' value=expr;
 
 //UTIL
 
-expr    : INTEGER                                                   # integerValue
-        | REAL                                                      # realValue
-        | 'false'                                                   # false
-        | 'true'                                                    # true
-        | reference=ID                                              # reference
-        | '(' expr ')'                                              # exprBrackets
+expr    : INTEGER                                                     # expressionInteger
+        | REAL                                                        # expressionReal
+        | 'false'                                                     # expressionFalse
+        | 'true'                                                      # expressionTrue
+        | reference=ID                                                # expressionReference
+        | '(' expr ')'                                                # expressionBrackets
       //  | gexpr                                                     # gexprCall
-        | oper=('+'|'-') arg=expr                                   # unaryExpression
-        | leftOp=expr oper=('+'|'-') rightOp=expr                   # addsubOperation
-        | leftOp=expr oper=('*'|'/') rightOp=expr                   # multdivOperation
-        | leftOp=expr oper=('%'|'//') rightOp=expr                  # additionalOperation
-        | leftOp=expr '^' rightOp=expr                              # exponentOperation
-        | '!' argument=expr                                         # negationExpression
-        | 'sqrt' '(' argument=expr ')'                              # squareRootExpression
-        | leftOp=expr oper=('&'|'&&') rightOp=expr                  # andExpression
-        | leftOp=expr oper=('|'|'||') rightOp=expr                  # orExpression
-        | leftOp=expr oper=('<'|'<='|'=='|'>='|'>') rightOp=expr    # relationExpression
-        | guardExpr=expr '?' thenBranch=expr ':' elseBranch=expr    # ifthenelseExpression
-      //  | '[' fieldAssignment (',' fieldAssignment)* ']'            # recordExpression
-        | 'U''['min=expr',' max=expr']'                             # weightedRandomExpression
-        | 'rnd'                                                     # randomExpression
-        | parent=ID '.' son=ID                                      # attributeRef
-        | 'forall' expr ('for' name=ID 'in' groupName=ID)?          # forallExpression
-        | 'exists' expr ('for' name=ID 'in' groupName=ID)?          # existsExpression
-        | 'min'    expr ('for' name=ID 'in' groupName=ID)?          # minimumExpression
-        | 'max'    expr ('for' name=ID 'in' groupName=ID)?          # maximumExpression
-        | 'it.' ID                                                  # itselfRef
+        | oper=('+'|'-') arg=expr                                     # expressionUnary
+        | leftOp=expr oper=('+'|'-') rightOp=expr                     # expressionAddSubOperation
+        | leftOp=expr oper=('*'|'/') rightOp=expr                     # expressionMultDivOperation
+        | leftOp=expr oper=('%'|'//') rightOp=expr                    # expressionAdditionalOperation
+        | leftOp=expr '^' rightOp=expr                                # expressionExponentOperation
+        | '!' argument=expr                                           # expressionNegation
+        | 'sqrt' '(' argument=expr ')'                                # expressionSquareRoot
+        | leftOp=expr oper=('&'|'&&') rightOp=expr                    # expressionAnd
+        | leftOp=expr oper=('|'|'||') rightOp=expr                    # expressionOr
+        | leftOp=expr oper=('<'|'<='|'=='|'!='|'>='|'>') rightOp=expr # expressionRelation
+        | guardExpr=expr '?' thenBranch=expr ':' elseBranch=expr      # expressionIfThenElse
+        | '[' fieldAssignment (',' fieldAssignment)* ']'              # expressionRecord
+        | 'U''['min=expr',' max=expr']'                               # expressionWeightedRandom
+        | 'rnd'                                                       # expressionRandom
+        | parent=ID '.' son=ID                                        # expressionAttributeRef
+        | 'forall' expr ('for' name=ID 'in' groupName=ID)?            # expressionForAll
+        | 'exists' expr ('for' name=ID 'in' groupName=ID)?            # expressionExists
+        | 'min'    expr ('for' name=ID 'in' groupName=ID)?            # expressionMinimum
+        | 'max'    expr ('for' name=ID 'in' groupName=ID)?            # expressionMaximum
+        | 'it.' ref=ID                                                # expressionItselfRef
+        | 'sin' '(' argument=expr ')'                                 # expressionSin
+        | 'sinh' '(' argument=expr ')'                                # expressionSinh
+        | 'asin' '(' argument=expr ')'                                # expressionAsin
+        | 'cos' '(' argument=expr ')'                                 # expressionCos
+        | 'cosh' '(' argument=expr ')'                                # expressionCosh
+        | 'acos' '(' argument=expr ')'                                # expressionAcos
+        | 'tan' '(' argument=expr ')'                                 # expressionTan
+        | 'tanh' '(' argument=expr ')'                                # expressionTanh
+        | 'atan' '(' argument=expr ')'                                # expressionAtan
+        | 'ceil' '(' argument=expr ')'                                # expressionCeiling
+        | 'floor' '(' argument=expr ')'                               # expressionFloor
 ;
 
-type    : 'int'                                                     # integerNumber
-        | 'real'                                                    # realNumber
-        | 'bool'                                                    # boolean
-        | 'char'                                                    # character
-        | 'String'                                                  # string
-        | 'array[' type (',' type)* ']'                             # arrayMultipleTypes
-        | typeDeclaration                                          # newType
+type    : 'int'                                                     # typeInteger
+        | 'real'                                                    # typeReal
+        | 'bool'                                                    # typeBoolean
+        | 'char'                                                    # typeCharacter
+        | 'String'                                                  # typeString
+        | 'array[' type (',' type)* ']'                             # typeArrayMultipleTypes
+        | typeDeclaration                                           # typeNew
 ;
 
-func    : 'generate' '('
-            '[' name_value=ID '=' expr (',' name_value=ID '=' expr)* ']'
-            ')'
-        | 'distinct' '('
-            init_number=expr ',' '[' name_value=ID '=' expr (',' name_value=ID '=' expr)* ']'
-            ')'
-        | 'distinctFrom''('
-            init_number=expr ',' '[' name_value=ID '=' expr (',' name_value=ID '=' expr)* ']' ','  name=ID
-            ')'
+func    : 'generate' '(' size=expr ',' randomExpression=expr ')'                 # functionGenerate
+        | 'distinct' '(' size=expr ',' randomExpression=expr ')'                 # functionDistinct
+        | 'distinctFrom''(' size=expr ',' randomExpression=expr ',' other=ID ')' # functionDistinctFrom
         ;
 
 fragment DIGIT  :   [0-9];

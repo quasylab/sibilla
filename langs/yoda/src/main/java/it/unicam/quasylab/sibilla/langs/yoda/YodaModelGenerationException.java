@@ -23,34 +23,22 @@
 
 package it.unicam.quasylab.sibilla.langs.yoda;
 
-import java.util.HashMap;
-import java.util.Map;
+import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 
-public class ParameterEvaluator extends YodaModelBaseVisitor<Map<String,Double>> {
+public class YodaModelGenerationException extends Throwable{
 
-    private final Map<String, Double> params;
+    //private final List<ModelBuildingError> errors;
 
+    private final ErrorCollector errors;
 
-    public ParameterEvaluator() {
-        this.params = new HashMap<>();
+    public YodaModelGenerationException(String message, ErrorCollector errors){
+        super(message);
+        this.errors = errors;
     }
 
-    @Override
-    public Map<String,Double> visitModel(YodaModelParser.ModelContext ctx){
-        for (YodaModelParser.ElementContext element : ctx.element()) {
-            element.accept(this);
-        }
-        return this.params;
+    public ErrorCollector getErrors() {
+        return errors;
     }
 
-    @Override
-    public Map<String, Double> visitConstantDeclaration(YodaModelParser.ConstantDeclarationContext ctx) {
-        return this.params;
-    }
 
-    @Override
-    public Map<String, Double> visitParameterDeclaration(YodaModelParser.ParameterDeclarationContext ctx) {
-        this.params.put(ctx.name.getText(), Double.parseDouble(ctx.value.getText()));
-        return this.params;
-    }
 }

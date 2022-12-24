@@ -36,7 +36,8 @@ public interface YodaType {
         BOOLEAN,
         INTEGER,
         REAL,
-        LIST
+        LIST,
+        RECORD
     }
 
     YodaType NONE_TYPE = new NoneType();
@@ -44,6 +45,7 @@ public interface YodaType {
     YodaType INTEGER_TYPE = new IntegerType();
     YodaType REAL_TYPE = new RealType();
     Function <YodaType, YodaType> LIST_TYPE = ListType::new;
+    YodaType RECORD_TYPE = new RecordType();
 
     YodaValue cast(YodaValue value);
 
@@ -52,6 +54,8 @@ public interface YodaType {
     default YodaType getContentType(){
         return NONE_TYPE;
     }
+
+    boolean isNumericType();
 
     class NoneType implements YodaType {
         private NoneType(){}
@@ -64,6 +68,11 @@ public interface YodaType {
         @Override
         public YodaCodeType code() {
             return YodaCodeType.NONE;
+        }
+
+        @Override
+        public boolean isNumericType() {
+            return false;
         }
     }
 
@@ -84,6 +93,11 @@ public interface YodaType {
         public YodaCodeType code() {
             return YodaCodeType.BOOLEAN;
         }
+
+        @Override
+        public boolean isNumericType() {
+            return false;
+        }
     }
 
     class IntegerType implements YodaType {
@@ -102,6 +116,11 @@ public interface YodaType {
         @Override
         public YodaCodeType code() {
             return YodaCodeType.INTEGER;
+        }
+
+        @Override
+        public boolean isNumericType() {
+            return true;
         }
     }
 
@@ -122,6 +141,11 @@ public interface YodaType {
         @Override
         public YodaCodeType code() {
             return YodaCodeType.REAL;
+        }
+
+        @Override
+        public boolean isNumericType() {
+            return true;
         }
     }
 
@@ -144,6 +168,31 @@ public interface YodaType {
 
         public YodaType getContentType(){return contentType;}
 
+        @Override
+        public boolean isNumericType() {
+            return false;
+        }
+    }
 
+    class RecordType implements YodaType {
+
+
+        public RecordType() {
+        }
+
+        @Override
+        public YodaValue cast(YodaValue value) {
+            return YodaValue.NONE;
+        }
+
+        @Override
+        public YodaCodeType code() {
+            return YodaCodeType.RECORD;
+        }
+
+        @Override
+        public boolean isNumericType() {
+            return false;
+        }
     }
 }
