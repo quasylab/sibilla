@@ -162,8 +162,8 @@ public final class YodaAgent {
      * @param rg a random generator
      * @param system a YodaSystem
      */
-    void computeObservations(RandomGenerator rg, YodaSystem system) {
-        this.agentObservations = omegaFunction.compute(rg, system, this);
+    public void computeObservations(RandomGenerator rg, YodaSystemState system) {
+        agentObservations = omegaFunction.compute(rg, system, this);
     }
 
     public YodaAgent next(RandomGenerator rg, YodaSystemState<?> state) {
