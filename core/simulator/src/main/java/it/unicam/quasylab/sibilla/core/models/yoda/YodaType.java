@@ -31,6 +31,8 @@ import java.util.function.Function;
  */
 public interface YodaType {
 
+
+
     enum YodaCodeType{
         NONE,
         BOOLEAN,

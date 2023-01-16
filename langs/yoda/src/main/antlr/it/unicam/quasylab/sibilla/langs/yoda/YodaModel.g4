@@ -31,7 +31,7 @@ typeBody: (fields += fieldDeclaration (';' fields += fieldDeclaration)*)? ;
 agentDeclaration:
     'agent' agentName=ID '{'
         'state' '{' knowledgeDeclaration informationDeclaration '}'
-        'observations' '{' observationDeclaration '}'
+        observationDeclaration
         'actions' '{' actionBody ('|' actionBody)*'}'
         'behaviour' '{'behaviourDeclaration'}'
     '}';
@@ -42,7 +42,7 @@ informationDeclaration: 'information' '{' (fields += fieldDeclaration (';' field
 
 observationDeclaration: 'observations' '{' (fields += fieldDeclaration (';' fields += fieldDeclaration)*)?  '}';
 
-newField: type fieldName=ID ';' ;
+fieldDeclaration: type fieldName=ID ;
 
 actionBody: actionName=ID '{' (fieldUpdate)* '}'
           | 'wait'    //the agent waits a turn
@@ -64,7 +64,7 @@ weightedRule: actionName=ID ':' weight=expr ';';
 
 systemDeclaration:
     'system' name=ID '{'
-        'scene' '{' (newField)* '}'
+        'scene' '{' (sceneFields += fieldDeclaration (';' sceneFields += fieldDeclaration)*)?  '}'
         'sensing' '{' (assignmentTemp)? (agentSensing)* '}'
         'evolution' '{' (evolutionDeclaration)* '}'
     '}'
@@ -142,6 +142,8 @@ expr    : INTEGER                                                     # expressi
         | 'ceil' '(' argument=expr ')'                                # expressionCeiling
         | 'floor' '(' argument=expr ')'                               # expressionFloor
 ;
+
+fieldAssignment: name=ID '=' value=expr;
 
 type    : 'int'                                                     # typeInteger
         | 'real'                                                    # typeReal
