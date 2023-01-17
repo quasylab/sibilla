@@ -26,6 +26,8 @@ package it.unicam.quasylab.sibilla.langs.yoda;
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaType;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 
@@ -40,6 +42,8 @@ public class YodaModelValidator extends YodaModelBaseVisitor<Boolean> {
 
     private ExpressionContext expressionContext = ExpressionContext.NONE;
     private String entityContext;
+
+    private Map<String, YodaType> constantsAndParametersTypes = new HashMap<>();
 
     public YodaModelValidator(ErrorCollector errors) {
         this.errors = errors;
@@ -80,47 +84,38 @@ public class YodaModelValidator extends YodaModelBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitConstantDeclaration(YodaModelParser.ConstantDeclarationContext ctx) {
-        try {
-            String name = ctx.name.getText();
-            if (table.existsDeclaration(name)) {
-                errors.record(ParseUtil.duplicatedIdentifierError(name, table.getDeclarationToken(name)));
-                return false;
-            }
-            this.expressionContext = ExpressionContext.CONSTANT;
-            if (ctx.value.accept(this)) {
-                YodaType constType = ctx.value.accept(new TypeInferenceVisitor(errors, table::solveTypeFromConstant));
-                if (!constType.equals(YodaType.NONE_TYPE)) {
-                    table.addConstants(ctx, constType);
-                    return true;
-                }
-            }
+        String name = ctx.name.getText();
+        if (table.existsDeclaration(name)) {
+            errors.record(ParseUtil.duplicatedIdentifierError(name, table.getDeclarationToken(name)));
             return false;
-        } finally {
-            this.expressionContext = ExpressionContext.NONE;
         }
-
+        this.expressionContext = ExpressionContext.CONSTANT;
+        TypeInferenceVisitor tiv = new TypeInferenceVisitor(this.errors, s -> this.constantsAndParametersTypes.getOrDefault(s, YodaType.NONE_TYPE));
+        YodaType constType = ctx.value.accept(tiv);
+        if (!constType.equals(YodaType.NONE_TYPE)) {
+            table.addConstants(ctx, constType);
+            this.constantsAndParametersTypes.put(name, constType);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public Boolean visitParameterDeclaration(YodaModelParser.ParameterDeclarationContext ctx) {
-        try {
-            String name = ctx.name.getText();
-            if (table.existsDeclaration(name)) {
-                errors.record(ParseUtil.duplicatedIdentifierError(name, table.getDeclarationToken(name)));
-                return false;
-            }
-            this.expressionContext = ExpressionContext.PARAMETER;
-            if (ctx.value.accept(this)) {
-                YodaType paramType = ctx.value.accept(new TypeInferenceVisitor(errors, table::solveTypeFromParameter));
-                if (paramType.equals(YodaType.NONE_TYPE)) {
-                    table.addParameter(ctx, paramType);
-                    return true;
-                }
-            }
+        String name = ctx.name.getText();
+        if (table.existsDeclaration(name)) {
+            errors.record(ParseUtil.duplicatedIdentifierError(name, table.getDeclarationToken(name)));
             return false;
-        } finally {
-            this.expressionContext = ExpressionContext.NONE;
         }
+        this.expressionContext = ExpressionContext.CONSTANT;
+        TypeInferenceVisitor tiv = new TypeInferenceVisitor(this.errors, s -> this.constantsAndParametersTypes.getOrDefault(s, YodaType.NONE_TYPE));
+        YodaType constType = ctx.value.accept(tiv);
+        if (!constType.equals(YodaType.NONE_TYPE)) {
+            table.addConstants(ctx, constType);
+            this.constantsAndParametersTypes.put(ctx.name.getText(), constType);
+            return true;
+        }
+        return false;
     }
 
     //TODO

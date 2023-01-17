@@ -11,7 +11,10 @@ element : constantDeclaration
         | typeDeclaration
         | agentDeclaration
         | systemDeclaration
+        | groupDeclaration
         | configurationDeclaration;
+
+groupDeclaration: 'group' name=ID '{' (agents += ID (',' agents += ID)* )? '}';
 
 //PARAMETERS
 
@@ -125,10 +128,10 @@ expr    : INTEGER                                                     # expressi
         | 'U''['min=expr',' max=expr']'                               # expressionWeightedRandom
         | 'rnd'                                                       # expressionRandom
         | parent=ID '.' son=ID                                        # expressionAttributeRef
-        | 'forall' expr ('for' name=ID 'in' groupName=ID)?            # expressionForAll
-        | 'exists' expr ('for' name=ID 'in' groupName=ID)?            # expressionExists
-        | 'min'    expr ('for' name=ID 'in' groupName=ID)?            # expressionMinimum
-        | 'max'    expr ('for' name=ID 'in' groupName=ID)?            # expressionMaximum
+        | 'forall' '{' groupExpression '}'                            # expressionForAll
+        | 'exists' '{' groupExpression '}'                            # expressionExists
+        | 'min'    '{' groupExpression '}'                            # expressionMinimum
+        | 'max'    '{' groupExpression '}'                            # expressionMaximum
         | 'it.' ref=ID                                                # expressionItselfRef
         | 'sin' '(' argument=expr ')'                                 # expressionSin
         | 'sinh' '(' argument=expr ')'                                # expressionSinh
@@ -142,6 +145,8 @@ expr    : INTEGER                                                     # expressi
         | 'ceil' '(' argument=expr ')'                                # expressionCeiling
         | 'floor' '(' argument=expr ')'                               # expressionFloor
 ;
+
+groupExpression: value=expr 'for' name=ID ':' groupName=ID ('when' guard=expr);
 
 fieldAssignment: name=ID '=' value=expr;
 

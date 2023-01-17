@@ -1233,13 +1233,16 @@ public interface YodaValue {
 
         private final Map<String, YodaValue> fieldsValue;
 
-        public RecordValue(Map<String, YodaValue> fieldsValue) {
+        private final YodaType.RecordType recordType;
+
+        public RecordValue(Map<String, YodaValue> fieldsValue, YodaType.RecordType recordType) {
             this.fieldsValue = fieldsValue;
+            this.recordType = recordType;
         }
 
         @Override
         public YodaType getType() {
-            return YodaType.RECORD_TYPE;
+            return recordType;
         }
 
         public YodaValue get(String name) {
