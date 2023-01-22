@@ -44,6 +44,9 @@ command : module_command
         | predicates_command
         | first_passage_time
         | reachability_command
+        | optimize_command
+        | set_optimization_property_command
+        | set_surrogate_property_command
         ;
 
 reachability_command: 'probreach' goal=STRING ('while' condition=STRING)? 'with' 'alpha' '='  alpha=REAL 'and' 'delta' '=' delta=REAL;
@@ -141,6 +144,40 @@ cwd_command : 'cwd' ;
 ls_command : 'ls' ;
 
 cd_command : 'cd' name=STRING;
+
+optimize_command:
+    ( 'opt' 'strat' | 'optimization' 'strategy' ) STRING (( 'surr' |'with surrogate' )  STRING)?
+;
+
+set_optimization_property_command:
+    'set' ( 'opt' 'prop' | 'optimization' 'property' ) name = ID '=' ( expr | STRING )';'
+;
+
+set_surrogate_property_command:
+    'set' ( 'surr' 'prop' | 'surrogate' 'property' ) name = ID '=' ( expr | STRING )';'
+;
+
+
+
+
+expr :
+      left=expr op=('&'|'&&') right=expr                      # andExpression
+    | left=expr op=('|'|'||') right=expr                      # orExpression
+    | left=expr '^' right=expr                                # exponentExpression
+    | left=expr op=('*'|'/'|'//') right=expr                  # mulDivExpression
+    | left=expr op=('+'|'-'|'%') right=expr                   # addSubExpression
+    | left=expr op=('<'|'<='|'=='|'>='|'>') right=expr        # relationExpression
+    | '!' arg=expr                                            # negationExpression
+    | guard=expr '?' thenBranch=expr ':' elseBranch=expr      # ifThenElseExpression
+    | op=('-'|'+') arg=expr                                   # unaryExpression
+    | '(' expr ')'                                            # bracketExpression
+    | INTEGER                                                 # intValue
+    | REAL                                                    # realValue
+    | 'false'                                                 # falseValue
+    | 'true'                                                  # trueValue
+    | reference=ID                                            # referenceExpression
+    | 'abs' '(' expr ')'                                      # absoluteValue
+    ;
 
 fragment DIGIT  :   [0-9];
 fragment LETTER :   [a-zA-Z_];

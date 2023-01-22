@@ -1,9 +1,9 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads;
-import java.util.Arrays;
 
 import static it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.Common.*;
 
-public class LTDirection implements Direction{
+@SuppressWarnings("ManualArrayCopy")
+public class LTDirection implements MadDirection {
 
     public record BlVectorAndiHat(
             int[] blVector,
@@ -52,8 +52,8 @@ public class LTDirection implements Direction{
      * either plus or minus 2^(l) and the lower components are randomly chosen in :<br>
      * [ -(2^(l)) + 1 , -(2^(l)) + 2 , ... , 2^(l)-1 ]
      *
-     * @param n
-     * @param l
+     * @param n dimension
+     * @param l the l value
      * @return L a lower triangular (n-1)x(n-1) matrix
      */
     public int[][] getL(int n, int l){
@@ -69,6 +69,7 @@ public class LTDirection implements Direction{
         }
         return lMatrix;
     }
+
 
     public int[][] getBasis(int n, double deltaMesh){
         BlVectorAndiHat blAndiHat = getBlVectorAndCapI(n,deltaMesh);

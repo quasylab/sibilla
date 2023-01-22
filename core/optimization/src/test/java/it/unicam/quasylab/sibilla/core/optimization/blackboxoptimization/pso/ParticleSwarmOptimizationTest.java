@@ -1,9 +1,8 @@
 package it.unicam.quasylab.sibilla.core.optimization.blackboxoptimization.pso;
 
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.pso.ParticleSwarmOptimization;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.ContinuousInterval;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -69,7 +68,7 @@ class ParticleSwarmOptimizationTest {
         ParticleSwarmOptimization pso = new ParticleSwarmOptimization(myFunction,constraints,searchSpace,properties);
         Map<String,Double> solution = pso.minimize();
         double result = myFunction.apply(solution);
-        System.out.println("SOLUTION" + solution);
+        //System.out.println("SOLUTION" + solution);
         assertEquals(111.0, result);
     }
 
@@ -367,7 +366,7 @@ class ParticleSwarmOptimizationTest {
         pso.setSearchSpaceAsConstraints();
 
         Map<String,Double> minimizingValues = pso.minimize();
-        System.out.println(minimizingValues.toString());
+        //System.out.println(minimizingValues.toString());
 
         HyperRectangle rightZone = new HyperRectangle(
                 new ContinuousInterval("x1",0.5,1.5),

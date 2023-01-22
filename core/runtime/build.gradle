@@ -9,6 +9,7 @@ repositories {
 
 dependencies {
     api project(':core:simulator')
+    api project(':core:optimization')
     api project(':langs:pm')
     api project(':langs:lio')
     //api project(':langs:yoda')

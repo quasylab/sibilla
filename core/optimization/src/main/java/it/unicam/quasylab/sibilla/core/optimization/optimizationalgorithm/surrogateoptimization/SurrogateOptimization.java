@@ -2,8 +2,8 @@ package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.surro
 
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategy;
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategyFactory;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.Interval;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.Surrogate;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateFactory;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.TrainingSet;
@@ -34,7 +34,6 @@ public class SurrogateOptimization implements OptimizationStrategy {
     final private HyperRectangle searchSpace;
     final private Properties properties;
 
-    private Function<Map<String,Double>,Double> surrogate;
 
     public SurrogateOptimization(Function<Map<String,Double>,Double> functionToBeSurrogate,
                                  List<Predicate<Map<String,Double>>> constraints,
@@ -73,21 +72,14 @@ public class SurrogateOptimization implements OptimizationStrategy {
 
     private Function<Map<String,Double>,Double> generateSurrogateFunction(){
         TrainingSet ts = new TrainingSet(this.searchSpace,this.samplingName,this.trainingSetSize,this.functionToBeSurrogate);
-//        System.out.println("Std Dev : " + ts.getResultSD());
-//        System.out.println("Mean    : " + ts.getResultMean());
         Surrogate surrogate = SurrogateFactory.getSurrogate(this.surrogateName,this.properties);
         surrogate.fit(ts);
-//        System.out.println("--- --- --- --- --- --- --- --- --- --- --- --- --- --- ---");
-//        System.out.println(surrogate.getMetrics().toString());
-//        ts.write().csv("/Users/lorenzomatteucci/phd/trainingSet/ts.csv");
-//        TrainingSet test = new TrainingSet(this.searchSpace,"ffs",15,map -> surrogate.predict(map.values().toArray(new Double[0])));
-//        test.write().csv("/Users/lorenzomatteucci/phd/trainingSet/test.csv");
         return map -> surrogate.predict(map.values().toArray(new Double[0]));
     }
 
     @Override
     public Map<String, Double> minimize() {
-        return OptimizationStrategyFactory.getOConstrainedOptimizationStrategy(
+        return OptimizationStrategyFactory.getOptimizationStrategy(
                 this.optimizationName,
                 this.generateSurrogateFunction(),
                 this.constraints,
@@ -98,7 +90,7 @@ public class SurrogateOptimization implements OptimizationStrategy {
 
     @Override
     public Map<String, Double> maximize() {
-        return OptimizationStrategyFactory.getOConstrainedOptimizationStrategy(
+        return OptimizationStrategyFactory.getOptimizationStrategy(
                         this.optimizationName,
                         this.generateSurrogateFunction(),
                         this.constraints,

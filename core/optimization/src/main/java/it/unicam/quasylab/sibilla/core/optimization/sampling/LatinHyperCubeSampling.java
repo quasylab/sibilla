@@ -1,6 +1,7 @@
 package it.unicam.quasylab.sibilla.core.optimization.sampling;
 
 
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.Table;
 
@@ -29,8 +30,8 @@ public class LatinHyperCubeSampling implements SamplingStrategy {
         for (int i = 0; i < hr.getDimensionality(); i++) {
             double[] columnArray = new double[numberOfSamples];
             for (int j = 0; j <numberOfSamples ; j++) {
-                double val = hr.getInterval(i).getLowerBound() + ((shuffledMatrix[i][j] - random.nextDouble())/(numberOfSamples)) * (hr.getInterval(i).getUpperBound() - hr.getInterval(i).getLowerBound() );
-                columnArray[j] = hr.getInterval(i).isContinuous() ? val : Math.round(val);
+                double value = hr.getInterval(i).getLowerBound() + ((shuffledMatrix[i][j] - random.nextDouble())/(numberOfSamples)) * (hr.getInterval(i).getUpperBound() - hr.getInterval(i).getLowerBound() );
+                columnArray[j] = hr.getInterval(i).isContinuous() ? value : hr.getInterval(i).getClosestValueTo(value);
             }
             columns[i] = DoubleColumn.create(hr.getInterval(i).getId(),columnArray);
         }

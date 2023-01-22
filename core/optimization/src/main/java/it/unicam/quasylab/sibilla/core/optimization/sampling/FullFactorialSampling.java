@@ -2,6 +2,7 @@ package it.unicam.quasylab.sibilla.core.optimization.sampling;
 
 
 import com.google.common.collect.Sets;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.Table;
 
@@ -64,7 +65,7 @@ public class FullFactorialSampling implements SamplingStrategy {
         for (List<Double> list: set) {
             for (int i = 0; i < list.size(); i++) {
                 double value = list.get(i);
-                columnList[i].append(hr.getInterval(i).isContinuous() ? value : Math.round(value));
+                columnList[i].append(hr.getInterval(i).isContinuous() ? value : hr.getInterval(i).getClosestValueTo(value));
             }
         }
         return Table.create(columnList).dropDuplicateRows();

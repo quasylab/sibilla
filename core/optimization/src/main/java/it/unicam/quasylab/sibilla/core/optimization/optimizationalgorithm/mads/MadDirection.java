@@ -1,4 +1,6 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads;
 
-public interface Direction {
+public interface MadDirection {
+
+
 }

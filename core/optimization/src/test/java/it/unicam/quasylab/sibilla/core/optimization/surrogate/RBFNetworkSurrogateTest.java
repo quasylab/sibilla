@@ -1,16 +1,12 @@
 package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 
-import it.unicam.quasylab.sibilla.core.optimization.sampling.ContinuousInterval;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class RBFNetworkSurrogateTest {
 
@@ -37,9 +33,9 @@ class RBFNetworkSurrogateTest {
 
         double res = rbfNetworkSurrogate.predict(new Double[]{1.0,1.0});
 
-        System.out.println(res);
-        System.out.println(funToOpt.apply(anInput));
-        System.out.println(rbfNetworkSurrogate.getInSampleMetrics());
+        //System.out.println(res);
+        //System.out.println(funToOpt.apply(anInput));
+        //System.out.println(rbfNetworkSurrogate.getInSampleMetrics());
     }
 
 }

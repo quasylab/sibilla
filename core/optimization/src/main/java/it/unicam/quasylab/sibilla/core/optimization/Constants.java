@@ -1,5 +1,7 @@
 package it.unicam.quasylab.sibilla.core.optimization;
 
+import tech.tablesaw.api.Table;
+
 import java.util.Map;
 import java.util.function.Function;
 /**
@@ -19,6 +21,9 @@ public final class Constants {
 
     public static final String EXCEPT_NO_SUCH_OPTIMIZATION_ALGORITHM = "there are no optimization algorithms with the name provided";
     public static final String EXCEPT_NO_SUCH_SURROGATE = "there are no surrogates with the name provided";
+
+    public static final String EXCEPT_ILLEGAL_CENTER_SIZE = "the array passed as parameter must have a size equal to the number of intervals of the hyper-rectangle";
+    public static final String EXCEPT_ILLEGAL_STEP = "the step must be strictly greater than zero";
 
     /**
      * <b>Description : </b> The Egg holder function is a difficult function to optimize,
@@ -58,6 +63,7 @@ public final class Constants {
                 return sum;
             }
     );
+
 
     private Constants(){}
 

@@ -1,9 +1,8 @@
 package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 
-import it.unicam.quasylab.sibilla.core.optimization.sampling.ContinuousInterval;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.DiscreteStepInterval;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.DiscreteStepInterval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 import org.junit.jupiter.api.Test;
 import tech.tablesaw.api.Row;
 
@@ -108,15 +107,15 @@ class TrainingSetTest {
         TrainingSet ts2 = new TrainingSet(searchSpace,"rs",2,function);
         TrainingSet ts3 = ts1.appendTrainingSet(ts2);
 
-        System.out.println("ts1 - "+ts1.rowCount());
-        System.out.println("ts2 - "+ts2.rowCount());
-        System.out.println("ts3 - "+ts3.rowCount());
+        //System.out.println("ts1 - "+ts1.rowCount());
+        //System.out.println("ts2 - "+ts2.rowCount());
+        //System.out.println("ts3 - "+ts3.rowCount());
 
-        System.out.println("- - - - - - - - - - - - - - -");
+        //System.out.println("- - - - - - - - - - - - - - -");
 
-        System.out.println(ts1);
-        System.out.println(ts2);
-        System.out.println(ts3);
+        //System.out.println(ts1);
+        //System.out.println(ts2);
+        //System.out.println(ts3);
 
     }
 

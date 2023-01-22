@@ -1,7 +1,7 @@
 package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 
-import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.Interval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.SampleStrategyFactory;
 import tech.tablesaw.api.*;
 import tech.tablesaw.columns.Column;
