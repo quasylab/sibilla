@@ -1,17 +1,18 @@
-package it.unicam.quasylab.sibilla.core.optimization.sampling;
+package it.unicam.quasylab.sibilla.core.optimization.sampling.interval;
 
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.DEFAULT_INTERVAL_ID;
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.EXCEPT_LOWER_BIGGER_THAN_UPPER;
 
 public abstract class AbstractInterval implements Interval{
-
     protected final String id;
     protected double lowerBound;
     protected double upperBound;
     protected Random rand = new Random();
     private static final AtomicLong idCounter = new AtomicLong();
+
     public AbstractInterval(String id, double lowerBound, double upperBound) {
         if (lowerBound >= upperBound)
             throw new IllegalArgumentException(EXCEPT_LOWER_BIGGER_THAN_UPPER);
@@ -52,13 +53,26 @@ public abstract class AbstractInterval implements Interval{
         return this.upperBound - (this.length()/2);
     }
 
+
     @Override
     public String toString() {
-        return "Interval [" +
+        return "interval [" +
                 "id='" + id + '\'' +
                 ", lowerBound=" + lowerBound +
                 ", upperBound=" + upperBound +
                 ']';
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractInterval that = (AbstractInterval) o;
+        return Double.compare(that.lowerBound, lowerBound) == 0 && Double.compare(that.upperBound, upperBound) == 0 && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, lowerBound, upperBound);
+    }
 }

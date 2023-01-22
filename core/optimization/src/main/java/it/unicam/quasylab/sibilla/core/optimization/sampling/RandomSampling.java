@@ -1,6 +1,7 @@
 package it.unicam.quasylab.sibilla.core.optimization.sampling;
 
 
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.Table;
 /**
@@ -16,8 +17,7 @@ public class RandomSampling implements SamplingStrategy {
         for (int i = 0; i < hr.getDimensionality(); i++) {
             double[] columnArray = new double[numberOfSamples];
             for (int j = 0; j <numberOfSamples ; j++) {
-                double val = hr.getInterval(i).getLowerBound() + (hr.getInterval(i).getUpperBound() -hr.getInterval(i).getLowerBound()) * random.nextDouble();
-                columnArray[j] = hr.getInterval(i).isContinuous() ? val : Math.round(val);
+                columnArray[j] = hr.getInterval(i).getRandomValue();
             }
             columns[i] = DoubleColumn.create(hr.getInterval(i).getId(),columnArray);
         }

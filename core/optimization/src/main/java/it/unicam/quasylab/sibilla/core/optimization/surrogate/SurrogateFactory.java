@@ -15,9 +15,14 @@ public class SurrogateFactory {
      *
      * @author      Lorenzo Matteucci
      */
+
     public static Surrogate getSurrogate(String surrogateName, Properties properties){
         if(surrogateName.equals("rfr"))
             return new RandomForestSurrogate(properties);
+        if(surrogateName.equals("gtb"))
+            return new GradientTreeBoostSurrogate(properties);
+        if(surrogateName.equals("rbf"))
+            return new RBFNetworkSurrogate(properties);
         else
             throw new IllegalArgumentException(EXCEPT_NO_SUCH_SURROGATE + " : "
                     + surrogateName + "\n the available surrogates are: \n"+
@@ -25,6 +30,10 @@ public class SurrogateFactory {
     }
 
     public static List<String> getSurrogatesList(){
-        return  Arrays.stream(new String[]{"rfr"}).toList();
+        return  Arrays.stream(new String[]{
+                "rfr", // Random Forest
+                "gtb", // GradientTreeBoostSurrogate
+                "rbf"  // Radial Basis Function network
+        }).toList();
     }
 }

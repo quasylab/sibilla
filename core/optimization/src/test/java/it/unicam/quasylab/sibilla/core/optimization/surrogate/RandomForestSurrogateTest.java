@@ -1,8 +1,7 @@
 package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 
-import it.unicam.quasylab.sibilla.core.optimization.sampling.ContinuousInterval;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 import org.junit.jupiter.api.Test;
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.*;
 
@@ -37,8 +36,8 @@ class RandomForestSurrogateTest {
                 ;
         RandomForestSurrogate rfr = new RandomForestSurrogate();
         rfr.fit(trainingSet);
-        System.out.println("metrics 1 ");
-        System.out.println(rfr.getInSampleMetrics().toString());
+        //System.out.println("metrics 1 ");
+        //System.out.println(rfr.getInSampleMetrics().toString());
 
         Properties newProp = new Properties();
         newProp.put("surrogate.random.forest.trees","1000");
@@ -46,8 +45,8 @@ class RandomForestSurrogateTest {
         newProp.put("not.surrogate.properties","100");
         rfr.setProperties(newProp);
         rfr.fit(trainingSet);
-        System.out.println("metrics 2 ");
-        System.out.println(rfr.getInSampleMetrics().toString());
+        //System.out.println("metrics 2 ");
+        //System.out.println(rfr.getInSampleMetrics().toString());
     }
 
     @Test
@@ -64,8 +63,8 @@ class RandomForestSurrogateTest {
                 ;
         RandomForestSurrogate rfr = new RandomForestSurrogate();
         rfr.fit(trainingSet);
-        System.out.println("metrics 1 ");
-        System.out.println(rfr.getInSampleMetrics().toString());
+        //System.out.println("metrics 1 ");
+        //System.out.println(rfr.getInSampleMetrics().toString());
 
         Properties newProp = new Properties();
         newProp.put("surrogate.random.forest.trees","1000");
@@ -73,8 +72,8 @@ class RandomForestSurrogateTest {
         newProp.put("not.surrogate.properties","100");
         rfr.setProperties(newProp);
         rfr.fit(trainingSet);
-        System.out.println("metrics 2 ");
-        System.out.println(rfr.getInSampleMetrics().toString());
+        //System.out.println("metrics 2 ");
+        //System.out.println(rfr.getInSampleMetrics().toString());
     }
 
 

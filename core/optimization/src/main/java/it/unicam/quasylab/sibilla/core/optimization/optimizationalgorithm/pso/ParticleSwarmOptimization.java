@@ -1,8 +1,8 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.pso;
 
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategy;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.HyperRectangle;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.Interval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.Interval;
 
 import java.util.*;
 import java.util.function.BiPredicate;

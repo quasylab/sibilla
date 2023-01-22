@@ -1,27 +1,61 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads;
 
-public class LTMADS {
+import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategy;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 
-    private int a = 0;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
-    private record myRec1(int i,int j){}
-    private record myRec2(int i,int j){}
+@SuppressWarnings("all")
+//TODO
+public class LTMADS implements OptimizationStrategy {
 
-    private class myInnerClass{
-        int b = a;
+    private final Function<Map<String,Double>,Double> functionToOptimize;
+    private final List<Predicate<Map<String,Double>>> constraints;
+    private final HyperRectangle searchSpace;
 
-        public void modifyA(){
-            a++;
-        }
+
+
+    private Map<String, Double> incumbentSolution;
+    private double deltaMesh;
+    private double deltaPoll;
+    private double tau;
+    private int wMinus;
+    private int wPlus;
+
+
+    private HyperRectangle meshSpace;
+
+
+
+    public LTMADS(Function<Map<String,Double>,Double> functionToOptimize,
+                                     List<Predicate<Map<String,Double>>> constraints,
+                                     HyperRectangle searchSpace,
+                                     Properties properties){
+
+        this.functionToOptimize = functionToOptimize;
+        this.constraints = Optional.ofNullable(constraints).orElse(new ArrayList<>());
+        this.searchSpace = searchSpace;
     }
 
 
-    public void method(){
-        myInnerClass mi = new myInnerClass();
-        mi.modifyA();
+    private void initialization(){
+
     }
 
-    public int getA() {
-        return a;
+    @Override
+    public Map<String, Double> minimize() {
+        return null;
+    }
+
+    @Override
+    public Map<String, Double> maximize() {
+        return null;
+    }
+
+    @Override
+    public void setSearchSpaceAsConstraints() {
+
     }
 }

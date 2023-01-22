@@ -1,5 +1,8 @@
 package it.unicam.quasylab.sibilla.core.optimization.sampling;
 
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.DiscreteStepInterval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 import org.junit.jupiter.api.Test;
 import tech.tablesaw.api.Table;
 
@@ -31,13 +34,13 @@ class FullFactorialSamplingTest {
     @Test
     void testNumberOfSamplesOverMixedInterval() {
         HyperRectangle hrMixed = new HyperRectangle(
-                new DiscreteStepInterval("v4",-1,1,1.0),
+                new DiscreteStepInterval("v1",-1,1,1.0),
                 new ContinuousInterval("v2",-40,65),
                 new ContinuousInterval("v3",-130,200),
                 new DiscreteStepInterval("v4",-1,1,1.0)
         );
         HyperRectangle hrAllContinuous = new HyperRectangle(
-                new ContinuousInterval("v1",1,25),
+                new ContinuousInterval("v1",-1,1),
                 new ContinuousInterval("v2",-40,65),
                 new ContinuousInterval("v3",-130,200),
                 new ContinuousInterval("v4",-1,1)
@@ -45,6 +48,8 @@ class FullFactorialSamplingTest {
         int numberOfSamplesPerDimension = 3;
         Table sampleSetMix = new FullFactorialSampling().getSampleTable(3,hrMixed);
         Table sampleSetCont = new FullFactorialSampling().getSampleTable(3,hrAllContinuous);
+
+
         assertTrue(sampleSetCont.rowCount() > sampleSetMix.rowCount());
     }
 

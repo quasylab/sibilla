@@ -1,5 +1,6 @@
 package it.unicam.quasylab.sibilla.core.optimization.sampling;
 
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 import tech.tablesaw.api.Table;
 
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package it.unicam.quasylab.sibilla.core.optimization.sampling;
+package it.unicam.quasylab.sibilla.core.optimization.sampling.interval;
 
 import java.util.*;
 
@@ -79,10 +79,18 @@ public class HyperRectangle{
         return isContainable;
     }
 
+
+    public Map<String,Double> getRandomValue(){
+        Map<String,Double> randomValue = new HashMap<>();
+        for (Interval i:this.intervals) {
+            randomValue.put(i.getId(),i.getRandomValue());
+        }
+        return randomValue;
+    }
+
     public void changeCenter(double[] newCenterArray){
         if(newCenterArray.length != intervals.length)
-            throw new IllegalArgumentException("the array passed as parameter must have a size equal " +
-                    "to the number of intervals of the hyper-rectangle");
+            throw new IllegalArgumentException(EXCEPT_ILLEGAL_CENTER_SIZE);
         for (int i = 0; i < intervals.length; i++) {
             this.intervals[i].changeCenter(newCenterArray[i]);
         }
@@ -90,8 +98,7 @@ public class HyperRectangle{
 
     public void changeCenter(Map<String,Double> newCenterMap){
         if(newCenterMap.size() != intervals.length)
-            throw new IllegalArgumentException("the array passed as parameter must have a size equal " +
-                    "to the number of intervals of the hyper-rectangle");
+            throw new IllegalArgumentException(EXCEPT_ILLEGAL_CENTER_SIZE);
         for (Interval i:this.intervals) {
             i.changeCenter(newCenterMap.get(i.getId()));
         }
@@ -102,6 +109,7 @@ public class HyperRectangle{
         Set<String> idSet = new HashSet<>(Arrays.asList(idArr));
         return (idSet.size() == idArr.length);
     }
+
 
     public HyperRectangle getCopy(){
         return new HyperRectangle(

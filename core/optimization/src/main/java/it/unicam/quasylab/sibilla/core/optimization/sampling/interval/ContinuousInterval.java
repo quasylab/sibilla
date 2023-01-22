@@ -1,8 +1,7 @@
-package it.unicam.quasylab.sibilla.core.optimization.sampling;
+package it.unicam.quasylab.sibilla.core.optimization.sampling.interval;
 
 
 public class ContinuousInterval extends AbstractInterval{
-
 
     public ContinuousInterval(String id, double lowerBound, double upperBound) {
         super(id, lowerBound, upperBound);
@@ -36,7 +35,7 @@ public class ContinuousInterval extends AbstractInterval{
     }
 
     @Override
-    public double getIntervalValueClosestTo(double value) {
+    public double getClosestValueTo(double value) {
         if(value < this.lowerBound)
             return this.lowerBound;
         return Math.min(value, this.upperBound);
@@ -45,6 +44,13 @@ public class ContinuousInterval extends AbstractInterval{
     @Override
     public Interval getDeepCopy() {
         return new ContinuousInterval(this.id,this.lowerBound,this.upperBound);
+    }
+
+
+
+    @Override
+    public String toString() {
+        return "Continuous "+super.toString();
     }
 
 }

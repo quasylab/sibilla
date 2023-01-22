@@ -1,10 +1,14 @@
 package it.unicam.quasylab.sibilla.core.optimization.sampling;
 
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.Interval;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static it.unicam.quasylab.sibilla.core.optimization.Constants.EXCEPT_INTERVALS_WITH_SAME_ID;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -23,8 +27,7 @@ class HyperRectangleTest {
             Interval i2 = new ContinuousInterval("default",40,50);
             HyperRectangle hr = new HyperRectangle(i1,i2);
         }catch (IllegalArgumentException ex){
-            String errorMessage = "there cannot be more intervals with the same identifier";
-            assertEquals(errorMessage, ex.getMessage());
+            assertEquals(EXCEPT_INTERVALS_WITH_SAME_ID, ex.getMessage());
         }
     }
 
@@ -78,9 +81,5 @@ class HyperRectangleTest {
         assertFalse(hr.couldContain(aPoint));
     }
 
-    @Test
-    void testCouldContain(){
-
-    }
 
 }
