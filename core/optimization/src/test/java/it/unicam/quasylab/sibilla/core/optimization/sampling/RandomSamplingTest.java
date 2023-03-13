@@ -1,6 +1,5 @@
 package it.unicam.quasylab.sibilla.core.optimization.sampling;
 
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.Common;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.DiscreteSetInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.DiscreteStepInterval;
@@ -23,7 +22,7 @@ class RandomSamplingTest {
                 new DiscreteSetInterval(3,5,9)
         );
         int numberOfSamples = 50;
-        Table sampleSet = new RandomSampling().getSampleTable(numberOfSamples,hr);
+        Table sampleSet = new RandomSamplingTask().getSampleTable(numberOfSamples,hr);
         assertTrue( sampleSet.rowCount() == numberOfSamples &&
                 sampleSet.columnCount() == hr.getDimensionality());
     }

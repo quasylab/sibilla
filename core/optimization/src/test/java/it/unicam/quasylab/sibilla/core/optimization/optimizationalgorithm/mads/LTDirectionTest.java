@@ -1,11 +1,10 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads;
 
+import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.poll.LTDirection;
 import org.junit.jupiter.api.Test;
-import smile.math.matrix.Matrix;
-import static it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.Common.*;
-import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.Common.*;
+
 @SuppressWarnings("all")
 //TODO
 class LTDirectionTest {
@@ -37,25 +36,23 @@ class LTDirectionTest {
         int[][] basis = ltDirection.getBasis(5,1.0/16.0);
         int l = (int) ((-1)*log(1.0/16.0,4));
         double desiredDet = Math.pow(2,5*l);
-        //System.out.println(desiredDet);
-        //int det = determinantOfMatrix(basis,5);
-        //System.out.println(det);
-        //System.out.println(desiredDet);
+        System.out.println(desiredDet);
+        int det = determinant(basis);
+        System.out.println(det);
     }
 
     @Test
     void testMinimalBasis(){
         LTDirection ltDirection = new LTDirection();
         int[][] minPositiveBasis = ltDirection.getMinimalPositiveBasis(5,1.0/16.0);
-        //System.out.println("^_^_^_^_^_^_^_^_^_^_^_^");
-        //print2D(minPositiveBasis);
+        print2D(minPositiveBasis);
     }
 
     @Test
     void testMaximalBasis(){
         LTDirection ltDirection = new LTDirection();
-        int[][] minPositiveBasis = ltDirection.getMaximalPositiveBasis(5,1.0);
-        //print2D(minPositiveBasis);
+        int[][] maxPositiveBasis = ltDirection.getMaximalPositiveBasis(5,1.0/128.0);
+        print2D(maxPositiveBasis);
     }
 
 

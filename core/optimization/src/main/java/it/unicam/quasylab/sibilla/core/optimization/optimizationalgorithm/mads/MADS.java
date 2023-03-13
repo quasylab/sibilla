@@ -1,10 +1,10 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads;
 
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategy;
+import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationTask;
 
 @SuppressWarnings("all")
 //TODO
-public interface MADS extends OptimizationStrategy {
+public interface MADS {
     void initialisation();
 
     void search();
