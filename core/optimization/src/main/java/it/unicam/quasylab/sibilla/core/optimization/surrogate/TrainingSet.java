@@ -1,44 +1,44 @@
 package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 
+import it.unicam.quasylab.sibilla.core.optimization.sampling.SamplingTask;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.Interval;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.SampleStrategyFactory;
 import tech.tablesaw.api.*;
 import tech.tablesaw.columns.Column;
 
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.*;
 
 public class TrainingSet extends Table {
-    private final Function<Map<String,Double>,Double> function;
+    private final ToDoubleFunction<Map<String,Double>> function;
     private final HyperRectangle searchSpace;
     private final String resultColumnName;
 
-    public TrainingSet(HyperRectangle searchSpace, String samplingStrategyName,int trainingSetSize, Function<Map<String,Double>,Double> function){
-        this(searchSpace,samplingStrategyName,trainingSetSize,function,DEFAULT_COLUMN_RESULT_NAME);
+    public TrainingSet(HyperRectangle searchSpace,SamplingTask samplingTask, int trainingSetSize, ToDoubleFunction<Map<String,Double>>function){
+        this(searchSpace,samplingTask,trainingSetSize,function,DEFAULT_COLUMN_RESULT_NAME);
     }
-    public TrainingSet(HyperRectangle searchSpace, String samplingStrategyName, int trainingSetSize, Function<Map<String,Double>,Double> function,String resultColumnName){
+    public TrainingSet(HyperRectangle searchSpace,SamplingTask samplingTask, int trainingSetSize, ToDoubleFunction<Map<String,Double>> function,String resultColumnName){
         super(DEFAULT_TRAINING_SET_NAME);
         this.function = function;
         this.searchSpace = searchSpace;
         this.resultColumnName = resultColumnName;
-        Table samples = SampleStrategyFactory.getSample(samplingStrategyName,trainingSetSize,searchSpace);
+        Table samples = samplingTask.getSampleTable(trainingSetSize,searchSpace);
         this.addColumns(samples.columns().toArray(Column[]::new));
         this.addColumns(computeResultColumn(samples,function,resultColumnName));
     }
 
-    private DoubleColumn computeResultColumn(Table input, Function<Map<String,Double>,Double> function, String columnID){
+    private DoubleColumn computeResultColumn(Table input, ToDoubleFunction<Map<String,Double>> function, String columnID){
         List<Map<String,Double>> listOfRowAsMap = toMapList(input);
         Double[] results = new Double[listOfRowAsMap.size()];
         for (int i = 0; i < listOfRowAsMap.size(); i++) {
-            results[i] = function.apply(listOfRowAsMap.get(i));
+            results[i] = function.applyAsDouble(listOfRowAsMap.get(i));
         }
         return DoubleColumn.create(columnID,results);
     }
 
-    private TrainingSet(Table trainingSet,HyperRectangle searchSpace, Function<Map<String,Double>,Double> function,String resultColumnName){
+    private TrainingSet(Table trainingSet,HyperRectangle searchSpace, ToDoubleFunction<Map<String,Double>> function,String resultColumnName){
         super(DEFAULT_TRAINING_SET_NAME,trainingSet.columns());
         this.searchSpace = searchSpace;
         this.function = function;
@@ -53,6 +53,19 @@ public class TrainingSet extends Table {
             Map<String,Double> rowMap = new HashMap<>();
             for (int j = 0; j < table.columnCount(); j++) {
                 rowMap.put(table.column(j).name(),row.getDouble(j));
+            }
+            mapList.add(rowMap);
+        }
+        return mapList;
+    }
+
+    public List<Map<String,Double>> toMapList(){
+        List<Map<String,Double>> mapList = new ArrayList<>();
+        for (int i = 0; i < this.rowCount(); i++) {
+            Row row = this.row(i);
+            Map<String,Double> rowMap = new HashMap<>();
+            for (int j = 0; j < this.columnCount(); j++) {
+                rowMap.put(this.column(j).name(),row.getDouble(j));
             }
             mapList.add(rowMap);
         }
@@ -140,7 +153,7 @@ public class TrainingSet extends Table {
 
     }
 
-    public Function<Map<String, Double>, Double> getFunction() {
+    public ToDoubleFunction<Map<String,Double>> getFunction() {
         return function;
     }
 

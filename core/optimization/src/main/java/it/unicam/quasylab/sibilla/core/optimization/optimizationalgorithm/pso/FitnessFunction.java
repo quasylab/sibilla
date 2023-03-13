@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
+
 /**
  *
  * A fitness function is a particular type of objective function that
@@ -17,10 +19,10 @@ import java.util.function.Predicate;
  * @author      Lorenzo Matteucci
  */
 public class FitnessFunction {
-    private final Function<Map<String,Double>,Double> fitnessFunction;
+    private final ToDoubleFunction<Map<String,Double>> fitnessFunction;
     private final List<Predicate<Map<String,Double>>> constraints;
     private final double penaltyValue;
-    public FitnessFunction(Function<Map<String,Double>,Double> fitnessFunction, List<Predicate<Map<String,Double>>> constraints, double penaltyValue){
+    public FitnessFunction(ToDoubleFunction<Map<String,Double>> fitnessFunction, List<Predicate<Map<String,Double>>> constraints, double penaltyValue){
         this.fitnessFunction = fitnessFunction;
         this.constraints = Optional.ofNullable(constraints).orElse(new ArrayList<>());
         this.penaltyValue = penaltyValue;
@@ -31,7 +33,7 @@ public class FitnessFunction {
             if(constraints.stream().anyMatch( p -> !p.test(parameters)))
                 return penaltyValue;
         }
-        return fitnessFunction.apply(parameters);
+        return fitnessFunction.applyAsDouble(parameters);
     }
 
 }

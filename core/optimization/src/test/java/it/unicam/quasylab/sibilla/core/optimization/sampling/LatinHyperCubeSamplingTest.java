@@ -23,7 +23,7 @@ class LatinHyperCubeSamplingTest {
                 new ContinuousInterval(1.0,10.0)
         );
         int numberOfSamples = 50;
-        Table sampleSet = new LatinHyperCubeSampling().getSampleTable(numberOfSamples,hr);
+        Table sampleSet = new LatinHyperCubeSamplingTask().getSampleTable(numberOfSamples,hr);
         assertTrue( sampleSet.rowCount() == numberOfSamples &&
                 sampleSet.columnCount() == hr.getDimensionality());
     }
@@ -36,7 +36,7 @@ class LatinHyperCubeSamplingTest {
                 new DiscreteStepInterval(1.0,10.0,1)
         );
         int numberOfSamples = 10;
-        Table sampleSet = new LatinHyperCubeSampling().getSampleTable(numberOfSamples,hr);
+        Table sampleSet = new LatinHyperCubeSamplingTask().getSampleTable(numberOfSamples,hr);
         //System.out.println(getCSVFromTable(sampleSet));
     }
 

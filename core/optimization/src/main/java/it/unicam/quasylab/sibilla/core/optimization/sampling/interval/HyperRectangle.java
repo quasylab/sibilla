@@ -1,6 +1,7 @@
 package it.unicam.quasylab.sibilla.core.optimization.sampling.interval;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.*;
 
@@ -20,9 +21,14 @@ public class HyperRectangle{
             this.intervals = intervals;
     }
 
+    public HyperRectangle(List<? extends Interval> intervals){
+        this(intervals.toArray(Interval[]::new));
+    }
+
     public Interval getInterval(int index){
         return intervals[index];
     }
+
 
     public Interval[] getIntervals() {
         return this.intervals;
@@ -123,6 +129,11 @@ public class HyperRectangle{
         HyperRectangle scaledOne = this.getCopy();
         scaledOne.scale(scaleFactor);
         return scaledOne;
+    }
+
+
+    public List<String> getIdsList(){
+        return Arrays.stream(intervals).map(Interval::getId).toList();
     }
 
     @Override

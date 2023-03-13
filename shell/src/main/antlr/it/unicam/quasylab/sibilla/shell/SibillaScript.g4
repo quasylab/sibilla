@@ -43,10 +43,14 @@ command : module_command
         | show_statistics
         | predicates_command
         | first_passage_time
-        | reachability_command
-        | optimize_command
-        | set_optimization_property_command
-        | set_surrogate_property_command
+        | set_optimization_strategy
+        | set_optimization_properties
+        | set_surrogate_properties
+        | search_space_interval
+        | set_search_space
+        | constraints_definition
+        | optimization_command
+        | training_set_setting
         ;
 
 reachability_command: 'probreach' goal=STRING ('while' condition=STRING)? 'with' 'alpha' '='  alpha=REAL 'and' 'delta' '=' delta=REAL;
@@ -145,20 +149,45 @@ ls_command : 'ls' ;
 
 cd_command : 'cd' name=STRING;
 
-optimize_command:
-    ( 'opt' 'strat' | 'optimization' 'strategy' ) STRING (( 'surr' |'with surrogate' )  STRING)?
+
+set_optimization_strategy :
+    'optimizes using' STRING ('with surrogate' STRING)?
 ;
 
-set_optimization_property_command:
-    'set' ( 'opt' 'prop' | 'optimization' 'property' ) name = ID '=' ( expr | STRING )';'
+set_optimization_properties :
+    ('set' 'optimization' 'property'|'set' 'opt' 'prop') STRING ' ' STRING
 ;
 
-set_surrogate_property_command:
-    'set' ( 'surr' 'prop' | 'surrogate' 'property' ) name = ID '=' ( expr | STRING )';'
+set_surrogate_properties :
+    ('set' 'surrogate' 'property'|'set' 'sur' 'prop') STRING ' ' STRING
 ;
 
+search_space_interval :
+    'search' 'in' variable=STRING 'in' '[' (REAL |'-INF') ',' (REAL |'+INF') ']'
+;
 
+set_search_space :
+    'add' ('all'|search_space_interval+) 'to' 'search' 'space'
+;
 
+constraints_definition :
+    'add' 'constraint' expr
+;
+
+optimization_command :
+    ( 'minimize' | 'min' | 'maximize' | 'max' ) ('reach' | 'ftp' ) (name = ID | expr)
+;
+
+training_set_setting :
+    'training''set' 'size' training_set_size=INTEGER ('sampling' sampling_strategy_name=STRING)?
+;
+
+objective_function :
+    expr
+    | reachability_command
+    | first_passage_time
+
+;
 
 expr :
       left=expr op=('&'|'&&') right=expr                      # andExpression

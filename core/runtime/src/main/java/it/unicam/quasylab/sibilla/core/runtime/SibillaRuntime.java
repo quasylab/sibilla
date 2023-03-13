@@ -49,6 +49,8 @@ public final class SibillaRuntime {
     private double deadline = Double.NaN;
     private double dt = Double.NaN;
 
+    private OptimizationModule optimizationModule;
+
     public SibillaRuntime() {
         initModules();
     }
@@ -60,6 +62,7 @@ public final class SibillaRuntime {
                 currentModule =  m;
             }
         }
+        this.optimizationModule = new OptimizationModule(this);
     }
 
     /**

@@ -1,7 +1,15 @@
 package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 
+
 import smile.validation.metric.*;
-import tech.tablesaw.api.Row;
+import tech.tablesaw.api.DoubleColumn;
+
+import tech.tablesaw.api.Table;
+
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.ToDoubleFunction;
 
 
 public class SurrogateMetrics {
@@ -13,19 +21,23 @@ public class SurrogateMetrics {
     double rSquared;
     double fitTime;
     TrainingSet trainingSet;
+    Table truthVsPredictedTable;
 
     double[] truth;
     double[] predicted;
 
-    Surrogate surrogate;
+    SurrogateModel surrogate;
 
-    public SurrogateMetrics(Surrogate surrogate, TrainingSet trainingSet, double fitTime){
+    public SurrogateMetrics(SurrogateModel surrogate, TrainingSet trainingSet, double fitTime){
 
         this.trainingSet = trainingSet;
         this.truth = trainingSet.getResultColumn().asDoubleArray();
         this.predicted = getPredictedValues(surrogate,trainingSet);
         this.fitTime = fitTime;
         this.surrogate = surrogate;
+
+        truthVsPredictedTable = Table.create(trainingSet.columns());
+        truthVsPredictedTable.addColumns(DoubleColumn.create("predicted", predicted));
 
         this.mse = MSE.of(this.truth,this.predicted);
         this.rmse = RMSE.of(this.truth,this.predicted);
@@ -35,15 +47,15 @@ public class SurrogateMetrics {
 
     }
 
-    private double[] getPredictedValues(Surrogate surrogate, TrainingSet trainingSet) {
+
+
+    private double[] getPredictedValues(SurrogateModel surrogate, TrainingSet trainingSet) {
         double[] predicted = new double[truth.length];
+        ToDoubleFunction<Map<String,Double>> surrogateFunction = surrogate.getSurrogateFunction();
+        List<Map<String,Double>> listOfRowsAsMaps = trainingSet.toMapList();
         for (int i = 0; i < truth.length; i++) {
-            Row trainingSetRow = trainingSet.row(i);
-            Double[] inputVector = new Double[trainingSetRow.columnCount()-1];
-            for (int j = 0; j < inputVector.length; j++) {
-                inputVector[j] = trainingSetRow.getDouble(j);
-            }
-            predicted[i] = surrogate.predict(inputVector);
+            Map<String,Double> row = listOfRowsAsMaps.get(i);
+            predicted[i] = surrogateFunction.applyAsDouble(row);
         }
         return predicted;
     }
@@ -77,9 +89,12 @@ public class SurrogateMetrics {
     }
 
     public String getFitTimeInSeconds(){
-        return this.fitTime /1000 + " sec";
+        return this.getFitTime() /1000 + " sec";
     }
 
+    public Table getTruthVsPredictedTable(){
+        return truthVsPredictedTable;
+    }
     @Override
     public String toString() {
         return "Metrics : \n"+

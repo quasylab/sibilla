@@ -1,6 +1,5 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads;
 
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationStrategy;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 
 import java.util.*;
@@ -9,7 +8,7 @@ import java.util.function.Predicate;
 
 @SuppressWarnings("all")
 //TODO
-public class LTMADS implements OptimizationStrategy {
+public class LTMADS {
 
     private final Function<Map<String,Double>,Double> functionToOptimize;
     private final List<Predicate<Map<String,Double>>> constraints;
@@ -40,22 +39,5 @@ public class LTMADS implements OptimizationStrategy {
     }
 
 
-    private void initialization(){
 
-    }
-
-    @Override
-    public Map<String, Double> minimize() {
-        return null;
-    }
-
-    @Override
-    public Map<String, Double> maximize() {
-        return null;
-    }
-
-    @Override
-    public void setSearchSpaceAsConstraints() {
-
-    }
 }

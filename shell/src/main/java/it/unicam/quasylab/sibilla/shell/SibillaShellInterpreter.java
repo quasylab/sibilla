@@ -529,4 +529,11 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
             return false;
         }
     }
+
+    @Override
+    public Boolean visitSet_optimization_strategy(SibillaScriptParser.Set_optimization_strategyContext ctx){
+        return true;
+    }
+
+
 }

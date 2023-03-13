@@ -24,7 +24,7 @@ class FullFactorialSamplingTest {
                 new ContinuousInterval(1.0,10.0)
         );
         int numberOfSamplesPerDimension = 3;
-        Table sampleSet = new FullFactorialSampling().getSampleTable(3,hr);
+        Table sampleSet = new FullFactorialSamplingTask().getSampleTable(3,hr);
         assertEquals(
                 sampleSet.rowCount(),
                 Math.pow(numberOfSamplesPerDimension, hr.getDimensionality())
@@ -46,8 +46,8 @@ class FullFactorialSamplingTest {
                 new ContinuousInterval("v4",-1,1)
         );
         int numberOfSamplesPerDimension = 3;
-        Table sampleSetMix = new FullFactorialSampling().getSampleTable(3,hrMixed);
-        Table sampleSetCont = new FullFactorialSampling().getSampleTable(3,hrAllContinuous);
+        Table sampleSetMix = new FullFactorialSamplingTask().getSampleTable(3,hrMixed);
+        Table sampleSetCont = new FullFactorialSamplingTask().getSampleTable(3,hrAllContinuous);
 
 
         assertTrue(sampleSetCont.rowCount() > sampleSetMix.rowCount());
