@@ -47,21 +47,21 @@ observationDeclaration: 'observations' '{' (fields += fieldDeclaration (';' fiel
 
 fieldDeclaration: type fieldName=ID ;
 
-actionBody: actionName=ID '{' (fieldUpdate)* '}'
+actionBody: actionName=ID '{' (updates += fieldUpdate(';' updates += fieldUpdate)*)? '}'
           | 'wait'    //the agent waits a turn
           | 'stop'    //the agent stops
           | 'rtf'     //the agent return to the Force
 ;
 
-fieldUpdate: fieldName=ID '<-' value=expr ';';
+fieldUpdate: fieldName=ID '<-' value=expr ;
 
 behaviourDeclaration: (ruleDeclaration '|' )* defaultRule;
 
-ruleDeclaration: '[' boolExpr=expr ']' '->' '{' (weightedRule)+ '}';
+ruleDeclaration: '[' boolExpr=expr ']' '->' '{' rules += weightedRule(';' rules += weightedRule)* '}';
 
-defaultRule: 'default' '{' (weightedRule)+ '}';
+defaultRule: 'default' '{' rules += weightedRule(';' rules += weightedRule)*'}';
 
-weightedRule: actionName=ID ':' weight=expr ';';
+weightedRule: actionName=ID ':' weight=expr ;
 
 //SYSTEM GRAMMAR
 
@@ -77,9 +77,9 @@ assignmentTemp: 'let' tempName=ID '{' (blocks += selectionBlock (';' blocks += s
 
 selectionBlock: 'select' name=ID 'in' groupName=ID 'that' expr;
 
-agentSensing: agentName=ID '{' (fieldUpdate)* '}';
+agentSensing: agentName=ID '{' (updates += fieldUpdate(';' updates += fieldUpdate)*)? '}';
 
-evolutionDeclaration: entityName=ID '{' (fieldUpdate)* '}';
+evolutionDeclaration: entityName=ID '{' (updates += fieldUpdate(';' updates += fieldUpdate)*)? '}';
 
 //CONFIG GRAMMAR
 
@@ -96,10 +96,10 @@ collectionDeclaration:
 
 collectionAssignment:  collectionName=ID '=' func;
 
-collectiveDeclaration: collectionName=ID '{' (fieldInit)* '}'                               #collectiveTerminal
-                     | 'for' name=ID 'in' groupName=ID '{' collectiveDeclaration '}'        #collectiveFor
+collectiveDeclaration: collectionName=ID '{' (fields += fieldInit (';' fields += fieldInit)*)? '}'       #collectiveTerminal
+                     | 'for' name=ID 'in' groupName=ID '{' collectiveDeclaration '}'                     #collectiveFor
                      | ('if' exprBool=expr '{'collectiveDeclaration'}')+
-                       ('else''{'collectiveDeclaration'}')?                                 #collectiveIfElse
+                       ('else''{'collectiveDeclaration'}')?                                              #collectiveIfElse
 ;
 
 fieldInit: fieldName=ID '=' value=expr;
