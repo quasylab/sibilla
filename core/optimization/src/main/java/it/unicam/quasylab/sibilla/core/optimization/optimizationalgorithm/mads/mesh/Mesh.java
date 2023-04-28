@@ -1,6 +1,5 @@
-package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads;
+package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.mesh;
 
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.search.MeshInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.Interval;
 
@@ -8,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("all")
 //TODO
 public class Mesh {
 
@@ -85,8 +83,7 @@ public class Mesh {
         meshIntervalList.forEach(i -> i.setStep(deltaMesh));
         this.deltaMesh = deltaMesh;
     }
-
-    public void setDeltaMesh(Map<String,Double> point) {
+    public void setPoint(Map<String,Double> point) {
         meshIntervalList.forEach(i -> i.setPoint(point.get(i.getId())));
         this.point = point;
     }

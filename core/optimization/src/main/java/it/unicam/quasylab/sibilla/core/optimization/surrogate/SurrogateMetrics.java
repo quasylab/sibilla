@@ -105,7 +105,6 @@ public class SurrogateMetrics {
                 "R^2  : " + getrSquared() +"\n"+
                 "\n"+
                 "Fit time : "+ getFitTimeInSeconds()+"\n"+
-                "Training set size : "+ getTrainingSet().rowCount()+"\n"
-                +surrogate;
+                "Training set size : "+ getTrainingSet().rowCount()+"\n";
     }
 }

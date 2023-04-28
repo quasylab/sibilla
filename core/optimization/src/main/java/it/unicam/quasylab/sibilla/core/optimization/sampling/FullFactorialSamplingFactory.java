@@ -1,6 +1,6 @@
 package it.unicam.quasylab.sibilla.core.optimization.sampling;
 
-public class FullFactorialSamplingAlgorithm implements SamplingAlgorithm{
+public class FullFactorialSamplingFactory implements SamplingFactory {
     @Override
     public SamplingTask getSamplingTask() {
         return new FullFactorialSamplingTask();

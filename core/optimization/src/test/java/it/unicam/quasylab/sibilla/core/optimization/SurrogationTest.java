@@ -8,6 +8,7 @@ import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRecta
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.RandomForest;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateFactory;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateModel;
+import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateModelRegistry;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -36,7 +37,7 @@ class SurrogationTest {
         // OPTIMIZATION WITHOUT SURROGATE
 
         OptimizationTask optimizationTask = new PSOAlgorithm().getOptimizationTask();
-        Map<String,Double> minimizingValuesFunction  = optimizationTask.minimizeWithinTheSearchSpace(ROSENBROCK_FUNCTION,searchSpace);
+        Map<String,Double> minimizingValuesFunction  = optimizationTask.minimize(ROSENBROCK_FUNCTION,searchSpace);
 
         // OPTIMIZATION WITH SURROGATE
 
@@ -44,7 +45,7 @@ class SurrogationTest {
         SurrogateModel randomForestModel = surrogateFactory.getSurrogateModel(ROSENBROCK_FUNCTION, new LatinHyperCubeSamplingTask(),searchSpace,10000,new Properties());
 
         ToDoubleFunction<Map<String,Double>> surrogateFunction = randomForestModel.getSurrogateFunction();
-        Map<String,Double> minimizingValuesSurrogate  = optimizationTask.minimizeWithinTheSearchSpace(surrogateFunction,searchSpace);
+        Map<String,Double> minimizingValuesSurrogate  = optimizationTask.minimize(surrogateFunction,searchSpace);
 
         // RESULT COMPARISON
 
@@ -75,7 +76,7 @@ class SurrogationTest {
         // OPTIMIZATION WITHOUT SURROGATE
 
         OptimizationTask optimizationTask = new PSOAlgorithm().getOptimizationTask();
-        Map<String,Double> minimizingValuesFunction  = optimizationTask.minimizeWithinTheSearchSpace(SIMPLE_FUNCTION,searchSpace);
+        Map<String,Double> minimizingValuesFunction  = optimizationTask.minimize(SIMPLE_FUNCTION,searchSpace);
 
         // OPTIMIZATION WITH SURROGATE
 
@@ -83,7 +84,7 @@ class SurrogationTest {
         SurrogateModel randomForestModel = surrogateFactory.getSurrogateModel(SIMPLE_FUNCTION, new LatinHyperCubeSamplingTask(),searchSpace,1000,new Properties());
 
         ToDoubleFunction<Map<String,Double>> surrogateFunction = randomForestModel.getSurrogateFunction();
-        Map<String,Double> minimizingValuesSurrogate  = optimizationTask.minimizeWithinTheSearchSpace(surrogateFunction,searchSpace);
+        Map<String,Double> minimizingValuesSurrogate  = optimizationTask.minimize(surrogateFunction,searchSpace);
 
         // RESULT COMPARISON
 
@@ -102,6 +103,11 @@ class SurrogationTest {
 
 
     }
+    @Test
+    void testRegistry(){
+        Map<String,String> a = SurrogateModelRegistry.getInstance().getSurrogateProperties("gtb");
+
+    }
 
 
     private double distanceCoordinates( Map<String,Double> values1,  Map<String,Double> values2){
@@ -111,6 +117,7 @@ class SurrogationTest {
         }
         return Math.sqrt(distance);
     }
+
 
 
 

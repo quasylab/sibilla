@@ -119,7 +119,6 @@ public class ExpressionEvaluator extends PopulationModelBaseVisitor<SibillaValue
         return SibillaValue.getOperator(ctx.op.getText()).apply(ctx.left.accept(this),ctx.right.accept(this));
     }
 
-
     @Override
     public SibillaValue visitAddSubExpression(PopulationModelParser.AddSubExpressionContext ctx) {
         return SibillaValue.getOperator(ctx.op.getText()).apply(ctx.left.accept(this),ctx.right.accept(this));

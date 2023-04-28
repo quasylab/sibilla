@@ -1,5 +1,6 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads;
 
+import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.mesh.Mesh;
 import smile.math.matrix.Matrix;
 
 import java.util.Arrays;

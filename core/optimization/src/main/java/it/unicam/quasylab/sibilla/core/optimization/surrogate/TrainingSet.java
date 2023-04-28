@@ -33,7 +33,9 @@ public class TrainingSet extends Table {
         List<Map<String,Double>> listOfRowAsMap = toMapList(input);
         Double[] results = new Double[listOfRowAsMap.size()];
         for (int i = 0; i < listOfRowAsMap.size(); i++) {
+            System.out.print("<");
             results[i] = function.applyAsDouble(listOfRowAsMap.get(i));
+            System.out.print(">");
         }
         return DoubleColumn.create(columnID,results);
     }

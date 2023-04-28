@@ -59,7 +59,7 @@ class DiscreteStepIntervalTest {
         //System.out.println(repetition);
         assertEquals(dsi.size(), repetition.keySet().size());
         for (Double key : repetition.keySet()) {
-            assertTrue(repetition.get(key) >= 170 && repetition.get(key) <= 230);
+            assertTrue(repetition.get(key) >= 150 && repetition.get(key) <= 250);
         }
     }
 

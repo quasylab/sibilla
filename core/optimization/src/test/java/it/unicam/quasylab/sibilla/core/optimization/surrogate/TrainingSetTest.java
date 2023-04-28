@@ -1,6 +1,7 @@
 package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 
 import it.unicam.quasylab.sibilla.core.optimization.sampling.RandomSamplingTask;
+import it.unicam.quasylab.sibilla.core.optimization.sampling.SamplingStrategyRegistry;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.DiscreteStepInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
@@ -21,6 +22,26 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SuppressWarnings({"UnusedDeclaration"})
 class TrainingSetTest {
+
+
+    @Test
+    void testCreationTrainingSet(){
+        HyperRectangle hr = new HyperRectangle(
+                new ContinuousInterval("x",0.0,5.0),
+                new ContinuousInterval("y",5.0,10.0),
+                new ContinuousInterval("z",10.0,15.0)
+        );
+        ToDoubleFunction<Map<String,Double>> function = (
+                stringDoubleMap -> stringDoubleMap.get("x") + stringDoubleMap.get("y")
+        );
+        TrainingSet ts = new TrainingSet(
+                hr,
+                SamplingStrategyRegistry.getInstance().get("lhs").getSamplingTask(),
+                1000,
+                function);
+
+        System.out.println(ts);
+    }
 
     @Test
     void testTrainingSet(){

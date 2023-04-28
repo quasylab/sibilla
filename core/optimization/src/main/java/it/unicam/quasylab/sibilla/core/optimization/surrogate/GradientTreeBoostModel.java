@@ -67,11 +67,11 @@ public class GradientTreeBoostModel extends AbstractSurrogateModel{
 
         this.ntrees = Integer.parseInt(properties.getProperty("gbt.trees", NUMBER_OF_TREES+""));
         this.loss = Loss.valueOf(properties.getProperty("gbt.loss", LOSS_FUNCTION_NAME));
-        this.maxDepth = Integer.parseInt(properties.getProperty("gbt.max.depth", MAX_DEPTH+""));
-        this.maxNodes = Integer.parseInt(properties.getProperty("gbt.max.nodes", MAX_NODES+""));
-        this.nodeSize = Integer.parseInt(properties.getProperty("gbt.node.size", NODES_SIZE+""));
+        this.maxDepth = Integer.parseInt(properties.getProperty("gbt.max_depth", MAX_DEPTH+""));
+        this.maxNodes = Integer.parseInt(properties.getProperty("gbt.max_nodes", MAX_NODES+""));
+        this.nodeSize = Integer.parseInt(properties.getProperty("gbt.node_size", NODES_SIZE+""));
         this.shrinkage = Double.parseDouble(properties.getProperty("gbt.shrinkage", SHRINKAGE+""));
-        this.subsample = Double.parseDouble(properties.getProperty("gbt.sample.rate", SUBSAMPLE+""));
+        this.subsample = Double.parseDouble(properties.getProperty("gbt.sample_rate", SUBSAMPLE+""));
 
         this.properties = properties;
     }
@@ -203,11 +203,11 @@ public class GradientTreeBoostModel extends AbstractSurrogateModel{
 //
 //        this.ntrees = Integer.parseInt(properties.getProperty("gbt.trees", NUMBER_OF_TREES+""));
 //        this.loss = Loss.valueOf(properties.getProperty("gbt.loss", LOSS_FUNCTION_NAME));
-//        this.maxDepth = Integer.parseInt(properties.getProperty("gbt.max.depth", MAX_DEPTH+""));
-//        this.maxNodes = Integer.parseInt(properties.getProperty("gbt.max.nodes", MAX_NODES+""));
-//        this.nodeSize = Integer.parseInt(properties.getProperty("gbt.node.size", NODES_SIZE+""));
+//        this.maxDepth = Integer.parseInt(properties.getProperty("gbt.max_depth", MAX_DEPTH+""));
+//        this.maxNodes = Integer.parseInt(properties.getProperty("gbt.max_nodes", MAX_NODES+""));
+//        this.nodeSize = Integer.parseInt(properties.getProperty("gbt.node_size", NODES_SIZE+""));
 //        this.shrinkage = Double.parseDouble(properties.getProperty("gbt.shrinkage", SHRINKAGE+""));
-//        this.subsample = Double.parseDouble(properties.getProperty("gbt.sample.rate", SUBSAMPLE+""));
+//        this.subsample = Double.parseDouble(properties.getProperty("gbt.sample_rate", SUBSAMPLE+""));
 //
 //        this.properties = properties;
 //    }

@@ -8,41 +8,25 @@ import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
 public interface OptimizationTask {
-    Map<String,Double> minimize(ToDoubleFunction<Map<String,Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String,Double>>> constraints);
+    Map<String,Double> minimize(ToDoubleFunction<Map<String,Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String,Double>>> constraints, Properties properties);
 
-    default Map<String, Double> maximize(ToDoubleFunction<Map<String, Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints) {
+    default Map<String, Double> maximize(ToDoubleFunction<Map<String, Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints, Properties properties) {
         ToDoubleFunction<Map<String, Double>> negativeObjectiveFunction = map -> -1 * objectiveFunction.applyAsDouble(map);
-        return minimize(negativeObjectiveFunction,searchSpace,constraints);
+        return minimize(negativeObjectiveFunction,searchSpace,constraints,properties);
+    }
+
+    default Map<String,Double> minimize(ToDoubleFunction<Map<String,Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints){
+        return minimize(objectiveFunction,searchSpace,constraints,new Properties());
+    }
+    default Map<String,Double> maximize(ToDoubleFunction<Map<String,Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints){
+        return maximize(objectiveFunction,searchSpace, constraints,new Properties());
     }
 
     default Map<String,Double> minimize(ToDoubleFunction<Map<String,Double>> objectiveFunction, HyperRectangle searchSpace){
-        List<Predicate<Map<String,Double>>> emptyConstraintsList = new ArrayList<>();
-        return minimize(objectiveFunction,searchSpace,emptyConstraintsList);
-    };
+        return minimize(objectiveFunction,searchSpace,new ArrayList<>(),new Properties());
+    }
     default Map<String,Double> maximize(ToDoubleFunction<Map<String,Double>> objectiveFunction, HyperRectangle searchSpace){
-        List<Predicate<Map<String,Double>>> emptyConstraintsList = new ArrayList<>();
-        return maximize(objectiveFunction,searchSpace,emptyConstraintsList);
-    };
-
-
-    default Map<String,Double> minimizeWithinTheSearchSpace(ToDoubleFunction<Map<String,Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String,Double>>> constraints){
-        constraints.addAll(getSearchSpaceAsConstraintList(searchSpace));
-        return minimize(objectiveFunction,searchSpace,constraints);
-    }
-
-    default Map<String,Double> maximizeWithinTheSearchSpace(ToDoubleFunction<Map<String,Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String,Double>>> constraints){
-        constraints.addAll(getSearchSpaceAsConstraintList(searchSpace));
-        return maximize(objectiveFunction,searchSpace,constraints);
-    }
-
-    default Map<String,Double> minimizeWithinTheSearchSpace(ToDoubleFunction<Map<String,Double>> objectiveFunction, HyperRectangle searchSpace){
-        List<Predicate<Map<String, Double>>> constraints = new ArrayList<>(getSearchSpaceAsConstraintList(searchSpace));
-        return minimize(objectiveFunction,searchSpace,constraints);
-    }
-
-    default Map<String,Double> maximizeWithinTheSearchSpace(ToDoubleFunction<Map<String,Double>> objectiveFunction, HyperRectangle searchSpace){
-        List<Predicate<Map<String, Double>>> constraints = new ArrayList<>(getSearchSpaceAsConstraintList(searchSpace));
-        return maximize(objectiveFunction,searchSpace,constraints);
+        return maximize(objectiveFunction,searchSpace, new ArrayList<>(),new Properties());
     }
 
     void setProperties(Properties properties);

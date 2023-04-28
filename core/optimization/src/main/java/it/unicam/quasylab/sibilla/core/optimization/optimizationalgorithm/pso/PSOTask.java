@@ -11,8 +11,6 @@ import java.util.function.ToDoubleFunction;
 
 
 public class PSOTask implements OptimizationTask {
-
-
     private double inertia;
     private double selfConfidence;
     private double swarmConfidence;
@@ -103,7 +101,9 @@ public class PSOTask implements OptimizationTask {
     }
 
     @Override
-    public Map<String, Double> minimize(ToDoubleFunction<Map<String, Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints) {
+    public Map<String, Double> minimize(ToDoubleFunction<Map<String, Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints,Properties properties) {
+        constraints.addAll(getSearchSpaceAsConstraintList(searchSpace));
+        setProperties(properties);
         this.penaltyValue = Double.POSITIVE_INFINITY;
         this.evaluationCriteria = (x, y) -> x < y;
         this.fitnessFunction = new FitnessFunction(objectiveFunction, constraints, penaltyValue);
@@ -113,7 +113,9 @@ public class PSOTask implements OptimizationTask {
     }
 
     @Override
-    public Map<String, Double> maximize(ToDoubleFunction<Map<String, Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints) {
+    public Map<String, Double> maximize(ToDoubleFunction<Map<String, Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints,Properties properties) {
+        constraints.addAll(getSearchSpaceAsConstraintList(searchSpace));
+        setProperties(properties);
         this.penaltyValue = Double.NEGATIVE_INFINITY;
         this.evaluationCriteria = (x, y) -> x > y;
         this.fitnessFunction = new FitnessFunction(objectiveFunction, constraints, penaltyValue);
@@ -132,10 +134,21 @@ public class PSOTask implements OptimizationTask {
         int ITERATION = 500;
 
         this.inertia = Double.parseDouble(properties.getProperty("pso.inertia", INERTIA +""));
-        this.selfConfidence = Double.parseDouble(properties.getProperty("pso.self.confidence", SELF_CONFIDENCE +""));
-        this.swarmConfidence = Double.parseDouble(properties.getProperty("pso.swarm.confidence", SWARM_CONFIDENCE +""));
-        this.numberOfParticles = Integer.parseInt(properties.getProperty("pso.particles.number", NUMBER_OF_PARTICLES +""));
+        this.selfConfidence = Double.parseDouble(properties.getProperty("pso.self_confidence", SELF_CONFIDENCE +""));
+        this.swarmConfidence = Double.parseDouble(properties.getProperty("pso.swarm_confidence", SWARM_CONFIDENCE +""));
+        this.numberOfParticles = Integer.parseInt(properties.getProperty("pso.particles_number", NUMBER_OF_PARTICLES +""));
         this.iteration = Integer.parseInt(properties.getProperty("pso.iteration", ITERATION +""));
 
+    }
+
+    @Override
+    public String toString() {
+        String str = "\n Algorithm : Particle Swarm Optimization ";
+        str += "\n  - inertia              : "+this.inertia;
+        str += "\n  - self confidence      : "+this.selfConfidence;
+        str += "\n  - swarm confidence     : "+this.swarmConfidence;
+        str += "\n  - number of particles  : "+this.numberOfParticles;
+        str += "\n  - iteration            : "+this.iteration;
+        return str;
     }
 }

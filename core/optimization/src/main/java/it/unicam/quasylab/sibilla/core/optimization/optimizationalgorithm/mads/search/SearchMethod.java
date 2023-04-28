@@ -1,8 +1,6 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.search;
 
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.Mesh;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.Interval;
+import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.mesh.Mesh;
 
 import java.util.List;
 import java.util.Map;

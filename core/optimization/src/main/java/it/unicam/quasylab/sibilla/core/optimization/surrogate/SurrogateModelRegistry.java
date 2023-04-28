@@ -19,6 +19,31 @@ public class SurrogateModelRegistry {
     private final Map<String, SurrogateFactory> registry;
     private final static SurrogateModelRegistry instance = new SurrogateModelRegistry();
 
+    Map<String, Map<String, String>> surrogateProperties = Map.of(
+            GTB_SURROGATE_ID,Map.of(
+                    "trees","Integer",
+                    "loss","String : \"LeastSquares\",\"LeastAbsoluteDeviation\",\"Quantile(REAL_NUMBER)\" or \"Huber(REAL_NUMBER)\"",
+                    "max_depth","Integer",
+                    "max_nodes","Integer",
+                    "node_size","Integer",
+                    "shrinkage","Real number",
+                    "sample_rate","Real number"
+            ),
+            RF_SURROGATE_ID,Map.of(
+                    "trees","Integer",
+                    "mtry","Integer",
+                    "max_depth","Integer",
+                    "max_nodes","Integer",
+                    "node_size","Integer",
+                    "rate","Real number"
+                    ),
+            RBF_SURROGATE_ID,Map.of(
+                    "neurons","Integer",
+                    "normalized","Boolean"
+            )
+
+    );
+
     public static SurrogateModelRegistry getInstance() {
         return instance;
     }
@@ -46,6 +71,10 @@ public class SurrogateModelRegistry {
 
     public String[] getSurrogates() {
         return this.registry.keySet().toArray(String[]::new);
+    }
+
+    public Map<String, String> getSurrogateProperties(String surrogateName){
+        return this.surrogateProperties.get(surrogateName);
     }
 
 }
