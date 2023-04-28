@@ -1,22 +1,22 @@
-    param lambdaMeet = 1.0;      /* Meeting rate */
-    param probInfection = 0.25;  /* Probability of Infection */
-    param recoverRate = 0.05;    /* Recovering rate */
+param meetRate = 1.0;      /* Meeting rate */
+param infectionRate = 0.005;  /* Probability of Infection */
+param recoverRate = 0.005;    /* Recovering rate */
 
-    const startS = 90;           /* Initial number of S agents */
-    const startI = 10;           /* Initial number of I agents */
+const startS = 95;           /* Initial number of S agents */
+const startI = 5;           /* Initial number of I agents */
+const startR = 0;            /* Initial number of R agents */
 
-    species S;
-    species I;
-    species R;
+species S;
+species I;
+species R;
 
-    rule infection {
-        S|I -[ 1.0 ]-> I|I
-    }
+rule infection {
+    S|I -[ #S * %I * meetRate * infectionRate ]-> I|I
+}
 
-    rule recovered {
-        I -[ 1.0 ]-> R
-    }
+rule recovered {
+    I -[ #I * recoverRate ]-> R
+}
 
-    system init = S<startS>|I<startI>;
-
-    predicate allRecovered = (#S+#I==0);
+system init = S<startS>|I<startI>|R<startR>;
+predicate allRecovered = (#S+#I==0);

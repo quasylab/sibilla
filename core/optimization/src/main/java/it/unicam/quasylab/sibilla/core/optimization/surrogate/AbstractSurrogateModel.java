@@ -65,7 +65,6 @@ public abstract class AbstractSurrogateModel implements SurrogateModel{
         return new SurrogateMetrics(this,outOfSampleTrainingSet,this.fitTime);
     }
 
-
     @Override
     public void setProperty(String key,String value){
         if(this.properties.containsKey(key))

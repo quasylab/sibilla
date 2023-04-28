@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.langs.pm;
 
+import java.util.HashMap;
 import java.util.function.Function;
 
 /**

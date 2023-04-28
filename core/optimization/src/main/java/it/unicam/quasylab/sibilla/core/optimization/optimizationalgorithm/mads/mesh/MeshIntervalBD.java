@@ -1,4 +1,4 @@
-package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.search;
+package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.mesh;
 
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.AbstractDiscreteInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.Interval;
@@ -10,7 +10,7 @@ import java.util.Random;
 import java.util.stream.Stream;
 
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.EXCEPT_ILLEGAL_STEP;
-public class MeshInterval extends AbstractDiscreteInterval {
+public class MeshIntervalBD extends AbstractDiscreteInterval {
 
     private BigDecimal pointBD;
     private BigDecimal stepBD;
@@ -18,11 +18,11 @@ public class MeshInterval extends AbstractDiscreteInterval {
     private BigDecimal upperBoundBD;
 
 
-    public MeshInterval(String id, double lowerBound, double upperBound) {
+    public MeshIntervalBD(String id, double lowerBound, double upperBound) {
         super(id, lowerBound, upperBound);
     }
 
-    public MeshInterval(String id, double lowerBound, double upperBound, double step, double point) {
+    public MeshIntervalBD(String id, double lowerBound, double upperBound, double step, double point) {
         this(id,lowerBound, upperBound);
         this.setStep(step);
         this.setPoint(point);
@@ -100,7 +100,15 @@ public class MeshInterval extends AbstractDiscreteInterval {
 
     @Override
     public void scale(double scaleFactor) {
-
+        BigDecimal scaledStepBD = this.stepBD.multiply(BigDecimal.valueOf(scaleFactor));
+        BigDecimal scaledDistanceToLeftmostBD = this.pointBD.subtract(this.lowerBoundBD).abs().remainder(scaledStepBD);
+        BigDecimal scaledNewLeftmostElementBD = this.lowerBoundBD.add(scaledDistanceToLeftmostBD);
+        BigDecimal scaledDistanceToRightmostBD = this.upperBoundBD.subtract(this.pointBD).abs().remainder(scaledStepBD);
+        BigDecimal scaledNewRightmostElementBD = this.upperBoundBD.subtract(scaledDistanceToRightmostBD);
+        this.setStep(scaledStepBD.doubleValue());
+        this.setPoint(this.getClosestValueTo(this.pointBD.doubleValue() * scaleFactor));
+        this.setLowerBound(scaledNewLeftmostElementBD.doubleValue());
+        this.setUpperBound(scaledNewRightmostElementBD.doubleValue());
     }
 
     @Override
@@ -114,7 +122,13 @@ public class MeshInterval extends AbstractDiscreteInterval {
 
     @Override
     public void changeCenter(double newCenter) {
-
+        BigDecimal newCenterBD = BigDecimal.valueOf(newCenter);
+        BigDecimal shiftBD = newCenterBD.subtract(this.pointBD);
+        BigDecimal newLowerBoundBD = this.lowerBoundBD.add(shiftBD);
+        BigDecimal newUpperBoundBD = this.upperBoundBD.add(shiftBD);
+        this.setLowerBound(newLowerBoundBD.doubleValue());
+        this.setUpperBound(newUpperBoundBD.doubleValue());
+        this.setPoint(newCenter);
     }
 
     @Override
@@ -134,6 +148,9 @@ public class MeshInterval extends AbstractDiscreteInterval {
 
     @Override
     public Interval getDeepCopy() {
-        return null;
+        MeshIntervalBD newCopy = new MeshIntervalBD(this.getId(), this.getLowerBound(), this.getUpperBound());
+        newCopy.setPoint(this.pointBD.doubleValue());
+        newCopy.setStep(this.stepBD.doubleValue());
+        return newCopy;
     }
 }

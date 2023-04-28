@@ -1,11 +1,9 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.poll;
 
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.MadDirection;
-
 import static it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.Common.*;
 
 @SuppressWarnings("ManualArrayCopy")
-public class LTDirection implements MadDirection {
+public class LTDirection {
 
     public record BlVectorAndiHat(
             int[] blVector,
@@ -44,6 +42,7 @@ public class LTDirection implements MadDirection {
             if(iHat!=i)
                 blVector[i] = getRandomIntBetween((int) ((-1)*Math.pow(2.0,l)+1),(int) (Math.pow(2.0,l)-1));
         }
+        this.memorizedBLVectorAndiHat = new BlVectorAndiHat(blVector,iHat);
         return new BlVectorAndiHat(blVector,iHat);
     }
 

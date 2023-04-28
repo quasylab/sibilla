@@ -23,10 +23,12 @@
 
 package it.unicam.quasylab.sibilla.core.runtime;
 
+
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import org.apache.commons.math3.random.RandomGenerator;
+import tech.tablesaw.api.Table;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +36,8 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
 
 public final class SibillaRuntime {
 
@@ -49,7 +52,6 @@ public final class SibillaRuntime {
     private double deadline = Double.NaN;
     private double dt = Double.NaN;
 
-    private OptimizationModule optimizationModule;
 
     public SibillaRuntime() {
         initModules();
@@ -62,7 +64,7 @@ public final class SibillaRuntime {
                 currentModule =  m;
             }
         }
-        this.optimizationModule = new OptimizationModule(this);
+        optimizationModule = new OptimizationModule();
     }
 
     /**
@@ -281,7 +283,7 @@ public final class SibillaRuntime {
     /**
      * Run a simulation and save results with the given label.
      */
-    public Map<String, double[][]>  simulate(SimulationMonitor monitor, String label) throws CommandExecutionException {
+    public Map<String, double[][]> simulate(SimulationMonitor monitor, String label) throws CommandExecutionException {
         checkDeadline();
         checkDt();
         lastSimulation = currentModule.simulate(monitor,rg,replica,deadline,dt);
@@ -449,9 +451,9 @@ public final class SibillaRuntime {
      * in the given output format. The name of each save file, having extension .csv,
      * consists of the string prefix, the name of the series, and the postfix.
      *
-     * @param outputFolder fodler where data are saved
+     * @param outputFolder folder where data are saved
      * @param prefix prefix of generated file names
-     * @param postfix postix of generate file names
+     * @param postfix postfix of generate file names
      * @throws IOException if an error while saving data occurs
      * @throws CommandExecutionException if an error occurred while executing this method
      */
@@ -460,7 +462,33 @@ public final class SibillaRuntime {
         if (lastSimulation != null) {
             writer.write(lastSimulation);
         } else {
-            throw new CommandExecutionException("No simulation is avabilable!");
+            throw new CommandExecutionException("No simulation is available!");
+        }
+    }
+
+
+
+    /**
+     * Save the sample set to a given folder. Data files, in CSV format, are stored
+     * in the given output format. The name of each save file, having extension .csv,
+     * consists of the string prefix, the name of the series, and the postfix.
+     *
+     * @param outputFolder folder where data are saved
+     * @param prefix prefix of generated file names
+     * @param postfix postfix of generate file names
+     * @throws IOException if an error while saving data occurs
+     * @throws CommandExecutionException if an error occurred while executing this method
+     */
+    public void saveTable(String name, String outputFolder, String prefix, String postfix) throws IOException, CommandExecutionException {
+        if (name == null) { name = "samples"; }
+        if (outputFolder == null) { outputFolder = System.getProperty("user.dir"); }
+        if (prefix == null) { prefix = ""; }
+        if (postfix == null) { postfix = ""; }
+        CSVWriter writer = new CSVWriter(outputFolder, prefix, postfix);
+        if (this.optimizationModule.getTrainingSet() != null) {
+            writer.write(name,this.optimizationModule.getTrainingSet());
+        } else {
+            throw new CommandExecutionException("No sample is available!");
         }
     }
 
@@ -469,9 +497,9 @@ public final class SibillaRuntime {
      * in the given output format. The name of each save file, having extension .csv,
      * consists of the string prefix, the name of the series, and the postfix.
      *
-     * @param outputFolder fodler where data are saved
+     * @param outputFolder folder where data are saved
      * @param prefix prefix of generated file names
-     * @param postfix postix of generate file names
+     * @param postfix postfix of generate file names
      * @throws IOException if an error while saving data occurs
      * @throws CommandExecutionException if an error occurred while executing this method
      */
@@ -544,6 +572,150 @@ public final class SibillaRuntime {
     }
 
 
+//  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    //  - - - - - - -  O P T I M I Z A T I O N   S E C T I O N  - - - - - - - - - - - - - -
+    //  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    private OptimizationModule optimizationModule;
+
+
+    public void setOptimizationStrategy(String name) throws CommandExecutionException {
+        try {
+            this.optimizationModule.setOptimizationStrategy(name);
+        }catch (IllegalArgumentException e){
+            throw new CommandExecutionException(String.format(e.getMessage(),name));
+        }
+    }
+
+    public void setSurrogateStrategy(String name) throws CommandExecutionException {
+        try {
+            this.optimizationModule.setSurrogateStrategy(name);
+        }catch (IllegalArgumentException e){
+            throw new CommandExecutionException(String.format(e.getMessage(),name));
+        }
+    }
+
+    public void usingSurrogate(boolean usingSurrogate){
+        this.optimizationModule.useASurrogateFunction(usingSurrogate);
+    }
+
+
+    public void setSurrogateProperty(String key, String value) throws CommandExecutionException {
+        try {
+            this.optimizationModule.setSurrogateProperty(key,value);
+        }catch (IllegalArgumentException e){
+            throw new CommandExecutionException(String.format(e.getMessage(),key));
+        }
+    }
+
+    public void setOptimizationProperty(String key, String value) throws CommandExecutionException {
+        try {
+            this.optimizationModule.setOptimizationProperty(key,value);
+        }catch (IllegalArgumentException e){
+            throw new CommandExecutionException(String.format(e.getMessage(),key));
+        }
+    }
+
+    public void addSpaceInterval(String variableName, double lowerBound, double upperBound){
+        this.optimizationModule.addInterval(variableName,lowerBound,upperBound);
+    }
+
+    public void addConstraint(Predicate<Map<String,Double>> predicate){
+        this.optimizationModule.addConstraint(predicate);
+    }
+
+    public void setTrainingSetSize(int trainingSetSize){
+        this.optimizationModule.setTrainingSetSize(trainingSetSize);
+    }
+
+    public void setSamplingStrategy(String samplingName){
+        this.optimizationModule.setSamplingStrategy(samplingName);
+    }
+
+
+    public void setOptimizationAsMinimization(boolean isMinimization){
+        this.optimizationModule.isAMinimizationProblem(isMinimization);
+    }
+
+
+
+    public void setProbReachAsObjectiveFunction(SimulationMonitor monitor, String goal, double alpha, double eps){
+        this.optimizationModule.setObjectiveFunction(
+                map -> {
+                    map.keySet().forEach(key -> this.setParameter(key,map.get(key)));
+                    this.addAllMeasures();
+                    System.out.println("testing for parameters : " + map);
+                    try {
+                        this.setConfiguration(this.currentModule.getCurrentConfiguration().name(),this.currentModule.getCurrentConfiguration().args());
+                        return this.computeProbReach(monitor,goal,alpha,eps);
+                    } catch (CommandExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        );
+    }
+
+    public void setProbReachAsObjectiveFunctionWithCondition(SimulationMonitor monitor,String condition, String goal, double alpha, double eps){
+        this.optimizationModule.setObjectiveFunction(
+                map -> {
+                    map.keySet().forEach(key -> this.setParameter(key,map.get(key)));
+                    this.addAllMeasures();
+                    try {
+                        this.setConfiguration(this.currentModule.getCurrentConfiguration().name(),this.currentModule.getCurrentConfiguration().args());
+                        return this.computeProbReach(monitor,condition,goal,alpha,eps);
+                    } catch (CommandExecutionException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        );
+    }
+
+    public void setFirstPassageTimeAsObjectiveFunction(SimulationMonitor monitor, String predicateName){
+        this.optimizationModule.setObjectiveFunction(
+            map -> {
+                map.keySet().forEach(key -> this.setParameter(key,map.get(key)));
+                this.addAllMeasures();
+                try {
+                    return this.firstPassageTime(monitor,predicateName).getMean();
+                } catch (CommandExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        );
+    }
+
+    public void setObjectiveFunction(ToDoubleFunction<Map<String,Double>> function){
+        this.optimizationModule.setObjectiveFunction(function);
+    }
+
+    public void performOptimization() {
+        this.optimizationModule.performOptimization();
+    }
+
+    public String getOptimizationInfo(){
+        return this.optimizationModule.info();
+    }
+
+    public String getTrainingSetInfo(){ return this.optimizationModule.infoTrainingSet(); }
+
+    public void generateTrainingSet(){
+        this.optimizationModule.generateTrainingSet();
+    }
+    public Table getTrainingSet() {
+        return this.optimizationModule.getTrainingSet();
+    }
+    public void resetOptimizationSettings(){ this.optimizationModule.reset();}
+
+    public Map<String,Double> getOptimalSolution(){
+        return this.optimizationModule.getOptimalCoordinates();
+    }
+
+    public double evaluateObjectiveFunction(Map<String,Double> value){
+        return this.optimizationModule.evaluateObjectiveFunction(value);
+    }
+    public double evaluateSurrogateFunction(Map<String,Double> value){
+        return this.optimizationModule.evaluateSurrogateFunction(value);
+    }
 
 
 }

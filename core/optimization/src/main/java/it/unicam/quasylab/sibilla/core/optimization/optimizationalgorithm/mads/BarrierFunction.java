@@ -8,11 +8,11 @@ import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
 public class BarrierFunction {
-    private final ToDoubleFunction<Map<String,Double>> fitnessFunction;
+    private final ToDoubleFunction<Map<String,Double>> function;
     private final List<Predicate<Map<String,Double>>> constraints;
 
-    public BarrierFunction(ToDoubleFunction<Map<String,Double>> fitnessFunction, List<Predicate<Map<String,Double>>> constraints){
-        this.fitnessFunction = fitnessFunction;
+    public BarrierFunction(ToDoubleFunction<Map<String,Double>> function, List<Predicate<Map<String,Double>>> constraints){
+        this.function = function;
         this.constraints = Optional.ofNullable(constraints).orElse(new ArrayList<>());
     }
 
@@ -22,6 +22,6 @@ public class BarrierFunction {
             if(constraints.stream().anyMatch(p -> !p.test(parameters)))
                 return penaltyValue;
         }
-        return fitnessFunction.applyAsDouble(parameters);
+        return function.applyAsDouble(parameters);
     }
 }

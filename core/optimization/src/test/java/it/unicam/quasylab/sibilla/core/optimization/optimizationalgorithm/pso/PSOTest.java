@@ -273,7 +273,7 @@ class PSOTest {
 
         Properties psoProperties = new Properties();
         psoProperties.setProperty("pso.iteration", "1000");
-        psoProperties.setProperty("pso.particles.number", "1000");
+        psoProperties.setProperty("pso.particles_number", "1000");
         //ParticleSwarmOptimization pso =  new ParticleSwarmOptimization(ROSENBROCK_FUNCTION,null,searchSpace,psoProperties);
 
         //pso.setSearchSpaceAsConstraints();
@@ -283,7 +283,7 @@ class PSOTest {
 
         OptimizationTask optimizationTask = new PSOAlgorithm().getOptimizationTask();
         optimizationTask.setProperties(psoProperties);
-        Map<String,Double> minimizingValues  = optimizationTask.minimizeWithinTheSearchSpace(ROSENBROCK_FUNCTION,searchSpace);
+        Map<String,Double> minimizingValues  = optimizationTask.minimize(ROSENBROCK_FUNCTION,searchSpace);
 
 
         HyperRectangle rightZone = new HyperRectangle(
@@ -336,7 +336,7 @@ class PSOTest {
 
         Properties properties = new Properties();
 
-        properties.put("pso.particles.number","5");
+        properties.put("pso.particles_number","5");
         properties.put("pso.iteration","3");
 
 
@@ -379,13 +379,13 @@ class PSOTest {
 
         Properties properties = new Properties();
 
-        properties.put("pso.particles.number","100");
+        properties.put("pso.particles_number","100");
         properties.put("pso.iteration","100");
 
 
         OptimizationTask optimizationTask = new PSOAlgorithm().getOptimizationTask();
         optimizationTask.setProperties(properties);
-        Map<String,Double> solution = optimizationTask.minimizeWithinTheSearchSpace(myFunction,searchSpace);
+        Map<String,Double> solution = optimizationTask.minimize(myFunction,searchSpace);
 //        ParticleSwarmOptimization pso = new ParticleSwarmOptimization(myFunction,null,searchSpace,properties);
 //        pso.setSearchSpaceAsConstraints();
 //        Map<String,Double> solution = pso.minimize();
@@ -403,7 +403,7 @@ class PSOTest {
         );
 
         OptimizationTask optimizationTask = new PSOAlgorithm().getOptimizationTask();
-        Map<String,Double> solution = optimizationTask.maximizeWithinTheSearchSpace(SIMPLE_FUNCTION,searchSpace);
+        Map<String,Double> solution = optimizationTask.maximize(SIMPLE_FUNCTION,searchSpace);
         double x = solution.get("x");
         double y = solution.get("y");
         assertTrue(validatePredictedResult(0.707,x,0.05));

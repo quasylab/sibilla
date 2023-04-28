@@ -4,8 +4,7 @@ grammar SibillaScript;
 package it.unicam.quasylab.sibilla.shell;
 }
 
-script   : (command)* EOF;
-
+script  : (command)* EOF;
 
 command : module_command
         | seed_command
@@ -43,14 +42,17 @@ command : module_command
         | show_statistics
         | predicates_command
         | first_passage_time
+        | reachability_command
         | set_optimization_strategy
         | set_optimization_properties
         | set_surrogate_properties
         | search_space_interval
-        | set_search_space
         | constraints_definition
         | optimization_command
         | training_set_setting
+        | reset_optimization_command
+        | sample_command
+        | save_samples_command
         ;
 
 reachability_command: 'probreach' goal=STRING ('while' condition=STRING)? 'with' 'alpha' '='  alpha=REAL 'and' 'delta' '=' delta=REAL;
@@ -64,7 +66,6 @@ summary_statistics: 'summary' 'statistics';
 descriptive_statistics: 'descriptive' 'statistics';
 
 quit_command: 'quit';
-
 
 module_command : 'module' name=STRING
         ;
@@ -151,48 +152,56 @@ cd_command : 'cd' name=STRING;
 
 
 set_optimization_strategy :
-    'optimizes using' STRING ('with surrogate' STRING)?
+    'optimizes using' algorithm_name=STRING ('with surrogate' surrogate_name=STRING)?
 ;
 
 set_optimization_properties :
-    ('set' 'optimization' 'property'|'set' 'opt' 'prop') STRING ' ' STRING
+    ('set' 'optimization' 'property'|'set' 'opt' 'prop') key=STRING value=STRING
 ;
 
 set_surrogate_properties :
-    ('set' 'surrogate' 'property'|'set' 'sur' 'prop') STRING ' ' STRING
+    ('set' 'surrogate' 'property'|'set' 'sur' 'prop') key=STRING  value=STRING
 ;
 
 search_space_interval :
-    'search' 'in' variable=STRING 'in' '[' (REAL |'-INF') ',' (REAL |'+INF') ']'
-;
-
-set_search_space :
-    'add' ('all'|search_space_interval+) 'to' 'search' 'space'
+    'search' 'in' variable=STRING 'in' '[' lower_bound=expr',' upper_bound=expr ']'
 ;
 
 constraints_definition :
-    'add' 'constraint' expr
-;
-
-optimization_command :
-    ( 'minimize' | 'min' | 'maximize' | 'max' ) ('reach' | 'ftp' ) (name = ID | expr)
+    'add' 'constraint' constraint=expr
 ;
 
 training_set_setting :
     'training''set' 'size' training_set_size=INTEGER ('sampling' sampling_strategy_name=STRING)?
 ;
 
-objective_function :
-    expr
-    | reachability_command
-    | first_passage_time
-
+optimization_command :
+    kind_of_optimization=( 'minimize' | 'min' | 'maximize' | 'max' ) objective_function
 ;
+
+sample_command :
+    'sample' ('using' sampling_strategy=STRING)? objective_function ('of size' number_of_samples=INTEGER)?
+ ;
+
+save_samples_command : 'save' 'samples' (name=ID)? ('output'  dir=STRING)? ('prefix' prefix=STRING)? ('postfix' postfix=STRING)?
+            ;
+
+objective_function : (
+     objective_reachability
+     | objective_first_passage_time
+     | objective_expr
+     );
+
+reset_optimization_command : 'reset' 'optimization' 'setting';
+
+objective_reachability : 'probreach' goal=STRING (('while' condition=STRING)? 'with' 'alpha' '='  alpha=REAL 'and' 'delta' '=' delta=REAL)?;
+objective_first_passage_time : 'fpt' name=STRING;
+objective_expr : expression=expr ;
 
 expr :
       left=expr op=('&'|'&&') right=expr                      # andExpression
     | left=expr op=('|'|'||') right=expr                      # orExpression
-    | left=expr '^' right=expr                                # exponentExpression
+    | <assoc=right> left=expr '^' right=expr                  # exponentExpression
     | left=expr op=('*'|'/'|'//') right=expr                  # mulDivExpression
     | left=expr op=('+'|'-'|'%') right=expr                   # addSubExpression
     | left=expr op=('<'|'<='|'=='|'>='|'>') right=expr        # relationExpression
@@ -202,6 +211,7 @@ expr :
     | '(' expr ')'                                            # bracketExpression
     | INTEGER                                                 # intValue
     | REAL                                                    # realValue
+    | ('-inf'|'+inf')                                         # infinity
     | 'false'                                                 # falseValue
     | 'true'                                                  # trueValue
     | reference=ID                                            # referenceExpression

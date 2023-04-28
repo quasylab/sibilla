@@ -1,6 +1,6 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.search;
 
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.Mesh;
+import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.mesh.Mesh;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.LatinHyperCubeSamplingTask;
 
 import java.util.*;

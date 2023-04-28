@@ -24,19 +24,15 @@
 package it.unicam.quasylab.sibilla.core.runtime;
 
 import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
-import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Predicate;
 
 public abstract class AbstractSibillaModule implements SibillaModule {
 
@@ -44,6 +40,8 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     private Set<String> enabledMeasures;
     private boolean summary = true;
     private final SimulationEnvironment simulator = new SimulationEnvironment();
+
+    private Configuration currentConfiguration;
 
 
     protected final void setModelDefinition(ModelDefinition<?> moduleEngine) {
@@ -168,7 +166,13 @@ public abstract class AbstractSibillaModule implements SibillaModule {
 
     @Override
     public boolean setConfiguration(String name, double... args) {
+        this.currentConfiguration = new Configuration(name,args);
         return moduleEngine.setConfiguration(name, args);
+    }
+
+    @Override
+    public Configuration getCurrentConfiguration() {
+        return currentConfiguration;
     }
 
     @Override

@@ -44,7 +44,7 @@ class RandomForestModelTest {
 //        System.out.println(rfr.getInSampleMetrics().getTruthVsPredictedTable());
 //        Properties newProp = new Properties();
 //        newProp.put("rf.trees","10000");
-//        newProp.put("rf.depth","1000");
+//        newProp.put("rf.max_depth","1000");
 //        newProp.put("not.model.property","100");
 //        rfr.setProperties(newProp);
 //        rfr.fit();
@@ -73,7 +73,7 @@ class RandomForestModelTest {
 //
 //        Properties newProp = new Properties();
 //        newProp.put("surrogate.random.forest.trees","1000");
-//        newProp.put("surrogate.random.forest.depth","500");
+//        newProp.put("surrogate.random.forest.max_depth","500");
 //        newProp.put("not.surrogate.properties","asjdn1oi2359990");
 //        rfr.setProperties(newProp);
 //        rfr.fit();
@@ -99,7 +99,7 @@ class RandomForestModelTest {
 //
 //        Properties newProp = new Properties();
 //        newProp.put("surrogate.random.forest.trees","1000");
-//        newProp.put("surrogate.random.forest.depth","100");
+//        newProp.put("surrogate.random.forest.max_depth","100");
 //        newProp.put("not.surrogate.properties","100");
 //        rfr.setProperties(newProp);
 //        rfr.fit(trainingSet);

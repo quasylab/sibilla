@@ -66,9 +66,9 @@ public class RandomForestModel extends AbstractSurrogateModel{
 
         this.numberOfTrees = Integer.parseInt(properties.getProperty("rf.trees", NUMBER_OF_TREES+""));
         this.mtry = Integer.parseInt(properties.getProperty("rf.mtry", MTRY+""));
-        this.maxDepth = Integer.parseInt(properties.getProperty("rf.depth", MAX_DEPTH+""));
-        this.maxNodes = Integer.parseInt(properties.getProperty("rf.nodes", MAX_NODES+""));
-        this.nodeSize = Integer.parseInt(properties.getProperty("rf.size", NODE_SIZE+""));
+        this.maxDepth = Integer.parseInt(properties.getProperty("rf.max_depth", MAX_DEPTH+""));
+        this.maxNodes = Integer.parseInt(properties.getProperty("rf.max_nodes", MAX_NODES+""));
+        this.nodeSize = Integer.parseInt(properties.getProperty("rf.node_size", NODE_SIZE+""));
         this.subSample = Double.parseDouble(properties.getProperty("rf.rate", SUB_SAMPLE+""));
 
         this.properties = properties;
@@ -199,9 +199,9 @@ public class RandomForestModel extends AbstractSurrogateModel{
 //
 //        this.numberOfTrees = Integer.parseInt(this.properties.getProperty("surrogate.random.forest.trees", "500"));
 //        this.mtry = Integer.parseInt(this.properties.getProperty("surrogate.random.forest.mtry", String.valueOf(Math.max(trainingSetDataFrame.ncols()/3, 1))));
-//        this.maxDepth = Integer.parseInt(this.properties.getProperty("surrogate.random.forest.depth", "200"));
+//        this.maxDepth = Integer.parseInt(this.properties.getProperty("surrogate.random.forest.max_depth", "200"));
 //        this.maxNodes = Integer.parseInt(this.properties.getProperty("surrogate.random.forest.nodes", String.valueOf(trainingSetDataFrame.size() / 5)));
-//        this.nodeSize = Integer.parseInt(this.properties.getProperty("surrogate.random.forest.size", "5"));
+//        this.nodeSize = Integer.parseInt(this.properties.getProperty("surrogate.random.forest.node_size", "5"));
 //        this.subSample = Double.parseDouble(this.properties.getProperty("surrogate.random.forest.rate", "1.0"));
 //
 //        long start = System.nanoTime();

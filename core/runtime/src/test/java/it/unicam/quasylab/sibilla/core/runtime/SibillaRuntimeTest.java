@@ -26,11 +26,14 @@ package it.unicam.quasylab.sibilla.core.runtime;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class SibillaRuntimeTest {
+
+
 
     public final String TEST_PARAM = "param lambda = 1.0;" +
             "species A;" +
@@ -120,7 +123,39 @@ class SibillaRuntimeTest {
             "\n" +
             "system balanced = A<NA>|B<NB>;";
 
-    private final static String CDOE_TSP = "species S0;\n" +
+    private final static String CODE_TSP = "species S0;\n" +
+            "species S1;\n" +
+            "species SU;\n" +
+            "\n" +
+            "const meetRate = 1.0;\n" +
+            "\n" +
+            "rule su_to_s1 {\n" +
+            "    SU|S1 -[ #SU*meetRate*%S1 ]-> S1|S1\n" +
+            "}\n" +
+            "\n" +
+            "rule su_to_s0 {\n" +
+            "    SU|S0 -[ #SU*meetRate*%S0 ]-> S0|S0\n" +
+            "}\n" +
+            "\n" +
+            "rule s1_to_su {\n" +
+            "    S1|S0 -[ #S1*meetRate*%S0 ]-> SU|S0\n" +
+            "}\n" +
+            "\n" +
+            "rule s0_to_su {\n" +
+            "    S0|S1 -[ #S0*meetRate*%S1 ]-> SU|S1\n" +
+            "}\n" +
+            "\n" +
+            "param scale = 1.0;\n" +
+            "\n" +
+            "system balanced = S0<1*scale>|S1<1*scale>|SU<8*scale>;\n" +
+            "\n" +
+            "\n" +
+            "system custom(s0,s1,su) = S0<s0>|S1<s1>|SU<su>;\n" +
+            "\n" +
+            "predicate consensus = (%S1==1.0)||(%S0==1.0);";
+
+
+    private final static String CODE_TSP_TEST = "species S0;\n" +
             "species S1;\n" +
             "species SU;\n" +
             "\n" +
@@ -203,6 +238,140 @@ class SibillaRuntimeTest {
             "\n" +
             "system shop=person<startPerson>|newCustomer<startNewCustomer>|customer<startCustomer>|salesClerk<startClerks>|servedCustomer<startServedCustomer>|waitingCustomer<startWaitingCustomer>|rejectedCustomer<startrejectedCustomer>|busySalesClerk<startBusySalesClerk>;";
 
+
+    private final static String TEST_TSP_OPT =
+            "param meetRate = 1.0; \n" +
+            "param pError = 0.5; \n" +
+            "\n" +
+            "param S0scale = 3; \n" +
+            "param S1scale = 3; \n" +
+            "param SUscale = 10; \n" +
+            "param S0InitialConviction = 2; \n"+
+            "param S1InitialConviction = 2; \n"+
+            "const maxConviction = 5; \n" +
+            "\n" +
+            "species S0 of [0,maxConviction]; \n" +
+            "species S1 of [0,maxConviction]; \n" +
+            "species SU; \n" +
+            "\n" +
+            "rule S1_dissuade_S0 for c in [0,maxConviction] when c > 0 { \n" +
+            "    S0[c]|S1[c] -[ #S0[c] * meetRate * %S1[c] * (1-pError) ]-> S0[c-1]|S1[c] \n" +
+            "}\n" +
+            "\n" +
+            "rule S0_dissuade_S1 for c in [0,maxConviction] when c > 0 { \n" +
+            "    S0[c]|S1[c] -[ #S1[c] * meetRate * %S0[c] ]-> S0[c]|S1[c-1] \n" +
+            "}\n" +
+            "\n" +
+            "rule S0_become_uncertain_meeting_S1 for c in [0,maxConviction] when c == 0 { \n" +
+            "    S0[c]|S1[c] -[ #S0[c] * meetRate * %S1[c] ]-> SU|S1[c] \n" +
+            "}\n" +
+            "\n" +
+            "rule S1_become_uncertain_meeting_S0 for c in [0,maxConviction] when c == 0 { \n" +
+            "    S0[c]|S1[c] -[ #S1[c] * meetRate * %S0[c] ]-> S0[c]|SU \n" +
+            "}\n" +
+            "\n" +
+            "rule uncertain_become_S0_meeting_S0 for c in [0,maxConviction]{ \n" +
+            "    SU|S0[c] -[ #SU*meetRate*%S0[c] ]-> S0[1]|S0[c] \n" +
+            "}\n" +
+            "\n" +
+            "rule uncertain_become_S1_meeting_S1 for c in [0,maxConviction]{ \n" +
+            "    SU|S1[c] -[ #SU*meetRate*%S1[c] ]-> S1[1]|S1[c] \n" +
+            "}\n" +
+            "\n" +
+            "rule S0_become_uncertain for c in [0,maxConviction] when c == 0 { \n" +
+            "    S0[c] -[ #S0[c] * meetRate * pError * (1-%S1[c]) ]-> SU \n" +
+            "}\n" +
+            "\n" +
+            "rule S1_become_uncertain for c in [0,maxConviction] when c == 0 { \n" +
+            "    S1[c] -[ #S1[c] * meetRate * pError * (1-%S0[c]) ]-> SU \n" +
+            "}\n" +
+            "\n" +
+            "rule uncertain_become_S0 for c in [0,maxConviction]{ \n" +
+            "    SU -[ #SU * meetRate * pError * (1-%S1[c])]-> S0[1]\n" +
+            "}\n" +
+            "\n" +
+            "rule uncertain_become_S1 for c in [0,maxConviction]{ \n" +
+            "    SU -[ #SU * meetRate * pError * (1-%S0[c]) ]-> S1[1]\n" +
+            "} \n" +
+            "\n" +
+            "rule radicalization_of_S1 for c in [0,maxConviction] when c < maxConviction-1 { \n" +
+            "    S1[c]|S1[c] -[ #S1[c] * meetRate * pError * (1-%S0[c]) ]-> S1[c]|S1[c+1] \n" +
+            "} \n" +
+            "rule radicalization_of_S0 for c in [0,maxConviction] when c < maxConviction-1 { \n" +
+            "    S0[c]|S0[c] -[ #S0[c] * meetRate * pError * (1-%S1[c]) ]-> S0[c]|S0[c+1] \n" +
+            "} \n" +
+            "\n" +
+            "\n" +
+            "system start = S0[S0InitialConviction]<1*S0scale>|S1[S1InitialConviction]<1*S1scale>|SU<1*SUscale>; \n" +
+            "\n" +
+            "predicate consensus = ((( %S1[1] + %S1[2] + %S1[3] + %S1[4] + %S1[0] )) >= 0.999 ) || ((( %S0[1] + %S0[2] + %S0[3] + %S0[4] + %S0[0] )) >= 0.999 );" +
+            "predicate win0 = ( %S0[1] + %S0[2] + %S0[3] + %S0[4] + %S0[0] ) >= 0.999; " +
+            "predicate win1 = ( %S1[1] + %S1[2] + %S1[3] + %S1[4] + %S1[0] ) >= 0.999; " +
+            "";
+
+
+
+
+    public String TEST_SIR = "param meetRate = 1.0;      /* Meeting rate */\n" +
+            "param infectionRate = 0.005;  /* Probability of Infection */\n" +
+            "param recoverRate = 0.005;    /* Recovering rate */\n" +
+            "\n" +
+            "const startS = 95;           /* Initial number of S agents */\n" +
+            "const startI = 5;           /* Initial number of I agents */\n" +
+            "const startR = 0;            /* Initial number of R agents */\n" +
+            "\n" +
+            "species S;\n" +
+            "species I;\n" +
+            "species R;\n" +
+            "\n" +
+            "rule infection {\n" +
+            "    S|I -[ #S * %I * meetRate * infectionRate ]-> I|I\n" +
+            "}\n" +
+            "\n" +
+            "rule recovered {\n" +
+            "    I -[ #I * recoverRate ]-> R\n" +
+            "}\n" +
+            "\n" +
+            "system init = S<startS>|I<startI>|R<startR>;\n" +
+            "predicate allRecovered = (#S+#I==0);";
+
+
+    @Test
+    public void testNewSIR() throws CommandExecutionException, IOException {
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.load(TEST_SIR);
+        sr.setConfiguration("init");
+        sr.addAllMeasures();
+        sr.setReplica(5);
+        sr.setDeadline(100);
+        sr.setDt(1);
+        sr.setSamplingStrategy("ffs");
+        sr.setTrainingSetSize(20);
+        sr.addSpaceInterval("infectionRate",0.005,1.5);
+        sr.addSpaceInterval("recoverRate",0.005,1.5);
+        sr.setProbReachAsObjectiveFunction(null,"allRecovered",0.05,0.05);
+        sr.generateTrainingSet();
+        //sr.saveTable("SIR_Sample","/Users/lorenzomatteucci/phd",null,null);
+    }
+
+    @Test
+    public void testNewTSP() throws CommandExecutionException, IOException {
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.load(TEST_TSP_OPT);
+        sr.setConfiguration("start");
+        sr.addAllMeasures();
+        sr.setReplica(5);
+        sr.setDeadline(50);
+        sr.setDt(1);
+        sr.setSamplingStrategy("ffs");
+        sr.setTrainingSetSize(20);
+        sr.addSpaceInterval("meetRate",0.005,1.5);
+        sr.addSpaceInterval("pError",0.005,1.5);
+        sr.setProbReachAsObjectiveFunction(null,"win0",0.05,0.05);
+        sr.generateTrainingSet();
+        //sr.saveTable("TSP_Sample","/Users/lorenzomatteucci/phd",null,null);
+    }
+
     @Test
     public void shouldSelectPopulationModule() throws CommandExecutionException {
         SibillaRuntime sr = new SibillaRuntime();
@@ -280,7 +449,7 @@ class SibillaRuntimeTest {
     @Test
     public void shouldComputeReachProbability() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithModule();
-        sr.load(CDOE_TSP);
+        sr.load(CODE_TSP);
         sr.setConfiguration("balanced");
         sr.setDeadline(100.0);
         assertEquals(1.0, sr.computeProbReach(null, "consensus", 0.1, 0.1));
@@ -316,6 +485,72 @@ class SibillaRuntimeTest {
         sr.setDt(1);
         sr.simulate("test");
     }
+
+
+
+    @Test
+    public void testOptimization() throws CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.load(CODE_TSP);
+        sr.setConfiguration("balanced");
+        sr.setDeadline(100.0);
+        sr.usingSurrogate(true);
+        sr.setProbReachAsObjectiveFunction(null,"consensus",0.1,0.1);
+        sr.addSpaceInterval("scale",1.0,20.0);
+        sr.setOptimizationAsMinimization(true);
+        sr.performOptimization();
+        System.out.println(sr.getOptimizationInfo());
+
+//        interpreter.execute("optimizes using \"pso\" with surrogate \"rf\"");
+//        interpreter.execute("search in \"x\" in [-10,10]");
+//        interpreter.execute("min x^2+x+3");
+    }
+
+
+//    @Test
+//    public void to() throws CommandExecutionException {
+//        SibillaRuntime sr = getRuntimeWithModule();
+//        sr.load(CDOE_TSP);
+//        sr.setDeadline(100.0);
+//        ToDoubleFunction<Map<String,Double>> fun = map -> {
+//            map.keySet().forEach(key -> sr.setParameter(key,map.get(key)));
+//            System.out.println("set parameter done");
+//            sr.addAllMeasures();
+//            System.out.println("add all measure done");
+//            try {
+//                sr.setConfiguration("balanced");
+//            } catch (CommandExecutionException e) {
+//                throw new RuntimeException(e);
+//            }
+//            try {
+//                System.out.println("try computation");
+//                double evaluation = sr.computeProbReach(null,"consensus",0.01,0.01);
+//                System.out.println("evaluation : "+evaluation);
+//                return evaluation;
+//            } catch (CommandExecutionException e) {
+//                System.out.println("fail");
+//                throw new RuntimeException(e);
+//            }
+//        };
+//
+//        HyperRectangle hyperRectangle = new HyperRectangle(new ContinuousInterval("scale",1.0,10.0));
+//        PSOTask psoTask = new PSOTask();
+//        Map<String,Double> values = psoTask.minimize(fun,hyperRectangle);
+//        System.out.println(values);
+//    }
+
+
+    @Test
+    public void exceptionInSetProperty() throws CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithModule();
+        try{
+            sr.setSurrogateProperty("not_a_parameter","5");
+        }catch (CommandExecutionException e){
+            System.out.printf((e.getErrorMessages().toString()) + "%n","word");
+        }
+
+    }
+
 
 //    @Test
 //    public void testSIR() throws CommandExecutionException {
