@@ -25,6 +25,10 @@ package it.unicam.quasylab.sibilla.langs.slam;
 
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.slam.*;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentBehaviourOld;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentDefinition;
+import it.unicam.quasylab.sibilla.core.models.slam.data.SlamType;
+import it.unicam.quasylab.sibilla.core.models.slam.data.SlamValue;
 import org.antlr.v4.runtime.RuleContext;
 
 import java.util.HashMap;
@@ -40,42 +44,42 @@ public class SlamModelGenerator {
     public EvaluationEnvironment getEvaluationEnvironment() {
         EvaluationEnvironment environment = new EvaluationEnvironment();
         ScalarExpressionEvaluator evaluator = new ScalarExpressionEvaluator(environment);
-        modelContext.params.forEach(p -> environment.set(p.name.getText(), p.value.accept(evaluator).toDouble()));
+        //modelContext.params.forEach(p -> environment.set(p.name.getText(), p.value.accept(evaluator).toDouble()));
         return environment;
     }
 
     public Map<String, SlamValue> evalConstants(EvaluationEnvironment environment) {
         HashMap<String, SlamValue> constants = new HashMap<>();
         ScalarExpressionEvaluator evaluator = new ScalarExpressionEvaluator(environment);
-        modelContext.consts.forEach(c -> constants.put(c.name.getText(), c.value.accept(evaluator)));
+        //modelContext.consts.forEach(c -> constants.put(c.name.getText(), c.value.accept(evaluator)));
         return constants;
     }
 
     public MessageRepository getMessageRepository() {
         MessageRepository repository = new MessageRepository();
-        modelContext.messages.forEach(m -> repository.addTag(m.tag.getText(),
-                m.content.stream().map(RuleContext::getText).map(SlamType::getTypeOf).toArray(SlamType[]::new)));
+        //modelContext.messages.forEach(m -> repository.addTag(m.tag.getText(),
+        //        m.content.stream().map(RuleContext::getText).map(SlamType::getTypeOf).toArray(SlamType[]::new)));
         return repository;
     }
 
     public AgentDefinition getAgentDefinition() {
         AgentDefinition definition = new AgentDefinition();
-        for (SlamModelParser.DeclarationAgentContext agentDefinition : modelContext.agents) {
-            String agentName = agentDefinition.name.getText();
-            definition.addAgent(agentName, table.getAgentParameters(agentDefinition.name.getText()));
-            definition.setAgentBehaviour(agentName, getAgentBehaviour(agentName, agentDefinition.states));
-        }
+//        for (SlamModelParser.DeclarationAgentContext agentDefinition : modelContext.agents) {
+//            String agentName = agentDefinition.name.getText();
+//            definition.addAgent(agentName, table.getAgentParameters(agentDefinition.name.getText()));
+//            definition.setAgentBehaviour(agentName, getAgentBehaviour(agentName, agentDefinition.states));
+//        }
         return definition;
     }
 
-    private AgentBehaviour getAgentBehaviour(String agentName, List<SlamModelParser.AgentStateDeclarationContext> states) {
-        AgentBehaviour behaviour = new AgentBehaviour();
+    private AgentBehaviourOld getAgentBehaviour(String agentName, List<SlamModelParser.AgentStateDeclarationContext> states) {
+        AgentBehaviourOld behaviour = new AgentBehaviourOld();
         states.forEach(s -> behaviour.addState(s.name.getText()));
         states.forEach(s -> populateAgentStateInfo(behaviour, s));
         return behaviour;
     }
 
-    private void populateAgentStateInfo(AgentBehaviour behaviour, SlamModelParser.AgentStateDeclarationContext state) {
+    private void populateAgentStateInfo(AgentBehaviourOld behaviour, SlamModelParser.AgentStateDeclarationContext state) {
 
     }
 }

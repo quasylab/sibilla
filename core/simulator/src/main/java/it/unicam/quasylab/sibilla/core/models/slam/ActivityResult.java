@@ -23,6 +23,9 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
+import it.unicam.quasylab.sibilla.core.models.slam.agents.Agent;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentMessage;
+
 import java.util.List;
 
 /**

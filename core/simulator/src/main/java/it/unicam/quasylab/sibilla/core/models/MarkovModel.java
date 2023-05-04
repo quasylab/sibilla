@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
+import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Optional;
@@ -122,4 +123,6 @@ public interface MarkovModel<S extends ImmutableState> extends Model<S> {
      * @return process time step.
      */
     Optional<TimeStep<S>> next(RandomGenerator r, double time, S state);
+
+
 }

@@ -24,8 +24,8 @@
 package it.unicam.quasylab.sibilla.langs.slam;
 
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
-import it.unicam.quasylab.sibilla.core.models.slam.SlamType;
-import it.unicam.quasylab.sibilla.core.models.slam.SlamValue;
+import it.unicam.quasylab.sibilla.core.models.slam.data.SlamType;
+import it.unicam.quasylab.sibilla.core.models.slam.data.SlamValue;
 
 import java.util.HashMap;
 import java.util.Map;

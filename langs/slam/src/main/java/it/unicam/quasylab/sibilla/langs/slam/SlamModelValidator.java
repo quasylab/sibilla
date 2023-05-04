@@ -24,7 +24,7 @@
 package it.unicam.quasylab.sibilla.langs.slam;
 
 import it.unicam.quasylab.sibilla.core.models.slam.MessageTag;
-import it.unicam.quasylab.sibilla.core.models.slam.SlamType;
+import it.unicam.quasylab.sibilla.core.models.slam.data.SlamType;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.RuleNode;
@@ -43,38 +43,54 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
 
     private final List<ParseError> errors = new LinkedList<>();
 
-    private Map<String, SlamType> localVariables = new HashMap<>();
+    private final TypeRegistry registry = new TypeRegistry();
 
     private String agentContext;
 
     private ExpressionContext context = ExpressionContext.NONE;
 
-
+    /**
+     * A model is valid if all its elements are valid.
+     *
+     * @param ctx the parse tree
+     * @return true if the model is valid, false otherwise.
+     */
     @Override
     public Boolean visitModel(SlamModelParser.ModelContext ctx) {
-        boolean result = true;
-        for (SlamModelParser.DeclarationParameterContext p : ctx.params) {
-            result &= p.accept(this);
+        boolean flag = true;
+        for(SlamModelParser.ModelElementContext element: ctx.elements) {
+            flag &= element.accept(this);
         }
-        for (SlamModelParser.DeclarationConstantContext c : ctx.consts) {
-            result &= c.accept(this);
+        return flag;
+    }
+
+    /**
+     * A constant declaration is valid if:
+     * - its name has not used before;
+     * - its value is a typeable expression.
+     *
+     * @param ctx the parse tree
+     * @return true if the constant is valid, false otherwise.
+     */
+    @Override
+    public Boolean visitDeclarationConstant(SlamModelParser.DeclarationConstantContext ctx) {
+        try {
+            String constantName = ctx.name.getText();
+            if (table.isDeclaredElementWithName(constantName)) {
+                this.errors.add(new ParseError(ParseUtil.duplicatedName(ctx.name, table.getDeclarationToken(constantName)), ctx.name.getLine(), ctx.name.getCharPositionInLine()));
+                return false;
+            }
+            if (ctx.value.accept(this)) {
+                SlamType constType = ctx.expr().accept(new TypeInferenceVisitor(ExpressionContext.CONSTANT, table, table.getGlobalTypeSolver(), this.errors));
+                if (!SlamType.NONE_TYPE.equals(constType)) {
+                    table.addConstant(ctx, constType);
+                    return true;
+                }
+            }
+            return false;
+        } finally {
+            this.context = ExpressionContext.NONE;
         }
-        for (SlamModelParser.DeclarationMessageContext m : ctx.messages) {
-            result &= m.accept(this);
-        }
-        result &= recordAgents(ctx.agents);
-        result &= recordAgentAttributes(ctx.agents);
-        result &= recordAgentViews(ctx.agents);
-        for (SlamModelParser.DeclarationMeasureContext m : ctx.measures) {
-            result &= m.accept(this);
-        }
-        for (SlamModelParser.DeclarationPredicateContext p : ctx.predicates) {
-            result &= p.accept(this);
-        }
-        for (SlamModelParser.DeclarationSystemContext s : ctx.systems) {
-            result &= s.accept(this);
-        }
-        return result && errors.isEmpty();
     }
 
     private boolean recordAgentViews(List<SlamModelParser.DeclarationAgentContext> agents) {
@@ -121,18 +137,17 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
             this.errors.add(ParseUtil.illegalAttributeDeclarationError(attribute.name));
             return false;
         }
-        SlamType attributeType = attribute.expr().accept(new TypeInferenceVisitor(ExpressionContext.AGENT_ATTRIBUTE,
-                table,
-                Map.of(),
-                table.attributeDeclarationTypeSolver(agentName),
-                this.errors
-        ));
-        if (SlamType.NONE_TYPE.equals(attributeType)) {
-            return false;
-        } else {
-            table.recordAgentAttribute(agentName, attributeName, attributeType);
-            return true;
-        }
+//        SlamType attributeType = attribute.expr().accept(new TypeInferenceVisitor(ExpressionContext.AGENT_ATTRIBUTE,
+//                table.attributeDeclarationTypeSolver(agentName),
+//                this.errors
+//        ));
+//        if (SlamType.NONE_TYPE.equals(attributeType)) {
+//            return false;
+//        } else {
+//            table.recordAgentAttribute(agentName, attributeName, attributeType);
+//            return true;
+//        }
+        return false;
     }
 
     private boolean recordAgentView(String agentName, SlamModelParser.AttributeDeclarationContext view) {
@@ -145,18 +160,19 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
             this.errors.add(ParseUtil.illegalAttributeDeclarationError(view.name));
             return false;
         }
-        SlamType attributeType = view.expr().accept(new TypeInferenceVisitor(ExpressionContext.AGENT_ATTRIBUTE,
-                table,
-                Map.of(),
-                table.viewDeclarationTypeSolver(agentName),
-                this.errors
-        ));
-        if (SlamType.NONE_TYPE.equals(attributeType)) {
-            return false;
-        } else {
-            table.recordAgentView(agentName, attributeName, attributeType);
-            return true;
-        }
+//        SlamType attributeType = view.expr().accept(new TypeInferenceVisitor(ExpressionContext.AGENT_ATTRIBUTE,
+//                table,
+//                Map.of(),
+//                table.viewDeclarationTypeSolver(agentName),
+//                this.errors
+//        ));
+//        if (SlamType.NONE_TYPE.equals(attributeType)) {
+//            return false;
+//        } else {
+//            table.recordAgentView(agentName, attributeName, attributeType);
+//            return true;
+//        }
+        return false;
     }
 
     private boolean recordAgents(List<SlamModelParser.DeclarationAgentContext> agents) {
@@ -167,7 +183,7 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
                 this.errors.add(new ParseError(ParseUtil.duplicatedName(agent.name, table.getDeclarationToken(agentName)), agent.name.getLine(), agent.name.getCharPositionInLine()));
                 result = false;
             } else {
-                table.addAgent(agent);
+//                table.addAgent(agent);
                 result &= checkAttributesAndParamDeclaration(agent) && recordAgentParameter(agent);
             }
         }
@@ -253,7 +269,7 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
         boolean result = true;
         String agentName = agent.name.getText();
         for (SlamModelParser.AgentParameterContext par : agent.params) {
-            table.recordAgentParameter(agentName, par.start, par.name.getText(), SlamType.getTypeOf(par.type.getText()));
+            //table.recordAgentParameter(agentName, par.start, par.name.getText(), SlamType.getTypeOf(par.type.getText()));
         }
         return result;
     }
@@ -268,42 +284,20 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
                 return false;
             }
             this.context = ExpressionContext.PREDICATE;
-            if (ctx.value.accept(this)) {
-                table.addPredicate(ctx);
-                SlamType predicateType = ctx.expr().accept(new TypeInferenceVisitor(
-                        ExpressionContext.PREDICATE,
-                        table,
-                        Map.of(),
-                        table::solveTypeFromMeasuresAndPredicates, errors));
-                return SlamType.NONE_TYPE.equals(predicateType) || SlamType.BOOLEAN_TYPE.equals(predicateType);
-            }
+//            if (ctx.value.accept(this)) {
+//                table.addPredicate(ctx);
+//                SlamType predicateType = ctx.expr().accept(new TypeInferenceVisitor(
+//                        ExpressionContext.PREDICATE,
+//                        this.registry, errors));
+//                return SlamType.NONE_TYPE.equals(predicateType) || SlamType.BOOLEAN_TYPE.equals(predicateType);
+//            }
             return false;
         } finally {
             this.context = ExpressionContext.NONE;
         }
     }
 
-    @Override
-    public Boolean visitDeclarationConstant(SlamModelParser.DeclarationConstantContext ctx) {
-        try {
-            String constantName = ctx.name.getText();
-            if (table.isDeclaredElementWithName(constantName)) {
-                this.errors.add(new ParseError(ParseUtil.duplicatedName(ctx.name, table.getDeclarationToken(constantName)), ctx.name.getLine(), ctx.name.getCharPositionInLine()));
-                return false;
-            }
-            this.context = ExpressionContext.CONSTANT;
-            if (ctx.value.accept(this)) {
-                SlamType constType = ctx.expr().accept(new TypeInferenceVisitor(ExpressionContext.PREDICATE, table, Map.of(), table::solveTypeFromConstants, errors));
-                if (!SlamType.NONE_TYPE.equals(constType)) {
-                    table.addConstant(ctx, constType);
-                    return true;
-                }
-            }
-            return false;
-        } finally {
-            this.context = ExpressionContext.NONE;
-        }
-    }
+
 
     @Override
     public Boolean visitDeclarationParameter(SlamModelParser.DeclarationParameterContext ctx) {
@@ -313,11 +307,9 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
                 this.errors.add(new ParseError(ParseUtil.duplicatedName(ctx.name, table.getDeclarationToken(parameterName)), ctx.name.getLine(), ctx.name.getCharPositionInLine()));
                 return false;
             }
-            if (ctx.value.accept(this)) {
+            if (new TypeInferenceVisitor(ExpressionContext.PARAMETER, table, table.getGlobalTypeSolver(), errors).checkType(SlamType.REAL_TYPE, ctx.expr())) {
                 table.addParameter(ctx);
-                this.context = ExpressionContext.PARAMETER;
-                SlamType actualType = ctx.expr().accept(new TypeInferenceVisitor(ExpressionContext.PREDICATE, table, Map.of(), table::solveTypeFromParameters, errors));
-                return SlamType.NONE_TYPE.equals(actualType) || SlamType.REAL_TYPE.equals(actualType);
+                return true;
             }
             return false;
         } finally {
@@ -336,8 +328,8 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
             if (ctx.expr().accept(this)) {
                 table.addMeasure(ctx);
                 this.context = ExpressionContext.MEASURE;
-                SlamType actualType = ctx.expr().accept(new TypeInferenceVisitor(ExpressionContext.PREDICATE, table, Map.of(), table::solveTypeFromMeasuresAndPredicates, errors));
-                return SlamType.NONE_TYPE.equals(actualType) || SlamType.REAL_TYPE.equals(actualType);
+                //SlamType actualType = ctx.expr().accept(new TypeInferenceVisitor(ExpressionContext.PREDICATE, table, Map.of(), table::solveTypeFromMeasuresAndPredicates, errors));
+                //return SlamType.NONE_TYPE.equals(actualType) || SlamType.REAL_TYPE.equals(actualType);
             }
             return false;
         } finally {
@@ -442,27 +434,28 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
             this.errors.add(ParseUtil.illegalNumberOfParameters(ctx.name, agentParameters.length, ctx.args.size()));
             return false;
         }
-        for (int i = 0; i < agentParameters.length; i++) {
-            SlamType argType = ctx.args.get(i).accept(new TypeInferenceVisitor(ExpressionContext.SYSTEM, table, Map.of(), table::solveTypeFromConstants, errors));
-            if (!SlamType.NONE_TYPE.equals(argType) && !agentParameters[i].equals(argType)) {
-                this.errors.add(ParseUtil.typeError(agentParameters[i], argType, ctx.args.get(i).start));
-                result = false;
-            }
-        }
+//        for (int i = 0; i < agentParameters.length; i++) {
+//            SlamType argType = ctx.args.get(i).accept(new TypeInferenceVisitor(ExpressionContext.SYSTEM, table, Map.of(), table::solveTypeFromConstants, errors));
+//            if (!SlamType.NONE_TYPE.equals(argType) && !agentParameters[i].equals(argType)) {
+//                //this.errors.add(ParseUtil.typeError(agentParameters[i], argType, ctx.args.get(i).start));
+//                result = false;
+//            }
+//        }
         if (ctx.copies != null) {
-            result &= SlamType.INTEGER_TYPE.equals(ctx.copies.accept(new TypeInferenceVisitor(ExpressionContext.SYSTEM, table, Map.of(), table::solveTypeFromConstants, errors)));
+            //result &= SlamType.INTEGER_TYPE.equals(ctx.copies.accept(new TypeInferenceVisitor(ExpressionContext.SYSTEM, table, Map.of(), table::solveTypeFromConstants, errors)));
         }
         return result;
     }
 
     private Boolean hasType(ExpressionContext context, Map<String, SlamType> localVariables, Function<String, SlamType> typeSolver, SlamType expected, SlamModelParser.ExprContext expr) {
-        SlamType actual = expr.accept(new TypeInferenceVisitor(context, table, localVariables, typeSolver, errors));
-        if (!SlamType.NONE_TYPE.equals(actual) && !expected.equals(actual)) {
-            this.errors.add(ParseUtil.typeError(expected, actual, expr.start));
-            return false;
-        } else {
-            return true;
-        }
+//        SlamType actual = expr.accept(new TypeInferenceVisitor(context, table, localVariables, typeSolver, errors));
+//        if (!SlamType.NONE_TYPE.equals(actual) && !expected.equals(actual)) {
+//            this.errors.add(ParseUtil.typeError(expected, actual, expr.start));
+//            return false;
+//        } else {
+//            return true;
+//        }
+        return false;
     }
 
     @Override
@@ -478,7 +471,7 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
         result &= ctx.guard.accept(this);
         result &= ctx.activityBlock().accept(this);
         this.context = ExpressionContext.NONE;
-        this.localVariables = new HashMap<>();
+        //this.localVariables = new HashMap<>();
         return result;
     }
 
@@ -494,12 +487,12 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
                 SlamModelParser.PatternVariableContext patternVariableContext = (SlamModelParser.PatternVariableContext) p;
                 SlamType type = messageTag.getTypeOf(counter);
                 String localVariableName = patternVariableContext.name.getText();
-                if (localVariables.containsKey(localVariableName)) {
-                    this.errors.add(ParseUtil.nameAlreadyUsedInMessagePattern(patternVariableContext.name));
-                    result = false;
-                } else {
-                    localVariables.put(localVariableName, type);
-                }
+//                if (localVariables.containsKey(localVariableName)) {
+//                    this.errors.add(ParseUtil.nameAlreadyUsedInMessagePattern(patternVariableContext.name));
+//                    result = false;
+//                } else {
+//                    localVariables.put(localVariableName, type);
+//                }
             }
             counter++;
         }
@@ -517,10 +510,11 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitSelectCase(SlamModelParser.SelectCaseContext ctx) {
-        boolean result = hasType(ExpressionContext.AGENT_COMMAND,localVariables,table.getAgentStateTypeSolver(agentContext),SlamType.REAL_TYPE, ctx.weight);
-        result &= hasType(ExpressionContext.AGENT_COMMAND,localVariables,table.getAgentStateTypeSolver(agentContext),SlamType.BOOLEAN_TYPE, ctx.guard);
-        result &= ctx.nextStateBlock().accept(this);
-        return result;
+//        boolean result = hasType(ExpressionContext.AGENT_COMMAND,localVariables,table.getAgentStateTypeSolver(agentContext),SlamType.REAL_TYPE, ctx.weight);
+//        result &= hasType(ExpressionContext.AGENT_COMMAND,localVariables,table.getAgentStateTypeSolver(agentContext),SlamType.BOOLEAN_TYPE, ctx.guard);
+//        result &= ctx.nextStateBlock().accept(this);
+//        return result;
+        return false;
     }
 
     @Override
@@ -548,10 +542,11 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitIfThenElseCommand(SlamModelParser.IfThenElseCommandContext ctx) {
-        boolean result = hasType(context, localVariables, table.getAgentStateTypeSolver(agentContext), SlamType.BOOLEAN_TYPE, ctx.guard);
-        result &= ctx.thenCommand.accept(this);
-        result &= ctx.elseCommand.accept(this);
-        return result;
+//        boolean result = hasType(context, localVariables, table.getAgentStateTypeSolver(agentContext), SlamType.BOOLEAN_TYPE, ctx.guard);
+//        result &= ctx.thenCommand.accept(this);
+//        result &= ctx.elseCommand.accept(this);
+//        return result;
+        return false;
     }
 
     @Override
@@ -568,11 +563,11 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
             return false;
         }
         boolean result = true;
-        for(int i=0; i< messageTag.getArity(); i++) {
-            result = hasType(context, localVariables, table.getAgentStateTypeSolver(agentContext), messageTag.getTypeOf(i), message.elements.get(i));
-        }
-        result &= ctx.target.accept(this);
-        result &= hasType(context, localVariables, table.getAgentStateTypeSolver(agentContext), SlamType.REAL_TYPE, ctx.time);
+//        for(int i=0; i< messageTag.getArity(); i++) {
+//            result = hasType(context, localVariables, table.getAgentStateTypeSolver(agentContext), messageTag.getTypeOf(i), message.elements.get(i));
+//        }
+//        result &= ctx.target.accept(this);
+//        result &= hasType(context, localVariables, table.getAgentStateTypeSolver(agentContext), SlamType.REAL_TYPE, ctx.time);
         return result;
     }
 
@@ -583,320 +578,8 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
             return false;
         }
         SlamType targetType = table.getTypeOf(agentContext, ctx.name.getText());
-        return hasType(context, localVariables, table.getAgentStateTypeSolver(agentContext), targetType, ctx.expr());
-    }
-
-    @Override
-    public Boolean visitSpawnCommand(SlamModelParser.SpawnCommandContext ctx) {
-        return ctx.agent.accept(this)&&hasType(context, localVariables, table.getAgentStateTypeSolver(agentContext), SlamType.REAL_TYPE, ctx.time);
-    }
-
-    @Override
-    public Boolean visitAgentPatternAny(SlamModelParser.AgentPatternAnyContext ctx) {
-        return true;
-    }
-
-    @Override
-    public Boolean visitAgentPatternNamed(SlamModelParser.AgentPatternNamedContext ctx) {
-        if (table.isAnAgent(ctx.name.getText())) {
-            this.errors.add(ParseUtil.unknownAgentError(ctx.name));
-            return false;
-        }
-        return super.visitAgentPatternNamed(ctx);
-    }
-
-    @Override
-    public Boolean visitAgentPatternProperty(SlamModelParser.AgentPatternPropertyContext ctx) {
-        return super.visitAgentPatternProperty(ctx);
-    }
-
-    @Override
-    public Boolean visitAgentPatternConjunction(SlamModelParser.AgentPatternConjunctionContext ctx) {
-        return super.visitAgentPatternConjunction(ctx);
-    }
-
-    @Override
-    public Boolean visitAgentPatternDisjunction(SlamModelParser.AgentPatternDisjunctionContext ctx) {
-        return super.visitAgentPatternDisjunction(ctx);
-    }
-
-    @Override
-    public Boolean visitMessageExpression(SlamModelParser.MessageExpressionContext ctx) {
-        return super.visitMessageExpression(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionACos(SlamModelParser.ExpressionACosContext ctx) {
-        return super.visitExpressionACos(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionReference(SlamModelParser.ExpressionReferenceContext ctx) {
-        return super.visitExpressionReference(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionAddSub(SlamModelParser.ExpressionAddSubContext ctx) {
-        return super.visitExpressionAddSub(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionLog(SlamModelParser.ExpressionLogContext ctx) {
-        return super.visitExpressionLog(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionCos(SlamModelParser.ExpressionCosContext ctx) {
-        return super.visitExpressionCos(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionMaxAgents(SlamModelParser.ExpressionMaxAgentsContext ctx) {
-        return super.visitExpressionMaxAgents(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionFloor(SlamModelParser.ExpressionFloorContext ctx) {
-        return super.visitExpressionFloor(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionIfThenElse(SlamModelParser.ExpressionIfThenElseContext ctx) {
-        return super.visitExpressionIfThenElse(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionForAllAgents(SlamModelParser.ExpressionForAllAgentsContext ctx) {
-        return super.visitExpressionForAllAgents(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionRelation(SlamModelParser.ExpressionRelationContext ctx) {
-        return super.visitExpressionRelation(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionSamplingNormal(SlamModelParser.ExpressionSamplingNormalContext ctx) {
-        return super.visitExpressionSamplingNormal(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionMin(SlamModelParser.ExpressionMinContext ctx) {
-        return super.visitExpressionMin(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionAnd(SlamModelParser.ExpressionAndContext ctx) {
-        return super.visitExpressionAnd(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionCast(SlamModelParser.ExpressionCastContext ctx) {
-        return super.visitExpressionCast(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionNow(SlamModelParser.ExpressionNowContext ctx) {
-        return super.visitExpressionNow(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionLog10(SlamModelParser.ExpressionLog10Context ctx) {
-        return super.visitExpressionLog10(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionCosh(SlamModelParser.ExpressionCoshContext ctx) {
-        return super.visitExpressionCosh(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionInteger(SlamModelParser.ExpressionIntegerContext ctx) {
-        return super.visitExpressionInteger(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionUnaryOperator(SlamModelParser.ExpressionUnaryOperatorContext ctx) {
-        return super.visitExpressionUnaryOperator(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionExistsAgent(SlamModelParser.ExpressionExistsAgentContext ctx) {
-        return super.visitExpressionExistsAgent(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionCeil(SlamModelParser.ExpressionCeilContext ctx) {
-        return super.visitExpressionCeil(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionMinAgents(SlamModelParser.ExpressionMinAgentsContext ctx) {
-        return super.visitExpressionMinAgents(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionTan(SlamModelParser.ExpressionTanContext ctx) {
-        return super.visitExpressionTan(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionMulDiv(SlamModelParser.ExpressionMulDivContext ctx) {
-        return super.visitExpressionMulDiv(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionMax(SlamModelParser.ExpressionMaxContext ctx) {
-        return super.visitExpressionMax(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionSamplingUniform(SlamModelParser.ExpressionSamplingUniformContext ctx) {
-        return super.visitExpressionSamplingUniform(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionATan(SlamModelParser.ExpressionATanContext ctx) {
-        return super.visitExpressionATan(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionBracket(SlamModelParser.ExpressionBracketContext ctx) {
-        return super.visitExpressionBracket(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionRandomValue(SlamModelParser.ExpressionRandomValueContext ctx) {
-        return super.visitExpressionRandomValue(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionDt(SlamModelParser.ExpressionDtContext ctx) {
-        return super.visitExpressionDt(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionSin(SlamModelParser.ExpressionSinContext ctx) {
-        return super.visitExpressionSin(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionPow(SlamModelParser.ExpressionPowContext ctx) {
-        return super.visitExpressionPow(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionSumAgents(SlamModelParser.ExpressionSumAgentsContext ctx) {
-        return super.visitExpressionSumAgents(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionExp(SlamModelParser.ExpressionExpContext ctx) {
-        return super.visitExpressionExp(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionTrue(SlamModelParser.ExpressionTrueContext ctx) {
-        return super.visitExpressionTrue(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionSinh(SlamModelParser.ExpressionSinhContext ctx) {
-        return super.visitExpressionSinh(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionASin(SlamModelParser.ExpressionASinContext ctx) {
-        return super.visitExpressionASin(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionNegation(SlamModelParser.ExpressionNegationContext ctx) {
-        return super.visitExpressionNegation(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionReal(SlamModelParser.ExpressionRealContext ctx) {
-        return super.visitExpressionReal(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionATan2(SlamModelParser.ExpressionATan2Context ctx) {
-        return super.visitExpressionATan2(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionFalse(SlamModelParser.ExpressionFalseContext ctx) {
-        return super.visitExpressionFalse(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionAbs(SlamModelParser.ExpressionAbsContext ctx) {
-        return super.visitExpressionAbs(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionTanh(SlamModelParser.ExpressionTanhContext ctx) {
-        return super.visitExpressionTanh(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionOr(SlamModelParser.ExpressionOrContext ctx) {
-        return super.visitExpressionOr(ctx);
-    }
-
-    @Override
-    protected Boolean defaultResult() {
-        return super.defaultResult();
-    }
-
-    @Override
-    protected Boolean aggregateResult(Boolean aggregate, Boolean nextResult) {
-        return super.aggregateResult(aggregate, nextResult);
-    }
-
-    @Override
-    protected boolean shouldVisitNextChild(RuleNode node, Boolean currentResult) {
-        return super.shouldVisitNextChild(node, currentResult);
-    }
-
-    public class AgentsInvolvedInAgentPattern extends SlamModelBaseVisitor<Set<String>> {
-
-        @Override
-        public Set<String> visitAgentPatternAny(SlamModelParser.AgentPatternAnyContext ctx) {
-            return table.getAgentNames();
-        }
-
-        @Override
-        public Set<String> visitAgentPatternNamed(SlamModelParser.AgentPatternNamedContext ctx) {
-            return Set.of(ctx.name.getText());
-        }
-
-        @Override
-        public Set<String> visitAgentPatternProperty(SlamModelParser.AgentPatternPropertyContext ctx) {
-            return table.getAgentNames();
-        }
-
-        @Override
-        public Set<String> visitAgentPatternConjunction(SlamModelParser.AgentPatternConjunctionContext ctx) {
-            Set<String> result = new HashSet<>(ctx.left.accept(this));
-            result.addAll(ctx.right.accept(this));
-            return result;
-        }
-
-        @Override
-        public Set<String> visitAgentPatternDisjunction(SlamModelParser.AgentPatternDisjunctionContext ctx) {
-            Set<String> result = new HashSet<>(ctx.left.accept(this));
-            result.removeAll(ctx.right.accept(this));
-            return result;
-        }
-
-        @Override
-        public Set<String> visitAgentPatternNegation(SlamModelParser.AgentPatternNegationContext ctx) {
-            Set<String> result = table.getAgentNames();
-            result.removeAll(ctx.arg.accept(this));
-            return result;
-        }
+//        return hasType(context, localVariables, table.getAgentStateTypeSolver(agentContext), targetType, ctx.expr());
+        return false;
     }
 
 }

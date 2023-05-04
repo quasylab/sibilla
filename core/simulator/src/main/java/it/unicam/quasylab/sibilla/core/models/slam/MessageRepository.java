@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
+import it.unicam.quasylab.sibilla.core.models.slam.data.SlamType;
+
 import java.util.Map;
 import java.util.TreeMap;
 

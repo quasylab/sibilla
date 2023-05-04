@@ -39,4 +39,55 @@ public enum ExpressionContext {
     AGENT_SOJOURN_TIME,
     AGENT_TIME_UPDATE,
     SYSTEM;
+
+    public boolean randomExpressionAllowed() {
+        switch (this) {
+            case NONE:
+            case PARAMETER:
+            case CONSTANT:
+            case PREDICATE:
+            case MEASURE:
+            case SYSTEM:
+                return false;
+            case AGENT_MESSAGE_HANDLER:
+            case AGENT_VIEW:
+            case AGENT_COMMAND:
+            case AGENT_ATTRIBUTE:
+            case AGENT_SOJOURN_TIME:
+            case AGENT_TIME_UPDATE:
+                return true;
+        }
+        return false;
+    }
+
+    public boolean timedExpressionAllowed() {
+        switch (this) {
+            case NONE:
+            case PARAMETER:
+            case CONSTANT:
+            case PREDICATE:
+            case MEASURE:
+            case SYSTEM:
+                return false;
+            case AGENT_MESSAGE_HANDLER:
+            case AGENT_VIEW:
+            case AGENT_COMMAND:
+            case AGENT_ATTRIBUTE:
+            case AGENT_SOJOURN_TIME:
+            case AGENT_TIME_UPDATE:
+                return true;
+        }
+        return false;
+    }
+
+    public boolean agentExpressionAllowed() {
+        switch (this) {
+            case PREDICATE:
+            case MEASURE:
+            case AGENT_VIEW:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

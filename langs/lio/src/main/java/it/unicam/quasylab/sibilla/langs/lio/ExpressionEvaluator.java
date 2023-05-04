@@ -23,11 +23,11 @@
 
 package it.unicam.quasylab.sibilla.langs.lio;
 
-import it.unicam.quasylab.sibilla.core.models.lio.LIOState;
+import it.unicam.quasylab.sibilla.core.models.lio.Agent;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOCollective;
 import org.antlr.v4.runtime.tree.RuleNode;
 
 import java.util.function.Function;
-import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
@@ -311,13 +311,13 @@ public class ExpressionEvaluator {
         }
     }
 
-    public static class ToMeasureEvaluator<S extends LIOState> extends LIOModelBaseVisitor<ToDoubleFunction<S>> {
+    public static class ToMeasureEvaluator<S extends LIOCollective> extends LIOModelBaseVisitor<ToDoubleFunction<S>> {
 
         private final ToDoubleFunction<String> context;
         private final ToPredicateEvaluator<S> predicateEvaluator;
-        private final Function<String, IntPredicate> atomicPropositionSolver;
+        private final Function<String, Predicate<Agent>> atomicPropositionSolver;
 
-        public ToMeasureEvaluator(ToDoubleFunction<String> context, Function<String, IntPredicate> atomicPropositionSolver) {
+        public ToMeasureEvaluator(ToDoubleFunction<String> context, Function<String, Predicate<Agent>> atomicPropositionSolver) {
             this.context = context;
             this.predicateEvaluator = new ToPredicateEvaluator(context, this);
             this.atomicPropositionSolver = atomicPropositionSolver;
@@ -430,13 +430,13 @@ public class ExpressionEvaluator {
 
         @Override
         public ToDoubleFunction<S> visitExpressionFractionOfAgents(LIOModelParser.ExpressionFractionOfAgentsContext ctx) {
-            IntPredicate predicate = atomicPropositionSolver.apply(ctx.agent.getText());
+            Predicate<Agent> predicate = atomicPropositionSolver.apply(ctx.agent.getText());
             return s -> s.fractionOf(predicate);
         }
 
         @Override
         public ToDoubleFunction<S> visitExpressionNumberOfAgents(LIOModelParser.ExpressionNumberOfAgentsContext ctx) {
-            IntPredicate predicate = atomicPropositionSolver.apply(ctx.agent.getText());
+            Predicate<Agent> predicate = atomicPropositionSolver.apply(ctx.agent.getText());
             return s -> s.numberOf(predicate);
         }
 
@@ -462,7 +462,7 @@ public class ExpressionEvaluator {
         }
     }
 
-    public static class ToPredicateEvaluator<S extends LIOState> extends LIOModelBaseVisitor<Predicate<S>> {
+    public static class ToPredicateEvaluator<S extends LIOCollective> extends LIOModelBaseVisitor<Predicate<S>> {
 
         private final ToDoubleFunction<String> context;
         private final ToMeasureEvaluator<S> toMeasureEvaluator;

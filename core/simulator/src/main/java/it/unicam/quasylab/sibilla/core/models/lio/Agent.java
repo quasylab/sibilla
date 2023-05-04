@@ -23,12 +23,12 @@
 
 package it.unicam.quasylab.sibilla.core.models.lio;
 
+import it.unicam.quasylab.sibilla.core.tools.ProbabilityVector;
 import it.unicam.quasylab.sibilla.core.util.Pair;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.stream.Collector;
 
 /**
  * Describes the behaviour of a single agent in a network of interactive objects.
@@ -68,8 +68,14 @@ public final class Agent {
      * @param distribution a function associating each action with a probability value.
      * @return List of pairs used to compute agent next state
      */
-    public List<Pair<Double,Agent>> next(ActionsProbability distribution) {
-        return actions.stream().map(p -> new Pair<>(distribution.probabilityOf(p.getKey()),p.getValue())).filter(p -> p.getKey() > 0.0 ).collect(Collectors.toList());
+    public ProbabilityVector<Agent> probabilityVector(ActionsProbability distribution) {
+        ProbabilityVector<Agent> result =  actions.stream()
+                .map(p -> new Pair<>(distribution.probabilityOf(p.getKey()),p.getValue()))
+                .filter(p -> p.getKey() > 0.0 )
+                .collect(Collector.of(ProbabilityVector::new, (v,p) -> v.add(p.getValue(),
+                        p.getKey()),
+                        (v1, v2) -> {v1.add(v2); return v1;}));
+        return result.complete(this);
     }
 
     /**
@@ -92,10 +98,7 @@ public final class Agent {
 
     @Override
     public String toString() {
-        return "Agent{" +
-                "index=" + index +
-                ", name='" + name + '\'' +
-                '}';
+        return name+"("+index+")";
     }
 
     @Override
@@ -103,11 +106,13 @@ public final class Agent {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Agent agent = (Agent) o;
-        return index == agent.index && Objects.equals(name, agent.name);
+        return index == agent.index;
     }
 
     @Override
     public int hashCode() {
         return index;
     }
+
+
 }

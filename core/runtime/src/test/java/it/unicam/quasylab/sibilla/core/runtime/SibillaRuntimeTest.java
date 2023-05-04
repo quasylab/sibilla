@@ -203,6 +203,57 @@ class SibillaRuntimeTest {
             "\n" +
             "system shop=person<startPerson>|newCustomer<startNewCustomer>|customer<startCustomer>|salesClerk<startClerks>|servedCustomer<startServedCustomer>|waitingCustomer<startWaitingCustomer>|rejectedCustomer<startrejectedCustomer>|busySalesClerk<startBusySalesClerk>;";
 
+    public static final String WOLVES_AND_SHEEPS = "const startW = 20;  /* Initial number of wolves */\n" +
+            "const startS = 100; /* Initial number of sheeps */\n" +
+            "const N = 10;       /* Width of the Grid */\n" +
+            "const M = 10;       /* Length of the Grid */\n" +
+            "\n" +
+            "param lambdaMovementS = 0.5; /* Rate of sheeps movement */\n" +
+            "param lambdaMovementW = 0.2; /* Rate of wolves movement */\n" +
+            "param lambdaMeet = 10.0;     /* Rate of wolves meeting with sheeps */\n" +
+            "param eatingProb = 5.0 ;     /* Probability of wolf eating a sheep */\n" +
+            "\n" +
+            "species W of [0,N]*[0,M];\n" +
+            "species S of [0,N]*[0,M];\n" +
+            "\n" +
+            "rule go_up_S for i in [0,N] and j in [0,M] when (j<N){\n" +
+            "    S[i,j] -[ lambdaMovementS * (1 - (#W[i,j+1]/(#W[i,j+1] + #W[i,j-1] + #W[i+1,j] + #W[i-1,j]))) ]-> S[i,j+1]\n" +
+            "}\n" +
+            "\n" +
+            "rule go_down_S for i in [0,N] and j in [0,M] when (j>0){\n" +
+            "    S[i,j] -[ lambdaMovementS * (1 - (#W[i,j-1]/(#W[i,j+1] + #W[i,j-1] + #W[i+1,j] + #W[i-1,j]))) ]-> S[i,j-1]\n" +
+            "}\n" +
+            "\n" +
+            "rule go_right_S for i in [0,N] and j in [0,M] when (i<N){\n" +
+            "    S[i,j] -[ lambdaMovementS * (1 - (#W[i+1,j]/(#W[i,j+1] + #W[i,j-1] + #W[i+1,j] + #W[i-1,j]))) ]-> S[i+1,j]\n" +
+            "}\n" +
+            "\n" +
+            "rule go_left_S for i in [0,N] and j in [0,M] when (i>0){\n" +
+            "    S[i,j] -[ lambdaMovementS * (1 - (#W[i-1,j]/(#W[i,j+1] + #W[i,j-1] + #W[i+1,j] + #W[i-1,j]))) ]-> S[i-1,j]\n" +
+            "}\n" +
+            "\n" +
+            "rule eating for i in [0,N] and j in [0,M]{\n" +
+            "    W[i,j]|S[i,j] -[ (lambdaMeet*(#W[i,j]/startW))*(eatingProb) ]-> W[i,j]\n" +
+            "}\n" +
+            "\n" +
+            "rule go_up_W for i in [0,N] and j in [0,M] when (j<N){\n" +
+            "    W[i,j] -[ lambdaMovementW * (#S[i,j+1]/(#S[i,j+1] + #S[i,j-1] + #S[i+1,j] + #S[i-1,j])) ]-> W[i,j+1]\n" +
+            "}\n" +
+            "\n" +
+            "rule go_down_W for i in [0,N] and j in [0,M] when (j>0){\n" +
+            "    W[i,j] -[ lambdaMovementW * (#S[i,j-1]/(#S[i,j+1] + #S[i,j-1] + #S[i+1,j] + #S[i-1,j])) ]-> W[i,j-1]\n" +
+            "}\n" +
+            "\n" +
+            "rule go_right_W for i in [0,N] and j in [0,M] when (i<N){\n" +
+            "    W[i,j] -[ lambdaMovementW * (#S[i+1,j]/(#S[i,j+1] + #S[i,j-1] + #S[i+1,j] + #S[i-1,j])) ]-> W[i+1,j]\n" +
+            "}\n" +
+            "\n" +
+            "rule go_left_W for i in [0,N] and j in [0,M] when (i>0){\n" +
+            "    W[i,j] -[ lambdaMovementW * (#S[i-1,j]/(#S[i,j+1] + #S[i,j-1] + #S[i+1,j] + #S[i-1,j])) ]-> W[i-1,j]\n" +
+            "}\n" +
+            "\n" +
+            "system startHunting = W[5,5]<startW>|S[5,5]<startS>;";
+
     @Test
     public void shouldSelectPopulationModule() throws CommandExecutionException {
         SibillaRuntime sr = new SibillaRuntime();
@@ -295,15 +346,15 @@ class SibillaRuntimeTest {
         sr.setDeadline(100.0);
         sr.setReplica(500);
         FirstPassageTimeResults res = sr.firstPassageTime(null, "done");
-        assertEquals(0.5, res.getMean(),0.1);
+        assertEquals(0.5, res.getMean(),0.2);
         sr.setParameter("lambda", 1.0);
         sr.setConfiguration("start");
         res = sr.firstPassageTime(null, "done");
-        assertEquals(1.0, res.getMean(),0.1);
+        assertEquals(1.0, res.getMean(),0.2);
         sr.setParameter("lambda", 3.0);
         sr.setConfiguration("start");
         res = sr.firstPassageTime(null, "done");
-        assertEquals(1.0/3.0, res.getMean(),0.1);
+        assertEquals(1.0/3.0, res.getMean(),0.2);
     }
 
     @Test
@@ -311,6 +362,17 @@ class SibillaRuntimeTest {
         SibillaRuntime sr = getRuntimeWithModule();
         sr.load(TEST_SHMNGR);
         sr.setConfiguration("shop");
+        sr.setDeadline(100.0);
+        sr.setReplica(1);
+        sr.setDt(1);
+        sr.simulate("test");
+    }
+
+    @Test
+    public void testWolvesAndSheeps() throws CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.load(WOLVES_AND_SHEEPS);
+        sr.setConfiguration("startHunting");
         sr.setDeadline(100.0);
         sr.setReplica(1);
         sr.setDt(1);

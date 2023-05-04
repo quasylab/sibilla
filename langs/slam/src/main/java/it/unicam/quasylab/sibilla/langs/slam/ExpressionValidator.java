@@ -23,7 +23,7 @@
 
 package it.unicam.quasylab.sibilla.langs.slam;
 
-import it.unicam.quasylab.sibilla.core.models.slam.SlamType;
+import it.unicam.quasylab.sibilla.core.models.slam.data.SlamType;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.RuleNode;
@@ -86,7 +86,7 @@ public class ExpressionValidator extends SlamModelBaseVisitor<Boolean> {
             this.errors.add(ParseUtil.unknownSymbolError(ctx.reference));
             return false;
         }
-        return super.visitExpressionReference(ctx);
+        return true;
     }
 
     @Override
@@ -110,14 +110,11 @@ public class ExpressionValidator extends SlamModelBaseVisitor<Boolean> {
     }
 
     private Boolean validateAgentExpression(Token start, SlamModelParser.ExprContext expr, SlamModelParser.AgentPatternContext agentPattern) {
-        switch (context) {
-            case PREDICATE:
-            case MEASURE:
-            case AGENT_VIEW:
-                return expr.accept(this) & agentPattern.accept(this);
-            default:
-                this.errors.add(ParseUtil.illegalAgentExpressionError(start));
-                return false;
+        if (context.agentExpressionAllowed()) {
+            return expr.accept(this) & agentPattern.accept(this);
+        } else {
+            this.errors.add(ParseUtil.illegalAgentExpressionError(start));
+            return false;
         }
     }
 
@@ -128,72 +125,92 @@ public class ExpressionValidator extends SlamModelBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitExpressionIfThenElse(SlamModelParser.ExpressionIfThenElseContext ctx) {
-        return super.visitExpressionIfThenElse(ctx);
+        return ctx.guard.accept(this) & ctx.thenBranch.accept(this) & ctx.elseBranch.accept(this);
     }
 
     @Override
     public Boolean visitExpressionForAllAgents(SlamModelParser.ExpressionForAllAgentsContext ctx) {
-        return super.visitExpressionForAllAgents(ctx);
+        if (context.agentExpressionAllowed()) {
+            return ctx.agentPattern().accept(this);
+        } else {
+            this.errors.add(ParseUtil.illegalAgentExpressionError(ctx.start));
+            return false;
+        }
     }
 
     @Override
     public Boolean visitExpressionRelation(SlamModelParser.ExpressionRelationContext ctx) {
-        return super.visitExpressionRelation(ctx);
+        return ctx.left.accept(this) & ctx.right.accept(this);
     }
 
     @Override
     public Boolean visitExpressionSamplingNormal(SlamModelParser.ExpressionSamplingNormalContext ctx) {
-        return super.visitExpressionSamplingNormal(ctx);
+        if (context.randomExpressionAllowed()) {
+            return ctx.mean.accept(this) & ctx.sigma.accept(this);
+        } else {
+            this.errors.add(ParseUtil.illegalUseOfRandomExpression(ctx.start));
+            return false;
+        }
     }
 
     @Override
     public Boolean visitExpressionMin(SlamModelParser.ExpressionMinContext ctx) {
-        return super.visitExpressionMin(ctx);
+        return ctx.firstArgument.accept(this) & ctx.secondArgument.accept(this);
     }
 
     @Override
     public Boolean visitExpressionAnd(SlamModelParser.ExpressionAndContext ctx) {
-        return super.visitExpressionAnd(ctx);
+        return ctx.left.accept(this) & ctx.right.accept(this);
     }
 
     @Override
     public Boolean visitExpressionCast(SlamModelParser.ExpressionCastContext ctx) {
-        return super.visitExpressionCast(ctx);
+        return ctx.expr().accept(this);
     }
 
     @Override
     public Boolean visitExpressionNow(SlamModelParser.ExpressionNowContext ctx) {
-        return super.visitExpressionNow(ctx);
+        if (this.context.timedExpressionAllowed()) {
+            return true;
+        } else {
+            this.errors.add(ParseUtil.illegalUseOfTimedExpression(ctx.start));
+            return false;
+        }
     }
 
     @Override
     public Boolean visitExpressionLog10(SlamModelParser.ExpressionLog10Context ctx) {
-        return super.visitExpressionLog10(ctx);
+        return ctx.argument.accept(this);
     }
 
     @Override
     public Boolean visitExpressionCosh(SlamModelParser.ExpressionCoshContext ctx) {
-        return super.visitExpressionCosh(ctx);
+        return ctx.argument.accept(this);
     }
 
     @Override
     public Boolean visitExpressionInteger(SlamModelParser.ExpressionIntegerContext ctx) {
-        return super.visitExpressionInteger(ctx);
+        return true;
     }
 
     @Override
     public Boolean visitExpressionUnaryOperator(SlamModelParser.ExpressionUnaryOperatorContext ctx) {
-        return super.visitExpressionUnaryOperator(ctx);
+        return ctx.arg.accept(this);
     }
 
     @Override
     public Boolean visitExpressionExistsAgent(SlamModelParser.ExpressionExistsAgentContext ctx) {
-        return super.visitExpressionExistsAgent(ctx);
+        if (context.agentExpressionAllowed()) {
+            return ctx.agentPattern().accept(this);
+        } else {
+            this.errors.add(ParseUtil.illegalAgentExpressionError(ctx.start));
+            return false;
+        }
     }
 
     @Override
     public Boolean visitExpressionCeil(SlamModelParser.ExpressionCeilContext ctx) {
-        return super.visitExpressionCeil(ctx);
+        return ctx.argument.accept(this);
     }
 
     @Override
@@ -203,111 +220,126 @@ public class ExpressionValidator extends SlamModelBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitExpressionTan(SlamModelParser.ExpressionTanContext ctx) {
-        return super.visitExpressionTan(ctx);
+        return ctx.argument.accept(this);
     }
 
     @Override
     public Boolean visitExpressionMulDiv(SlamModelParser.ExpressionMulDivContext ctx) {
-        return super.visitExpressionMulDiv(ctx);
+        return ctx.left.accept(this) & ctx.right.accept(this);
     }
 
     @Override
     public Boolean visitExpressionMax(SlamModelParser.ExpressionMaxContext ctx) {
-        return super.visitExpressionMax(ctx);
+        return ctx.firstArgument.accept(this) & ctx.secondArgument.accept(this);
     }
 
     @Override
     public Boolean visitExpressionSamplingUniform(SlamModelParser.ExpressionSamplingUniformContext ctx) {
-        return super.visitExpressionSamplingUniform(ctx);
+        if (!context.randomExpressionAllowed()) {
+            this.errors.add(ParseUtil.illegalUseOfRandomExpression(ctx.start));
+            return false;
+        } else {
+            return ctx.from.accept(this) & ctx.to.accept(this);
+        }
     }
 
     @Override
     public Boolean visitExpressionATan(SlamModelParser.ExpressionATanContext ctx) {
-        return super.visitExpressionATan(ctx);
+        return ctx.argument.accept(this);
     }
 
     @Override
     public Boolean visitExpressionBracket(SlamModelParser.ExpressionBracketContext ctx) {
-        return super.visitExpressionBracket(ctx);
+        return ctx.expr().accept(this);
     }
 
     @Override
     public Boolean visitExpressionRandomValue(SlamModelParser.ExpressionRandomValueContext ctx) {
-        return super.visitExpressionRandomValue(ctx);
+        if (context.randomExpressionAllowed()) {
+            return true;
+        } else {
+            this.errors.add(ParseUtil.illegalUseOfRandomExpression(ctx.start));
+            return false;
+        }
     }
 
     @Override
     public Boolean visitExpressionDt(SlamModelParser.ExpressionDtContext ctx) {
-        return super.visitExpressionDt(ctx);
+        if (this.context.timedExpressionAllowed()) {
+            return true;
+        } else {
+            this.errors.add(ParseUtil.illegalUseOfTimedExpression(ctx.start));
+            return false;
+        }
     }
 
     @Override
     public Boolean visitExpressionSin(SlamModelParser.ExpressionSinContext ctx) {
-        return super.visitExpressionSin(ctx);
+        return ctx.argument.accept(this);
     }
 
     @Override
     public Boolean visitExpressionPow(SlamModelParser.ExpressionPowContext ctx) {
-        return super.visitExpressionPow(ctx);
+        return ctx.left.accept(this) & ctx.right.accept(this);
     }
 
     @Override
     public Boolean visitExpressionSumAgents(SlamModelParser.ExpressionSumAgentsContext ctx) {
-        return super.visitExpressionSumAgents(ctx);
+        return validateAgentExpression(ctx.start, ctx.expr(), ctx.agentPattern());
     }
 
     @Override
     public Boolean visitExpressionExp(SlamModelParser.ExpressionExpContext ctx) {
-        return super.visitExpressionExp(ctx);
+        return ctx.argument.accept(this);
     }
 
     @Override
     public Boolean visitExpressionTrue(SlamModelParser.ExpressionTrueContext ctx) {
-        return super.visitExpressionTrue(ctx);
+        return true;
     }
 
     @Override
     public Boolean visitExpressionSinh(SlamModelParser.ExpressionSinhContext ctx) {
-        return super.visitExpressionSinh(ctx);
+        return ctx.argument.accept(this);
     }
 
     @Override
     public Boolean visitExpressionASin(SlamModelParser.ExpressionASinContext ctx) {
-        return super.visitExpressionASin(ctx);
+        return ctx.argument.accept(this);
     }
 
     @Override
     public Boolean visitExpressionNegation(SlamModelParser.ExpressionNegationContext ctx) {
-        return super.visitExpressionNegation(ctx);
+        return ctx.arg.accept(this);
     }
 
     @Override
     public Boolean visitExpressionReal(SlamModelParser.ExpressionRealContext ctx) {
-        return super.visitExpressionReal(ctx);
+        return true;
     }
 
     @Override
     public Boolean visitExpressionATan2(SlamModelParser.ExpressionATan2Context ctx) {
-        return super.visitExpressionATan2(ctx);
+        return ctx.firstArgument.accept(this) & ctx.secondArgument.accept(this);
     }
 
     @Override
     public Boolean visitExpressionFalse(SlamModelParser.ExpressionFalseContext ctx) {
-        return super.visitExpressionFalse(ctx);
+        return true;
     }
 
     @Override
     public Boolean visitExpressionAbs(SlamModelParser.ExpressionAbsContext ctx) {
-        return super.visitExpressionAbs(ctx);
+        return ctx.argument.accept(this);
     }
 
     @Override
     public Boolean visitExpressionTanh(SlamModelParser.ExpressionTanhContext ctx) {
-        return super.visitExpressionTanh(ctx);
+        return ctx.argument.accept(this);
     }
 
     @Override
     public Boolean visitExpressionOr(SlamModelParser.ExpressionOrContext ctx) {
-        return super.visitExpressionOr(ctx);
+        return ctx.left.accept(this) & ctx.right.accept(this);
     }
 }

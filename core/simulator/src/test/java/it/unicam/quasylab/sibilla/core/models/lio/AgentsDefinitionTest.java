@@ -31,39 +31,39 @@ class AgentsDefinitionTest {
 
     @Test
     void emptyAgentsDefinitionShouldHaveNoDeclaredAgent() {
-        AgentsDefinition def = new AgentsDefinition();
+        AgentsDefinition def = new AgentsDefinition(new String[]{} , new String[] {} );
         assertEquals(0,def.numberOfAgents());
     }
 
     @Test
     void anAgentShouldBeSuccessfullyCreated() {
-        AgentsDefinition def = new AgentsDefinition();
-        assertNotNull(def.addAgent("TEST"));
+        AgentsDefinition def = new AgentsDefinition(new String[]{"TEST"}, new String[] {});
+        assertNotNull(def.getAgent("TEST"));
     }
 
     @Test
     void anAgentShouldBeFoundByItsIndex() {
-        AgentsDefinition def = new AgentsDefinition();
-        Agent a = def.addAgent("TEST");
+        AgentsDefinition def = new AgentsDefinition(new String[]{"TEST"}, new String[] {});
+        Agent a = def.getAgent("TEST");
         Agent b = def.getAgent(a.getIndex());
         assertEquals(a,b);
     }
 
     @Test
     void anAgentShouldBeFoundByItsName() {
-        AgentsDefinition def = new AgentsDefinition();
-        Agent a = def.addAgent("TEST");
+        AgentsDefinition def = new AgentsDefinition(new String[]{"TEST"}, new String[] {});
+        Agent a = def.getAgent("TEST");
         Agent b = def.getAgent("TEST");
         assertEquals(a,b);
     }
 
     @Test
     void createLIOIndividualState() {
-        AgentsDefinition def = new AgentsDefinition();
-        Agent agentA = def.addAgent("A");
-        Agent agentB = def.addAgent("B");
-        Agent agentC = def.addAgent("C");
-        Agent agentD = def.addAgent("D");
+        AgentsDefinition def = new AgentsDefinition(new String[]{"A", "B", "C", "D"}, new String[] {});
+        Agent agentA = def.getAgent("A");
+        Agent agentB = def.getAgent("B");
+        Agent agentC = def.getAgent("C");
+        Agent agentD = def.getAgent("D");
         LIOIndividualState state = new LIOIndividualState(def, "A" , "A", "A", "A", "D");
         assertEquals(0.8,state.fractionOf(agentA));
         assertEquals(0,state.fractionOf(agentB));
@@ -74,13 +74,13 @@ class AgentsDefinitionTest {
 
     @Test
     void shouldComputeActionProbability() {
-        AgentsDefinition def = new AgentsDefinition();
-        Agent agentA = def.addAgent("A");
-        Agent agentB = def.addAgent("B");
-        Agent agentC = def.addAgent("C");
-        Agent agentD = def.addAgent("D");
-        AgentAction act1 = def.addAction("act1", s -> 0.25);
-        AgentAction act2 = def.addAction("act2", s -> 0.75);
+        AgentsDefinition def = new AgentsDefinition(new String[]{"A", "B", "C", "D"}, new String[] {"act1", "act2"});
+        Agent agentA = def.getAgent("A");
+        Agent agentB = def.getAgent("B");
+        Agent agentC = def.getAgent("C");
+        Agent agentD = def.getAgent("D");
+        AgentAction act1 = def.setActionProbability("act1", s -> 0.25);
+        AgentAction act2 = def.setActionProbability("act2", s -> 0.75);
         LIOIndividualState state = new LIOIndividualState(def, "A" , "A", "A", "A", "D");
         ActionsProbability prob = def.getActionProbability(state);
         assertEquals(0.25, prob.probabilityOf(act1));

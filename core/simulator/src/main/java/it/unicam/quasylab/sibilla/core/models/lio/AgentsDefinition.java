@@ -23,80 +23,41 @@
 
 package it.unicam.quasylab.sibilla.core.models.lio;
 
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
+import it.unicam.quasylab.sibilla.core.tools.ProbabilityMatrix;
+
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * This class contains the definitions of a set of Interactvie Objects.
  */
 public final class AgentsDefinition {
 
-    private int agentCounter = 0;
-    private int actionCounter = 0;
-    private final ArrayList<Agent> agentIndex;
-    private final Map<String,Agent> agents;
-    private final Map<String,AgentAction> actions;
-    private final ArrayList<ToDoubleFunction<LIOState>> probabilityFunctions;
+
+    private final Agent[] agents;
+
+    private final AgentAction[] actions;
+
+    private final ActionProbabilityFunction[] probabilityFunctions;
+
+    private final Map<String,Agent> agentRegistry;
+
+    private final Map<String,AgentAction> actionRegistry;
 
 
     /**
      * Create an empty agents definition.
      */
-    public AgentsDefinition() {
-        this.agents = new TreeMap<>();
-        this.agentIndex = new ArrayList<>();
-        this.actions = new TreeMap<>();
-        this.probabilityFunctions = new ArrayList<>();
+    public AgentsDefinition(String[] agentNames, String[] agentActions) {
+        this.agents = IntStream.range(0, agentNames.length).mapToObj(i -> new Agent(agentNames[i], i)).toArray(Agent[]::new);
+        this.actions = IntStream.range(0, agentActions.length).mapToObj(i -> new AgentAction(agentActions[i], i)).toArray(AgentAction[]::new);
+        this.agentRegistry = Stream.of(agents).collect(Collectors.toMap(Agent::getName, a -> a));
+        this.actionRegistry = Stream.of(actions).collect(Collectors.toMap(AgentAction::getName, a -> a));
+        this.probabilityFunctions = new ActionProbabilityFunction[agentActions.length];
     }
 
-    /**
-     * Add a new agent.
-     *
-     * @param name agent name
-     * @return the created agent.
-     */
-    public Agent addAgent(String name) {
-        if (agents.containsKey(name)) {
-            throw new IllegalStateException("Duplicated agent name "+name);
-        }
-        Agent agent = new Agent(name,agentCounter++);
-        agents.put(name, agent);
-        agentIndex.add(agent.getIndex(),agent);
-        return agent;
-    }
-
-    /**
-     * Return the agent with the given name. The method returns null if no agent with the
-     * given name is defined.
-     *
-     * @param name an agent name.
-     * @return the agent with the given name.
-     */
-    public Agent getAgent(String name) {
-        return agents.get(name);
-    }
-
-
-    /**
-     * Add a new action with the given name and probability function.
-     *
-     * @param name action name.
-     * @param probabilityFunction probability function.
-     * @return the new created action.
-     */
-    public AgentAction addAction(String name, ToDoubleFunction<LIOState> probabilityFunction) {
-        if (actions.containsKey(name)) {
-            throw new IllegalStateException("Duplicated action name "+name);
-        }
-        AgentAction action = new AgentAction(name,actionCounter++);
-        actions.put(name,action);
-        probabilityFunctions.add(probabilityFunction);
-        return action;
-    }
 
     /**
      * Return the action with the given name or null if no action with that name is available.
@@ -105,7 +66,7 @@ public final class AgentsDefinition {
      * @return the action with the given name.
      */
     public AgentAction getAction(String name) {
-        return actions.get(name);
+        return actionRegistry.get(name);
     }
 
     /**
@@ -114,9 +75,9 @@ public final class AgentsDefinition {
      * @param state the state used to compute action probabilities.
      * @return the function associating each action with a probability value.
      */
-    public ActionsProbability getActionProbability(LIOState state) {
-        double[] probs = probabilityFunctions.stream().mapToDouble(f -> f.applyAsDouble(state)).toArray();
-        return a -> probs[a.getIndex()];
+    public <S extends LIOCollective> ActionsProbability getActionProbability(S state) {
+        double[] actionProbabilities = Stream.of(probabilityFunctions).mapToDouble(f -> f.getProbability(state)).toArray();
+        return a -> actionProbabilities[a.getIndex()];
     }
 
     /**
@@ -125,7 +86,7 @@ public final class AgentsDefinition {
      * @return the number of defined agents.
      */
     public int numberOfAgents() {
-        return agentCounter;
+        return agents.length;
     }
 
     /**
@@ -134,13 +95,9 @@ public final class AgentsDefinition {
      * @param state a state.
      * @return the agents probability matrix associated with the given state.
      */
-    public double[][] getAgentProbabilityMatrix(LIOState state) {
+    public <S extends LIOCollective> ProbabilityMatrix<Agent> getAgentProbabilityMatrix(S state) {
         ActionsProbability actionsProbability = getActionProbability(state);
-        double[][] matrix = new double[agentCounter][agentCounter];
-        IntStream.range(0,agentCounter).forEach(i ->
-            getAgent(i).next(actionsProbability).forEach(p -> matrix[i][p.getValue().getIndex()] += p.getKey())
-        );
-        return matrix;
+        return new ProbabilityMatrix<>(a -> a.probabilityVector(actionsProbability));
     }
 
     /**
@@ -150,7 +107,11 @@ public final class AgentsDefinition {
      * @return the agent with the given index.
      */
     public Agent getAgent(int i) {
-        return agentIndex.get(i);
+        return agents[i];
+    }
+
+    public Agent getAgent(String name) {
+        return agentRegistry.get(name);
     }
 
     /**
@@ -160,11 +121,40 @@ public final class AgentsDefinition {
      * @return the index of agent named <code>s</code>.
      */
     public int getAgentIndex(String s) {
-        Agent a = getAgent(s);
+        Agent a = agentRegistry.get(s);
         if (a == null) {
             return -1;
         } else {
             return a.getIndex();
         }
+    }
+
+    /**
+     * Returns the multiplicity array of the given list of agents.
+     *
+     * @param agents a list of agents.
+     * @return the multiplicity array of the given list of agents.
+     */
+    public int[] getMultiplicity(List<Agent> agents) {
+        return IntStream.range(0, numberOfAgents())
+                .parallel()
+                .map(i -> (int) agents.stream().mapToInt(Agent::getIndex).filter(j -> i==j).count())
+                .toArray();
+    }
+
+    /**
+     * Sets the probability function associated with the action with the given name.
+     *
+     * @param name action name.
+     * @param function probability function.
+     * @return the reference to the changed action.
+     */
+    public AgentAction setActionProbability(String name, ActionProbabilityFunction function) {
+        AgentAction act = getAction(name);
+        if (act == null) {
+            throw new IllegalArgumentException("Action "+name+" is unknown in this definition!");
+        }
+        probabilityFunctions[act.getIndex()] = function;
+        return act;
     }
 }

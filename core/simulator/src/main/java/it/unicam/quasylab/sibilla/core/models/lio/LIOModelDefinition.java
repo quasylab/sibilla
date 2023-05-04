@@ -33,7 +33,7 @@ import java.util.function.Function;
 /**
  * This class represents a definition of a LIO Model.
  */
-public class LIOModelDefinition<S extends LIOState> extends AbstractModelDefinition<S> {
+public class LIOModelDefinition<S extends LIOState<S>> extends AbstractModelDefinition<S> {
 
     private final Function<EvaluationEnvironment,LIOModel<S>> definitionGenerator;
     private final Function<EvaluationEnvironment, ParametricDataSet<Function<RandomGenerator, S>>>  stateGenerator;

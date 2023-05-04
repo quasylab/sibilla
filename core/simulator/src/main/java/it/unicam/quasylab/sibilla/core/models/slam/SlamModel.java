@@ -25,6 +25,7 @@ package it.unicam.quasylab.sibilla.core.models.slam;
 
 import it.unicam.quasylab.sibilla.core.models.AbstractModel;
 import it.unicam.quasylab.sibilla.core.models.SimulatorCursor;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentDefinition;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import org.apache.commons.math3.random.RandomGenerator;
 

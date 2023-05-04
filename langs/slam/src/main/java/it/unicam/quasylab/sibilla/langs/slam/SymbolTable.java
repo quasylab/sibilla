@@ -23,10 +23,10 @@
 
 package it.unicam.quasylab.sibilla.langs.slam;
 
-import it.unicam.quasylab.sibilla.core.models.slam.AgentVariable;
+import it.unicam.quasylab.sibilla.core.models.slam.data.AgentVariable;
 import it.unicam.quasylab.sibilla.core.models.slam.MessageRepository;
 import it.unicam.quasylab.sibilla.core.models.slam.MessageTag;
-import it.unicam.quasylab.sibilla.core.models.slam.SlamType;
+import it.unicam.quasylab.sibilla.core.models.slam.data.SlamType;
 import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.Token;
 
@@ -48,9 +48,7 @@ public class SymbolTable {
     private final Map<String, SlamModelParser.DeclarationMeasureContext> measures = new HashMap<>();
     private final Map<String, SlamModelParser.DeclarationSystemContext> systems = new HashMap<>();
 
-    private final Map<String, AgentVariable> variables = new HashMap<>();
-    private final Set<String>                attributes = new HashSet<>();
-    private final Set<String>                views = new HashSet();
+    private final Map<String, SlamType> globalTypeSolver = new HashMap<String, SlamType>();
 
     private final MessageRepository repository = new MessageRepository();
 
@@ -61,10 +59,6 @@ public class SymbolTable {
 
     public Token getDeclarationToken(String name) {
         return declarationTokens.get(name);
-    }
-
-    public Token getDeclarationToken(String agentName, String parameterName) {
-        return declarationTokens.get(ParseUtil.localVariableName(agentName,parameterName));
     }
 
     public void addPredicate(SlamModelParser.DeclarationPredicateContext ctx) {
@@ -89,7 +83,7 @@ public class SymbolTable {
         checkForDuplicatedName(ctx.name);
         declarationTokens.put(ctx.name.getText(), ctx.name);
         constants.put(ctx.name.getText(), ctx);
-        recordVariable(ctx.name.getText(), type);
+        this.globalTypeSolver.put(ctx.name.getText(), type);
     }
 
     public Collection<SlamModelParser.DeclarationConstantContext> getConstants() {
@@ -100,11 +94,7 @@ public class SymbolTable {
         checkForDuplicatedName(ctx.name);
         declarationTokens.put(ctx.name.getText(), ctx.name);
         parameters.put(ctx.name.getText(), ctx);
-        recordVariable(ctx.name.getText(), SlamType.REAL_TYPE);
-    }
-
-    private synchronized  void recordVariable(String name, SlamType type) {
-        this.variables.put(name, new AgentVariable(name, variables.size(), type));
+        this.globalTypeSolver.put(ctx.name.getText(), SlamType.REAL_TYPE);
     }
 
     public Collection<SlamModelParser.DeclarationParameterContext> getParameters() {
@@ -122,10 +112,10 @@ public class SymbolTable {
         return messages.values();
     }
 
-    public void addAgent(SlamModelParser.DeclarationAgentContext ctx) {
+    public void addAgent(String agent, SlamModelParser.DeclarationAgentContext ctx, String[] parameters, SlamType[] parametersType) {
         checkForDuplicatedName(ctx.name);
         declarationTokens.put(ctx.name.getText(), ctx.name);
-        agents.put(ctx.name.getText(), new AgentInfo(ctx.name.getText(), ctx));
+        agents.put(ctx.name.getText(), new AgentInfo(ctx.name.getText(), parameters, parametersType, ctx));
     }
 
     public Collection<SlamModelParser.DeclarationAgentContext> getAgents() {
@@ -152,35 +142,15 @@ public class SymbolTable {
         return systems.values();
     }
 
-    private synchronized AgentVariable getOrRecordVariable(String name, SlamType type) {
-        AgentVariable var = this.variables.get(name);
-        if (var == null) {
-            var = new AgentVariable(name, this.variables.size(), type);
-            this.variables.put(name, var);
-        } else {
-            if (!var.getType().equals(type)) {
-                return null;
-            }
-        }
-        return var;
-    }
-
-    public synchronized void recordAgentParameter(String agentName, Token start, String parameterName, SlamType type) {
-        AgentInfo info = agents.get(agentName);
-        if (agentName != null) {
-            String variableName = ParseUtil.localVariableName(agentName, parameterName);
-            info.addParameter(parameterName, getOrRecordVariable(variableName, type));
-            declarationTokens.put(variableName, start);
-        } else {
-            throw new IllegalArgumentException("Agent "+agentName+" is unknown!");
-        }
+    public synchronized SlamType getAttributeType(String name) {
+        Optional<SlamType> oType = this.agents.values().stream().map(a -> a.getAttributeType(name)).filter(Objects::nonNull).findFirst();
+        return oType.orElse(SlamType.NONE_TYPE);
     }
 
     public synchronized void recordAgentAttribute(String agentName, String attributeName, SlamType type) {
         AgentInfo info = agents.get(agentName);
         if (agentName != null) {
-            info.addAttribute(attributeName, getOrRecordVariable(attributeName, type));
-            attributes.add(attributeName);
+            info.addAttribute(attributeName, type);
         } else {
             throw new IllegalArgumentException("Agent "+agentName+" is unknown!");
         }
@@ -189,8 +159,9 @@ public class SymbolTable {
     public synchronized void recordAgentView(String agentName, String viewName, SlamType type) {
         AgentInfo info = agents.get(agentName);
         if (agentName != null) {
-            info.addView(viewName, getOrRecordVariable(viewName, type));
-            views.add(viewName);
+            //FIXME!
+//            info.addView(viewName, getOrRecordVariable(viewName, type));
+//            views.add(viewName);
         } else {
             throw new IllegalArgumentException("Agent "+agentName+" is unknown!");
         }
@@ -213,7 +184,7 @@ public class SymbolTable {
     }
 
     public boolean isAgentView(String name) {
-        return this.views.contains(name);
+        return false;//this.views.contains(name);
     }
 
     public boolean isAgentAttribute(String agentName, String viewName) {
@@ -225,7 +196,7 @@ public class SymbolTable {
     }
 
     public boolean isAgentAttribute(String name) {
-        return this.attributes.contains(name);
+        return false;//this.attributes.contains(name);
     }
 
 
@@ -278,7 +249,7 @@ public class SymbolTable {
 
     public SlamType solveTypeFromParameters(String name) {
         if (isAParameter(name)) {
-            return getTypeOf(this.variables.get(name));
+            return SlamType.NONE_TYPE;//getTypeOf(this.variables.get(name));
         } else {
             return SlamType.NONE_TYPE;
         }
@@ -286,21 +257,21 @@ public class SymbolTable {
 
     public SlamType solveTypeFromConstants(String name) {
         if (isAConstant(name)) {
-            return getTypeOf(this.variables.get(name));
+            return SlamType.NONE_TYPE;//getTypeOf(this.variables.get(name));
         } else {
             return solveTypeFromParameters(name);
         }
     }
 
     public SlamType solveTypeFromMeasuresAndPredicates(String name) {
-        return getTypeOf(this.variables.get(name));
+        return SlamType.NONE_TYPE;//getTypeOf(this.variables.get(name));
     }
 
     public SlamType solveTypeFromViews(String name) {
         if (isAgentView(name)) {
             return SlamType.NONE_TYPE;
         } else {
-            return this.variables.get(name).getType();
+            return SlamType.NONE_TYPE;//this.variables.get(name).getType();
         }
     }
 
@@ -309,7 +280,7 @@ public class SymbolTable {
         if (info == null) {
             return solveTypeFromConstants(name);
         }
-        return info.resolveTypeFromMeasuresAndPredicates(name);
+        return SlamType.NONE_TYPE;//info.resolveTypeFromMeasuresAndPredicates(name);
     }
 
 
@@ -328,7 +299,7 @@ public class SymbolTable {
         if (variable == null) {
             return SlamType.NONE_TYPE;
         } else {
-            return variable.getType();
+            return SlamType.NONE_TYPE;//variable.getType();
         }
     }
 
@@ -337,7 +308,7 @@ public class SymbolTable {
         if (info == null) {
             throw new IllegalArgumentException("Agent "+agentName+" is unknown!");
         }
-        return info::attributeDeclarationTypeSolver;
+        return null;//info::attributeDeclarationTypeSolver;
     }
 
     public boolean isAParameterOf(String agentName, String attributeName) {
@@ -353,7 +324,7 @@ public class SymbolTable {
         if (info == null) {
             throw new IllegalArgumentException("Agent "+agentName+" is unknown!");
         }
-        return info::viewDeclarationTypeSolver;
+        return null;//info::viewDeclarationTypeSolver;
     }
 
     public Function<String, SlamType> getAgentStateTypeSolver(String agentName) {
@@ -361,7 +332,7 @@ public class SymbolTable {
         if (info == null) {
             throw new IllegalArgumentException("Agent "+agentName+" is unknown!");
         }
-        return info::viewDeclarationTypeSolver;
+        return null;//info::viewDeclarationTypeSolver;
     }
 
     public boolean isAssignable(ExpressionContext context, String agentName, String name) {
@@ -382,7 +353,11 @@ public class SymbolTable {
         if (info == null) {
             throw new IllegalArgumentException("Agent "+agentName+" is unknown!");
         }
-        return info.getTypeOf(attribute);
+        return null;//info.getTypeOf(attribute);
+    }
+
+    public TypeSolver getGlobalTypeSolver() {
+        return n -> globalTypeSolver.getOrDefault(n, SlamType.NONE_TYPE);
     }
 
     public class AgentInfo {
@@ -391,29 +366,43 @@ public class SymbolTable {
 
         private final SlamModelParser.DeclarationAgentContext declarationAgentContext;
 
-        private final Map<String, AgentVariable> parameters = new HashMap<>();
+        private final SlamType[] parametersType;
 
-        private final Map<String, AgentVariable> views = new HashMap<>();
+        private final Map<String, SlamType> parameters = new HashMap<>();
 
-        private final Map<String, AgentVariable> attributes = new HashMap<>();
+        private final Map<String, SlamType> views = new HashMap<>();
+
+        private final Map<String, SlamType> attributes = new HashMap<>();
 
         private final Map<String, SlamModelParser.AgentStateDeclarationContext> states = new HashMap<>();
 
-        public AgentInfo(String name, SlamModelParser.DeclarationAgentContext declarationAgentContext) {
+        public AgentInfo(String name, String[] parameters, SlamType[] parametersType, SlamModelParser.DeclarationAgentContext declarationAgentContext) {
             this.name = name;
+            this.parametersType = parametersType;
             this.declarationAgentContext = declarationAgentContext;
+
         }
 
-        public void addParameter(String name, AgentVariable variable) {
+        private void fillAgentParameterTypes(String[] parameters) {
+            for(int i=0; i<parameters.length; i++) {
+                this.parameters.put(parameters[i], parametersType[i]);
+            }
+        }
+
+        public void addParameter(String name, SlamType variable) {
             this.parameters.put(name, variable);
         }
 
-        public void addView(String name, AgentVariable variable) {
+        public void addView(String name, SlamType variable) {
             this.views.put(name, variable);
         }
 
-        public void addAttribute(String name, AgentVariable variable) {
-            this.attributes.put(name, variable);
+        public void addAttribute(String name, SlamType type) {
+            this.attributes.put(name, type);
+        }
+
+        public SlamType getAttributeType(String name) {
+            return this.attributes.get(name);
         }
 
         public void addState(SlamModelParser.AgentStateDeclarationContext state) {
@@ -422,6 +411,19 @@ public class SymbolTable {
 
         public boolean isDeclared(String name) {
             return parameters.containsKey(name)||attributes.containsKey(name)||views.containsKey(name);
+        }
+
+        public SlamType typeOf(String name) {
+            if (this.parameters.containsKey(name)) {
+                return this.parameters.get(name);
+            }
+            if (this.attributes.containsKey(name)) {
+                return this.attributes.get(name);
+            }
+            if (this.views.containsKey(name)) {
+                return this.views.get(name);
+            }
+            return SlamType.NONE_TYPE;
         }
 
         public boolean isAnAttribute(String name) {
@@ -441,79 +443,6 @@ public class SymbolTable {
             return this.states.containsKey(stateName);
         }
 
-        public AgentVariable resolveVariableFromMeasuresAndPredicates(String name) {
-            if (this.isAView(name)) {
-                return this.views.get(name);
-            }
-            if (this.isAnAttribute(name)) {
-                return this.attributes.get(name);
-            }
-            return null;
-        }
 
-        public SlamType resolveTypeFromMeasuresAndPredicates(String name) {
-            AgentVariable variable = resolveVariableFromMeasuresAndPredicates(name);
-            if (variable == null) {
-                return SlamType.NONE_TYPE;
-            } else {
-                return variable.getType();
-            }
-        }
-
-        public AgentVariable resolveVariableFromViews(String name) {
-            return this.attributes.get(name);
-        }
-
-        public SlamType resolveTypeFromViews(String name) {
-            AgentVariable variable = resolveVariableFromViews(name);
-            if (variable == null) {
-                return SlamType.NONE_TYPE;
-            } else {
-                return variable.getType();
-            }
-        }
-
-        public AgentVariable resolveFromStateCode(String name) {
-            return resolveVariableFromMeasuresAndPredicates(name);
-        }
-
-        public SlamType resolveTypeFromStateCode(String name) {
-            AgentVariable variable = resolveFromStateCode(name);
-            if (variable == null) {
-                return SlamType.NONE_TYPE;
-            } else {
-                return variable.getType();
-            }
-        }
-
-
-        public SlamType attributeDeclarationTypeSolver(String name) {
-            AgentVariable var = this.parameters.get(name);
-            if (var != null) return var.getType();
-            var = this.attributes.get(name);
-            if (var != null) return var.getType();
-            return solveTypeFromConstants(name);
-        }
-
-        //TODO: CHECK THIS!!!
-        public SlamType viewDeclarationTypeSolver(String s) {
-            AgentVariable var = this.parameters.get(name);
-            if (var != null) return var.getType();
-            var = this.attributes.get(name);
-            if (var != null) return var.getType();
-            var = this.views.get(name);
-            if (var != null) return var.getType();
-            return solveTypeFromConstants(name);
-        }
-
-        public SlamType getTypeOf(String attribute) {
-            AgentVariable var = this.parameters.get(attribute);
-            if (var != null) return var.getType();
-            var = this.attributes.get(attribute);
-            if (var != null) return var.getType();
-            var = this.views.get(attribute);
-            if (var != null) return var.getType();
-            return solveTypeFromConstants(attribute);
-        }
     }
 }

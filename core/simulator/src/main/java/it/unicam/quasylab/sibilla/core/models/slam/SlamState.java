@@ -24,6 +24,10 @@
 package it.unicam.quasylab.sibilla.core.models.slam;
 
 import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.Agent;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentFactory;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentMessage;
+import it.unicam.quasylab.sibilla.core.models.slam.data.AgentStore;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Arrays;
@@ -37,15 +41,15 @@ import java.util.stream.Stream;
 /**
  * Instances of this class represents an environment where a number of agents are operating.
  */
-public final class SlamState implements State, GlobalStateExpressionEvaluator {
+public final class SlamState implements State, StateExpressionEvaluator {
 
     private int agentCounter = 0;
-    private final HashMap<Integer,Agent> agents;
+    private final HashMap<Integer, Agent> agents;
     private double now;
     private final HashMap<Integer,Activity> agentsActivities;
     private final PriorityQueue<Activity> scheduledActivities;
 
-    public SlamState(AgentFactory ... agents) {
+    public SlamState(AgentFactory... agents) {
         this(0.0, agents);
     }
 

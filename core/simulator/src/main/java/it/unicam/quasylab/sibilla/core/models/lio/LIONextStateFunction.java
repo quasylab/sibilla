@@ -25,7 +25,7 @@ package it.unicam.quasylab.sibilla.core.models.lio;
 
 import org.apache.commons.math3.random.RandomGenerator;
 
-public interface LIONextStateFunction<S extends LIOState> {
+public interface LIONextStateFunction<S extends LIOCollective> {
 
     S step(RandomGenerator r, double[][] matrix, S current);
 

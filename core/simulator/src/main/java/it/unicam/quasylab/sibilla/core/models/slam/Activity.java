@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
+import it.unicam.quasylab.sibilla.core.models.slam.agents.Agent;
 import org.apache.commons.math3.random.RandomGenerator;
 
 /**

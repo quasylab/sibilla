@@ -23,6 +23,9 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
+import it.unicam.quasylab.sibilla.core.models.slam.agents.Agent;
+import it.unicam.quasylab.sibilla.core.models.slam.data.SlamValue;
+
 /**
  * Identifies a message that must be delivered at a given agent.
  */

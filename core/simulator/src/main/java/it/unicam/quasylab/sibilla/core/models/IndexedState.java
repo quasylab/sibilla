@@ -28,7 +28,7 @@ package it.unicam.quasylab.sibilla.core.models;
  *
  * @param <S> data type of indexed elements.
  */
-public interface IndexedState<S> {
+public interface IndexedState<S> extends State {
 
     /**
      * Returns the element at position i.

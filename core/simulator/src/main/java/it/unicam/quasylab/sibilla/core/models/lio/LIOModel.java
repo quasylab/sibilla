@@ -28,8 +28,6 @@ import it.unicam.quasylab.sibilla.core.models.DiscreteModel;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -38,7 +36,7 @@ import java.util.function.Predicate;
  * Identifies a model for a Langauge of Interactive Objects.
  *
  */
-public class LIOModel<S extends LIOState> extends AbstractModel<S> implements DiscreteModel<S> {
+public class LIOModel<S extends LIOState<S>> extends AbstractModel<S> implements DiscreteModel<S> {
 
     private final AgentsDefinition definitions;
 
@@ -69,7 +67,7 @@ public class LIOModel<S extends LIOState> extends AbstractModel<S> implements Di
     }
 
     @Override
-    public byte[] byteOf(LIOState state) throws IOException {
+    public byte[] byteOf(S state) throws IOException {
         return new byte[0];
     }
 
@@ -79,7 +77,7 @@ public class LIOModel<S extends LIOState> extends AbstractModel<S> implements Di
     }
 
     @Override
-    public LIOState sampleNextState(RandomGenerator r, double time, LIOState state) {
+    public S sampleNextState(RandomGenerator r, double time, S state) {
         return state.step(r, definitions.getAgentProbabilityMatrix(state));
     }
 }

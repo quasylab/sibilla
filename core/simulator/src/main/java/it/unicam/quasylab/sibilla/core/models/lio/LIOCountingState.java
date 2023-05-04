@@ -23,63 +23,107 @@
 
 package it.unicam.quasylab.sibilla.core.models.lio;
 
+import it.unicam.quasylab.sibilla.core.tools.ProbabilityMatrix;
+import it.unicam.quasylab.sibilla.core.tools.ProbabilityVector;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Arrays;
-import java.util.function.IntPredicate;
+import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 /**
  *
  */
-public class LIOCountingState implements LIOState {
+public class LIOCountingState implements LIOState<LIOCountingState> {
 
+    private final AgentsDefinition definition;
     private final int size;
     private final int[] occupancy;
 
     /**
      * Create a new state with the given occupancy.
      *
-     * @param occupancy occupancy created state.
+     * @param definition
+     * @param occupancy  occupancy created state.
      */
-    public LIOCountingState(int[] occupancy) {
+    public LIOCountingState(AgentsDefinition definition, int[] occupancy) {
+        this(definition, occupancy, IntStream.of(occupancy).sum());
+    }
+
+    private LIOCountingState(AgentsDefinition definition, int[] occupancy, int size) {
+        this.definition = definition;
         this.occupancy = Arrays.copyOf(occupancy,occupancy.length);
-        this.size = IntStream.of(occupancy).sum();
+        this.size = size;
+    }
+
+    public LIOCountingState(AgentsDefinition definition) {
+        this(definition, new int[definition.numberOfAgents()], 0);
     }
 
 
+    public LIOCountingState add(Agent a) {
+        int[] newOccupancy = Arrays.copyOf(occupancy, occupancy.length);
+        newOccupancy[a.getIndex()]++;
+        int newSize = size+1;
+        return new LIOCountingState(definition, newOccupancy, newSize);
+    }
 
     @Override
     public int size() {
         return size;
     }
 
+
     @Override
-    public double fractionOf(int stateIndex) {
-        return ((double) occupancy[stateIndex])/size;
+    public double numberOf(Agent agent) {
+        return occupancy[agent.getIndex()];
     }
 
     @Override
-    public double fractionOf(IntPredicate predicate) {
-        return numberOf(predicate)/size;
+    public double numberOf(Predicate<Agent> predicate) {
+        return IntStream.range(0, occupancy.length).filter(i -> predicate.test(definition.getAgent(i))).sum();
     }
 
     @Override
-    public double numberOf(int stateIndex) {
-        return occupancy[stateIndex];
-    }
-
-    @Override
-    public double numberOf(IntPredicate predicate) {
-        return IntStream.range(0, occupancy.length).filter(predicate).sum();
-    }
-
-    @Override
-    public LIOState step(RandomGenerator randomGenerator, double[][] matrix) {
+    public LIOCountingState step(RandomGenerator randomGenerator, ProbabilityMatrix<Agent> probabilityMatrix) {
         int[] occupancy = new int[this.occupancy.length];
         IntStream.range(0, occupancy.length).forEach(s ->
-            IntStream.range(0, this.occupancy[s]).forEach(i -> occupancy[LIOState.doSample(randomGenerator,matrix[s],s)]++)
+            IntStream.range(0, this.occupancy[s]).forEach(i -> occupancy[probabilityMatrix.sample(randomGenerator, definition.getAgent(i)).getIndex()]++)
         );
-        return new LIOCountingState(occupancy);
+        return new LIOCountingState(definition, occupancy);
+    }
+
+    @Override
+    public ProbabilityVector<LIOCountingState> next(ProbabilityMatrix<Agent> matrix) {
+        ProbabilityVector<LIOCountingState> current = new ProbabilityVector<>();
+        current.add(new LIOCountingState(definition), 1.0);
+        for(int i = 0; i<occupancy.length; i++) {
+            Agent a = definition.getAgent(i);
+            for(int k=0; k<occupancy[i]; k++) {
+                current = current.apply(LIOCountingState::add, matrix.getRowOf(a));
+            }
+        }
+        return current;
+    }
+
+    @Override
+    public ProbabilityVector<LIOCountingState> next() {
+        return next(definition.getAgentProbabilityMatrix(this));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LIOCountingState that = (LIOCountingState) o;
+        return size == that.size && Arrays.equals(occupancy, that.occupancy);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(size);
+        result = 31 * result + Arrays.hashCode(occupancy);
+        return result;
     }
 }

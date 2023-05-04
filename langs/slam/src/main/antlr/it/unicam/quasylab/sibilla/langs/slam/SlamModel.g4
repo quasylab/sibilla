@@ -5,14 +5,18 @@ package it.unicam.quasylab.sibilla.langs.slam;
 }
 
 model   :
-(params += declarationParameter)*
-(consts += declarationConstant)*
-(messages += declarationMessage)*
-(agents += declarationAgent)*
-(measures += declarationMeasure)*
-(predicates += declarationPredicate)*
-(systems += declarationSystem)*
-EOF;
+    (elements += modelElement)*
+    EOF
+;
+
+modelElement :
+    declarationParameter
+    | declarationConstant
+    | declarationMessage
+    | declarationAgent
+    | declarationMeasure
+    | declarationPredicate
+    | declarationSystem;
 
 declarationPredicate:
     'predicate' name=ID '=' value=expr ';'
@@ -119,7 +123,7 @@ skipBlock:
 ;
 
 nextStateBlock:
-    '->' name=ID agentCommandBlock
+    '->' name=ID (block=agentCommandBlock|';')
 ;
 
 agentCommandBlock:
@@ -159,6 +163,7 @@ agentPattern:
     | left=agentPattern '|' right=agentPattern     # agentPatternDisjunction
     | left=agentPattern '&' right=agentPattern     # agentPatternConjunction
     | '!' arg=agentPattern                         # agentPatternNegation
+    | '(' agentPattern ')'                         # agentPatternBrackets
 ;
 
 
@@ -260,7 +265,7 @@ expr    :
     | 'true'                                       # expressionTrue
     | 'now'                                        # expressionNow
     | 'dt'                                         # expressionDt
-    | reference=ID                                 # expressionReference
+    | ('this' '.') reference=ID                                 # expressionReference
     | 'abs' '(' argument=expr ')'                             # expressionAbs
 //    | 'head' '(' argument=expr ')'                          # expressionHead
 //    | 'tail' '(' argument=expr ')'                          # expressionTail

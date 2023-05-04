@@ -23,9 +23,11 @@
 
 package it.unicam.quasylab.sibilla.langs.slam;
 
-import it.unicam.quasylab.sibilla.core.models.slam.SlamType;
+import it.unicam.quasylab.sibilla.core.models.slam.data.SlamType;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import org.antlr.v4.runtime.Token;
+
+import java.util.Locale;
 
 public class ParseUtil {
 
@@ -52,6 +54,7 @@ public class ParseUtil {
     private static final String NAME_ALREADY_USED_IN_PATTERN = "Name %s at line %d:%d has been already used in the same message pattern!";
     private static final String UNKNOWN_SYMBOL_STATE = "State %s at line %d:%d is unknown in agent %s!";
     private static final String ILLEGAL_ASSIGNMENT = "Values cannot be assigned to %s at line %d:%d!";
+    private static final String ILLEGAL_RANDOM_EXPRESSION = "Illegal use of random expression at line %d:%d!";
 
     public static String duplicatedAgentName(Token agentName) {
         return String.format(DUPLICATED_AGENT_NAME_MESSAGE, agentName.getText(), agentName.getLine(), agentName.getCharPositionInLine());
@@ -316,4 +319,27 @@ public class ParseUtil {
         return String.format(ILLEGAL_ASSIGNMENT, token.getText(), token.getLine(), token.getCharPositionInLine());
     }
 
+    public static String illegalUseOfRandomExpressionMessage(Token token) {
+        return String.format(ILLEGAL_RANDOM_EXPRESSION, token.getLine(), token.getCharPositionInLine());
+    }
+
+    public static ParseError illegalUseOfRandomExpression(Token token) {
+        return new ParseError(
+                illegalUseOfRandomExpressionMessage(token),
+                token.getLine(),
+                token.getCharPositionInLine()
+        );
+    }
+
+    public static ParseError illegalUseOfTimedExpression(Token token) {
+        return new ParseError(
+                illegalUseOfTimedExpressionMessage(token),
+                token.getLine(),
+                token.getCharPositionInLine()
+        );
+    }
+
+    private static String illegalUseOfTimedExpressionMessage(Token token) {
+        return String.format(ILLEGAL_TIME_EXPRESSION, token.getLine(), token.getCharPositionInLine());
+    }
 }

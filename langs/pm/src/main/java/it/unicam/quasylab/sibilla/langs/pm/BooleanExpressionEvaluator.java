@@ -68,5 +68,8 @@ public class BooleanExpressionEvaluator extends PopulationModelBaseVisitor<Boole
         return true;
     }
 
-
+    @Override
+    public Boolean visitBracketExpression(PopulationModelParser.BracketExpressionContext ctx) {
+        return ctx.expr().accept(this);
+    }
 }

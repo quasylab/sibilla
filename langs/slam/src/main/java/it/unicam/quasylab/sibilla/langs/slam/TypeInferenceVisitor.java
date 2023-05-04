@@ -23,53 +23,46 @@
 
 package it.unicam.quasylab.sibilla.langs.slam;
 
-import it.unicam.quasylab.sibilla.core.models.slam.SlamType;
+import it.unicam.quasylab.sibilla.core.models.slam.data.SlamType;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import org.antlr.v4.runtime.Token;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 
 /**
  * This visitor is used to infer types of expressions.
  */
 public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
 
-    private final Map<String, SlamType> localVariables;
-    private final Function<String, SlamType> typeResolver;
+    private final TypeSolver typeResolver;
     private final List<ParseError> errors;
-    private final SymbolTable table;
     private final ExpressionContext context;
+
+    private final SymbolTable table;
 
     /**
      * Creates a new visitor that is used to infer the type of expressions occurring in the
      * given context.
      *
-     * @param localVariables
      * @param context expresssion context
-     * @param table symbol table
      * @param typeResolver function used to resolve types
      * @param errors list where errors are stored.
      */
-    public TypeInferenceVisitor(ExpressionContext context, SymbolTable table, Map<String, SlamType> localVariables, Function<String, SlamType> typeResolver, List<ParseError> errors) {
-        this.localVariables = localVariables;
-        this.table = table;
+    public TypeInferenceVisitor(ExpressionContext context,  SymbolTable table, TypeSolver typeResolver, List<ParseError> errors) {
         this.context = context;
         this.typeResolver = typeResolver;
         this.errors = errors;
+        this.table = table;
     }
 
-    public boolean withErrors() {
-        return errors.isEmpty();
-    }
-
-    private SlamType checkType(SlamType expected, SlamModelParser.ExprContext expr) {
+    public boolean checkType(SlamType expected, SlamModelParser.ExprContext expr) {
         SlamType actual = expr.accept(this);
         if (!expected.equals(actual)) {
             errors.add(ParseUtil.typeError(expected, actual, expr.start));
+            return false;
+        } else {
+            return true;
         }
-        return expected;
     }
 
     private SlamType checkAndReturn(SlamType expected, SlamModelParser.ExprContext expr) {
@@ -91,7 +84,11 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
 
     @Override
     public SlamType visitExpressionReference(SlamModelParser.ExpressionReferenceContext ctx) {
-        return typeResolver.apply(ctx.reference.getText());
+        SlamType referenceType = typeResolver.typeOf(ctx.reference.getText());
+        if (referenceType == SlamType.NONE_TYPE) {
+            this.errors.add(ParseUtil.unknownSymbolError(ctx.reference));
+        }
+        return referenceType;
     }
 
     @Override
@@ -188,16 +185,11 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
 
     @Override
     public SlamType visitExpressionNow(SlamModelParser.ExpressionNowContext ctx) {
-        switch (context) {
-            case AGENT_VIEW:
-            case AGENT_TIME_UPDATE:
-            case AGENT_COMMAND:
-            case AGENT_MESSAGE_HANDLER:
-            case AGENT_SOJOURN_TIME:
-                return SlamType.REAL_TYPE;
-            default:
-                this.errors.add(ParseUtil.illegalExpressionError(ctx.start));
-                return SlamType.NONE_TYPE;
+        if (context.timedExpressionAllowed()) {
+            return SlamType.REAL_TYPE;
+        } else {
+            errors.add(ParseUtil.illegalUseOfTimedExpression(ctx.start));
+            return SlamType.NONE_TYPE;
         }
     }
 
@@ -390,4 +382,5 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
     public SlamType visitExpressionAddSub(SlamModelParser.ExpressionAddSubContext ctx) {
         return checkAndReturn(checkAndReturn(SlamType.REAL_TYPE, ctx.left), ctx.right);
     }
+
 }

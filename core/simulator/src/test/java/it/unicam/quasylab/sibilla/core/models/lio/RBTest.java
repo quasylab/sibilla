@@ -23,16 +23,21 @@
 
 package it.unicam.quasylab.sibilla.core.models.lio;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.DoublePredicate;
 import java.util.stream.IntStream;
 
+import it.unicam.quasylab.sibilla.core.tools.ProbabilityVector;
 import it.unicam.quasylab.sibilla.core.models.TimeStep;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.tools.DiscreteTimeAgentSMC;
 import it.unicam.quasylab.sibilla.core.tools.DiscreteTimePathChecker;
-import it.unicam.quasylab.sibilla.core.util.Pair;
+import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalFormula;
+import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalFractionOfFormula;
+import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalAlwaysFormula;
+import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalAtomicFormula;
+import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalFormula;
+import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalNextFormula;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,10 +58,9 @@ public class RBTest {
         Agent a = def.getAgent("B");
         Agent b = def.getAgent("R");
         ActionsProbability prob = def.getActionProbability(getInitialState(def,10,10));
-        List<Pair<Double, Agent>> next = a.next(prob);
-        assertEquals(1,next.size());
-        assertEquals(0.25,next.get(0).getKey().doubleValue());
-        assertEquals(b,next.get(0).getValue());
+        ProbabilityVector<Agent> next = a.probabilityVector(prob);
+        assertEquals(2,next.size());
+        assertEquals(0.25,next.getProbability(b));
     }
 
     @Test
@@ -65,10 +69,9 @@ public class RBTest {
         Agent a = def.getAgent("R");
         Agent b = def.getAgent("B");
         ActionsProbability prob = def.getActionProbability(getInitialState(def,10,10));
-        List<Pair<Double, Agent>> next = a.next(prob);
-        assertEquals(1,next.size());
-        assertEquals(0.25,next.get(0).getKey().doubleValue());
-        assertEquals(b,next.get(0).getValue());
+        ProbabilityVector<Agent> next = a.probabilityVector(prob);
+        assertEquals(2,next.size());
+        assertEquals(0.25,next.getProbability(b));
     }
 
     @Test
@@ -78,13 +81,13 @@ public class RBTest {
         Agent agentR = def.getAgent("R");
         Agent agentB = def.getAgent("B");
         LIOIndividualState s = getInitialState(def,100000,100000);
-        assertEquals(0.5,s.fractionOf(agentB.getIndex()));
-        assertEquals(0.5,s.fractionOf(agentR.getIndex()));
-        LIOModel model = new LIOModel(def);
+        assertEquals(0.5,s.fractionOf(agentB));
+        assertEquals(0.5,s.fractionOf(agentR));
+        LIOModel<LIOIndividualState> model = new LIOModel<>(def);
         Optional<TimeStep<LIOIndividualState>> oNext = model.next(rg,0.0,s);
         assertTrue(oNext.isPresent());
         TimeStep<LIOIndividualState> next = oNext.get();
-        assertEquals(0.5,next.getValue().fractionOf(agentB.getIndex()), 0.1);
+        assertEquals(0.5,next.getValue().fractionOf(agentB), 0.1);
     }
 
 
@@ -111,11 +114,13 @@ public class RBTest {
 
 
     public AgentsDefinition getAgentDefinition(double meet_probability) {
-        AgentsDefinition def = new AgentsDefinition();
-        Agent agentR = def.addAgent("R");
-        Agent agentB = def.addAgent("B");
-        AgentAction redAction = def.addAction("red", s -> s.fractionOf(agentR)*meet_probability );
-        AgentAction blueAction = def.addAction( "blue" , s -> s.fractionOf(agentB)*meet_probability );
+        String[] agents = new String[] { "R", "B" };
+        String[] actions = new String[] { "red", "blue" };
+        AgentsDefinition def = new AgentsDefinition(agents, actions);
+        Agent agentR = def.getAgent("R");
+        Agent agentB = def.getAgent("B");
+        AgentAction redAction = def.setActionProbability( "red", s -> s.fractionOf(agentB)*meet_probability );
+        AgentAction blueAction = def.setActionProbability( "blue" , s -> s.fractionOf(agentR)*meet_probability );
         agentR.addAction(blueAction, agentB);
         agentB.addAction(redAction, agentR);
         return def;
@@ -125,6 +130,71 @@ public class RBTest {
         int agentB = def.getAgentIndex("B");
         int agentR = def.getAgentIndex("R");
         return new LIOIndividualState(def,IntStream.range(0,red+blue).map(i -> (i<red?agentR:agentB)).toArray());
+    }
+
+    @Test
+    public void shouldNotBeLocalStable() {
+        AgentsDefinition def = getAgentDefinition(0.5);
+        Agent red = def.getAgent("R");
+        Agent blue = def.getAgent("B");
+        LocalFormula<Agent> formula = LocalFormula.conjunction(phiStable(2, red, blue), phiStable(2, blue, red));
+
+        formula = formula.next(red);
+        assertFalse(formula.isAccepting());
+        assertFalse(formula.isRejecting());
+        formula = formula.next(blue);
+        assertFalse(formula.isAccepting());
+        assertFalse(formula.isRejecting());
+        formula = formula.next(red);
+        assertFalse(formula.isAccepting());
+        assertTrue(formula.isRejecting());
+    }
+
+    @Test
+    public void shouldBeLocalStable() {
+        AgentsDefinition def = getAgentDefinition(0.5);
+        Agent red = def.getAgent("R");
+        Agent blue = def.getAgent("B");
+        LocalFormula<Agent> formula = LocalFormula.conjunction(phiStable(2, red, blue), phiStable(2, blue, red));
+
+        formula = formula.next(red);
+        assertFalse(formula.isAccepting());
+        assertFalse(formula.isRejecting());
+        formula = formula.next(blue);
+        assertFalse(formula.isAccepting());
+        assertFalse(formula.isRejecting());
+        formula = formula.next(blue);
+        assertFalse(formula.isAccepting());
+        assertFalse(formula.isRejecting());
+        formula = formula.next(blue);
+        assertTrue(formula.isAccepting());
+        assertFalse(formula.isRejecting());
+    }
+
+
+    public void shouldBeBalanced() {
+
+    }
+
+    public static LocalFormula<Agent> phiStable(int k, Agent a1, Agent a2) {
+        return LocalFormula.imply(new LocalAtomicFormula<>(a1::equals),
+                new LocalNextFormula<>(
+                        LocalFormula.imply(new LocalAtomicFormula<>(a2::equals),
+                                new LocalAlwaysFormula<>(0, k, new LocalAtomicFormula<>(a2::equals))
+                        )
+                )
+        );
+    }
+
+
+    public static GlobalFormula<Agent, LIOIndividualState> getPhiBal(double eps, AgentsDefinition def) {
+        DoublePredicate dPred = d -> (d>=0.5-eps)&&(d<=0.5+eps);
+        return new GlobalFractionOfFormula<>(balancedLocalFormula2(def), dPred);
+    }
+
+    public static LocalFormula<Agent> balancedLocalFormula2(AgentsDefinition def) {
+        Agent agentB = def.getAgent("B");
+        return new LocalAtomicFormula<>(agentB::equals);
     }
 
 

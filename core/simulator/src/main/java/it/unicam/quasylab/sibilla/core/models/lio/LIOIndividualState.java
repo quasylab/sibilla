@@ -23,48 +23,69 @@
 
 package it.unicam.quasylab.sibilla.core.models.lio;
 
+import it.unicam.quasylab.sibilla.core.tools.ProbabilityEntries;
+import it.unicam.quasylab.sibilla.core.tools.ProbabilityMatrix;
+import it.unicam.quasylab.sibilla.core.tools.ProbabilityVector;
 import it.unicam.quasylab.sibilla.core.models.IndexedState;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.util.function.IntPredicate;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
  * Indentify a state where each agent is stored individually.
  */
-public class LIOIndividualState implements LIOState, IndexedState<Agent> {
+public class LIOIndividualState implements IndexedState<Agent>, LIOState<LIOIndividualState> {
 
     private final AgentsDefinition definition;
-    private final int[] agents;
+    private final ArrayList<Agent> agents;
     private final int[] multiplicity;
 
+    private int hashValue;
+
     /**
-     * Create a new state given an agents definition and an array a agent names.
+     * Creates a new state containing no agent.
+     *
+     * @param definition agents definition.
+     */
+    public LIOIndividualState(AgentsDefinition definition) {
+        this(definition, new ArrayList<>());
+    }
+
+    /**
+     * Create a new state given an agents definition and the names of agents in the state.
      *
      * @param definition agents definition.
      * @param agents array of agent names.
      */
     public LIOIndividualState(AgentsDefinition definition, String ... agents) {
-        this(definition, Stream.of(agents).mapToInt(definition::getAgentIndex).toArray());
-    }
-
-    public LIOIndividualState(AgentsDefinition definition, int ... agents) {
-        this.definition = definition;
-        this.agents = agents;
-        this.multiplicity = new int[definition.numberOfAgents()];
-        fillMultiplicity();
+        this(definition, Stream.of(agents).map(definition::getAgent).collect(Collectors.toCollection(ArrayList::new)));
     }
 
     /**
-     * Fill the array with agent multiplicity.
+     * Create a new state given an agents definition and the indexes of agents in the state.
+     *
+     * @param definition agents definition.
+     * @param agents array of agent indexes.
      */
-    private void fillMultiplicity() {
-        IntStream.of(this.agents).forEach(i -> this.multiplicity[i]++);
+    public LIOIndividualState(AgentsDefinition definition, int ... agents) {
+        this(definition, IntStream.of(agents).mapToObj(definition::getAgent).collect(Collectors.toCollection(ArrayList::new)));
     }
+
+
+    /**
+     * Create a new state given an agents definition and the indexes of agents in the state.
+     *
+     * @param definition agents definition.
+     * @param agents a list of agents.
+     */
+    private LIOIndividualState(AgentsDefinition definition, ArrayList<Agent> agents) {
+        this(definition, agents, definition.getMultiplicity(agents));
+    }
+
 
     /**
      * Create a new state given the total number of species and the array with agents state.
@@ -72,35 +93,46 @@ public class LIOIndividualState implements LIOState, IndexedState<Agent> {
      * @param agents agents state.
      * @param multiplicity agent state multiplicity.
      */
-    private LIOIndividualState(AgentsDefinition definition, int[] agents, int[] multiplicity) {
+    private LIOIndividualState(AgentsDefinition definition, ArrayList<Agent> agents, int[] multiplicity) {
+        this(definition, agents, multiplicity, agents.hashCode());
+    }
+
+    public LIOIndividualState(AgentsDefinition definition, ArrayList<Agent> agents, int[] multiplicity, int hashCode) {
         this.definition = definition;
         this.agents = agents;
         this.multiplicity = multiplicity;
+        this.hashValue = hashCode;
+
+    }
+
+    /**
+     * Creates a new state obtained by this one by adding a new state.
+     *
+     * @param a the agent to add.
+     * @return a new state obtained by this one by adding a new state.
+     */
+    public LIOIndividualState add(Agent a) {
+        ArrayList<Agent> newList = new ArrayList<>(agents);
+        int[] newMultiplicity = Arrays.copyOf(this.multiplicity, this.multiplicity.length);
+        newMultiplicity[a.getIndex()]++;
+        newList.add(a);
+        return new LIOIndividualState(definition, newList, newMultiplicity);
     }
 
     @Override
     public int size() {
-        return agents.length;
+        return agents.size();
     }
 
     @Override
-    public double fractionOf(int stateIndex) {
-        return ((double) multiplicity[stateIndex])/size();
+    public double numberOf(Agent a) {
+        return multiplicity[a.getIndex()];
     }
 
-    @Override
-    public double fractionOf(IntPredicate predicate) {
-        return numberOf(predicate)/size();
-    }
 
     @Override
-    public double numberOf(int stateIndex) {
-        return multiplicity[stateIndex];
-    }
-
-    @Override
-    public double numberOf(IntPredicate predicate) {
-        return IntStream.range(0,multiplicity.length).filter(predicate).mapToDouble(i -> multiplicity[i]).sum();
+    public double numberOf(Predicate<Agent> predicate) {
+        return IntStream.range(0,multiplicity.length).filter(i -> predicate.test(definition.getAgent(i))).mapToDouble(i -> multiplicity[i]).sum();
     }
 
 
@@ -111,7 +143,7 @@ public class LIOIndividualState implements LIOState, IndexedState<Agent> {
      * @return the agent in position i.
      */
     public Agent get(int i) {
-        return definition.getAgent( agents[i] );
+        return agents.get(i);
     }
 
     /**
@@ -121,7 +153,7 @@ public class LIOIndividualState implements LIOState, IndexedState<Agent> {
      * @return the index of agent in position i.
      */
     public int getIndexAt(int i) {
-        return agents[i];
+        return get(i).getIndex();
     }
 
 
@@ -133,16 +165,50 @@ public class LIOIndividualState implements LIOState, IndexedState<Agent> {
      * @return next state
      */
     @Override
-    public LIOState step(RandomGenerator randomGenerator, double[][] probabilityMatrix) {
-        int[] agents = new int[this.agents.length];
+    public LIOIndividualState step(RandomGenerator randomGenerator, ProbabilityMatrix<Agent> probabilityMatrix) {
+        ArrayList<Agent> nextAgents = new ArrayList<>();
         int[] multiplicity = new int[this.multiplicity.length];
-        for(int i=0 ;i<agents.length;i++) {
-//        IntStream.of(0,agents.length).forEach( i -> {
-            int self = this.getIndexAt(i);
-            int next = LIOState.doSample(randomGenerator,probabilityMatrix[self],self);
-            agents[i] = next;
-            multiplicity[next] += 1;
-        }//);
-        return new LIOIndividualState(this.definition,agents,multiplicity);
+        for (Agent a: this.agents) {
+            Agent nA = probabilityMatrix.sample(randomGenerator, a);
+            multiplicity[nA.getIndex()]++;
+            nextAgents.add(nA);
+        }
+        return new LIOIndividualState(this.definition, nextAgents, multiplicity);
+    }
+
+    @Override
+    public ProbabilityVector<LIOIndividualState> next(ProbabilityMatrix<Agent> matrix) {
+        //ProbabilityVector<LIOIndividualState> current = new ProbabilityVector<>();
+        List<ProbabilityEntries<LIOIndividualState>> current = List.of(new ProbabilityEntries<>(new LIOIndividualState(definition), 1.0));
+        for (Agent a: agents) {
+            List<ProbabilityEntries<LIOIndividualState>> next = new LinkedList<>();
+            ProbabilityVector<Agent> v = matrix.getRowOf(a);
+            current.forEach(e -> v.iterate((s, p) -> next.add(e.apply(LIOIndividualState::add, s, p))));
+            current = next;
+        }
+        return ProbabilityVector.getProbabilityVector(current);
+    }
+
+    @Override
+    public ProbabilityVector<LIOIndividualState> next() {
+        return next(definition.getAgentProbabilityMatrix(this));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        LIOIndividualState that = (LIOIndividualState) o;
+        return (this.hashValue == that.hashValue)&&(definition == that.definition) && agents.equals(that.agents);
+    }
+
+    @Override
+    public int hashCode() {
+        return hashValue;
+    }
+
+    @Override
+    public String toString() {
+        return agents.toString();
     }
 }

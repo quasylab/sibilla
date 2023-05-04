@@ -91,16 +91,20 @@ public class Main {
 	}
 
 	public static AgentsDefinition getAgentDefinition() {
-		AgentsDefinition def = new AgentsDefinition();
-		Agent agentS = def.addAgent("S");
-		Agent agentE = def.addAgent("E");
-		Agent agentI = def.addAgent("I");
-		Agent agentR = def.addAgent("R");
-		AgentAction exposed = def.addAction("exposed", s -> s.fractionOf(agentI)*infection_probability );
-		AgentAction infected = def.addAction( "infected" , s -> e_to_i_probability );
-		AgentAction recovered = def.addAction( "recovered" , s -> i_to_r_probability );
-		AgentAction lost = def.addAction("loss" , s -> r_to_s_probability );
-		AgentAction external = def.addAction("external" , s -> external_infection_probability );
+		AgentsDefinition def =
+				new AgentsDefinition(
+						new String[] {"S", "E", "I", "R"},
+						new String[] {"exposed", "infected", "recovered", "loss", "external"}
+						);
+		Agent agentS = def.getAgent("S");
+		Agent agentE = def.getAgent("E");
+		Agent agentI = def.getAgent("I");
+		Agent agentR = def.getAgent("R");
+		AgentAction exposed = def.setActionProbability("exposed", s -> s.fractionOf(agentI)*infection_probability );
+		AgentAction infected = def.setActionProbability( "infected" , s -> e_to_i_probability );
+		AgentAction recovered = def.setActionProbability( "recovered" , s -> i_to_r_probability );
+		AgentAction lost = def.setActionProbability("loss" , s -> r_to_s_probability );
+		AgentAction external = def.setActionProbability("external" , s -> external_infection_probability );
 		agentS.addAction(exposed, agentE);
 		agentS.addAction(external, agentE);
 		agentE.addAction(infected, agentI);

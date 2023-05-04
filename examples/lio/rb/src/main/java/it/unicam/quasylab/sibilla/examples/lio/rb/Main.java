@@ -65,20 +65,20 @@ public class Main {
 
 	private static final int[] STEPS = {10, 50, 100};
 
-	private static final int[] SCALES = {1, 10, 100, 1000};
+	private static final int[] SCALES = {1, 10, 100};//, 1000};
 
 	private static final int[] REPLICAS = {100, 500, 1000};
 
 	public static void main(String[] argv)  {
-		//runAllChecking();
+		runAllChecking();
 		//runAndPrint(1, 31, 100,"phi3_100",Main::getPhi3);
 		//runAndPrint(1, 31, 1000,"phi3_1000",Main::getPhi3);
 		//runAndPrint(1, 31, 10000,"phi3_10000",Main::getPhi3);
 		//runAndPrint(1, 31, 100,"phibal_100",Main::getPhiBal);
 		//runAndPrint(1, 31, 1000,"phibal_1000",Main::getPhiBal);
-		runAndPrint(1, 31, 100,"phiBal_025_100",Main::getPhiBal);
-		runAndPrint(1, 31, 1000,"phiBal_025_1000",Main::getPhiBal);
-		runAndPrint(1, 31, 10000,"phiBal_025_10000",Main::getPhiBal);
+		//runAndPrint(100, 31, 100,"phiBal_025_100",Main::getPhiBal);
+		//runAndPrint(100, 31, 1000,"phiBal_025_1000",Main::getPhiBal);
+		//runAndPrint(100, 31, 10000,"phiBal_025_10000",Main::getPhiBal);
 //		runAndPrint(1, 31, 100,"phi1_100",Main::getPhi1);
 //		runAndPrint(1, 31, 1000,"phi1_1000",Main::getPhi1);
 //		runAndPrint(1, 31, 10000,"phi1_10000",Main::getPhi1);
@@ -153,11 +153,13 @@ public class Main {
 	}
 
 	public static AgentsDefinition getAgentDefinition() {
-		AgentsDefinition def = new AgentsDefinition();
-		Agent agentR = def.addAgent("R");
-		Agent agentB = def.addAgent("B");
-		AgentAction redAction = def.addAction("red", s -> s.fractionOf(agentB)*meet_probability );
-		AgentAction blueAction = def.addAction( "blue" , s -> s.fractionOf(agentR)*meet_probability );
+		String[] agents = new String[] { "R", "B" };
+		String[] actions = new String[] { "red", "blue" };
+		AgentsDefinition def = new AgentsDefinition(agents, actions);
+		Agent agentR = def.getAgent("R");
+		Agent agentB = def.getAgent("B");
+		AgentAction redAction = def.setActionProbability( "red", s -> s.fractionOf(agentB)*meet_probability );
+		AgentAction blueAction = def.setActionProbability( "blue" , s -> s.fractionOf(agentR)*meet_probability );
 		agentR.addAction(blueAction, agentB);
 		agentB.addAction(redAction, agentR);
 		return def;

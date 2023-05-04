@@ -23,94 +23,16 @@
 
 package it.unicam.quasylab.sibilla.core.models.lio;
 
-import it.unicam.quasylab.sibilla.core.models.ImmutableState;
-import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.tools.ProbabilityMatrix;
+import it.unicam.quasylab.sibilla.core.tools.ProbabilityVector;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.function.IntPredicate;
-
 /**
- * A LIOState indicates a state of a network of interactive objects.
+ * This interface is implemented by LIO representations that are able to perform a computational step.
+ *
+ * @param <S> type of LIO representations.
  */
-public interface LIOState extends ImmutableState {
-
-    /**
-     * Sample next agent state from given a row of probability transition matrix.
-     *
-     * @param randomGenerator random generator
-     * @param probabilityRow probability matrix row associated with the agent
-     * @param self self agent index
-     * @return next agent state
-     */
-    static int doSample(RandomGenerator randomGenerator, double[] probabilityRow, int self) {
-        double p = randomGenerator.nextDouble();
-        double sum = 0.0;
-        for(int i=0 ; i<probabilityRow.length; i++) {
-            sum += probabilityRow[i];
-            if (p<sum) {
-                return i;
-            }
-        }
-
-        return self;
-    }
-
-    /**
-     * Return the number of agents in the system.
-     *
-     * @return the number of agents in the system.
-     */
-    int size();
-
-    /**
-     * Return the fraction of agents in the given state.
-     *
-     * @param stateIndex state index.
-     * @return the fraction of agents in the given state.
-     */
-    double fractionOf(int stateIndex);
-
-    /**
-     * Return the fraction of agents in the given state.
-     *
-     * @param a agent state.
-     * @return the fraction of agents in the given state.
-     */
-    default double fractionOf(Agent a) {
-        return fractionOf(a.getIndex());
-    }
-
-    /**
-     * Returns the fraction of agents in a state satisfying the given predicate.
-     *
-     * @param predicate state predicate.
-     * @return  the fraction of agents in a state satisfying the given predicate.
-     */
-    double fractionOf(IntPredicate predicate);
-
-    /**
-     * Return the number of agents in the given state.
-     *
-     * @param stateIndex state index.
-     * @return the number of agents in the given state.
-     */
-    double numberOf(int stateIndex);
-
-    /**
-     * Return the number of agents in the given state.
-     *
-     * @param a agent state.
-     * @return the number of agents in the given state.
-     */
-    default double numberOf(Agent a) { return numberOf(a.getIndex()); }
-
-    /**
-     * Returns the number of agents in a state satisfying the given predicate.
-     *
-     * @param predicate state predicate.
-     * @return  the number of agents in a state satisfying the given predicate.
-     */
-    double numberOf(IntPredicate predicate);
+public interface LIOState<S extends LIOCollective> extends LIOCollective {
 
     /**
      * Given a random generator and the probability matrix, this method returns a sampling of next
@@ -120,7 +42,19 @@ public interface LIOState extends ImmutableState {
      * @param matrix probability matrix
      * @return a sampling of next state.
      */
-    LIOState step(RandomGenerator randomGenerator, double[][] matrix);
+    S step(RandomGenerator randomGenerator, ProbabilityMatrix<Agent> matrix);
+
+
+    /**
+     * Returns the probability distribution of states reachable from this one in one state.
+     *
+     * @param matrix probability matrix representing behaviour of each single agent.
+     * @return the probability distribution of states reachable from this one in one state.
+     */
+    ProbabilityVector<S> next(ProbabilityMatrix<Agent> matrix);
+
+
+    ProbabilityVector<S> next();
 
 
 }
