@@ -111,7 +111,7 @@ public class YodaModelValidator extends YodaModelBaseVisitor<Boolean> {
         TypeInferenceVisitor tiv = new TypeInferenceVisitor(this.errors, s -> this.constantsAndParametersTypes.getOrDefault(s, YodaType.NONE_TYPE));
         YodaType constType = ctx.value.accept(tiv);
         if (!constType.equals(YodaType.NONE_TYPE)) {
-            table.addConstants(ctx, constType);
+            table.addParameter(ctx, constType);
             this.constantsAndParametersTypes.put(ctx.name.getText(), constType);
             return true;
         }

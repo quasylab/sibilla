@@ -44,12 +44,13 @@ public class RobotScenario {
 
     private static List<YodaAgent> AGENTS = new LinkedList<>();
     static {
-        AGENTS.add(RobotDefinition.T800);
+        //AGENTS.add(RobotDefinition.T800); //T800 is a deterministic robot
+        AGENTS.add(RobotDefinition.WALLE);  //Walle is a non deterministic robot
     }
 
     public static void main(String[] args) throws  InterruptedException, FileNotFoundException {
         RobotScenario robotScenario = new RobotScenario(new DefaultRandomGenerator());
-        robotScenario.startSimulation("Test1", 10, 10, 10, AGENTS, 100, 100.0);
+        robotScenario.startSimulation("Test1", 10, 10, 15, AGENTS, 100, 100.0);
         //robotScenario.startSimulation("Test2", 10, 50, 150, AGENTS, 100, 100.0);
     }
 
@@ -98,9 +99,9 @@ public class RobotScenario {
     }
 
     private void saveDataOfScene(PrintWriter printWriter, Grid scene) {
-        printWriter.printf("%d\n", scene.getWidthInt());
-        printWriter.printf("%d\n", scene.getHeightInt());
         scene.getObstacles().stream().forEach(o -> printWriter.printf("%d; %d\n",o.getPosx(), o.getPosy()));
+        printWriter.printf("Scene Width: %d\n", scene.getWidthInt());
+        printWriter.printf("Scene Height: %d\n", scene.getHeightInt());
         printWriter.flush();
         printWriter.close();
     }

@@ -30,6 +30,7 @@ import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariableMapping;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class RobotState implements YodaVariableMapping {
 
@@ -46,8 +47,10 @@ public class RobotState implements YodaVariableMapping {
 
     public static Map<YodaVariable, YodaValue> positionMap;
     static {
+        //YodaValue posx = YodaValue.integerOf((int) (Math.random()*10));
         positionMap = new HashMap<>();
-        positionMap.put(POSX_VAR, POSX_VAL);
+        positionMap.put(POSX_VAR, POSX_VAL); //To be used if a static position x is required
+        //positionMap.put(POSX_VAR, posx);   //To be used if a random position x is required
         positionMap.put(POSY_VAR, POSY_VAL);
     }
     public static YodaVariableMapping AGENT_POS_MAP = new RobotState(positionMap);

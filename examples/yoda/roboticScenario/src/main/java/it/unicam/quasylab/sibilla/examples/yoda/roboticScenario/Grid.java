@@ -66,7 +66,7 @@ public class Grid implements YodaScene {
 
     @Override
     public boolean thereIsSomething(int posx, int posy) {
-        if ((posx == 0) || (posx == width)){
+        if ((posx == -1) || (posx == width)){
             return true;
         }
         if (this.obstacles.stream().anyMatch(o -> o.isPlacedAt(posx, posy))){

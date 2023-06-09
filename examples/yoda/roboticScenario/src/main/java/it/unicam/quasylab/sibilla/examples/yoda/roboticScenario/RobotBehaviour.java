@@ -49,6 +49,7 @@ public class RobotBehaviour {
     }
 
     public static YodaBehaviour DETERMINISTIC = YodaBehaviour.behaviourOf("Deterministic", actionList, RobotBehaviour::deterministicBehaviour);
+    public static YodaBehaviour NON_DETERMINISTIC = YodaBehaviour.behaviourOf("NonDeterministic", actionList, RobotBehaviour::nonDeterministicBehaviour);
 
 
     public static WeightedStructure<YodaAction> deterministicBehaviour(RandomGenerator rg, YodaVariableMapping currentState, YodaVariableMapping observations){
@@ -67,6 +68,26 @@ public class RobotBehaviour {
         if (observations.getValue(RobotObservation.NORTH_VAR).equals(YodaValue.TRUE) && observations.getValue(RobotObservation.EAST_VAR).equals(YodaValue.TRUE)){
             possibleActions.add(1.0, RobotAction.GO_WEST);
         }
+        return possibleActions;
+    }
+
+    public static WeightedStructure<YodaAction> nonDeterministicBehaviour(RandomGenerator rg, YodaVariableMapping currentState, YodaVariableMapping observations){
+        WeightedStructure<YodaAction> possibleActions = new WeightedLinkedList<>();
+
+        if (observations.getValue(RobotObservation.GOAL_VAR).equals(YodaValue.TRUE)) {
+            possibleActions.add(1.0, RobotAction.STAND_STILL);
+            return possibleActions;
+        }
+        if (observations.getValue(RobotObservation.NORTH_VAR).equals(YodaValue.FALSE)) {
+            possibleActions.add(1.0, RobotAction.GO_NORTH);
+        }
+        if (observations.getValue(RobotObservation.NORTH_VAR).equals(YodaValue.TRUE) && observations.getValue(RobotObservation.EAST_VAR).equals(YodaValue.FALSE)) {
+            possibleActions.add(1.0, RobotAction.GO_EAST);
+        }
+        if (observations.getValue(RobotObservation.NORTH_VAR).equals(YodaValue.TRUE) && observations.getValue(RobotObservation.WEST_VAR).equals(YodaValue.FALSE)) {
+            possibleActions.add(1.0, RobotAction.GO_WEST);
+        }
+
         return possibleActions;
     }
 }

@@ -35,12 +35,14 @@ public class RobotDefinition {
     private static YodaVariableMapping INFORMATION = RobotState.AGENT_POS_MAP;
     private static YodaVariableMapping OBSERVATIONS = RobotObservation.AGENT_OBS_MAP;
     private static YodaBehaviour DET_BEHAVIOUR = RobotBehaviour.DETERMINISTIC;
+    private static YodaBehaviour NON_BEHAVIOUR = RobotBehaviour.NON_DETERMINISTIC;
     private static OmegaFunction OMEGA = RobotDefinition::computeOmega;
     private static AgentInfoUpdateFunction INFO_UPDATE = RobotDefinition::computeInfoUpdate;
     private RandomGenerator rg;
 
 
-    public static YodaAgent T800 = new YodaAgent(0, "T800", KNOWLEDGE,INFORMATION, OBSERVATIONS, DET_BEHAVIOUR, OMEGA, INFO_UPDATE);
+    public static YodaAgent T800 = new YodaAgent(0, "T800", KNOWLEDGE, INFORMATION, OBSERVATIONS, DET_BEHAVIOUR, OMEGA, INFO_UPDATE);
+    public static YodaAgent WALLE = new YodaAgent(1,"Wall-E", KNOWLEDGE, INFORMATION, OBSERVATIONS, NON_BEHAVIOUR, OMEGA, INFO_UPDATE);
 
 
     private static YodaVariableMapping computeOmega(RandomGenerator rg, YodaSystemState yodaSystemState, YodaAgent yodaAgent) {
