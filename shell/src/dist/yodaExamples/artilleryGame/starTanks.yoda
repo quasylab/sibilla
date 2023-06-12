@@ -1,0 +1,114 @@
+param healthPoints   = 5.0;
+param randomNumber   = rnd;
+param startPosRed    = 3.0;
+param startPosBlue   = 8.0;
+param dimBattlefield = 12.0;
+
+agent RedTank(real x, real life){
+    state{
+        real dir_x <- x;
+        real life <- life;
+        real shotHit <- 0.0;
+    }
+    observations{bool leftSensor; bool rightSensor; bool enemyClose; bool enemyMid; bool enemyFar}
+    actions{
+        moveRight{
+            dir_x <- 1.0;
+            shotHit <- 0.0
+        }
+        moveLeft{
+            dir_x <- -1.0;
+            shotHit <- 0.0
+        }
+        fireShot{
+            dir_x <- 0.0;
+            shotHit <- 1.0
+        }
+        missShot{
+            dir_x <- 0.0;
+            shotHit <- 0.0
+        }
+    }
+    behaviour{
+        nonAggressiveBehaviour{
+            [!leftSensor && !rightSensor && enemyFar]
+            -> moveRight: || moveLeft: || fireShot: || missShot: ;
+            [!leftSensor && !rightSensor && enemyMid]
+            -> moveRight: || moveLeft: || fireShot: || missShot: ;
+            [!leftSensor && enemyClose]
+            -> moveLeft: || fireShot: ;
+            [!rightSensor && enemyClose]
+            -> moveRight: || fireShot: ;
+            [(leftSensor || rightSensor) && enemyClose]
+            -> fireShot: ;
+            [leftSensor && enemyFar]
+            -> moveRight: || fireShot: || missShot: ;
+            [leftSensor && enemyMid]
+            -> moveRight: || fireShot: || missShot: ;
+            [rightSensor && enemyFar]
+            -> moveLeft: || fireShot: || missShot: ;
+            [rightSensor && enemyMid]
+            -> moveLeft: || fireShot: || missShot: ;
+
+            default missShot: ;
+        }
+    }
+}
+
+world Battlefield(real dimBattlefield){
+    global{
+        real dimBattlefield <- dimBattlefield;
+        redTank{
+            int pos_x;
+        }
+        blueTank{
+            int pos_x;
+        }
+    }
+    sensing{
+        redTank{
+            leftSensor = (x==0)
+            rightSensor = (x==dimBattlefield)
+            enemyFar = (exists b in blueTank: b.x >= 4)
+            enemyMid = (exists b in blueTank: b.x >= 1 && b.x < 4)
+            enemyClose = (exists b in blueTank: b.x == 1)
+        }
+        blueTank{
+            ...
+        }
+    }
+    steps{
+        StepAction{
+            redTank{
+                pos_x <- pos_x + dir_x;
+                life <- life + b.shotHit;
+            }
+            blueTank{
+                ...
+            }
+        }
+    }
+    environment{
+        default StepAction: ;
+    }
+}
+
+system SpaceTanks(int dimBattlefield) {
+    let r = generate([x = U[0, dimBattlefield]])
+    and b = generate([x = U[0, dimBattlefield]])
+    in
+        Battlefield{
+            redTank{
+                pos_x <- r.x;
+                dir_x <- 0;
+                life <- 5;
+                shotHit <- 0;
+            }
+            blueTank{
+                pos_x <- b.x;
+                dir_x <- 0;
+                life <- 5;
+                shotHit <- 0;
+            }
+        }
+}

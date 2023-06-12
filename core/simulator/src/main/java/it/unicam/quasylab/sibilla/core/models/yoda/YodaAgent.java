@@ -46,8 +46,8 @@ public final class YodaAgent {
 
     private final int identifier;
     private final String name;
-    private YodaVariableMapping agentLocalState;
-    private YodaVariableMapping agentExternalInfo;
+    private YodaVariableMapping agentKnowledge;
+    private YodaVariableMapping agentInformation;
     private YodaVariableMapping agentObservations;
     private final YodaBehaviour agentBehaviour;
     private final OmegaFunction omegaFunction;
@@ -55,16 +55,16 @@ public final class YodaAgent {
 
     public YodaAgent(int identifier,
                      String name,
-                     YodaVariableMapping agentLocalState,
-                     YodaVariableMapping agentExternalInfo,
+                     YodaVariableMapping agentKnowledge,
+                     YodaVariableMapping agentInformation,
                      YodaVariableMapping agentObservations,
                      YodaBehaviour agentBehaviour,
                      OmegaFunction omegaFunction,
                      AgentInfoUpdateFunction agentInfoUpdateFunction) {
         this.identifier = identifier;
         this.name = name;
-        this.agentLocalState = agentLocalState;
-        this.agentExternalInfo = agentExternalInfo;
+        this.agentKnowledge = agentKnowledge;
+        this.agentInformation = agentInformation;
         this.agentObservations = agentObservations;
         this.agentBehaviour = agentBehaviour;
         this.omegaFunction = omegaFunction;
@@ -94,8 +94,8 @@ public final class YodaAgent {
      *
      * @return the agent local state
      */
-    public YodaVariableMapping getAgentLocalState(){
-        return agentLocalState;
+    public YodaVariableMapping getAgentKnowledge(){
+        return agentKnowledge;
     }
 
     /**
@@ -103,8 +103,8 @@ public final class YodaAgent {
      *
      * @return the global information of the agent
      */
-    public YodaVariableMapping getAgentExternalInfo() {
-        return agentExternalInfo;
+    public YodaVariableMapping getAgentInformation() {
+        return agentInformation;
     }
 
     /**
@@ -131,9 +131,9 @@ public final class YodaAgent {
      * @param rg a random generator
      */
     public void step(RandomGenerator rg){
-        WeightedStructure<YodaAction> actionSet = agentBehaviour.evaluate(rg, agentLocalState, agentObservations);
+        WeightedStructure<YodaAction> actionSet = agentBehaviour.evaluate(rg, agentKnowledge, agentObservations);
         YodaAction selectedAction = agentBehaviour.selectAction(rg, actionSet);
-        updateState(rg, selectedAction);
+        updateKnowledge(rg, selectedAction);
     }
 
     /**
@@ -142,9 +142,9 @@ public final class YodaAgent {
      * @param rg a random generator
      * @param action the action that the agent should perform
      */
-    public void updateState(RandomGenerator rg, YodaAction action){
-        YodaVariableMapping newState = action.performAction(rg, agentLocalState);
-        this.agentLocalState = newState;
+    public void updateKnowledge(RandomGenerator rg, YodaAction action){
+        YodaVariableMapping newState = action.performAction(rg, agentKnowledge);
+        agentKnowledge = newState;
     }
 
     /**
@@ -152,8 +152,8 @@ public final class YodaAgent {
      *
      * @param rg a random generator
      */
-    void updateInfo(RandomGenerator rg){
-        this.agentExternalInfo = this.agentInfoUpdateFunction.compute(rg, this.agentLocalState, this.agentExternalInfo);
+    public void updateInfo(RandomGenerator rg){
+        agentInformation = agentInfoUpdateFunction.compute(rg, this.agentKnowledge, this.agentInformation);
     }
 
     /**
@@ -162,7 +162,16 @@ public final class YodaAgent {
      * @param rg a random generator
      * @param system a YodaSystem
      */
-    void computeObservations(RandomGenerator rg, YodaSystem system) {
-        this.agentObservations = omegaFunction.compute(rg, system, this);
+    public void computeObservations(RandomGenerator rg, YodaSystemState system) {
+        agentObservations = omegaFunction.compute(rg, system, this);
+    }
+
+    public YodaAgent next(RandomGenerator rg, YodaSystemState<?> state) {
+        YodaVariableMapping newObservations = this.omegaFunction.compute(rg, state, this);
+        WeightedStructure<YodaAction> actionSet = this.agentBehaviour.evaluate(rg, this.agentKnowledge, newObservations);
+        YodaAction selectedAction = this.agentBehaviour.selectAction(rg, actionSet);
+        YodaVariableMapping newKnowledge = selectedAction.performAction(rg, this.agentKnowledge);
+        YodaVariableMapping newInfo = this.agentInfoUpdateFunction.compute(rg, newKnowledge, this.agentInformation);
+        return new YodaAgent(this.identifier, this.name, newKnowledge, newInfo, newObservations, this.agentBehaviour, this.omegaFunction, this.agentInfoUpdateFunction);
     }
 }

@@ -34,4 +34,6 @@ import java.util.List;
 @FunctionalInterface
 public interface GlobalStateUpdateFunction {
     YodaVariableMapping compute(RandomGenerator rg, List<YodaAgent> agents, YodaVariableMapping globalState);
+
+    //    YodaVariableMapping compute(RandomGenerator rg, List<YodaAgent> agents, YodaScene globalState);
 }

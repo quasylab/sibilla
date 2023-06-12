@@ -23,13 +23,37 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import java.util.List;
 
-/**
- * The interface <code>OmegaFunction</code> represents
- * a functional interface computing the observations of an agent
- */
-@FunctionalInterface
-public interface OmegaFunction {
-    YodaVariableMapping compute(RandomGenerator rg, YodaSystemState system, YodaAgent agent);
+public interface YodaModelBuilder<S extends YodaScene> {
+
+    S getScene();
+
+    void initialiseScene();
+
+    int getNumberOfObstacles();
+
+    int getNumberOfAgent();
+
+    List<YodaAgent> getAgents();
+
+    void addAgent(YodaAgent yodaAgent);
+
+    YodaVariableMapping getAgentsInfo(int i);
+
+    YodaVariableMapping getGlobalState();
+
+    GlobalStateUpdateFunction getGlobalStateUpdateFunction();
+
+    default YodaSystemState<S> getState(){
+        S scene = getScene();
+        YodaVariableMapping globalState = getGlobalState();
+        List<YodaAgent> agents = getAgents();
+        GlobalStateUpdateFunction updateFunction = getGlobalStateUpdateFunction();
+        return new YodaSystemState<>(globalState, agents, scene, updateFunction);
+    }
+
+    default YodaModel<S> getYodaModel(){
+        return new YodaModel<>(getState());
+    }
 }

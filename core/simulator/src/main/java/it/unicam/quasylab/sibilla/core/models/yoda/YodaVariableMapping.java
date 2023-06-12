@@ -39,6 +39,7 @@ public interface YodaVariableMapping extends Serializable {
      */
     YodaValue getValue(YodaVariable variable);
 
+
     /**
      * This method sets an input value to a certain input variable
      *
@@ -48,10 +49,26 @@ public interface YodaVariableMapping extends Serializable {
     void setValue(YodaVariable variable, YodaValue value);
 
     /**
+     * This method add an element to the variable mapping
+     * by giving an input variable and a input value
+     *
+     * @param variable an input variable
+     * @param value an input value
+     */
+    void addElement(YodaVariable variable, YodaValue value);
+
+    /**
      * This method returns a copy of the original map
      *
      * @return a copy of the original map
      */
     YodaVariableMapping copy();
+
+    /**
+     * This method return the size of a map
+     *
+     * @return the size of a map
+     */
+    int size();
 
 }

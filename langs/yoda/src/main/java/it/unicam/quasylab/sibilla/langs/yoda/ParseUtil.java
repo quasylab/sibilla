@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.langs.yoda;
 
+import it.unicam.quasylab.sibilla.core.models.yoda.YodaType;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -30,21 +31,50 @@ import org.antlr.v4.runtime.Token;
 
 public class ParseUtil {
     private static final String DUPLICATED_ID_ERROR = "Identifier %s has been already used at line %d:%d.";
+    private static final String DUPLICATED_ENTITY = "Entity %s has been already used";
+    private static final String DUPLICATED_FIELD = "Field %s has been already used";
+    private static final String DUPLICATED_ACTION = "Action %s has been already used";
     private static final String EXPECTED_NUMBER_ERROR = "Expected numeric type while is %s";
     private static final String UNKNOWN_ACTION_ERROR = "Action %s can not be resolved";
     private static final String UNKNOWN_AGENT_ERROR = "Agent or System %s can not be resolved";
     private static final String UNKNOWN_SYMBOL_ERROR = "Symbol %s can not be resolved";
     private static final String UNKNOWN_VARIABLE_ERROR = "Variable %s can not be resolved";
     private static final String WRONG_TYPE_ERROR = "Wrong type! Expected %s actual is %s";
+    private static final String ILLEGAL_TYPE_ERROR_ARITHMETIC = "Illegal type! Type %s can not be used in arithmetic expression";
+    private static final String UNKNOWN_ENTITY_ERROR = "Agent or Variable %s can not be resolved";
 
-    public static ParseError duplicatedIdentifierError(String name, Token duplicated, Token original){
+    public static ParseError duplicatedIdentifierError(String name, Token original){
         return new ParseError(
                 String.format(DUPLICATED_ID_ERROR, name, original.getLine(), original.getCharPositionInLine()),
-                duplicated.getLine(),
-                duplicated.getCharPositionInLine());
+                original.getLine(),
+                original.getCharPositionInLine());
     }
 
-    public static ParseError expectedNumberError(DataType type, YodaModelParser.ExprContext exprContext) {
+    public static ParseError duplicatedEntityError(String entityName, Token original) {
+        return new ParseError(
+                String.format(DUPLICATED_ENTITY,entityName),
+                original.getLine(),
+                original.getCharPositionInLine()
+        );
+    }
+
+    public static ParseError duplicatedFieldError(String fieldName, Token original) {
+        return new ParseError(
+                String.format(DUPLICATED_FIELD, fieldName),
+                original.getLine(),
+                original.getCharPositionInLine()
+        );
+    }
+
+    public static ParseError duplicatedActionName(String actionName, Token original) {
+        return new ParseError(
+                String.format(DUPLICATED_ACTION, actionName),
+                original.getLine(),
+                original.getCharPositionInLine()
+        );
+    }
+
+    public static ParseError expectedNumberError(YodaType type, YodaModelParser.ExprContext exprContext) {
         return new ParseError(
                 String.format(EXPECTED_NUMBER_ERROR, type),
                 exprContext.start.getLine(),
@@ -84,15 +114,33 @@ public class ParseUtil {
         );
     }
 
-    public static ParseError wrongTypeError(DataType expected, DataType actual, YodaModelParser.ExprContext argument){
+    public static ParseError wrongTypeError(YodaType expected, YodaType actual, YodaModelParser.ExprContext argument){
         return new ParseError(
                 String.format(WRONG_TYPE_ERROR, expected, actual),
                 argument.start.getLine(),
-                argument.start.getCharPositionInLine());
+                argument.start.getCharPositionInLine()
+        );
     }
 
+    public static ParseError illegalTypeError(YodaType actual, YodaModelParser.ExprContext argument) {
+        return new ParseError(
+                String.format(ILLEGAL_TYPE_ERROR_ARITHMETIC, actual),
+                argument.start.getLine(),
+                argument.start.getCharPositionInLine()
+        );
+    }
 
+    public static ParseError unknownEntityError(String name, Token variableName){
+        return new ParseError(
+                String.format(UNKNOWN_ENTITY_ERROR, name),
+                variableName.getLine(),
+                variableName.getCharPositionInLine()
+        );
+    }
 
+    public static String localVariableName(String agentName, String variableName) {
+        return agentName+"@"+variableName;
+    }
 
 
 }

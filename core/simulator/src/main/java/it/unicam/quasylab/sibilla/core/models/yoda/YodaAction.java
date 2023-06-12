@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
+import java.util.function.BiFunction;
 
 /**
  * The interface <code>YodaAction</code> represents
@@ -49,5 +50,20 @@ public interface YodaAction extends Serializable {
      * @return the new internal state of an agent after performing an action
      */
     YodaVariableMapping performAction(RandomGenerator rg, YodaVariableMapping currentState);
+
+
+    static YodaAction actionOf(String name, BiFunction<RandomGenerator, YodaVariableMapping, YodaVariableMapping> f) {
+        return new YodaAction() {
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public YodaVariableMapping performAction(RandomGenerator rg, YodaVariableMapping currentState) {
+                return f.apply(rg, currentState);
+            }
+        };
+    }
 
 }

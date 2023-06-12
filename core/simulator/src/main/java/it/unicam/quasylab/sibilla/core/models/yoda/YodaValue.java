@@ -25,6 +25,9 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.*;
 import java.util.stream.IntStream;
 
@@ -68,6 +71,14 @@ public interface YodaValue {
         }
     }
 
+    static YodaValue integerOf(int v){
+        return new IntegerValue(v);
+    }
+
+    static YodaValue realOf(double v) {
+        return new RealValue(v);
+    }
+
     /**
      * This method returns the type of the value
      *
@@ -99,8 +110,8 @@ public interface YodaValue {
      *
      * @return the integer representation of this value
      */
-    default YodaValue integerValue(){
-        return NONE;
+    default Optional<IntegerValue> integerValue(){
+        return Optional.empty();
     }
 
     /**
@@ -108,8 +119,8 @@ public interface YodaValue {
      *
      * @return
      */
-    default YodaValue realValue(){
-        return NONE;
+    default Optional<RealValue> realValue(){
+        return Optional.empty();
     }
 
     /**
@@ -450,7 +461,96 @@ public interface YodaValue {
         return NONE;
     }
 
+    /**
+     * This method returns the square root of an input value
+     *
+     * @return the square root of an input value
+     */
+    default YodaValue sqrt() {
+        return NONE;
+    }
 
+    /**
+     * This method returns true if this value is less than the other
+     *
+     * @param other the value to compare
+     * @return true if this value is less than the other
+     */
+    default YodaValue lessThan(YodaValue other){
+        return NONE;
+    }
+
+    /**
+     * This method returns true if this value is less or equal than the other
+     *
+     * @param other the value to compare
+     * @return true if this value is less or equal than the other
+     */
+    default YodaValue lessOrEqualThan(YodaValue other) {
+        return NONE;
+    }
+
+    /**
+     * This method returns true if this value is equal to the other
+     *
+     * @param other the value to compare
+     * @return true if this value is equal to the other
+     */
+    default YodaValue equalTo(YodaValue other) {
+        return NONE;
+    }
+
+    /**
+     * This method returns true if this value is not equal to the other
+     *
+     * @param other the value to compare
+     * @return true if this value is not equal to the other
+     */
+    default YodaValue notEqualTo(YodaValue other) {
+        return NONE;
+    }
+
+    /**
+     * This method returns true if this value is greater or equal than the other
+     *
+     * @param other the value to compare
+     * @return true if this value is greater or equal than the other
+     */
+    default YodaValue greaterOrEqualTo(YodaValue other) {
+        return NONE;
+    }
+
+    /**
+     * This method returns true if this value is greater than the other
+     *
+     * @param other the value to compare
+     * @return true if this value is greater than the other
+     */
+    default YodaValue greaterThan(YodaValue other) {
+        return NONE;
+    }
+
+    /**
+     * This method returns the negative of a value
+     *
+     * @return the negative of a value
+     */
+    default YodaValue minus() {
+        return NONE;
+    }
+
+    /**
+     * This method returns the positive of a value
+     *
+     * @return the positive of a value
+     */
+    default YodaValue plus() {
+        return NONE;
+    }
+
+    default boolean isZero() { return false; }
+
+    default boolean isRecord() { return false; }
 
     class NoneValue implements YodaValue {
 
@@ -474,11 +574,6 @@ public interface YodaValue {
             return YodaValue.super.cast(type);
         }
 
-        //TODO
-        @Override
-        public YodaValue isTrue() {
-            return YodaValue.super.isTrue();
-        }
 
         @Override
         public YodaValue negation() {
@@ -505,6 +600,22 @@ public interface YodaValue {
             }
             return NONE;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BooleanValue that = (BooleanValue) o;
+            return value == that.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
+        }
+
+
+
     }
 
     class IntegerValue implements YodaValue {
@@ -513,6 +624,10 @@ public interface YodaValue {
 
         public IntegerValue(int value) {
             this.value=value;
+        }
+
+        public int value() {
+            return value;
         }
 
         private IntegerValue doApply(IntUnaryOperator operator){return new IntegerValue(operator.applyAsInt(this.value));}
@@ -538,13 +653,8 @@ public interface YodaValue {
         }
 
         @Override
-        public YodaValue integerValue() {
-            return this;
-        }
-
-        @Override
-        public YodaValue realValue() {
-            return REAL_VALUE.apply(this.value);
+        public Optional<IntegerValue> integerValue() {
+            return Optional.of(this);
         }
 
         @Override
@@ -702,6 +812,89 @@ public interface YodaValue {
         public YodaValue atan() {
             return NONE;
         }
+
+        //TODO
+        @Override
+        public YodaValue sqrt() {
+            return NONE;
+        }
+
+        @Override
+        public YodaValue lessThan(YodaValue other) {
+            if (other.getType() == YodaType.INTEGER_TYPE) {
+                return (this.value < ((IntegerValue) other).value ? YodaValue.TRUE : YodaValue.FALSE);
+            }
+            return YodaValue.NONE;
+        }
+
+        @Override
+        public YodaValue lessOrEqualThan(YodaValue other) {
+            if (other.getType() == YodaType.INTEGER_TYPE) {
+                return (this.value <= ((IntegerValue) other).value ? YodaValue.TRUE : YodaValue.FALSE);
+            }
+            return YodaValue.NONE;
+        }
+
+        @Override
+        public YodaValue equalTo(YodaValue other) {
+            if (other.getType() == YodaType.INTEGER_TYPE) {
+                return (this.value == ((IntegerValue) other).value ? YodaValue.TRUE : YodaValue.FALSE);
+            }
+            return YodaValue.NONE;
+        }
+
+        @Override
+        public YodaValue notEqualTo(YodaValue other) {
+            if (other.getType() == YodaType.INTEGER_TYPE) {
+                return (this.value != ((IntegerValue) other).value ? YodaValue.TRUE : YodaValue.FALSE);
+            }
+            return YodaValue.NONE;
+        }
+
+        @Override
+        public YodaValue greaterOrEqualTo(YodaValue other) {
+            if (other.getType() == YodaType.INTEGER_TYPE) {
+                return (this.value >= ((IntegerValue) other).value ? YodaValue.TRUE : YodaValue.FALSE);
+            }
+            return YodaValue.NONE;
+        }
+
+        @Override
+        public YodaValue greaterThan(YodaValue other) {
+            if (other.getType() == YodaType.INTEGER_TYPE) {
+                return (this.value > ((IntegerValue) other).value ? YodaValue.TRUE : YodaValue.FALSE);
+            }
+            return YodaValue.NONE;
+        }
+
+        @Override
+        public YodaValue plus() {
+            return new IntegerValue(+value);
+        }
+
+        @Override
+        public YodaValue minus() {
+            return new IntegerValue(-value);
+        }
+
+        //TODO
+        @Override
+        public boolean isZero() {
+            return YodaValue.super.isZero();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            IntegerValue that = (IntegerValue) o;
+            return value == that.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
+        }
     }
 
     class RealValue implements YodaValue{
@@ -732,14 +925,10 @@ public interface YodaValue {
             return getBooleanOf(value);
         }
 
-        @Override
-        public YodaValue integerValue() {
-            return INTEGER_VALUE.apply((int) value);
-        }
 
         @Override
-        public YodaValue realValue() {
-            return this;
+        public Optional<RealValue> realValue() {
+            return Optional.of(this);
         }
 
         @Override
@@ -879,6 +1068,87 @@ public interface YodaValue {
         public YodaValue atan() {
             return doApply(Math::atan);
         }
+
+        @Override
+        public YodaValue sqrt() {
+            return doApply(Math::sqrt);
+        }
+
+        @Override
+        public YodaValue lessThan(YodaValue other) {
+            if (other.getType() == YodaType.REAL_TYPE) {
+                return (this.value < ((RealValue) other).value ? YodaValue.TRUE : YodaValue.FALSE);
+            }
+            return YodaValue.NONE;
+        }
+
+        @Override
+        public YodaValue lessOrEqualThan(YodaValue other) {
+            if (other.getType() == YodaType.REAL_TYPE) {
+                return (this.value <= ((RealValue) other).value ? YodaValue.TRUE : YodaValue.FALSE);
+            }
+            return YodaValue.NONE;
+        }
+
+        @Override
+        public YodaValue equalTo(YodaValue other) {
+            if (other.getType() == YodaType.REAL_TYPE) {
+                return (this.value == ((RealValue) other).value ? YodaValue.TRUE : YodaValue.FALSE);
+            }
+            return YodaValue.NONE;
+        }
+
+        @Override
+        public YodaValue notEqualTo(YodaValue other) {
+            if (other.getType() == YodaType.REAL_TYPE) {
+                return (this.value != ((RealValue) other).value ? YodaValue.TRUE : YodaValue.FALSE);
+            }
+            return YodaValue.NONE;
+        }
+
+        @Override
+        public YodaValue greaterOrEqualTo(YodaValue other) {
+            if (other.getType() == YodaType.REAL_TYPE) {
+                return (this.value >= ((RealValue) other).value ? YodaValue.TRUE : YodaValue.FALSE);
+            }
+            return YodaValue.NONE;
+        }
+
+        @Override
+        public YodaValue greaterThan(YodaValue other) {
+            if (other.getType() == YodaType.REAL_TYPE) {
+                return (this.value > ((RealValue) other).value ? YodaValue.TRUE : YodaValue.FALSE);
+            }
+            return YodaValue.NONE;
+        }
+
+        @Override
+        public YodaValue plus() {
+            return new RealValue(+value);
+        }
+
+        @Override
+        public YodaValue minus() {
+            return new RealValue(-value);
+        }
+
+        @Override
+        public boolean isZero() {
+            return YodaValue.super.isZero();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            RealValue realValue = (RealValue) o;
+            return Double.compare(realValue.value, value) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
+        }
     }
 
     class ListValue implements YodaValue{
@@ -956,6 +1226,32 @@ public interface YodaValue {
         @Override
         public YodaValue concat(YodaValue value) {
             return YodaValue.super.concat(value);
+        }
+    }
+
+    class RecordValue implements YodaValue {
+
+        private final Map<String, YodaValue> fieldsValue;
+
+        private final YodaType.RecordType recordType;
+
+        public RecordValue(Map<String, YodaValue> fieldsValue, YodaType.RecordType recordType) {
+            this.fieldsValue = fieldsValue;
+            this.recordType = recordType;
+        }
+
+        @Override
+        public YodaType getType() {
+            return recordType;
+        }
+
+        public YodaValue get(String name) {
+            return fieldsValue.getOrDefault(name, YodaValue.NONE);
+        }
+
+        @Override
+        public boolean isRecord() {
+            return true;
         }
     }
 }

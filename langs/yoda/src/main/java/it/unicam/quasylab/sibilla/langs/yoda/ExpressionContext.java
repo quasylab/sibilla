@@ -21,15 +21,13 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.models.yoda;
-
-import org.apache.commons.math3.random.RandomGenerator;
+package it.unicam.quasylab.sibilla.langs.yoda;
 
 /**
- * The interface <code>OmegaFunction</code> represents
- * a functional interface computing the observations of an agent
+ * This enum class is used to define all the possible contexts where an expression can occur
  */
-@FunctionalInterface
-public interface OmegaFunction {
-    YodaVariableMapping compute(RandomGenerator rg, YodaSystemState system, YodaAgent agent);
+public enum ExpressionContext {
+    CONSTANT, PARAMETER, NONE
+
+    //TODO
 }

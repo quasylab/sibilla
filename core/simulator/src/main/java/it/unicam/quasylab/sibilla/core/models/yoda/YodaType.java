@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
+import java.util.Arrays;
 import java.util.function.Function;
 
 /**
@@ -31,19 +32,22 @@ import java.util.function.Function;
  */
 public interface YodaType {
 
+
+
     enum YodaCodeType{
         NONE,
         BOOLEAN,
         INTEGER,
         REAL,
-        LIST
+        LIST,
+        RECORD
     }
 
     YodaType NONE_TYPE = new NoneType();
     YodaType BOOLEAN_TYPE = new BooleanType();
     YodaType INTEGER_TYPE = new IntegerType();
     YodaType REAL_TYPE = new RealType();
-    Function <YodaType, YodaType> LIST_TYPE = ListType::new;
+
 
     YodaValue cast(YodaValue value);
 
@@ -52,6 +56,24 @@ public interface YodaType {
     default YodaType getContentType(){
         return NONE_TYPE;
     }
+
+    boolean canBeAssignedTo(YodaType other);
+
+    static boolean areCompatible(YodaType aType, YodaType anotherType) {
+        return aType.canBeAssignedTo(anotherType)||anotherType.canBeAssignedTo(aType);
+    }
+
+    static YodaType merge(YodaType aType, YodaType anotherType) {
+        if (aType.canBeAssignedTo(anotherType)) {
+            return anotherType;
+        }
+        if (anotherType.canBeAssignedTo(aType)) {
+            return aType;
+        }
+        return YodaType.NONE_TYPE;
+    }
+
+    boolean isNumericType();
 
     class NoneType implements YodaType {
         private NoneType(){}
@@ -64,6 +86,16 @@ public interface YodaType {
         @Override
         public YodaCodeType code() {
             return YodaCodeType.NONE;
+        }
+
+        @Override
+        public boolean canBeAssignedTo(YodaType other) {
+            return false;
+        }
+
+        @Override
+        public boolean isNumericType() {
+            return false;
         }
     }
 
@@ -84,6 +116,16 @@ public interface YodaType {
         public YodaCodeType code() {
             return YodaCodeType.BOOLEAN;
         }
+
+        @Override
+        public boolean canBeAssignedTo(YodaType other) {
+            return other == YodaType.BOOLEAN_TYPE;
+        }
+
+        @Override
+        public boolean isNumericType() {
+            return false;
+        }
     }
 
     class IntegerType implements YodaType {
@@ -94,7 +136,7 @@ public interface YodaType {
         public YodaValue cast(YodaValue value) {
             switch (value.getType().code()){
                 case INTEGER: return value;
-                case REAL: return value.integerValue();
+                case REAL: return (YodaValue.IntegerValue) value;
                 default: return YodaValue.NONE;
             }
         }
@@ -102,6 +144,16 @@ public interface YodaType {
         @Override
         public YodaCodeType code() {
             return YodaCodeType.INTEGER;
+        }
+
+        @Override
+        public boolean canBeAssignedTo(YodaType other) {
+            return other.isNumericType();
+        }
+
+        @Override
+        public boolean isNumericType() {
+            return true;
         }
     }
 
@@ -114,7 +166,7 @@ public interface YodaType {
         public YodaValue cast(YodaValue value) {
             switch (value.getType().code()){
                 case REAL: return value;
-                case INTEGER: return value.realValue();
+                case INTEGER: return (YodaValue.RealValue) value;
                 default: return  YodaValue.NONE;
             }
         }
@@ -122,6 +174,16 @@ public interface YodaType {
         @Override
         public YodaCodeType code() {
             return YodaCodeType.REAL;
+        }
+
+        @Override
+        public boolean canBeAssignedTo(YodaType other) {
+            return other == YodaType.REAL_TYPE;
+        }
+
+        @Override
+        public boolean isNumericType() {
+            return true;
         }
     }
 
@@ -144,6 +206,49 @@ public interface YodaType {
 
         public YodaType getContentType(){return contentType;}
 
+        @Override
+        public boolean canBeAssignedTo(YodaType other) {
+            if (other instanceof ListType) {
+                return this.contentType.equals(((ListType) other).contentType);
+            }
+            return false;
+        }
 
+        @Override
+        public boolean isNumericType() {
+            return false;
+        }
+    }
+
+    class RecordType implements YodaType {
+
+        private final String name;
+
+        private final String[] fields;
+
+        public RecordType(String name, String[] fields) {
+            this.name = name;
+            this.fields = fields;
+        }
+
+        @Override
+        public YodaValue cast(YodaValue value) {
+            return YodaValue.NONE;
+        }
+
+        @Override
+        public YodaCodeType code() {
+            return YodaCodeType.RECORD;
+        }
+
+        @Override
+        public boolean canBeAssignedTo(YodaType other) {
+            return this == other;
+        }
+
+        @Override
+        public boolean isNumericType() {
+            return false;
+        }
     }
 }
