@@ -46,12 +46,14 @@ public class RobotScenario {
     static {
         //AGENTS.add(RobotDefinition.T800); //T800 is a deterministic robot
         AGENTS.add(RobotDefinition.WALLE);  //Walle is a non deterministic robot
+        AGENTS.add(RobotDefinition.EVE);
+        AGENTS.add(RobotDefinition.AUTO);
     }
 
     public static void main(String[] args) throws  InterruptedException, FileNotFoundException {
         RobotScenario robotScenario = new RobotScenario(new DefaultRandomGenerator());
-        robotScenario.startSimulation("Test1", 10, 10, 15, AGENTS, 100, 100.0);
-        //robotScenario.startSimulation("Test2", 10, 50, 150, AGENTS, 100, 100.0);
+        //robotScenario.startSimulation("Test1", 10, 10, 15, AGENTS, 100, 100.0);
+        robotScenario.startSimulation("Test2", 100, 100, 100, AGENTS, 100, 100.0);
     }
 
 
@@ -65,7 +67,7 @@ public class RobotScenario {
     }
 
     public void startSimulation(String label, int width, int height, int numberOfObstacles, List<YodaAgent> agents, int iterations, double deadline) throws FileNotFoundException {
-        RobotScenarioDefinition def = new RobotScenarioDefinition(label, width, height, numberOfObstacles,agents,rg);
+        RobotScenarioDefinition def = new RobotScenarioDefinition(label, width, height, numberOfObstacles, agents, rg);
         def.initialiseScene();
         Trajectory<YodaSystemState<Grid>> robotTrajectory = getTrajectory(def, deadline);
         File cwd = new File(this.outputDir,label + "_result");
@@ -79,8 +81,8 @@ public class RobotScenario {
     }
 
     private void saveTrajectory(File outputDir, String label, Trajectory<YodaSystemState<Grid>> trajectory) throws FileNotFoundException {
-        saveDataOfScene(new PrintWriter(new File(outputDir, label+"_arena.data")), trajectory.getData().get(0).getValue().getScene());
-        saveDataOfAgents(new PrintWriter(new File(outputDir, label+"_agents.data")), trajectory);
+        saveDataOfScene(new PrintWriter(new File(outputDir, label+"_arena.csv")), trajectory.getData().get(0).getValue().getScene());
+        saveDataOfAgents(new PrintWriter(new File(outputDir, label+"_agents.csv")), trajectory);
     }
 
     private void saveDataOfAgents(PrintWriter printWriter, Trajectory<YodaSystemState<Grid>> trajectory) {
@@ -90,7 +92,7 @@ public class RobotScenario {
             for(int i=0; i<scenario.getAgents().size(); i++){
                 int posx = scenario.getAgentsInfo(i, RobotState.POSX_VAR).integerValue().map(YodaValue.IntegerValue::value).orElse(0);
                 int posy = scenario.getAgentsInfo(i, RobotState.POSY_VAR).integerValue().map(YodaValue.IntegerValue::value).orElse(0);
-                printWriter.printf(";%d;%d ", posx, posy);
+                printWriter.printf(";%d;%d", posx, posy);
             }
             printWriter.printf("\n");
         });
@@ -99,9 +101,9 @@ public class RobotScenario {
     }
 
     private void saveDataOfScene(PrintWriter printWriter, Grid scene) {
+        printWriter.printf("%d\n", scene.getWidthInt());
+        printWriter.printf("%d\n", scene.getHeightInt());
         scene.getObstacles().stream().forEach(o -> printWriter.printf("%d; %d\n",o.getPosx(), o.getPosy()));
-        printWriter.printf("Scene Width: %d\n", scene.getWidthInt());
-        printWriter.printf("Scene Height: %d\n", scene.getHeightInt());
         printWriter.flush();
         printWriter.close();
     }

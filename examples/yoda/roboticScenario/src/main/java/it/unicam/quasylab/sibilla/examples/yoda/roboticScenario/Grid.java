@@ -92,6 +92,18 @@ public class Grid implements YodaScene {
         return new Grid(width, height, obstacles);
     }
 
+    public static Grid generateSingleColumn(RandomGenerator rg, int width, int height, int numberOfObstacles) {
+        LinkedList<Obstacle> obstacles = new LinkedList<>();
+        int counter = 0;
+        while (counter < numberOfObstacles) {
+            int x = counter;
+            int y = 1+rg.nextInt(height-2);
+            obstacles.add(new Obstacle(x,y));
+            counter++;
+        }
+        return new Grid(width, height, obstacles);
+    }
+
 
     @Override
     public double getWidthReal() {

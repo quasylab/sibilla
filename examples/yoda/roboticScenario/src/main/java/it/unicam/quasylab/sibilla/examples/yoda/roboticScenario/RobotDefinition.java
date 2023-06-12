@@ -32,7 +32,9 @@ import org.apache.commons.math3.random.RandomGenerator;
  */
 public class RobotDefinition {
     private static YodaVariableMapping KNOWLEDGE = RobotState.AGENT_ACC_MAP;
-    private static YodaVariableMapping INFORMATION = RobotState.AGENT_POS_MAP;
+    private static YodaVariableMapping INFORMATION1 = RobotState.AGENT_POS_MAP1;
+    private static YodaVariableMapping INFORMATION2 = RobotState.AGENT_POS_MAP2;
+    private static YodaVariableMapping INFORMATION3 = RobotState.AGENT_POS_MAP3;
     private static YodaVariableMapping OBSERVATIONS = RobotObservation.AGENT_OBS_MAP;
     private static YodaBehaviour DET_BEHAVIOUR = RobotBehaviour.DETERMINISTIC;
     private static YodaBehaviour NON_BEHAVIOUR = RobotBehaviour.NON_DETERMINISTIC;
@@ -41,9 +43,10 @@ public class RobotDefinition {
     private RandomGenerator rg;
 
 
-    public static YodaAgent T800 = new YodaAgent(0, "T800", KNOWLEDGE, INFORMATION, OBSERVATIONS, DET_BEHAVIOUR, OMEGA, INFO_UPDATE);
-    public static YodaAgent WALLE = new YodaAgent(1,"Wall-E", KNOWLEDGE, INFORMATION, OBSERVATIONS, NON_BEHAVIOUR, OMEGA, INFO_UPDATE);
-
+    //public static YodaAgent T800 = new YodaAgent(0, "T800", KNOWLEDGE, INFORMATION, OBSERVATIONS, DET_BEHAVIOUR, OMEGA, INFO_UPDATE);
+    public static YodaAgent WALLE = new YodaAgent(1,"Wall-E", KNOWLEDGE, INFORMATION1, OBSERVATIONS, NON_BEHAVIOUR, OMEGA, INFO_UPDATE);
+    public static YodaAgent EVE = new YodaAgent(2, "Eve", KNOWLEDGE, INFORMATION2, OBSERVATIONS, NON_BEHAVIOUR, OMEGA, INFO_UPDATE);
+    public static YodaAgent AUTO = new YodaAgent(3, "Auto", KNOWLEDGE, INFORMATION3, OBSERVATIONS, NON_BEHAVIOUR, OMEGA, INFO_UPDATE);
 
     private static YodaVariableMapping computeOmega(RandomGenerator rg, YodaSystemState yodaSystemState, YodaAgent yodaAgent) {
         YodaVariableMapping agentPos = yodaAgent.getAgentInformation();

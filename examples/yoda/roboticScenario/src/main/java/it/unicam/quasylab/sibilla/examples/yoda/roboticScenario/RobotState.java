@@ -45,15 +45,28 @@ public class RobotState implements YodaVariableMapping {
     public static YodaValue ACCY_VAL = YodaValue.integerOf(0);
 
 
-    public static Map<YodaVariable, YodaValue> positionMap;
+    public static Map<YodaVariable, YodaValue> positionMap1;
+    public static Map<YodaVariable, YodaValue> positionMap2;
+    public static Map<YodaVariable, YodaValue> positionMap3;
     static {
-        //YodaValue posx = YodaValue.integerOf((int) (Math.random()*10));
-        positionMap = new HashMap<>();
-        positionMap.put(POSX_VAR, POSX_VAL); //To be used if a static position x is required
-        //positionMap.put(POSX_VAR, posx);   //To be used if a random position x is required
-        positionMap.put(POSY_VAR, POSY_VAL);
+        YodaValue posx1 = YodaValue.integerOf((int) (Math.random()*10));
+        YodaValue posx2 = YodaValue.integerOf((int) (Math.random()*10));
+        YodaValue posx3 = YodaValue.integerOf((int) (Math.random()*10));
+        positionMap1 = new HashMap<>();
+        positionMap2 = new HashMap<>();
+        positionMap3 = new HashMap<>();
+        //positionMap.put(POSX_VAR, POSX_VAL); //To be used if a static position x is required
+        positionMap1.put(POSX_VAR, posx1);   //To be used if a random position x is required
+        positionMap1.put(POSY_VAR, POSY_VAL);
+        positionMap2.put(POSX_VAR, posx2);   //To be used if a random position x is required
+        positionMap2.put(POSY_VAR, POSY_VAL);
+        positionMap3.put(POSX_VAR, posx3);   //To be used if a random position x is required
+        positionMap3.put(POSY_VAR, POSY_VAL);
+
     }
-    public static YodaVariableMapping AGENT_POS_MAP = new RobotState(positionMap);
+    public static YodaVariableMapping AGENT_POS_MAP1 = new RobotState(positionMap1);
+    public static YodaVariableMapping AGENT_POS_MAP2 = new RobotState(positionMap2);
+    public static YodaVariableMapping AGENT_POS_MAP3 = new RobotState(positionMap3);
 
     public static Map<YodaVariable, YodaValue> accelerationMap;
     static {
