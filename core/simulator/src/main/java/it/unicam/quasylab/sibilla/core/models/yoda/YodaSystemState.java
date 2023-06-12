@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
 import it.unicam.quasylab.sibilla.core.models.ImmutableState;
+import it.unicam.quasylab.sibilla.core.models.IndexedState;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.List;
@@ -39,7 +40,7 @@ import java.util.stream.Collectors;
  *     <li>a GlobalStateUpdateFunction updating the global state</li>
  * </ul>
  */
-public class YodaSystemState<S extends YodaScene> implements ImmutableState {
+public class YodaSystemState<S extends YodaScene> implements ImmutableState, IndexedState<YodaAgent> {
 
     private final YodaVariableMapping globalState;
     private final List<YodaAgent> agents;
@@ -146,5 +147,15 @@ public class YodaSystemState<S extends YodaScene> implements ImmutableState {
      */
     public void updateGlobalState(RandomGenerator rg) {
         globalStateUpdateFunction.compute(rg, agents, globalState);
+    }
+
+    @Override
+    public YodaAgent get(int i) {
+        return agents.get(i);
+    }
+
+    @Override
+    public int numberOfAgents() {
+        return agents.size();
     }
 }

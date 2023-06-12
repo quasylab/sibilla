@@ -120,8 +120,8 @@ public class LIOIndividualState implements IndexedState<Agent>, LIOState<LIOIndi
     }
 
     @Override
-    public int size() {
-        return agents.size();
+    public double size() {
+        return this.numberOfAgents();
     }
 
     @Override
@@ -144,6 +144,11 @@ public class LIOIndividualState implements IndexedState<Agent>, LIOState<LIOIndi
      */
     public Agent get(int i) {
         return agents.get(i);
+    }
+
+    @Override
+    public int numberOfAgents() {
+        return agents.size();
     }
 
     /**

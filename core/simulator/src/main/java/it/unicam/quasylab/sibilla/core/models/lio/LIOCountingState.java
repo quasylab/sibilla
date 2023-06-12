@@ -70,7 +70,7 @@ public class LIOCountingState implements LIOState<LIOCountingState> {
     }
 
     @Override
-    public int size() {
+    public double size() {
         return size;
     }
 

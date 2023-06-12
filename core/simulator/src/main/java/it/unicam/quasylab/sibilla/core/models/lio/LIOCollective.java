@@ -33,11 +33,21 @@ public interface LIOCollective extends ImmutableState {
 
 
     /**
+     * Returns true if this collective contains an infinite number of agents.
+     *
+     * @return true if this collective contains an infinite number of agents.
+     */
+    default boolean isInfinite() {
+        return false;
+    }
+
+
+    /**
      * Return the number of agents in the system.
      *
      * @return the number of agents in the system.
      */
-    int size();
+    double size();
 
     /**
      * Return the fraction of agents in the given state.

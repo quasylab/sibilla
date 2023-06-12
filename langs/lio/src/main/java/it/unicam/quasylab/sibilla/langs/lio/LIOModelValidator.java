@@ -39,9 +39,12 @@ public class LIOModelValidator extends LIOModelBaseVisitor<Boolean> {
     private final SymbolTable table;
     private final ErrorCollector errors;
 
+    private final AgentRegistry registry;
+
     public LIOModelValidator(ErrorCollector errors) {
         this.errors = errors;
         this.table = new SymbolTable();
+        this.registry = new AgentRegistry();
     }
 
 
@@ -119,12 +122,13 @@ public class LIOModelValidator extends LIOModelBaseVisitor<Boolean> {
     @Override
     public Boolean visitElementAtomic(LIOModelParser.ElementAtomicContext ctx) {
         boolean result = true;
-        for (Token state: ctx.states) {
-            if (!table.isState(state.getText())) {
-                recordError(ParseUtil.unknownStateError(state),state.getLine(), state.getCharPositionInLine());
-                result = false;
-            }
-        }
+        //FIXME!
+//        for (Token state: ctx.states) {
+//            if (!table.isState(state.getText())) {
+//                recordError(ParseUtil.unknownStateError(state),state.getLine(), state.getCharPositionInLine());
+//                result = false;
+//            }
+//        }
         return result;
     }
 

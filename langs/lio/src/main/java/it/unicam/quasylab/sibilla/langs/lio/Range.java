@@ -21,29 +21,40 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.models;
+package it.unicam.quasylab.sibilla.langs.lio;
+
+import java.util.stream.IntStream;
 
 /**
- * Identifies state whose elements are indexed.
- *
- * @param <S> data type of indexed elements.
+ * Instances of this class are used to represent a set of integers in a given interval.
  */
-public interface IndexedState<S> extends State {
+public class Range {
+
+    private final int from;
+
+    private final int to;
 
     /**
-     * Returns the element at position i.
+     * Creates a new range in the interval <code>[from, to]</code>.
      *
-     * @param i index.
-     * @return the element at position i.
+     * @param from first integer in the interval;
+     * @param to last integer in the interval;
+     * @throws {@link IllegalArgumentException} if <code>from>to</code>.
      */
-    S get(int i);
+    public Range(int from, int to) {
+        if (from>=to) {
+            throw new IllegalArgumentException("From must be less or equal than to");
+        }
+        this.from = from;
+        this.to = to;
+    }
 
     /**
-     * Returns the number of elements.
+     * Returns the array of values in this range.
      *
-     * @return the number of elements.
+     * @return the array of values in this range.
      */
-    int numberOfAgents();
-
-
+    public int[] getValues() {
+        return IntStream.range(from, to+1).toArray();
+    }
 }

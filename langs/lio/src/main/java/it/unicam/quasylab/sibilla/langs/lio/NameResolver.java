@@ -21,29 +21,23 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.models;
+package it.unicam.quasylab.sibilla.langs.lio;
 
-/**
- * Identifies state whose elements are indexed.
- *
- * @param <S> data type of indexed elements.
- */
-public interface IndexedState<S> extends State {
+import java.util.HashMap;
+import java.util.Map;
 
-    /**
-     * Returns the element at position i.
-     *
-     * @param i index.
-     * @return the element at position i.
-     */
-    S get(int i);
+public class NameResolver {
 
-    /**
-     * Returns the number of elements.
-     *
-     * @return the number of elements.
-     */
-    int numberOfAgents();
+    private final Map<String, Number> values;
+
+    public NameResolver() {
+        values = new HashMap<>();
+    }
+
+
+    public int getIntValueOf(String name) {
+        return values.get(name).intValue();
+    }
 
 
 }

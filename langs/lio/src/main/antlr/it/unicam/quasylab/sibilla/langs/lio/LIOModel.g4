@@ -17,45 +17,58 @@ element     : elementAction
             ;
 
 elementParam:
-            'param' name=ID '=' value=expr ';'
+            'param' name=ID '=' value=expr
             ;
 
 elementConstant:
-            ('constant'|'const') name=ID '='  value=expr ';'
+            ('constant'|'const') name=ID '='  value=expr
             ;
 
 elementAction:
-            'action' name=ID '=' probability=expr ';'
+            'action' name=ID '=' probability=expr
             ;
 
 elementState:
-            'state' name=ID '{'
+            'state' name=ID ('[' (agentParameters += agentParameterDeclaration (',' agentParameters += agentParameterDeclaration)*) ']')? '='
                 (steps+=agentStep ('+' steps+=agentStep)*)?
-            '}'
+            'endstate'
             ;
 
+agentParameterDeclaration:
+    name=ID ':' from=INTEGER '..' to=INTEGER
+;
+
 elementMeasure:
-            'measure' name=ID '=' value=expr ';'
+            'measure' name=ID '=' value=expr
             ;
 
 elementAtomic:
-            'atomic' name=ID '=' '{' states += ID (',' states += ID)* '}' ';'
+            'atomic' name=ID '=' '{' states += agentPattern (',' states += agentPattern)* '}'
             ;
 
+agentPattern:
+    name=ID ('[' patternElements += patternElement (',' patternElements+=patternElement)*  ('|' guard=expr)? ']')?
+;
+
+patternElement:
+    '_'     # patternElementAny
+ |  name=ID # patternElementVariable
+ ;
+
 elementPredicate:
-            'predicate' name=ID '=' value=expr ';'
+            'predicate' name=ID '=' value=expr
             ;
 
 agentStep:
-            performedAction=ID '.' nextState=ID
+            ('[' guard=expr ']')? performedAction=ID '.' nextState=ID ('[' stateArguments += expr (',' stateArguments += expr)* ']')?
             ;
 
 elementSystem:
-            'system' name=ID ('('args += ID (',' args += ID)* ')')? '=' population += agentExpression ('|' population+=agentExpression)* ';'
+            'system' name=ID ('['args += ID (',' args += ID)* '[')? '=' population += agentExpression ('|' population+=agentExpression)* ';'
             ;
 
 agentExpression:
-            name=ID ('[' size=expr ']')?
+            name=ID ('[' stateArguments += expr (',' stateArguments += expr)* ']') ('#' size=expr )?
             ;
 
 expr:

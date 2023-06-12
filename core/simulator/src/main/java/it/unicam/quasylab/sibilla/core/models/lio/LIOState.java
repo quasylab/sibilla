@@ -46,7 +46,7 @@ public interface LIOState<S extends LIOCollective> extends LIOCollective {
 
 
     /**
-     * Returns the probability distribution of states reachable from this one in one state.
+     * Returns the probability distribution of the states reachable from this one in one state.
      *
      * @param matrix probability matrix representing behaviour of each single agent.
      * @return the probability distribution of states reachable from this one in one state.

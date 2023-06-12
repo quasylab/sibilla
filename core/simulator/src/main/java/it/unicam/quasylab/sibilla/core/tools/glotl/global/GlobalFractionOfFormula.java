@@ -55,7 +55,7 @@ public class GlobalFractionOfFormula<T, S extends IndexedState<T>> implements Gl
     @Override
     public GlobalFormula<T, S> next(S state) {
         return new GlobalArrayOfLocalFormula<>(
-                IntStream.range(0, state.size()).mapToObj(i -> this.argument.next(state.get(i))).collect(Collectors.toCollection(ArrayList::new)),
+                IntStream.range(0, state.numberOfAgents()).mapToObj(i -> this.argument.next(state.get(i))).collect(Collectors.toCollection(ArrayList::new)),
                 this.predicate
         );
     }
