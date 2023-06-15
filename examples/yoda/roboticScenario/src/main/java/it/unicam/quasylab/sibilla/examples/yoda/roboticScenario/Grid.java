@@ -92,14 +92,20 @@ public class Grid implements YodaScene {
         return new Grid(width, height, obstacles);
     }
 
-    public static Grid generateSingleColumn(RandomGenerator rg, int width, int height, int numberOfObstacles) {
+    public static Grid generateThroughColumn(RandomGenerator rg, int width, int height, int numberOfObstacles) {
         LinkedList<Obstacle> obstacles = new LinkedList<>();
+        boolean [][] coordinates = new boolean[width][height];
+        int multi = 0;
         int counter = 0;
         while (counter < numberOfObstacles) {
-            int x = counter;
+            multi = (int) counter/width;
+            int x = counter-(width*multi);
             int y = 1+rg.nextInt(height-2);
-            obstacles.add(new Obstacle(x,y));
-            counter++;
+            if (!coordinates[x][y]) {
+                obstacles.add(new Obstacle(x, y));
+                coordinates[x][y] = true;
+                counter++;
+            }
         }
         return new Grid(width, height, obstacles);
     }

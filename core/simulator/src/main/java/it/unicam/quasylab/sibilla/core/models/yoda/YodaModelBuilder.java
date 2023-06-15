@@ -53,7 +53,7 @@ public interface YodaModelBuilder<S extends YodaScene> {
         return new YodaSystemState<>(globalState, agents, scene, updateFunction);
     }
 
-    default YodaModel<S> getYodaModel(){
+    default YodaModel getYodaModel(){
         return new YodaModel<>(getState());
     }
 }

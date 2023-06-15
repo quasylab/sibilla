@@ -26,6 +26,9 @@ package it.unicam.quasylab.sibilla.examples.yoda.roboticScenario;
 import it.unicam.quasylab.sibilla.core.models.yoda.*;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.HashMap;
+import java.util.LinkedList;
+
 /**
  * @author nicoladelgiudice
  *
@@ -44,9 +47,9 @@ public class RobotDefinition {
 
 
     //public static YodaAgent T800 = new YodaAgent(0, "T800", KNOWLEDGE, INFORMATION, OBSERVATIONS, DET_BEHAVIOUR, OMEGA, INFO_UPDATE);
-    public static YodaAgent WALLE = new YodaAgent(1,"Wall-E", KNOWLEDGE, INFORMATION1, OBSERVATIONS, NON_BEHAVIOUR, OMEGA, INFO_UPDATE);
-    public static YodaAgent EVE = new YodaAgent(2, "Eve", KNOWLEDGE, INFORMATION2, OBSERVATIONS, NON_BEHAVIOUR, OMEGA, INFO_UPDATE);
-    public static YodaAgent AUTO = new YodaAgent(3, "Auto", KNOWLEDGE, INFORMATION3, OBSERVATIONS, NON_BEHAVIOUR, OMEGA, INFO_UPDATE);
+    public static YodaAgent R2D2 = new YodaAgent(1,"R2D2", KNOWLEDGE, INFORMATION1, OBSERVATIONS, NON_BEHAVIOUR, OMEGA, INFO_UPDATE);
+    public static YodaAgent CHOPPER = new YodaAgent(2, "C1-10P", KNOWLEDGE, INFORMATION2, OBSERVATIONS, NON_BEHAVIOUR, OMEGA, INFO_UPDATE);
+    public static YodaAgent BD1 = new YodaAgent(3, "BD-1", KNOWLEDGE, INFORMATION3, OBSERVATIONS, NON_BEHAVIOUR, OMEGA, INFO_UPDATE);
 
     private static YodaVariableMapping computeOmega(RandomGenerator rg, YodaSystemState yodaSystemState, YodaAgent yodaAgent) {
         YodaVariableMapping agentPos = yodaAgent.getAgentInformation();
@@ -73,5 +76,22 @@ public class RobotDefinition {
         return newInfo;
     }
 
+    public static LinkedList<YodaAgent> getRobotAgents(int size, int from, int to) {
+        int dt = (to - from) / size;
+        LinkedList<YodaAgent> agents = new LinkedList<>();
+        for (int i = 0; i < size; i++) {
+            agents.add(new YodaAgent(i, "R" + i, KNOWLEDGE, getInformation(from + dt * i), OBSERVATIONS, NON_BEHAVIOUR, OMEGA, INFO_UPDATE));
+        }
+        return agents;
+    }
+
+
+    private static YodaVariableMapping getInformation(int xVal) {
+        HashMap<YodaVariable, YodaValue> map = new HashMap<>();
+        map.put(RobotState.POSX_VAR, YodaValue.integerOf(xVal));
+        map.put(RobotState.POSY_VAR, RobotState.POSY_VAL);
+        YodaVariableMapping variableMapping = new RobotState(map);
+        return variableMapping;
+    }
 
 }

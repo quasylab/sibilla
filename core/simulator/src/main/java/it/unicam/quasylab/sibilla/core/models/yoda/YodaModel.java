@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class YodaModel<S extends YodaScene> implements InteractiveModel<YodaSystemState<S>> {
+public class YodaModel<S extends YodaScene> implements InteractiveModel<YodaSystemState<S>>, DiscreteModel<YodaSystemState<S>> {
     private final YodaSystemState<S> systemState;
 
     public YodaModel(YodaSystemState<S> systemState) {
@@ -46,10 +46,10 @@ public class YodaModel<S extends YodaScene> implements InteractiveModel<YodaSyst
     }
 
     @Override
-    public Optional<TimeStep<YodaSystemState<S>>> next(RandomGenerator r, double time, YodaSystemState<S> state) {
-        YodaSystemState<S> next = state.next(r);
-        return Optional.of(new TimeStep<YodaSystemState<S>>(1.0,next));
+    public YodaSystemState<S> sampleNextState(RandomGenerator r, double time, YodaSystemState<S> state) {
+        return state.next(r);
     }
+
 
     @Override
     public int stateByteArraySize() {

@@ -29,6 +29,7 @@ import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariable;
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariableMapping;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 

@@ -23,11 +23,9 @@
 
 package it.unicam.quasylab.sibilla.examples.yoda.roboticScenario;
 
-import it.unicam.quasylab.sibilla.core.models.agents.VariableMapping;
 import it.unicam.quasylab.sibilla.core.models.yoda.*;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.LinkedList;
 import java.util.List;
 
 public class RobotScenarioDefinition implements YodaModelBuilder<Grid> {
@@ -65,7 +63,8 @@ public class RobotScenarioDefinition implements YodaModelBuilder<Grid> {
     @Override
     public void initialiseScene() {
         //grid = Grid.generate(rg, width, height, numberOfObstacles); //obstacles randomly placed
-        grid = Grid.generateSingleColumn(rg, width, height, numberOfObstacles); //obstacles placed randomly for each column
+        grid = Grid.generateThroughColumn(rg, width, height, numberOfObstacles); //obstacles placed randomly for each column
+
     }
 
     @Override
