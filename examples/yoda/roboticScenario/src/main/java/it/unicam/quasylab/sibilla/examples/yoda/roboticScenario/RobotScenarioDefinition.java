@@ -62,8 +62,24 @@ public class RobotScenarioDefinition implements YodaModelBuilder<Grid> {
 
     @Override
     public void initialiseScene() {
+
         //grid = Grid.generate(rg, width, height, numberOfObstacles); //obstacles randomly placed
-        grid = Grid.generateThroughColumn(rg, width, height, numberOfObstacles); //obstacles placed randomly for each column
+
+
+    }
+
+    @Override
+    public void initialiseScene(int sceneType) {
+        switch (sceneType) {
+            case 1 : grid = Grid.generateThroughColumn(rg, width, height, numberOfObstacles); //Obstacles placed randomly for each column
+                break;
+            case 2 : grid = Grid.generateDiagonal(rg, width, height,numberOfObstacles); //Obstacles placed in diagonals and one horizontal
+                break;
+            case 3 : grid = Grid.generateCulDeSac(rg,width, height); //Obstacles placed in random cul-de-sac
+                break;
+        }
+        //
+        //
 
     }
 

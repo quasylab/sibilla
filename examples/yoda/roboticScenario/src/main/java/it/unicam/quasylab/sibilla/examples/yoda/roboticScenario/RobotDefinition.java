@@ -76,11 +76,11 @@ public class RobotDefinition {
         return newInfo;
     }
 
-    public static LinkedList<YodaAgent> getRobotAgents(int size, int from, int to) {
+    public static LinkedList<YodaAgent> getRobotAgents(int size, int from, int to, YodaBehaviour behaviour) {
         int dt = (to - from) / size;
         LinkedList<YodaAgent> agents = new LinkedList<>();
         for (int i = 0; i < size; i++) {
-            agents.add(new YodaAgent(i, "R" + i, KNOWLEDGE, getInformation(from + dt * i), OBSERVATIONS, NON_BEHAVIOUR, OMEGA, INFO_UPDATE));
+            agents.add(new YodaAgent(i, "R" + i, KNOWLEDGE, getInformation(from + dt * i), OBSERVATIONS, behaviour, OMEGA, INFO_UPDATE));
         }
         return agents;
     }

@@ -31,6 +31,8 @@ public interface YodaModelBuilder<S extends YodaScene> {
 
     void initialiseScene();
 
+    void initialiseScene(int sceneType);
+
     int getNumberOfObstacles();
 
     int getNumberOfAgent();

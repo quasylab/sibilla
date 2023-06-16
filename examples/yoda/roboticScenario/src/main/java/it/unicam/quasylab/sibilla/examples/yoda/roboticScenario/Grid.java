@@ -41,6 +41,8 @@ public class Grid implements YodaScene {
         this.obstacles = obstacles;
     }
 
+
+
     @Override
     public int getWidthInt() {
         return width;
@@ -110,6 +112,71 @@ public class Grid implements YodaScene {
         return new Grid(width, height, obstacles);
     }
 
+    public static Grid generateDiagonal(RandomGenerator rg, int width, int height, int numberOfObstacles) {
+        LinkedList<Obstacle> obstacles = new LinkedList<>();
+        boolean[][] coordinates = new boolean[width][height];
+        int counter = 0;
+        boolean flag = true;
+        while (counter < numberOfObstacles) {
+            if (flag) {
+                int rowStart = 1+ rg.nextInt(height-5);
+                for (int j = 0; j<5; j++){
+                    int x = counter;
+                    int y = rowStart++;
+                    if (!coordinates[x][y]) {
+                        obstacles.add(new Obstacle(x, y));
+                        coordinates[x][y] = true;
+                        counter++;
+                    }
+                }
+                flag = false;
+            } else {
+                int rowStart = height - rg.nextInt(height-5);
+                for (int j = 0; j<5; j++) {
+                    int x = counter;
+                    int y = rowStart--;
+                    if (!coordinates[x][y]) {
+                        obstacles.add(new Obstacle(x, y));
+                        coordinates[x][y] = true;
+                        counter++;
+                    }
+                }
+                flag = true;
+            }
+
+        }
+        return new Grid(width, height, obstacles);
+    }
+
+    public static Grid generateCulDeSac(RandomGenerator rg, int width, int height) {
+        LinkedList<Obstacle> obstacles = new LinkedList<>();
+        int numberOfCulDeSac = (int) width/10;
+        for (int i = 0; i<numberOfCulDeSac; i++){
+            int startingX = i*10 + rg.nextInt(7);
+            int startingY = 1+ rg.nextInt(height-4);
+            getCulDeSac(4,3,startingX, startingY,obstacles);
+        }
+        return new Grid(width, height, obstacles);
+    }
+
+    private static void getCulDeSac(int width, int height, int startingX, int startingY, LinkedList<Obstacle> obstacles) {
+        for (int i = 0; i < height; i++) {
+            int x = startingX;
+            int y = startingY+i;
+            obstacles.add(new Obstacle(x,y));
+        }
+        for (int i = 1; i < width; i++) {
+            int x = startingX + i;
+            int y = startingY+height;
+            obstacles.add(new Obstacle(x,y));
+        }
+        for (int i = 0; i < height; i++){
+            int x = startingX + width;
+            int y = startingY+height-i;
+            obstacles.add(new Obstacle(x,y));
+        }
+
+    }
 
     @Override
     public double getWidthReal() {

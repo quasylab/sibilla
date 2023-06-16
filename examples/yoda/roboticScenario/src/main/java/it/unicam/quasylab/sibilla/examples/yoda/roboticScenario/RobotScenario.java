@@ -42,7 +42,7 @@ public class RobotScenario {
 
     private File outputDir;
 
-    //private static List<YodaAgent> AGENTS = RobotDefinition.
+
     /*private static List<YodaAgent> AGENTS = new LinkedList<>();
     static {
         //AGENTS.add(RobotDefinition.T800); //T800 is a deterministic robot
@@ -54,7 +54,9 @@ public class RobotScenario {
     public static void main(String[] args) throws  InterruptedException, FileNotFoundException {
         RobotScenario robotScenario = new RobotScenario(new DefaultRandomGenerator());
         //robotScenario.startSimulation("Test1", 10, 10, 15, AGENTS, 100, 100.0);
-        robotScenario.startSimulation("Test2", 100, 100, 200, RobotDefinition.getRobotAgents(100, 0, 100), 100, 150.0);
+        robotScenario.startSimulation("Test2", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 1, 100, 150.0);
+        robotScenario.startSimulation("Test3", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 2, 100, 150.0);
+        robotScenario.startSimulation("Test4", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 3, 100, 150.0);
     }
 
 
@@ -67,9 +69,10 @@ public class RobotScenario {
         }
     }
 
-    public void startSimulation(String label, int width, int height, int numberOfObstacles, List<YodaAgent> agents, int iterations, double deadline) throws FileNotFoundException {
+    public void startSimulation(String label, int width, int height, int numberOfObstacles, List<YodaAgent> agents, int gridType, int iterations, double deadline) throws FileNotFoundException {
         RobotScenarioDefinition def = new RobotScenarioDefinition(label, width, height, numberOfObstacles, agents, rg);
-        def.initialiseScene();
+        //def.initialiseScene();
+        def.initialiseScene(gridType);
         Trajectory<YodaSystemState<Grid>> robotTrajectory = getTrajectory(def, deadline);
         File cwd = new File(this.outputDir,label + "_result");
         cwd.mkdir();
