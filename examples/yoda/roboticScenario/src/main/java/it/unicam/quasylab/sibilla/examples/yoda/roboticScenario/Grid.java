@@ -71,6 +71,9 @@ public class Grid implements YodaScene {
         if ((posx == -1) || (posx == width)){
             return true;
         }
+        if ((posy == -1)) {
+            return true;
+        }
         if (this.obstacles.stream().anyMatch(o -> o.isPlacedAt(posx, posy))){
             return true;
         }

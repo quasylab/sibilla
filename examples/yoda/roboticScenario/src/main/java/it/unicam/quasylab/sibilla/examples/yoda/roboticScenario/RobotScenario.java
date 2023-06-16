@@ -57,6 +57,7 @@ public class RobotScenario {
         robotScenario.startSimulation("Test2", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 1, 100, 150.0);
         robotScenario.startSimulation("Test3", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 2, 100, 150.0);
         robotScenario.startSimulation("Test4", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 3, 100, 150.0);
+        robotScenario.startSimulation("Test4b", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.FOUR_DIRECTIONS), 3, 100, 450.0);
     }
 
 

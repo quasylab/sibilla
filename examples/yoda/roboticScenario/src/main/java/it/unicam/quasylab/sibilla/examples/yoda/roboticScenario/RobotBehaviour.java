@@ -34,8 +34,6 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.util.LinkedList;
 import java.util.List;
 
-import static it.unicam.quasylab.sibilla.examples.yoda.roboticScenario.RobotObservation.*;
-
 public class RobotBehaviour {
 
     public static List<YodaAction> actionList;
@@ -50,6 +48,9 @@ public class RobotBehaviour {
 
     public static YodaBehaviour DETERMINISTIC = YodaBehaviour.behaviourOf("Deterministic", actionList, RobotBehaviour::deterministicBehaviour);
     public static YodaBehaviour NON_DETERMINISTIC = YodaBehaviour.behaviourOf("NonDeterministic", actionList, RobotBehaviour::nonDeterministicBehaviour);
+    public static YodaBehaviour FOUR_DIRECTIONS = YodaBehaviour.behaviourOf("FourDirection", actionList, RobotBehaviour::fourDirectionsBehaviour);
+
+
 
 
     public static WeightedStructure<YodaAction> deterministicBehaviour(RandomGenerator rg, YodaVariableMapping currentState, YodaVariableMapping observations){
@@ -86,6 +87,29 @@ public class RobotBehaviour {
         }
         if (observations.getValue(RobotObservation.NORTH_VAR).equals(YodaValue.TRUE) && observations.getValue(RobotObservation.WEST_VAR).equals(YodaValue.FALSE)) {
             possibleActions.add(1.0, RobotAction.GO_WEST);
+        }
+
+        return possibleActions;
+    }
+
+    public static WeightedStructure<YodaAction> fourDirectionsBehaviour(RandomGenerator randomGenerator, YodaVariableMapping currentState, YodaVariableMapping observations) {
+        WeightedStructure<YodaAction> possibleActions = new WeightedLinkedList<>();
+
+        if (observations.getValue(RobotObservation.GOAL_VAR).equals(YodaValue.TRUE)) {
+            possibleActions.add(1.0, RobotAction.STAND_STILL);
+            return possibleActions;
+        }
+        if (observations.getValue(RobotObservation.NORTH_VAR).equals(YodaValue.FALSE)) {
+            possibleActions.add(2.0, RobotAction.GO_NORTH);
+        }
+        if (observations.getValue(RobotObservation.EAST_VAR).equals(YodaValue.FALSE)) {
+            possibleActions.add(1.0, RobotAction.GO_EAST);
+        }
+        if (observations.getValue(RobotObservation.WEST_VAR).equals(YodaValue.FALSE)) {
+            possibleActions.add(1.0, RobotAction.GO_WEST);
+        }
+        if (observations.getValue(RobotObservation.SOUTH_VAR).equals(YodaValue.FALSE)) {
+            possibleActions.add(1.0, RobotAction.GO_SOUTH);
         }
 
         return possibleActions;
