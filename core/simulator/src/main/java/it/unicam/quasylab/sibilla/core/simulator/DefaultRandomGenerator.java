@@ -36,6 +36,15 @@ public class DefaultRandomGenerator extends AbstractRandomGenerator implements S
 	private static final long serialVersionUID = -8354414629214279876L;
 	private Random random = new Random();
 
+	public DefaultRandomGenerator(long seed) {
+		super();
+		random.setSeed(seed);
+	}
+
+	public DefaultRandomGenerator() {
+		super();
+	}
+
 	@Override
 	public void setSeed(long seed) {
 		clear();

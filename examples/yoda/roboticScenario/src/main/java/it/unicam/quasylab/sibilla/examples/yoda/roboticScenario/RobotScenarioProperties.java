@@ -33,7 +33,7 @@ public class RobotScenarioProperties {
     }
 
     public static void main(String[] args) {
-        RobotScenarioProperties robotScenarioProperties = new RobotScenarioProperties(new DefaultRandomGenerator());
+        RobotScenarioProperties robotScenarioProperties = new RobotScenarioProperties(new DefaultRandomGenerator(1000L));
 
         //runAndPrint("testphi1_grid1", 100, 100, 200, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 1, 1000, i ->RobotScenarioProperties.getPhi1(i, 0.95));
         //runAndPrint("testphi2_grid1", 100, 100, 200, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 1,1000, i ->RobotScenarioProperties.getPhi2(i, 0.95));
@@ -77,6 +77,8 @@ public class RobotScenarioProperties {
         System.out.println(Arrays.toString(values));
         System.out.println(end);
     }
+
+
 
     public static LocalFormula<YodaAgent> goalReachedFormula() {
         return new LocalAtomicFormula<>(a ->

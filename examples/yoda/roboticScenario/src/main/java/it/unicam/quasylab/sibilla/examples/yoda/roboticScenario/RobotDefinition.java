@@ -78,7 +78,7 @@ public class RobotDefinition {
     }
 
     public static LinkedList<YodaAgent> getRobotAgents(int size, int from, int to, YodaBehaviour behaviour) {
-        Random random = new Random();
+        Random random = new Random(1000);
         int dt = (to - from) / size;
         LinkedList<YodaAgent> agents = new LinkedList<>();
         for (int i = 0; i < size; i++) {

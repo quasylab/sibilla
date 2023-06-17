@@ -31,8 +31,10 @@ import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalAferFormula;
 import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalFormula;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -61,8 +63,7 @@ public class GLoTLStatisticalModelChecker {
         return computeProbability(model, state, i -> new GlobalAferFormula<>(i+from, formula), to-from, replica);
     }
 
-
-    public <S extends ImmutableState & IndexedState<A>,A> double[] computeProbability(DiscreteModel<S> model, S state, IntFunction<GlobalFormula<A, S>> formulaBuilder, int size, int replica) {
+    public <S extends ImmutableState & IndexedState<A>,A> double[] computeProbability(DiscreteModel<S> model, Function<RandomGenerator,S> stateBuilder, IntFunction<GlobalFormula<A, S>> formulaBuilder, int size, int replica) {
         DefaultRandomGenerator rg = new DefaultRandomGenerator();
         SimulationEnvironment se = new SimulationEnvironment();
         int[] counterArray = new int[size];
@@ -70,7 +71,7 @@ public class GLoTLStatisticalModelChecker {
         List<GLoTLPathChecker<A,S>> pathCheckers = formulas.stream().map(GLoTLPathChecker::new).collect(Collectors.toList());
         double deadline = formulas.stream().mapToDouble(GlobalFormula::getTimeHorizon).max().orElse(0.0);
         for(int i=0; i<replica; i++) {
-            Trajectory<S> trajectory = se.sampleTrajectory(rg, model, state, deadline);
+            Trajectory<S> trajectory = se.sampleTrajectory(rg, model, stateBuilder.apply(rg), deadline);
             int j = 0;
             for (GLoTLPathChecker<A,S> pc: pathCheckers) {
                 if (pc.test(trajectory)) {
@@ -80,6 +81,10 @@ public class GLoTLStatisticalModelChecker {
             }
         }
         return IntStream.of(counterArray).sequential().mapToDouble(c -> ((double) c)/replica).toArray();
+    }
+
+    public <S extends ImmutableState & IndexedState<A>,A> double[] computeProbability(DiscreteModel<S> model, S state, IntFunction<GlobalFormula<A, S>> formulaBuilder, int size, int replica) {
+        return computeProbability(model, (Function<RandomGenerator, S>) rg -> state, formulaBuilder, size, replica);
     }
 
 
