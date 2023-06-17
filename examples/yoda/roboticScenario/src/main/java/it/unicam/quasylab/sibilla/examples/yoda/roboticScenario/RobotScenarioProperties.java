@@ -35,14 +35,14 @@ public class RobotScenarioProperties {
     public static void main(String[] args) {
         RobotScenarioProperties robotScenarioProperties = new RobotScenarioProperties(new DefaultRandomGenerator());
 
-        runAndPrint("testphi1_grid1", 100, 100, 200, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 1, 1000, i ->RobotScenarioProperties.getPhi1(i, 0.95));
-        runAndPrint("testphi2_grid1", 100, 100, 200, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 1,1000, i ->RobotScenarioProperties.getPhi2(i, 0.95));
-        runAndPrint("testphi1_grid2", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 2, 1000, i ->RobotScenarioProperties.getPhi1(i, 0.95));
-        runAndPrint("testphi2_grid2", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 2,1000, i ->RobotScenarioProperties.getPhi2(i, 0.95));
-        runAndPrint("testphi1_grid3", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 3, 1000, i ->RobotScenarioProperties.getPhi1(i, 0.95));
-        runAndPrint("testphi2_grid3", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 3,1000, i ->RobotScenarioProperties.getPhi2(i, 0.25));
-        runAndPrint("testphi1_grid3b", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.FOUR_DIRECTIONS), 3, 1000, i ->RobotScenarioProperties.getPhi1(i, 0.35));
-        runAndPrint("testphi2_grid3b", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.FOUR_DIRECTIONS), 3,1000, i ->RobotScenarioProperties.getPhi2(i, 0.35));
+        //runAndPrint("testphi1_grid1", 100, 100, 200, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 1, 1000, i ->RobotScenarioProperties.getPhi1(i, 0.95));
+        //runAndPrint("testphi2_grid1", 100, 100, 200, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 1,1000, i ->RobotScenarioProperties.getPhi2(i, 0.95));
+        //runAndPrint("testphi1_grid2", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 2, 1000, i ->RobotScenarioProperties.getPhi1(i, 0.95));
+        //runAndPrint("testphi2_grid2", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 2,1000, i ->RobotScenarioProperties.getPhi2(i, 0.95));
+        //runAndPrint("testphi1_grid3", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 3, 1000, i ->RobotScenarioProperties.getPhi1(i, 0.95));
+        runAndPrint("testphi2_grid3", 100, 100, 100, RobotDefinition.getRobotAgents(50, 0, 100, RobotBehaviour.NON_DETERMINISTIC), 3,1000, i ->RobotScenarioProperties.getPhi2(i, 0.6));
+        //runAndPrint("testphi1_grid3b", 100, 100, 100, RobotDefinition.getRobotAgents(100, 0, 100, RobotBehaviour.FOUR_DIRECTIONS), 3, 1000, i ->RobotScenarioProperties.getPhi1(i, 0.35));
+        //runAndPrint("testphi2_grid3b", 100, 100, 100, RobotDefinition.getRobotAgents(50, 0, 100, RobotBehaviour.FOUR_DIRECTIONS), 3,1000, i ->RobotScenarioProperties.getPhi2(i, 0.35));
 
     }
 

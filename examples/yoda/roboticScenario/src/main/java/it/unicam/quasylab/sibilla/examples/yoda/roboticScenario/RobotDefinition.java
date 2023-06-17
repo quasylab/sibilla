@@ -28,6 +28,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Random;
 
 /**
  * @author nicoladelgiudice
@@ -77,10 +78,11 @@ public class RobotDefinition {
     }
 
     public static LinkedList<YodaAgent> getRobotAgents(int size, int from, int to, YodaBehaviour behaviour) {
+        Random random = new Random();
         int dt = (to - from) / size;
         LinkedList<YodaAgent> agents = new LinkedList<>();
         for (int i = 0; i < size; i++) {
-            agents.add(new YodaAgent(i, "R" + i, KNOWLEDGE, getInformation(from + dt * i), OBSERVATIONS, behaviour, OMEGA, INFO_UPDATE));
+            agents.add(new YodaAgent(i, "R" + i, KNOWLEDGE, getInformation(from + random.nextInt(to-from)), OBSERVATIONS, behaviour, OMEGA, INFO_UPDATE));
         }
         return agents;
     }
