@@ -46,7 +46,7 @@ public interface LIOState<S extends LIOCollective> extends LIOCollective {
 
 
     /**
-     * Returns the probability distribution of the states reachable from this one in one state.
+     * Returns the probability distribution of the states reachable from this one state by using the given probability in one state.
      *
      * @param matrix probability matrix representing behaviour of each single agent.
      * @return the probability distribution of states reachable from this one in one state.
@@ -54,7 +54,26 @@ public interface LIOState<S extends LIOCollective> extends LIOCollective {
     ProbabilityVector<S> next(ProbabilityMatrix<Agent> matrix);
 
 
-    ProbabilityVector<S> next();
+    default ProbabilityVector<S> next() {
+        return next(getAgentsDefinition().getAgentProbabilityMatrix(this));
+    }
+
+    /**
+     * Returns the agents definition in this state.
+     *
+     * @return the agents definition in this state.
+     */
+    AgentsDefinition getAgentsDefinition();
+
+
+    /**
+     * Returns an array of doubles containing the fraction of population in each species.
+     *
+     * @return array of doubles containing the fraction of population in each species.
+     */
+    default LIOPopulationFraction getPopulationFractionVector() {
+        return getAgentsDefinition().getPopulationFractionOf(this);
+    }
 
 
 }

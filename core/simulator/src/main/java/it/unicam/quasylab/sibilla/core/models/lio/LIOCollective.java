@@ -24,6 +24,8 @@
 package it.unicam.quasylab.sibilla.core.models.lio;
 
 import it.unicam.quasylab.sibilla.core.models.ImmutableState;
+
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -33,31 +35,12 @@ public interface LIOCollective extends ImmutableState {
 
 
     /**
-     * Returns true if this collective contains an infinite number of agents.
-     *
-     * @return true if this collective contains an infinite number of agents.
-     */
-    default boolean isInfinite() {
-        return false;
-    }
-
-
-    /**
-     * Return the number of agents in the system.
-     *
-     * @return the number of agents in the system.
-     */
-    double size();
-
-    /**
      * Return the fraction of agents in the given state.
      *
      * @param a agent state.
      * @return the fraction of agents in the given state.
      */
-    default double fractionOf(Agent a) {
-        return this.numberOf(a)/size();
-    }
+    double fractionOf(Agent a);
 
     /**
      * Returns the fraction of agents in a state satisfying the given predicate.
@@ -65,26 +48,13 @@ public interface LIOCollective extends ImmutableState {
      * @param predicate state predicate.
      * @return  the fraction of agents in a state satisfying the given predicate.
      */
-    default double fractionOf(Predicate<Agent> predicate) {
-        return this.numberOf(predicate)/size();
-    }
-
+    double fractionOf(Predicate<Agent> predicate);
 
     /**
-     * Return the number of agents in the given state.
+     * Returns the set of agents occurring in this collective.
      *
-     * @param a agent state.
-     * @return the number of agents in the given state.
+     * @return the set of agents occurring in this collective.
      */
-    double numberOf(Agent a);
-
-    /**
-     * Returns the number of agents in a state satisfying the given predicate.
-     *
-     * @param predicate state predicate.
-     * @return  the number of agents in a state satisfying the given predicate.
-     */
-    double numberOf(Predicate<Agent> predicate);
-
+    Set<Agent> getAgents();
 
 }

@@ -437,7 +437,7 @@ public class ExpressionEvaluator {
         @Override
         public ToDoubleFunction<S> visitExpressionNumberOfAgents(LIOModelParser.ExpressionNumberOfAgentsContext ctx) {
             Predicate<Agent> predicate = atomicPropositionSolver.apply(ctx.agent.getText());
-            return s -> s.numberOf(predicate);
+            return s -> 0.0;
         }
 
         @Override

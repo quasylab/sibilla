@@ -25,6 +25,7 @@ package it.unicam.quasylab.sibilla.core.util;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -230,6 +231,7 @@ public class SequenceOfPositiveIntervals {
         }
         return Stream.concat(intervals.stream().map(Interval::start), intervals.stream().map(Interval::end)).collect(Collectors.toSet());
     }
+
 
     private static class ConjunctionMerger {
 

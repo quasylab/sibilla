@@ -27,84 +27,79 @@ import it.unicam.quasylab.sibilla.core.tools.ProbabilityMatrix;
 import it.unicam.quasylab.sibilla.core.tools.ProbabilityVector;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.Set;
 import java.util.function.Predicate;
 
-public class LIOMixedState<S extends LIOState<S>> implements LIOState<LIOMixedState<S>> {
+public class LIOMixedState implements LIOState<LIOMixedState> {
 
     private final AgentsDefinition definition;
 
     private final Agent thisAgent;
 
-    private final S otherAgents;
+    private final LIOCountingState otherAgents;
 
-    public LIOMixedState(AgentsDefinition definition, Agent thisAgent, S otherAgents) {
+    public LIOMixedState(AgentsDefinition definition, Agent thisAgent, LIOCountingState otherAgents) {
         this.definition = definition;
         this.thisAgent = thisAgent;
         this.otherAgents = otherAgents;
     }
 
-    @Override
     public double size() {
-        if (this.otherAgents.isInfinite()) {
-            return this.otherAgents.size();
-        }
-        return 1+this.otherAgents.size();
+        return otherAgents.size()+1;
     }
 
     @Override
     public double fractionOf(Agent a) {
-        if (this.otherAgents.isInfinite()||!this.thisAgent.equals(a)) {
-            return this.otherAgents.fractionOf(a);
-        } else {
-            double size = this.otherAgents.size();
-            return (otherAgents.fractionOf(a)*size+1)/(size+1);
-        }
+        return numberOf(a)/size();
     }
 
     @Override
     public double fractionOf(Predicate<Agent> predicate) {
-        if (this.otherAgents.isInfinite()||!predicate.test(thisAgent)) {
-            return this.otherAgents.fractionOf(predicate);
-        } else {
-            double size = this.otherAgents.size();
-            return (this.otherAgents.fractionOf(predicate)*size+1)/(size+1);
-        }
+        return numberOf(predicate)/size();
     }
 
     @Override
+    public Set<Agent> getAgents() {
+        return null;
+    }
+
     public double numberOf(Agent a) {
-        if (this.otherAgents.isInfinite()||(!thisAgent.equals(a))) {
-            return this.otherAgents.numberOf(a);
-        } else {
+        if (thisAgent.equals(a)) {
             return 1+this.otherAgents.numberOf(a);
-        }
-    }
-
-    @Override
-    public double numberOf(Predicate<Agent> predicate) {
-        if (this.otherAgents.isInfinite()||(!predicate.test(thisAgent))) {
-            return this.otherAgents.numberOf(predicate);
         } else {
+            return this.otherAgents.numberOf(a);
+        }
+    }
+
+    public double numberOf(Predicate<Agent> predicate) {
+        if (predicate.test(thisAgent)) {
             return 1+this.otherAgents.numberOf(predicate);
+        } else {
+            return this.otherAgents.numberOf(predicate);
         }
     }
 
     @Override
-    public LIOMixedState<S> step(RandomGenerator randomGenerator, ProbabilityMatrix<Agent> matrix) {
-        return new LIOMixedState<>(definition, matrix.sample(randomGenerator, thisAgent), otherAgents.step(randomGenerator, matrix));
+    public LIOMixedState step(RandomGenerator randomGenerator, ProbabilityMatrix<Agent> matrix) {
+        return new LIOMixedState(definition, matrix.sample(randomGenerator, thisAgent), otherAgents.step(randomGenerator, matrix));
     }
 
     @Override
-    public ProbabilityVector<LIOMixedState<S>> next(ProbabilityMatrix<Agent> matrix) {
+    public ProbabilityVector<LIOMixedState> next(ProbabilityMatrix<Agent> matrix) {
         ProbabilityVector<Agent> agentNext = matrix.getRowOf(thisAgent);
-        ProbabilityVector<S> otherNext = otherAgents.next(matrix);
-        ProbabilityVector<LIOMixedState<S>> next = new ProbabilityVector<>();
-        agentNext.iterate((a,p1) -> otherNext.iterate((o,p2) -> next.add(new LIOMixedState<>(definition, a, o), p1*p2)));
+        ProbabilityVector<LIOCountingState> otherNext = otherAgents.next(matrix);
+        ProbabilityVector<LIOMixedState> next = new ProbabilityVector<>();
+        agentNext.iterate((a,p1) -> otherNext.iterate((o,p2) -> next.add(new LIOMixedState(definition, a, o), p1*p2)));
         return next;
     }
 
+
     @Override
-    public ProbabilityVector<LIOMixedState<S>> next() {
-        return next(definition.getAgentProbabilityMatrix(this));
+    public AgentsDefinition getAgentsDefinition() {
+        return definition;
+    }
+
+    public Agent getAgent() {
+        return this.thisAgent;
     }
 }

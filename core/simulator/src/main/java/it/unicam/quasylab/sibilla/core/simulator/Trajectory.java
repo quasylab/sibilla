@@ -27,6 +27,7 @@ import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Sample;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
+import it.unicam.quasylab.sibilla.core.util.SequenceOfPositiveIntervals;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -174,5 +175,26 @@ public class Trajectory<S> implements Externalizable {
             }
         }
         return Double.NaN;
+    }
+
+
+    public SequenceOfPositiveIntervals test(Predicate<S> predicate) {
+        SequenceOfPositiveIntervals result = new SequenceOfPositiveIntervals();
+        boolean flag = false;
+        double lastPositive = 0.0;
+        for (Sample<S> interval: data) {
+            boolean newFlag = predicate.test(interval.getValue());
+            if (!flag&&newFlag) {
+                lastPositive = interval.getTime();
+            }
+            if (flag&&!newFlag) {
+                result.add(lastPositive, interval.getTime());
+            }
+            flag = newFlag;
+        }
+        if (flag) {
+            result.add(lastPositive, this.end);
+        }
+        return result;
     }
 }

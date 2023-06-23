@@ -28,76 +28,68 @@ import it.unicam.quasylab.sibilla.core.tools.ProbabilityVector;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
+/**
+ * Represents a state composed by a single agent operating in an environment approximated
+ * in terms of mean-field equations.
+ */
 public class LIOMeanFieldState implements LIOState<LIOMeanFieldState> {
 
-    private final AgentsDefinition definition;
+    private final LIOMeanFieldTrajectory trajectory;
 
-    private final double[] fractionsOfAgents;
+    private final int time;
 
-    public LIOMeanFieldState(AgentsDefinition definition, double[] fractionsOfAgents) {
-        if (definition.numberOfAgents() != fractionsOfAgents.length) {
-            throw new IllegalArgumentException();
-        }
-        this.definition = definition;
-        this.fractionsOfAgents = fractionsOfAgents;
+
+
+    public LIOMeanFieldState(LIOMeanFieldTrajectory trajectory, int time) {
+        this.trajectory = trajectory;
+        this.time = time;
     }
 
-    @Override
-    public double size() {
-        return Double.POSITIVE_INFINITY;
-    }
-
-    @Override
-    public boolean isInfinite() {
-        return true;
-    }
 
     @Override
     public double fractionOf(Agent a) {
-        return fractionsOfAgents[a.getIndex()];
+        return trajectory.fractionOf(time, a);
     }
 
     @Override
     public double fractionOf(Predicate<Agent> predicate) {
-        return IntStream.range(0,fractionsOfAgents.length).filter(i -> predicate.test(definition.getAgent(i))).mapToDouble(i -> fractionsOfAgents[i]).sum();
-    }
-
-
-    @Override
-    public double numberOf(Agent a) {
-        return Double.NaN;
+        return trajectory.fractionOf(time, predicate);
     }
 
     @Override
-    public double numberOf(Predicate<Agent> predicate) {
-        return Double.NaN;
+    public Set<Agent> getAgents() {
+        return null;
     }
+
 
     @Override
     public LIOMeanFieldState step(RandomGenerator randomGenerator, ProbabilityMatrix<Agent> matrix) {
-        return step(null, matrix);
+        return step();
     }
 
-    public LIOMeanFieldState step(ProbabilityMatrix<Agent> matrix) {
-        double[] nextFraction = new double[fractionsOfAgents.length];
-        for(int i=0; i<nextFraction.length; i++) {
-            ProbabilityVector<Agent> row = matrix.getRowOf(definition.getAgent(i));
-            row.iterate((a,v) -> nextFraction[a.getIndex()] += v);
-        }
-        return new LIOMeanFieldState(definition, nextFraction);
+    private LIOMeanFieldState step() {
+        return new LIOMeanFieldState(trajectory, time+1);
     }
+
 
     @Override
     public ProbabilityVector<LIOMeanFieldState> next(ProbabilityMatrix<Agent> matrix) {
-        return ProbabilityVector.dirac(step(matrix));
+        return next();
     }
 
     @Override
     public ProbabilityVector<LIOMeanFieldState> next() {
-        return next(definition.getAgentProbabilityMatrix(this));
+        return ProbabilityVector.dirac(step());
+    }
+
+    @Override
+    public AgentsDefinition getAgentsDefinition() {
+        return trajectory.getAgentsDefinition();
     }
 
     @Override
@@ -105,11 +97,11 @@ public class LIOMeanFieldState implements LIOState<LIOMeanFieldState> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LIOMeanFieldState that = (LIOMeanFieldState) o;
-        return Arrays.equals(fractionsOfAgents, that.fractionsOfAgents);
+        return Objects.equals(this.trajectory, that.trajectory)&&(this.time==that.time);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.hashCode(fractionsOfAgents);
+        return time;
     }
 }

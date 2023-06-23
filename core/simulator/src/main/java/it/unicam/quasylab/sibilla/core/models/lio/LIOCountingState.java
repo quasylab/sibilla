@@ -29,6 +29,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
@@ -69,18 +70,30 @@ public class LIOCountingState implements LIOState<LIOCountingState> {
         return new LIOCountingState(definition, newOccupancy, newSize);
     }
 
-    @Override
     public double size() {
         return size;
     }
 
+    @Override
+    public double fractionOf(Agent a) {
+        return numberOf(a)/size();
+    }
 
     @Override
+    public double fractionOf(Predicate<Agent> predicate) {
+        return numberOf(predicate)/size();
+    }
+
+    @Override
+    public Set<Agent> getAgents() {
+        return definition.getAgents(IntStream.range(0, occupancy.length).filter(i -> occupancy[i]>0).toArray());
+    }
+
+
     public double numberOf(Agent agent) {
         return occupancy[agent.getIndex()];
     }
 
-    @Override
     public double numberOf(Predicate<Agent> predicate) {
         return IntStream.range(0, occupancy.length).filter(i -> predicate.test(definition.getAgent(i))).sum();
     }
@@ -107,9 +120,10 @@ public class LIOCountingState implements LIOState<LIOCountingState> {
         return current;
     }
 
+
     @Override
-    public ProbabilityVector<LIOCountingState> next() {
-        return next(definition.getAgentProbabilityMatrix(this));
+    public AgentsDefinition getAgentsDefinition() {
+        return definition;
     }
 
     @Override
@@ -125,5 +139,19 @@ public class LIOCountingState implements LIOState<LIOCountingState> {
         int result = Objects.hash(size);
         result = 31 * result + Arrays.hashCode(occupancy);
         return result;
+    }
+
+    /**
+     * Returns a copy of this state where the given agent has been removed.
+     * @param a the agent to remove.
+     * @return a copy of this state where the given agent has been removed.
+     */
+    public LIOCountingState remove(Agent a) {
+        if (this.occupancy[a.getIndex()]==0) {
+            return this;
+        } else {
+            int[] newOccupancy = Arrays.copyOf(this.occupancy, this.occupancy.length);
+            return new LIOCountingState(definition, occupancy, size);
+        }
     }
 }

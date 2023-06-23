@@ -157,4 +157,12 @@ public final class AgentsDefinition {
         probabilityFunctions[act.getIndex()] = function;
         return act;
     }
+
+    public LIOPopulationFraction getPopulationFractionOf(LIOState<?> state) {
+        return new LIOPopulationFraction(this, Stream.of(agents).mapToDouble(state::fractionOf).toArray());
+    }
+
+    public Set<Agent> getAgents(int[] agents) {
+        return IntStream.of(agents).mapToObj(this::getAgent).collect(Collectors.toSet());
+    }
 }

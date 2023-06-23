@@ -23,10 +23,12 @@
 
 package it.unicam.quasylab.sibilla.core.tools;
 
+import it.unicam.quasylab.sibilla.core.models.pm.Population;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
@@ -92,5 +94,14 @@ public class ProbabilityMatrix<S> {
 
     public S sample(RandomGenerator randomGenerator, S s) {
         return getRowOf(s).sample(randomGenerator, s);
+    }
+
+    /**
+     * Iterates the given consumer on all the rows of this matrix.
+     *
+     * @param consumer the consumer used to evaluate each matrix row.
+     */
+    public void iterate(BiConsumer<S, ProbabilityVector<S>> consumer) {
+        this.rows.entrySet().forEach(e -> consumer.accept(e.getKey(), e.getValue()));
     }
 }

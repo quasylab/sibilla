@@ -68,7 +68,7 @@ public class Interval {
     }
 
     /**
-     * Returns the shift of this interval by the given parameter if it exists. Given two intervals <code>I=[a,b)</code> and
+     * Returns the shift of this interval by the given one, if it exists. Given two intervals <code>I=[a,b)</code> and
      * <code>J=[c,d)</code> such that <code>c<b</code>, the shift of <code>I</code> by <code>J</code> is the interval starting at
      * <code>Math.max(0.0, a-d)</code> and ending at <code>Math.max(0,b-c)</code>.
      *
@@ -76,7 +76,7 @@ public class Interval {
      * @return the shift of this interval by the given parameter if it exists.
      */
     public Optional<Interval> shiftBack(Interval other) {
-        if (other.start>=this.hashCode()) {
+        if (other.start>=this.end()) {
             return Optional.empty();
         } else {
             return Optional.of(new Interval(Math.max(0.0, this.start-other.end), Math.max(0.0, this.end-other.start)));
@@ -184,13 +184,14 @@ public class Interval {
     }
 
     /**
-     * Returns true if this interval <i>meets</i> the given one.
+     * Returns true if this interval <i>meets</i> the given one, namely whenever
+     * the end of this interval is equal to the start of the other.
      *
      * @param other an interval.
      * @return true if this interval <i>meets</i> the given one.
      */
     public boolean meets(Interval other) {
-        return Double.compare(this.start, other.end)==0;
+        return Double.compare(this.end, other.start)==0;
     }
 
     /**

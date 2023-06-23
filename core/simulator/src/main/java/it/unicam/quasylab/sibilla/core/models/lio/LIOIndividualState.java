@@ -119,18 +119,27 @@ public class LIOIndividualState implements IndexedState<Agent>, LIOState<LIOIndi
         return new LIOIndividualState(definition, newList, newMultiplicity);
     }
 
+
     @Override
-    public double size() {
-        return this.numberOfAgents();
+    public double fractionOf(Agent a) {
+        return numberOf(a)/numberOfAgents();
     }
 
     @Override
+    public double fractionOf(Predicate<Agent> predicate) {
+        return numberOf(predicate)/numberOf(predicate);
+    }
+
+    @Override
+    public Set<Agent> getAgents() {
+        return null;
+    }
+
     public double numberOf(Agent a) {
         return multiplicity[a.getIndex()];
     }
 
 
-    @Override
     public double numberOf(Predicate<Agent> predicate) {
         return IntStream.range(0,multiplicity.length).filter(i -> predicate.test(definition.getAgent(i))).mapToDouble(i -> multiplicity[i]).sum();
     }
@@ -195,8 +204,8 @@ public class LIOIndividualState implements IndexedState<Agent>, LIOState<LIOIndi
     }
 
     @Override
-    public ProbabilityVector<LIOIndividualState> next() {
-        return next(definition.getAgentProbabilityMatrix(this));
+    public AgentsDefinition getAgentsDefinition() {
+        return definition;
     }
 
     @Override

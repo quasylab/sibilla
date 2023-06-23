@@ -187,7 +187,7 @@ public class ProbabilityVector<S> {
     }
 
     public double compute(ToDoubleFunction<S> function) {
-        return this.elements.keySet().stream().mapToDouble(function).sum();
+        return this.elements.entrySet().stream().mapToDouble(e -> function.applyAsDouble(e.getKey())*e.getValue()).sum();
     }
 
     public <T> ProbabilityVector<T> apply(Function<S, ProbabilityVector<T>> f) {
