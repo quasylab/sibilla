@@ -57,4 +57,7 @@ public interface LIOCollective extends ImmutableState {
      */
     Set<Agent> getAgents();
 
+    default double fractionOf(Set<Agent> agents) {
+        return agents.stream().mapToDouble(this::fractionOf).sum();
+    }
 }

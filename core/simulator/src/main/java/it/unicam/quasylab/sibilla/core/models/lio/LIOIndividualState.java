@@ -44,7 +44,7 @@ public class LIOIndividualState implements IndexedState<Agent>, LIOState<LIOIndi
     private final ArrayList<Agent> agents;
     private final int[] multiplicity;
 
-    private int hashValue;
+    private final int hashValue;
 
     /**
      * Creates a new state containing no agent.
@@ -62,8 +62,24 @@ public class LIOIndividualState implements IndexedState<Agent>, LIOState<LIOIndi
      * @param agents array of agent names.
      */
     public LIOIndividualState(AgentsDefinition definition, String ... agents) {
+        this(definition, Stream.of(agents).map(AgentName::new).toArray(AgentName[]::new));
+    }
+
+
+
+
+    /**
+     * Create a new state given an agents definition and the names of agents in the state.
+     *
+     * @param definition agents definition.
+     * @param agents array of agent names.
+     */
+    public LIOIndividualState(AgentsDefinition definition, AgentName ... agents) {
         this(definition, Stream.of(agents).map(definition::getAgent).collect(Collectors.toCollection(ArrayList::new)));
     }
+
+
+
 
     /**
      * Create a new state given an agents definition and the indexes of agents in the state.
@@ -82,7 +98,7 @@ public class LIOIndividualState implements IndexedState<Agent>, LIOState<LIOIndi
      * @param definition agents definition.
      * @param agents a list of agents.
      */
-    private LIOIndividualState(AgentsDefinition definition, ArrayList<Agent> agents) {
+    public LIOIndividualState(AgentsDefinition definition, ArrayList<Agent> agents) {
         this(definition, agents, definition.getMultiplicity(agents));
     }
 
@@ -97,7 +113,7 @@ public class LIOIndividualState implements IndexedState<Agent>, LIOState<LIOIndi
         this(definition, agents, multiplicity, agents.hashCode());
     }
 
-    public LIOIndividualState(AgentsDefinition definition, ArrayList<Agent> agents, int[] multiplicity, int hashCode) {
+    private LIOIndividualState(AgentsDefinition definition, ArrayList<Agent> agents, int[] multiplicity, int hashCode) {
         this.definition = definition;
         this.agents = agents;
         this.multiplicity = multiplicity;

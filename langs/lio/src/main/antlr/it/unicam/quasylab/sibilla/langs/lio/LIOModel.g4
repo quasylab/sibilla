@@ -35,7 +35,7 @@ elementState:
             ;
 
 agentParameterDeclaration:
-    name=ID ':' from=INTEGER '..' to=INTEGER
+    name=ID ':' from=expr '..' to=expr
 ;
 
 elementMeasure:
@@ -53,6 +53,7 @@ agentPattern:
 patternElement:
     '_'     # patternElementAny
  |  name=ID # patternElementVariable
+ //TODO: Add pattern syntax `a la linda` + values.
  ;
 
 elementPredicate:
@@ -64,31 +65,33 @@ agentStep:
             ;
 
 elementSystem:
-            'system' name=ID ('['args += ID (',' args += ID)* '[')? '=' population += agentExpression ('|' population+=agentExpression)* ';'
+            'system' name=ID ('['args += ID (',' args += ID)* '[')? '=' population = populationExpression 'endsystem'
             ;
 
-agentExpression:
-            name=ID ('[' stateArguments += expr (',' stateArguments += expr)* ']') ('#' size=expr )?
+populationExpression:
+                'for' name=ID 'from' from=expr 'to' to=expr body=populationExpression 'endfor' # populationExpressionFor
+                | 'if' guard=expr 'then' thenPopulation=populationExpression 'else' elsePopulation=populationExpression 'endif' #populationExpressionIfThenElse
+                | left=populationExpression '|' right=populationExpression # populationExpressionParallel
+                | name=ID ('[' stateArguments += expr (',' stateArguments += expr)* ']') ('#' size=expr )? # populationExpressionAgent
             ;
 
 expr:
-            left=expr op=('<'|'<='|'=='|'>='|'>') right=expr          # expressionRelation
-            | left=expr op=('&'|'&&') right=expr                        # expressionConjunction
-            | left=expr op=('|'|'||') right=expr                        # expressionDisjunction
-            | left=expr '^' right=expr                                  # expressionPower
-            | left=expr op=('*'|'/'|'//') right=expr                    # expressionMulDiv
-            | left=expr op=('+'|'-'|'%') right=expr                     # expressionSumDiff
-            | '!' arg=expr                                              # expressionNegation
-            | guard=expr '?' thenBranch=expr ':' elseBranch=expr        # expressionIfThenElse
-            | op=('-'|'+') arg=expr                                     # expressionUnary
-            | '(' expr ')'                                              # expressionBracket
-            | INTEGER                                                   # expressionInteger
-            | REAL                                                      # expressionReal
-            | 'false'                                                   # expressionFalse
-            | 'true'                                                    # expressionTrue
-            | '%' agent=ID                                              # expressionFractionOfAgents
-            | '#' agent=ID                                              # expressionNumberOfAgents
-            | reference=ID                                              # expressionReference
+            left=expr op=('<'|'<='|'=='|'>='|'>') right=expr              # expressionRelation
+            | left=expr op=('&'|'&&') right=expr                          # expressionConjunction
+            | left=expr op=('|'|'||') right=expr                          # expressionDisjunction
+            | left=expr '^' right=expr                                    # expressionPower
+            | left=expr op=('*'|'/'|'//') right=expr                      # expressionMulDiv
+            | left=expr op=('+'|'-'|'%') right=expr                       # expressionSumDiff
+            | '!' arg=expr                                                # expressionNegation
+            | guard=expr '?' thenBranch=expr ':' elseBranch=expr          # expressionIfThenElse
+            | op=('-'|'+') arg=expr                                       # expressionUnary
+            | '(' expr ')'                                                # expressionBracket
+            | INTEGER                                                     # expressionInteger
+            | REAL                                                        # expressionReal
+            | 'false'                                                     # expressionFalse
+            | 'true'                                                      # expressionTrue
+            | '%' agentPattern                                            # expressionFractionOfAgents
+            | reference=ID                                                # expressionReference
             ;
 
 

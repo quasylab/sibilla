@@ -177,13 +177,11 @@ public class MainQest {
 	}
 
 	public static AgentsDefinition getAgentDefinition() {
-		String[] agents = new String[] { "R", "B" };
-		String[] actions = new String[] { "red", "blue" };
-		AgentsDefinition def = new AgentsDefinition(agents, actions);
-		Agent agentR = def.getAgent("R");
-		Agent agentB = def.getAgent("B");
-		AgentAction redAction = def.setActionProbability( "red", s -> s.fractionOf(agentB)*meet_probability );
-		AgentAction blueAction = def.setActionProbability( "blue" , s -> s.fractionOf(agentR)*meet_probability );
+		AgentsDefinition def = new AgentsDefinition();
+		Agent agentR = def.addAgent("R");
+		Agent agentB = def.addAgent("B");
+		AgentAction redAction = def.addAction( "red", s -> s.fractionOf(agentB)*meet_probability );
+		AgentAction blueAction = def.addAction( "blue" , s -> s.fractionOf(agentR)*meet_probability );
 		agentR.addAction(blueAction, agentB);
 		agentB.addAction(redAction, agentR);
 		return def;

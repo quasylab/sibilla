@@ -46,24 +46,13 @@ public enum LIOType {
     /**
      * Real type.
      */
-    LIO_REAL,
+    LIO_REAL;
 
-    /**
-     * Type associated with functions mapping states to reals.
-     */
-    LIO_MEASURE,
-
-    /**
-     * Type associated with functions mapping states to booleans.
-     */
-    LIO_PREDICATE;
 
     public boolean compatibleWith(LIOType actual) {
         return (this==actual)
                 ||(actual==LIO_NONE)
-                ||((this==LIO_REAL)&&(actual==LIO_INTEGER))
-                ||((this==LIO_MEASURE)&&((actual==LIO_INTEGER)||(actual==LIO_REAL)))
-                ||((this==LIO_PREDICATE)&&(actual==LIO_BOOLEAN));
+                ||((this==LIO_REAL)&&(actual==LIO_INTEGER));
     }
 
     public String messageText() {
@@ -72,14 +61,12 @@ public enum LIOType {
             case LIO_BOOLEAN: return "a boolean";
             case LIO_INTEGER: return "an integer";
             case LIO_REAL: return "a real";
-            case LIO_MEASURE: return "a measure";
-            case LIO_PREDICATE: return "a predicate";
         }
         return "";
     }
 
     public boolean isANumber() {
-        return (this==LIO_NONE)||(this==LIO_INTEGER)||(this==LIO_REAL)||(this==LIO_MEASURE);
+        return (this==LIO_NONE)||(this==LIO_INTEGER)||(this==LIO_REAL);
     }
 
     public static LIOType combine(LIOType t1, LIOType t2) {
@@ -93,19 +80,7 @@ public enum LIOType {
     }
 
     public boolean isABoolean() {
-        return (this==LIO_NONE)||(this==LIO_BOOLEAN)||(this==LIO_PREDICATE);
+        return (this==LIO_NONE)||(this==LIO_BOOLEAN);
     }
 
-    public boolean isAFunction() {
-        return (this==LIO_NONE)||(this==LIO_MEASURE)||(this==LIO_PREDICATE);
-    }
-
-    public LIOType toFunction() {
-        switch (this) {
-            case LIO_BOOLEAN: return LIO_PREDICATE;
-            case LIO_INTEGER:
-            case LIO_REAL: return LIO_MEASURE;
-            default: return this;
-        }
-    }
 }

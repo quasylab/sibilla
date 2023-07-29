@@ -176,13 +176,11 @@ class DiscreteTimeModelCheckerTest {
     }
 
     public AgentsDefinition getAgentDefinition() {
-        String[] agents = new String[] { "0", "1" };
-        String[] actions = new String[] { "be0", "be1" };
-        AgentsDefinition def = new AgentsDefinition(agents, actions);
-        Agent stateZero = def.getAgent("0");
-        Agent stateOne = def.getAgent("1");
-        AgentAction beOne = def.setActionProbability( "be1", s -> 0.5 );
-        AgentAction beZero = def.setActionProbability( "be0" , s -> 0.5 );
+        AgentsDefinition def = new AgentsDefinition();
+        Agent stateZero = def.addAgent("0");
+        Agent stateOne = def.addAgent("1");
+        AgentAction beOne = def.addAction( "be1", s -> 0.5 );
+        AgentAction beZero = def.addAction( "be0" , s -> 0.5 );
         stateZero.addAction(beOne, stateOne);
         stateOne.addAction(beZero, stateZero);
         return def;

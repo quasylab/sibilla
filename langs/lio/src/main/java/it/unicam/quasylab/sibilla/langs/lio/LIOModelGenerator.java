@@ -62,7 +62,7 @@ public class LIOModelGenerator {
         if (!this.parseTree.accept(validator)) {
             throw new LIOModelParseError("Syntax Error!", this.errorCollector);
         }
-        this.symbolTable = validator.getSymbolTable();
+        
     }
 
     private void generateParseTree() throws LIOModelParseError {

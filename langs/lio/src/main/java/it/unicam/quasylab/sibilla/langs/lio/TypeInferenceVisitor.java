@@ -25,54 +25,77 @@ package it.unicam.quasylab.sibilla.langs.lio;
 
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
+import org.antlr.v4.runtime.Token;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * A visitor used to infer type of expressions
  */
 public class TypeInferenceVisitor extends LIOModelBaseVisitor<LIOType> {
 
-    private final SymbolTable table;
-    private final ErrorCollector errors;
-    private final Map<String, LIOType> localVariables;
 
-    public TypeInferenceVisitor(SymbolTable table, Map<String, LIOType> localVariables, ErrorCollector errors) {
-        this.table = table;
+    private final ErrorCollector errors;
+    private final LIOTypeResolver localVariables;
+
+    private final boolean stateExpressionsAllowed;
+
+    private final Map<String, LIOType[]> agentPrototype;
+    private boolean withError = false;
+
+
+    /**
+     * Creates a visitor to infer type of expressions.
+     *
+     * @param agentPrototype          map associating each declared state with its parameter types
+     * @param localVariables          type environment for declared symbols
+     * @param errors                  error collector
+     * @param stateExpressionsAllowed flag indicating if expressions of states are allowed or not
+     */
+    public TypeInferenceVisitor(Map<String, LIOType[]> agentPrototype, LIOTypeResolver localVariables, ErrorCollector errors, boolean stateExpressionsAllowed) {
+        this.agentPrototype = agentPrototype;
         this.errors = errors;
         this.localVariables = localVariables;
+        this.stateExpressionsAllowed = stateExpressionsAllowed;
+    }
+
+    public TypeInferenceVisitor(LIOTypeResolver resolver, ErrorCollector errors) {
+        this(Map.of(), resolver, errors, false);
+    }
+
+    public TypeInferenceVisitor(Map<String, LIOType[]> agentPrototype, LIOTypeResolver resolver, ErrorCollector errors) {
+        this(agentPrototype, resolver, errors, true);
+    }
+
+
+    public boolean checkBooleanType(LIOModelParser.ExprContext expr) {
+        LIOType actual = expr.accept(this);
+        if (!actual.isABoolean()) {
+            recordError(new ParseError(ParseUtil.booleanValueExpected(actual, expr.start),expr.start.getLine(), expr.start.getCharPositionInLine()));
+            return false;
+        }
+        return true;
     }
 
     @Override
     public LIOType visitExpressionConjunction(LIOModelParser.ExpressionConjunctionContext ctx) {
-        LIOType left = ctx.left.accept(this);
-        LIOType right = ctx.right.accept(this);
-        LIOType result = LIOType.LIO_BOOLEAN;
-        if (!left.isABoolean()) {
-            this.errors.record(new ParseError(ParseUtil.booleanValueExpected(left, ctx.left.start),ctx.left.start.getLine(), ctx.left.start.getCharPositionInLine()));
-            result = LIOType.LIO_NONE;
+        if (checkBooleanType(ctx.left)&&checkBooleanType(ctx.right)) {
+            return LIOType.LIO_BOOLEAN;
         }
-        if (!right.isABoolean()) {
-            this.errors.record(new ParseError(ParseUtil.booleanValueExpected(right, ctx.left.start),ctx.right.start.getLine(), ctx.right.start.getCharPositionInLine()));
-            result = LIOType.LIO_NONE;
-        }
-        return result;
+        return LIOType.LIO_NONE;
     }
 
     @Override
     public LIOType visitExpressionReference(LIOModelParser.ExpressionReferenceContext ctx) {
         String name = ctx.reference.getText();
-        if (localVariables.containsKey(name)) {
-            return localVariables.get(name);
+        Optional<LIOType> oType = localVariables.get(name);
+        if (oType.isPresent()) {
+            return oType.get();
         }
-        if (table.isParameter(name)||table.isConstant(name)) {
-            LIOType typeOf = table.getTypeOf(name);
-            if (typeOf == LIOType.LIO_NONE) {
-                this.errors.record(new ParseError(ParseUtil.illegalUseOfUnboundNameError(ctx.reference),ctx.reference.getLine(), ctx.reference.getCharPositionInLine()));
-            }
-            return typeOf;
-        }
-        this.errors.record(new ParseError(ParseUtil.illegalUseOfNameError(ctx.reference),ctx.reference.getLine(), ctx.reference.getCharPositionInLine()));
+        recordError(new ParseError(ParseUtil.unknownSymbolError(ctx.reference), ctx.reference.getLine(), ctx.reference.getCharPositionInLine()));
         return LIOType.LIO_NONE;
     }
 
@@ -85,11 +108,11 @@ public class TypeInferenceVisitor extends LIOModelBaseVisitor<LIOType> {
         LIOType left = e1.accept(this);
         LIOType right = e2.accept(this);
         if (!left.isANumber()) {
-            this.errors.record(new ParseError(ParseUtil.numericalValueExpected(left, e1.start),e1.start.getLine(), e1.start.getCharPositionInLine()));
+            recordError(new ParseError(ParseUtil.numericalValueExpected(left, e1.start),e1.start.getLine(), e1.start.getCharPositionInLine()));
             return LIOType.LIO_NONE;
         }
         if (!right.isANumber()) {
-            this.errors.record(new ParseError(ParseUtil.numericalValueExpected(right, e2.start),e2.start.getLine(), e2.start.getCharPositionInLine()));
+            recordError(new ParseError(ParseUtil.numericalValueExpected(right, e2.start),e2.start.getLine(), e2.start.getCharPositionInLine()));
             return LIOType.LIO_NONE;
         }
         return LIOType.combine(left, right);
@@ -106,7 +129,7 @@ public class TypeInferenceVisitor extends LIOModelBaseVisitor<LIOType> {
         if (type.isANumber()) {
             return type;
         } else {
-            this.errors.record(new ParseError(ParseUtil.numericalValueExpected(type, ctx.arg.start),ctx.arg.start.getLine(), ctx.arg.start.getCharPositionInLine()));
+            recordError(new ParseError(ParseUtil.numericalValueExpected(type, ctx.arg.start),ctx.arg.start.getLine(), ctx.arg.start.getCharPositionInLine()));
             return LIOType.LIO_NONE;
         }
     }
@@ -123,56 +146,36 @@ public class TypeInferenceVisitor extends LIOModelBaseVisitor<LIOType> {
 
     @Override
     public LIOType visitExpressionDisjunction(LIOModelParser.ExpressionDisjunctionContext ctx) {
-        LIOType left = ctx.left.accept(this);
-        LIOType right = ctx.right.accept(this);
-        LIOType result = LIOType.LIO_BOOLEAN;
-        if (!left.isABoolean()) {
-            this.errors.record(new ParseError(ParseUtil.booleanValueExpected(left, ctx.left.start),ctx.left.start.getLine(), ctx.left.start.getCharPositionInLine()));
-            result = LIOType.LIO_NONE;
+        if (checkBooleanType(ctx.left)&&checkBooleanType(ctx.right)) {
+            return LIOType.LIO_BOOLEAN;
         }
-        if (!right.isABoolean()) {
-            this.errors.record(new ParseError(ParseUtil.booleanValueExpected(right, ctx.left.start),ctx.right.start.getLine(), ctx.right.start.getCharPositionInLine()));
-            result = LIOType.LIO_NONE;
-        }
-        return result;
+        return LIOType.LIO_NONE;
     }
 
     @Override
     public LIOType visitExpressionIfThenElse(LIOModelParser.ExpressionIfThenElseContext ctx) {
-        LIOType guardType = ctx.guard.accept(this);
+        checkBooleanType(ctx.guard);
         LIOType thenType = ctx.thenBranch.accept(this);
         LIOType elseType = ctx.elseBranch.accept(this);
-        LIOType result = LIOType.combine(thenType, elseType);
-        if (LIOType.LIO_NONE == result) {
-            this.errors.record(new ParseError(ParseUtil.typeErrorMessage(thenType, elseType, ctx.elseBranch.start),ctx.elseBranch.start.getLine(), ctx.elseBranch.start.getCharPositionInLine()));
+        if (thenType.compatibleWith(elseType)||elseType.compatibleWith(thenType)) {
+            return LIOType.combine(thenType, elseType);
+        } else {
+            recordError(new ParseError(ParseUtil.typeErrorMessage(thenType, elseType, ctx.elseBranch.start), ctx.elseBranch.start.getLine(), ctx.elseBranch.start.getCharPositionInLine()));
+            return LIOType.LIO_NONE;
         }
-        if (!guardType.isABoolean()) {
-            this.errors.record(new ParseError(ParseUtil.booleanValueExpected(guardType, ctx.guard.start),ctx.guard.start.getLine(), ctx.guard.start.getCharPositionInLine()));
-            result = LIOType.LIO_NONE;
-        }
-        if (guardType.isAFunction()) {
-            result = result.toFunction();
-        }
-        return result;
     }
 
     @Override
     public LIOType visitExpressionRelation(LIOModelParser.ExpressionRelationContext ctx) {
         LIOType left = ctx.left.accept(this);
         LIOType right = ctx.right.accept(this);
-        LIOType result = LIOType.LIO_BOOLEAN;
         if (!left.isANumber()) {
-            this.errors.record(new ParseError(ParseUtil.numericalValueExpected(left, ctx.left.start),ctx.left.start.getLine(), ctx.left.start.getCharPositionInLine()));
-            result = LIOType.LIO_NONE;
+            recordError(new ParseError(ParseUtil.numericalValueExpected(left, ctx.left.start),ctx.left.start.getLine(), ctx.left.start.getCharPositionInLine()));
         }
         if (!right.isANumber()) {
-            this.errors.record(new ParseError(ParseUtil.numericalValueExpected(right, ctx.right.start),ctx.right.start.getLine(), ctx.right.start.getCharPositionInLine()));
-            result = LIOType.LIO_NONE;
+            recordError(new ParseError(ParseUtil.numericalValueExpected(right, ctx.right.start),ctx.right.start.getLine(), ctx.right.start.getCharPositionInLine()));
         }
-        if (LIOType.combine(left, right).isAFunction()) {
-            result = result.toFunction();
-        }
-        return result;
+        return LIOType.LIO_BOOLEAN;
     }
 
     @Override
@@ -182,9 +185,7 @@ public class TypeInferenceVisitor extends LIOModelBaseVisitor<LIOType> {
 
     @Override
     public LIOType visitExpressionNegation(LIOModelParser.ExpressionNegationContext ctx) {
-        LIOType left = ctx.arg.accept(this);
-        if (!left.isABoolean()) {
-            this.errors.record(new ParseError(ParseUtil.booleanValueExpected(left, ctx.arg.start),ctx.arg.start.getLine(), ctx.arg.start.getCharPositionInLine()));
+        if (checkBooleanType(ctx.arg)) {
             return LIOType.LIO_NONE;
         } else {
             return LIOType.LIO_BOOLEAN;
@@ -203,92 +204,57 @@ public class TypeInferenceVisitor extends LIOModelBaseVisitor<LIOType> {
 
     @Override
     public LIOType visitExpressionFractionOfAgents(LIOModelParser.ExpressionFractionOfAgentsContext ctx) {
-        String name = ctx.agent.getText();
-        if (table.isPredicate(name)||table.isState(name)) {
-            return LIOType.LIO_MEASURE;
+        if (stateExpressionsAllowed) {
+            checkAgentPatter(ctx.agentPattern());
         } else {
-            this.errors.record(new ParseError(ParseUtil.illegalUseOfNameError(ctx.agent),ctx.agent.getLine(), ctx.agent.getCharPositionInLine()));
-            return LIOType.LIO_NONE;
+            recordError(new ParseError(ParseUtil.illegalUseOfStateExpression(ctx.start), ctx.start.getLine(), ctx.start.getCharPositionInLine()));
+        }
+        return LIOType.LIO_REAL;
+    }
+
+    private void recordError(ParseError parseError) {
+        errors.record(parseError);
+        withError = true;
+    }
+
+    private void checkAgentPatter(LIOModelParser.AgentPatternContext ctx) {
+        LIOType[] argsType = agentPrototype.get(ctx.name.getText());
+        if (ctx.patternElements.size() != argsType.length) {
+            recordError(new ParseError(ParseUtil.wrongNumberOfAgentParameters(ctx.name, argsType.length, ctx.patternElements.size()), ctx.name.getLine(), ctx.name.getCharPositionInLine()));
+            return ;
+        }
+        if (ctx.guard != null) {
+            LIOTypeResolver patternVariables = LIOTypeResolver.resolverOf(getPatternVariableType(ctx.patternElements, argsType)).orElse(localVariables);
+            withError = withError & (new TypeInferenceVisitor(agentPrototype, patternVariables, errors, false).checkBooleanType(ctx.guard));
         }
     }
 
-    @Override
-    public LIOType visitExpressionNumberOfAgents(LIOModelParser.ExpressionNumberOfAgentsContext ctx) {
-        String name = ctx.agent.getText();
-        if (table.isPredicate(name)||table.isState(name)) {
-            return LIOType.LIO_MEASURE;
-        } else {
-            this.errors.record(new ParseError(ParseUtil.illegalUseOfNameError(ctx.agent),ctx.agent.getLine(), ctx.agent.getCharPositionInLine()));
-            return LIOType.LIO_NONE;
+    private Map<String, LIOType> getPatternVariableType(List<LIOModelParser.PatternElementContext> patternElements, LIOType[] argsType) {
+        Map<String, LIOType> map = new HashMap<>();
+        Map<String, Token> declared = new HashMap<>();
+        int counter = 0;
+        for (LIOModelParser.PatternElementContext patternElement: patternElements) {
+            if (patternElement instanceof LIOModelParser.PatternElementVariableContext) {
+                LIOModelParser.PatternElementVariableContext localVariable = ((LIOModelParser.PatternElementVariableContext) patternElement);
+                if (declared.containsKey(localVariable.name.getText())) {
+                    recordError(new ParseError(ParseUtil.duplicatedNameErrorMessage(localVariable.name, declared.get(localVariable.name.getText())),localVariable.name.getLine(), localVariable.name.getCharPositionInLine()));
+                } else {
+                    map.put(localVariable.name.getText(), argsType[counter]);
+                    declared.put(localVariable.name.getText(), localVariable.name);
+                }
+            }
+            counter++;
         }
+        return map;
     }
+
 
     @Override
     public LIOType visitExpressionInteger(LIOModelParser.ExpressionIntegerContext ctx) {
         return LIOType.LIO_INTEGER;
     }
 
-    /**
-     * Returns the type associated with the given expression and using the given table to solve
-     * types of symbols.
-     *
-     * @param table symbol table used to resolve used names in the expression
-     * @param errors list used to store the errors found while inferring the expression type
-     * @param expr an expression
-     * @return the type associated with the given expression.
-     */
-    public static LIOType inferTypeOf(SymbolTable table, ErrorCollector errors, LIOModelParser.ExprContext expr) {
-        return inferTypeOf(Map.of(), table, errors, expr);
-    }
-
-    /**
-     * Returns the type associated with the given expression and using the given table to solve
-     * types of symbols.
-     *
-     * @param localVariables local variables that can be used in the expression
-     * @param table symbol table used to resolve used names in the expression
-     * @param errors list used to store the errors found while inferring the expression type
-     * @param expr an expression
-     * @return the type associated with the given expression.
-     */
-    public static LIOType inferTypeOf(Map<String, LIOType> localVariables, SymbolTable table, ErrorCollector errors, LIOModelParser.ExprContext expr) {
-        return expr.accept(new TypeInferenceVisitor(table, localVariables, errors));
-    }
-
-    /**
-     * Checks if the given expression has a type compatible with the given expected type. The type of expression is
-     * inferred by using the given symbol table. In errors are found while inferring the type these are stored in the
-     * given list.
-     *
-     * @param table symbol table used to resolve used names in the expression
-     * @param errors list used to store the errors found while inferring the expression type
-     * @param expectedType expected type.
-     * @param expr  expression to check.
-     * @return true if the given expression has a type compatible with the given expected type.
-     */
-    public static boolean hasType(SymbolTable table, ErrorCollector errors, LIOType expectedType, LIOModelParser.ExprContext expr) {
-        return hasType(Map.of(), table, errors, expectedType, expr);
-    }
-
-    /**
-     * Checks if the given expression has a type compatible with the given expected type. The type of expression is
-     * inferred by using the given symbol table. In errors are found while inferring the type these are stored in the
-     * given list.
-     *
-     * @param localVariables local variables that can be used in the expression
-     * @param table symbol table used to resolve used names in the expression
-     * @param errors list used to store the errors found while inferring the expression type
-     * @param expectedType expected type.
-     * @param expr  expression to check.
-     * @return true if the given expression has a type compatible with the given expected type.
-     */
-    public static boolean hasType(Map<String, LIOType> localVariables, SymbolTable table, ErrorCollector errors, LIOType expectedType, LIOModelParser.ExprContext expr) {
-        LIOType actualType = inferTypeOf(localVariables, table, errors, expr);
-        if (expectedType.compatibleWith(actualType)) {
-            return true;
-        } else {
-            errors.record(new ParseError(ParseUtil.typeErrorMessage(expectedType, actualType, expr.start),expr.start.getLine(), expr.start.getCharPositionInLine()));
-            return false;
-        }
+    public boolean withError() {
+        return withError;
     }
 }

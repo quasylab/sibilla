@@ -36,7 +36,7 @@ import java.util.stream.Collector;
 public final class Agent {
 
     private final int index;
-    private final String name;
+    private final AgentName name;
 
     private final List<Pair<AgentAction,Agent>> actions;
 
@@ -46,7 +46,7 @@ public final class Agent {
      * @param name agent name.
      * @param index agent index.
      */
-    public Agent(String name, int index) {
+    public Agent(AgentName name, int index) {
         this.index = index;
         this.name = name;
         this.actions = new LinkedList<>();
@@ -92,7 +92,7 @@ public final class Agent {
      *
      * @return agent name.
      */
-    public String getName() {
+    public AgentName getName() {
         return name;
     }
 

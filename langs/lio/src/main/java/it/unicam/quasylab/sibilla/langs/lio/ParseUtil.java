@@ -40,6 +40,9 @@ public class ParseUtil {
     private static final String ILLEGAL_USE_OF_UNBOUND_NAME_MESSAGE = "Name %s is unbound at line %d:%d.";
     private static final String UNKNOWN_ACTION_MESSAGE = "Action %s is unknown at line %d:%d.";
     private static final String UNKNOWN_STATE_MESSAGE = "Action %s is unknown at line %d:%d.";
+    private static final String UNKNOWN_SYMBOL_MESSAGE = "Symbol %s is unknown at line %d:%d.";
+    private static final String ILLEGAL_USE_OF_STATE_EXPRESSION_MESSAGE = "Illegal use of a state expression at line %d:%d.";
+    private static final String WRONG_NUMBER_OF_AGENT_PARAMETERS = "Wrong number of parameters for agent %s at line %d:%d. Expected %d are %d.";;
 
     public static String duplicatedNameErrorMessage(Token declaredToken, Token existingToken) {
         return String.format(DUPLICATED_NAME_MESSAGE,
@@ -100,4 +103,15 @@ public class ParseUtil {
                 token.getCharPositionInLine());
     }
 
+    public static String unknownSymbolError(Token token) {
+        return String.format(UNKNOWN_SYMBOL_MESSAGE, token.getText(), token.getLine(), token.getCharPositionInLine());
+    }
+
+    public static String illegalUseOfStateExpression(Token token) {
+        return String.format(ILLEGAL_USE_OF_STATE_EXPRESSION_MESSAGE, token.getLine(), token.getCharPositionInLine());
+    }
+
+    public static String wrongNumberOfAgentParameters(Token token, int expected, int actual) {
+        return String.format(WRONG_NUMBER_OF_AGENT_PARAMETERS,token.getText(), token.getLine(), token.getCharPositionInLine(), expected, actual);
+    }
 }
