@@ -25,6 +25,7 @@ package it.unicam.quasylab.sibilla.examples.lio.seir;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModel;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 
 import java.io.FileNotFoundException;
 import java.net.UnknownHostException;
@@ -47,7 +48,7 @@ public class CovidReachability {
         SimulationEnvironment simulator = new SimulationEnvironment();
         SimulationEnvironment.silent = false;
         double lambda = 3.75;
-        def.setParameter("lambdaMeet",lambda);
+        def.setParameter("lambdaMeet",new SibillaDouble(lambda));
         PopulationModel model = def.createModel();
         int A = model.indexOf("A");
         int G = model.indexOf("G");

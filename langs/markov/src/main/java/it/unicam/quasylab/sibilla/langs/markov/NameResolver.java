@@ -38,7 +38,7 @@ public interface NameResolver {
             if (consts.containsKey(name)) {
                 return consts.get(name);
             } else {
-                return env.get(name);
+                return env.get(name).doubleOf();
             }
         };
     }

@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Map;
@@ -38,8 +40,8 @@ public class EvaluationEnvironment {
 
 
     private final CachedValues constants;
-    private final Map<String,Double> attributes;
-    private final Map<String,Double> values;
+    private final Map<String, SibillaValue> attributes;
+    private final Map<String, SibillaValue> values;
     private final PropertyChangeSupport changer;
     private boolean isChanged = false;
 
@@ -60,7 +62,7 @@ public class EvaluationEnvironment {
         this.constants.setEnvironment(this);
     }
 
-    public EvaluationEnvironment(Map<String, Double> values, CachedValues constants) {
+    public EvaluationEnvironment(Map<String, SibillaValue> values, CachedValues constants) {
         this(constants);
         this.attributes.putAll(values);
         this.values.putAll(values);
@@ -72,8 +74,8 @@ public class EvaluationEnvironment {
      * @param name name of a parameter.
      * @return the value associate with a given name.
      */
-    public synchronized double get(String name) {
-        return values.getOrDefault(name,Double.NaN);
+    public synchronized SibillaValue get(String name) {
+        return values.getOrDefault(name,SibillaValue.ERROR_VALUE);
     }
 
     /**
@@ -82,24 +84,13 @@ public class EvaluationEnvironment {
      * @param name name of a parameter.
      * @param value value to associate.q
      */
-    public synchronized void set(String name, double value) {
+    public synchronized void set(String name, SibillaValue value) {
         if (!attributes.containsKey(name)) {
             throw new IllegalArgumentException("Parameter "+name+" is unknown.");
         }
-        Double old = values.put(name,value);
+        SibillaValue old = values.put(name,value);
         changer.firePropertyChange(name,old,value);
         this.isChanged = true;
-    }
-
-    /**
-     * Adds a new parameter in the environment with the given value.
-     *
-     * @param name
-     * @param value
-     */
-    public synchronized void define(String name, double value) {
-        this.attributes.put(name, value);
-        this.values.put(name, value);
     }
 
     /**
@@ -108,7 +99,7 @@ public class EvaluationEnvironment {
      * @param name name of a parameter.
      * @param value default value.
      */
-    public synchronized void register(String name, double value) {
+    public synchronized void register(String name, SibillaValue value) {
         if (attributes.containsKey(name)) {
             throw new IllegalArgumentException("Parameter "+name+" is already defined in the environment.");
         }
@@ -131,8 +122,8 @@ public class EvaluationEnvironment {
      * @param name parameter name.
      * @return the default value associated with the given parameter.
      */
-    public synchronized double getDefault(String name) {
-        Double value = attributes.get(name);
+    public synchronized SibillaValue getDefault(String name) {
+        SibillaValue value = attributes.get(name);
         if (value == null) {
             throw new IllegalArgumentException("Parameter "+name+" is unknown.");
         }
@@ -140,11 +131,10 @@ public class EvaluationEnvironment {
     }
 
     /**
-     * Reset all paramters to the default values.
+     * Reset all parameters to their default values.
      */
     public synchronized void reset( ) {
-        for (Map.Entry<String, Double> e: attributes.entrySet()
-             ) {
+        for (Map.Entry<String, SibillaValue> e: attributes.entrySet()) {
             set(e.getKey(), e.getValue());
         }
     }
@@ -182,7 +172,7 @@ public class EvaluationEnvironment {
      *
      * @return the map associating each parameter with its current value.
      */
-    public Map<String, Double> getParameterMap() {
+    public Map<String, SibillaValue> getParameterMap() {
         return new TreeMap<>(values);
     }
 
@@ -199,7 +189,7 @@ public class EvaluationEnvironment {
         return s -> {
             double d = constants.get(s);
             if (Double.isNaN(d)) {
-                return get(s);
+                return get(s).doubleOf();
             } else {
                 return d;
             }

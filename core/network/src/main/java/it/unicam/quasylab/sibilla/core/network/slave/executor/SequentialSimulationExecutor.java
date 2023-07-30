@@ -43,9 +43,9 @@ public class SequentialSimulationExecutor extends SimulationExecutor {
     public void simulate(NetworkTask networkTask, TCPNetworkManager master) {
         List<? extends SimulationTask<?>> tasks = networkTask.getTasks();
         LinkedList<Trajectory<?>> trajectories = new LinkedList<>();
-        Model model = tasks.get(0).getUnit().getModel();
 
         //TODO: FIX!
+        //        Model model = tasks.get(0).getUnit().getModel();
 //        this.computationBenchmark.run(() -> {
 //            for (int i = 0; i < tasks.size(); i++) {
 //                Trajectory trajectory = tasks.get(i).get();
@@ -53,8 +53,7 @@ public class SequentialSimulationExecutor extends SimulationExecutor {
 //            }
 //            return List.of((double) tasks.size());
 //        });
-
-        sendResult(new ComputationResult(trajectories), master, model);
+// sendResult(new ComputationResult(trajectories), master, model);
 
         /*
         for (int i = 0; i < tasks.size(); i++) {

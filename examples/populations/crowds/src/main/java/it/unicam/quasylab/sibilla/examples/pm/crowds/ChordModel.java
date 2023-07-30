@@ -27,7 +27,7 @@ public class ChordModel {
 
     public static PopulationRegistry generatePopulationRegistry(EvaluationEnvironment ee) {
         PopulationRegistry reg = new PopulationRegistry();
-        int N = (int) ee.get("N");
+        int N = ee.get("N").intOf();
         for (int i = 0; i < N; i++) {
             reg.register("A", i);
         }
@@ -42,7 +42,7 @@ public class ChordModel {
     }
 
     public static List<PopulationRule> getRules(EvaluationEnvironment ee, PopulationRegistry reg) {
-        int N = (int) ee.get("N");
+        int N = ee.get("N").intOf();
         List<PopulationRule> rules = new LinkedList<>();
 
         // regole inserimento nel crowd
@@ -80,14 +80,14 @@ public class ChordModel {
     }
 
     public static Map<String,Measure<PopulationState>> getMeasures(EvaluationEnvironment ee, PopulationRegistry reg) {
-        int N = (int) ee.get("N");
+        int N = ee.get("N").intOf();
         HashMap<String,Measure<PopulationState>> toReturn = new HashMap<>();
         toReturn.put("MESSAGES",new SimpleMeasure<>("MESSAGES", s -> runningMessages(N, reg, s)));
         return toReturn;
     }
 
     public static ParametricDataSet<Function<RandomGenerator,PopulationState>> states(EvaluationEnvironment ee, PopulationRegistry reg) {
-        int N = (int) ee.get("N");
+        int N = ee.get("N").intOf();
         Population[] pop = new Population[N + 1];
         pop[0] = new Population(reg.indexOf("M1"), 1);
         for (int i = 0; i < N; i++) {

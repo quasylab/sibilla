@@ -47,10 +47,10 @@ public class MultithreadedSimulationExecutor extends SimulationExecutor {
 
     @Override
     public void simulate(NetworkTask networkTask, TCPNetworkManager master) {
-        List<? extends SimulationTask<?>> tasks = networkTask.getTasks();
-        LinkedList<Trajectory<?>> trajectories = new LinkedList<>();
-        Model model = tasks.get(0).getUnit().getModel();
-        CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
+//        List<? extends SimulationTask<?>> tasks = networkTask.getTasks();
+//        LinkedList<Trajectory<?>> trajectories = new LinkedList<>();
+//        Model model = tasks.get(0).getUnit().getModel();
+//        CompletableFuture<?>[] futures = new CompletableFuture<?>[tasks.size()];
 
         //FIXME!
 //        this.computationBenchmark.run(() -> {
@@ -65,7 +65,7 @@ public class MultithreadedSimulationExecutor extends SimulationExecutor {
 //            return List.of((double) tasks.size());
 //        });
 
-        sendResult(new ComputationResult(trajectories), master, model);
+//        sendResult(new ComputationResult(trajectories), master, model);
 
         /*
          * for (int i = 0; i < tasks.size(); i++) { futures[i] =

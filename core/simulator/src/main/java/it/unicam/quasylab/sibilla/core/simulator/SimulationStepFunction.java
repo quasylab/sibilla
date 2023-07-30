@@ -21,33 +21,19 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.models;
+package it.unicam.quasylab.sibilla.core.simulator;
 
-import it.unicam.quasylab.sibilla.core.simulator.DefaultSimulationCursor;
-import it.unicam.quasylab.sibilla.core.simulator.SimulatorCursor;
+import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.models.TimeStep;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Optional;
-import java.util.function.Function;
 
-public interface MarkovModel<S extends ImmutableState> extends Model<S> {
-
-    @Override
-    default SimulatorCursor<S> createSimulationCursor(RandomGenerator r, Function<RandomGenerator, S> initialStateBuilder) {
-        return new DefaultSimulationCursor<>(r, this::next, initialStateBuilder);
-    }
-
-
-    /**
-     * Returns the simulator cursor starting its execution from the given initial state.
-     *
-     * @param r random generator to use in the simulation
-     * @param initialState initial state
-     * @return the simulator cursor starting its execution from the given initial state.
-     */
-    default SimulatorCursor<S> createSimulationCursor(RandomGenerator r, S initialState) {
-        return createSimulationCursor(r, rg -> initialState);
-    }
+/**
+ * This functional interface is used to simulate
+ */
+@FunctionalInterface
+public interface SimulationStepFunction<S extends State> {
 
     /**
      * Samples possible next state when the process is in a given state at a given
@@ -59,6 +45,5 @@ public interface MarkovModel<S extends ImmutableState> extends Model<S> {
      * @return process time step.
      */
     Optional<TimeStep<S>> next(RandomGenerator r, double time, S state);
-
 
 }

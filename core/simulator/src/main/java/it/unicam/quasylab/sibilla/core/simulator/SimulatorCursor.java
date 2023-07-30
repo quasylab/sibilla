@@ -21,8 +21,9 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.models;
+package it.unicam.quasylab.sibilla.core.simulator;
 
+import it.unicam.quasylab.sibilla.core.models.State;
 import org.apache.commons.math3.random.RandomGenerator;
 
 /**

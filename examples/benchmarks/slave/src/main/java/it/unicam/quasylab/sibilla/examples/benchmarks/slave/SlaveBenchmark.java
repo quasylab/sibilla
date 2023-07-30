@@ -12,6 +12,7 @@ import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSe
 import it.unicam.quasylab.sibilla.core.network.serialization.Serializer;
 import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
 import it.unicam.quasylab.sibilla.core.network.util.NetworkUtils;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.examples.pm.crowds.ChordModel;
 
 import java.io.IOException;
@@ -41,7 +42,7 @@ public class SlaveBenchmark {
                 ChordModel::getMeasures,
                 (e, r) -> new HashMap<>(),
                 ChordModel::states);
-        def.setParameter("N", 1000);
+        def.setParameter("N", new SibillaDouble(1000));
         PopulationModel model = def.createModel();
 
         SlaveBenchmarkEnvironment<PopulationState> env = SlaveBenchmarkEnvironment.getSlaveBenchmark(networkManager,

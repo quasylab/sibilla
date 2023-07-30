@@ -24,19 +24,25 @@
 package it.unicam.quasylab.sibilla.core.models.lio;
 
 import it.unicam.quasylab.sibilla.core.models.AbstractModel;
-import it.unicam.quasylab.sibilla.core.models.DiscreteModel;
+import it.unicam.quasylab.sibilla.core.models.DiscreteTimeModel;
+import it.unicam.quasylab.sibilla.core.models.TimeStep;
+import it.unicam.quasylab.sibilla.core.simulator.DefaultSimulationCursor;
+import it.unicam.quasylab.sibilla.core.simulator.DiscreteTimeSimulationStepFunction;
+import it.unicam.quasylab.sibilla.core.simulator.SimulatorCursor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
  * Identifies a model for a Langauge of Interactive Objects.
  *
  */
-public class LIOModel<S extends LIOState<S>> extends AbstractModel<S> implements DiscreteModel<S> {
+public class LIOModel extends AbstractModel<LIOState> implements DiscreteTimeModel<LIOState> {
 
     private final AgentsDefinition definitions;
 
@@ -56,7 +62,7 @@ public class LIOModel<S extends LIOState<S>> extends AbstractModel<S> implements
      *
      * @param definitions agent definitions.
      */
-    public LIOModel(AgentsDefinition definitions, Map<String, Measure<? super S>> measures, Map<String, Predicate<? super S>> predicates) {
+    public LIOModel(AgentsDefinition definitions, Map<String, Measure<? super LIOState>> measures, Map<String, Predicate<? super LIOState>> predicates) {
         super(measures, predicates);
         this.definitions = definitions;
     }
@@ -67,17 +73,38 @@ public class LIOModel<S extends LIOState<S>> extends AbstractModel<S> implements
     }
 
     @Override
-    public byte[] byteOf(S state) throws IOException {
+    public byte[] byteOf(LIOState state) throws IOException {
         return new byte[0];
     }
 
     @Override
-    public S fromByte(byte[] bytes) throws IOException {
+    public LIOState fromByte(byte[] bytes) throws IOException {
         return null;
     }
 
     @Override
-    public S sampleNextState(RandomGenerator r, double time, S state) {
+    public LIOState sampleNextState(RandomGenerator r, double time, LIOState state) {
         return state.step(r, definitions.getAgentProbabilityMatrix(state));
     }
+
+    public SimulatorCursor<LIOIndividualState> createIndividualSimulationCursor(RandomGenerator randomGenerator, Function<RandomGenerator, LIOIndividualState> indivistateBuilder) {
+        return new DefaultSimulationCursor<>(randomGenerator, this.nextIndividuals(), indivistateBuilder);
+    }
+
+    public DiscreteTimeSimulationStepFunction<LIOIndividualState> nextIndividuals() {
+        return (rg, state) -> state.step(rg, definitions.getAgentProbabilityMatrix(state));
+    }
+
+    public DiscreteTimeSimulationStepFunction<LIOMixedState> nextMixed() {
+        return (rg, state) -> state.step(rg, definitions.getAgentProbabilityMatrix(state));
+    }
+
+    public DiscreteTimeSimulationStepFunction<LIOCountingState> nextCounting() {
+        return (rg, state) -> state.step(rg, definitions.getAgentProbabilityMatrix(state));
+    }
+
+    public DiscreteTimeSimulationStepFunction<LIOMeanFieldState> nextMeanField() {
+        return (rg, state) -> state.step(rg, definitions.getAgentProbabilityMatrix(state));
+    }
+
 }

@@ -11,6 +11,7 @@ import it.unicam.quasylab.sibilla.core.network.communication.TCPNetworkManagerTy
 import it.unicam.quasylab.sibilla.core.network.serialization.ComputationResultSerializerType;
 import it.unicam.quasylab.sibilla.core.network.serialization.Serializer;
 import it.unicam.quasylab.sibilla.core.network.serialization.SerializerType;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.examples.pm.crowds.ChordModel;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class MasterBenchmark {
                 ChordModel::getMeasures,
                 (e,r) -> new HashMap<>(),
                 ChordModel::states);
-        def.setParameter("N", 1000);
+        def.setParameter("N", new SibillaDouble(1000));
         PopulationModel model = def.createModel();
 
         MasterBenchmarkEnvironment<PopulationState> env = MasterBenchmarkEnvironment.getMasterBenchmark(networkManager,

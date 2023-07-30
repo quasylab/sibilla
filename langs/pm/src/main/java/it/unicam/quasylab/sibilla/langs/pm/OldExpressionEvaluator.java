@@ -242,7 +242,7 @@ public class OldExpressionEvaluator {
                 return getValueOfConstants(id);
             }
             if (table.isAParameter(id)) {
-                return environment.get(id);
+                return environment.get(id).doubleOf();
             }
             return context.getOrDefault(id,Double.NaN);
         }
@@ -382,7 +382,7 @@ public class OldExpressionEvaluator {
                 return s -> v;
             }
             if (table.isAParameter(id)) {
-                double v = environment.get(id);
+                double v = environment.get(id).doubleOf();
                 return s -> v;
             }
             if (table.isAVariable(id)) {

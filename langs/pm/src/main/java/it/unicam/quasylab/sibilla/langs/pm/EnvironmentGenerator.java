@@ -24,6 +24,8 @@
 package it.unicam.quasylab.sibilla.langs.pm;
 
 import it.unicam.quasylab.sibilla.core.models.CachedValues;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +35,7 @@ public class EnvironmentGenerator extends PopulationModelBaseVisitor<Boolean> {
 
     private final Map<String,Function<Function<String,Double>,Double>> definitions;
     private final Map<String,Double> constants;
-    private final Map<String,Double> parameters;
+    private final Map<String, SibillaValue> parameters;
 
     public EnvironmentGenerator() {
         this.constants = new HashMap<>();
@@ -57,13 +59,13 @@ public class EnvironmentGenerator extends PopulationModelBaseVisitor<Boolean> {
     }
 
     private Double getValueOf(String name) {
-        return constants.getOrDefault(name,parameters.getOrDefault(name, Double.NaN));
+        return constants.getOrDefault(name,parameters.getOrDefault(name, SibillaValue.ERROR_VALUE).doubleOf());
     }
 
     @Override
     public Boolean visitParam_declaration(PopulationModelParser.Param_declarationContext ctx) {
         ExpressionEvaluator evaluator = new ExpressionEvaluator(this::getValueOf);
-        parameters.put(ctx.name.getText(), ctx.expr().accept(evaluator));
+        parameters.put(ctx.name.getText(), new SibillaDouble(ctx.expr().accept(evaluator)));
         return true;
     }
 
@@ -72,7 +74,7 @@ public class EnvironmentGenerator extends PopulationModelBaseVisitor<Boolean> {
         return true;
     }
 
-    public Map<String,Double> getParameters() {
+    public Map<String,SibillaValue> getParameters() {
         return this.parameters;
     }
 

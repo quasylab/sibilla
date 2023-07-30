@@ -23,12 +23,15 @@
 
 package it.unicam.quasylab.sibilla.langs.markov;
 
+import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+
 import java.util.HashMap;
 import java.util.Map;
 
-public class ParameterEvaluator extends MarkovChainModelBaseVisitor<Map<String, Double>> {
+public class ParameterEvaluator extends MarkovChainModelBaseVisitor<Map<String, SibillaValue>> {
 
-    private final Map<String, Double> parameters;
+    private final Map<String, SibillaValue> parameters;
 
 
     public ParameterEvaluator() {
@@ -36,7 +39,7 @@ public class ParameterEvaluator extends MarkovChainModelBaseVisitor<Map<String, 
     }
 
     @Override
-    public Map<String, Double> visitModel(MarkovChainModelParser.ModelContext ctx) {
+    public Map<String, SibillaValue> visitModel(MarkovChainModelParser.ModelContext ctx) {
         for (MarkovChainModelParser.ElementContext element : ctx.element()) {
             element.accept(this);
         }
@@ -44,13 +47,13 @@ public class ParameterEvaluator extends MarkovChainModelBaseVisitor<Map<String, 
     }
 
     @Override
-    public Map<String, Double> visitConst_declaration(MarkovChainModelParser.Const_declarationContext ctx) {
+    public Map<String, SibillaValue> visitConst_declaration(MarkovChainModelParser.Const_declarationContext ctx) {
         return this.parameters;
     }
 
     @Override
-    public Map<String, Double> visitParam_declaration(MarkovChainModelParser.Param_declarationContext ctx) {
-        this.parameters.put(ctx.name.getText(), Double.parseDouble(ctx.value.getText()));
+    public Map<String, SibillaValue> visitParam_declaration(MarkovChainModelParser.Param_declarationContext ctx) {
+        this.parameters.put(ctx.name.getText(), new SibillaDouble(Double.parseDouble(ctx.value.getText())));
         return this.parameters;
     }
 }

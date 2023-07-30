@@ -23,38 +23,35 @@
 
 package it.unicam.quasylab.sibilla.core.tools;
 
-import it.unicam.quasylab.sibilla.core.models.DiscreteModel;
 import it.unicam.quasylab.sibilla.core.models.ImmutableState;
 import it.unicam.quasylab.sibilla.core.models.IndexedState;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import it.unicam.quasylab.sibilla.core.simulator.DiscreteTimeSimulationStepFunction;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Sample;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.function.DoublePredicate;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class DiscreteTimeAgentSMC<S extends ImmutableState & IndexedState<A>,A> {
 
-    private final DiscreteModel<S> model;
+    private final DiscreteTimeSimulationStepFunction<S> stepFunction;
     private final RandomGenerator rg;
     private final IntFunction<S[]> arrayBuilder;
 
-    public DiscreteTimeAgentSMC(DiscreteModel<S> model,IntFunction<S[]> arrayBuilder) {
-        this(new DefaultRandomGenerator(), model, arrayBuilder);
+    public DiscreteTimeAgentSMC(DiscreteTimeSimulationStepFunction<S> stepFunction, IntFunction<S[]> arrayBuilder) {
+        this(new DefaultRandomGenerator(), stepFunction, arrayBuilder);
     }
 
-    public DiscreteTimeAgentSMC(RandomGenerator rg, DiscreteModel<S> model,IntFunction<S[]> arrayBuilder) {
-        this.model = model;
+    public DiscreteTimeAgentSMC(RandomGenerator rg, DiscreteTimeSimulationStepFunction<S> stepFunction, IntFunction<S[]> arrayBuilder) {
+        this.stepFunction = stepFunction;
         this.rg = rg;
         this.arrayBuilder = arrayBuilder;
     }
@@ -69,7 +66,7 @@ public class DiscreteTimeAgentSMC<S extends ImmutableState & IndexedState<A>,A> 
         SimulationEnvironment se = new SimulationEnvironment();
         double[] result = new double[steps];
         for(int i=0; i<n;i++) {
-            Trajectory<S> trj = se.sampleTrajectory(rg,model,initialState,steps);
+            Trajectory<S> trj = se.sampleTrajectory(rg, stepFunction,initialState,steps);
             Boolean[] sat = f.eval(extractValues(trj,steps+1));
             IntStream.range(0,steps).forEach(k -> {
                 if (sat[k]) {

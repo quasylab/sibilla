@@ -98,22 +98,22 @@ public class MainNew {
 
 	private static void runAndPrintExact(int scale, int replica, String label, Function<AgentsDefinition,GlobalFormula<Agent, LIOIndividualState>> formulaBuilder, int range) {
 		AgentsDefinition def = getAgentDefinition();
-		LIOModel<LIOIndividualState> model = new LIOModel<>(def);
+		LIOModel model = new LIOModel(def);
 		GLoTLStatisticalModelChecker modelChecker = new GLoTLStatisticalModelChecker();
 		LIOIndividualState initial = getInitialState(def, scale);
 		GlobalFormula<Agent, LIOIndividualState> formula = formulaBuilder.apply(def);
-		double[] values = modelChecker.computeProbability(model, initial, formula, 0, 50, replica);
+		double[] values = modelChecker.computeProbability(model.nextIndividuals(), initial, formula, 0, 50, replica);
 		System.out.printf("#SCALE %d STEPS %d REPLICA %d\n\n",scale, range, replica);
 		System.out.println(label+" = ["+(DoubleStream.of(values).boxed().map(Object::toString).collect(Collectors.joining(",")))+"]");
 	}
 
 	private static void runAndPrint(int scale, int replica, String label, Function<AgentsDefinition,GlobalFormula<Agent, LIOIndividualState>> formulaBuilder, int range) {
 		AgentsDefinition def = getAgentDefinition();
-		LIOModel<LIOIndividualState> model = new LIOModel<>(def);
+		LIOModel model = new LIOModel(def);
 		GLoTLStatisticalModelChecker modelChecker = new GLoTLStatisticalModelChecker();
 		LIOIndividualState initial = getInitialState(def, scale);
 		GlobalFormula<Agent, LIOIndividualState> formula = formulaBuilder.apply(def);
-		double[] values = modelChecker.computeProbability(model, initial, formula, 0, 50, replica);
+		double[] values = modelChecker.computeProbability(model.nextIndividuals(), initial, formula, 0, 50, replica);
 		System.out.printf("#SCALE %d STEPS %d REPLICA %d\n\n",scale, range, replica);
 		System.out.println(label+" = ["+(DoubleStream.of(values).boxed().map(Object::toString).collect(Collectors.joining(",")))+"]");
 	}
@@ -122,7 +122,7 @@ public class MainNew {
 	private static void runAllChecking( ) {
 		StringBuilder output = new StringBuilder();
 		AgentsDefinition def = getAgentDefinition();
-		LIOModel<LIOIndividualState> model = new LIOModel<>(def);
+		LIOModel model = new LIOModel(def);
 		GLoTLStatisticalModelChecker modelChecker = new GLoTLStatisticalModelChecker();
 
 		for( int scale: SCALES) {
@@ -134,7 +134,7 @@ public class MainNew {
 					GlobalFormula<Agent, LIOIndividualState> formula = e.getValue();
 					System.out.printf("Checking %s: scale=%d replica=%d\n",name,scale, replica);
 					long start = System.currentTimeMillis();
-					double p = modelChecker.computeProbability(model, initial, formula, replica);
+					double p = modelChecker.computeProbability(model.nextIndividuals(), initial, formula, replica);
 					long elapsed = System.currentTimeMillis()-start;
 					String dataLine = String.format("%s %d %d %f, %f",name,scale, replica,p, (elapsed/1000.0));
 					System.out.println(dataLine);

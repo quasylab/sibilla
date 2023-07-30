@@ -30,7 +30,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public class LIOMixedState implements LIOState<LIOMixedState> {
+public class LIOMixedState implements LIOState {
 
     private final AgentsDefinition definition;
 
@@ -93,6 +93,10 @@ public class LIOMixedState implements LIOState<LIOMixedState> {
         return next;
     }
 
+    @Override
+    public ProbabilityVector<LIOMixedState> next() {
+        return next(getAgentsDefinition().getAgentProbabilityMatrix(this));
+    }
 
     @Override
     public AgentsDefinition getAgentsDefinition() {

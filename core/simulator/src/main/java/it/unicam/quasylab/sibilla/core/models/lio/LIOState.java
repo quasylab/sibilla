@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models.lio;
 
+import it.unicam.quasylab.sibilla.core.models.IndexedState;
 import it.unicam.quasylab.sibilla.core.tools.ProbabilityMatrix;
 import it.unicam.quasylab.sibilla.core.tools.ProbabilityVector;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -30,19 +31,18 @@ import org.apache.commons.math3.random.RandomGenerator;
 /**
  * This interface is implemented by LIO representations that are able to perform a computational step.
  *
- * @param <S> type of LIO representations.
  */
-public interface LIOState<S extends LIOCollective> extends LIOCollective {
+public interface LIOState extends LIOCollective, IndexedState<Agent> {
 
     /**
      * Given a random generator and the probability matrix, this method returns a sampling of next
      * state.
      *
      * @param randomGenerator random generator
-     * @param matrix probability matrix
+     * @param matrix          probability matrix
      * @return a sampling of next state.
      */
-    S step(RandomGenerator randomGenerator, ProbabilityMatrix<Agent> matrix);
+    LIOState step(RandomGenerator randomGenerator, ProbabilityMatrix<Agent> matrix);
 
 
     /**
@@ -51,12 +51,10 @@ public interface LIOState<S extends LIOCollective> extends LIOCollective {
      * @param matrix probability matrix representing behaviour of each single agent.
      * @return the probability distribution of states reachable from this one in one state.
      */
-    ProbabilityVector<S> next(ProbabilityMatrix<Agent> matrix);
+    ProbabilityVector<? extends LIOState> next(ProbabilityMatrix<Agent> matrix);
 
 
-    default ProbabilityVector<S> next() {
-        return next(getAgentsDefinition().getAgentProbabilityMatrix(this));
-    }
+    ProbabilityVector<? extends LIOState> next();
 
     /**
      * Returns the agents definition in this state.
@@ -76,4 +74,13 @@ public interface LIOState<S extends LIOCollective> extends LIOCollective {
     }
 
 
+    @Override
+    default Agent get(int i) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    default int numberOfAgents() {
+        throw new UnsupportedOperationException();
+    }
 }

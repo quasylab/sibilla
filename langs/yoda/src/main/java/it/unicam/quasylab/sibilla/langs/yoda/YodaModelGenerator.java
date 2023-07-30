@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.langs.yoda;
 import it.unicam.quasylab.sibilla.core.models.CachedValues;
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaModelDefinition;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
@@ -105,7 +106,7 @@ public class YodaModelGenerator {
     }
 
     //TODO
-    private Map<String, Double> evaluateParameters() throws YodaModelGenerationException {
+    private Map<String, SibillaValue> evaluateParameters() throws YodaModelGenerationException {
         return null;
     }
 

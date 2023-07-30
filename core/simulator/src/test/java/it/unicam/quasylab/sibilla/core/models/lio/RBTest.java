@@ -83,10 +83,10 @@ public class RBTest {
         LIOIndividualState s = getInitialState(def,100000,100000);
         assertEquals(0.5,s.fractionOf(agentB));
         assertEquals(0.5,s.fractionOf(agentR));
-        LIOModel<LIOIndividualState> model = new LIOModel<>(def);
-        Optional<TimeStep<LIOIndividualState>> oNext = model.next(rg,0.0,s);
+        LIOModel model = new LIOModel(def);
+        Optional<TimeStep<LIOState>> oNext = model.next(rg,0.0,s);
         assertTrue(oNext.isPresent());
-        TimeStep<LIOIndividualState> next = oNext.get();
+        TimeStep<LIOState> next = oNext.get();
         assertEquals(0.5,next.getValue().fractionOf(agentB), 0.1);
     }
 
@@ -94,10 +94,10 @@ public class RBTest {
     @Test
     public void testAtomic() {
         AgentsDefinition def = getAgentDefinition(0.5);
-        LIOModel<LIOIndividualState> model = new LIOModel(def);
+        LIOModel model = new LIOModel(def);
         LIOIndividualState initial = getInitialState(def, 200000,0);
         DiscreteTimePathChecker<LIOIndividualState, Boolean> phi = getPhiBal(100,0.1,def);
-        DiscreteTimeAgentSMC<LIOIndividualState,Agent> smc = new DiscreteTimeAgentSMC<>(model,LIOIndividualState[]::new);
+        DiscreteTimeAgentSMC<LIOIndividualState,Agent> smc = new DiscreteTimeAgentSMC<>(model.nextIndividuals(), LIOIndividualState[]::new);
         smc.compute(initial,phi,100,100);
         assertTrue(true);
     }

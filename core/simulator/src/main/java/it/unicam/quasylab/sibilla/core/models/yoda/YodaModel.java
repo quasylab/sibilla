@@ -24,15 +24,15 @@
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
 import it.unicam.quasylab.sibilla.core.models.*;
+import it.unicam.quasylab.sibilla.core.simulator.DiscreteTimeSimulationStepFunction;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 
-public class YodaModel<S extends YodaScene> implements InteractiveModel<YodaSystemState<S>>, DiscreteModel<YodaSystemState<S>> {
+public class YodaModel<S extends YodaScene> implements InteractiveModel<YodaSystemState<S>>, DiscreteTimeModel<YodaSystemState<S>> {
     private final YodaSystemState<S> systemState;
 
     public YodaModel(YodaSystemState<S> systemState) {
@@ -89,5 +89,9 @@ public class YodaModel<S extends YodaScene> implements InteractiveModel<YodaSyst
     @Override
     public String[] predicates() {
         return new String[0];
+    }
+
+    public DiscreteTimeSimulationStepFunction<YodaSystemState<S>> getDiscreteTimeStepFunction() {
+        return (rg,state) -> state.next(rg);
     }
 }

@@ -37,7 +37,8 @@ public class LIOModelModule extends AbstractSibillaModule {
 
     public enum LIOModes {
         INDIVIDUALS,
-        MASS;
+        MASS,
+        FLUID;
     }
 
     private LIOModes mode = LIOModes.INDIVIDUALS;

@@ -91,10 +91,10 @@ public class Main {
 
 	private static void runAndPrint(int scale, int step, int replica, String label, BiFunction<Integer,AgentsDefinition,DiscreteTimePathChecker<LIOIndividualState, Boolean>> builder) {
 		AgentsDefinition def = getAgentDefinition();
-		LIOModel<LIOIndividualState> model = new LIOModel<>(def);
+		LIOModel model = new LIOModel(def);
 		DiscreteTimePathChecker<LIOIndividualState, Boolean> f = builder.apply(scale,def);
 		LIOIndividualState initial = getInitialState(def, scale);
-		DiscreteTimeAgentSMC<LIOIndividualState,Agent> smc = new DiscreteTimeAgentSMC<>(model,LIOIndividualState[]::new);
+		DiscreteTimeAgentSMC<LIOIndividualState,Agent> smc = new DiscreteTimeAgentSMC<>(model.nextIndividuals(),LIOIndividualState[]::new);
 		double[] values = smc.compute(initial,f,step,replica);
 		System.out.printf("#SCALE %d STEPS %d REPLICA %d\n\n",scale, step, replica);
 		System.out.println(label+" = ["+(DoubleStream.of(values).boxed().map(Object::toString).collect(Collectors.joining(",")))+"]");
@@ -103,7 +103,7 @@ public class Main {
 	private static void runAllChecking( ) {
 		StringBuilder output = new StringBuilder();
 		AgentsDefinition def = getAgentDefinition();
-		LIOModel<LIOIndividualState> model = new LIOModel<>(def);
+		LIOModel model = new LIOModel(def);
 
 		for( int scale: SCALES) {
 			Map<String, DiscreteTimePathChecker<LIOIndividualState, Boolean>> map = getFormulas(scale,def);
@@ -113,7 +113,7 @@ public class Main {
 					for (Map.Entry<String, DiscreteTimePathChecker<LIOIndividualState, Boolean>> e:map.entrySet()) {
 						String name = e.getKey();
 						DiscreteTimePathChecker<LIOIndividualState, Boolean> formula = e.getValue();
-						DiscreteTimeAgentSMC<LIOIndividualState,Agent> smc = new DiscreteTimeAgentSMC<>(model,LIOIndividualState[]::new);
+						DiscreteTimeAgentSMC<LIOIndividualState,Agent> smc = new DiscreteTimeAgentSMC<>(model.nextIndividuals(),LIOIndividualState[]::new);
 						System.out.printf("Checking %s: scale=%d step=%d replica=%d\n",name,scale,step,replica);
 						long start = System.currentTimeMillis();
 						smc.compute(initial,formula,step,replica);

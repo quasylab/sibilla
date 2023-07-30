@@ -148,7 +148,12 @@ public class RobotScenario {
         YodaSystemState<Grid> state = def.getState();
         YodaModel<Grid> model = def.getYodaModel();
 
-        SimulationUnit<YodaSystemState<Grid>> simulationUnit = new SimulationUnit<YodaSystemState<Grid>>(model,state,collector,(t, s) -> t>=deadline);
+        //BiFunction<RandomGenerator, Function<RandomGenerator,S>, SimulatorCursor<S>> simulationCursorSupplier
+        SimulationUnit<YodaSystemState<Grid>> simulationUnit = new SimulationUnit<YodaSystemState<Grid>>(
+                model::createSimulationCursor,
+                state,
+                collector,
+                (t, s) -> t>=deadline);
         SimulationTask<YodaSystemState<Grid>> task = new SimulationTask<>(rg, simulationUnit);
         task.get();
         return collector.getTrajectory();

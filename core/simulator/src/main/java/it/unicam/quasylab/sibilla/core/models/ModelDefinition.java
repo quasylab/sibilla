@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.function.Function;
@@ -54,7 +55,7 @@ public interface ModelDefinition<S extends State> {
      * @param name name of parameter.
      * @return the value associated with the given parameter.
      */
-    double getParameterValue(String name);
+    SibillaValue getParameterValue(String name);
 
     /**
      * Return the used EvaluationEnvironment.
@@ -94,7 +95,7 @@ public interface ModelDefinition<S extends State> {
      * @param name name of parameter to set.
      * @param value value of parameter.
      */
-    default void setParameter(String name, double value) {
+    default void setParameter(String name, SibillaValue value) {
         throw new IllegalArgumentException(String.format("Species %s is unknown!",name));
     }
 

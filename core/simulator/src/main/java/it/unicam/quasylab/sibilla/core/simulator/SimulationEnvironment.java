@@ -31,6 +31,8 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.TrajectoryCollector;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
@@ -143,8 +145,34 @@ public class SimulationEnvironment implements Serializable {
 			long iterations,
 			double deadline)
 			throws InterruptedException {
+		simulate(monitor, random, model::createSimulationCursor, initialStateSupplier, handlerSupplier, iterations, deadline);
+	}
+
+	/**
+	 * Performs a given number of simulations by using the given cursor supplier. Data are collected via
+	 * a {@link SamplingFunction}. A monitor is passed to control simulation.
+	 *
+	 * @param monitor           monitor used to control simulation.
+	 * @param random            random generator used in the simulation.
+	 * @param cursorSupplier    function used to build the simulator cursor.
+	 * @param initialStateSupplier      initial state supplier.
+	 * @param handlerSupplier 	supplier used to create the function used to collect data from the sampled trajectories.
+	 * @param iterations        number of iterations.
+	 * @param deadline          simulation deadline.
+	 *
+	 * @throws InterruptedException is thrown when simulation is interrupted.
+	 */
+	public <S extends State> void simulate(
+			SimulationMonitor monitor,
+			RandomGenerator random,
+			BiFunction<RandomGenerator, Function<RandomGenerator, S>, SimulatorCursor<S>> cursorSupplier,
+			Function<RandomGenerator,S> initialStateSupplier,
+			Supplier<SamplingHandler<S>> handlerSupplier,
+			long iterations,
+			double deadline)
+			throws InterruptedException {
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, monitor);
-		SimulationUnit<S> unit = new SimulationUnit<>(model, initialStateSupplier, handlerSupplier,
+		SimulationUnit<S> unit = new SimulationUnit<>(cursorSupplier, initialStateSupplier, handlerSupplier,
 				SamplePredicate.timeDeadlinePredicate(deadline));
 		for (long i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			simulationManager.simulate(unit);
@@ -252,10 +280,43 @@ public class SimulationEnvironment implements Serializable {
 	public <S extends State> double reachability(SimulationMonitor monitor, RandomGenerator random,
 			double errorProbability, double delta, double deadline, Model<S> model, Function<RandomGenerator,S> state,
 			StatePredicate<? super S> condition, StatePredicate<? super S> goal) throws InterruptedException {
+			return reachability(monitor, random, errorProbability, delta, deadline, model::createSimulationCursor, state, condition, goal);
+	}
+
+	/**
+	 * Estimates the probability to reach a state satisfying the given goal
+	 * predicate within the given deadline while traversing only states satisfying a
+	 * given condition. The estimated probability differs from the exact one by
+	 * <code>delta</code> with a probability less or equal than
+	 * <code>errorProbability</code>.
+	 *
+	 * @param monitor          monitor used to control simulation.
+	 * @param random           random generator used in the simulation.
+	 * @param errorProbability error probability.
+	 * @param delta            error gap.
+	 * @param deadline         reachability deadline.
+	 * @param cursorSupplier   cursor used to generate the simulated trajectory.
+	 * @param state            initial state
+	 * @param condition        condition predicate.
+	 * @param goal             goal predicate.
+	 * @return the probability to reach a state satisfying the given condition
+	 *         within the given deadline.
+	 * @throws InterruptedException is thrown when simulation is interrupted.
+	 */
+	public <S extends State> double reachability(
+			SimulationMonitor monitor,
+			RandomGenerator random,
+			double errorProbability,
+			double delta,
+			double deadline,
+			BiFunction<RandomGenerator, Function<RandomGenerator, S>, SimulatorCursor<S>> cursorSupplier,
+			Function<RandomGenerator,S> state,
+			StatePredicate<? super S> condition,
+			StatePredicate<? super S> goal) throws InterruptedException {
 		ReachabilityChecker<S> reachabilityChecker = new ReachabilityChecker<S>(condition, goal);
 		double n = Math.ceil(Math.log(2 / delta) / (2 * Math.pow(errorProbability,2)));
 		LOGGER.info("Computing reachability with "+(int) n+" iterations.");
-		SimulationUnit<S> unit = new SimulationUnit<>(model, state, reachabilityChecker,
+		SimulationUnit<S> unit = new SimulationUnit<>(cursorSupplier, state, reachabilityChecker,
 				(t, s) -> (t > deadline) || goal.check(s) || !condition.check(s), goal);
 		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, monitor);
 
@@ -315,11 +376,19 @@ public class SimulationEnvironment implements Serializable {
 
 	public <S extends ImmutableState> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state,
 			double deadline) {
+		return sampleTrajectory(random, model::createSimulationCursor, state, deadline);
+	}
+
+	public <S extends ImmutableState> Trajectory<S> sampleTrajectory(
+			RandomGenerator random,
+			BiFunction<RandomGenerator, Function<RandomGenerator, S>, SimulatorCursor<S>> cursorSupplier,
+			S state,
+			double deadline) {
 		TrajectoryCollector<S> collector = new TrajectoryCollector<>();
-		SimulationUnit<S> unit = new SimulationUnit<>(model, state, collector, SamplePredicate.timeDeadlinePredicate(deadline),
+		SimulationUnit<S> unit = new SimulationUnit<>(cursorSupplier, state, collector, SamplePredicate.timeDeadlinePredicate(deadline),
 				s -> true);
 		SimulationTask<S> simulationRun = new SimulationTask<>(0, random, unit);
-		try {
+			try {
 			simulationRun.get();
 			return collector.getTrajectory();
 		} catch (Exception e) {
@@ -328,10 +397,42 @@ public class SimulationEnvironment implements Serializable {
 		}
 	}
 
-	public <S extends ImmutableState> Trajectory<S> sampleTrajectory(RandomGenerator random, ContinuousTimeMarkovProcess<S> model, S state,
+	public <S extends ImmutableState> Trajectory<S> sampleTrajectory(
+			RandomGenerator random,
+			SimulationStepFunction<S> stepFunction,
+			S state,
+			double deadline) {
+		Trajectory<S> trajectory = new Trajectory<>();
+		double time = 0.0;
+		S current = state;
+		try {
+			while (time<deadline) {
+				trajectory.add(time, current);
+				Optional<TimeStep<S>> optionalStep = stepFunction.next(random, time, current);
+				if (optionalStep.isPresent()) {
+					TimeStep<S> step = optionalStep.get();
+					time += step.getTime();
+					current = step.getValue();
+				} else {
+					time = deadline;
+				}
+			}
+			trajectory.setEnd(deadline);
+			return trajectory;
+		} catch (Exception e) {
+			LOGGER.severe(e.getMessage());
+			return null;
+		}
+	}
+
+
+	public <S extends ImmutableState> Trajectory<S> sampleTrajectory(
+			RandomGenerator random,
+			ContinuousTimeMarkovProcess<S> model,
+			S state,
 																	 double deadline, StatePredicate<? super S> reachPredicate) {
 		TrajectoryCollector<S> collector = new TrajectoryCollector<>();
-		SimulationUnit<S> unit = new SimulationUnit<S>(model, state, collector,
+		SimulationUnit<S> unit = new SimulationUnit<S>(model::createSimulationCursor, state, collector,
 				SamplePredicate.samplePredicate(deadline, reachPredicate), reachPredicate);
 		SimulationTask<S> simulationRun = new SimulationTask<>(random, unit);
 		try {

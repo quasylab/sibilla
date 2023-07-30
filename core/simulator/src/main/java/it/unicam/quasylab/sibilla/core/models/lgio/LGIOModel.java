@@ -24,17 +24,16 @@
 package it.unicam.quasylab.sibilla.core.models.lgio;
 
 import it.unicam.quasylab.sibilla.core.models.AbstractModel;
-import it.unicam.quasylab.sibilla.core.models.DiscreteModel;
+import it.unicam.quasylab.sibilla.core.models.DiscreteTimeModel;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class LGIOModel extends AbstractModel<Collective> implements DiscreteModel<Collective> {
+public class LGIOModel extends AbstractModel<Collective> implements DiscreteTimeModel<Collective> {
 
 
     private final Function<Collective, Function<Agent, ActionProbabilityFunction>> probabilityFunction;

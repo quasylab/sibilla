@@ -32,6 +32,7 @@ import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Map;
@@ -56,12 +57,12 @@ public class ModuleEngine<S extends State> {
         this.states = null;
     }
 
-    public void setParameter(String name, double value) {
+    public void setParameter(String name, SibillaValue value) {
         this.modelDefinition.setParameter(name, value);
         clear();
     }
 
-    public double getParameter(String name) {
+    public SibillaValue getParameter(String name) {
         return this.modelDefinition.getParameterValue(name);
     }
 
@@ -69,7 +70,7 @@ public class ModuleEngine<S extends State> {
         return this.modelDefinition.getModelParameters();
     }
 
-    public Map<String, Double> getEvaluationEnvironment() {
+    public Map<String, SibillaValue> getEvaluationEnvironment() {
         return this.modelDefinition.getEnvironment().getParameterMap();
     }
 
@@ -201,7 +202,7 @@ public class ModuleEngine<S extends State> {
     }
 
 
-    public Map<String, Double> getEnvironment() {
+    public Map<String, SibillaValue> getEnvironment() {
         return modelDefinition.getEnvironment().getParameterMap();
     }
 

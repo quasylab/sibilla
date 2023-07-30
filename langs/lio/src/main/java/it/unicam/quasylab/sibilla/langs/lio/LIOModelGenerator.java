@@ -84,15 +84,15 @@ public class LIOModelGenerator {
     }
 
 
-    public LIOModel<LIOIndividualState> generateInddividualModel(EvaluationEnvironment environment) {
+    public LIOModel generateInddividualModel(EvaluationEnvironment environment) {
         return null;//return new LIOModel<LIOIndividualState>(DefinitionGenerator.apply(environment), measureGenerator.apply(environment), predicateGenerator.apply(environment));
     }
 
-    public LIOModelDefinition<LIOCountingState> getMassModelDefinition() {
+    public LIOModelDefinition getMassModelDefinition() {
         return null;
     }
 
-    public LIOModelDefinition<LIOIndividualState> getIndividualModelDefinition() {
+    public LIOModelDefinition getIndividualModelDefinition() {
         return null;
     }
 

@@ -14,6 +14,7 @@ import it.unicam.quasylab.sibilla.core.network.serialization.TrajectorySerialize
 import it.unicam.quasylab.sibilla.core.network.util.BytearrayToFile;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Sample;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.examples.pm.crowds.ChordModel;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class SerializationBenchmark {
                 ChordModel::getMeasures,
                 (e, r) -> new HashMap<>(),
                 ChordModel::states);
-        def.setParameter("N",1000);
+        def.setParameter("N",new SibillaDouble(1000));
         PopulationModel model = def.createModel();
 
         List<Trajectory> trajectories = new LinkedList();

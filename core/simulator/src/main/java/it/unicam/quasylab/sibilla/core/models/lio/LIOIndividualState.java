@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 /**
  * Indentify a state where each agent is stored individually.
  */
-public class LIOIndividualState implements IndexedState<Agent>, LIOState<LIOIndividualState> {
+public class LIOIndividualState implements LIOState {
 
     private final AgentsDefinition definition;
     private final ArrayList<Agent> agents;
@@ -190,7 +190,7 @@ public class LIOIndividualState implements IndexedState<Agent>, LIOState<LIOIndi
     /**
      * Given a random generator and a probability transition matrix sample a computational step of a give state.
      *
-     * @param randomGenerator a random generator
+     * @param randomGenerator   a random generator
      * @param probabilityMatrix a probability transition matrix
      * @return next state
      */
@@ -217,6 +217,11 @@ public class LIOIndividualState implements IndexedState<Agent>, LIOState<LIOIndi
             current = next;
         }
         return ProbabilityVector.getProbabilityVector(current);
+    }
+
+    @Override
+    public ProbabilityVector<LIOIndividualState> next() {
+        return next(getAgentsDefinition().getAgentProbabilityMatrix(this));
     }
 
     @Override

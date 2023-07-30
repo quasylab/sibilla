@@ -23,31 +23,17 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
-import it.unicam.quasylab.sibilla.core.simulator.DefaultSimulationCursor;
-import it.unicam.quasylab.sibilla.core.simulator.SimulatorCursor;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Optional;
-import java.util.function.Function;
 
-public interface MarkovModel<S extends ImmutableState> extends Model<S> {
-
-    @Override
-    default SimulatorCursor<S> createSimulationCursor(RandomGenerator r, Function<RandomGenerator, S> initialStateBuilder) {
-        return new DefaultSimulationCursor<>(r, this::next, initialStateBuilder);
-    }
-
-
-    /**
-     * Returns the simulator cursor starting its execution from the given initial state.
-     *
-     * @param r random generator to use in the simulation
-     * @param initialState initial state
-     * @return the simulator cursor starting its execution from the given initial state.
-     */
-    default SimulatorCursor<S> createSimulationCursor(RandomGenerator r, S initialState) {
-        return createSimulationCursor(r, rg -> initialState);
-    }
+/**
+ * Identifies a model with deterministic time. In this kind of models, each step always
+ * needs a single time unit.
+ *
+ * @param <S> type for the state of model.
+ */
+public interface DiscreteTimeModel<S extends ImmutableState> extends MarkovModel<S> {
 
     /**
      * Samples possible next state when the process is in a given state at a given
@@ -56,9 +42,12 @@ public interface MarkovModel<S extends ImmutableState> extends Model<S> {
      * @param r     random generator used to sample needed random values.
      * @param time  current time.
      * @param state current state.
-     * @return process time step.
+     * @return next state.
      */
-    Optional<TimeStep<S>> next(RandomGenerator r, double time, S state);
+    S sampleNextState(RandomGenerator r, double time, S state);
 
-
+    @Override
+    default Optional<TimeStep<S>> next(RandomGenerator r, double time, S state) {
+        return Optional.of(new TimeStep<>(1.0,sampleNextState(r,time,state)));
+    }
 }

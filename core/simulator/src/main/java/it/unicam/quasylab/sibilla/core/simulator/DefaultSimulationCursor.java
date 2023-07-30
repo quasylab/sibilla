@@ -21,74 +21,89 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.models.slam;
+package it.unicam.quasylab.sibilla.core.simulator;
 
-import it.unicam.quasylab.sibilla.core.simulator.SimulatorCursor;
+import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.models.TimeStep;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.Optional;
 import java.util.function.Function;
 
-public class SlamSimulationCursor implements SimulatorCursor<SlamState> {
+public class DefaultSimulationCursor<S extends State> implements SimulatorCursor<S> {
 
     private RandomGenerator rg;
-    private SlamState currentState = null;
-    private final Function<RandomGenerator, SlamState> initialStateSupplier;
+    private S current = null;
+    private double now = 0.0;
+    private boolean terminated = false;
+    private boolean started = false;
 
-    public SlamSimulationCursor(RandomGenerator rg, Function<RandomGenerator, SlamState> initialStateSupplier) {
+    private final Function<RandomGenerator, S> initialStateBuilder;
+
+    private final SimulationStepFunction<S> stepFunction;
+
+    public DefaultSimulationCursor(RandomGenerator rg, SimulationStepFunction<S> stepFunction, Function<RandomGenerator, S> initialStateBuilder) {
         this.rg = rg;
-        this.initialStateSupplier = initialStateSupplier;
+        this.initialStateBuilder = initialStateBuilder;
+        this.stepFunction = stepFunction;
     }
 
     @Override
     public void start() {
-        this.currentState = initialStateSupplier.apply(rg);
+        this.current = initialStateBuilder.apply(rg);
+        this.now = 0.0;
+        this.started = true;
+        this.terminated = false;
     }
 
     @Override
     public boolean step() {
-        Activity activity = currentState.nextScheduledActivity();
-        if (activity != null) {
-            activity.execute(rg, currentState);
+        Optional<TimeStep<S>> optionalTimeStep = stepFunction.next(rg, now, current);
+        if (optionalTimeStep.isPresent()) {
+            recordTimeStep(optionalTimeStep.get());
             return true;
         } else {
+            terminated = true;
             return false;
         }
     }
 
     @Override
-    public SlamState currentState() {
-        return currentState;
+    public S currentState() {
+        return current;
     }
 
     @Override
     public double time() {
-        if (currentState != null) {
-            return currentState.now();
-        }
-        return Double.NaN;
+        return now;
     }
 
     @Override
     public boolean isTerminated() {
-        if (currentState != null) {
-            return currentState.isTerminal();
-        }
-        return false;
+        return terminated;
     }
 
     @Override
     public boolean isStarted() {
-        return (currentState != null);
+        return started;
     }
 
     @Override
     public void restart(RandomGenerator rg) {
         this.rg = rg;
-        this.currentState = null;
+        this.current = null;
+        this.terminated = false;
+        this.started = false;
     }
 
     @Override
     public void restart() {
         restart(this.rg);
     }
+
+    private void recordTimeStep(TimeStep<S> step) {
+        this.current = step.getValue();
+        this.now += step.getTime();
+    }
 }
+

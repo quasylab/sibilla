@@ -35,6 +35,8 @@ import it.unicam.quasylab.sibilla.core.models.util.MappingState;
 import it.unicam.quasylab.sibilla.core.models.util.VariableTable;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
@@ -141,7 +143,7 @@ public class MarkovChainModelGenerator {
         return new EvaluationEnvironment(evalParameters(), evalConstants());
     }
 
-    private Map<String, Double> evalParameters() {
+    private Map<String, SibillaValue> evalParameters() {
         return getParseTree().accept(new ParameterEvaluator());
     }
 

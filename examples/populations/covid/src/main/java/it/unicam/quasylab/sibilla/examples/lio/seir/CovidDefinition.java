@@ -66,7 +66,7 @@ public class CovidDefinition {
         int D = registry.indexOf("D");
 
         LinkedList<PopulationRule> rules = new LinkedList<>();
-        double lambda = environment.get("lambdaMeet");
+        double lambda = environment.get("lambdaMeet").doubleOf();
         PopulationRule rule_S_A_A = new ReactionRule(
                 "S->A",
                 new Population[] { new Population(S), new Population(A)} ,

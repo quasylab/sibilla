@@ -59,7 +59,7 @@ public class ScalarExpressionEvaluator extends SlamModelBaseVisitor<SlamValue> {
             return constants.get(name);
         }
         if (environment.isDefined(name)) {
-            return SlamValue.REAL_VALUE.apply(environment.get(ctx.reference.getText()));
+            return SlamValue.REAL_VALUE.apply(environment.get(ctx.reference.getText()).doubleOf());
         }
         return SlamValue.NONE;
     }

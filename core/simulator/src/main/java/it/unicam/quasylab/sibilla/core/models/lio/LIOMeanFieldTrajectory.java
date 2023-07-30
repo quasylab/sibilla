@@ -42,7 +42,7 @@ public class LIOMeanFieldTrajectory {
      *
      * @param state the initial state of the trajectory.
      */
-    public LIOMeanFieldTrajectory(LIOState<?> state) {
+    public LIOMeanFieldTrajectory(LIOState state) {
         this.agentsDefinition = state.getAgentsDefinition();
         this.trajectory = new ArrayList<>();
         this.lastStep = state.getPopulationFractionVector();

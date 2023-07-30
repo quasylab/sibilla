@@ -94,7 +94,7 @@ public class MainQest {
 
 	private static void runAndPrintExact(int scale, String label, Function<AgentsDefinition,GlobalFormula<Agent, LIOIndividualState>> formulaBuilder, int range) {
 		AgentsDefinition def = getAgentDefinition();
-		LIOModel<LIOIndividualState> model = new LIOModel<>(def);
+		LIOModel model = new LIOModel(def);
 		GLoTLDiscreteTimeModelChecker modelChecker = new GLoTLDiscreteTimeModelChecker();
 		ChachedFunction<LIOIndividualState, ProbabilityVector<LIOIndividualState>> cachedNext = new ChachedFunction<>(LIOIndividualState::next);
 		LIOIndividualState initial = getInitialState(def, scale);
@@ -106,11 +106,11 @@ public class MainQest {
 
 	private static void runAndPrintRange(int scale, int replica, int size, String label, BiFunction<Integer, AgentsDefinition,GlobalFormula<Agent, LIOIndividualState>> formulaBuilder) {
 		AgentsDefinition def = getAgentDefinition();
-		LIOModel<LIOIndividualState> model = new LIOModel<>(def);
+		LIOModel model = new LIOModel(def);
 		GLoTLStatisticalModelChecker modelChecker = new GLoTLStatisticalModelChecker();
 		LIOIndividualState initial = getInitialState(def, scale);
 		long start = System.currentTimeMillis();
-		double[] values = modelChecker.computeProbability(model, initial, i -> formulaBuilder.apply(i, def), size, replica);
+		double[] values = modelChecker.computeProbability(model.nextIndividuals(), initial, i -> formulaBuilder.apply(i, def), size, replica);
 		long end = System.currentTimeMillis();
 		//double[] values = modelChecker.computeProbability(model, initial, i -> formulaBuilder.apply(i, def), size, replica);
 		System.out.printf("#SCALE %d STEPS %d REPLICA %d TIME %f\n\n",scale, size, replica, (end-start)/1000.0);
@@ -119,10 +119,10 @@ public class MainQest {
 
 	private static void runAndPrintRangeExact(int scale, int replica, int size, String label, BiFunction<Integer, AgentsDefinition,GlobalFormula<Agent, LIOIndividualState>> formulaBuilder) {
 		AgentsDefinition def = getAgentDefinition();
-		LIOModel<LIOIndividualState> model = new LIOModel<>(def);
+		LIOModel model = new LIOModel(def);
 		GLoTLStatisticalModelChecker modelChecker = new GLoTLStatisticalModelChecker();
 		LIOIndividualState initial = getInitialState(def, scale);
-		double[] values = modelChecker.computeProbability(model, initial, i -> formulaBuilder.apply(i, def), size, replica);
+		double[] values = modelChecker.computeProbability(model.nextIndividuals(), initial, i -> formulaBuilder.apply(i, def), size, replica);
 		//double[] values = modelChecker.computeProbability(model, initial, i -> formulaBuilder.apply(i, def), size, replica);
 		System.out.printf("#SCALE %d STEPS %d REPLICA %d\n\n",scale, size, replica);
 		System.out.println(label+"_"+scale+"_"+replica+" = ["+(DoubleStream.of(values).boxed().map(Object::toString).collect(Collectors.joining(",")))+"]");
@@ -131,7 +131,7 @@ public class MainQest {
 	private static void runAllChecking( ) {
 		StringBuilder output = new StringBuilder();
 		AgentsDefinition def = getAgentDefinition();
-		LIOModel<LIOIndividualState> model = new LIOModel<>(def);
+		LIOModel model = new LIOModel(def);
 		GLoTLStatisticalModelChecker modelChecker = new GLoTLStatisticalModelChecker();
 
 		for( int scale: SCALES) {
@@ -143,7 +143,7 @@ public class MainQest {
 					GlobalFormula<Agent, LIOIndividualState> formula = e.getValue();
 					System.out.printf("Checking %s: scale=%d replica=%d\n",name,scale, replica);
 					long start = System.currentTimeMillis();
-					double p = modelChecker.computeProbability(model, initial, formula, replica);
+					double p = modelChecker.computeProbability(model.nextIndividuals(), initial, formula, replica);
 					long elapsed = System.currentTimeMillis()-start;
 					String dataLine = String.format("%s %d %d %f, %f",name,scale, replica,p, (elapsed/1000.0));
 					System.out.println(dataLine);

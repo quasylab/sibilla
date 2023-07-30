@@ -28,6 +28,7 @@ import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.jupiter.api.Test;
 
@@ -211,7 +212,7 @@ public class TestParser {
         assertTrue(generator.validate());
         EvaluationEnvironment ee = generator.generateEvaluationEnvironment();
         assertArrayEquals(new String[]{"x"}, ee.getParameters());
-        assertEquals(10, ee.get("x"));
+        assertEquals(new SibillaDouble(10), ee.get("x"));
     }
 
     @Test
@@ -274,7 +275,7 @@ public class TestParser {
         PopulationModelGenerator pmg = new PopulationModelGenerator(CODE6);
         assertTrue(pmg.validate());
         EvaluationEnvironment env = pmg.generateEvaluationEnvironment();
-        env.set("N",10);
+        env.set("N",new SibillaDouble(10));
         PopulationRegistry reg = pmg.generatePopulationRegistry(env);
         assertEquals(100, reg.size());
         for(int i=0; i<10; i++) {

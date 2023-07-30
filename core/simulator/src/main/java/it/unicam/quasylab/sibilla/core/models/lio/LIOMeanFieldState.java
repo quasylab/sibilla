@@ -27,17 +27,15 @@ import it.unicam.quasylab.sibilla.core.tools.ProbabilityMatrix;
 import it.unicam.quasylab.sibilla.core.tools.ProbabilityVector;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
 
 /**
  * Represents a state composed by a single agent operating in an environment approximated
  * in terms of mean-field equations.
  */
-public class LIOMeanFieldState implements LIOState<LIOMeanFieldState> {
+public class LIOMeanFieldState implements LIOState {
 
     private final LIOMeanFieldTrajectory trajectory;
 

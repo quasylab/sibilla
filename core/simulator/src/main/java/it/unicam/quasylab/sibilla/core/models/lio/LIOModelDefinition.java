@@ -33,16 +33,16 @@ import java.util.function.Function;
 /**
  * This class represents a definition of a LIO Model.
  */
-public class LIOModelDefinition<S extends LIOState<S>> extends AbstractModelDefinition<S> {
+public class LIOModelDefinition extends AbstractModelDefinition<LIOState> {
 
-    private final Function<EvaluationEnvironment,LIOModel<S>> definitionGenerator;
-    private final Function<EvaluationEnvironment, ParametricDataSet<Function<RandomGenerator, S>>>  stateGenerator;
-    private LIOModel<S> cachedModel;
-    private ParametricDataSet<Function<RandomGenerator, S>> cachedStates;
+    private final Function<EvaluationEnvironment,LIOModel> definitionGenerator;
+    private final Function<EvaluationEnvironment, ParametricDataSet<Function<RandomGenerator, LIOState>>>  stateGenerator;
+    private LIOModel cachedModel;
+    private ParametricDataSet<Function<RandomGenerator, LIOState>> cachedStates;
 
     public LIOModelDefinition(EvaluationEnvironment environment,
-                              Function<EvaluationEnvironment, LIOModel<S>> definitionGenerator,
-                              Function<EvaluationEnvironment, ParametricDataSet<Function<RandomGenerator, S>>> stateGenerator) {
+                              Function<EvaluationEnvironment, LIOModel> definitionGenerator,
+                              Function<EvaluationEnvironment, ParametricDataSet<Function<RandomGenerator, LIOState>>> stateGenerator) {
         super(environment);
         this.definitionGenerator = definitionGenerator;
         this.stateGenerator = stateGenerator;
@@ -56,7 +56,7 @@ public class LIOModelDefinition<S extends LIOState<S>> extends AbstractModelDefi
     }
 
     @Override
-    public ParametricDataSet<Function<RandomGenerator, S>> getStates() {
+    public ParametricDataSet<Function<RandomGenerator, LIOState>> getStates() {
         if (cachedStates==null) {
             cachedStates = stateGenerator.apply(getEnvironment());
         }
@@ -65,7 +65,7 @@ public class LIOModelDefinition<S extends LIOState<S>> extends AbstractModelDefi
 
 
     @Override
-    public LIOModel<S> createModel() {
+    public LIOModel createModel() {
         if (cachedModel==null) {
             cachedModel = definitionGenerator.apply(getEnvironment());
         }

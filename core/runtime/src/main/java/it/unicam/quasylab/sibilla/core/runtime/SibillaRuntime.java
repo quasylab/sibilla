@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.core.runtime;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.File;
@@ -155,7 +156,7 @@ public final class SibillaRuntime {
      *
      * @return the EvaluationEnvironment of the current model.
      */
-    public Map<String,Double> getEvaluationEnvironment() {
+    public Map<String, SibillaValue> getEvaluationEnvironment() {
         return currentModule.getEvaluationEnvironment();
     }
 

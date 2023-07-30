@@ -68,7 +68,7 @@ public class CachedValues {
         if (environment == null) {
             return this.values.getOrDefault(s, Double.NaN);
         } else {
-            return this.values.getOrDefault(s,environment.get(s));
+            return this.values.getOrDefault(s,environment.get(s).doubleOf());
         }
     }
 

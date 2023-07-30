@@ -27,6 +27,7 @@ import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 
 import java.io.FileNotFoundException;
 import java.net.UnknownHostException;
@@ -48,7 +49,7 @@ public class CovidModel {
                 CovidDefinition::states);
 
         SimulationEnvironment simulator = new SimulationEnvironment();
-        def.setParameter("lambdaMeet",4);
+        def.setParameter("lambdaMeet",new SibillaDouble(4));
         PopulationModel model = def.createModel();
         SamplingFunction<PopulationState> collection = model.getSamplingFunction(SAMPLINGS,DEADLINE/SAMPLINGS);
         simulator.simulate(model,def.state(),collection::getSamplingHandler,REPLICA,DEADLINE);

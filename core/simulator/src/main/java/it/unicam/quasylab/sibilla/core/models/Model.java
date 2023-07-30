@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
+import it.unicam.quasylab.sibilla.core.simulator.SimulatorCursor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.*;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -31,7 +32,6 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 /**
  * Represents a <i>Stochastic Process</i>.

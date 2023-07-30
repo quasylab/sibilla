@@ -71,7 +71,7 @@ public class RobotScenarioProperties {
         GLoTLStatisticalModelChecker modelChecker = new GLoTLStatisticalModelChecker();
         YodaSystemState<Grid> initial = def.getState();
         long start = System.currentTimeMillis();
-        double[] values = modelChecker.computeProbability(model, initial, formulaBuilder , 200, replica);
+        double[] values = modelChecker.computeProbability(model.getDiscreteTimeStepFunction(), initial, formulaBuilder , 200, replica);
         long end = System.currentTimeMillis();
         System.out.println(start);
         System.out.println(Arrays.toString(values));

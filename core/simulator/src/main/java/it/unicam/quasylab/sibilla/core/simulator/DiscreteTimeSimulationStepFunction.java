@@ -21,33 +21,28 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.models;
+package it.unicam.quasylab.sibilla.core.simulator;
 
+import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.models.TimeStep;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Optional;
 
-/**
- * Identifies a model with deterministic time. In this kind of models, each step always
- * needs a single time unit.
- *
- * @param <S> type for the state of model.
- */
-public interface DiscreteModel<S extends ImmutableState> extends MarkovModel<S> {
+public interface DiscreteTimeSimulationStepFunction<S extends State> extends SimulationStepFunction<S> {
 
     /**
-     * Samples possible next state when the process is in a given state at a given
-     * time. A random generator is passed to sample random values when needed.
+     * Samples possible next state when the process is in a given state.
+     * A random generator is passed to sample random values when needed.
      *
      * @param r     random generator used to sample needed random values.
-     * @param time  current time.
      * @param state current state.
      * @return next state.
      */
-    S sampleNextState(RandomGenerator r, double time, S state);
+    S next(RandomGenerator r, S state);
 
-    @Override
     default Optional<TimeStep<S>> next(RandomGenerator r, double time, S state) {
-        return Optional.of(new TimeStep<>(1.0,sampleNextState(r,time,state)));
+        return Optional.of(new TimeStep<>(1.0, next(r, state)));
     }
+
 }

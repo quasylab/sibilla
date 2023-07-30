@@ -30,6 +30,8 @@ import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.List;
@@ -60,13 +62,13 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     @Override
     public void setParameter(String name, double value) {
         checkForLoadedDefinition();
-        this.moduleEngine.setParameter(name, value);
+        this.moduleEngine.setParameter(name, new SibillaDouble(value));
     }
 
     @Override
     public double getParameter(String name) {
         checkForLoadedDefinition();
-        return this.moduleEngine.getParameter(name);
+        return this.moduleEngine.getParameter(name).doubleOf();
     }
 
     @Override
@@ -76,7 +78,7 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     }
 
     @Override
-    public Map<String, Double> getEvaluationEnvironment() {
+    public Map<String, SibillaValue> getEvaluationEnvironment() {
         checkForLoadedDefinition();
         return this.moduleEngine.getEnvironment();
     }

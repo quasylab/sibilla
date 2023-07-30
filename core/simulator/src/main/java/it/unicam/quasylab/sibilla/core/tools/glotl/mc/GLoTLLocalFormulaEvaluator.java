@@ -81,8 +81,7 @@ public class GLoTLLocalFormulaEvaluator implements GLoTLbLocalPathProbabilityEva
     }
 
     private void addToQueueIfNotInCache(Pair<LIOMixedState, LocalFormula<Agent>> element, Queue<PendingElement> elements) {
-        LocalFormula<Agent> nextFormula = element.getValue().next(element.getKey().getAgent());
-        ProbabilityVector<LIOMixedState> vector = element.getKey().next();
+
     }
 
 

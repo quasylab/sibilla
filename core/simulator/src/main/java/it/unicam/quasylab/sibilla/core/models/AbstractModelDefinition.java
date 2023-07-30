@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.models;
 
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Map;
@@ -64,12 +65,12 @@ public abstract class AbstractModelDefinition<T extends State> implements ModelD
      * @param name parameter to register.
      * @param value parameter defaul value.
      */
-    public void registerParameter(String name, double value) {
-        this.environment.register(name,value);
+    public void registerParameter(String name, SibillaValue value) {
+        this.environment.register(name, value);
     }
 
     @Override
-    public void setParameter(String name, double value) {
+    public void setParameter(String name, SibillaValue value) {
         environment.set(name,value);
         clearCache();
     }
@@ -90,7 +91,7 @@ public abstract class AbstractModelDefinition<T extends State> implements ModelD
     }
 
     @Override
-    public double getParameterValue(String name) {
+    public SibillaValue getParameterValue(String name) {
         return environment.get(name);
     }
 
@@ -100,7 +101,7 @@ public abstract class AbstractModelDefinition<T extends State> implements ModelD
      * @param name name of parameter.
      * @return the default value associated with the given parameter.
      */
-    public double getDefaultValue(String name) {
+    public SibillaValue getDefaultValue(String name) {
         return environment.getDefault(name);
     }
 

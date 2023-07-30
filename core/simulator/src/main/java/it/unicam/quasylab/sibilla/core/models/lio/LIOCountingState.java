@@ -36,7 +36,7 @@ import java.util.stream.IntStream;
 /**
  *
  */
-public class LIOCountingState implements LIOState<LIOCountingState> {
+public class LIOCountingState implements LIOState {
 
     private final AgentsDefinition definition;
     private final int size;
@@ -118,6 +118,11 @@ public class LIOCountingState implements LIOState<LIOCountingState> {
             }
         }
         return current;
+    }
+
+    @Override
+    public ProbabilityVector<LIOCountingState> next() {
+            return next(getAgentsDefinition().getAgentProbabilityMatrix(this));
     }
 
 

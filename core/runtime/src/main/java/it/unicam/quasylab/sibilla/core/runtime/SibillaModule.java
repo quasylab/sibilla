@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.core.runtime;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.File;
@@ -37,7 +38,7 @@ import java.util.Map;
  */
 public interface SibillaModule {
 
-    public final static List<SibillaModule> MODULES = List.of(new PopulationModelModule());
+    List<SibillaModule> MODULES = List.of(new PopulationModelModule());
 
     /**
      * Return the module name.
@@ -95,7 +96,7 @@ public interface SibillaModule {
      *
      * @return the EvaluationEnvironment of the current model.
      */
-    Map<String, Double> getEvaluationEnvironment();
+    Map<String, SibillaValue> getEvaluationEnvironment();
 
     /**
      * Cancels all the data loaded in the module.
