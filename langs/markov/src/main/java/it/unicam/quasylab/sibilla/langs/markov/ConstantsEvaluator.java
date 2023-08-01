@@ -24,41 +24,68 @@
 package it.unicam.quasylab.sibilla.langs.markov;
 
 import it.unicam.quasylab.sibilla.core.models.CachedValues;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
-import java.util.function.Function;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
-public class ConstantsEvaluator extends MarkovChainModelBaseVisitor<CachedValues> {
+public class ConstantsEvaluator extends MarkovChainModelBaseVisitor<Boolean> {
 
-    private final CachedValues constants;
-    private final Function<String, DataType> types;
+    private final Map<String, SibillaValue> values;
 
-    public ConstantsEvaluator(Function<String, DataType> types) {
-        this.constants = new CachedValues();
-        this.types = types;
+    private final Map<String, SibillaValue> parameters;
+
+
+    public ConstantsEvaluator() {
+        this(new HashMap<>());
+    }
+
+    public ConstantsEvaluator(Map<String, SibillaValue> parameters) {
+        this.parameters = parameters;
+        this.values = new HashMap<>();
     }
 
     @Override
-    public CachedValues visitModel(MarkovChainModelParser.ModelContext ctx) {
+    public Boolean visitModel(MarkovChainModelParser.ModelContext ctx) {
         for (MarkovChainModelParser.ElementContext e: ctx.element()) {
             e.accept(this);
         }
-        return constants;
+        return true;
     }
 
     @Override
-    public CachedValues visitConst_declaration(MarkovChainModelParser.Const_declarationContext ctx) {
-        DataType cType = types.apply(ctx.name.getText());
-        if (DataType.INTEGER == cType) {
-            constants.register(ctx.name.getText(), f -> (double) ExpressionEvaluator.evalInteger(types, f, ctx.expr()));
-        }
-        if (DataType.REAL == cType) {
-            constants.register(ctx.name.getText(), f -> ExpressionEvaluator.evalDouble(types, f, ctx.expr()));
-        }
-        return constants;
+    protected Boolean defaultResult() {
+        return true;
+    }
+
+    private Optional<SibillaValue> getValueOf(String name) {
+        if (values.containsKey(name)) return Optional.of(values.get(name));
+        if (parameters.containsKey(name)) return Optional.of(parameters.get(name));
+        return Optional.empty();
     }
 
     @Override
-    public CachedValues visitParam_declaration(MarkovChainModelParser.Param_declarationContext ctx) {
-        return this.constants;
+    public Boolean visitConst_declaration(MarkovChainModelParser.Const_declarationContext ctx) {
+        this.values.put(ctx.name.getText(), ctx.expr().accept(new ExpressionEvaluator(this::getValueOf)));
+        return true;
     }
+
+    @Override
+    public Boolean visitParam_declaration(MarkovChainModelParser.Param_declarationContext ctx) {
+        if (!this.parameters.containsKey(ctx.name.getText())) {
+            this.parameters.put(ctx.name.getText(), SibillaValue.of(Double.parseDouble(ctx.name.getText())));
+        }
+        this.values.put(ctx.name.getText(), this.parameters.get(ctx.name.getText()));
+        return true;
+    }
+
+    public Map<String, SibillaValue> getValues() {
+        return this.values;
+    }
+
+    public Map<String, SibillaValue> getParameters() {
+        return this.parameters;
+    }
+
 }

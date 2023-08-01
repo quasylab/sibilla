@@ -27,56 +27,62 @@ import it.unicam.quasylab.sibilla.core.models.MeasureFunction;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.models.pm.RatePopulationFunction;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaBoolean;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaInteger;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
+import java.util.Optional;
 import java.util.function.BiPredicate;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class PopulationExpressionEvaluator extends PopulationModelBaseVisitor<MeasureFunction<PopulationState>> {
+public class PopulationExpressionEvaluator extends PopulationModelBaseVisitor<Function<PopulationState, SibillaValue>> {
 
-    private final Function<String, Double> resolver;
+    private final Function<String, Optional<SibillaValue>> resolver;
     private final PopulationRegistry registry;
 
-    public PopulationExpressionEvaluator(Function<String, Double> resolver, PopulationRegistry registry) {
+    public PopulationExpressionEvaluator(Function<String, Optional<SibillaValue>> resolver, PopulationRegistry registry) {
         this.resolver = resolver;
         this.registry = registry;
     }
 
     @Override
-    protected MeasureFunction<PopulationState> defaultResult() {
-        return s -> Double.NaN;
+    protected Function<PopulationState, SibillaValue> defaultResult() {
+        return s -> SibillaValue.ERROR_VALUE;
     }
 
     @Override
-    public MeasureFunction<PopulationState> visitExponentExpression(PopulationModelParser.ExponentExpressionContext ctx) {
-        MeasureFunction<PopulationState> left = ctx.left.accept(this);
-        MeasureFunction<PopulationState> right = ctx.right.accept(this);
-        return s -> Math.pow(left.apply(s),right.apply(s));
+    public Function<PopulationState, SibillaValue> visitExponentExpression(PopulationModelParser.ExponentExpressionContext ctx) {
+        Function<PopulationState, SibillaValue> left = ctx.left.accept(this);
+        Function<PopulationState, SibillaValue> right = ctx.right.accept(this);
+        return s -> SibillaValue.eval(Math::pow, left.apply(s),right.apply(s));
     }
 
     @Override
-    public MeasureFunction<PopulationState> visitIntValue(PopulationModelParser.IntValueContext ctx) {
-        int v = Integer.parseInt(ctx.getText());
+    public Function<PopulationState, SibillaValue> visitIntValue(PopulationModelParser.IntValueContext ctx) {
+        SibillaValue v = new SibillaInteger(Integer.parseInt(ctx.getText()));
         return s-> v;
     }
 
     @Override
-    public MeasureFunction<PopulationState> visitBracketExpression(PopulationModelParser.BracketExpressionContext ctx) {
+    public Function<PopulationState, SibillaValue> visitBracketExpression(PopulationModelParser.BracketExpressionContext ctx) {
         return ctx.expr().accept(this);
     }
 
     @Override
-    public MeasureFunction<PopulationState> visitPopulationFractionExpression(PopulationModelParser.PopulationFractionExpressionContext ctx) {
+    public Function<PopulationState, SibillaValue> visitPopulationFractionExpression(PopulationModelParser.PopulationFractionExpressionContext ctx) {
         int[] indexes = PopulationModelGenerator.getIndexes(resolver, registry, ctx.agent);
-        return s -> s.getFraction(indexes);
+        return s -> new SibillaDouble(s.getFraction(indexes));
     }
 
     @Override
-    public MeasureFunction<PopulationState> visitIfThenElseExpression(PopulationModelParser.IfThenElseExpressionContext ctx) {
+    public Function<PopulationState, SibillaValue> visitIfThenElseExpression(PopulationModelParser.IfThenElseExpressionContext ctx) {
         PopulationPredicateEvaluator predicateEvaluator = getPopulationPredicateEvaluator();
         Predicate<PopulationState> guard = ctx.guard.accept(predicateEvaluator);
-        MeasureFunction<PopulationState> thenBranch = ctx.thenBranch.accept(this);
-        MeasureFunction<PopulationState> elseBranch = ctx.elseBranch.accept(this);
+        Function<PopulationState, SibillaValue> thenBranch = ctx.thenBranch.accept(this);
+        Function<PopulationState, SibillaValue> elseBranch = ctx.elseBranch.accept(this);
         return s -> (guard.test(s)?thenBranch.apply(s):elseBranch.apply(s));
     }
 
@@ -85,40 +91,40 @@ public class PopulationExpressionEvaluator extends PopulationModelBaseVisitor<Me
     }
 
     @Override
-    public MeasureFunction<PopulationState> visitRealValue(PopulationModelParser.RealValueContext ctx) {
-        double val = Double.parseDouble(ctx.getText());
+    public Function<PopulationState, SibillaValue> visitRealValue(PopulationModelParser.RealValueContext ctx) {
+        SibillaDouble val = new SibillaDouble(Double.parseDouble(ctx.getText()));
         return s -> val;
     }
 
     @Override
-    public MeasureFunction<PopulationState> visitMulDivExpression(PopulationModelParser.MulDivExpressionContext ctx) {
+    public Function<PopulationState, SibillaValue> visitMulDivExpression(PopulationModelParser.MulDivExpressionContext ctx) {
         return evalBinaryExpression(ctx.left,ctx.op.getText(),ctx.right);
     }
 
-    private MeasureFunction<PopulationState> evalBinaryExpression(PopulationModelParser.ExprContext left, String op, PopulationModelParser.ExprContext right) {
-        return PopulationModelGenerator.combine(
-                left.accept(this),
-                PopulationModelGenerator.getOperator(op),
-                right.accept(this)
-        );
+    private Function<PopulationState, SibillaValue> evalBinaryExpression(PopulationModelParser.ExprContext left, String op, PopulationModelParser.ExprContext right) {
+        Function<PopulationState, SibillaValue> leftEvaluationFunciton = left.accept(this);
+        Function<PopulationState, SibillaValue> rightEvaluationFunction = right.accept(this);
+        BinaryOperator<SibillaValue> semanticFunction = PopulationModelGenerator.getOperator(op);
+        return s -> semanticFunction.apply(leftEvaluationFunciton.apply(s), rightEvaluationFunction.apply(s));
     }
 
     @Override
-    public MeasureFunction<PopulationState> visitPopulationSizeExpression(PopulationModelParser.PopulationSizeExpressionContext ctx) {
+    public Function<PopulationState, SibillaValue> visitPopulationSizeExpression(PopulationModelParser.PopulationSizeExpressionContext ctx) {
         int[] indexes = PopulationModelGenerator.getIndexes(resolver, registry, ctx.agent);
-        return s -> s.getOccupancy(indexes);
+        return s -> new SibillaDouble(s.getOccupancy(indexes));
     }
 
     @Override
-    public MeasureFunction<PopulationState> visitAddSubExpression(PopulationModelParser.AddSubExpressionContext ctx) {
+    public Function<PopulationState, SibillaValue> visitAddSubExpression(PopulationModelParser.AddSubExpressionContext ctx) {
         return evalBinaryExpression(ctx.left,ctx.op.getText(),ctx.right);
     }
 
     @Override
-    public MeasureFunction<PopulationState> visitUnaryExpression(PopulationModelParser.UnaryExpressionContext ctx) {
-        MeasureFunction<PopulationState> arg = ctx.arg.accept(this);
+    public Function<PopulationState, SibillaValue> visitUnaryExpression(PopulationModelParser.UnaryExpressionContext ctx) {
+        Function<PopulationState, SibillaValue> arg = ctx.arg.accept(this);
+
         if (ctx.op.getText().equals("-")) {
-            return s -> -arg.apply(s);
+            return s -> SibillaValue.minus(arg.apply(s));
         } else {
             return arg;
         }

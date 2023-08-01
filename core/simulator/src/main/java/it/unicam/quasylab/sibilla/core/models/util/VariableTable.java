@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.models.util;
 
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -131,9 +133,9 @@ public class VariableTable {
     }
 
     public MappingState getMappingStateOf(Map<String, Integer> values) {
-        int[] state = new int[names.length];
+        SibillaValue[] state = new SibillaValue[names.length];
         for(int i=0; i<state.length; i++) {
-            state[i] = valueOf(i, values.getOrDefault(names[i], 0));
+            state[i] = SibillaValue.of(valueOf(i, values.getOrDefault(names[i], 0)));
         }
         return new MappingState(this, state);
     }

@@ -25,6 +25,7 @@ package it.unicam.quasylab.sibilla.langs.lio;
 
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.lio.*;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
@@ -35,13 +36,17 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Map;
 
 public class LIOModelGenerator {
 
     private final CodePointCharStream sourceCode;
     private ParseTree parseTree;
     private ErrorCollector errorCollector;
-    private SymbolTable symbolTable;
+
+    private Map<String, SibillaValue> parameters;
+
+    private Map<String, SibillaValue> constants;
 
     public LIOModelGenerator(File file) throws IOException, LIOModelParseError {
         this(CharStreams.fromReader(new FileReader(file)));
@@ -78,13 +83,17 @@ public class LIOModelGenerator {
         }
     }
 
+    public Map<String, SibillaValue> getModelParameters() {
+        return null;
+    }
 
-    public AgentsDefinition generateAgentsDefinition(EvaluationEnvironment environment) {
+    public AgentsDefinition generateAgentsDefinition(Map<String, SibillaValue> parameters) {
+
         return null;
     }
 
 
-    public LIOModel generateInddividualModel(EvaluationEnvironment environment) {
+    public LIOModel generateInddividualModel(Map<String, SibillaValue> parameters) {
         return null;//return new LIOModel<LIOIndividualState>(DefinitionGenerator.apply(environment), measureGenerator.apply(environment), predicateGenerator.apply(environment));
     }
 

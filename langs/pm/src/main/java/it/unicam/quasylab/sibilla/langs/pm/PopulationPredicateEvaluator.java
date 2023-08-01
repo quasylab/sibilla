@@ -26,9 +26,11 @@ package it.unicam.quasylab.sibilla.langs.pm;
 import it.unicam.quasylab.sibilla.core.models.MeasureFunction;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.models.pm.RatePopulationFunction;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class PopulationPredicateEvaluator extends PopulationModelBaseVisitor<Predicate<PopulationState>> {
@@ -51,10 +53,10 @@ public class PopulationPredicateEvaluator extends PopulationModelBaseVisitor<Pre
 
     @Override
     public Predicate<PopulationState> visitRelationExpression(PopulationModelParser.RelationExpressionContext ctx) {
-        MeasureFunction<PopulationState> left = ctx.left.accept(rateExpressionEvaluator);
-        MeasureFunction<PopulationState> right = ctx.right.accept(rateExpressionEvaluator);
-        BiFunction<Double, Double, Boolean> op = PopulationModelGenerator.getRelationOperator(ctx.op.getText());
-        return s -> op.apply(left.apply(s),right.apply(s));
+        Function<PopulationState, SibillaValue> left = ctx.left.accept(rateExpressionEvaluator);
+        Function<PopulationState, SibillaValue> right = ctx.right.accept(rateExpressionEvaluator);
+        BiPredicate<SibillaValue, SibillaValue> op = PopulationModelGenerator.getRelationOperator(ctx.op.getText());
+        return s -> op.test(left.apply(s),right.apply(s));
     }
 
     @Override

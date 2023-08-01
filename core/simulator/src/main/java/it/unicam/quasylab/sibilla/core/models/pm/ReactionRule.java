@@ -90,7 +90,7 @@ public class ReactionRule implements PopulationRule, Serializable {
 	@Override
 	public PopulationTransition apply(RandomGenerator r, double now, PopulationState state) {
 		if (isEnabled(state)) {
-			double rate = rateFunction.apply(now,state);
+			double rate = rateFunction.apply(now,state).doubleOf();
 			if (rate>0&&Double.isFinite(rate)) {
 				return new PopulationTransition(
 						name, 

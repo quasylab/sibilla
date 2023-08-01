@@ -28,10 +28,12 @@ import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -61,7 +63,7 @@ public class PopulationPredicatesGenerator extends PopulationModelBaseVisitor<Ma
     @Override
     public Map<String, Predicate<PopulationState>> visitPredicate_declaration(PopulationModelParser.Predicate_declarationContext ctx) {
         String name = ctx.name.getText();
-        Function<String, Double> evaluator = environment.getEvaluator();
+        Function<String, Optional<SibillaValue>> evaluator = environment.getEvaluator();
         measures.put(name, ctx.expr().accept(new PopulationExpressionEvaluator(evaluator, registry).getPopulationPredicateEvaluator()));
         return measures;
     }

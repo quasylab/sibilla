@@ -27,6 +27,9 @@ import it.unicam.quasylab.sibilla.core.models.*;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaInteger;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
@@ -39,10 +42,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.DoubleBinaryOperator;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -157,36 +157,41 @@ public class PopulationModelGenerator {
         if (!withErrors()&&(this.environment==null)) {
             EnvironmentGenerator eg = new EnvironmentGenerator();
             this.parseTree.accept(eg);
-            CachedValues constants = eg.getConstants();
-            this.environment = new EvaluationEnvironment(eg.getParameters(), constants);
+            this.environment = new EvaluationEnvironment(eg.getParameters(), eg.getValues(), this::evaluateConstantsAndParameters);
             return environment;
         }
         return this.environment;
     }
 
-    public static List<Integer> getValues(Function<String, Double> resolver, PopulationModelParser.RangeContext range) {
+    private Map<String, SibillaValue> evaluateConstantsAndParameters(Map<String, SibillaValue> parameters) {
+        EnvironmentGenerator eg = new EnvironmentGenerator(parameters);
+        this.parseTree.accept(eg);
+        return eg.getValues();
+    }
+
+    public static List<SibillaValue> getValues(Function<String, Optional<SibillaValue>> resolver, PopulationModelParser.RangeContext range) {
         ExpressionEvaluator evaluator = new ExpressionEvaluator(resolver);
         int min = evaluator.evalInteger(range.min);
         int max = evaluator.evalInteger(range.max);
         if (max<=min) {
             throw new IllegalArgumentException(ParseUtil.illegalInterval(min,max,range));
         }
-        return IntStream.range(min,max).boxed().collect(Collectors.toList());
+        return IntStream.range(min,max).mapToObj(SibillaInteger::new).collect(Collectors.toList());
     }
 
-    public static List<List<Integer>> merge(List<Integer> rangeValues, List<List<Integer>> collected) {
+    public static List<List<Integer>> merge(List<SibillaValue> rangeValues, List<List<Integer>> collected) {
         List<List<Integer>> result = new LinkedList<>();
-        for (Integer i: rangeValues) {
+        for (SibillaValue i: rangeValues) {
             for( List<Integer> lst: collected) {
                 List<Integer> newList = new LinkedList<>(lst);
-                newList.add(i);
+                newList.add(i.intOf());
                 result.add(newList);
             }
         }
         return result;
     }
 
-    public static List<List<Integer>> getValues(Function<String, Double> resolver, List<PopulationModelParser.RangeContext> rangeList) {
+    public static List<List<Integer>> getValues(Function<String, Optional<SibillaValue>> resolver, List<PopulationModelParser.RangeContext> rangeList) {
         List<List<Integer>> values = new LinkedList<>();
         values.add(new LinkedList<>());
         for (PopulationModelParser.RangeContext range: rangeList) {
@@ -195,35 +200,35 @@ public class PopulationModelGenerator {
         return values;
     }
 
-    public static List<Map<String,Double>> addValues(Function<String, Double> resolver, String name, PopulationModelParser.RangeContext range, List<Map<String, Double>> maps) {
-        List<Integer> values = getValues(resolver, range);
-        List<Map<String, Double>> result = new LinkedList<>();
-        for (Map<String, Double> map: maps) {
-            for(int i: values) {
-                Map<String, Double> newMap = new HashMap<>(map);
-                newMap.put(name,(double) i);
+    public static List<Map<String,SibillaValue>> addValues(Function<String, Optional<SibillaValue>> resolver, String name, PopulationModelParser.RangeContext range, List<Map<String, SibillaValue>> maps) {
+        List<SibillaValue> values = getValues(resolver, range);
+        List<Map<String, SibillaValue>> result = new LinkedList<>();
+        for (Map<String, SibillaValue> map: maps) {
+            for(SibillaValue i: values) {
+                Map<String, SibillaValue> newMap = new HashMap<>(map);
+                newMap.put(name, i);
                 result.add(newMap);
             }
         }
         return result;
     }
 
-    public static List<Map<String,Double>> getMaps(Function<String, Double> resolver, PopulationModelParser.Local_variablesContext local_variables) {
+    public static List<Map<String,SibillaValue>> getMaps(Function<String, Optional<SibillaValue>> resolver, PopulationModelParser.Local_variablesContext local_variables) {
         return getMaps(resolver, local_variables, List.of( new HashMap<>()));
     }
 
-    public static List<Map<String,Double>> getMaps(Function<String, Double> evaluator, PopulationModelParser.Local_variablesContext local_variables, PopulationModelParser.Guard_expressionContext guard) {
+    public static List<Map<String,SibillaValue>> getMaps(Function<String, Optional<SibillaValue>> evaluator, PopulationModelParser.Local_variablesContext local_variables, PopulationModelParser.Guard_expressionContext guard) {
         if (local_variables == null) {
             return List.of(new HashMap<>());
         }
-        List<Map<String,Double>> maps = PopulationModelGenerator.getMaps(evaluator,local_variables);
+        List<Map<String,SibillaValue>> maps = PopulationModelGenerator.getMaps(evaluator,local_variables);
         if (guard != null) {
             maps = PopulationModelGenerator.filter(evaluator, guard, maps);
         }
         return maps;
     }
 
-    public static List<Map<String,Double>> getMaps(Function<String, Double> resolver, PopulationModelParser.Local_variablesContext local_variables, List<Map<String,Double>> maps) {
+    public static List<Map<String,SibillaValue>> getMaps(Function<String, Optional<SibillaValue>> resolver, PopulationModelParser.Local_variablesContext local_variables, List<Map<String,SibillaValue>> maps) {
         if (local_variables == null) {
             return maps;
         }
@@ -233,28 +238,34 @@ public class PopulationModelGenerator {
         return maps;
     }
 
-    public static List<Map<String,Double>> filter(Function<String, Double> resolver, PopulationModelParser.Guard_expressionContext guard, List<Map<String,Double>> values) {
+    public static List<Map<String,SibillaValue>> filter(Function<String, Optional<SibillaValue>> resolver, PopulationModelParser.Guard_expressionContext guard, List<Map<String,SibillaValue>> values) {
         if (guard == null) {
             return values;
         }
         return values.stream().filter(m ->
-            guard.expr().accept(new ExpressionEvaluator(combine(resolver,m)).getBooleanExpressionEvaluator())
+            guard.expr().accept(new ExpressionEvaluator(combine(resolver,m))).booleanOf()
             ).collect(Collectors.toList());
     }
 
-    public static Function<String, Double> combine(Function<String, Double> resolver, Map<String, Double> map) {
-        return s -> map.getOrDefault(s, resolver.apply(s));
+    public static Function<String, Optional<SibillaValue>> combine(Function<String, Optional<SibillaValue>> resolver, Map<String, SibillaValue> map) {
+        return s -> {
+            if (map.containsKey(s)) {
+                return Optional.of(map.get(s));
+            } else {
+                return resolver.apply(s);
+            }
+        };
     }
 
-    public static double evalExpressionToDouble(Function<String, Double> resolver, PopulationModelParser.ExprContext expr) {
+    public static double evalExpressionToDouble(Function<String, Optional<SibillaValue>> resolver, PopulationModelParser.ExprContext expr) {
         return new ExpressionEvaluator(resolver).evalDouble(expr);
     }
 
-    public static int evalExpressionToInteger(Function<String, Double> resolver, PopulationModelParser.ExprContext expr) {
+    public static int evalExpressionToInteger(Function<String, Optional<SibillaValue>> resolver, PopulationModelParser.ExprContext expr) {
         return new ExpressionEvaluator(resolver).evalInteger(expr);
     }
 
-    public static int[] getIndexes(Function<String, Double> resolver, PopulationRegistry registry, PopulationModelParser.Species_expressionContext agent) {
+    public static int[] getIndexes(Function<String, Optional<SibillaValue>> resolver, PopulationRegistry registry, PopulationModelParser.Species_expressionContext agent) {
         String name = agent.name.getText();
         int[] indexes;
         if (registry.isALabel(name)) {
@@ -269,57 +280,57 @@ public class PopulationModelGenerator {
         return indexes;
     }
 
-    public static int getIndex(PopulationRegistry registry, Function<String, Double> resolver, String species, List<PopulationModelParser.ExprContext> args) {
+    public static int getIndex(PopulationRegistry registry, Function<String, Optional<SibillaValue>> resolver, String species, List<PopulationModelParser.ExprContext> args) {
         return registry.indexOf(species, args.stream().map(e -> evalExpressionToInteger(resolver, e)).toArray());
     }
 
-    public static PopulationRegistry.Tuple getTuple(Function<String, Double> resolver, String species, List<PopulationModelParser.ExprContext> args) {
+    public static PopulationRegistry.Tuple getTuple(Function<String, Optional<SibillaValue>> resolver, String species, List<PopulationModelParser.ExprContext> args) {
         return new PopulationRegistry.Tuple(species, args.stream().map(e -> evalExpressionToInteger(resolver, e)).toArray());
     }
 
 
-    public static int[] getIndexArray(PopulationRegistry registry, Function<String, Double> resolver, List<Map<String,Double>> maps, String species, List<PopulationModelParser.ExprContext> args) {
+    public static int[] getIndexArray(PopulationRegistry registry, Function<String, Optional<SibillaValue>> resolver, List<Map<String,SibillaValue>> maps, String species, List<PopulationModelParser.ExprContext> args) {
         return maps.stream().mapToInt(m -> getIndex(registry, combine(resolver, m), species, args)).toArray();
     }
 
 
 
 
-    public static Set<Integer> getIndexSet(PopulationRegistry registry, Function<String, Double> resolver, List<Map<String,Double>> maps, String species, List<PopulationModelParser.ExprContext> args) {
+    public static Set<Integer> getIndexSet(PopulationRegistry registry, Function<String, Optional<SibillaValue>> resolver, List<Map<String,SibillaValue>> maps, String species, List<PopulationModelParser.ExprContext> args) {
         return maps.stream().map(m -> getIndex(registry, combine(resolver, m), species, args)).collect(Collectors.toSet());
     }
 
-    public static Set<PopulationRegistry.Tuple> getTupleSet(Function<String, Double> resolver, List<Map<String,Double>> maps, String species, List<PopulationModelParser.ExprContext> args) {
+    public static Set<PopulationRegistry.Tuple> getTupleSet(Function<String, Optional<SibillaValue>> resolver, List<Map<String,SibillaValue>> maps, String species, List<PopulationModelParser.ExprContext> args) {
         return maps.stream().map(m -> getTuple(combine(resolver, m), species, args)).collect(Collectors.toSet());
     }
 
-    public static Set<Integer> getIndexSet(PopulationRegistry registry, Function<String, Double> resolver, Map<String, Double> map, PopulationModelParser.Species_expressionContext se) {
-        List<Map<String,Double>> localMaps = PopulationModelGenerator.getMaps(combine(resolver,map), se.local_variables(), se.guard_expression());
+    public static Set<Integer> getIndexSet(PopulationRegistry registry, Function<String, Optional<SibillaValue>> resolver, Map<String, SibillaValue> map, PopulationModelParser.Species_expressionContext se) {
+        List<Map<String,SibillaValue>> localMaps = PopulationModelGenerator.getMaps(combine(resolver,map), se.local_variables(), se.guard_expression());
         return PopulationModelGenerator.getIndexSet(registry,combine(resolver,map),localMaps,se.name.getText(), se.expr());
     }
 
 
-    public static Set<PopulationRegistry.Tuple> getTupleSet(Function<String, Double> resolver, PopulationModelParser.Species_expressionContext se) {
-        List<Map<String,Double>> localMaps = PopulationModelGenerator.getMaps(resolver, se.local_variables(), se.guard_expression());
+    public static Set<PopulationRegistry.Tuple> getTupleSet(Function<String, Optional<SibillaValue>> resolver, PopulationModelParser.Species_expressionContext se) {
+        List<Map<String,SibillaValue>> localMaps = PopulationModelGenerator.getMaps(resolver, se.local_variables(), se.guard_expression());
         return PopulationModelGenerator.getTupleSet(resolver,localMaps,se.name.getText(), se.expr());
     }
 
-    public static Set<PopulationRegistry.Tuple> getTupleSet(Function<String, Double> resolver, List<PopulationModelParser.Species_expressionContext> seList) {
+    public static Set<PopulationRegistry.Tuple> getTupleSet(Function<String, Optional<SibillaValue>> resolver, List<PopulationModelParser.Species_expressionContext> seList) {
         return seList.stream().map(se -> getTupleSet(resolver,se)).flatMap(Collection::stream).collect(Collectors.toSet());
     }
 
-    public static PopulationRegistry.Tuple[] getTupleArray(Function<String, Double> resolver, List<PopulationModelParser.Species_expressionContext> seList) {
+    public static PopulationRegistry.Tuple[] getTupleArray(Function<String, Optional<SibillaValue>> resolver, List<PopulationModelParser.Species_expressionContext> seList) {
         return getTupleSet(resolver, seList).toArray(new PopulationRegistry.Tuple[0]);
     }
 
 
-    public static Function<double[],PopulationRegistry.Tuple[]> getLabelFunction(String[] variables, Function<String, Double> resolver, List<PopulationModelParser.Species_expressionContext> species_expression) {
+    public static Function<double[],PopulationRegistry.Tuple[]> getLabelFunction(String[] variables, Function<String, Optional<SibillaValue>> resolver, List<PopulationModelParser.Species_expressionContext> species_expression) {
         return d -> getTupleArray(combine(resolver, PopulationModelGenerator.getMap(variables,d)),species_expression);
     }
 
 
 
-    public static List<Population> getPopulationList(PopulationRegistry registry, Function<String, Double> resolver, Map<String, Double> map, PopulationModelParser.Species_pattern_elementContext se) {
+    public static List<Population> getPopulationList(PopulationRegistry registry, Function<String, Optional<SibillaValue>> resolver, Map<String, SibillaValue> map, PopulationModelParser.Species_pattern_elementContext se) {
         Set<Integer> indexSet = getIndexSet(registry, resolver, map, se.species_expression());
         int size ;
         if (se.expr() != null) {
@@ -330,45 +341,52 @@ public class PopulationModelGenerator {
         return indexSet.stream().map(i -> new Population(i,size)).collect(Collectors.toList());
     }
 
-    public static List<Population> getPopulationList(PopulationRegistry registry, Function<String, Double> resolver, Map<String, Double> map, List<PopulationModelParser.Species_pattern_elementContext> seList) {
+    public static List<Population> getPopulationList(PopulationRegistry registry, Function<String, Optional<SibillaValue>> resolver, Map<String, SibillaValue> map, List<PopulationModelParser.Species_pattern_elementContext> seList) {
         return seList.stream().map(se -> getPopulationList(registry, resolver, map, se)).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
-    public static Population[] getPopulationArray(PopulationRegistry registry, Function<String, Double> resolver, Map<String, Double> map, List<PopulationModelParser.Species_pattern_elementContext> seList) {
+    public static Population[] getPopulationArray(PopulationRegistry registry, Function<String, Optional<SibillaValue>> resolver, Map<String, SibillaValue> map, List<PopulationModelParser.Species_pattern_elementContext> seList) {
         return getPopulationList(registry, resolver, map, seList).toArray(new Population[0]);
     }
 
-    public static RatePopulationFunction combine(RatePopulationFunction f1, DoubleBinaryOperator op, RatePopulationFunction f2) {
-        return (n,s) -> op.applyAsDouble(f1.apply(n,s),f2.apply(n,s));
+    public static RatePopulationFunction combine(RatePopulationFunction f1, BinaryOperator<SibillaValue> op, RatePopulationFunction f2) {
+        return (n,s) -> op.apply(f1.apply(n,s),f2.apply(n,s));
     }
 
-    public static MeasureFunction<PopulationState> combine(MeasureFunction<PopulationState> f1, DoubleBinaryOperator op, MeasureFunction<PopulationState> f2) {
-        return s -> op.applyAsDouble(f1.apply(s),f2.apply(s));
+    public static Function<PopulationState, SibillaValue> combine(Function<PopulationState, SibillaValue> f1, DoubleBinaryOperator op, Function<PopulationState, SibillaValue> f2) {
+        return s -> SibillaValue.eval(op, f1.apply(s),f2.apply(s));
     }
 
-    public static BiFunction<Double,Double,Boolean> getRelationOperator(String op) {
-        if (op.equals("<"))  { return (x,y) -> x<y; }
-        if (op.equals("<="))  { return (x,y) -> x<=y; }
-        if (op.equals("=="))  { return Double::equals; }
+    public static BiPredicate<SibillaValue,SibillaValue> getRelationOperator(String op) {
+        if (op.equals("<"))  { return (x,y) -> x.doubleOf()<y.doubleOf(); }
+        if (op.equals("<="))  { return (x,y) -> x.doubleOf()<=y.doubleOf(); }
+        if (op.equals("=="))  { return (x,y) -> x.doubleOf()==y.doubleOf(); }
         if (op.equals("!="))  { return (x,y) -> !x.equals(y); }
-        if (op.equals(">"))  { return (x,y) -> x>y; }
-        if (op.equals(">="))  { return (x,y) -> x>=y; }
+        if (op.equals(">"))  { return (x,y) -> x.doubleOf()>y.doubleOf(); }
+        if (op.equals(">="))  { return (x,y) -> x.doubleOf()>=y.doubleOf(); }
         return (x,y) -> false;
     }
 
-    public static DoubleBinaryOperator getOperator(String op) {
-        if (op.equals("+")) {return Double::sum;}
-        if (op.equals("-")) {return (x,y) -> x-y; }
-        if (op.equals("%")) {return (x,y) -> x%y; }
-        if (op.equals("*")) {return (x,y) -> x*y; }
-        if (op.equals("/")) {return (x,y) -> x/y; }
-        if (op.equals("//")) {return (x,y) -> (y==0.0?0.0:x/y); }
-        return (x,y) -> Double.NaN;
+
+    public static BinaryOperator<SibillaValue> getOperator(String op) {
+        if (op.equals("+")) {return SibillaValue::sum;}
+        if (op.equals("-")) {return SibillaValue::sub; }
+        if (op.equals("%")) {return SibillaValue::mod; }
+        if (op.equals("*")) {return SibillaValue::mul; }
+        if (op.equals("/")) {return SibillaValue::div; }
+        if (op.equals("//")) {return SibillaValue::zeroDiv; }
+        return (x,y) -> SibillaValue.ERROR_VALUE;
     }
 
-    public static Map<String,Double> getMap(String[] variables, double[] args) {
-        Map<String, Double> map = new HashMap<>();
+    public static Map<String,SibillaValue> getMap(String[] variables, SibillaValue[] args) {
+        Map<String, SibillaValue> map = new HashMap<>();
         IntStream.range(0,variables.length).sequential().forEach(i -> map.put(variables[i],args[i]));
+        return map;
+    }
+
+    public static Map<String,SibillaValue> getMap(String[] variables, double[] args) {
+        Map<String, SibillaValue> map = new HashMap<>();
+        IntStream.range(0,variables.length).sequential().forEach(i -> map.put(variables[i],new SibillaDouble(args[i])));
         return map;
     }
 

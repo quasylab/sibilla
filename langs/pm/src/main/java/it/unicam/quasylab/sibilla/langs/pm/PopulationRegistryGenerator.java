@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.langs.pm;
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.ParametricValue;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.antlr.v4.runtime.Token;
 
 import java.util.HashSet;
@@ -65,7 +66,7 @@ public class PopulationRegistryGenerator extends PopulationModelBaseVisitor<Popu
     @Override
     public PopulationRegistry visitLabel_declaration(PopulationModelParser.Label_declarationContext ctx) {
         String name = ctx.name.getText();
-        String[] variables = ctx.args.stream().sequential().map(Token::getText).toArray(String[]::new);
+        String[] variables = ctx.args.stream().map(Token::getText).toArray(String[]::new);
         registry.addLabel(name, new ParametricValue<>(variables, PopulationModelGenerator.getLabelFunction(variables,environment.getEvaluator(),ctx.species_expression())));
         return registry;
 //

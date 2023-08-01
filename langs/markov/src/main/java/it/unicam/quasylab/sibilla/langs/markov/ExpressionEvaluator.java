@@ -23,113 +23,131 @@
 
 package it.unicam.quasylab.sibilla.langs.markov;
 
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+
+import java.util.Optional;
 import java.util.function.Function;
 
-public class ExpressionEvaluator extends MarkovChainModelBaseVisitor<Value> {
+public class ExpressionEvaluator extends MarkovChainModelBaseVisitor<SibillaValue> {
 
-    private final Function<String, Double> resolver;
-    private final Function<String, DataType> types;
+    private final Function<String, Optional<SibillaValue>> resolver;
 
-    public ExpressionEvaluator(Function<String, Double> resolver, Function<String, DataType> types) {
+    public ExpressionEvaluator(Function<String, Optional<SibillaValue>> resolver) {
         super();
         this.resolver = resolver;
-        this.types = types;
     }
 
-    public static int evalInteger(Function<String, DataType> types, Function<String, Double> resolver, MarkovChainModelParser.ExprContext expr) {
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(resolver, types);
-        return expr.accept(evaluator).getIntValue();
+    public static int evalInteger(Function<String, Optional<SibillaValue>> resolver, MarkovChainModelParser.ExprContext expr) {
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(resolver);
+        return expr.accept(evaluator).intOf();
     }
 
-    public static double evalDouble(Function<String, DataType> types, Function<String, Double> resolver, MarkovChainModelParser.ExprContext expr) {
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(resolver, types);
-        return expr.accept(evaluator).getDoubleValue();
+    public static double evalDouble(Function<String, Optional<SibillaValue>> resolver, MarkovChainModelParser.ExprContext expr) {
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(resolver);
+        return expr.accept(evaluator).doubleOf();
     }
 
-    public static boolean evalBoolean(Function<String, DataType> types, Function<String, Double> resolver, MarkovChainModelParser.ExprContext expr) {
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(resolver, types);
-        return expr.accept(evaluator).getBooleanValue();
-    }
-
-    @Override
-    public Value visitExponentExpression(MarkovChainModelParser.ExponentExpressionContext ctx) {
-        Value v1 = ctx.left.accept(this);
-        Value v2 = ctx.right.accept(this);
-        return v1.pow(v2);
+    public static boolean evalBoolean(Function<String, Optional<SibillaValue>> resolver, MarkovChainModelParser.ExprContext expr) {
+        ExpressionEvaluator evaluator = new ExpressionEvaluator(resolver);
+        return expr.accept(evaluator).booleanOf();
     }
 
     @Override
-    public Value visitNegationExpression(MarkovChainModelParser.NegationExpressionContext ctx) {
-        return ctx.arg.accept(this).not();
+    public SibillaValue visitExponentExpression(MarkovChainModelParser.ExponentExpressionContext ctx) {
+        SibillaValue v1 = ctx.left.accept(this);
+        SibillaValue v2 = ctx.right.accept(this);
+
+        return SibillaValue.eval(Math::pow, v1, v2);
     }
 
     @Override
-    public Value visitReferenceExpression(MarkovChainModelParser.ReferenceExpressionContext ctx) {
-        return Value.getValue(types.apply(ctx.getText()), resolver.apply(ctx.getText()));
+    public SibillaValue visitNegationExpression(MarkovChainModelParser.NegationExpressionContext ctx) {
+        return SibillaValue.not(ctx.arg.accept(this));
     }
 
     @Override
-    public Value visitIntValue(MarkovChainModelParser.IntValueContext ctx) {
-        return new Value.IntegerValue(Integer.parseInt(ctx.getText()));
+    public SibillaValue visitReferenceExpression(MarkovChainModelParser.ReferenceExpressionContext ctx) {
+        return resolver.apply(ctx.getText()).orElse(SibillaValue.ERROR_VALUE);
     }
 
     @Override
-    public Value visitTrueValue(MarkovChainModelParser.TrueValueContext ctx) {
-        return Value.TRUE;
+    public SibillaValue visitIntValue(MarkovChainModelParser.IntValueContext ctx) {
+        return SibillaValue.of(Integer.parseInt(ctx.getText()));
     }
 
     @Override
-    public Value visitRelationExpression(MarkovChainModelParser.RelationExpressionContext ctx) {
-        return Value.evalRelation(ctx.left.accept(this), ctx.op.getText(), ctx.right.accept(this));
+    public SibillaValue visitTrueValue(MarkovChainModelParser.TrueValueContext ctx) {
+        return SibillaValue.of(true);
     }
 
     @Override
-    public Value visitBracketExpression(MarkovChainModelParser.BracketExpressionContext ctx) {
+    public SibillaValue visitRelationExpression(MarkovChainModelParser.RelationExpressionContext ctx) {
+        if (ctx.op.equals("<")) return SibillaValue.of(ctx.left.accept(this).doubleOf()<ctx.right.accept(this).doubleOf());
+        if (ctx.op.equals("<=")) return SibillaValue.of(ctx.left.accept(this).doubleOf()<=ctx.right.accept(this).doubleOf());
+        if (ctx.op.equals("==")) return SibillaValue.of(ctx.left.accept(this).doubleOf()==ctx.right.accept(this).doubleOf());
+        if (ctx.op.equals("!=")) return SibillaValue.of(ctx.left.accept(this).doubleOf()!=ctx.right.accept(this).doubleOf());
+        if (ctx.op.equals(">")) return SibillaValue.of(ctx.left.accept(this).doubleOf()>ctx.right.accept(this).doubleOf());
+        if (ctx.op.equals(">=")) return SibillaValue.of(ctx.left.accept(this).doubleOf()>=ctx.right.accept(this).doubleOf());
+        return SibillaValue.ERROR_VALUE;
+    }
+
+    @Override
+    public SibillaValue visitBracketExpression(MarkovChainModelParser.BracketExpressionContext ctx) {
         return ctx.expr().accept(this);
     }
 
     @Override
-    public Value visitOrExpression(MarkovChainModelParser.OrExpressionContext ctx) {
-        return ctx.left.accept(this).or(ctx.right.accept(this));
+    public SibillaValue visitOrExpression(MarkovChainModelParser.OrExpressionContext ctx) {
+        return SibillaValue.or(ctx.left.accept(this), ctx.right.accept(this));
     }
 
     @Override
-    public Value visitIfThenElseExpression(MarkovChainModelParser.IfThenElseExpressionContext ctx) {
-        return (ctx.guard.accept(this).getBooleanValue()?ctx.thenBranch.accept(this):ctx.elseBranch.accept(this));
+    public SibillaValue visitIfThenElseExpression(MarkovChainModelParser.IfThenElseExpressionContext ctx) {
+        return (ctx.guard.accept(this).booleanOf()?ctx.thenBranch.accept(this):ctx.elseBranch.accept(this));
     }
 
     @Override
-    public Value visitFalseValue(MarkovChainModelParser.FalseValueContext ctx) {
-        return Value.FALSE;
+    public SibillaValue visitFalseValue(MarkovChainModelParser.FalseValueContext ctx) {
+        return SibillaValue.of(false);
     }
 
     @Override
-    public Value visitRealValue(MarkovChainModelParser.RealValueContext ctx) {
-        return new Value.RealValue(Double.parseDouble(ctx.getText()));
+    public SibillaValue visitRealValue(MarkovChainModelParser.RealValueContext ctx) {
+        return SibillaValue.of(Double.parseDouble(ctx.getText()));
     }
 
     @Override
-    public Value visitAndExpression(MarkovChainModelParser.AndExpressionContext ctx) {
-        return ctx.left.accept(this).and(ctx.right.accept(this));
+    public SibillaValue visitAndExpression(MarkovChainModelParser.AndExpressionContext ctx) {
+        return SibillaValue.and(ctx.left.accept(this), ctx.right.accept(this));
     }
 
     @Override
-    public Value visitMulDivExpression(MarkovChainModelParser.MulDivExpressionContext ctx) {
-        return Value.apply(ctx.left.accept(this), ctx.op.getText(), ctx.right.accept(this));
+    public SibillaValue visitMulDivExpression(MarkovChainModelParser.MulDivExpressionContext ctx) {
+        if (ctx.op.getText().equals("*")) return SibillaValue.mul(ctx.left.accept(this), ctx.right.accept(this));
+        if (ctx.op.getText().equals("/")) return SibillaValue.div(ctx.left.accept(this), ctx.right.accept(this));
+        if (ctx.op.getText().equals("//")) return SibillaValue.zeroDiv(ctx.left.accept(this), ctx.right.accept(this));
+        return SibillaValue.ERROR_VALUE;
     }
 
     @Override
-    public Value visitAddSubExpression(MarkovChainModelParser.AddSubExpressionContext ctx) {
-        return Value.apply(ctx.left.accept(this), ctx.op.getText(), ctx.right.accept(this));
+    public SibillaValue visitAddSubExpression(MarkovChainModelParser.AddSubExpressionContext ctx) {
+        if (ctx.op.getText().equals("+")) return SibillaValue.sum(ctx.left.accept(this), ctx.right.accept(this));
+        if (ctx.op.getText().equals("-")) return SibillaValue.sub(ctx.left.accept(this), ctx.right.accept(this));
+        if (ctx.op.getText().equals("%")) return SibillaValue.mod(ctx.left.accept(this), ctx.right.accept(this));
+        return SibillaValue.ERROR_VALUE;
     }
 
     @Override
-    public Value visitCastToIntExpression(MarkovChainModelParser.CastToIntExpressionContext ctx) {
-        return ctx.arg.accept(this).cast(DataType.INTEGER);
+    public SibillaValue visitCastToIntExpression(MarkovChainModelParser.CastToIntExpressionContext ctx) {
+        return SibillaValue.of(ctx.arg.accept(this).intOf());
     }
 
     @Override
-    public Value visitUnaryExpression(MarkovChainModelParser.UnaryExpressionContext ctx) {
-        return Value.apply(ctx.op.getText(), ctx.arg.accept(this));
+    public SibillaValue visitUnaryExpression(MarkovChainModelParser.UnaryExpressionContext ctx) {
+        if (ctx.op.getText().equals("-")) {
+            return SibillaValue.minus(ctx.arg.accept(this));
+        } else {
+            return ctx.arg.accept(this);
+        }
     }
 }

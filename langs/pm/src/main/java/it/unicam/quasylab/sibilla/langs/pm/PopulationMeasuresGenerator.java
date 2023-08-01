@@ -28,10 +28,12 @@ import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class PopulationMeasuresGenerator extends PopulationModelBaseVisitor<Map<String, Measure<PopulationState>>> {
@@ -60,16 +62,16 @@ public class PopulationMeasuresGenerator extends PopulationModelBaseVisitor<Map<
     @Override
     public Map<String, Measure<PopulationState>> visitMeasure_declaration(PopulationModelParser.Measure_declarationContext ctx) {
         String name = ctx.name.getText();
-        Function<String, Double> evaluator = environment.getEvaluator();
-        List<Map<String,Double>> maps = PopulationModelGenerator.getMaps(evaluator, ctx.local_variables(), ctx.guard_expression());
+        Function<String, Optional<SibillaValue>> evaluator = environment.getEvaluator();
+        List<Map<String,SibillaValue>> maps = PopulationModelGenerator.getMaps(evaluator, ctx.local_variables(), ctx.guard_expression());
         maps.stream().map(m -> getMeasure(name, evaluator, m, ctx.expr())).forEach(m -> measures.put(m.getName(), m));
         return measures;
     }
 
-    private Measure<PopulationState> getMeasure(String name, Function<String, Double> evaluator, Map<String, Double> m, PopulationModelParser.ExprContext expr) {
-        return new SimpleMeasure<>(name+m.toString(), expr.accept(
-                new PopulationExpressionEvaluator(PopulationModelGenerator.combine(evaluator, m), registry))
-        );
+    private Measure<PopulationState> getMeasure(String name, Function<String, Optional<SibillaValue>> evaluator, Map<String, SibillaValue> m, PopulationModelParser.ExprContext expr) {
+        Function<PopulationState, SibillaValue> measureFunction = expr.accept(
+                new PopulationExpressionEvaluator(PopulationModelGenerator.combine(evaluator, m), registry));
+        return new SimpleMeasure<>(name+m.toString(), s -> measureFunction.apply(s).doubleOf());
     }
 
 

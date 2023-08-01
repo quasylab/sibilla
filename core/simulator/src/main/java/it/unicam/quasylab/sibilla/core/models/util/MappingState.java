@@ -25,6 +25,7 @@ package it.unicam.quasylab.sibilla.core.models.util;
 
 import it.unicam.quasylab.sibilla.core.models.ImmutableState;
 import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -44,7 +45,7 @@ public class MappingState implements ImmutableState {
     /**
      * Array with values.
      */
-    private final int[] state;
+    private final SibillaValue[] state;
 
     /**
      * Create a new state from the given table and values.
@@ -52,7 +53,7 @@ public class MappingState implements ImmutableState {
      * @param table index of variables.
      * @param state values.
      */
-    public MappingState(VariableTable table, int[] state) {
+    public MappingState(VariableTable table, SibillaValue[] state) {
         this.state = Arrays.copyOf(state, state.length);
         this.table = table;
     }
@@ -74,7 +75,7 @@ public class MappingState implements ImmutableState {
      * @return the value of variabile with index i as an integer.
      */
     public int getIntValue(int i) {
-        return state[i];
+        return state[i].intOf();
     }
 
     /**
@@ -84,7 +85,7 @@ public class MappingState implements ImmutableState {
      * @return the value of variable with index i as a double.
      */
     public double getDoubleValue(int i) {
-        return state[i];
+        return state[i].doubleOf();
     }
 
     /**
@@ -118,12 +119,15 @@ public class MappingState implements ImmutableState {
         if (update.isEmpty()) {
             return this;
         }
-        int[] copyState = Arrays.copyOf(state,state.length);
+        SibillaValue[] copyState = Arrays.copyOf(state,state.length);
         for (Map.Entry<Integer, ToIntFunction<MappingState>> e: update.entrySet()) {
-            copyState[e.getKey()] = e.getValue().applyAsInt(this);
+            copyState[e.getKey()] = SibillaValue.of(e.getValue().applyAsInt(this));
         }
         return new MappingState(table, copyState);
     }
 
 
+    public SibillaValue get(int idx) {
+        return this.state[idx];
+    }
 }

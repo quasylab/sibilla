@@ -26,12 +26,15 @@ package it.unicam.quasylab.sibilla.langs.pm;
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationRule;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
+import it.unicam.quasylab.sibilla.core.models.pm.RatePopulationFunction;
 import it.unicam.quasylab.sibilla.core.models.pm.ReactionRule;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -58,23 +61,23 @@ public class PopulationRuleGenerator extends PopulationModelBaseVisitor<List<Pop
 
     @Override
     public List<PopulationRule> visitRule_declaration(PopulationModelParser.Rule_declarationContext ctx) {
-        Function<String, Double> evaluator = environment.getEvaluator();
-        List<Map<String,Double>> maps = PopulationModelGenerator.getMaps(evaluator, ctx.local_variables(), ctx.guard_expression());
+        Function<String, Optional<SibillaValue>> evaluator = environment.getEvaluator();
+        List<Map<String,SibillaValue>> maps = PopulationModelGenerator.getMaps(evaluator, ctx.local_variables(), ctx.guard_expression());
         rules.addAll(getRules(ctx.name.getText(), evaluator, maps, ctx.rule_body()));
         return rules;
     }
 
 
-    public List<PopulationRule> getRules(String name, Function<String,Double> evaluator, List<Map<String,Double>> maps, PopulationModelParser.Rule_bodyContext body) {
+    public List<PopulationRule> getRules(String name, Function<String,Optional<SibillaValue>> evaluator, List<Map<String,SibillaValue>> maps, PopulationModelParser.Rule_bodyContext body) {
         return maps.stream().map(m -> getRule(name, evaluator, m, body)).collect(Collectors.toList());
     }
 
-    public PopulationRule getRule(String name, Function<String,Double> evaluator, Map<String,Double> map, PopulationModelParser.Rule_bodyContext body) {
+    public PopulationRule getRule(String name, Function<String,Optional<SibillaValue>> evaluator, Map<String,SibillaValue> map, PopulationModelParser.Rule_bodyContext body) {
         RateExpressionEvaluator expressionEvaluator =  new RateExpressionEvaluator(PopulationModelGenerator.combine(evaluator,map), registry);
-        BiPredicate<Double,PopulationState> biPredicate = (body.guard==null?null:body.guard.accept(expressionEvaluator.getPopulationPredicateEvaluator()));
+        RatePopulationFunction biPredicate = (body.guard==null?null:body.guard.accept(expressionEvaluator));
         Predicate<PopulationState> predicate = null;
         if (biPredicate != null) {
-            predicate = s -> biPredicate.test(0.0,s);
+            predicate = s -> biPredicate.apply(0.0,s).booleanOf();
         }
         return new ReactionRule(
                 name+(map.isEmpty()?"":map.toString()),

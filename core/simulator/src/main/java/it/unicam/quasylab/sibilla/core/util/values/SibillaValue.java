@@ -24,6 +24,9 @@
 package it.unicam.quasylab.sibilla.core.util.values;
 
 import java.util.Optional;
+import java.util.function.BiPredicate;
+import java.util.function.BinaryOperator;
+import java.util.function.DoubleBinaryOperator;
 
 /**
  * Instances of this interface represent values in a Sibilla model.
@@ -140,6 +143,45 @@ public interface SibillaValue {
         return SibillaValue.ERROR_VALUE;
     }
 
+    static SibillaValue eval(DoubleBinaryOperator op, SibillaValue v1, SibillaValue v2) {
+        return new SibillaDouble(op.applyAsDouble(v1.doubleOf(), v2.doubleOf()));
+    }
+
+    /**
+     * Returns the sibilla value representing the double value <code>v</code>.
+     *
+     * @param v a double value.
+     * @return the sibilla value representing the double value <code>v</code>.
+     */
+    static SibillaValue of(double v) {
+        return new SibillaDouble(v);
+    }
+
+    /**
+     * Returns the sibilla value representing the int value <code>v</code>.
+     *
+     * @param v a double value.
+     * @return the sibilla value representing the int value <code>v</code>.
+     */
+    static SibillaValue of(int v) {
+        return new SibillaInteger(v);
+    }
+
+    /**
+     * Returns the sibilla value representing the boolean value <code>v</code>.
+     *
+     * @param v a double value.
+     * @return the sibilla value representing the boolean value <code>v</code>.
+     */
+    static SibillaValue of(boolean v) {
+        if (v) {
+            return SibillaBoolean.TRUE;
+        } else {
+            return SibillaBoolean.FALSE;
+        }
+    }
+
+
 
     /**
      * Returns the double representation of this value. {@link Double#NaN} is returned if this
@@ -170,4 +212,25 @@ public interface SibillaValue {
      * @return the type associated with this value.
      */
     SibillaType<?> getType();
+
+    public static BiPredicate<SibillaValue,SibillaValue> getRelationOperator(String op) {
+        if (op.equals("<"))  { return (x,y) -> x.doubleOf()<y.doubleOf(); }
+        if (op.equals("<="))  { return (x,y) -> x.doubleOf()<=y.doubleOf(); }
+        if (op.equals("=="))  { return (x,y) -> x.doubleOf()==y.doubleOf(); }
+        if (op.equals("!="))  { return (x,y) -> !x.equals(y); }
+        if (op.equals(">"))  { return (x,y) -> x.doubleOf()>y.doubleOf(); }
+        if (op.equals(">="))  { return (x,y) -> x.doubleOf()>=y.doubleOf(); }
+        return (x,y) -> false;
+    }
+
+
+    public static BinaryOperator<SibillaValue> getOperator(String op) {
+        if (op.equals("+")) {return SibillaValue::sum;}
+        if (op.equals("-")) {return SibillaValue::sub; }
+        if (op.equals("%")) {return SibillaValue::mod; }
+        if (op.equals("*")) {return SibillaValue::mul; }
+        if (op.equals("/")) {return SibillaValue::div; }
+        if (op.equals("//")) {return SibillaValue::zeroDiv; }
+        return (x,y) -> SibillaValue.ERROR_VALUE;
+    }
 }

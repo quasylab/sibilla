@@ -28,6 +28,7 @@ import it.unicam.quasylab.sibilla.core.models.ParametricValue;
 import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.antlr.v4.runtime.Token;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -74,7 +75,7 @@ public class StateSetGenerator extends PopulationModelBaseVisitor<ParametricData
     }
 
 
-    public PopulationState getPopulationState(Map<String,Double> map, PopulationModelParser.Species_patternContext species_pattern) {
+    public PopulationState getPopulationState(Map<String, SibillaValue> map, PopulationModelParser.Species_patternContext species_pattern) {
         return registry.createPopulationState(PopulationModelGenerator.getPopulationArray(registry,environment.getEvaluator(),map,species_pattern.species_pattern_element()));
     }
 

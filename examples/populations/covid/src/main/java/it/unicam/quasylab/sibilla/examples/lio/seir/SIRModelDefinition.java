@@ -28,6 +28,7 @@ import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -59,10 +60,10 @@ public class SIRModelDefinition {
     public static List<PopulationRule> generateRules(EvaluationEnvironment environment, PopulationRegistry registry) {
         PopulationRule rule_S_I = new ReactionRule("S->I", new Population[] { new Population(S), new Population(I) },
                 new Population[] { new Population(I), new Population(I) },
-                (t, s) -> s.getOccupancy(S) * PROB_TRANSMISSION * LAMBDA_MEET * (s.getOccupancy(I) / N));
+                (t, s) -> SibillaValue.of(s.getOccupancy(S) * PROB_TRANSMISSION * LAMBDA_MEET * (s.getOccupancy(I) / N)));
 
         PopulationRule rule_I_R = new ReactionRule("I->R", new Population[] { new Population(I) },
-                new Population[] { new Population(R) }, (t, s) -> s.getOccupancy(I) * LAMBDA_R);
+                new Population[] { new Population(R) }, (t, s) -> SibillaValue.of(s.getOccupancy(I) * LAMBDA_R));
 
         LinkedList<PopulationRule> rules = new LinkedList<>();
         rules.add(rule_S_I);

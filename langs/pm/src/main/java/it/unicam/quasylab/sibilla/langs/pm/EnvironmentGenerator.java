@@ -29,18 +29,21 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class EnvironmentGenerator extends PopulationModelBaseVisitor<Boolean> {
 
-    private final Map<String,Function<Function<String,Double>,Double>> definitions;
-    private final Map<String,Double> constants;
+    private final Map<String,SibillaValue> values;
     private final Map<String, SibillaValue> parameters;
 
     public EnvironmentGenerator() {
-        this.constants = new HashMap<>();
-        this.parameters = new HashMap<>();
-        this.definitions = new HashMap<>();
+        this(new HashMap<>());
+    }
+
+    public EnvironmentGenerator(Map<String, SibillaValue> parameters) {
+        this.values = new HashMap<>();
+        this.parameters = parameters;
     }
 
     @Override
@@ -51,21 +54,25 @@ public class EnvironmentGenerator extends PopulationModelBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitConst_declaration(PopulationModelParser.Const_declarationContext ctx) {
-        Function<Function<String,Double>,Double> evaluator =
+        Function<Function<String,Optional<SibillaValue>>,SibillaValue> evaluator =
                 resolver-> ctx.expr().accept(new ExpressionEvaluator(resolver));
-        definitions.put(ctx.name.getText(), evaluator);
-        constants.put(ctx.name.getText(), evaluator.apply(this::getValueOf));
+        values.put(ctx.name.getText(), evaluator.apply(this::getValueOf));
         return true;
     }
 
-    private Double getValueOf(String name) {
-        return constants.getOrDefault(name,parameters.getOrDefault(name, SibillaValue.ERROR_VALUE).doubleOf());
+    private Optional<SibillaValue> getValueOf(String name) {
+        if (values.containsKey(name)) return Optional.of(values.get(name));
+        if (parameters.containsKey(name)) return Optional.of(parameters.get(name));
+        return Optional.empty();
     }
 
     @Override
     public Boolean visitParam_declaration(PopulationModelParser.Param_declarationContext ctx) {
-        ExpressionEvaluator evaluator = new ExpressionEvaluator(this::getValueOf);
-        parameters.put(ctx.name.getText(), new SibillaDouble(ctx.expr().accept(evaluator)));
+        if (!parameters.containsKey(ctx.name.getText())) {
+            ExpressionEvaluator evaluator = new ExpressionEvaluator(this::getValueOf);
+            parameters.put(ctx.name.getText(), ctx.expr().accept(evaluator));
+        }
+        this.values.put(ctx.name.getText(), parameters.get(ctx.name.getText()));
         return true;
     }
 
@@ -78,7 +85,12 @@ public class EnvironmentGenerator extends PopulationModelBaseVisitor<Boolean> {
         return this.parameters;
     }
 
-    public CachedValues getConstants() {
-        return new CachedValues(definitions, constants);
+    @Override
+    protected Boolean aggregateResult(Boolean aggregate, Boolean nextResult) {
+        return aggregate & nextResult;
+    }
+
+    public Map<String, SibillaValue> getValues() {
+        return this.values;
     }
 }

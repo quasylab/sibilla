@@ -102,7 +102,7 @@ public class YodaModelGenerator {
     }
 
     public EvaluationEnvironment getEvaluationEnvironment() throws YodaModelGenerationException {
-        return new EvaluationEnvironment(evaluateParameters(), evaluateConstants());
+        return new EvaluationEnvironment(evaluateParameters(), null);//evaluateConstants());
     }
 
     //TODO

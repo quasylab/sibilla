@@ -25,155 +25,160 @@ package it.unicam.quasylab.sibilla.langs.markov;
 
 import it.unicam.quasylab.sibilla.core.models.util.MappingState;
 import it.unicam.quasylab.sibilla.core.models.util.VariableTable;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaBoolean;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.antlr.v4.runtime.ParserRuleContext;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.ToDoubleFunction;
-import java.util.function.ToIntFunction;
+import javax.swing.text.html.Option;
+import java.util.Optional;
+import java.util.function.*;
 
-public class StateExpressionEvaluator extends MarkovChainModelBaseVisitor<LazyValue<MappingState>> {
+public class StateExpressionEvaluator extends MarkovChainModelBaseVisitor<Function<MappingState, SibillaValue>> {
 
-    private final Function<String, Double> resolver;
-    private final Function<String, DataType> types;
+    private final Function<String, Optional<SibillaValue>> resolver;
     private final VariableTable table;
 
 
-    public static Predicate<MappingState> evalStatePredicate(Function<String, DataType> types, Function<String, Double> resolver, VariableTable table, ParserRuleContext ctx) {
-        return ctx.accept( new StateExpressionEvaluator(table, resolver, types)).getToBooleanFunction();
+    public static Predicate<MappingState> evalStatePredicate(Function<String, Optional<SibillaValue>> resolver, VariableTable table, ParserRuleContext ctx) {
+        Function<MappingState, SibillaValue> f = ctx.accept( new StateExpressionEvaluator(table, resolver));
+        return s -> f.apply(s).booleanOf();
     }
 
-    public static ToIntFunction<MappingState> evalToIntFunction(Function<String, DataType> types, Function<String, Double> resolver, VariableTable table, ParserRuleContext ctx) {
-        return ctx.accept( new StateExpressionEvaluator(table, resolver, types)).getToIntegerFunction();
+    public static ToIntFunction<MappingState> evalToIntFunction(Function<String, Optional<SibillaValue>> resolver, VariableTable table, ParserRuleContext ctx) {
+        Function<MappingState, SibillaValue> f = ctx.accept( new StateExpressionEvaluator(table, resolver));
+        return s -> f.apply(s).intOf();
     }
 
-    public static ToDoubleFunction<MappingState> evalToDoubleFunction(Function<String, DataType> types, Function<String, Double> resolver, VariableTable table, ParserRuleContext ctx) {
-        return ctx.accept( new StateExpressionEvaluator(table, resolver, types)).getToDoubleFunction();
+    public static ToDoubleFunction<MappingState> evalToDoubleFunction(Function<String, Optional<SibillaValue>> resolver, VariableTable table, ParserRuleContext ctx) {
+        Function<MappingState, SibillaValue> f = ctx.accept( new StateExpressionEvaluator(table, resolver));
+        return s -> f.apply(s).doubleOf();
     }
 
-    public StateExpressionEvaluator(VariableTable table, Function<String, Double> resolver, Function<String, DataType> types) {
+    public StateExpressionEvaluator(VariableTable table, Function<String, Optional<SibillaValue>> resolver) {
         super();
-        this.types = types;
         this.resolver = resolver;
         this.table = table;
     }
 
     @Override
-    public LazyValue<MappingState> visitNegationExpression(MarkovChainModelParser.NegationExpressionContext ctx) {
-        return ctx.arg.accept(this).not();
+    public Function<MappingState, SibillaValue> visitNegationExpression(MarkovChainModelParser.NegationExpressionContext ctx) {
+        Function<MappingState, SibillaValue> fun = ctx.arg.accept(this);
+        return s -> SibillaValue.not(fun.apply(s));
     }
 
     @Override
-    public LazyValue<MappingState> visitExponentExpression(MarkovChainModelParser.ExponentExpressionContext ctx) {
-        return ctx.left.accept(this).pow(ctx.right.accept(this));
+    public Function<MappingState, SibillaValue> visitExponentExpression(MarkovChainModelParser.ExponentExpressionContext ctx) {
+        Function<MappingState, SibillaValue> left = ctx.left.accept(this);
+        Function<MappingState, SibillaValue> right = ctx.right.accept(this);
+        return s -> SibillaValue.eval(Math::pow, left.apply(s), right.apply(s));
     }
 
     @Override
-    public LazyValue<MappingState> visitReferenceExpression(MarkovChainModelParser.ReferenceExpressionContext ctx) {
+    public Function<MappingState, SibillaValue> visitReferenceExpression(MarkovChainModelParser.ReferenceExpressionContext ctx) {
         String name = ctx.getText();
-        DataType type = types.apply(name);
         if (table.contains(name)) {
-            return getStateVariableValue(name, type);
+            return getStateVariableValue(name);
         } else {
-            return getValue(name, type);
+            return getValue(name);
         }
     }
 
-    private LazyValue<MappingState> getValue(String name, DataType type) {
+    private Function<MappingState, SibillaValue> getValue(String name) {
         int idx = table.indexOf(name);
-        double value = resolver.apply(name);
-        switch (type) {
-            case BOOLEAN: return new LazyValue.LazyBoolean<>(s -> (value>0));
-            case INTEGER: return new LazyValue.LazyInteger<>(s -> (int) value);
-            case REAL: return new LazyValue.LazyReal<>(s -> value);
-            default:
-                return new LazyValue.NoneLazyValue<>();
-        }
+        return s -> s.get(idx);
     }
 
-    private LazyValue<MappingState> getStateVariableValue(String name, DataType type) {
+    private Function<MappingState, SibillaValue> getStateVariableValue(String name) {
         int idx = table.indexOf(name);
-        switch (type) {
-            case BOOLEAN: return new LazyValue.LazyBoolean<>(s -> s.getDoubleValue(idx)>0);
-            case INTEGER: return new LazyValue.LazyInteger<>(s -> s.getIntValue(idx));
-            case REAL: return new LazyValue.LazyReal<>(s -> s.getDoubleValue(idx));
-            default:
-                return new LazyValue.NoneLazyValue<>();
-        }
+        return s -> s.get(idx);
     }
 
     @Override
-    public LazyValue<MappingState> visitIntValue(MarkovChainModelParser.IntValueContext ctx) {
-        int n = Integer.parseInt(ctx.getText());
-        return new LazyValue.LazyInteger<>(s -> n);
+    public Function<MappingState, SibillaValue> visitIntValue(MarkovChainModelParser.IntValueContext ctx) {
+        SibillaValue n = SibillaValue.of(Integer.parseInt(ctx.getText()));
+        return s -> n;
     }
 
     @Override
-    public LazyValue<MappingState> visitTrueValue(MarkovChainModelParser.TrueValueContext ctx) {
-        return new LazyValue.LazyBoolean<>(s -> true);
+    public Function<MappingState, SibillaValue> visitTrueValue(MarkovChainModelParser.TrueValueContext ctx) {
+        return s -> SibillaBoolean.TRUE;
     }
 
     @Override
-    public LazyValue<MappingState> visitRelationExpression(MarkovChainModelParser.RelationExpressionContext ctx) {
-        return LazyValue.evalRelation(ctx.left.accept(this), ctx.op.getText(), ctx.right.accept(this));
+    public Function<MappingState, SibillaValue> visitRelationExpression(MarkovChainModelParser.RelationExpressionContext ctx) {
+        Function<MappingState, SibillaValue> left = ctx.left.accept(this);
+        Function<MappingState, SibillaValue> right = ctx.right.accept(this);
+        BiPredicate<SibillaValue, SibillaValue> op = SibillaValue.getRelationOperator(ctx.op.getText());
+        return s -> SibillaValue.of(op.test(left.apply(s), right.apply(s)));
     }
 
     @Override
-    public LazyValue<MappingState> visitBracketExpression(MarkovChainModelParser.BracketExpressionContext ctx) {
+    public Function<MappingState, SibillaValue> visitBracketExpression(MarkovChainModelParser.BracketExpressionContext ctx) {
         return ctx.expr().accept(this);
     }
 
     @Override
-    public LazyValue<MappingState> visitOrExpression(MarkovChainModelParser.OrExpressionContext ctx) {
-        return ctx.left.accept(this).or(ctx.right.accept(this));
+    public Function<MappingState, SibillaValue> visitOrExpression(MarkovChainModelParser.OrExpressionContext ctx) {
+        Function<MappingState, SibillaValue> left = ctx.left.accept(this);
+        Function<MappingState, SibillaValue> right = ctx.right.accept(this);
+        return s -> SibillaValue.or(left.apply(s), right.apply(s));
     }
 
     @Override
-    public LazyValue<MappingState> visitIfThenElseExpression(MarkovChainModelParser.IfThenElseExpressionContext ctx) {
-        LazyValue<MappingState> guard = ctx.guard.accept(this);
-        LazyValue<MappingState> thenBranch = ctx.thenBranch.accept(this);
-        LazyValue<MappingState> elseBranch = ctx.elseBranch.accept(this);
-        return LazyValue.ifThenElse(guard, thenBranch, elseBranch);
+    public Function<MappingState, SibillaValue> visitIfThenElseExpression(MarkovChainModelParser.IfThenElseExpressionContext ctx) {
+        Function<MappingState, SibillaValue> guard = ctx.guard.accept(this);
+        Function<MappingState, SibillaValue> thenBranch = ctx.thenBranch.accept(this);
+        Function<MappingState, SibillaValue> elseBranch = ctx.elseBranch.accept(this);
+        return s -> (guard.apply(s).booleanOf()?thenBranch.apply(s):elseBranch.apply(s));
     }
 
     @Override
-    public LazyValue<MappingState> visitFalseValue(MarkovChainModelParser.FalseValueContext ctx) {
-        return new LazyValue.LazyBoolean<>(s -> false);
+    public Function<MappingState, SibillaValue> visitFalseValue(MarkovChainModelParser.FalseValueContext ctx) {
+        return s -> SibillaBoolean.FALSE;
     }
 
     @Override
-    public LazyValue<MappingState> visitRealValue(MarkovChainModelParser.RealValueContext ctx) {
-        double v = Double.parseDouble(ctx.getText());
-        return new LazyValue.LazyReal<>(s -> v);
+    public Function<MappingState, SibillaValue> visitRealValue(MarkovChainModelParser.RealValueContext ctx) {
+        SibillaValue v = SibillaValue.of(Double.parseDouble(ctx.getText()));
+        return s -> v;
     }
 
     @Override
-    public LazyValue<MappingState> visitAndExpression(MarkovChainModelParser.AndExpressionContext ctx) {
-        return ctx.left.accept(this).and(ctx.right.accept(this));
+    public Function<MappingState, SibillaValue> visitAndExpression(MarkovChainModelParser.AndExpressionContext ctx) {
+        Function<MappingState, SibillaValue> left = ctx.left.accept(this);
+        Function<MappingState, SibillaValue> right = ctx.right.accept(this);
+        return s -> SibillaValue.and(left.apply(s), right.apply(s));
     }
 
     @Override
-    public LazyValue<MappingState> visitMulDivExpression(MarkovChainModelParser.MulDivExpressionContext ctx) {
-        return  LazyValue.apply(ctx.left.accept(this), ctx.op.getText(), ctx.right.accept(this));
+    public Function<MappingState, SibillaValue> visitMulDivExpression(MarkovChainModelParser.MulDivExpressionContext ctx) {
+        Function<MappingState, SibillaValue> left = ctx.left.accept(this);
+        Function<MappingState, SibillaValue> right = ctx.right.accept(this);
+        BinaryOperator<SibillaValue> op = SibillaValue.getOperator(ctx.op.getText());
+        return s -> op.apply(left.apply(s), right.apply(s));
     }
 
     @Override
-    public LazyValue<MappingState> visitAddSubExpression(MarkovChainModelParser.AddSubExpressionContext ctx) {
-        return  LazyValue.apply(ctx.left.accept(this), ctx.op.getText(), ctx.right.accept(this));
+    public Function<MappingState, SibillaValue> visitAddSubExpression(MarkovChainModelParser.AddSubExpressionContext ctx) {
+        Function<MappingState, SibillaValue> left = ctx.left.accept(this);
+        Function<MappingState, SibillaValue> right = ctx.right.accept(this);
+        BinaryOperator<SibillaValue> op = SibillaValue.getOperator(ctx.op.getText());
+        return s -> op.apply(left.apply(s), right.apply(s));
     }
 
     @Override
-    public LazyValue<MappingState> visitCastToIntExpression(MarkovChainModelParser.CastToIntExpressionContext ctx) {
-        return ctx.arg.accept(this).cast(DataType.INTEGER);
+    public Function<MappingState, SibillaValue> visitCastToIntExpression(MarkovChainModelParser.CastToIntExpressionContext ctx) {
+        Function<MappingState, SibillaValue> arg = ctx.arg.accept(this);
+        return s -> SibillaValue.of(arg.apply(s).intOf());
     }
 
     @Override
-    public LazyValue<MappingState> visitUnaryExpression(MarkovChainModelParser.UnaryExpressionContext ctx) {
-        switch (ctx.op.getText()) {
-            case "+": return ctx.arg.accept(this).plus();
-            case "-": return ctx.arg.accept(this).minus();
-            default:
-                return null;
+    public Function<MappingState, SibillaValue> visitUnaryExpression(MarkovChainModelParser.UnaryExpressionContext ctx) {
+        if (ctx.op.equals("-")) {
+            Function<MappingState, SibillaValue> arg = ctx.arg.accept(this);
+            return s -> SibillaValue.minus(arg.apply(s));
+        } else {
+            return ctx.arg.accept(this);
         }
     }
 }

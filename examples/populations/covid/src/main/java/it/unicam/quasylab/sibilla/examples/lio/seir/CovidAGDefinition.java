@@ -27,6 +27,7 @@ import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -75,66 +76,66 @@ public class CovidAGDefinition {
                 "S->A",
                 new Population[] { new Population(S), new Population(A)} ,
                 new Population[] { new Population(A), new Population(A)},
-                (t,s) -> PROB_ASINT*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(A)/N));
+                (t,s) -> SibillaValue.of(PROB_ASINT*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(A)/N)));
 
         PopulationRule rule_S_G_A = new ReactionRule(
                 "S->A",
                 new Population[] { new Population(S), new Population(A)} ,
                 new Population[] { new Population(G), new Population(A)},
-                (t,s) -> (1-PROB_ASINT)*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(A)/N));
+                (t,s) -> SibillaValue.of((1-PROB_ASINT)*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(A)/N)));
 
         PopulationRule rule_S_A_G = new ReactionRule(
                 "S->A",
                 new Population[] { new Population(S), new Population(G)} ,
                 new Population[] { new Population(A), new Population(G)},
-                (t,s) -> PROB_ASINT*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(G)/N));
+                (t,s) -> SibillaValue.of(PROB_ASINT*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(G)/N)));
 
         PopulationRule rule_S_G_G = new ReactionRule(
                 "S->A",
                 new Population[] { new Population(S), new Population(G)} ,
                 new Population[] { new Population(G), new Population(G)},
-                (t,s) -> (1-PROB_ASINT)*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(G)/N));
+                (t,s) -> SibillaValue.of((1-PROB_ASINT)*s.getOccupancy(S)* PROB_TRANSMISSION*LAMBDA_MEET *(s.getOccupancy(G)/N)));
 
         PopulationRule rule_A_R = new ReactionRule(
                 "I->R",
                 new Population[] { new Population(A) },
                 new Population[] { new Population(R) },
-                (t,s) -> s.getOccupancy(A)*LAMBDA_R_A*(1-PROB_A_G)
+                (t,s) -> SibillaValue.of(s.getOccupancy(A)*LAMBDA_R_A*(1-PROB_A_G))
         );
 
         PopulationRule rule_A_G = new ReactionRule(
                 "I->R",
                 new Population[] { new Population(A) },
                 new Population[] { new Population(G) },
-                (t,s) -> s.getOccupancy(A)*LAMBDA_R_A*PROB_A_G
+                (t,s) -> SibillaValue.of(s.getOccupancy(A)*LAMBDA_R_A*PROB_A_G)
         );
 
         PopulationRule rule_IA_R = new ReactionRule(
                 "I->R",
                 new Population[] { new Population(IA) },
                 new Population[] { new Population(R) },
-                (t,s) -> s.getOccupancy(IA)*LAMBDA_R_A*(1-PROB_A_G)
+                (t,s) -> SibillaValue.of(s.getOccupancy(IA)*LAMBDA_R_A*(1-PROB_A_G))
         );
 
         PopulationRule rule_IA_IG = new ReactionRule(
                 "I->R",
                 new Population[] { new Population(IA) },
                 new Population[] { new Population(IG) },
-                (t,s) -> s.getOccupancy(IA)*LAMBDA_R_A*PROB_A_G
+                (t,s) -> SibillaValue.of(s.getOccupancy(IA)*LAMBDA_R_A*PROB_A_G)
         );
 
         PopulationRule rule_G_IG = new ReactionRule(
                 "I->R",
                 new Population[] { new Population(G) },
                 new Population[] { new Population(IG) },
-                (t,s) -> s.getOccupancy(G)*LAMBDA_I_G
+                (t,s) -> SibillaValue.of(s.getOccupancy(G)*LAMBDA_I_G)
         );
 
         PopulationRule rule_A_IA = new ReactionRule(
                 "I->R",
                 new Population[] { new Population(A) },
                 new Population[] { new Population(IA) },
-                (t,s) -> s.getOccupancy(A)*LAMBDA_I_A
+                (t,s) -> SibillaValue.of(s.getOccupancy(A)*LAMBDA_I_A)
         );
 
 
@@ -142,28 +143,28 @@ public class CovidAGDefinition {
                 "I->R",
                 new Population[] { new Population(G) },
                 new Population[] { new Population(R) },
-                (t,s) -> s.getOccupancy(G)*LAMBDA_R_G*(1-PROB_DEATH)
+                (t,s) -> SibillaValue.of(s.getOccupancy(G)*LAMBDA_R_G*(1-PROB_DEATH))
         );
 
         PopulationRule rule_G_D = new ReactionRule(
                 "I->R",
                 new Population[] { new Population(G) },
                 new Population[] { new Population(D) },
-                (t,s) -> s.getOccupancy(G)*LAMBDA_R_G*PROB_DEATH
+                (t,s) -> SibillaValue.of(s.getOccupancy(G)*LAMBDA_R_G*PROB_DEATH)
         );
 
         PopulationRule rule_IG_R = new ReactionRule(
                 "I->R",
                 new Population[] { new Population(IG) },
                 new Population[] { new Population(R) },
-                (t,s) -> s.getOccupancy(IG)*LAMBDA_R_G*(1-PROB_DEATH)
+                (t,s) -> SibillaValue.of(s.getOccupancy(IG)*LAMBDA_R_G*(1-PROB_DEATH))
         );
 
         PopulationRule rule_IG_D = new ReactionRule(
                 "I->R",
                 new Population[] { new Population(IG) },
                 new Population[] { new Population(D) },
-                (t,s) -> s.getOccupancy(IG)*LAMBDA_R_G*PROB_DEATH
+                (t,s) -> SibillaValue.of(s.getOccupancy(IG)*LAMBDA_R_G*PROB_DEATH)
         );
 
         LinkedList<PopulationRule> rules = new LinkedList<>();

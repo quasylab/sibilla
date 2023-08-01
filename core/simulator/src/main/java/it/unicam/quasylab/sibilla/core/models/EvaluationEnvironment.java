@@ -28,6 +28,7 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Function;
 
@@ -39,33 +40,39 @@ import java.util.function.Function;
 public class EvaluationEnvironment {
 
 
-    private final CachedValues constants;
-    private final Map<String, SibillaValue> attributes;
-    private final Map<String, SibillaValue> values;
+    private final Function<Map<String, SibillaValue>, Map<String, SibillaValue>> valuesEvaluationFunction;
+    private Map<String, SibillaValue> currentAttributeValues;
+
+    private final Map<String, SibillaValue> defaultAttributeValues;
+    private Map<String, SibillaValue> values;
     private final PropertyChangeSupport changer;
     private boolean isChanged = false;
 
 
 
     public EvaluationEnvironment() {
-        this(new CachedValues());
+        this(map -> Map.of());
     }
 
     /**
      * Creates an empty EvaluationEnvironment.
      */
-    public EvaluationEnvironment(CachedValues constants) {
-        this.attributes = new TreeMap<>();
-        this.values = new TreeMap<>();
-        this.changer = new PropertyChangeSupport(this);
-        this.constants = constants;
-        this.constants.setEnvironment(this);
+    public EvaluationEnvironment(Function<Map<String, SibillaValue>, Map<String, SibillaValue>> valuesEvaluationFunction) {
+        this(new TreeMap<>(), valuesEvaluationFunction);
     }
 
-    public EvaluationEnvironment(Map<String, SibillaValue> values, CachedValues constants) {
-        this(constants);
-        this.attributes.putAll(values);
-        this.values.putAll(values);
+    public EvaluationEnvironment(Map<String, SibillaValue> attributes, Function<Map<String, SibillaValue>, Map<String, SibillaValue>> valuesEvaluationFunction) {
+        this(attributes, valuesEvaluationFunction.apply(attributes), valuesEvaluationFunction);
+    }
+
+
+    public EvaluationEnvironment(Map<String, SibillaValue> attributes, Map<String, SibillaValue> values, Function<Map<String, SibillaValue>, Map<String, SibillaValue>> valuesEvaluationFunction) {
+        this.defaultAttributeValues = attributes;
+        this.currentAttributeValues = new TreeMap<>(defaultAttributeValues);
+        this.values = values;
+        this.changer = new PropertyChangeSupport(this);
+        this.isChanged = false;
+        this.valuesEvaluationFunction = valuesEvaluationFunction;
     }
 
     /**
@@ -85,10 +92,10 @@ public class EvaluationEnvironment {
      * @param value value to associate.q
      */
     public synchronized void set(String name, SibillaValue value) {
-        if (!attributes.containsKey(name)) {
+        if (!currentAttributeValues.containsKey(name)) {
             throw new IllegalArgumentException("Parameter "+name+" is unknown.");
         }
-        SibillaValue old = values.put(name,value);
+        SibillaValue old = currentAttributeValues.put(name,value);
         changer.firePropertyChange(name,old,value);
         this.isChanged = true;
     }
@@ -100,10 +107,11 @@ public class EvaluationEnvironment {
      * @param value default value.
      */
     public synchronized void register(String name, SibillaValue value) {
-        if (attributes.containsKey(name)) {
+        if (currentAttributeValues.containsKey(name)) {
             throw new IllegalArgumentException("Parameter "+name+" is already defined in the environment.");
         }
-        attributes.put(name,value);
+        defaultAttributeValues.put(name, value);
+        currentAttributeValues.put(name,value);
         values.put(name,value);
         changer.firePropertyChange(name,null,value);
     }
@@ -123,7 +131,7 @@ public class EvaluationEnvironment {
      * @return the default value associated with the given parameter.
      */
     public synchronized SibillaValue getDefault(String name) {
-        SibillaValue value = attributes.get(name);
+        SibillaValue value = defaultAttributeValues.get(name);
         if (value == null) {
             throw new IllegalArgumentException("Parameter "+name+" is unknown.");
         }
@@ -134,9 +142,10 @@ public class EvaluationEnvironment {
      * Reset all parameters to their default values.
      */
     public synchronized void reset( ) {
-        for (Map.Entry<String, SibillaValue> e: attributes.entrySet()) {
-            set(e.getKey(), e.getValue());
-        }
+        Map<String, SibillaValue> oldValues = this.currentAttributeValues;
+        this.currentAttributeValues = new TreeMap<>(this.defaultAttributeValues);
+        this.isChanged = true;
+        changer.firePropertyChange("*", oldValues, this.values);
     }
 
     /**
@@ -145,7 +154,7 @@ public class EvaluationEnvironment {
      * @return the array with all the registered parameters.
      */
     public String[] getParameters() {
-        return attributes.keySet().toArray(new String[0]);
+        return currentAttributeValues.keySet().toArray(new String[0]);
     }
 
 
@@ -173,7 +182,7 @@ public class EvaluationEnvironment {
      * @return the map associating each parameter with its current value.
      */
     public Map<String, SibillaValue> getParameterMap() {
-        return new TreeMap<>(values);
+        return Map.copyOf(this.currentAttributeValues);
     }
 
     /**
@@ -181,22 +190,17 @@ public class EvaluationEnvironment {
      *
      * @return a function used to resolve names.
      */
-    public Function<String, Double> getEvaluator() {
+    public Function<String, Optional<SibillaValue>> getEvaluator() {
         if (isChanged) {
-            constants.reset();
-            constants.compute();
+            this.values = valuesEvaluationFunction.apply(this.currentAttributeValues);
         }
         return s -> {
-            double d = constants.get(s);
-            if (Double.isNaN(d)) {
-                return get(s).doubleOf();
+            if (values.containsKey(s)) {
+                return Optional.of(values.get(s));
             } else {
-                return d;
+                return Optional.empty();
             }
         };
     }
 
-    public boolean isDefined(String name) {
-        return attributes.containsKey(name)||constants.isDefined(name);
-    }
 }

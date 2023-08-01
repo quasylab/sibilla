@@ -23,81 +23,123 @@
 
 package it.unicam.quasylab.sibilla.langs.pm;
 
+import it.unicam.quasylab.sibilla.core.util.values.SibillaBoolean;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaInteger;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
  * This visitor is used to evaluate expressions as double. Whenever an expression of the wrong
  * type is considered, a Double.NaN is returned.
  */
-public class ExpressionEvaluator extends PopulationModelBaseVisitor<Double> {
+public class ExpressionEvaluator extends PopulationModelBaseVisitor<SibillaValue> {
 
-    private final Function<String,Double> nameResolver;
+    private final Function<String, Optional<SibillaValue>> nameResolver;
 
-    public ExpressionEvaluator(Function<String,Double> nameResolver) {
+    public ExpressionEvaluator(Function<String, Optional<SibillaValue>> nameResolver) {
         this.nameResolver = nameResolver;
     }
 
 
     @Override
-    public Double visitExponentExpression(PopulationModelParser.ExponentExpressionContext ctx) {
-        return Math.pow(ctx.left.accept(this), ctx.right.accept(this));
+    public SibillaValue visitExponentExpression(PopulationModelParser.ExponentExpressionContext ctx) {
+        return SibillaValue.eval(Math::pow, ctx.left.accept(this), ctx.right.accept(this));
     }
 
     @Override
-    public Double visitReferenceExpression(PopulationModelParser.ReferenceExpressionContext ctx) {
-        return nameResolver.apply(ctx.reference.getText());
+    public SibillaValue visitReferenceExpression(PopulationModelParser.ReferenceExpressionContext ctx) {
+        return nameResolver.apply(ctx.reference.getText()).orElse(SibillaValue.ERROR_VALUE);
     }
 
     @Override
-    public Double visitIntValue(PopulationModelParser.IntValueContext ctx) {
-        return Double.parseDouble(ctx.getText());
+    public SibillaValue visitIntValue(PopulationModelParser.IntValueContext ctx) {
+        return new SibillaInteger(Integer.parseInt(ctx.getText()));
     }
 
     @Override
-    public Double visitBracketExpression(PopulationModelParser.BracketExpressionContext ctx) {
+    public SibillaValue visitBracketExpression(PopulationModelParser.BracketExpressionContext ctx) {
         return ctx.expr().accept(this);
     }
 
     @Override
-    public Double visitRealValue(PopulationModelParser.RealValueContext ctx) {
-        return Double.parseDouble(ctx.getText());
+    public SibillaValue visitRealValue(PopulationModelParser.RealValueContext ctx) {
+        return new SibillaDouble(Double.parseDouble(ctx.getText()));
     }
 
     @Override
-    public Double visitIfThenElseExpression(PopulationModelParser.IfThenElseExpressionContext ctx) {
-        return (ctx.guard.accept(getBooleanExpressionEvaluator())?ctx.thenBranch.accept(this):ctx.elseBranch.accept(this));
-    }
-
-    public BooleanExpressionEvaluator getBooleanExpressionEvaluator() {
-        return new BooleanExpressionEvaluator(this);
-    }
-
-    @Override
-    public Double visitMulDivExpression(PopulationModelParser.MulDivExpressionContext ctx) {
-        return PopulationModelGenerator.getOperator(ctx.op.getText()).applyAsDouble(ctx.left.accept(this),ctx.right.accept(this));
-    }
-
-
-    @Override
-    public Double visitAddSubExpression(PopulationModelParser.AddSubExpressionContext ctx) {
-        return PopulationModelGenerator.getOperator(ctx.op.getText()).applyAsDouble(ctx.left.accept(this),ctx.right.accept(this));
+    public SibillaValue visitIfThenElseExpression(PopulationModelParser.IfThenElseExpressionContext ctx) {
+        if (ctx.guard.accept(this).booleanOf()) {
+            return ctx.thenBranch.accept(this);
+        } else {
+            return ctx.elseBranch.accept(this);
+        }
     }
 
     @Override
-    public Double visitUnaryExpression(PopulationModelParser.UnaryExpressionContext ctx) {
+    public SibillaValue visitNegationExpression(PopulationModelParser.NegationExpressionContext ctx) {
+        return SibillaValue.not(ctx.arg.accept(this));
+    }
+
+    @Override
+    public SibillaValue visitTrueValue(PopulationModelParser.TrueValueContext ctx) {
+        return SibillaBoolean.TRUE;
+    }
+
+    @Override
+    public SibillaValue visitRelationExpression(PopulationModelParser.RelationExpressionContext ctx) {
+        return SibillaBoolean.of(PopulationModelGenerator.getRelationOperator(ctx.op.getText()).test(ctx.left.accept(this), ctx.right.accept(this)));
+    }
+
+    @Override
+    public SibillaValue visitOrExpression(PopulationModelParser.OrExpressionContext ctx) {
+        return SibillaValue.or(ctx.left.accept(this), ctx.right.accept(this));
+    }
+
+    @Override
+    public SibillaValue visitFalseValue(PopulationModelParser.FalseValueContext ctx) {
+        return SibillaBoolean.FALSE;
+    }
+
+    @Override
+    public SibillaValue visitAndExpression(PopulationModelParser.AndExpressionContext ctx) {
+        return SibillaValue.and(ctx.left.accept(this), ctx.right.accept(this));
+    }
+
+    @Override
+    protected SibillaValue defaultResult() {
+        return SibillaValue.ERROR_VALUE;
+    }
+
+
+    @Override
+    public SibillaValue visitMulDivExpression(PopulationModelParser.MulDivExpressionContext ctx) {
+        return PopulationModelGenerator.getOperator(ctx.op.getText()).apply(ctx.left.accept(this),ctx.right.accept(this));
+    }
+
+
+    @Override
+    public SibillaValue visitAddSubExpression(PopulationModelParser.AddSubExpressionContext ctx) {
+        return PopulationModelGenerator.getOperator(ctx.op.getText()).apply(ctx.left.accept(this),ctx.right.accept(this));
+    }
+
+    @Override
+    public SibillaValue visitUnaryExpression(PopulationModelParser.UnaryExpressionContext ctx) {
         if (ctx.op.getText().equals("-")) {
-            return -ctx.arg.accept(this);
+            return SibillaValue.minus(ctx.arg.accept(this));
         } else {
             return ctx.arg.accept(this);
         }
     }
 
     public double evalDouble(PopulationModelParser.ExprContext expression) {
-        return expression.accept(this);
+        return expression.accept(this).doubleOf();
     }
 
     public int evalInteger(PopulationModelParser.ExprContext expression) {
-        return (int) evalDouble(expression);
+        return expression.accept(this).intOf();
     }
 
 }

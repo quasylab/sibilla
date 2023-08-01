@@ -35,7 +35,6 @@ import it.unicam.quasylab.sibilla.core.models.util.MappingState;
 import it.unicam.quasylab.sibilla.core.models.util.VariableTable;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
-import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
@@ -140,7 +139,15 @@ public class MarkovChainModelGenerator {
     }
 
     public EvaluationEnvironment getEvaluationEnvironment() {
-        return new EvaluationEnvironment(evalParameters(), evalConstants());
+        ConstantsEvaluator evaluator = new ConstantsEvaluator();
+        getParseTree().accept(new ConstantsEvaluator());
+        return new EvaluationEnvironment(evaluator.getParameters(), evaluator.getValues(), this::evaluateConstantsAndParameters);
+    }
+
+    private Map<String, SibillaValue> evaluateConstantsAndParameters(Map<String, SibillaValue> parameters) {
+        ConstantsEvaluator eg = new ConstantsEvaluator(parameters);
+        this.parseTree.accept(eg);
+        return eg.getValues();
     }
 
     private Map<String, SibillaValue> evalParameters() {
@@ -174,9 +181,6 @@ public class MarkovChainModelGenerator {
         return errorList.withErrors();
     }
 
-    private CachedValues evalConstants() {
-        return getParseTree().accept(new ConstantsEvaluator(validator.getTypes()));
-    }
 
 
     public static class IsContinuousModelChecker extends MarkovChainModelBaseVisitor<Boolean> {
@@ -202,14 +206,14 @@ public class MarkovChainModelGenerator {
 
 
 
-    private class StateGeneratorVisitor extends MarkovChainModelBaseVisitor<ParametricDataSet<Function<RandomGenerator, MappingState>>> {
+    private static class StateGeneratorVisitor extends MarkovChainModelBaseVisitor<ParametricDataSet<Function<RandomGenerator, MappingState>>> {
 
-        private final Function<String, Double> resolver;
+        private final Function<String, Optional<SibillaValue>> resolver;
         private final VariableTable table;
         private final Function<String, DataType> types;
         private ParametricDataSet<Function<RandomGenerator, MappingState>> stateSet;
 
-        public StateGeneratorVisitor(Function<String, Double> resolver, VariableTable table, Function<String,DataType> types) {
+        public StateGeneratorVisitor(Function<String, Optional<SibillaValue>> resolver, VariableTable table, Function<String,DataType> types) {
             this.resolver = resolver;
             this.table = table;
             this.types = types;
@@ -248,7 +252,7 @@ public class MarkovChainModelGenerator {
         }
 
         private ToIntFunction<double[]> getEvalFunction(Map<String, Integer> index, String name, MarkovChainModelParser.ExprContext value) {
-            return args -> ExpressionEvaluator.evalInteger(validator::getTypeOf, combine(args, index, resolver), value);
+            return args -> ExpressionEvaluator.evalInteger(combine(args, index, resolver), value);
         }
 
 
@@ -266,10 +270,10 @@ public class MarkovChainModelGenerator {
         }
     }
 
-    public static Function<String, Double> combine(double[] args, Map<String, Integer> index, Function<String, Double> resolver) {
+    public static Function<String, Optional<SibillaValue>> combine(double[] args, Map<String, Integer> index, Function<String, Optional<SibillaValue>> resolver) {
         return s -> {
             if (index.containsKey(s)) {
-                return args[index.get(s)];
+                return Optional.of(SibillaValue.of(args[index.get(s)]));
             } else {
                 return resolver.apply(s);
             }
@@ -287,11 +291,11 @@ public class MarkovChainModelGenerator {
 
     private class StateVariableVisitor extends MarkovChainModelBaseVisitor<VariableTable> {
 
-        private final Function<String, Double> evaluator;
+        private final Function<String, Optional<SibillaValue>> evaluator;
         private VariableTable variableTable = null;
         private int varIndex = 0;
 
-        public StateVariableVisitor(Function<String, Double> evaluator) {
+        public StateVariableVisitor(Function<String, Optional<SibillaValue>> evaluator) {
             super();
             this.evaluator = evaluator;
         }
@@ -308,8 +312,8 @@ public class MarkovChainModelGenerator {
         @Override
         public VariableTable visitVariable_declaration(MarkovChainModelParser.Variable_declarationContext ctx) {
             String varName = ctx.name.getText();
-            int min = ExpressionEvaluator.evalInteger(validator::getTypeOf, evaluator, ctx.min);
-            int max = ExpressionEvaluator.evalInteger(validator::getTypeOf, evaluator, ctx.max);
+            int min = ExpressionEvaluator.evalInteger(evaluator, ctx.min);
+            int max = ExpressionEvaluator.evalInteger(evaluator, ctx.max);
             //TODO: handle here the fact that min must be < max!
             variableTable.record(varIndex++, varName, min, max);
             return variableTable;
@@ -319,13 +323,13 @@ public class MarkovChainModelGenerator {
 
     private class RuleGenerator extends MarkovChainModelBaseVisitor<List<MappingStateUpdate>> {
 
-        private final Function<String, Double> resolver;
+        private final Function<String, Optional<SibillaValue>> resolver;
         private final VariableTable variables;
         private Predicate<MappingState> guard;
         private ToDoubleFunction<MappingState> weight;
         private LinkedList<MappingStateUpdate> updates;
 
-        public RuleGenerator(Function<String, Double> resolver, VariableTable variables) {
+        public RuleGenerator(Function<String, Optional<SibillaValue>> resolver, VariableTable variables) {
             this.resolver = resolver;
             this.variables = variables;
         }
@@ -339,12 +343,12 @@ public class MarkovChainModelGenerator {
         public List<MappingStateUpdate> visitRules_declaration(MarkovChainModelParser.Rules_declarationContext ctx) {
             this.updates = new LinkedList<>();
             for (MarkovChainModelParser.Rule_caseContext ruleCase : ctx.rule_case()) {
-                this.guard = StateExpressionEvaluator.evalStatePredicate(validator::getTypeOf, resolver, variables, ruleCase.guard);
+                this.guard = StateExpressionEvaluator.evalStatePredicate(resolver, variables, ruleCase.guard);
                 for (MarkovChainModelParser.StepContext step : ruleCase.step()) {
                     if (step.weight == null) {
                         this.weight = s -> 1.0;
                     } else {
-                        this.weight = StateExpressionEvaluator.evalToDoubleFunction(validator::getTypeOf, resolver, variables, step.weight);
+                        this.weight = StateExpressionEvaluator.evalToDoubleFunction(resolver, variables, step.weight);
                     }
                     step.updates().accept(this);
                 }
@@ -363,7 +367,7 @@ public class MarkovChainModelGenerator {
             Map<Integer, ToIntFunction<MappingState>> variablesUpdate = ctx.variable_update().stream().collect(
                     Collectors.toMap(
                         vu -> variables.indexOf(getVariableNameFromTarget(vu.target.getText())),
-                        vu -> StateExpressionEvaluator.evalToIntFunction(validator::getTypeOf, resolver, variables, vu.expr())
+                        vu -> StateExpressionEvaluator.evalToIntFunction(resolver, variables, vu.expr())
                     )
             );
             this.updates.add(new MappingStateUpdate(this.guard, this.weight, Map.of()));
@@ -378,11 +382,11 @@ public class MarkovChainModelGenerator {
     private class MeasureGenerator extends MarkovChainModelBaseVisitor<Map<String, Measure<? super MappingState>>> {
 
 
-        private final Function<String, Double> resolver;
+        private final Function<String, Optional<SibillaValue>> resolver;
         private final VariableTable variables;
         private final TreeMap<String, Measure<? super MappingState>> measures;
 
-        public MeasureGenerator(Function<String, Double> resolver, VariableTable variables) {
+        public MeasureGenerator(Function<String, Optional<SibillaValue>> resolver, VariableTable variables) {
             this.resolver = resolver;
             this.variables = variables;
             this.measures = new TreeMap<>();
@@ -399,7 +403,7 @@ public class MarkovChainModelGenerator {
         @Override
         public Map<String, Measure<? super MappingState>> visitMeasure_declaration(MarkovChainModelParser.Measure_declarationContext ctx) {
             String name = ctx.name.getText();
-            ToDoubleFunction<MappingState> measureFunction = StateExpressionEvaluator.evalToDoubleFunction(validator::getTypeOf, resolver, variables, ctx.expr());
+            ToDoubleFunction<MappingState> measureFunction = StateExpressionEvaluator.evalToDoubleFunction(resolver, variables, ctx.expr());
             measures.put(name, new SimpleMeasure<>(name, measureFunction::applyAsDouble));
             return measures;
         }

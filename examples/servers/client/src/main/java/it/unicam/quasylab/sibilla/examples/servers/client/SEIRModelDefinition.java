@@ -30,6 +30,7 @@ import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.LinkedList;
@@ -65,20 +66,20 @@ public class SEIRModelDefinition {
                 "S->E",
                 new Population[] { new Population(S), new Population(I)} ,
                 new Population[] { new Population(E), new Population(I)},
-                (t,s) -> s.getOccupancy(S)*LAMBDA_E*(s.getOccupancy(I)/N));
+                (t,s) -> SibillaValue.of(s.getOccupancy(S)*LAMBDA_E*(s.getOccupancy(I)/N)));
 
         PopulationRule rule_E_I = new ReactionRule(
                 "E->I",
                 new Population[] { new Population(E) },
                 new Population[] { new Population(I) },
-                (t,s) -> s.getOccupancy(E)*LAMBDA_I
+                (t,s) -> SibillaValue.of(s.getOccupancy(E)*LAMBDA_I)
         );
 
         PopulationRule rule_I_R = new ReactionRule(
                 "I->R",
                 new Population[] { new Population(I) },
                 new Population[] { new Population(R) },
-                (t,s) -> s.getOccupancy(I)*LAMBDA_R
+                (t,s) -> SibillaValue.of(s.getOccupancy(I)*LAMBDA_R)
         );
 
 
@@ -86,7 +87,7 @@ public class SEIRModelDefinition {
                 "R->S",
                 new Population[] { new Population(R) },
                 new Population[] { new Population(S) },
-                (t,s) -> s.getOccupancy(R)*LAMBDA_DECAY
+                (t,s) -> SibillaValue.of(s.getOccupancy(R)*LAMBDA_DECAY)
         );
 
         rules.add(rule_S_E);

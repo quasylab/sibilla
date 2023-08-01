@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.models.pm;
 
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+
 import java.io.Serializable;
 
 /**
@@ -32,6 +34,6 @@ import java.io.Serializable;
 @FunctionalInterface
 public interface RatePopulationFunction extends Serializable {
 
-    double apply(double now, PopulationState state);
+    SibillaValue apply(double now, PopulationState state);
 
 }

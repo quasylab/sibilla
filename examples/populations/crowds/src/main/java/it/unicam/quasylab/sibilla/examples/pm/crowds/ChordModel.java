@@ -6,6 +6,7 @@ import it.unicam.quasylab.sibilla.core.models.pm.*;
 import it.unicam.quasylab.sibilla.core.models.pm.util.PopulationRegistry;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.HashMap;
@@ -50,13 +51,13 @@ public class ChordModel {
         for (int i = 0; i < N; i++) {
             rules.add(new ReactionRule("M1->A" + i,
                     new Population[] { new Population(reg.indexOf("A", i)), new Population(reg.indexOf("M1")) },
-                    new Population[] { new Population(reg.indexOf("AM", i)) }, (s, t) -> LAMBDA_S / N));
+                    new Population[] { new Population(reg.indexOf("AM", i)) }, (s, t) -> SibillaValue.of(LAMBDA_S / N)));
         }
 
         for (int i = 0; i < N; i++) {
             rules.add(new ReactionRule("M2->A" + i,
                     new Population[] { new Population(reg.indexOf("A", i)), new Population(reg.indexOf("M2")) },
-                    new Population[] { new Population(reg.indexOf("AM", i)) }, (s, t) -> LAMBDA_S / N));
+                    new Population[] { new Population(reg.indexOf("AM", i)) }, (s, t) -> SibillaValue.of(LAMBDA_S / N)));
         }
 
         // regole movimento nel crowd
@@ -66,14 +67,14 @@ public class ChordModel {
             rules.add(new ReactionRule("A" + i + "->A" + j,
                     new Population[] { new Population(reg.indexOf("AM", i)), new Population(reg.indexOf("A", j)) },
                     new Population[] { new Population(reg.indexOf("A", i)), new Population(reg.indexOf("AM", j)) },
-                    (s, t) -> P_F * LAMBDA_S));
+                    (s, t) -> SibillaValue.of(P_F * LAMBDA_S)));
         }
 
         // regola arrivo a destinazione
 
         for (int i = 0; i < N; i++) {
             rules.add(new ReactionRule("A" + i + "->D", new Population[] { new Population(reg.indexOf("AM", i)) },
-                    new Population[] { new Population(reg.indexOf("A", i)) }, (s, t) -> (1 - P_F) * LAMBDA_S));
+                    new Population[] { new Population(reg.indexOf("A", i)) }, (s, t) -> SibillaValue.of((1 - P_F) * LAMBDA_S)));
 
         }
         return rules;
