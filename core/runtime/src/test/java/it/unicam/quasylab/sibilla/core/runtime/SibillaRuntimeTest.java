@@ -257,7 +257,7 @@ class SibillaRuntimeTest {
     @Test
     public void shouldSelectPopulationModule() throws CommandExecutionException {
         SibillaRuntime sr = new SibillaRuntime();
-        assertTrue(Arrays.deepEquals(new String[] {PopulationModelModule.MODULE_NAME}, sr.getModules()));
+        assertTrue(Arrays.deepEquals(new String[] {LIOModelModule.MODULE_NAME, PopulationModelModule.MODULE_NAME, YodaModelModule.MODULE_NAME}, sr.getModules()));
         sr.loadModule(PopulationModelModule.MODULE_NAME);
     }
 
@@ -369,7 +369,7 @@ class SibillaRuntimeTest {
     }
 
     @Test
-    public void testWolvesAndSheeps() throws CommandExecutionException {
+    public void testWolvesAndSheep() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithModule();
         sr.load(WOLVES_AND_SHEEPS);
         sr.setConfiguration("startHunting");

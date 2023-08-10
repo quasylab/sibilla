@@ -59,11 +59,6 @@ public class SibillaInteger implements SibillaValue {
         return value;
     }
 
-    @Override
-    public SibillaType<?> getType() {
-        return SibillaType.INTEGER_TYPE;
-    }
-
     /**
      * Returns the integer resulting from the application of the given binary operator to this value and the given one.
      * @param op the operator to apply

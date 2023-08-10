@@ -55,7 +55,7 @@ public class PopulationPredicateEvaluator extends PopulationModelBaseVisitor<Pre
     public Predicate<PopulationState> visitRelationExpression(PopulationModelParser.RelationExpressionContext ctx) {
         Function<PopulationState, SibillaValue> left = ctx.left.accept(rateExpressionEvaluator);
         Function<PopulationState, SibillaValue> right = ctx.right.accept(rateExpressionEvaluator);
-        BiPredicate<SibillaValue, SibillaValue> op = PopulationModelGenerator.getRelationOperator(ctx.op.getText());
+        BiPredicate<SibillaValue, SibillaValue> op = SibillaValue.getRelationOperator(ctx.op.getText());
         return s -> op.test(left.apply(s),right.apply(s));
     }
 

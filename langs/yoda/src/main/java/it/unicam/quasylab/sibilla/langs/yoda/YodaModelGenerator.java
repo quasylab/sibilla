@@ -23,9 +23,10 @@
 
 package it.unicam.quasylab.sibilla.langs.yoda;
 
-import it.unicam.quasylab.sibilla.core.models.CachedValues;
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
-import it.unicam.quasylab.sibilla.core.models.yoda.YodaModelDefinition;
+import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
+import it.unicam.quasylab.sibilla.core.models.yoda.*;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
@@ -33,11 +34,14 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class YodaModelGenerator {
 
@@ -46,7 +50,8 @@ public class YodaModelGenerator {
     private ErrorCollector errorCollector;
     //private boolean validated = false;
     private ParseTree parseTree;
-    private SymbolTable table;
+    private YodaElementNameRegistry elementNameRegistry;
+    private YodaVariableRegistry variableRegistry;
 
     public YodaModelGenerator(CodePointCharStream source) throws YodaModelGenerationException {
         this.source = source;
@@ -61,12 +66,11 @@ public class YodaModelGenerator {
         this(CharStreams.fromReader(new FileReader(file)));
     }
 
-    public ParseTree getParseTree() throws YodaModelGenerationException {
+    public void getParseTree() throws YodaModelGenerationException {
         if (this.parseTree==null){
             generateParseTree();
             validateParseTree();
         }
-        return this.parseTree;
     }
 
     private void generateParseTree() throws YodaModelGenerationException {
@@ -78,16 +82,16 @@ public class YodaModelGenerator {
         this.parseTree = parser.model();
         this.errorCollector = errorListener.getErrorCollector();
         if (this.errorCollector.withErrors()) {
-            throw new YodaModelGenerationException("Syntax Error!", this.errorCollector);
+            throw new YodaModelGenerationException(this.errorCollector);
         }
     }
 
     public void validateParseTree() throws YodaModelGenerationException {
         YodaModelValidator validator = new YodaModelValidator(this.errorCollector);
-        if (!this.parseTree.accept(validator)) {
-            throw new YodaModelGenerationException("Syntax Error!", this.errorCollector);
+        if (!validator.validate(parseTree)) {
+            throw new YodaModelGenerationException(this.errorCollector);
         }
-        this.table = validator.getTable();
+        this.elementNameRegistry = validator.getElementNameRegistry();
     }
 
     private boolean withErrors() {
@@ -95,24 +99,76 @@ public class YodaModelGenerator {
     }
 
     public YodaModelDefinition getYodaModelDefinition() throws YodaModelGenerationException {
+        getParseTree();
+        if (withErrors()) {
+            throw new YodaModelGenerationException(errorCollector);
+        }
         return new YodaModelDefinition(
-                getEvaluationEnvironment()
-                //TODO inserire parametri
+                getEvaluationEnvironment(),
+                this::getMeasures,
+                this::getPredicates,
+                this::getSystemStates
         );
     }
 
+    private ParametricDataSet<Function<RandomGenerator, YodaSystemState>> getSystemStates(EvaluationEnvironment environment) {
+        YodaConfigurationsGenerator generator = new YodaConfigurationsGenerator(environment.getEvaluator(), getYodaAgentsDefinitions(environment.getEvaluator()), getYodaVariableRegistry(), getYodaElementNameRegistry() );
+        this.parseTree.accept(generator);
+        return generator.getGeneratedConfigurations();
+    }
+
+    private Map<String, Predicate<YodaSystemState>> getPredicates(EvaluationEnvironment environment) {
+        YodaPredicateGenerator generator = new YodaPredicateGenerator(environment.getEvaluator(), getYodaVariableRegistry(), getYodaElementNameRegistry());
+        this.parseTree.accept(generator);
+        return generator.getPredicates();
+    }
+
+    private Map<String, Measure<YodaSystemState>> getMeasures(EvaluationEnvironment environment) {
+        YodaMeasuresGenerator generator = new YodaMeasuresGenerator(environment.getEvaluator(), getYodaVariableRegistry(), getYodaElementNameRegistry());
+        this.parseTree.accept(generator);
+        return generator.getMeasures();
+    }
+
     public EvaluationEnvironment getEvaluationEnvironment() throws YodaModelGenerationException {
-        return new EvaluationEnvironment(evaluateParameters(), null);//evaluateConstants());
+        ConstantsAndParametersEvaluator evaluator = new ConstantsAndParametersEvaluator();
+        this.parseTree.accept(evaluator);
+        return new EvaluationEnvironment(evaluator.getParameters(), this::evalConstantsAndParameters);//evaluateConstants());
     }
 
-    //TODO
-    private Map<String, SibillaValue> evaluateParameters() throws YodaModelGenerationException {
-        return null;
+    private Map<String, SibillaValue> evalConstantsAndParameters(Map<String, SibillaValue> parameters) {
+        ConstantsAndParametersEvaluator evaluator = new ConstantsAndParametersEvaluator(parameters);
+        this.parseTree.accept(evaluator);
+        return evaluator.getConstantsAndParameters();
     }
 
-    //TODO
-    private CachedValues evaluateConstants() throws YodaModelGenerationException {
-        return null;
+    private YodaVariableRegistry getYodaVariableRegistry() {
+        if (this.variableRegistry == null) {
+            YodaVariableCollector collector = new YodaVariableCollector();
+            this.parseTree.accept(collector);
+            this.variableRegistry = collector.getVariableRegistry();
+        }
+        return this.variableRegistry;
+    }
+
+    private YodaElementNameRegistry getYodaElementNameRegistry() {
+        return this.elementNameRegistry;
+    }
+
+    private YodaAgentsDefinitions getYodaAgentsDefinitions(Function<String, Optional<SibillaValue>> nameResolver) {
+        YodaAgentsDefinitionsGenerator generator = new YodaAgentsDefinitionsGenerator(this.elementNameRegistry, this.variableRegistry, nameResolver);
+        this.parseTree.accept(generator);
+        return generator.getAgentsDefinitions();
+    }
+
+
+    public static Function<String, Optional<SibillaValue>> getNameEvaluationFunction(Map<String, SibillaValue> map) {
+        return name -> {
+            if (map.containsKey(name)) {
+                return Optional.of(map.get(name));
+            } else {
+                return Optional.empty();
+            }
+        };
     }
 
 

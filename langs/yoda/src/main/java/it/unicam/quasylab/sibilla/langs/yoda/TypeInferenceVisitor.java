@@ -25,9 +25,12 @@ package it.unicam.quasylab.sibilla.langs.yoda;
 
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaType;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
+import org.antlr.v4.runtime.Token;
 
-import java.util.function.BiFunction;
+import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * This visitor class is used to infer type in expressions
@@ -36,39 +39,51 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
 
 
     private final ErrorCollector errors;
-    //private final ExpressionContext context;
-    private final Function<String, YodaType> typeFunction;
 
-    private final BiFunction<String, String, YodaType> agentAttributeTypes;
+    private final Function<String, Optional<YodaType>> typeFunction;
+    private final YodaElementAttributeTable elementAttributeTable;
+    private final Predicate<String> validAttributePredicate;
+    private final Predicate<String> validItAttributePredicates;
+    private final boolean randomnessAllowed;
+    private final boolean groupExpressionsAllowed;
 
-    private final Function<String, Function<String, YodaType>> agentsEnvironment;
+    private final Map<String, YodaType.RecordType> fieldsRecordType;
 
-    public TypeInferenceVisitor(ErrorCollector errors, Function<String, YodaType> typeFunction, BiFunction<String, String, YodaType> agetAttributeTypes) {
-        this(errors, typeFunction, agetAttributeTypes, g -> (a -> YodaType.NONE_TYPE));
-    }
 
-    public TypeInferenceVisitor(ErrorCollector errors, Function<String, YodaType> typeFunction, BiFunction<String, String, YodaType> agetAttributeTypes, Function<String, Function<String, YodaType>> agentsEnvironment) {
-        //this.context = context;
+    public TypeInferenceVisitor(ErrorCollector errors,
+                                Function<String, Optional<YodaType>> typeFunction,
+                                YodaElementAttributeTable elementAttributeTable,
+                                Map<String, YodaType.RecordType> fieldsRecordType,
+                                Predicate<String> validAttributePredicate,
+                                Predicate<String> validItAttributePredicates,
+                                boolean randomnessAllowed,
+                                boolean groupExpressionsAllowed) {
         this.errors = errors;
         this.typeFunction = typeFunction;
-        this.agentAttributeTypes = agetAttributeTypes;
-        this.agentsEnvironment = agentsEnvironment;
+        this.elementAttributeTable = elementAttributeTable;
+        this.validAttributePredicate = validAttributePredicate;
+        this.validItAttributePredicates = validItAttributePredicates;
+        this.randomnessAllowed = randomnessAllowed;
+        this.groupExpressionsAllowed = groupExpressionsAllowed;
+        this.fieldsRecordType = fieldsRecordType;
     }
 
-    public TypeInferenceVisitor(ErrorCollector errors, Function<String, YodaType> typeFunction) {
-        this(errors, typeFunction, (ag, attr) -> YodaType.NONE_TYPE);
+    public TypeInferenceVisitor(ErrorCollector errors, Function<String, Optional<YodaType>> getTypeOfConstantsAndParameters, YodaElementAttributeTable elementAttributeTable, Map<String, YodaType.RecordType> fieldsRecordType) {
+        this(errors, getTypeOfConstantsAndParameters, elementAttributeTable, fieldsRecordType, x -> false, x -> false, false, false);
     }
 
     public boolean withErrors() {
         return errors.withErrors();
     }
 
-    private YodaType checkType(YodaType expected, YodaModelParser.ExprContext ctx) {
+    public boolean checkType(YodaType expected, YodaModelParser.ExprContext ctx) {
         YodaType actual = ctx.accept(this);
-        if (!expected.equals(actual)) {
+        if (!actual.canBeAssignedTo(expected)) {
             errors.record(ParseUtil.wrongTypeError(expected, actual, ctx));
+            return false;
+        } else {
+            return true;
         }
-        return expected;
     }
 
     private YodaType checkAndReturn(YodaType expected, YodaModelParser.ExprContext ctx) {
@@ -113,11 +128,19 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
 
     @Override
     public YodaType visitExpressionReference(YodaModelParser.ExpressionReferenceContext ctx) {
-        YodaType type = typeFunction.apply(ctx.getText());
-        if (type == YodaType.NONE_TYPE) {
+        String name = ctx.reference.getText();
+        if (elementAttributeTable.isAttribute(name)) {
+            if (!validAttributePredicate.test(name)) {
+                this.errors.record(ParseUtil.illegalSymbolError(ctx.reference.getText(), ctx));
+                return YodaType.NONE_TYPE;
+            }
+            return elementAttributeTable.getTypeOf(name);
+        }
+        Optional<YodaType> type = typeFunction.apply(ctx.reference.getText());
+        if (type.isEmpty()) {
             this.errors.record(ParseUtil.unknownSymbolError(ctx.getText(), ctx));
         }
-        return type;
+        return type.orElse(YodaType.NONE_TYPE);
     }
 
     @Override
@@ -162,7 +185,7 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
     }
 
     @Override
-    public YodaType visitExpressionExponentOperation(YodaModelParser.ExpressionExponentOperationContext ctx) {
+    public YodaType visitExpressionPowOperation(YodaModelParser.ExpressionPowOperationContext ctx) {
         YodaType leftType = ctx.leftOp.accept(this);
         if (!leftType.isNumericType()) {
             errors.record(ParseUtil.illegalTypeError(leftType, ctx));
@@ -225,108 +248,127 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
 
     @Override
     public YodaType visitExpressionWeightedRandom(YodaModelParser.ExpressionWeightedRandomContext ctx) {
+        if (!randomnessAllowed) {
+            errors.record(ParseUtil.illegalRandomExpression(ctx));
+        }
         return combineNumericBinaryOperators(ctx.min, ctx.max);
     }
 
     @Override
     public YodaType visitExpressionRandom(YodaModelParser.ExpressionRandomContext ctx) {
+        if (!randomnessAllowed) {
+            errors.record(ParseUtil.illegalRandomExpression(ctx));
+        }
         return YodaType.REAL_TYPE;
     }
 
-    @Override
-    public YodaType visitExpressionAttributeRef(YodaModelParser.ExpressionAttributeRefContext ctx) {
-        YodaType type = agentAttributeTypes.apply(ctx.parent.getText(), ctx.son.getText());
-        if (type == YodaType.NONE_TYPE) {
-            this.errors.record(ParseUtil.unknownSymbolError(ctx.getText(), ctx));
-        }
-        return type;
-    }
 
-    //TODO
     @Override
     public YodaType visitExpressionMinimum(YodaModelParser.ExpressionMinimumContext ctx) {
-        return ctx.groupExpression().accept(this);
+        if (groupExpressionsAllowed) {
+            return checkGroupExpression(ctx, ctx.groupName, ctx.value, ctx.guard);
+        }
+        return YodaType.NONE_TYPE;
+    }
+
+    private YodaType checkGroupExpression(YodaModelParser.ExprContext ctx, Token groupName, YodaModelParser.ExprContext value, YodaModelParser.ExprContext guard) {
+        if (groupExpressionsAllowed) {
+            Predicate<String> validAttributePredicate = getValidGroupPredicate(groupName);
+            TypeInferenceVisitor visitor = new TypeInferenceVisitor(this.errors, typeFunction, elementAttributeTable, fieldsRecordType, validAttributePredicate, validItAttributePredicates, false, false);
+            if (visitor.checkNumericType(value)&&((guard == null)||(visitor.checkType(YodaType.BOOLEAN_TYPE, ctx)))) {
+                return YodaType.REAL_TYPE;
+            }
+        }
+        return YodaType.NONE_TYPE;
+
+    }
+
+    private Predicate<String> getValidGroupPredicate(Token groupName) {
+        Predicate<String> validAttributePredicate = elementAttributeTable.getGroupExpressionValidAttributePredicate();
+        if (groupName != null) {
+            if (elementAttributeTable.isGroupOrElement(groupName.getText())) {
+                validAttributePredicate = elementAttributeTable.getEnvironmentalAttibutePredicateOf(groupName.getText());
+            } else {
+                this.errors.record(ParseUtil.unknownSymbolError(groupName));
+            }
+        }
+        return validAttributePredicate;
     }
 
     @Override
-    public YodaType visitGroupExpression(YodaModelParser.GroupExpressionContext ctx) {
-        Function<String, YodaType> groupAttributes = agentsEnvironment.apply(ctx.groupName.getText());
-        if (groupAttributes == null) {
-            errors.record(ParseUtil.unknownSymbolError(ctx.groupName.getText(), ctx));
-            return YodaType.NONE_TYPE;
+    public YodaType visitExpressionMaximum(YodaModelParser.ExpressionMaximumContext ctx) {
+        if (groupExpressionsAllowed) {
+            return checkGroupExpression(ctx, ctx.groupName, ctx.value, ctx.guard);
         }
-        String varName = ctx.name.getText();
-        TypeInferenceVisitor tiv = new TypeInferenceVisitor(errors, typeFunction, (n, a) -> (varName.equals(n)?groupAttributes.apply(a):agentAttributeTypes.apply(n, a)), agentsEnvironment);
-        boolean flag = true;
-        if (ctx.guard != null) {
-            flag = (tiv.checkAndReturn(YodaType.BOOLEAN_TYPE, ctx.guard) == YodaType.BOOLEAN_TYPE);
+        return YodaType.NONE_TYPE;
+    }
+
+    @Override
+    public YodaType visitExpressionMean(YodaModelParser.ExpressionMeanContext ctx) {
+        if (groupExpressionsAllowed) {
+            return checkGroupExpression(ctx, ctx.groupName, ctx.value, ctx.guard);
         }
-        YodaType valueType = ctx.value.accept(tiv);
-        if (!valueType.isNumericType()) {
-            errors.record(ParseUtil.illegalTypeError(valueType, ctx.value));
-            flag = false;
-        }
-        if (flag) {
-            return valueType;
+        return YodaType.NONE_TYPE;
+    }
+
+
+
+    @Override
+    public YodaType visitExpressionImplication(YodaModelParser.ExpressionImplicationContext ctx) {
+        if (this.checkType(YodaType.BOOLEAN_TYPE, ctx.leftOp)&&this.checkType(YodaType.BOOLEAN_TYPE, ctx.rightOp)) {
+            return YodaType.BOOLEAN_TYPE;
         } else {
             return YodaType.NONE_TYPE;
         }
-    }
-
-    //TODO
-    @Override
-    public YodaType visitExpressionMaximum(YodaModelParser.ExpressionMaximumContext ctx) {
-        return ctx.groupExpression().accept(this);
     }
 
     @Override
     public YodaType visitExpressionForAll(YodaModelParser.ExpressionForAllContext ctx) {
-        YodaModelParser.GroupExpressionContext groupExpression = ctx.groupExpression();
-        Function<String, YodaType> groupAttributes = agentsEnvironment.apply(groupExpression.groupName.getText());
-        if (groupAttributes == null) {
-            errors.record(ParseUtil.unknownSymbolError(groupExpression.groupName.getText(), ctx));
-            return YodaType.NONE_TYPE;
+        if (groupExpressionsAllowed) {
+            return checkGroupPredicateExpression(ctx, ctx.groupName, ctx.expr());
         }
-        String varName = groupExpression.name.getText();
-        TypeInferenceVisitor tiv = new TypeInferenceVisitor(errors, typeFunction, (n, a) -> (varName.equals(n)?groupAttributes.apply(a):agentAttributeTypes.apply(n, a)), agentsEnvironment);
-        boolean flag = true;
-        if (groupExpression.guard != null) {
-            flag = (tiv.checkAndReturn(YodaType.BOOLEAN_TYPE, groupExpression.guard) == YodaType.BOOLEAN_TYPE);
-        }
-        flag &= (tiv.checkAndReturn(YodaType.BOOLEAN_TYPE, groupExpression.value) == YodaType.BOOLEAN_TYPE);
-        if (flag) {
-            return YodaType.BOOLEAN_TYPE;
-        } else {
-            return YodaType.NONE_TYPE;
-        }
+        return YodaType.NONE_TYPE;
+    }
+
+    private YodaType checkGroupPredicateExpression(YodaModelParser.ExprContext ctx, Token groupName, YodaModelParser.ExprContext expr) {
+        Predicate<String> validAttributePredicate = getValidGroupPredicate(groupName);
+        TypeInferenceVisitor visitor = new TypeInferenceVisitor(this.errors, typeFunction, elementAttributeTable, fieldsRecordType, validAttributePredicate, validItAttributePredicates, false, false);
+        return visitor.checkAndReturn(YodaType.BOOLEAN_TYPE, expr);
     }
 
     @Override
     public YodaType visitExpressionExists(YodaModelParser.ExpressionExistsContext ctx) {
-        YodaModelParser.GroupExpressionContext groupExpression = ctx.groupExpression();
-        Function<String, YodaType> groupAttributes = agentsEnvironment.apply(groupExpression.groupName.getText());
-        if (groupAttributes == null) {
-            errors.record(ParseUtil.unknownSymbolError(groupExpression.groupName.getText(), ctx));
-            return YodaType.NONE_TYPE;
+        if (groupExpressionsAllowed) {
+            return checkGroupPredicateExpression(ctx, ctx.groupName, ctx.expr());
         }
-        String varName = groupExpression.name.getText();
-        TypeInferenceVisitor tiv = new TypeInferenceVisitor(errors, typeFunction, (n, a) -> (varName.equals(n)?groupAttributes.apply(a):agentAttributeTypes.apply(n, a)), agentsEnvironment);
-        boolean flag = true;
-        if (groupExpression.guard != null) {
-            flag = (tiv.checkAndReturn(YodaType.BOOLEAN_TYPE, groupExpression.guard) == YodaType.BOOLEAN_TYPE);
-        }
-        flag &= (tiv.checkAndReturn(YodaType.BOOLEAN_TYPE, groupExpression.value) == YodaType.BOOLEAN_TYPE);
-        if (flag) {
-            return YodaType.BOOLEAN_TYPE;
+        return YodaType.NONE_TYPE;
+    }
+
+    @Override
+    public YodaType visitExpressionItselfRef(YodaModelParser.ExpressionItselfRefContext ctx) {
+        if (validItAttributePredicates.test(ctx.ref.getText())) {
+            return elementAttributeTable.getTypeOf(ctx.ref.getText());
         } else {
+            errors.record(ParseUtil.illegalSymbolError(ctx.ref.getText(), ctx));
             return YodaType.NONE_TYPE;
         }
     }
 
-    //TODO
     @Override
-    public YodaType visitExpressionItselfRef(YodaModelParser.ExpressionItselfRefContext ctx) {
-        return agentAttributeTypes.apply("it", ctx.ref.getText());
+    public YodaType visitExpressionRecordAccess(YodaModelParser.ExpressionRecordAccessContext ctx) {
+        YodaType type = ctx.record.accept(this);
+        if (type instanceof YodaType.RecordType) {
+            YodaType.RecordType recordType = (YodaType.RecordType) type;
+            if (!recordType.hasField(ctx.fieldName.getText())) {
+                return recordType.getType(ctx.fieldName.getText());
+            } else {
+                this.errors.record(ParseUtil.unknownFieldName(type, ctx.fieldName.getText(), ctx));
+                return YodaType.NONE_TYPE;
+            }
+        } else {
+            this.errors.record(ParseUtil.recordTypeExpected(type, ctx));
+            return YodaType.NONE_TYPE;
+        }
     }
 
     @Override
@@ -339,7 +381,6 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         return YodaType.REAL_TYPE;
     }
 
-    //TODO
     @Override
     public YodaType visitExpressionSinh(YodaModelParser.ExpressionSinhContext ctx) {
         YodaType argType = ctx.argument.accept(this);
@@ -350,7 +391,6 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         return YodaType.REAL_TYPE;
     }
 
-    //TODO
     @Override
     public YodaType visitExpressionAsin(YodaModelParser.ExpressionAsinContext ctx) {
         YodaType argType = ctx.argument.accept(this);
@@ -361,7 +401,6 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         return YodaType.REAL_TYPE;
     }
 
-    //TODO
     @Override
     public YodaType visitExpressionCos(YodaModelParser.ExpressionCosContext ctx) {
         YodaType argType = ctx.argument.accept(this);
@@ -372,7 +411,6 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         return YodaType.REAL_TYPE;
     }
 
-    //TODO
     @Override
     public YodaType visitExpressionCosh(YodaModelParser.ExpressionCoshContext ctx) {
         YodaType argType = ctx.argument.accept(this);
@@ -383,7 +421,6 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         return YodaType.REAL_TYPE;
     }
 
-    //TODO
     @Override
     public YodaType visitExpressionAcos(YodaModelParser.ExpressionAcosContext ctx) {
         YodaType argType = ctx.argument.accept(this);
@@ -394,7 +431,6 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         return YodaType.REAL_TYPE;
     }
 
-    //TODO
     @Override
     public YodaType visitExpressionTan(YodaModelParser.ExpressionTanContext ctx) {
         YodaType argType = ctx.argument.accept(this);
@@ -405,7 +441,6 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         return YodaType.REAL_TYPE;
     }
 
-    //TODO
     @Override
     public YodaType visitExpressionTanh(YodaModelParser.ExpressionTanhContext ctx) {
         YodaType argType = ctx.argument.accept(this);
@@ -416,7 +451,6 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         return YodaType.REAL_TYPE;
     }
 
-    //TODO
     @Override
     public YodaType visitExpressionAtan(YodaModelParser.ExpressionAtanContext ctx) {
         YodaType argType = ctx.argument.accept(this);
@@ -427,7 +461,6 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         return YodaType.REAL_TYPE;
     }
 
-    //TODO
     @Override
     public YodaType visitExpressionCeiling(YodaModelParser.ExpressionCeilingContext ctx) {
         YodaType argType = ctx.argument.accept(this);
@@ -438,7 +471,6 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         return YodaType.REAL_TYPE;
     }
 
-    //TODO
     @Override
     public YodaType visitExpressionFloor(YodaModelParser.ExpressionFloorContext ctx) {
         YodaType argType = ctx.argument.accept(this);
@@ -449,9 +481,44 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         return YodaType.REAL_TYPE;
     }
 
-    //TODO
     @Override
     public YodaType visitExpressionRecord(YodaModelParser.ExpressionRecordContext ctx) {
-        return super.visitExpressionRecord(ctx);
+        boolean allFieldsAreCorrect = true;
+        YodaType.RecordType recordType = null;
+        for (YodaModelParser.FieldAssignmentContext fa: ctx.fieldAssignment()) {
+            Optional<YodaType.RecordType> optionalRecordType = checkFieldAssignment(recordType, fa);
+            if (optionalRecordType.isPresent()) {
+                recordType = optionalRecordType.get();
+            } else {
+                allFieldsAreCorrect = false;
+            }
+        }
+        if (recordType == null) return YodaType.NONE_TYPE;
+        if (allFieldsAreCorrect) {
+            checkAllFieldsAreAssigned(recordType, ctx);
+        }
+        return recordType;
+    }
+
+    private void checkAllFieldsAreAssigned(YodaType.RecordType recordType, YodaModelParser.ExpressionRecordContext ctx) {
+        Set<String> fields = recordType.getFields();
+        if (fields.size() != ctx.fieldAssignment().size()) {
+            fields.retainAll(ctx.fieldAssignment().stream().map(fa -> fa.name.getText()).collect(Collectors.toList()));
+            errors.record(ParseUtil.missingFieldAssignment(fields, recordType, ctx));
+        }
+    }
+
+    public Optional<YodaType.RecordType> checkFieldAssignment(YodaType.RecordType expected, YodaModelParser.FieldAssignmentContext ctx) {
+        YodaType.RecordType recordType = fieldsRecordType.get(ctx.name.getText());
+        if (recordType == null) {
+            errors.record(ParseUtil.unknownAssignedFieldName(ctx.name));
+            return Optional.empty();
+        }
+        checkAndReturn(recordType.getType(ctx.name.getText()), ctx.value);
+        if ((expected != null)&&(!expected.equals(recordType))) {
+            errors.record(ParseUtil.inconsistentFieldAssignment(expected, recordType, ctx.name));
+            return Optional.empty();
+        }
+        return Optional.of(recordType);
     }
 }

@@ -32,6 +32,8 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
@@ -69,7 +71,7 @@ public final class SibillaRuntime {
      * @return an array with the names of all enabled modules.
      */
     public String[] getModules() {
-        return moduleIndex.keySet().toArray(new String[0]);
+        return moduleIndex.keySet().stream().sorted().toArray(String[]::new);
     }
 
 
@@ -542,6 +544,11 @@ public final class SibillaRuntime {
     }
 
 
-
-
+    public void load(URL resource) throws CommandExecutionException {
+        try {
+            load(new File(resource.toURI()));
+        } catch (URISyntaxException e) {
+            throw new CommandExecutionException(e.getMessage());
+        }
+    }
 }

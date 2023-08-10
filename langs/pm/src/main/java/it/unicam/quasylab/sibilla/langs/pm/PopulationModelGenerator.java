@@ -357,26 +357,6 @@ public class PopulationModelGenerator {
         return s -> SibillaValue.eval(op, f1.apply(s),f2.apply(s));
     }
 
-    public static BiPredicate<SibillaValue,SibillaValue> getRelationOperator(String op) {
-        if (op.equals("<"))  { return (x,y) -> x.doubleOf()<y.doubleOf(); }
-        if (op.equals("<="))  { return (x,y) -> x.doubleOf()<=y.doubleOf(); }
-        if (op.equals("=="))  { return (x,y) -> x.doubleOf()==y.doubleOf(); }
-        if (op.equals("!="))  { return (x,y) -> !x.equals(y); }
-        if (op.equals(">"))  { return (x,y) -> x.doubleOf()>y.doubleOf(); }
-        if (op.equals(">="))  { return (x,y) -> x.doubleOf()>=y.doubleOf(); }
-        return (x,y) -> false;
-    }
-
-
-    public static BinaryOperator<SibillaValue> getOperator(String op) {
-        if (op.equals("+")) {return SibillaValue::sum;}
-        if (op.equals("-")) {return SibillaValue::sub; }
-        if (op.equals("%")) {return SibillaValue::mod; }
-        if (op.equals("*")) {return SibillaValue::mul; }
-        if (op.equals("/")) {return SibillaValue::div; }
-        if (op.equals("//")) {return SibillaValue::zeroDiv; }
-        return (x,y) -> SibillaValue.ERROR_VALUE;
-    }
 
     public static Map<String,SibillaValue> getMap(String[] variables, SibillaValue[] args) {
         Map<String, SibillaValue> map = new HashMap<>();

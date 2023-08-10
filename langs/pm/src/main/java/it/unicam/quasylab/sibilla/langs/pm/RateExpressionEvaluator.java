@@ -107,7 +107,7 @@ public class RateExpressionEvaluator extends PopulationModelBaseVisitor<RatePopu
 
     private RatePopulationFunction evalBinaryExpression(PopulationModelParser.ExprContext left, String op, PopulationModelParser.ExprContext right) {
         return PopulationModelGenerator.combine(left.accept(this),
-                PopulationModelGenerator.getOperator(op),
+                SibillaValue.getOperator(op),
                 right.accept(this));
     }
 
@@ -145,7 +145,7 @@ public class RateExpressionEvaluator extends PopulationModelBaseVisitor<RatePopu
 
     @Override
     public RatePopulationFunction visitRelationExpression(PopulationModelParser.RelationExpressionContext ctx) {
-        BiPredicate<SibillaValue, SibillaValue> relationPredicate = PopulationModelGenerator.getRelationOperator(ctx.op.getText());
+        BiPredicate<SibillaValue, SibillaValue> relationPredicate = SibillaValue.getRelationOperator(ctx.op.getText());
         RatePopulationFunction leftFunction = ctx.left.accept(this);
         RatePopulationFunction rightFunction = ctx.right.accept(this);
         return (now, s) -> SibillaBoolean.of(relationPredicate.test(leftFunction.apply(now, s), rightFunction.apply(now, s)));

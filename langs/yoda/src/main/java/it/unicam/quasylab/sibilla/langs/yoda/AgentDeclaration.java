@@ -96,13 +96,6 @@ public class AgentDeclaration {
         }
     }
 
-    public YodaType getTypeFromFields(String name) {
-        YodaVariable variable = getVariableFromFields(name);
-        if (variable == null) {
-            return YodaType.NONE_TYPE;
-        } else {
-            return variable.getType();
-        }
-    }
+
 
 }

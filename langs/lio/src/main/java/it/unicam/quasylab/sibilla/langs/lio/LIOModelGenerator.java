@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.langs.lio;
 
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
+import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import it.unicam.quasylab.sibilla.core.models.lio.*;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
@@ -32,11 +33,13 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Map;
+import java.util.function.Function;
 
 public class LIOModelGenerator {
 
@@ -44,9 +47,6 @@ public class LIOModelGenerator {
     private ParseTree parseTree;
     private ErrorCollector errorCollector;
 
-    private Map<String, SibillaValue> parameters;
-
-    private Map<String, SibillaValue> constants;
 
     public LIOModelGenerator(File file) throws IOException, LIOModelParseError {
         this(CharStreams.fromReader(new FileReader(file)));
@@ -56,10 +56,8 @@ public class LIOModelGenerator {
         this(CharStreams.fromString(sourceCode));
     }
 
-    public LIOModelGenerator(CodePointCharStream sourceCode) throws LIOModelParseError {
+    public LIOModelGenerator(CodePointCharStream sourceCode) {
         this.sourceCode = sourceCode;
-        generateParseTree();
-        validateParseTree();
     }
 
     private void validateParseTree() throws LIOModelParseError {
@@ -83,34 +81,46 @@ public class LIOModelGenerator {
         }
     }
 
-    public Map<String, SibillaValue> getModelParameters() {
-        return null;
+
+    public EvaluationEnvironment generateEvaluationEnvironment() {
+        ErrorCollector errorCollector = new ErrorCollector();
+        LIOModelConstantsAndParametersEvaluator evaluator = new LIOModelConstantsAndParametersEvaluator(errorCollector);
+        this.parseTree.accept(evaluator);
+        return new EvaluationEnvironment(evaluator.getParameters(), evaluator.getConstantsAndParameters(), this::evaluateConstantsAndParameters);
     }
 
-    public AgentsDefinition generateAgentsDefinition(Map<String, SibillaValue> parameters) {
-
-        return null;
+    private Map<String, SibillaValue> evaluateConstantsAndParameters(Map<String, SibillaValue> stringSibillaValueMap) {
+        LIOModelConstantsAndParametersEvaluator evaluator = new LIOModelConstantsAndParametersEvaluator(errorCollector);
+        this.parseTree.accept(evaluator);
+        return evaluator.getConstantsAndParameters();
     }
 
-
-    public LIOModel generateInddividualModel(Map<String, SibillaValue> parameters) {
-        return null;//return new LIOModel<LIOIndividualState>(DefinitionGenerator.apply(environment), measureGenerator.apply(environment), predicateGenerator.apply(environment));
+    public LIOModelDefinition getDefinition() throws LIOModelParseError {
+        generateParseTree();
+        validateParseTree();
+        return new LIOModelDefinition(generateEvaluationEnvironment(), this::agentsDefinitionGenerator, this::modelGenerator, this::configurationsGenerator);
     }
 
-    public LIOModelDefinition getMassModelDefinition() {
-        return null;
+    private ParametricDataSet<Function<RandomGenerator, LIOState>> configurationsGenerator(EvaluationEnvironment environment, AgentsDefinition agentsDefinition) {
+        LIOModelSystemGenerator systemGenerator = new LIOModelSystemGenerator(this.errorCollector, agentsDefinition, environment.getValues());
+        this.parseTree.accept(systemGenerator);
+        return systemGenerator.getSystems();
     }
 
-    public LIOModelDefinition getIndividualModelDefinition() {
-        return null;
+    private LIOModel modelGenerator(EvaluationEnvironment environment, AgentsDefinition agentsDefinition) {
+        LIOModelMeasuresGenerator measuresGenerator = new LIOModelMeasuresGenerator(this.errorCollector, agentsDefinition, environment.getValues());
+        LIOModelPredicateGenerator predicatesGenerator = new LIOModelPredicateGenerator(this.errorCollector, agentsDefinition, environment.getValues());
+        this.parseTree.accept(measuresGenerator);
+        this.parseTree.accept(predicatesGenerator);
+        return new LIOModel(agentsDefinition, measuresGenerator.getMeasures(), predicatesGenerator.getPredicates());
     }
 
-    private EvaluationEnvironment generateEnvironment() {
-        return this.parseTree.accept(new EvaluationEnvironmentGenerator());
-    }
-
-    private AgentsDefinition getAgentsDefinition(EvaluationEnvironment environment) {
-        return null;
+    private AgentsDefinition agentsDefinitionGenerator(EvaluationEnvironment environment) {
+        AgentsDefinition agentsDefinition = new AgentsDefinition();
+        this.parseTree.accept(new LIOModelAgentStatesGenerator(this.errorCollector, agentsDefinition, environment.getValues()));
+        this.parseTree.accept(new LIOModelActionsGenerator(this.errorCollector, agentsDefinition, environment.getValues()));
+        this.parseTree.accept(new LIOModelAgentStepGenerator(this.errorCollector, agentsDefinition, environment.getValues()));
+        return agentsDefinition;
     }
 
 }

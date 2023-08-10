@@ -29,46 +29,24 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
+import java.util.function.ToDoubleBiFunction;
 
 /**
  * The interface <code>YodaBehaviour</code> represents
  * the behaviour allowing the agent to choose any available action
  */
+@FunctionalInterface
 public interface YodaBehaviour extends Serializable {
-
-    /**
-     * This method returns the name of the behaviour
-     *
-     * @return the name of the behaviour
-     */
-    String getName();
-
-    /*
-    /**
-     * This method returns the identifier of the behaviour
-     *
-     * @return the identifier of the behaviour
-     *
-    int getId();
-     */
-
-
-    /**
-     * This method returns all the available actions for a certain agent
-     *
-     * @return all the available actions for a certain agent
-     */
-    List<YodaAction> getAvailableActions();
 
     /**
      * This method returns a distribution of possible actions
      *
-     * @param rg a random generator
      * @param currentInternalState the current internal state of the agent
      * @param observations the available observations of the agent
      * @return a distribution of possible actions
      */
-    WeightedStructure<YodaAction> evaluate(RandomGenerator rg, YodaVariableMapping currentInternalState, YodaVariableMapping observations);
+    WeightedStructure<YodaAction> evaluate(YodaVariableMapping currentInternalState, YodaVariableMapping observations);
 
     /**
      * This method returns a single action from a distribution of actions
@@ -85,24 +63,14 @@ public interface YodaBehaviour extends Serializable {
         }
     }
 
-    static YodaBehaviour behaviourOf(String name,
-                                     List<YodaAction> actionList,
-                                     BehaviouralStepFunction<RandomGenerator, YodaVariableMapping, YodaVariableMapping, WeightedStructure<YodaAction>> bf) {
-        return new YodaBehaviour() {
-            @Override
-            public String getName() {
-                return name;
+    static YodaBehaviour behaviourOf(List<YodaBehaviourElement> elements , YodaBehaviourElement defaultBehaviour) {
+        return ((currentInternalState, observations) -> {
+            for (YodaBehaviourElement element: elements) {
+                if (element.isEnabled(currentInternalState, observations)) {
+                    return element.eval(currentInternalState, observations);
+                }
             }
-
-            @Override
-            public List<YodaAction> getAvailableActions() {
-                return actionList;
-            }
-
-            @Override
-            public WeightedStructure<YodaAction> evaluate(RandomGenerator rg, YodaVariableMapping currentInternalState, YodaVariableMapping observations) {
-                return bf.apply(rg, currentInternalState, observations);
-            }
-        };
+            return defaultBehaviour.eval(currentInternalState, observations);
+        });
     }
 }

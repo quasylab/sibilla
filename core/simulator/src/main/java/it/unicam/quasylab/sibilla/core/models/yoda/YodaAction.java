@@ -23,14 +23,17 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
+import it.unicam.quasylab.sibilla.core.models.agents.VariableMapping;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.function.BiFunction;
 
 /**
  * The interface <code>YodaAction</code> represents
- * the action done by agents in a system
+ * the action done by agents in a system.
  *
  */
 public interface YodaAction extends Serializable {
@@ -52,6 +55,13 @@ public interface YodaAction extends Serializable {
     YodaVariableMapping performAction(RandomGenerator rg, YodaVariableMapping currentState);
 
 
+    /**
+     * Returns the action with the given name that transforms the state according to the given function.
+     *
+     * @param name action name
+     * @param f action function
+     * @return returns the action with the given name that transforms the state according to the given function.
+     */
     static YodaAction actionOf(String name, BiFunction<RandomGenerator, YodaVariableMapping, YodaVariableMapping> f) {
         return new YodaAction() {
             @Override
@@ -64,6 +74,17 @@ public interface YodaAction extends Serializable {
                 return f.apply(rg, currentState);
             }
         };
+    }
+
+
+    static YodaAction actionOf(String name, Map<YodaVariable, BiFunction<RandomGenerator, YodaVariableMapping, SibillaValue>> updates) {
+        return actionOf(name, (rg, vm) -> {
+            YodaVariableMapping result = vm;
+            for (Map.Entry<YodaVariable, BiFunction<RandomGenerator, YodaVariableMapping, SibillaValue>> e: updates.entrySet()) {
+                result = vm.setValue(e.getKey(), e.getValue().apply(rg, vm));
+            }
+            return result;
+        });
     }
 
 }

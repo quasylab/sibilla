@@ -24,20 +24,23 @@
 package it.unicam.quasylab.sibilla.langs.yoda;
 
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
+import it.unicam.quasylab.sibilla.langs.util.ParseError;
+
+import java.util.List;
 
 public class YodaModelGenerationException extends Throwable{
+    private final ErrorCollector errors;
 
     //private final List<ModelBuildingError> errors;
 
-    private final ErrorCollector errors;
 
-    public YodaModelGenerationException(String message, ErrorCollector errors){
-        super(message);
+    public YodaModelGenerationException(ErrorCollector errors){
+        super();
         this.errors = errors;
     }
 
-    public ErrorCollector getErrors() {
-        return errors;
+    public List<ParseError> getErrors() {
+        return errors.getSyntaxErrorList();
     }
 
 

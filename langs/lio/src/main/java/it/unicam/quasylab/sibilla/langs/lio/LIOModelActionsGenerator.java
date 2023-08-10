@@ -29,9 +29,12 @@ import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 
 import java.util.Map;
 
+/**
+ * This visitor is used to populate all the info about performed actions.
+ */
 public class LIOModelActionsGenerator extends LIOModelAgentDependentChecker {
 
-    public LIOModelActionsGenerator(AgentsDefinition definition, ErrorCollector errors, Map<String, SibillaValue> constantsAndParameters) {
+    public LIOModelActionsGenerator(ErrorCollector errors, AgentsDefinition definition, Map<String, SibillaValue> constantsAndParameters) {
         super(errors, definition, constantsAndParameters);
     }
 

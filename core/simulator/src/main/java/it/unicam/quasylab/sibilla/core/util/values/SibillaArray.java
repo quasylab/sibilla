@@ -29,11 +29,9 @@ public class SibillaArray<S extends SibillaValue> implements SibillaValue {
 
     private final S[] elements;
 
-    private final SibillaArrayType<S, SibillaType<S>> thisType;
 
     public SibillaArray(S[] elements) {
         this.elements = elements;
-        this.thisType = new SibillaArrayType<>();
     }
 
     @Override
@@ -50,12 +48,6 @@ public class SibillaArray<S extends SibillaValue> implements SibillaValue {
     public int intOf() {
         return 0;
     }
-
-    @Override
-    public SibillaType<?> getType() {
-        return thisType;
-    }
-
 
     /**
      * Returns the length of this array.

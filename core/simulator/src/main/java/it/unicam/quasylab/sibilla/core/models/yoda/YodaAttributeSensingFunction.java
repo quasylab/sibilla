@@ -21,15 +21,27 @@
  *  limitations under the License.
  */
 
+
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 /**
- * The interface <code>OmegaFunction</code> represents
- * a functional interface computing the observations of an agent
+ * This functional interface is used to represent the functions used to compute the value of a
+ * sensing attribute of an agent.
  */
 @FunctionalInterface
-public interface OmegaFunction {
-    YodaVariableMapping compute(RandomGenerator rg, YodaSystemState system, YodaAgent agent);
+public interface YodaAttributeSensingFunction {
+
+    /**
+     * Returns the value perceived by the given agent when it is running in the given system.
+     *
+     * @param rg random generator used to sample random values
+     * @param state the system state where the agent is operating
+     * @param agent the agent that is perceiving the value
+     * @return the value perceived by the given agent when it is running in the given system.
+     */
+    SibillaValue apply(RandomGenerator rg, YodaSystemState state, YodaAgent agent);
+
 }

@@ -80,11 +80,6 @@ public class SibillaBoolean implements SibillaValue {
     }
 
 
-    @Override
-    public SibillaType<?> getType() {
-        return SibillaType.BOOLEAN_TYPE;
-    }
-
     /**
      * Returns the conjunction of this value with the other.
      *

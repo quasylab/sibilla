@@ -90,7 +90,7 @@ public class ExpressionEvaluator extends PopulationModelBaseVisitor<SibillaValue
 
     @Override
     public SibillaValue visitRelationExpression(PopulationModelParser.RelationExpressionContext ctx) {
-        return SibillaBoolean.of(PopulationModelGenerator.getRelationOperator(ctx.op.getText()).test(ctx.left.accept(this), ctx.right.accept(this)));
+        return SibillaBoolean.of(SibillaValue.getRelationOperator(ctx.op.getText()).test(ctx.left.accept(this), ctx.right.accept(this)));
     }
 
     @Override
@@ -116,13 +116,13 @@ public class ExpressionEvaluator extends PopulationModelBaseVisitor<SibillaValue
 
     @Override
     public SibillaValue visitMulDivExpression(PopulationModelParser.MulDivExpressionContext ctx) {
-        return PopulationModelGenerator.getOperator(ctx.op.getText()).apply(ctx.left.accept(this),ctx.right.accept(this));
+        return SibillaValue.getOperator(ctx.op.getText()).apply(ctx.left.accept(this),ctx.right.accept(this));
     }
 
 
     @Override
     public SibillaValue visitAddSubExpression(PopulationModelParser.AddSubExpressionContext ctx) {
-        return PopulationModelGenerator.getOperator(ctx.op.getText()).apply(ctx.left.accept(this),ctx.right.accept(this));
+        return SibillaValue.getOperator(ctx.op.getText()).apply(ctx.left.accept(this),ctx.right.accept(this));
     }
 
     @Override

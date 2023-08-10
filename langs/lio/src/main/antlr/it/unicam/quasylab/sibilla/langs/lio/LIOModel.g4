@@ -72,7 +72,7 @@ populationExpression:
                 'for' name=ID 'from' from=expr 'to' to=expr body=populationExpression 'endfor' # populationExpressionFor
                 | 'if' guard=expr 'then' thenPopulation=populationExpression 'else' elsePopulation=populationExpression 'endif' #populationExpressionIfThenElse
                 | left=populationExpression '|' right=populationExpression # populationExpressionParallel
-                | name=ID ('[' stateArguments += expr (',' stateArguments += expr)* ']') ('#' size=expr )? # populationExpressionAgent
+                | name=ID ('[' stateArguments += expr (',' stateArguments += expr)* ']')? ('#' size=expr )? # populationExpressionAgent
             ;
 
 expr:

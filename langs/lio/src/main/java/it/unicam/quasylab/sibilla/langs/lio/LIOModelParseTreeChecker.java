@@ -54,8 +54,4 @@ public abstract class LIOModelParseTreeChecker extends LIOModelBaseVisitor<Boole
         return aggregate && nextResult ;
     }
 
-    @Override
-    protected boolean shouldVisitNextChild(RuleNode node, Boolean currentResult) {
-        return true;
-    }
 }

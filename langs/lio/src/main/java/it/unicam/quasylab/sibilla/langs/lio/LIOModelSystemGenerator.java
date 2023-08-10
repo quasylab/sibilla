@@ -23,12 +23,15 @@
 
 package it.unicam.quasylab.sibilla.langs.lio;
 
+import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import it.unicam.quasylab.sibilla.core.models.lio.Agent;
 import it.unicam.quasylab.sibilla.core.models.lio.AgentsDefinition;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOState;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaInteger;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 import org.antlr.v4.runtime.Token;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.HashMap;
 import java.util.List;
@@ -92,8 +95,8 @@ public class LIOModelSystemGenerator extends LIOModelAgentDependentChecker {
      * @return the map containing associating each name with the list of functions used to generate the system
      * state defined in the model.
      */
-    public Map<String, List<Function<SibillaValue[], Map<Agent, Integer>>>> getSystems() {
-        return systems;
+    public ParametricDataSet<Function<RandomGenerator, LIOState>> getSystems() {
+        return null;
     }
 
     public class PopulationGenerator extends LIOModelBaseVisitor<BiFunction<Map<String, SibillaValue>, Map<Agent, Integer>, Map<Agent, Integer>>> {

@@ -24,14 +24,11 @@
 package it.unicam.quasylab.sibilla.langs.lio;
 
 
-import it.unicam.quasylab.sibilla.core.models.lio.Agent;
-import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import org.antlr.v4.runtime.Token;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -105,7 +102,7 @@ public class LIOModelValidator extends LIOModelParseTreeChecker {
         predicates.values().forEach(this::validatePredicate);
         atomics.values().forEach(this::validateAtomic);
         systems.values().forEach(this::validateSystem);
-        return errors.withErrors();
+        return !errors.withErrors();
     }
 
     private void validateSystem(LIOModelParser.ElementSystemContext elementSystemContext) {

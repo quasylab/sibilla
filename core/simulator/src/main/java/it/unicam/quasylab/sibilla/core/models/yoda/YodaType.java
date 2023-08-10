@@ -23,8 +23,10 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
-import java.util.Arrays;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The interface <code>YodaType</code> represents
@@ -33,6 +35,13 @@ import java.util.function.Function;
 public interface YodaType {
 
 
+    static Map<String,YodaType> getMapOfYodaType() {
+        HashMap<String, YodaType> typeMap = new HashMap<>();
+        typeMap.put("int", YodaType.INTEGER_TYPE);
+        typeMap.put("bool", YodaType.BOOLEAN_TYPE);
+        typeMap.put("real", YodaType.REAL_TYPE);
+        return typeMap;
+    }
 
     enum YodaCodeType{
         NONE,
@@ -97,6 +106,8 @@ public interface YodaType {
         public boolean isNumericType() {
             return false;
         }
+
+
     }
 
     class BooleanType implements YodaType {
@@ -126,6 +137,8 @@ public interface YodaType {
         public boolean isNumericType() {
             return false;
         }
+
+
     }
 
     class IntegerType implements YodaType {
@@ -185,6 +198,8 @@ public interface YodaType {
         public boolean isNumericType() {
             return true;
         }
+
+
     }
 
     class ListType implements YodaType {
@@ -218,17 +233,30 @@ public interface YodaType {
         public boolean isNumericType() {
             return false;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ListType listType = (ListType) o;
+            return Objects.equals(contentType, listType.contentType);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(contentType);
+        }
     }
 
     class RecordType implements YodaType {
 
         private final String name;
 
-        private final String[] fields;
+        private final Map<String, YodaType> fields;
 
-        public RecordType(String name, String[] fields) {
+        public RecordType(String name, Map<String, YodaType> fields) {
             this.name = name;
-            this.fields = fields;
+            this.fields = Map.copyOf(fields);
         }
 
         @Override
@@ -249,6 +277,35 @@ public interface YodaType {
         @Override
         public boolean isNumericType() {
             return false;
+        }
+
+        public boolean hasField(String fieldName) {
+            return this.fields.containsKey(fieldName);
+        }
+
+        public YodaType getType(String fieldName) {
+            return this.fields.getOrDefault(fieldName, YodaType.NONE_TYPE);
+        }
+
+        public Set<String> getFields() {
+            return new HashSet<>(this.fields.keySet());
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            RecordType that = (RecordType) o;
+            return Objects.equals(name, that.name) && Objects.equals(fields, that.fields);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, fields);
         }
     }
 }

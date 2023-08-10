@@ -67,4 +67,6 @@ public class YodaModelModule extends AbstractSibillaModule{
     private void generateDefinition(YodaModelGenerator yodaModelGenerator) throws YodaModelGenerationException {
         setModelDefinition(yodaModelGenerator.getYodaModelDefinition());
     }
+
+
 }

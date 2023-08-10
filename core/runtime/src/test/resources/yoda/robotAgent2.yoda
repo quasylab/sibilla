@@ -1,0 +1,60 @@
+param height = 10;
+param length = 10;
+param no = 10;
+param na = 3;
+
+agent Robot =
+    state:
+        int dirx = 0;
+        int diry = 0;
+    features:
+        int x = 0;
+        int y = 0;
+    observations:
+        bool north = false;
+        bool south = false;
+        bool east = false;
+        bool west = false;
+        bool goal = false;
+    actions :
+        moveNorth [ dirx <- 0; diry <- 1;]
+        moveSouth [ dirx <- 0; diry <- 1;]
+        moveEast [ dirx <- 0; diry <- 1;]
+        moveWest [ dirx <- 0; diry <- 1;]
+        stop [ dirx <- 0; diry <- 0; ]
+    behaviour :
+        when goal -> [ stop: 1 ]
+        orwhen !north -> [ moveNorth: 1 ]
+        orwhen !east -> [ moveEast: 1 ]
+        orwhen !west -> [ moveWest: 1 ]
+        otherwise [ stop: 1 ]
+end
+
+element Obstacle =
+    int x = 0;
+    int y = 0;
+end
+
+environment:
+    sensing :
+        Robot [
+            north <- any Obstacle : (y==it.y+1)&&(x==it.y);
+            south <- any Obstacle : (y==it.y-1)&&(x==it.y);
+            east <- any Obstacle : (y==it.y-1)&&(x==it.y);
+            west <- any Obstacle : (y==it.y-1)&&(x==it.y);
+            goal <- it.y==height+1;
+        ]
+
+    dynamic :
+        Robot [
+           x <- x + dirx;
+           y <- y + diry;
+        ]
+ end
+
+ configuration Main :
+    for ox sampled distinct 5 time from U[0, width] do
+       Obstacle[ x = ox; y = 10; ]
+    endfor
+    Robot[ x = U[0, 20]; y = 0; ]
+ end

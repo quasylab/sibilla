@@ -34,6 +34,10 @@ public class LIOModelConstantsAndParametersEvaluator extends LIOModelParseTreeCh
     private final Map<String, SibillaValue> constantsAndParameters = new HashMap<>();
     private final Map<String, SibillaValue> parameters;
 
+    public LIOModelConstantsAndParametersEvaluator(ErrorCollector errors) {
+        this(new HashMap<>(), errors);
+    }
+
 
     public LIOModelConstantsAndParametersEvaluator(Map<String, SibillaValue> parameters, ErrorCollector errors) {
         super(errors);

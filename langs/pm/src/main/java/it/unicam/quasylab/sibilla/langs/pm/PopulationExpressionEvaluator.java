@@ -104,7 +104,7 @@ public class PopulationExpressionEvaluator extends PopulationModelBaseVisitor<Fu
     private Function<PopulationState, SibillaValue> evalBinaryExpression(PopulationModelParser.ExprContext left, String op, PopulationModelParser.ExprContext right) {
         Function<PopulationState, SibillaValue> leftEvaluationFunciton = left.accept(this);
         Function<PopulationState, SibillaValue> rightEvaluationFunction = right.accept(this);
-        BinaryOperator<SibillaValue> semanticFunction = PopulationModelGenerator.getOperator(op);
+        BinaryOperator<SibillaValue> semanticFunction = SibillaValue.getOperator(op);
         return s -> semanticFunction.apply(leftEvaluationFunciton.apply(s), rightEvaluationFunction.apply(s));
     }
 

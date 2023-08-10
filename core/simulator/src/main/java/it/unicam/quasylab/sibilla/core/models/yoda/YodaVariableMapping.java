@@ -23,13 +23,32 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
-import java.io.Serializable;
+import it.unicam.quasylab.sibilla.core.util.SibillaMap;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+
+import java.util.Map;
 
 /**
- * The interface <code>YodaVariableMapping</code> represents
- * the mapping between a variable and a value
+ * Instances of this class are used to associate values with variables.
  */
-public interface YodaVariableMapping extends Serializable {
+public class YodaVariableMapping {
+
+    private final SibillaMap<YodaVariable, SibillaValue> map;
+
+    /**
+     * Creates an empty mapping.
+     */
+    public YodaVariableMapping() {
+        this(new SibillaMap<>());
+    }
+
+    public YodaVariableMapping(Map<YodaVariable, SibillaValue> map) {
+        this(SibillaMap.of(map));
+    }
+
+    public YodaVariableMapping(SibillaMap<YodaVariable, SibillaValue> map) {
+        this.map = map;
+    }
 
     /**
      * This method returns the value associated to an input variable
@@ -37,38 +56,67 @@ public interface YodaVariableMapping extends Serializable {
      * @param variable the variable to search
      * @return the value associated to an input variable
      */
-    YodaValue getValue(YodaVariable variable);
+    public SibillaValue getValue(YodaVariable variable) {
+        return this.map.get(variable).orElse(SibillaValue.ERROR_VALUE);
+    }
 
 
     /**
      * This method sets an input value to a certain input variable
      *
-     * @param variable an input variable
-     * @param value an input value
+     * @param variable the variable to set
+     * @param value the value that is associated to the variable
      */
-    void setValue(YodaVariable variable, YodaValue value);
+    public YodaVariableMapping setValue(YodaVariable variable, SibillaValue value) {
+        return new YodaVariableMapping(this.map.add(variable, value));
+    }
+
 
     /**
-     * This method add an element to the variable mapping
-     * by giving an input variable and a input value
+     * Returns the variable mapping obtained from this one by setting each variable to the value associated to it
+     * in the given map.
      *
-     * @param variable an input variable
-     * @param value an input value
+     * @param map the map containing all the assignment to perform.
+     * @return the variable mapping obtained from this one by setting each variable to the value associated to it
+     * in the given map.
      */
-    void addElement(YodaVariable variable, YodaValue value);
+    public YodaVariableMapping setAll(Map<YodaVariable, SibillaValue> map) {
+        SibillaMap<YodaVariable, SibillaValue> newMap = this.map.addAll(map);
+        if (this.map == newMap) return this;
+        return new YodaVariableMapping(this.map.addAll(map));
+    }
+
 
     /**
-     * This method returns a copy of the original map
+     * Returns true if the given variable is defined in this mapping.
      *
-     * @return a copy of the original map
+     * @param var the variable whose definition is tested
+     * @return true if the given variable is defined in this mapping.
      */
-    YodaVariableMapping copy();
+    public boolean isDefined(YodaVariable var) {
+        return this.map.containsKey(var);
+    }
 
     /**
-     * This method return the size of a map
+     * Returns the mapping obtained from this one by setting all the assignment contained in the given mapping.
      *
-     * @return the size of a map
+     * @param initialAssignment the assignment containing the mapping to assign.
+     * @return the mapping obtained from this one by setting all the assignment contained in the given mapping.
      */
-    int size();
+    public YodaVariableMapping setAll(YodaVariableMapping initialAssignment) {
+        return new YodaVariableMapping(this.map.apply(initialAssignment::getOrDefault));
+    }
 
+    /**
+     * Returns the value associated to the given variable. If the variable is not defined in this mapping, the
+     * given default value is returned.
+     *
+     * @param var the variable whose value is retrieved from this map
+     * @param value the value returned if the given variable is not defined in this map.
+     * @return the value associated to the given variable. If the variable is not defined in this mapping, the
+     * given default value is returned.
+     */
+    public SibillaValue getOrDefault(YodaVariable var, SibillaValue value) {
+        return this.map.get(var).orElse(value);
+    }
 }

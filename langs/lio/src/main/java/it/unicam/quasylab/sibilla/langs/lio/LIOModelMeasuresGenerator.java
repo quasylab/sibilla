@@ -25,23 +25,28 @@ package it.unicam.quasylab.sibilla.langs.lio;
 
 import it.unicam.quasylab.sibilla.core.models.lio.AgentsDefinition;
 import it.unicam.quasylab.sibilla.core.models.lio.LIOCollective;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOModel;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOState;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
+import java.util.stream.Collectors;
 
 /**
  * This class is used to generate the measures declared in a model.
  */
 public class LIOModelMeasuresGenerator extends LIOModelAgentDependentChecker {
 
-    private final Map<String, ToDoubleFunction<LIOCollective>> measures;
+    private final Map<String, ToDoubleFunction<? super LIOState>> measures;
 
     public LIOModelMeasuresGenerator(ErrorCollector errors, AgentsDefinition definition, Map<String, SibillaValue> constantsAndParameters) {
         super(errors, definition, constantsAndParameters);
-        this.measures = new HashMap<String, ToDoubleFunction<LIOCollective>>();
+        this.measures = new HashMap<>();
     }
 
 
@@ -57,7 +62,7 @@ public class LIOModelMeasuresGenerator extends LIOModelAgentDependentChecker {
      *
      * @return the map containing the measures defined in the model.
      */
-    public Map<String, ToDoubleFunction<LIOCollective>> getMeasures() {
-        return measures;
+    public Map<String, Measure<? super LIOState>> getMeasures() {
+        return measures.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> new SimpleMeasure<>(e.getKey(), e.getValue())));
     }
 }

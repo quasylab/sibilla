@@ -58,11 +58,6 @@ public class SibillaDouble implements SibillaValue {
         return (int) value;
     }
 
-    @Override
-    public SibillaType<?> getType() {
-        return SibillaType.DOUBLE_VALUE;
-    }
-
     /**
      * Returns the double obtained from the application of the given operator to this value and the other.
      * @param op the operator to apply.

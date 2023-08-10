@@ -31,13 +31,20 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.util.List;
 
 /**
- *
- * @param <RG>
- * @param <F>
- * @param <S>
- * @param <R>
+ * This functional interface represents the action behaviour.
  */
 @FunctionalInterface
-public interface BehaviouralStepFunction<RG, F, S, R> {
+public interface BehaviouralStepFunction {
+
+    /**
+     * Returns the weighted list of actions that are enable when a given agent is in the given state and
+     * it has the given observations.
+     *
+     * @param rg random generator used to evaluate random expressions
+     * @param state current agent state
+     * @param observations agent observations
+     * @return the weighted list of actions that are enable when a given agent is in the given state and
+     * it has the given observations.
+     */
     WeightedStructure<YodaAction> apply(RandomGenerator rg, YodaVariableMapping state, YodaVariableMapping observations);
 }

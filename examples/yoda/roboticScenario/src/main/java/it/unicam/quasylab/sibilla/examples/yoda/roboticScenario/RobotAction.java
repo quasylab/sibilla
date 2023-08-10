@@ -30,6 +30,8 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 public class RobotAction {
 
+    /*
+
     public static YodaAction GO_NORTH = YodaAction.actionOf("GoToNorth", RobotAction::goToNorth);
     public static YodaAction GO_SOUTH = YodaAction.actionOf("GoToSouth", RobotAction::goToSouth);
     public static YodaAction GO_EAST = YodaAction.actionOf("GoToEast", RobotAction::goToEast);
@@ -66,4 +68,6 @@ public class RobotAction {
         return currentState;
     }
 
+
+     */
 }

@@ -10,9 +10,15 @@ element : constantDeclaration
         | parameterDeclaration
         | typeDeclaration
         | agentDeclaration
+        | sceneElementDeclaration
         | systemDeclaration
         | groupDeclaration
+        | measureDeclaration
         | configurationDeclaration;
+
+measureDeclaration: 'measure' name=ID '=' measure=expr;
+
+predicateDeclaration: 'measure' name=ID '=' predicate=expr;
 
 groupDeclaration: 'group' name=ID '{' (agents += ID (',' agents += ID)* )? '}';
 
@@ -24,114 +30,107 @@ parameterDeclaration: 'param' name=ID '=' value=expr ';';
 
 typeDeclaration:
     'type' typeName=ID '{'
-        typeBody
-    '}';
+    (fields += recordFieldDeclaration (';' fields += recordFieldDeclaration)*)?
+'}';
 
-typeBody: (fields += fieldDeclaration (';' fields += fieldDeclaration)*)? ;
+recordFieldDeclaration: type name=ID;
+
 
 //AGENT GRAMMAR
 
 agentDeclaration:
-    'agent' agentName=ID '{'
-        'state' '{' knowledgeDeclaration informationDeclaration '}'
-        observationDeclaration
-        'actions' '{' actionBody ('|' actionBody)*'}'
-        'behaviour' '{'behaviourDeclaration'}'
-    '}';
+    'agent' agentName=ID  '='
+        'state' ':'
+            (agentStateAttributes += nameDeclaration ';')*
+        'features' ':'
+            (agentFeaturesAttributes += nameDeclaration ';')*
+        'observations' ':'
+            (agentObservationsAttributes += nameDeclaration ';')*
+        'actions' ':' actionBody*
+        'behaviour' ':' behaviourDeclaration
+    'end';
 
-knowledgeDeclaration: 'knowledge' '{' (fields += fieldDeclaration (';' fields += fieldDeclaration)*)? '}';
+sceneElementDeclaration:
+    'element' agentName=ID '='
+            (elementFeaturesAttributes += nameDeclaration ';')*
+    'end';
 
-informationDeclaration: 'information' '{' (fields += fieldDeclaration (';' fields += fieldDeclaration)*)? '}';
 
-observationDeclaration: 'observations' '{' (fields += fieldDeclaration (';' fields += fieldDeclaration)*)?  '}';
+nameDeclaration: type name=ID '=' value=expr;
 
-fieldDeclaration: type fieldName=ID ;
-
-actionBody: actionName=ID '{' (updates += fieldUpdate(';' updates += fieldUpdate)*)? '}'
+actionBody: actionName=ID '[' (updates += nameUpdate ';')* ']' /*
           | 'wait'    //the agent waits a turn
           | 'stop'    //the agent stops
-          | 'rtf'     //the agent return to the Force
+          | 'rtf'     //the agent return to the Force */
 ;
 
-fieldUpdate: fieldName=ID '<-' value=expr ;
+nameUpdate: fieldName=ID '<-' value=expr ;
 
-behaviourDeclaration: (ruleDeclaration '|' )* defaultRule;
+behaviourDeclaration: ('when' cases+=ruleCase ('orwhen' cases+=ruleCase)* 'otherwise')? ('[' defaultcase+=weightedAction* ']')?;
 
-ruleDeclaration: '[' boolExpr=expr ']' '->' '{' rules += weightedRule(';' rules += weightedRule)* '}';
+ruleCase: guard=expr '->' '[' actions+=weightedAction* ']';
 
-defaultRule: 'default' '{' rules += weightedRule(';' rules += weightedRule)*'}';
-
-weightedRule: actionName=ID ':' weight=expr ;
+weightedAction: actionName=ID ':' weight=expr ;
 
 //SYSTEM GRAMMAR
 
 systemDeclaration:
-    'system' name=ID '{'
-        'scene' '{' (sceneFields += fieldDeclaration (';' sceneFields += fieldDeclaration)*)?  '}'
-        'sensing' '{' (assignmentTemp)? (agentSensing)* '}'
-        'evolution' '{' (evolutionDeclaration)* '}'
-    '}'
+    'environment' ':'
+        ('sensing' ':' (agentSensing += agentAttributesUpdate)* )?
+        ('dynamic' ':' (agentDynamics += agentAttributesUpdate)* )?
+    'end'
 ;
 
-assignmentTemp: 'let' tempName=ID '{' (blocks += selectionBlock (';' blocks += selectionBlock)*)? '}';
-
-selectionBlock: 'select' name=ID 'in' groupName=ID 'that' expr;
-
-agentSensing: agentName=ID '{' (updates += fieldUpdate(';' updates += fieldUpdate)*)? '}';
-
-evolutionDeclaration: entityName=ID '{' (updates += fieldUpdate(';' updates += fieldUpdate)*)? '}';
+agentAttributesUpdate: agentName=ID '[' (updates += nameUpdate ';')* ']';
 
 //CONFIG GRAMMAR
 
-configurationDeclaration: 'configuration' name=ID '{'
-    (collectionDeclaration)?
-    systemName=ID ('[' (sceneField += fieldInit (',' sceneField += fieldInit)*)?  ']')? '{'(collectiveDeclaration)*'}'
-    '}';
+configurationDeclaration: 'configuration' name=ID ':'
+    (collectives += collectiveExpression)*
+'end';
 
-collectionDeclaration:
-    'let' collections+=collectionAssignment
-    ('and' collections+=collectionAssignment)*
-    'in'
-    ;
-
-collectionAssignment:  collectionName=ID '=' func;
-
-collectiveDeclaration: collectionName=ID '{' (fields += fieldInit (';' fields += fieldInit)*)? '}'       #collectiveTerminal
-                     | 'for' name=ID 'in' groupName=ID '{' collectiveDeclaration '}'                     #collectiveFor
-                     | ('if' exprBool=expr '{'collectiveDeclaration'}')+
-                       ('else''{'collectiveDeclaration'}')?                                              #collectiveIfElse
+collectiveExpression:
+        elementName=ID '[' (init += fieldAssignment ';')* ']'                # collectiveExpressionIndividual
+        | 'for' name=ID setOfValues 'do' (body += collectiveExpression)* 'endfor'            # collectiveExpressionFor
+        | 'if' guard=expr 'then' (thenCollective+=collectiveExpression)* ('else' (elseeCollective+=collectiveExpression)*)? 'endif' # collectiveExpressionIfElse
 ;
 
-fieldInit: fieldName=ID '=' value=expr;
+setOfValues:
+    'from' from=expr 'to' to=expr                                           # setOfValuesInterval
+    | 'in' '{' values += expr (',' values += expr) '}'                      # setOfValuesEnumeration
+    | 'sampled' (distinct='distinct')? size = expr 'time' 'from' generator=expr      # setOfValuesRandom
+;
 
 //UTIL
 
-expr    : INTEGER                                                     # expressionInteger
-        | REAL                                                        # expressionReal
-        | 'false'                                                     # expressionFalse
-        | 'true'                                                      # expressionTrue
-        | reference=ID                                                # expressionReference
-        | '(' expr ')'                                                # expressionBrackets
-      //  | gexpr                                                     # gexprCall
-        | oper=('+'|'-') arg=expr                                     # expressionUnary
-        | leftOp=expr oper=('+'|'-') rightOp=expr                     # expressionAddSubOperation
-        | leftOp=expr oper=('*'|'/') rightOp=expr                     # expressionMultDivOperation
-        | leftOp=expr oper=('%'|'//') rightOp=expr                    # expressionAdditionalOperation
-        | leftOp=expr '^' rightOp=expr                                # expressionExponentOperation
-        | '!' argument=expr                                           # expressionNegation
-        | 'sqrt' '(' argument=expr ')'                                # expressionSquareRoot
-        | leftOp=expr oper=('&'|'&&') rightOp=expr                    # expressionAnd
-        | leftOp=expr oper=('|'|'||') rightOp=expr                    # expressionOr
-        | leftOp=expr oper=('<'|'<='|'=='|'!='|'>='|'>') rightOp=expr # expressionRelation
-        | guardExpr=expr '?' thenBranch=expr ':' elseBranch=expr      # expressionIfThenElse
-        | '[' fieldAssignment (',' fieldAssignment)* ']'              # expressionRecord
-        | 'U''['min=expr',' max=expr']'                               # expressionWeightedRandom
-        | 'rnd'                                                       # expressionRandom
-        | parent=ID '.' son=ID                                        # expressionAttributeRef
-        | 'forall' '{' groupExpression '}'                            # expressionForAll
-        | 'exists' '{' groupExpression '}'                            # expressionExists
-        | 'min'    '{' groupExpression '}'                            # expressionMinimum
-        | 'max'    '{' groupExpression '}'                            # expressionMaximum
+expr    : INTEGER                                                          # expressionInteger
+        | REAL                                                             # expressionReal
+        | 'false'                                                          # expressionFalse
+        | 'true'                                                           # expressionTrue
+        | reference=ID                                                     # expressionReference
+        | '(' expr ')'                                                     # expressionBrackets
+      //  | gexpr                                                          # gexprCall
+        | oper=('+'|'-') arg=expr                                          # expressionUnary
+        | leftOp=expr oper=('+'|'-') rightOp=expr                          # expressionAddSubOperation
+        | leftOp=expr oper=('*'|'/') rightOp=expr                          # expressionMultDivOperation
+        | leftOp=expr oper=('%'|'//') rightOp=expr                         # expressionAdditionalOperation
+        | leftOp=expr '^' rightOp=expr                                     # expressionPowOperation
+        | '!' argument=expr                                                # expressionNegation
+        | 'sqrt' '(' argument=expr ')'                                     # expressionSquareRoot
+        | leftOp=expr oper=('&'|'&&') rightOp=expr                         # expressionAnd
+        | leftOp=expr oper=('|'|'||') rightOp=expr                         # expressionOr
+        | leftOp=expr '->' rightOp=expr                                    # expressionImplication
+        | leftOp=expr oper=('<'|'<='|'=='|'!='|'>='|'>') rightOp=expr      # expressionRelation
+        | guardExpr=expr '?' thenBranch=expr ':' elseBranch=expr           # expressionIfThenElse
+        | '[' fieldAssignment (',' fieldAssignment)* ']'                   # expressionRecord
+        | 'U''['min=expr',' max=expr']'                                    # expressionWeightedRandom
+        | 'rnd'                                                            # expressionRandom
+        | 'all' (groupName=ID)? ':' expr                            # expressionForAll
+        | 'any' (groupName=ID)? ':' expr                               # expressionExists
+        | 'min' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr      # expressionMinimum
+        | 'max' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr      # expressionMaximum
+        | 'mean' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr     # expressionMean
+        |  record=expr '.' fieldName =ID                                                # expressionRecordAccess
         | 'it.' ref=ID                                                # expressionItselfRef
         | 'sin' '(' argument=expr ')'                                 # expressionSin
         | 'sinh' '(' argument=expr ')'                                # expressionSinh
@@ -146,23 +145,18 @@ expr    : INTEGER                                                     # expressi
         | 'floor' '(' argument=expr ')'                               # expressionFloor
 ;
 
-groupExpression: value=expr 'for' name=ID ':' groupName=ID ('when' guard=expr);
 
 fieldAssignment: name=ID '=' value=expr;
 
 type    : 'int'                                                     # typeInteger
         | 'real'                                                    # typeReal
         | 'bool'                                                    # typeBoolean
-        | 'char'                                                    # typeCharacter
-        | 'String'                                                  # typeString
-        | 'array[' type (',' type)* ']'                             # typeArrayMultipleTypes
-        | typeDeclaration                                           # typeNew
+/*        | 'char'                                                    # typeCharacter
+        | 'string'                                                  # typeString
+        | 'array[' type (',' type)* ']'                             # typeArrayMultipleTypes */
+        | name=ID                                                   # typeCustom
 ;
 
-func    : 'generate' '(' size=expr ',' randomExpression=expr ')'                 # functionGenerate
-        | 'distinct' '(' size=expr ',' randomExpression=expr ')'                 # functionDistinct
-        | 'distinctFrom''(' size=expr ',' randomExpression=expr ',' other=ID ')' # functionDistinctFrom
-        ;
 
 fragment DIGIT  :   [0-9];
 fragment LETTER :   [a-zA-Z_];

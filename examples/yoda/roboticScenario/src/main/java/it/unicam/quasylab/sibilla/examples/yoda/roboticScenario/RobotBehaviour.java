@@ -34,7 +34,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class RobotBehaviour {
+public class RobotBehaviour { /*
 
     public static List<YodaAction> actionList;
     static {
@@ -114,4 +114,5 @@ public class RobotBehaviour {
 
         return possibleActions;
     }
+    */
 }

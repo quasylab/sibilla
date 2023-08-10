@@ -29,30 +29,37 @@ import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class YodaModelDefinition extends AbstractModelDefinition<YodaSystemState> {
 
-    //private final Function<EvaluationEnvironment, ParametricDataSet<Function<RandomGenerator, YodaSystemState>>> statesBuilder;
-    //private final BiFunction<EvaluationEnvironment, , Map<String, Measure<? super YodaSystemState>>> measuresBuilder;
 
-    private ParametricDataSet<Function<RandomGenerator, YodaSystemState>> states;
-    private Map<String, Measure<? super YodaSystemState>> measures;
+    private final Function<EvaluationEnvironment, Map<String, Measure<YodaSystemState>>> measuresGenerationFunction;
+
+    private final Function<EvaluationEnvironment, Map<String, Predicate<YodaSystemState>>> preducatesGenerationFunction;
+
+    private final Function<EvaluationEnvironment, ParametricDataSet<Function<RandomGenerator, YodaSystemState>>> statesGenerationFunction;
+
     private YodaModel model;
+    private ParametricDataSet<Function<RandomGenerator, YodaSystemState>> states;
+    private Map<String, Measure<YodaSystemState>> measures;
+    private Map<String, Predicate<YodaSystemState>> predicates;
 
     public YodaModelDefinition(
-            EvaluationEnvironment environment){
+            EvaluationEnvironment environment, Function<EvaluationEnvironment, Map<String, Measure<YodaSystemState>>> measuresGenerationFunction, Function<EvaluationEnvironment, Map<String, Predicate<YodaSystemState>>> preducatesGenerationFunction, Function<EvaluationEnvironment, ParametricDataSet<Function<RandomGenerator, YodaSystemState>>> statesGenerationFunction){
         super(environment);
+        this.measuresGenerationFunction = measuresGenerationFunction;
+        this.preducatesGenerationFunction = preducatesGenerationFunction;
+        this.statesGenerationFunction = statesGenerationFunction;
     }
 
-    //TODO
     @Override
     protected void clearCache(){
         this.states = null;
         this.measures = null;
+        this.predicates = null;
         this.model = null;
     }
 
@@ -60,18 +67,32 @@ public class YodaModelDefinition extends AbstractModelDefinition<YodaSystemState
     @Override
     public ParametricDataSet<Function<RandomGenerator, YodaSystemState>> getStates() {
         if (states == null){
-            //states = statesBuilder.apply(getEnvironment());
+            this.states = statesGenerationFunction.apply(getEnvironment());
         }
         return states;
     }
 
 
-    //TODO
     @Override
     public YodaModel createModel() {
         if (model == null){
+            this.model = new YodaModel(getMeasures(), getPredicates());
         }
         return model;
+    }
+
+    private Map<String, Predicate<YodaSystemState>> getPredicates() {
+        if (this.predicates == null) {
+            this.predicates = preducatesGenerationFunction.apply(getEnvironment());
+        }
+        return this.predicates;
+    }
+
+    private Map<String, Measure<YodaSystemState>> getMeasures() {
+        if (this.measures == null) {
+            this.measures = measuresGenerationFunction.apply(getEnvironment());
+        }
+        return this.measures;
     }
 
 }

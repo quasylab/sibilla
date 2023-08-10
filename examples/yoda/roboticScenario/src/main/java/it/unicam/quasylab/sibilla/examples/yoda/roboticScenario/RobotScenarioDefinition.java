@@ -28,7 +28,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.List;
 
-public class RobotScenarioDefinition implements YodaModelBuilder<Grid> {
+public class RobotScenarioDefinition {
 
     protected final String label;
     protected final int width;
@@ -40,7 +40,7 @@ public class RobotScenarioDefinition implements YodaModelBuilder<Grid> {
 
     public Grid grid;
 
-    public YodaSystemState<Grid> yodaSysState;
+    public YodaSystemState yodaSysState;
 
     public RobotScenarioDefinition(String label, int width, int height, int numberOfObstacles, List<YodaAgent> agents, RandomGenerator rg) {
         this.label = label;
@@ -52,6 +52,7 @@ public class RobotScenarioDefinition implements YodaModelBuilder<Grid> {
         //this.numberOfAgents = numberOfAgents;
     }
 
+    /*
     @Override
     public Grid getScene() {
         if (grid == null){
@@ -119,4 +120,6 @@ public class RobotScenarioDefinition implements YodaModelBuilder<Grid> {
     public GlobalStateUpdateFunction getGlobalStateUpdateFunction() {
         return null;
     }
+
+     */
 }

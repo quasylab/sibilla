@@ -21,13 +21,15 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.langs.yoda;
+package it.unicam.quasylab.sibilla.core.models.yoda;
 
-/**
- * This enum class is used to define all the possible contexts where an expression can occur
- */
-public enum ExpressionContext {
-    CONSTANT, PARAMETER, NONE
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+import org.apache.commons.math3.random.RandomGenerator;
 
-    //TODO
+public interface YodaAgentEnvironmentalAttributeEvaluationFunction {
+
+    SibillaValue apply(RandomGenerator rg, YodaVariableMapping agentState, YodaVariableMapping currentEnvironmentalAttributes);
+
+
+
 }

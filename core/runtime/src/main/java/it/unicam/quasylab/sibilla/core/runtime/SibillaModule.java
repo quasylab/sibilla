@@ -38,7 +38,7 @@ import java.util.Map;
  */
 public interface SibillaModule {
 
-    List<SibillaModule> MODULES = List.of(new PopulationModelModule());
+    List<SibillaModule> MODULES = List.of(new PopulationModelModule(), new LIOModelModule(), new YodaModelModule());
 
     /**
      * Return the module name.
@@ -53,6 +53,7 @@ public interface SibillaModule {
      * @param file specification file.
      */
     void load(File file) throws CommandExecutionException;
+
 
     /**
      * Load a specification from a string.

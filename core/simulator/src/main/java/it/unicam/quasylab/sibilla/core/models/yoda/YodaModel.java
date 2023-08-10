@@ -29,24 +29,23 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
-public class YodaModel<S extends YodaScene> implements InteractiveModel<YodaSystemState<S>>, DiscreteTimeModel<YodaSystemState<S>> {
-    private final YodaSystemState<S> systemState;
+public class YodaModel implements DiscreteTimeModel<YodaSystemState> {
 
-    public YodaModel(YodaSystemState<S> systemState) {
-        this.systemState = systemState;
+    private final Map<String, Measure<YodaSystemState>> measureMap;
+
+    private final Map<String, Predicate<YodaSystemState>> predicateMap;
+
+    public YodaModel(Map<String, Measure<YodaSystemState>> measureMap, Map<String, Predicate<YodaSystemState>> predicateMap) {
+        this.measureMap = measureMap;
+        this.predicateMap = predicateMap;
     }
 
 
     @Override
-    public List<Action<YodaSystemState<S>>> actions(RandomGenerator r, double time, YodaSystemState<S> state) {
-        return null;
-    }
-
-    @Override
-    public YodaSystemState<S> sampleNextState(RandomGenerator r, double time, YodaSystemState<S> state) {
+    public YodaSystemState sampleNextState(RandomGenerator r, double time, YodaSystemState state) {
         return state.next(r);
     }
 
@@ -57,41 +56,46 @@ public class YodaModel<S extends YodaScene> implements InteractiveModel<YodaSyst
     }
 
     @Override
-    public byte[] byteOf(YodaSystemState<S> state) throws IOException {
+    public byte[] byteOf(YodaSystemState state) throws IOException {
         return new byte[0];
     }
 
     @Override
-    public YodaSystemState<S> fromByte(byte[] bytes) throws IOException {
+    public YodaSystemState fromByte(byte[] bytes) throws IOException {
         return null;
     }
 
     @Override
     public String[] measures() {
-        return new String[0];
+        return measureMap.keySet().toArray(new String[0]);
     }
 
     @Override
-    public double measure(String m, YodaSystemState<S> state) {
-        return 0;
+    public double measure(String m, YodaSystemState state) {
+        Measure<YodaSystemState> measure = measureMap.get(m);
+        if (m == null) {
+            return Double.NaN;
+        } else {
+            return measure.measure(state);
+        }
     }
 
     @Override
-    public Measure getMeasure(String m) {
-        return null;
+    public Measure<YodaSystemState> getMeasure(String m) {
+        return measureMap.get(m);
     }
 
     @Override
-    public Predicate getPredicate(String name) {
-        return null;
+    public Predicate<YodaSystemState> getPredicate(String name) {
+        return predicateMap.get(name);
     }
 
     @Override
     public String[] predicates() {
-        return new String[0];
+        return predicateMap.keySet().toArray(new String[0]);
     }
 
-    public DiscreteTimeSimulationStepFunction<YodaSystemState<S>> getDiscreteTimeStepFunction() {
+    public DiscreteTimeSimulationStepFunction<YodaSystemState> getDiscreteTimeStepFunction() {
         return (rg,state) -> state.next(rg);
     }
 }

@@ -41,7 +41,7 @@ public class LIOModelModule extends AbstractSibillaModule {
         FLUID;
     }
 
-    private LIOModes mode = LIOModes.INDIVIDUALS;
+    private LIOModes mode = LIOModes.MASS;
 
 
     public final static String MODULE_NAME = "lio";
@@ -69,7 +69,7 @@ public class LIOModelModule extends AbstractSibillaModule {
         }
     }
 
-    private void setModelGenerator(LIOModelGenerator modelGenerator) {
+    private void setModelGenerator(LIOModelGenerator modelGenerator) throws LIOModelParseError {
         this.modelGenerator = modelGenerator;
         generateDefinition();
     }
@@ -95,11 +95,8 @@ public class LIOModelModule extends AbstractSibillaModule {
         return this.mode.name();
     }
 
-    private void generateDefinition() {
-        switch (mode) {
-            case MASS: setModelDefinition(modelGenerator.getMassModelDefinition());
-            case INDIVIDUALS: setModelDefinition(modelGenerator.getIndividualModelDefinition());
-        }
+    private void generateDefinition() throws LIOModelParseError {
+        setModelDefinition(modelGenerator.getDefinition());
     }
 
 

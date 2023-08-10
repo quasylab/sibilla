@@ -23,760 +23,349 @@
 
 package it.unicam.quasylab.sibilla.langs.yoda;
 
+import it.unicam.quasylab.sibilla.core.models.yoda.YodaElementNameRegistry;
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaType;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 
 /**
  * This visitor class is used to validate the model
  */
-public class YodaModelValidator extends YodaModelBaseVisitor<Boolean> {
+public class YodaModelValidator {
 
 
-    private final SymbolTable table;
+    private final YodaElementAttributeTable elementAttributeTable;
+
+    private final Map<String, ParserRuleContext> declarations;
+
+    private final Map<String, YodaType.RecordType> declaredFields;
+
+    private final Map<String, YodaType> constantsAndParameters;
+
     private final ErrorCollector errors;
+    private final Map<String, YodaType> yodaTypes;
+    private final Map<String, Set<String>> agentsActions;
+    private final Map<String, YodaType> sceneAttributes;
 
-    private ExpressionContext expressionContext = ExpressionContext.NONE;
-    private String entityContext;
-
-    private Map<String, YodaType> constantsAndParametersTypes = new HashMap<>();
 
     public YodaModelValidator(ErrorCollector errors) {
         this.errors = errors;
-        this.table = new SymbolTable();
+        elementAttributeTable = new YodaElementAttributeTable();
+        constantsAndParameters = new HashMap<>();
+        declaredFields = new HashMap<>();
+        declarations = new HashMap<>();
+        yodaTypes = YodaType.getMapOfYodaType();
+        agentsActions = new HashMap<>();
+        sceneAttributes = new HashMap<>();
     }
 
-    public SymbolTable getTable() {
-        return table;
+    public boolean validate(ParseTree parseTree) {
+        return parseTree.accept(new CustomTypeCollector())
+                & parseTree.accept(new AgentAttributesCollector())
+                & parseTree.accept(new ModelElementValidator());
     }
 
-    public boolean hasType(YodaType expectedType, YodaModelParser.ExprContext expr, Function<String, YodaType>  typeSolver) {
-        YodaType actual = expr.accept(new TypeInferenceVisitor(errors, typeSolver));
-        if (!actual.equals(YodaType.NONE_TYPE) && !actual.equals(expectedType)) {
-            errors.record(ParseUtil.wrongTypeError(expectedType, actual, expr));
-            return false;
-        } else {
-            return true;
-        }
+    public YodaElementNameRegistry getElementNameRegistry() {
+        return this.elementAttributeTable.getRegistry();
     }
 
-    @Override
-    public Boolean visitModel(YodaModelParser.ModelContext ctx) {
-        boolean res = true;
-        for(YodaModelParser.ElementContext e : ctx.element()) {
-            res &= e.accept(this);
-        }
-        return res && !errors.withErrors();
-    }
-
-    /*
-    //TODO
-    @Override
-    public Boolean visitElement(YodaModelParser.ElementContext ctx) {
-        return super.visitElement(ctx);
-    }
-
-     */
-
-    @Override
-    public Boolean visitConstantDeclaration(YodaModelParser.ConstantDeclarationContext ctx) {
-        String name = ctx.name.getText();
-        if (table.existsDeclaration(name)) {
-            errors.record(ParseUtil.duplicatedIdentifierError(name, table.getDeclarationToken(name)));
-            return false;
-        }
-        this.expressionContext = ExpressionContext.CONSTANT;
-        TypeInferenceVisitor tiv = new TypeInferenceVisitor(this.errors, s -> this.constantsAndParametersTypes.getOrDefault(s, YodaType.NONE_TYPE));
-        YodaType constType = ctx.value.accept(tiv);
-        if (!constType.equals(YodaType.NONE_TYPE)) {
-            table.addConstants(ctx, constType);
-            this.constantsAndParametersTypes.put(name, constType);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public Boolean visitParameterDeclaration(YodaModelParser.ParameterDeclarationContext ctx) {
-        String name = ctx.name.getText();
-        if (table.existsDeclaration(name)) {
-            errors.record(ParseUtil.duplicatedIdentifierError(name, table.getDeclarationToken(name)));
-            return false;
-        }
-        this.expressionContext = ExpressionContext.CONSTANT;
-        TypeInferenceVisitor tiv = new TypeInferenceVisitor(this.errors, s -> this.constantsAndParametersTypes.getOrDefault(s, YodaType.NONE_TYPE));
-        YodaType constType = ctx.value.accept(tiv);
-        if (!constType.equals(YodaType.NONE_TYPE)) {
-            table.addParameter(ctx, constType);
-            this.constantsAndParametersTypes.put(ctx.name.getText(), constType);
-            return true;
-        }
-        return false;
-    }
-
-    //TODO
-    @Override
-    public Boolean visitTypeDeclaration(YodaModelParser.TypeDeclarationContext ctx) {
-        return super.visitTypeDeclaration(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitAgentDeclaration(YodaModelParser.AgentDeclarationContext ctx) {
-        try {
-            String agentName = ctx.agentName.getText();
-            boolean res = true;
-            this.entityContext = agentName;
-            if (table.existsAgent(agentName)) {
-                this.errors.record(ParseUtil.duplicatedEntityError(agentName, table.getDeclarationToken(agentName)));
-                res = false;
-            } else {
-                table.addAgent(ctx);
-                res &= recordAgentKnowledge(ctx);
-                res &= recordAgentInformation(ctx);
-                res &= recordAgentObservation(ctx);
-                res &= recordAgentAction(ctx);
-            }
-            return res;
-        } finally {
-            this.entityContext = null;
-        }
-    }
-
-    private boolean recordAgentKnowledge(YodaModelParser.AgentDeclarationContext ctx) {
-        boolean res = true;
-        String agentName = ctx.agentName.getText();
-        for (YodaModelParser.FieldDeclarationContext field : ctx.knowledgeDeclaration().fields) {
-            res &= recordAgentKnowledge(agentName, field);
-        }
-        return res;
-    }
-
-    //TODO
-    private boolean recordAgentKnowledge(String agentName, YodaModelParser.FieldDeclarationContext field) {
-        String fieldName = field.fieldName.getText();
-        String localVarName = ParseUtil.localVariableName(agentName, fieldName);
-        if (table.existsDeclaration(localVarName)) {
-            this.errors.record(ParseUtil.duplicatedEntityError(localVarName, table.getDeclarationToken(agentName)));
-            return false;
-        }
-        if (table.existsAgentKnowledge(agentName, fieldName) || table.existsAgentInformation(agentName, fieldName) || table.existsAgentObservation(agentName, fieldName)){
-            this.errors.record(ParseUtil.duplicatedFieldError(fieldName, field.fieldName));
-            return false;
-        }
-        //registrare il tipo della variabile
-        YodaType fieldType = YodaType.NONE_TYPE;
-        if (YodaType.NONE_TYPE.equals(fieldType)) {
-            return false;
-        } else {
-            table.recordAgentKnowledge(agentName, field.fieldName, fieldName, fieldType);
-            return true;
-        }
-
-    }
-
-
-    private boolean recordAgentInformation(YodaModelParser.AgentDeclarationContext ctx) {
-        boolean res = true;
-        String agentName = ctx.agentName.getText();
-        for (YodaModelParser.FieldDeclarationContext field : ctx.informationDeclaration().fields) {
-            res &= recordAgentInformation(agentName,field);
-        }
-        return res;
-    }
-
-    //TODO
-    private boolean recordAgentInformation(String agentName, YodaModelParser.FieldDeclarationContext field) {
-        String fieldName = field.fieldName.getText();
-        String localVarName = ParseUtil.localVariableName(agentName, fieldName);
-        if (table.existsDeclaration(localVarName)) {
-            this.errors.record(ParseUtil.duplicatedIdentifierError(localVarName, table.getDeclarationToken(agentName)));
-            return false;
-        }
-        if (table.existsAgentKnowledge(agentName, fieldName) || table.existsAgentInformation(agentName, fieldName) || table.existsAgentObservation(agentName, fieldName)){
-            this.errors.record(ParseUtil.duplicatedFieldError(fieldName, field.fieldName));
-            return false;
-        }
-        //registrare il tipo della variabile
-        YodaType fieldType = YodaType.NONE_TYPE;
-        if (YodaType.NONE_TYPE.equals(fieldType)) {
-            return false;
-        } else {
-            table.recordAgentInformation( agentName, field.fieldName, fieldName, fieldType);
-            return true;
-        }
-    }
-
-
-    private boolean recordAgentObservation(YodaModelParser.AgentDeclarationContext ctx) {
-        boolean res = true;
-        String agentName = ctx.agentName.getText();
-        for (YodaModelParser.FieldDeclarationContext field : ctx.observationDeclaration().fields) {
-            res &= recordAgentObservation(agentName,field);
-        }
-        return res;
-    }
-
-    //TODO
-    private boolean recordAgentObservation(String agentName, YodaModelParser.FieldDeclarationContext field) {
-        String fieldName = field.fieldName.getText();
-        String localVarName = ParseUtil.localVariableName(agentName, fieldName);
-        if (table.existsDeclaration(localVarName)) {
-            this.errors.record(ParseUtil.duplicatedIdentifierError(localVarName, table.getDeclarationToken(agentName)));
-            return false;
-        }
-        if (table.existsAgentKnowledge(agentName, fieldName) || table.existsAgentInformation(agentName, fieldName) || table.existsAgentObservation(agentName, fieldName)){
-            this.errors.record(ParseUtil.duplicatedFieldError(fieldName, field.fieldName));
-            return false;
-        }
-        //registrare il tipo della variabile
-        YodaType fieldType = YodaType.NONE_TYPE;
-        if(YodaType.NONE_TYPE.equals(fieldType)){
-            return false;
-        } else {
-            table.recordAgentObservation(agentName, field.fieldName, fieldName, fieldType);
-            return true;
-        }
-    }
-
-    private boolean recordAgentAction(YodaModelParser.AgentDeclarationContext ctx) {
-        boolean res = true;
-        String agentName = ctx.agentName.getText();
-        for (YodaModelParser.ActionBodyContext actionBody : ctx.actionBody()){
-            res &= recordAgentAction(agentName, actionBody);
-        }
-        return res;
-    }
-
-    //TODO
-    private boolean recordAgentAction(String agentName, YodaModelParser.ActionBodyContext actionBody) {
-        boolean res = true;
-        String actionName = actionBody.actionName.getText();
-        String localActionName = ParseUtil.localVariableName(agentName, actionName);
-        if (table.existsDeclaration(localActionName)) {
-            this.errors.record(ParseUtil.duplicatedIdentifierError(actionName, table.getDeclarationToken(agentName)));
-            return false;
-        }
-        if (table.existsAgentAction(agentName, actionName)) {
-            this.errors.record(ParseUtil.duplicatedActionName(actionName, actionBody.actionName));
-            return false;
-        }
-        for (YodaModelParser.FieldUpdateContext f : actionBody.fieldUpdate()){
-            res &= checkFieldUpdate(agentName, f);
-        }
-        table.recordAgentAction(agentName, actionBody.actionName, actionBody);
-        return res;
-    }
-
-    //TODO
-    private boolean checkFieldUpdate(String agentName, YodaModelParser.FieldUpdateContext fieldUpdate) {
-        return false;
-    }
-
-
-
-    /*
-    @Override
-    public Boolean visitKnowledgeDeclaration(YodaModelParser.KnowledgeDeclarationContext ctx) {
-        boolean res = true;
-        for (YodaModelParser.NewFieldContext newField : ctx.newField()) {
-            res &= newField.accept(this);
-        }
-        return res;
-    }
-
-
-
-    @Override
-    public Boolean visitInformationDeclaration(YodaModelParser.InformationDeclarationContext ctx) {
-        boolean res = true;
-        for (YodaModelParser.NewFieldContext newField : ctx.newField()) {
-            res &= newField.accept(this);
-        }
-        return res;
-    }
-
-    @Override
-    public Boolean visitObservationDeclaration(YodaModelParser.ObservationDeclarationContext ctx) {
-        boolean res = true;
-        for (YodaModelParser.NewFieldContext newField : ctx.newField()) {
-            res &= newField.accept(this);
-        }
-        return res;
-    }
-
-     */
-
-    //TODO
-    @Override
-    public Boolean visitFieldDeclaration(YodaModelParser.FieldDeclarationContext ctx) {
-        return super.visitFieldDeclaration(ctx);
-    }
-
-
-    //TODO
-    @Override
-    public Boolean visitActionBody(YodaModelParser.ActionBodyContext ctx) {
-        return super.visitActionBody(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitFieldUpdate(YodaModelParser.FieldUpdateContext ctx) {
-        return super.visitFieldUpdate(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitBehaviourDeclaration(YodaModelParser.BehaviourDeclarationContext ctx) {
-        boolean res = true;
-        for (YodaModelParser.RuleDeclarationContext ruleDeclaration : ctx.ruleDeclaration()){
-            res &= ruleDeclaration.accept(this);
-        }
-        res &= ctx.defaultRule().accept(this);
-        return res;
-    }
-
-    @Override
-    public Boolean visitRuleDeclaration(YodaModelParser.RuleDeclarationContext ctx) {
-        boolean res = true;
-        res &= hasType(YodaType.BOOLEAN_TYPE, ctx.boolExpr, table.getAgentTypeSolver(entityContext));
-        for (YodaModelParser.WeightedRuleContext w : ctx.weightedRule()) {
-            res &= w.accept(this);
-        }
-        return res;
-    }
-
-    @Override
-    public Boolean visitDefaultRule(YodaModelParser.DefaultRuleContext ctx) {
-        boolean res = true;
-        for (YodaModelParser.WeightedRuleContext rule : ctx.weightedRule()) {
-            res &= rule.accept(this);
-        }
-        return res;
-    }
-
-    //TODO
-    @Override
-    public Boolean visitWeightedRule(YodaModelParser.WeightedRuleContext ctx) {
-        return null;
-    }
-
-    //TODO
-    @Override
-    public Boolean visitSystemDeclaration(YodaModelParser.SystemDeclarationContext ctx) {
-        return super.visitSystemDeclaration(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitAssignmentTemp(YodaModelParser.AssignmentTempContext ctx) {
-        return super.visitAssignmentTemp(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitSelectionBlock(YodaModelParser.SelectionBlockContext ctx) {
-        return super.visitSelectionBlock(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitAgentSensing(YodaModelParser.AgentSensingContext ctx) {
-        return super.visitAgentSensing(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitEvolutionDeclaration(YodaModelParser.EvolutionDeclarationContext ctx) {
-        return super.visitEvolutionDeclaration(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitConfigurationDeclaration(YodaModelParser.ConfigurationDeclarationContext ctx) {
-        boolean res = true;
-        return res;
-    }
-
-    //TODO
-    @Override
-    public Boolean visitCollectionDeclaration(YodaModelParser.CollectionDeclarationContext ctx) {
-        return super.visitCollectionDeclaration(ctx);
-    }
-
-
-
-    //TODO
-    @Override
-    public Boolean visitFieldInit(YodaModelParser.FieldInitContext ctx) {
-        return super.visitFieldInit(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionNegation(YodaModelParser.ExpressionNegationContext ctx) {
-        return super.visitExpressionNegation(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionBrackets(YodaModelParser.ExpressionBracketsContext ctx) {
-        return ctx.expr().accept(this);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionMinimum(YodaModelParser.ExpressionMinimumContext ctx) {
-        return super.visitExpressionMinimum(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionMaximum(YodaModelParser.ExpressionMaximumContext ctx) {
-        return super.visitExpressionMaximum(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionRelation(YodaModelParser.ExpressionRelationContext ctx) {
-        return super.visitExpressionRelation(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionReference(YodaModelParser.ExpressionReferenceContext ctx) {
-        return super.visitExpressionReference(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionSquareRoot(YodaModelParser.ExpressionSquareRootContext ctx) {
-        return super.visitExpressionSquareRoot(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionAnd(YodaModelParser.ExpressionAndContext ctx) {
-        return super.visitExpressionAnd(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionForAll(YodaModelParser.ExpressionForAllContext ctx) {
-        return super.visitExpressionForAll(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionExists(YodaModelParser.ExpressionExistsContext ctx) {
-        return super.visitExpressionExists(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionAddSubOperation(YodaModelParser.ExpressionAddSubOperationContext ctx) {
-        return super.visitExpressionAddSubOperation(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionInteger(YodaModelParser.ExpressionIntegerContext ctx) {
-        return super.visitExpressionInteger(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionUnary(YodaModelParser.ExpressionUnaryContext ctx) {
-        return super.visitExpressionUnary(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionItselfRef(YodaModelParser.ExpressionItselfRefContext ctx) {
-        return super.visitExpressionItselfRef(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionWeightedRandom(YodaModelParser.ExpressionWeightedRandomContext ctx) {
-        return super.visitExpressionWeightedRandom(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionFalse(YodaModelParser.ExpressionFalseContext ctx) {
-        return true;
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionMultDivOperation(YodaModelParser.ExpressionMultDivOperationContext ctx) {
-        return super.visitExpressionMultDivOperation(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionOr(YodaModelParser.ExpressionOrContext ctx) {
-        return super.visitExpressionOr(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionExponentOperation(YodaModelParser.ExpressionExponentOperationContext ctx) {
-        return super.visitExpressionExponentOperation(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionReal(YodaModelParser.ExpressionRealContext ctx) {
-        return super.visitExpressionReal(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionAdditionalOperation(YodaModelParser.ExpressionAdditionalOperationContext ctx) {
-        return super.visitExpressionAdditionalOperation(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionTrue(YodaModelParser.ExpressionTrueContext ctx) {
-        return true;
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionIfThenElse(YodaModelParser.ExpressionIfThenElseContext ctx) {
-        return super.visitExpressionIfThenElse(ctx);
-    }
-
-    @Override
-    public Boolean visitExpressionRandom(YodaModelParser.ExpressionRandomContext ctx) {
-        return true;
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionAttributeRef(YodaModelParser.ExpressionAttributeRefContext ctx) {
-        return super.visitExpressionAttributeRef(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionCeiling(YodaModelParser.ExpressionCeilingContext ctx) {
-        return super.visitExpressionCeiling(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionCos(YodaModelParser.ExpressionCosContext ctx) {
-        return super.visitExpressionCos(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionAtan(YodaModelParser.ExpressionAtanContext ctx) {
-        return super.visitExpressionAtan(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionFloor(YodaModelParser.ExpressionFloorContext ctx) {
-        return super.visitExpressionFloor(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionAsin(YodaModelParser.ExpressionAsinContext ctx) {
-        return super.visitExpressionAsin(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionCosh(YodaModelParser.ExpressionCoshContext ctx) {
-        return super.visitExpressionCosh(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionTan(YodaModelParser.ExpressionTanContext ctx) {
-        return super.visitExpressionTan(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionAcos(YodaModelParser.ExpressionAcosContext ctx) {
-        return super.visitExpressionAcos(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionSin(YodaModelParser.ExpressionSinContext ctx) {
-        return super.visitExpressionSin(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionRecord(YodaModelParser.ExpressionRecordContext ctx) {
-        return super.visitExpressionRecord(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionSinh(YodaModelParser.ExpressionSinhContext ctx) {
-        return super.visitExpressionSinh(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitExpressionTanh(YodaModelParser.ExpressionTanhContext ctx) {
-        return super.visitExpressionTanh(ctx);
-    }
-
-    @Override
-    public Boolean visitTypeInteger(YodaModelParser.TypeIntegerContext ctx) {
-        return true;
-    }
-
-    @Override
-    public Boolean visitTypeReal(YodaModelParser.TypeRealContext ctx) {
-        return true;
-    }
-
-    @Override
-    public Boolean visitTypeBoolean(YodaModelParser.TypeBooleanContext ctx) {
-        return true;
-    }
-
-    @Override
-    public Boolean visitTypeCharacter(YodaModelParser.TypeCharacterContext ctx) {
-        return true;
-    }
-
-    @Override
-    public Boolean visitTypeString(YodaModelParser.TypeStringContext ctx) {
-        return true;
-    }
-
-    //TODO
-    @Override
-    public Boolean visitTypeArrayMultipleTypes(YodaModelParser.TypeArrayMultipleTypesContext ctx) {
-        return super.visitTypeArrayMultipleTypes(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitTypeNew(YodaModelParser.TypeNewContext ctx) {
-        return super.visitTypeNew(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitFunctionGenerate(YodaModelParser.FunctionGenerateContext ctx) {
-        return super.visitFunctionGenerate(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitFunctionDistinct(YodaModelParser.FunctionDistinctContext ctx) {
-        return super.visitFunctionDistinct(ctx);
-    }
-
-    //TODO
-    @Override
-    public Boolean visitFunctionDistinctFrom(YodaModelParser.FunctionDistinctFromContext ctx) {
-        return super.visitFunctionDistinctFrom(ctx);
-    }
-
-
-    /*
-    public class SymbolCollector extends YodaModelBaseVisitor<Boolean> {
+    private class CustomTypeCollector extends YodaModelBaseVisitor<Boolean> {
 
         @Override
         public Boolean visitModel(YodaModelParser.ModelContext ctx) {
-            boolean flag = true;
-            for (YodaModelParser.ElementContext e : ctx.element()) {
-                flag &= e.accept(this);
-            }
-            return flag;
-        }
-
-        @Override
-        public Boolean visitConstantDeclaration(YodaModelParser.ConstantDeclarationContext ctx) {
-            if (table.existsDeclaration(ctx.name.getText())) {
-                String name = ctx.name.getText();
-                errors.record(ParseUtil.duplicatedIdentifierError(name, ctx.name, table.getDeclarationToken(name)));
-                return false;
-            } else {
-                table.addConstants(ctx);
-                return true;
-            }
-        }
-
-        @Override
-        public Boolean visitParameterDeclaration(YodaModelParser.ParameterDeclarationContext ctx) {
-            if (table.existsDeclaration(ctx.name.getText())){
-                String name = ctx.name.getText();
-                errors.record(ParseUtil.duplicatedIdentifierError(name, ctx.name, table.getDeclarationToken(name)));
-                return false;
-            } else {
-                table.addParameter(ctx);
-                return true;
-            }
+            return ctx.element().stream().allMatch(e -> e.accept(this));
         }
 
         @Override
         public Boolean visitTypeDeclaration(YodaModelParser.TypeDeclarationContext ctx) {
-            if (table.existsDeclaration(ctx.name.getText())) {
-                String name = ctx.name.getText();
-                errors.record(ParseUtil.duplicatedIdentifierError(name, ctx.name, table.getDeclarationToken(name)));
-                return false;
+            String recordName = ctx.typeName.getText();
+            boolean flag = true;
+            if (checkUniquenessOfName(recordName, ctx)) {
+                Map<String, YodaType> recordFields = new HashMap<>();
+                for (YodaModelParser.RecordFieldDeclarationContext fd: ctx.fields) {
+                    String fieldName = fd.name.getText();
+                    if (declaredFields.containsKey(fieldName)) {
+                        errors.record(ParseUtil.duplicatedFieldError(fd.name, declaredFields.get(fieldName).getName()));
+                        flag = false;
+                    } else {
+                        if (recordFields.containsKey(fieldName)) {
+                            errors.record(ParseUtil.duplicatedFieldError(fd.name, recordName));
+                            flag = false;
+                        }
+                        recordFields.put(fieldName, getYodaType(fd.type()));
+                    }
+                }
+                registerRecord(recordName, recordFields);
+                return flag;
             } else {
-                table.addType(ctx);
-                return true;
+                return false;
             }
         }
 
         @Override
-        public Boolean visitAgentDeclaration(YodaModelParser.AgentDeclarationContext ctx) {
-            if (table.existsDeclaration(ctx.agentName.getText())) {
-                String name = ctx.agentName.getText();
-                errors.record(ParseUtil.duplicatedIdentifierError(name, ctx.agentName, table.getDeclarationToken(name)));
-                return false;
-            } else {
-                table.addAgent(ctx);
-                return true;
-            }
+        protected Boolean defaultResult() {
+            return true;
         }
 
         @Override
-        public Boolean visitSystemDeclaration(YodaModelParser.SystemDeclarationContext ctx) {
-            if (table.existsDeclaration(ctx.name.getText())) {
-                String name = ctx.name.getText();
-                errors.record(ParseUtil.duplicatedIdentifierError(name, ctx.name, table.getDeclarationToken(name)));
-                return false;
-            } else {
-                table.addSystem(ctx);
-                return true;
-            }
-        }
-
-        @Override
-        public Boolean visitConfigurationDeclaration(YodaModelParser.ConfigurationDeclarationContext ctx) {
-            if (table.existsDeclaration(ctx.name.getText())) {
-                String name = ctx.name.getText();
-                errors.record(ParseUtil.duplicatedIdentifierError(name, ctx.name, table.getDeclarationToken(name)));
-                return false;
-            } else {
-                table.addConfiguration(ctx);
-                return true;
-            }
+        protected Boolean aggregateResult(Boolean aggregate, Boolean nextResult) {
+            return aggregate && nextResult;
         }
 
 
     }
 
-     */
+    private void registerRecord(String recordName, Map<String, YodaType> recordFields) {
+        YodaType.RecordType newRecord = new YodaType.RecordType(recordName, recordFields);
+        this.yodaTypes.put(recordName, newRecord);
+        for (String name: recordFields.keySet()) {
+            this.declaredFields.put(name, newRecord);
+        }
+    }
+
+    private boolean checkUniquenessOfName(String name, ParserRuleContext ctx) {
+        if (this.declarations.containsKey(name)) {
+            this.errors.record(ParseUtil.duplicatedElementDeclaration(name, this.declarations.get(name), ctx));
+            return false;
+        } else {
+            this.declarations.put(name, ctx);
+            return true;
+        }
+    }
+
+    private YodaType getYodaType(YodaModelParser.TypeContext type) {
+        if (yodaTypes.containsKey(type.getText())) {
+            return yodaTypes.get(type.getText());
+        } else {
+            errors.record(ParseUtil.unknownTypeName(type));
+            return YodaType.NONE_TYPE;
+        }
+    }
+
+    private Optional<YodaType> getTypeOfConstantsAndParameters(String name) {
+        if (constantsAndParameters.containsKey(name)) {
+            return Optional.of(constantsAndParameters.get(name));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+
+    private class AgentAttributesCollector extends YodaModelBaseVisitor<Boolean> {
+
+
+        @Override
+        public Boolean visitModel(YodaModelParser.ModelContext ctx) {
+            return ctx.element().stream().allMatch(e -> e.accept(this));
+        }
+
+        @Override
+        public Boolean visitAgentDeclaration(YodaModelParser.AgentDeclarationContext ctx) {
+            if (checkUniquenessOfName(ctx.agentName.getText(), ctx)) {
+                Map<String, YodaModelParser.NameDeclarationContext> declaredAttributes = new HashMap<>();
+                boolean flag = true;
+                Map<String, YodaType> agentAttributes = getAttributes(declaredAttributes, elementAttributeTable::isValidAgentAttribute, ctx.agentStateAttributes );
+                Map<String, YodaType> agentEnvironmentalAttributes = getAttributes(declaredAttributes, elementAttributeTable::isValidEnvironmentalAttribute, ctx.agentFeaturesAttributes);
+                Map<String, YodaType> observations = getAttributes(declaredAttributes, elementAttributeTable::isValidObservationsAttribute, ctx.agentObservationsAttributes);
+                elementAttributeTable.recordAgentAttributes(ctx.agentName.getText(), agentEnvironmentalAttributes, agentAttributes, observations);
+                return flag;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public Boolean visitSceneElementDeclaration(YodaModelParser.SceneElementDeclarationContext ctx) {
+            if (checkUniquenessOfName(ctx.agentName.getText(), ctx)) {
+                Map<String, YodaModelParser.NameDeclarationContext> declaredAttributes = new HashMap<>();
+                boolean flag = true;
+                Map<String, YodaType> agentEnvironmentalAttributes = getAttributes(declaredAttributes, elementAttributeTable::isValidEnvironmentalAttribute, ctx.elementFeaturesAttributes);
+                elementAttributeTable.recordAgentAttributes(ctx.agentName.getText(), agentEnvironmentalAttributes, Map.of(), Map.of());
+                return flag;
+            } else {
+                return false;
+            }
+        }
+
+        private Map<String, YodaType> getAttributes(Map<String, YodaModelParser.NameDeclarationContext> declaredAttributes, Predicate<String> attribueValidatorPredicate, List<YodaModelParser.NameDeclarationContext> fields) {
+            return fields.stream().collect(Collectors.toMap(f -> f.name.getText(), fd -> checkFieldAndReturnItsType(declaredAttributes, attribueValidatorPredicate, fd)));
+        }
+
+        private YodaType checkFieldAndReturnItsType(Map<String, YodaModelParser.NameDeclarationContext> declaredAttributes, Predicate<String> attribueValidatorPredicate, YodaModelParser.NameDeclarationContext nameDeclarationContext) {
+            if (!attribueValidatorPredicate.test(nameDeclarationContext.name.getText())) {
+                errors.record(ParseUtil.illegalSymbolError(nameDeclarationContext.name.getText(), nameDeclarationContext));
+                return YodaType.NONE_TYPE;
+            }
+            if (declaredAttributes.containsKey(nameDeclarationContext.name.getText())) {
+                errors.record(ParseUtil.duplicatedAttributeDeclarationError(nameDeclarationContext.name.getText(), declaredAttributes.get(nameDeclarationContext.name.getText()), nameDeclarationContext));
+            } else {
+                declaredAttributes.put(nameDeclarationContext.name.getText(), nameDeclarationContext);
+                YodaType thisType = getYodaType(nameDeclarationContext.type());
+                if (YodaType.areCompatible(thisType, elementAttributeTable.getTypeOf(nameDeclarationContext.name.getText()))) {
+                    thisType = YodaType.merge(thisType, elementAttributeTable.getTypeOf(nameDeclarationContext.name.getText()));
+                }
+                if (new TypeInferenceVisitor(errors, YodaModelValidator.this::getTypeOfConstantsAndParameters, elementAttributeTable, declaredFields).checkType(thisType, nameDeclarationContext.value)) {
+                    return thisType;
+                }
+            }
+            return YodaType.NONE_TYPE;
+        }
+
+        @Override
+        protected Boolean defaultResult() {
+            return true;
+        }
+
+        @Override
+        protected Boolean aggregateResult(Boolean aggregate, Boolean nextResult) {
+            return aggregate && nextResult;
+        }
+    }
+
+    private class ModelElementValidator extends YodaModelBaseVisitor<Boolean> {
+
+        private boolean systemDeclared = false;
+
+        @Override
+        protected Boolean defaultResult() {
+            return true;
+        }
+
+        @Override
+        protected Boolean aggregateResult(Boolean aggregate, Boolean nextResult) {
+            return aggregate&&nextResult;
+        }
+
+        @Override
+        public Boolean visitConstantDeclaration(YodaModelParser.ConstantDeclarationContext ctx) {
+            if (checkUniquenessOfName(ctx.name.getText(), ctx)) {
+                YodaType type = ctx.value.accept(new TypeInferenceVisitor(errors, YodaModelValidator.this::getTypeOfConstantsAndParameters, elementAttributeTable, declaredFields));
+                if (type != YodaType.NONE_TYPE) {
+                    constantsAndParameters.put(ctx.name.getText(), type);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+
+        @Override
+        public Boolean visitParameterDeclaration(YodaModelParser.ParameterDeclarationContext ctx) {
+            if (checkUniquenessOfName(ctx.name.getText(), ctx)) {
+                YodaType type = ctx.value.accept(new TypeInferenceVisitor(errors, YodaModelValidator.this::getTypeOfConstantsAndParameters, elementAttributeTable, declaredFields));
+                if (type != YodaType.NONE_TYPE) {
+                    constantsAndParameters.put(ctx.name.getText(), type);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public Boolean visitAgentDeclaration(YodaModelParser.AgentDeclarationContext ctx) {
+            return checkAgentActions(ctx.agentName.getText(), ctx.actionBody())&&checkAgentBehaviour(ctx.agentName.getText(), ctx.behaviourDeclaration());
+        }
+
+        private Boolean checkAgentActions(String agentName, List<YodaModelParser.ActionBodyContext> actionBodyContexts) {
+            Set<String> agentActions = new HashSet<>();
+            boolean flag = true;
+            for (YodaModelParser.ActionBodyContext action: actionBodyContexts) {
+                if (agentActions.contains(action.actionName.getText())) {
+                    errors.record(ParseUtil.duplicatedActionName(agentName, action.actionName));
+                    flag = false;
+                } else {
+                    agentActions.add(action.actionName.getText());
+                    flag &= action.updates.stream().allMatch(au -> checkAttributeUpdate(agentName, s -> elementAttributeTable.isAgentAttribute(agentName, s), elementAttributeTable.getAccessibleAttributeOf(agentName), elementAttributeTable.getAccessibleAttributeOf(agentName),  au,false));
+                }
+            }
+            agentsActions.put(agentName, agentActions);
+            return flag;
+        }
+
+        private boolean checkAttributeUpdate(String agentName, Predicate<String> canBeUpdatedPredicate, Predicate<String> canBeReadPredicate, Predicate<String> canBeReadWithItPredicate, YodaModelParser.NameUpdateContext fieldUpdateContext, boolean groupExpressionsAllowed) {
+            if (canBeUpdatedPredicate.test(fieldUpdateContext.fieldName.getText())) {
+                YodaType fieldType = elementAttributeTable.getTypeOf(fieldUpdateContext.fieldName.getText());
+                if (fieldType != null) {
+                    return new TypeInferenceVisitor(errors, YodaModelValidator.this::getTypeOfConstantsAndParameters, elementAttributeTable, declaredFields, canBeReadPredicate, canBeReadWithItPredicate, true, groupExpressionsAllowed).checkType(fieldType, fieldUpdateContext.value);
+                } else {
+                    errors.record(ParseUtil.unknownAttributeName(fieldUpdateContext.fieldName));
+                    return false;
+                }
+            } else {
+                errors.record(ParseUtil.illegalUpdateOfAttribute(fieldUpdateContext.fieldName));
+                return false;
+            }
+        }
+
+
+        @Override
+        public Boolean visitSystemDeclaration(YodaModelParser.SystemDeclarationContext ctx) {
+            if (systemDeclared) {
+                errors.record(ParseUtil.duplicatedSystemDeclaration(ctx));
+                return false;
+            }
+            systemDeclared = true;
+            return ctx.agentSensing.stream().allMatch(this::checkAgentSensing)&
+                    ctx.agentDynamics.stream().allMatch(this::checkAgentDynamic);
+        }
+
+        private boolean checkAgentSensing(YodaModelParser.AgentAttributesUpdateContext agentSensingContext) {
+            String agentName = agentSensingContext.agentName.getText();
+            return agentSensingContext.updates.stream().allMatch(fu -> checkAttributeUpdate(agentName, s -> elementAttributeTable.isAgentObservation(agentName, s), elementAttributeTable.getSensingAttributeOf(agentName), elementAttributeTable.getSensingAttributeOf(agentName), fu, true));
+        }
+
+        private boolean checkAgentDynamic(YodaModelParser.AgentAttributesUpdateContext agentSensingContext) {
+            String agentName = agentSensingContext.agentName.getText();
+            return agentSensingContext.updates.stream().allMatch(fu -> checkAttributeUpdate(agentName, elementAttributeTable.getEnvironmentalAttibutePredicateOf(agentName), elementAttributeTable.getSensingAttributeOf(agentName), elementAttributeTable.getSensingAttributeOf(agentName), fu, true));
+        }
+
+        @Override
+        public Boolean visitConfigurationDeclaration(YodaModelParser.ConfigurationDeclarationContext ctx) {
+            return super.visitConfigurationDeclaration(ctx);
+        }
+
+        @Override
+        public Boolean visitGroupDeclaration(YodaModelParser.GroupDeclarationContext ctx) {
+            boolean flag = true;
+            if (checkUniquenessOfName(ctx.name.getText(), ctx)) {
+                for (Token id: ctx.agents) {
+                    if (!elementAttributeTable.isElement(id.getText())) {
+                        errors.record(ParseUtil.unknownAgentError(id.getText(), id));
+                        flag = false;
+                    }
+                }
+            } else {
+                flag = false;
+            }
+            return flag;
+        }
+    }
+
+
+
+    private boolean checkAgentBehaviour(String agentName, YodaModelParser.BehaviourDeclarationContext behaviourDeclarationContext) {
+        boolean flag = true;
+        TypeInferenceVisitor typeInferenceVisitor = new TypeInferenceVisitor(errors, this::getTypeOfConstantsAndParameters, elementAttributeTable, declaredFields, elementAttributeTable.getAccessibleAttributeOf(agentName), elementAttributeTable.getAccessibleAttributeOf(agentName), false, false);
+        for (YodaModelParser.RuleCaseContext rc: behaviourDeclarationContext.cases) {
+            flag &= typeInferenceVisitor.checkType(YodaType.BOOLEAN_TYPE, rc.guard)&rc.actions.stream().allMatch(wa -> checkWeightedAction(typeInferenceVisitor, agentName, wa));
+        }
+        return flag & behaviourDeclarationContext.defaultcase.stream().allMatch(wa -> checkWeightedAction(typeInferenceVisitor, agentName, wa));
+    }
+
+    private boolean checkWeightedAction(TypeInferenceVisitor typeInferenceVisitor, String agentName, YodaModelParser.WeightedActionContext wa) {
+        boolean flag = true;
+        if (!agentsActions.getOrDefault(agentName, Set.of()).contains(wa.actionName.getText())) {
+            flag = false;
+            errors.record(ParseUtil.unknownActionError(wa.actionName.getText(), wa.actionName));
+        }
+        return flag & typeInferenceVisitor.checkType(YodaType.REAL_TYPE, wa.weight);
+    }
 }

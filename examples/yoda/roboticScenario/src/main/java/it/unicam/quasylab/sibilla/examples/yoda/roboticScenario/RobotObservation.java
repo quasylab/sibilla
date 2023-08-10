@@ -27,25 +27,26 @@ import it.unicam.quasylab.sibilla.core.models.yoda.YodaType;
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaValue;
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariable;
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariableMapping;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class RobotObservation implements YodaVariableMapping {
+public class RobotObservation {
 
-    public static YodaVariable NORTH_VAR = new YodaVariable(0, "north", YodaType.BOOLEAN_TYPE);
-    public static YodaVariable SOUTH_VAR = new YodaVariable(1, "south", YodaType.BOOLEAN_TYPE);
-    public static YodaVariable EAST_VAR = new YodaVariable(2, "east", YodaType.BOOLEAN_TYPE);
-    public static YodaVariable WEST_VAR = new YodaVariable(3, "west", YodaType.BOOLEAN_TYPE);
-    public static YodaVariable GOAL_VAR = new YodaVariable(4, "goal", YodaType.BOOLEAN_TYPE);
+    public static YodaVariable NORTH_VAR = new YodaVariable(0, "NORTH_VAR");
+    public static YodaVariable SOUTH_VAR = new YodaVariable(1, "SOUTH_VAR");
+    public static YodaVariable EAST_VAR = new YodaVariable(2, "EAST_VAR");
+    public static YodaVariable WEST_VAR = new YodaVariable(3, "WEST_VAR");
+    public static YodaVariable GOAL_VAR = new YodaVariable(4, "GOAL_VAR");
 
-    public static YodaValue NORTH_VAL = new YodaValue.BooleanValue(false);
-    public static YodaValue SOUTH_VAL = new YodaValue.BooleanValue(false);
-    public static YodaValue EAST_VAL = new YodaValue.BooleanValue(false);
-    public static YodaValue WEST_VAL = new YodaValue.BooleanValue(false);
-    public static YodaValue GOAL_VAL = new YodaValue.BooleanValue(false);
+    public static SibillaValue NORTH_VAL = SibillaValue.of(false);
+    public static SibillaValue SOUTH_VAL = SibillaValue.of(false);
+    public static SibillaValue EAST_VAL = SibillaValue.of(false);
+    public static SibillaValue WEST_VAL = SibillaValue.of(false);
+    public static SibillaValue GOAL_VAL = SibillaValue.of(false);
 
-    public static Map<YodaVariable, YodaValue> observationMap;
+    public static Map<YodaVariable, SibillaValue> observationMap;
     static {
         observationMap = new HashMap<>();
         observationMap.put(NORTH_VAR, NORTH_VAL);
@@ -54,36 +55,6 @@ public class RobotObservation implements YodaVariableMapping {
         observationMap.put(WEST_VAR, WEST_VAL);
         observationMap.put(GOAL_VAR, GOAL_VAL);
     }
-    public static YodaVariableMapping AGENT_OBS_MAP = new RobotObservation(observationMap);
+    public static YodaVariableMapping AGENT_OBS_MAP = new YodaVariableMapping(observationMap);
 
-    private Map<YodaVariable, YodaValue> map;
-    public RobotObservation(Map<YodaVariable, YodaValue> map) {
-        this.map = map;
-    }
-
-    @Override
-    public YodaValue getValue(YodaVariable variable) {
-        return map.get(variable);
-    }
-
-    @Override
-    public void setValue(YodaVariable variable, YodaValue value) {
-        this.map.put(variable, value);
-    }
-
-    @Override
-    public void addElement(YodaVariable variable, YodaValue value) {
-        this.map.put(variable, value);
-    }
-
-    @Override
-    public YodaVariableMapping copy() {
-        Map<YodaVariable, YodaValue> newMap = new HashMap<>(map);
-        return new RobotObservation(newMap);
-    }
-
-    @Override
-    public int size() {
-        return map.size();
-    }
 }

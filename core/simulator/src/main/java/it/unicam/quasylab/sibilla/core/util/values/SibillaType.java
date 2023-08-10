@@ -36,4 +36,5 @@ public interface SibillaType<S extends SibillaValue> {
 
     <T extends SibillaValue> Optional<S> cast(T value);
 
+
 }

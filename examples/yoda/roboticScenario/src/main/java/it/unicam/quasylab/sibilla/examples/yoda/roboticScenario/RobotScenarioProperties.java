@@ -19,7 +19,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 
-public class RobotScenarioProperties {
+public class RobotScenarioProperties { /*
 
     private static RandomGenerator rg;
 
@@ -31,6 +31,9 @@ public class RobotScenarioProperties {
         AGENTS.add(RobotDefinition.CHOPPER);
         AGENTS.add(RobotDefinition.BD1);
     }
+    */
+
+    /*
 
     public static void main(String[] args) {
         RobotScenarioProperties robotScenarioProperties = new RobotScenarioProperties(new DefaultRandomGenerator(1000L));
@@ -97,4 +100,6 @@ public class RobotScenarioProperties {
     public static GlobalFormula<YodaAgent, YodaSystemState<Grid>> getPhi2(int k, double eps) {
         return new GlobalEventuallyFormula<>(0, k, new GlobalFractionOfFormula<>(goalReachedFormula(), d -> d>=eps));
     }
+
+     */
 }

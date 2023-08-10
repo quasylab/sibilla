@@ -21,15 +21,16 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.models.yoda;
+package it.unicam.quasylab.sibilla.core.models.lio;
 
-import org.apache.commons.math3.random.RandomGenerator;
+import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 
-/**
- * The interface <code>AgentInfoUpdateFunction</code> represents
- * a functional interface computing the agent external info
- */
-@FunctionalInterface
-public interface AgentInfoUpdateFunction {
-    YodaVariableMapping compute(RandomGenerator rg, YodaVariableMapping localState, YodaVariableMapping agentInfo);
+public interface LIOModelElementsSupplier {
+
+    LIOModel getModel( );
+
+
+
+
+
 }

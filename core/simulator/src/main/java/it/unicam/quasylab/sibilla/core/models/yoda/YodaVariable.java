@@ -26,17 +26,15 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
  * The class <code>YodaVariable</code> represents
  * a variable handled by YodaAgents
  */
-public class YodaVariable {
+public class YodaVariable implements Comparable<YodaVariable> {
 
     private final String name;
     private final int idx;
-    private final YodaType type;
 
 
-    public YodaVariable(int idx, String name, YodaType type) {
+    public YodaVariable(int idx, String name) {
         this.name = name;
         this.idx = idx;
-        this.type = type;
     }
 
     public int getIdx() {
@@ -47,7 +45,8 @@ public class YodaVariable {
         return name;
     }
 
-    public YodaType getType() {
-        return type;
+    @Override
+    public int compareTo(YodaVariable o) {
+        return this.idx - o.idx;
     }
 }

@@ -35,8 +35,8 @@ import java.util.stream.Collectors;
 
 public class LIOModelAgentStepGenerator extends LIOModelAgentDependentChecker {
 
-    public LIOModelAgentStepGenerator(AgentsDefinition definition,
-                                      ErrorCollector errors,
+    public LIOModelAgentStepGenerator(ErrorCollector errors,
+                                      AgentsDefinition definition,
                                       Map<String, SibillaValue> constantsAndParameters) {
         super(errors, definition, constantsAndParameters);
     }

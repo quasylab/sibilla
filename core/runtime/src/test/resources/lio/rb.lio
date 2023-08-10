@@ -1,0 +1,20 @@
+param NUMBER_OF_RED = 10
+param NUMBER_OF_BLUE = 10
+
+param meetingProbability = 0.75
+
+action changeInBlue = %B
+action changeInRed  = %R
+
+state B =
+    changeInRed.R
+endstate
+
+state R =
+    changeInBlue.B
+endstate
+
+
+system Balanced =
+    B#100 | R#100
+endsystem

@@ -28,6 +28,7 @@ import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -35,16 +36,19 @@ import java.util.function.Function;
  */
 public class LIOModelDefinition extends AbstractModelDefinition<LIOState> {
 
-    private final Function<EvaluationEnvironment,LIOModel> definitionGenerator;
-    private final Function<EvaluationEnvironment, ParametricDataSet<Function<RandomGenerator, LIOState>>>  stateGenerator;
+    private final Function<EvaluationEnvironment, AgentsDefinition> definitionGenerator;
+
+    private final BiFunction<EvaluationEnvironment, AgentsDefinition, LIOModel> modelGenerator;
+
+    private final BiFunction<EvaluationEnvironment, AgentsDefinition, ParametricDataSet<Function<RandomGenerator, LIOState>>>  stateGenerator;
     private LIOModel cachedModel;
     private ParametricDataSet<Function<RandomGenerator, LIOState>> cachedStates;
+    private AgentsDefinition agentsDefinition;
 
-    public LIOModelDefinition(EvaluationEnvironment environment,
-                              Function<EvaluationEnvironment, LIOModel> definitionGenerator,
-                              Function<EvaluationEnvironment, ParametricDataSet<Function<RandomGenerator, LIOState>>> stateGenerator) {
+    public LIOModelDefinition(EvaluationEnvironment environment, Function<EvaluationEnvironment, AgentsDefinition> definitionGenerator, BiFunction<EvaluationEnvironment, AgentsDefinition, LIOModel> modelGenerator, BiFunction<EvaluationEnvironment, AgentsDefinition, ParametricDataSet<Function<RandomGenerator, LIOState>>> stateGenerator) {
         super(environment);
         this.definitionGenerator = definitionGenerator;
+        this.modelGenerator = modelGenerator;
         this.stateGenerator = stateGenerator;
     }
 
@@ -53,21 +57,29 @@ public class LIOModelDefinition extends AbstractModelDefinition<LIOState> {
     protected void clearCache() {
         this.cachedModel = null;
         this.cachedStates = null;
+        this.agentsDefinition = null;
     }
 
     @Override
     public ParametricDataSet<Function<RandomGenerator, LIOState>> getStates() {
         if (cachedStates==null) {
-            cachedStates = stateGenerator.apply(getEnvironment());
+            cachedStates = stateGenerator.apply(getEnvironment(), getAgentsDefinitions());
         }
         return cachedStates;
+    }
+
+    private AgentsDefinition getAgentsDefinitions() {
+        if (this.agentsDefinition == null) {
+            this.agentsDefinition = definitionGenerator.apply(getEnvironment());
+        }
+        return this.agentsDefinition;
     }
 
 
     @Override
     public LIOModel createModel() {
         if (cachedModel==null) {
-            cachedModel = definitionGenerator.apply(getEnvironment());
+            cachedModel = modelGenerator.apply(getEnvironment(), getAgentsDefinitions());
         }
         return cachedModel;
     }

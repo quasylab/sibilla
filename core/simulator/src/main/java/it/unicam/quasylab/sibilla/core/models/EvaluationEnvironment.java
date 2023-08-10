@@ -203,4 +203,12 @@ public class EvaluationEnvironment {
         };
     }
 
+    public Map<String, SibillaValue> getValues() {
+        if (this.isChanged) {
+            this.values = this.valuesEvaluationFunction.apply(this.currentAttributeValues);
+        }
+        return Map.copyOf(this.values);
+    }
+
+
 }

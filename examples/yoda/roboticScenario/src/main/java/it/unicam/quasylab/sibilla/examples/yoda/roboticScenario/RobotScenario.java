@@ -51,6 +51,7 @@ public class RobotScenario {
         AGENTS.add(RobotDefinition.BD1);
     }*/
 
+    /*
     public static void main(String[] args) throws  InterruptedException, FileNotFoundException {
         RobotScenario robotScenario = new RobotScenario(new DefaultRandomGenerator());
         //robotScenario.startSimulation("Test1", 10, 10, 15, AGENTS, 100, 100.0);
@@ -81,14 +82,14 @@ public class RobotScenario {
     }
 
 
-    private void saveTrajectories(File outputDir, String label, LinkedList<Trajectory<YodaSystemState<Grid>>> trajectories) throws FileNotFoundException {
+    private void saveTrajectories(File outputDir, String label, LinkedList<Trajectory<YodaSystemState>> trajectories) throws FileNotFoundException {
         int counter = 0;
-        for (Trajectory<YodaSystemState<Grid>> t: trajectories) {
+        for (Trajectory<YodaSystemState> t: trajectories) {
             saveDataOfAgents(new PrintWriter(new File(outputDir, label+"_"+(counter++)+".csv")), t);
         }
     }
 
-    private void saveTrajectory(File outputDir, String label, Trajectory<YodaSystemState<Grid>> trajectory, int agentsNumb) throws FileNotFoundException {
+    private void saveTrajectory(File outputDir, String label, Trajectory<YodaSystemState> trajectory, int agentsNumb) throws FileNotFoundException {
         saveDataOfScene(new PrintWriter(new File(outputDir, label+"_arena.csv")), trajectory.getData().get(0).getValue().getScene());
         File agentsFolder = new File(outputDir, "robots");
         agentsFolder.mkdir();
@@ -158,4 +159,6 @@ public class RobotScenario {
         task.get();
         return collector.getTrajectory();
     }
+
+     */
 }

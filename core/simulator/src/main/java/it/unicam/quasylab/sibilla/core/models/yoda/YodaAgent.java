@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 /**
@@ -37,74 +38,55 @@ import org.apache.commons.math3.random.RandomGenerator;
  *     <li>a external state containing the information unknown to the agent</li>
  *     <li>a set of observations done by the agent</li>
  *     <li>a behaviour that select the actions</li>
- *     <li>a OmegaFunction to determine the observations</li>
- *     <li>a AgentInfoUpdateFunction to update the external state of the agent</li>
+ *     <li>a YodaAgentSensingFunction to determine the observations</li>
+ *     <li>a YodaAgentEnvironmentalAttributeUpdateFunction to update the external state of the agent</li>
  * </ul>
  *
  */
-public final class YodaAgent {
+public final class YodaAgent extends YodaSceneElement {
 
-    private final int identifier;
-    private final String name;
-    private YodaVariableMapping agentKnowledge;
-    private YodaVariableMapping agentInformation;
-    private YodaVariableMapping agentObservations;
+    private final YodaVariableMapping agentAttributes;
+    private final YodaVariableMapping agentObservations;
     private final YodaBehaviour agentBehaviour;
-    private final OmegaFunction omegaFunction;
-    private final AgentInfoUpdateFunction agentInfoUpdateFunction;
+    private final YodaAgentSensingFunction observationsUpdateFunction;
+    private final YodaAgentEnvironmentalAttributeUpdateFunction environmentalAttributeUpdateFunction;
 
+    /**
+     * Creates a new instance with the given parameters.
+     *
+     * @param identifier
+     * @param agentName
+     * @param agentAttributes
+     * @param environmentalAttributes
+     * @param agentObservations
+     * @param agentBehaviour
+     * @param observationsUpdateFunction
+     * @param environmentalAttributeUpdateFunction
+     */
     public YodaAgent(int identifier,
-                     String name,
-                     YodaVariableMapping agentKnowledge,
-                     YodaVariableMapping agentInformation,
+                     YodaElementName agentName,
+                     YodaVariableMapping agentAttributes,
+                     YodaVariableMapping environmentalAttributes,
                      YodaVariableMapping agentObservations,
                      YodaBehaviour agentBehaviour,
-                     OmegaFunction omegaFunction,
-                     AgentInfoUpdateFunction agentInfoUpdateFunction) {
-        this.identifier = identifier;
-        this.name = name;
-        this.agentKnowledge = agentKnowledge;
-        this.agentInformation = agentInformation;
+                     YodaAgentSensingFunction observationsUpdateFunction,
+                     YodaAgentEnvironmentalAttributeUpdateFunction environmentalAttributeUpdateFunction) {
+        super(agentName, identifier, environmentalAttributes);
+        this.agentAttributes = agentAttributes;
         this.agentObservations = agentObservations;
         this.agentBehaviour = agentBehaviour;
-        this.omegaFunction = omegaFunction;
-        this.agentInfoUpdateFunction = agentInfoUpdateFunction;
+        this.observationsUpdateFunction = observationsUpdateFunction;
+        this.environmentalAttributeUpdateFunction = environmentalAttributeUpdateFunction;
     }
 
-    /**
-     * This method returns the identifier of the agent
-     *
-     * @return the identifier of the agent
-     */
-    public int getIdentifier() {
-        return identifier;
-    }
 
     /**
-     * This method returns the name of the agent
-     *
-     * @return the name of the agent
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * This method returns the agent local state
+     * This method returns the agent local state.
      *
      * @return the agent local state
      */
-    public YodaVariableMapping getAgentKnowledge(){
-        return agentKnowledge;
-    }
-
-    /**
-     * This method returns the global information of the agent
-     *
-     * @return the global information of the agent
-     */
-    public YodaVariableMapping getAgentInformation() {
-        return agentInformation;
+    public YodaVariableMapping getAgentAttributes() {
+        return agentAttributes;
     }
 
     /**
@@ -125,53 +107,41 @@ public final class YodaAgent {
         return agentBehaviour;
     }
 
-    /**
-     * This method makes an agent step
-     *
-     * @param rg a random generator
-     */
-    public void step(RandomGenerator rg){
-        WeightedStructure<YodaAction> actionSet = agentBehaviour.evaluate(rg, agentKnowledge, agentObservations);
-        YodaAction selectedAction = agentBehaviour.selectAction(rg, actionSet);
-        updateKnowledge(rg, selectedAction);
-    }
 
     /**
-     * This method updates the state of this agent
+     * Returns the next state of this agent.
      *
-     * @param rg a random generator
-     * @param action the action that the agent should perform
+     * @param rg random generator used to evaluate rando expressions
+     * @param state global system state.
+     * @return the next state of this agent.
      */
-    public void updateKnowledge(RandomGenerator rg, YodaAction action){
-        YodaVariableMapping newState = action.performAction(rg, agentKnowledge);
-        agentKnowledge = newState;
-    }
-
-    /**
-     * This method updates the global information of this agents
-     *
-     * @param rg a random generator
-     */
-    public void updateInfo(RandomGenerator rg){
-        agentInformation = agentInfoUpdateFunction.compute(rg, this.agentKnowledge, this.agentInformation);
-    }
-
-    /**
-     * This method updates the agent's observations set
-     *
-     * @param rg a random generator
-     * @param system a YodaSystem
-     */
-    public void computeObservations(RandomGenerator rg, YodaSystemState system) {
-        agentObservations = omegaFunction.compute(rg, system, this);
-    }
-
-    public YodaAgent next(RandomGenerator rg, YodaSystemState<?> state) {
-        YodaVariableMapping newObservations = this.omegaFunction.compute(rg, state, this);
-        WeightedStructure<YodaAction> actionSet = this.agentBehaviour.evaluate(rg, this.agentKnowledge, newObservations);
+    public YodaAgent next(RandomGenerator rg, YodaSystemState state) {
+        YodaVariableMapping newObservations = this.observationsUpdateFunction.compute(rg, state, this);
+        WeightedStructure<YodaAction> actionSet = this.agentBehaviour.evaluate(this.agentAttributes, newObservations);
         YodaAction selectedAction = this.agentBehaviour.selectAction(rg, actionSet);
-        YodaVariableMapping newKnowledge = selectedAction.performAction(rg, this.agentKnowledge);
-        YodaVariableMapping newInfo = this.agentInfoUpdateFunction.compute(rg, newKnowledge, this.agentInformation);
-        return new YodaAgent(this.identifier, this.name, newKnowledge, newInfo, newObservations, this.agentBehaviour, this.omegaFunction, this.agentInfoUpdateFunction);
+        YodaVariableMapping newKnowledge = this.agentAttributes;
+        if (selectedAction != null) {
+            newKnowledge = selectedAction.performAction(rg, this.agentAttributes);
+        }
+        YodaVariableMapping newEnvironmentalAttributes = this.environmentalAttributeUpdateFunction.compute(rg, newKnowledge, this.environmentalAttributes);
+        return new YodaAgent(this.getId(), this.getName(), newKnowledge, newEnvironmentalAttributes, newObservations, this.agentBehaviour, this.observationsUpdateFunction, this.environmentalAttributeUpdateFunction);
     }
+
+    public SibillaValue get(YodaVariable var) {
+        if (agentAttributes.isDefined(var)) {
+            return agentAttributes.getValue(var);
+        }
+        if (agentObservations.isDefined(var)) {
+            return agentObservations.getValue(var);
+        }
+        return environmentalAttributes.getValue(var);
+    }
+
+    /**
+     * Returns the application of the given function to the information associated with this agent.
+     *
+     * @param f the function to apply.
+     * @return the application of the given function to the information associated with this agent.
+     * @param <T> type returned by the given function.
+     */
 }

@@ -26,12 +26,14 @@ package it.unicam.quasylab.sibilla.core.simulator.sampling;
 import it.unicam.quasylab.sibilla.core.models.MeasureFunction;
 import it.unicam.quasylab.sibilla.core.models.State;
 
+import java.util.function.ToDoubleFunction;
+
 public class SimpleMeasure<S extends State> implements Measure<S> {
 
     private final String name;
-    private final MeasureFunction<S> measure;
+    private final ToDoubleFunction<? super S> measure;
 
-    public SimpleMeasure(String name, MeasureFunction<S> measure) {
+    public SimpleMeasure(String name, ToDoubleFunction<? super S> measure) {
         this.name = name;
         this.measure = measure;
     }
@@ -39,7 +41,7 @@ public class SimpleMeasure<S extends State> implements Measure<S> {
 
     @Override
     public double measure(S t) {
-        return measure.apply(t);
+        return measure.applyAsDouble(t);
     }
 
     @Override

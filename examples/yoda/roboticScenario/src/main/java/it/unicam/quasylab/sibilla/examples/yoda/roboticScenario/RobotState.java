@@ -27,32 +27,33 @@ import it.unicam.quasylab.sibilla.core.models.yoda.YodaType;
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaValue;
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariable;
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariableMapping;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 
-public class RobotState implements YodaVariableMapping {
+public class RobotState {
 
-    public static YodaVariable POSX_VAR = new YodaVariable(0, "posX", YodaType.INTEGER_TYPE);
-    public static YodaVariable POSY_VAR = new YodaVariable(1, "posY", YodaType.INTEGER_TYPE);
-    public static YodaVariable ACCX_VAR = new YodaVariable(2, "accX", YodaType.INTEGER_TYPE);
-    public static YodaVariable ACCY_VAR = new YodaVariable(3, "accY", YodaType.INTEGER_TYPE);
+    public static YodaVariable POSX_VAR = new YodaVariable(0, "posX");
+    public static YodaVariable POSY_VAR = new YodaVariable(1, "posY");
+    public static YodaVariable ACCX_VAR = new YodaVariable(2, "accX");
+    public static YodaVariable ACCY_VAR = new YodaVariable(3, "accY");
 
-    public static YodaValue POSX_VAL = YodaValue.integerOf(5);
-    public static YodaValue POSY_VAL = YodaValue.integerOf(0);
-    public static YodaValue ACCX_VAL = YodaValue.integerOf(0);
-    public static YodaValue ACCY_VAL = YodaValue.integerOf(0);
+    public static SibillaValue POSX_VAL = SibillaValue.of(5);
+    public static SibillaValue POSY_VAL = SibillaValue.of(0);
+    public static SibillaValue ACCX_VAL = SibillaValue.of(0);
+    public static SibillaValue ACCY_VAL = SibillaValue.of(0);
 
 
-    public static Map<YodaVariable, YodaValue> positionMap1;
-    public static Map<YodaVariable, YodaValue> positionMap2;
-    public static Map<YodaVariable, YodaValue> positionMap3;
+    public static Map<YodaVariable, SibillaValue> positionMap1;
+    public static Map<YodaVariable, SibillaValue> positionMap2;
+    public static Map<YodaVariable, SibillaValue> positionMap3;
     static {
-        YodaValue posx1 = YodaValue.integerOf((int) (Math.random()*10));
-        YodaValue posx2 = YodaValue.integerOf((int) (Math.random()*10));
-        YodaValue posx3 = YodaValue.integerOf((int) (Math.random()*10));
+        SibillaValue posx1 = SibillaValue.of((int) (Math.random()*10));
+        SibillaValue posx2 = SibillaValue.of((int) (Math.random()*10));
+        SibillaValue posx3 = SibillaValue.of((int) (Math.random()*10));
         positionMap1 = new HashMap<>();
         positionMap2 = new HashMap<>();
         positionMap3 = new HashMap<>();
@@ -65,52 +66,26 @@ public class RobotState implements YodaVariableMapping {
         positionMap3.put(POSY_VAR, POSY_VAL);
 
     }
-    public static YodaVariableMapping AGENT_POS_MAP1 = new RobotState(positionMap1);
-    public static YodaVariableMapping AGENT_POS_MAP2 = new RobotState(positionMap2);
-    public static YodaVariableMapping AGENT_POS_MAP3 = new RobotState(positionMap3);
+    public static YodaVariableMapping AGENT_POS_MAP1 = new YodaVariableMapping(positionMap1);
+    public static YodaVariableMapping AGENT_POS_MAP2 = new YodaVariableMapping(positionMap2);
+    public static YodaVariableMapping AGENT_POS_MAP3 = new YodaVariableMapping(positionMap3);
 
-    public static Map<YodaVariable, YodaValue> accelerationMap;
+    public static Map<YodaVariable, SibillaValue> accelerationMap;
     static {
         accelerationMap = new HashMap<>();
         accelerationMap.put(ACCX_VAR, ACCX_VAL);
         accelerationMap.put(ACCY_VAR, ACCY_VAL);
     }
-    public static YodaVariableMapping AGENT_ACC_MAP = new RobotState(accelerationMap);
+    public static YodaVariableMapping AGENT_ACC_MAP = new YodaVariableMapping(accelerationMap);
 
 
 
 
-    private Map<YodaVariable, YodaValue> map;
+    private Map<YodaVariable, SibillaValue> map;
 
-    public RobotState(Map<YodaVariable, YodaValue> map) {
+    public RobotState(Map<YodaVariable, SibillaValue> map) {
         this.map = map;
     }
 
 
-    @Override
-    public YodaValue getValue(YodaVariable variable) {
-        return map.get(variable);
-    }
-
-    @Override
-    public void setValue(YodaVariable variable, YodaValue value) {
-        this.map.put(variable, value);
-    }
-
-    @Override
-    public void addElement(YodaVariable variable, YodaValue value) {
-        this.map.put(variable, value);
-    }
-
-    @Override
-    public YodaVariableMapping copy() {
-        Map<YodaVariable, YodaValue> newMap = new HashMap<>(map);
-        return new RobotState(newMap);
-    }
-
-
-    @Override
-    public int size() {
-        return map.size();
-    }
 }

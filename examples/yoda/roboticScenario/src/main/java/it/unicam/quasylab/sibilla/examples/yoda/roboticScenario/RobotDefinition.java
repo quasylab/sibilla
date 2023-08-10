@@ -35,6 +35,7 @@ import java.util.Random;
  *
  */
 public class RobotDefinition {
+    /*
     private static YodaVariableMapping KNOWLEDGE = RobotState.AGENT_ACC_MAP;
     private static YodaVariableMapping INFORMATION1 = RobotState.AGENT_POS_MAP1;
     private static YodaVariableMapping INFORMATION2 = RobotState.AGENT_POS_MAP2;
@@ -42,8 +43,8 @@ public class RobotDefinition {
     private static YodaVariableMapping OBSERVATIONS = RobotObservation.AGENT_OBS_MAP;
     private static YodaBehaviour DET_BEHAVIOUR = RobotBehaviour.DETERMINISTIC;
     private static YodaBehaviour NON_BEHAVIOUR = RobotBehaviour.NON_DETERMINISTIC;
-    private static OmegaFunction OMEGA = RobotDefinition::computeOmega;
-    private static AgentInfoUpdateFunction INFO_UPDATE = RobotDefinition::computeInfoUpdate;
+    private static YodaAgentSensingFunction OMEGA = RobotDefinition::computeOmega;
+    private static YodaAgentEnvironmentalAttributeUpdateFunction INFO_UPDATE = RobotDefinition::computeInfoUpdate;
     private RandomGenerator rg;
 
 
@@ -96,4 +97,6 @@ public class RobotDefinition {
         return variableMapping;
     }
 
+
+     */
 }

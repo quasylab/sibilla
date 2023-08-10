@@ -47,8 +47,4 @@ public class SibillaErrorValue implements SibillaValue {
         return 0;
     }
 
-    @Override
-    public SibillaType<?> getType() {
-        return null;
-    }
 }
