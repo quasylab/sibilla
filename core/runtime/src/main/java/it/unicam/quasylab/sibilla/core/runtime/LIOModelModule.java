@@ -33,7 +33,6 @@ import java.util.Arrays;
 
 public class LIOModelModule extends AbstractSibillaModule {
 
-    private LIOModelGenerator modelGenerator;
 
     public enum LIOModes {
         INDIVIDUALS,
@@ -43,6 +42,8 @@ public class LIOModelModule extends AbstractSibillaModule {
 
     private LIOModes mode = LIOModes.MASS;
 
+
+    private LIOModuleEngine moduleEngine;
 
     public final static String MODULE_NAME = "lio";
 
@@ -70,8 +71,8 @@ public class LIOModelModule extends AbstractSibillaModule {
     }
 
     private void setModelGenerator(LIOModelGenerator modelGenerator) throws LIOModelParseError {
-        this.modelGenerator = modelGenerator;
-        generateDefinition();
+        this.moduleEngine = new LIOModuleEngine(this.mode, modelGenerator.getDefinition());
+        this.moduleEngine.setMode(mode);
     }
 
     @Override
@@ -88,6 +89,9 @@ public class LIOModelModule extends AbstractSibillaModule {
     @Override
     public void setMode(String name) {
         this.mode = LIOModes.valueOf(name);
+        if (this.moduleEngine != null) {
+            this.moduleEngine.setMode(this.mode);
+        }
     }
 
     @Override
@@ -95,10 +99,11 @@ public class LIOModelModule extends AbstractSibillaModule {
         return this.mode.name();
     }
 
-    private void generateDefinition() throws LIOModelParseError {
-        setModelDefinition(modelGenerator.getDefinition());
-    }
 
+    @Override
+    protected ModuleEngine<?> getModuleEngine() {
+        return moduleEngine;
+    }
 
 
 }

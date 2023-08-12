@@ -40,7 +40,7 @@ public interface LIOCollective extends ImmutableState {
      * @param a agent state.
      * @return the fraction of agents in the given state.
      */
-    double fractionOf(Agent a);
+    double fractionOf(LIOAgent a);
 
     /**
      * Returns the fraction of agents in a state satisfying the given predicate.
@@ -48,16 +48,16 @@ public interface LIOCollective extends ImmutableState {
      * @param predicate state predicate.
      * @return  the fraction of agents in a state satisfying the given predicate.
      */
-    double fractionOf(Predicate<Agent> predicate);
+    double fractionOf(Predicate<LIOAgent> predicate);
 
     /**
      * Returns the set of agents occurring in this collective.
      *
      * @return the set of agents occurring in this collective.
      */
-    Set<Agent> getAgents();
+    Set<LIOAgent> getAgents();
 
-    default double fractionOf(Set<Agent> agents) {
+    default double fractionOf(Set<LIOAgent> agents) {
         return agents.stream().mapToDouble(this::fractionOf).sum();
     }
 }

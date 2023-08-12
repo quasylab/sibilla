@@ -110,33 +110,5 @@ public abstract class AbstractModelDefinition<T extends State> implements ModelD
         return environment;
     }
 
-    public boolean isAState(String name) {
-        return getStates().isDefined(name);
-    }
-
-    @Override
-    public int stateArity() {
-        return getStates().arity();
-    }
-
-    @Override
-    public int stateArity(String name) {
-        return getStates().arity(name);
-    }
-
-    @Override
-    public String[] states() {
-        return getStates().states();
-    }
-
-    @Override
-    public Function<RandomGenerator,T> state(String name, double... args) {
-        return getStates().state(name,args);
-    }
-
-    @Override
-    public Function<RandomGenerator,T> state(double... args) {
-        return getStates().get(args);
-    }
 
 }

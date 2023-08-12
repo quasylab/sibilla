@@ -23,9 +23,6 @@
 
 package it.unicam.quasylab.sibilla.langs.lio;
 
-import it.unicam.quasylab.sibilla.core.models.lio.Agent;
-import it.unicam.quasylab.sibilla.core.models.lio.AgentName;
-import it.unicam.quasylab.sibilla.core.models.lio.AgentsDefinition;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaBoolean;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaInteger;
@@ -33,10 +30,7 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * This class provides utility methods for evaluating expressions in the different contexts.

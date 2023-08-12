@@ -64,7 +64,7 @@ public class Main {
 	private static final int REPLICA = 10;
 
 	public static void main(String[] argv) throws FileNotFoundException, InterruptedException, UnknownHostException {
-		AgentsDefinition def = getAgentDefinition();
+		LIOAgentDefinitions def = getAgentDefinition();
 		LIOModel model = new LIOModel(def);
 		LIOIndividualState initial = getInitialState(def, 100000);
 		SimulationEnvironment se = new SimulationEnvironment();
@@ -73,12 +73,12 @@ public class Main {
 
 
 
-	private static LIOIndividualState getInitialState(AgentsDefinition def, int scale) {
+	private static LIOIndividualState getInitialState(LIOAgentDefinitions def, int scale) {
 		String[] agents = IntStream.range(0, N*scale).boxed().map(i -> getAgent(def,scale,i)).toArray(i -> new String[i]);
 		return new LIOIndividualState(def,agents);
 	}
 
-	private static String getAgent(AgentsDefinition def, int scale, Integer i) {
+	private static String getAgent(LIOAgentDefinitions def, int scale, Integer i) {
 		if (i<=INIT_S*scale) { return S; }
 		i = i-INIT_S*scale;
 		if (i<=INIT_E*scale) { return E; }
@@ -87,17 +87,17 @@ public class Main {
 		return R;
 	}
 
-	public static AgentsDefinition getAgentDefinition() {
-		AgentsDefinition def = new AgentsDefinition();
-		Agent agentS = def.addAgent("S");
-		Agent agentE = def.addAgent("E");
-		Agent agentI = def.addAgent("I");
-		Agent agentR = def.addAgent("R");
-		AgentAction exposed = def.addAction("exposed", s -> s.fractionOf(agentI)*infection_probability );
-		AgentAction infected = def.addAction( "infected" , s -> e_to_i_probability );
-		AgentAction recovered = def.addAction( "recovered" , s -> i_to_r_probability );
-		AgentAction lost = def.addAction("loss" , s -> r_to_s_probability );
-		AgentAction external = def.addAction("external" , s -> external_infection_probability );
+	public static LIOAgentDefinitions getAgentDefinition() {
+		LIOAgentDefinitions def = new LIOAgentDefinitions();
+		LIOAgent agentS = def.addAgent("S");
+		LIOAgent agentE = def.addAgent("E");
+		LIOAgent agentI = def.addAgent("I");
+		LIOAgent agentR = def.addAgent("R");
+		LIOAgentAction exposed = def.addAction("exposed", s -> s.fractionOf(agentI)*infection_probability );
+		LIOAgentAction infected = def.addAction( "infected" , s -> e_to_i_probability );
+		LIOAgentAction recovered = def.addAction( "recovered" , s -> i_to_r_probability );
+		LIOAgentAction lost = def.addAction("loss" , s -> r_to_s_probability );
+		LIOAgentAction external = def.addAction("external" , s -> external_infection_probability );
 		agentS.addAction(exposed, agentE);
 		agentS.addAction(external, agentE);
 		agentE.addAction(infected, agentI);

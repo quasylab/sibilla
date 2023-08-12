@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 
 /**
  * The interface <code>YodaType</code> represents
- * the types handled by a Yoda Agent
+ * the types handled by a Yoda LIOAgent
  */
 public interface YodaType {
 

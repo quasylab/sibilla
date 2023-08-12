@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.core.models.slam;
 import it.unicam.quasylab.sibilla.core.models.AbstractModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.function.Function;
@@ -37,7 +38,6 @@ public class SlamModelDefinition extends AbstractModelDefinition<SlamState> {
 
     }
 
-    @Override
     public ParametricDataSet<Function<RandomGenerator, SlamState>> getStates() {
         return null;
     }
@@ -45,5 +45,46 @@ public class SlamModelDefinition extends AbstractModelDefinition<SlamState> {
     @Override
     public Model<SlamState> createModel() {
         return null;
+    }
+
+    @Override
+    public boolean isAnInitialConfiguration(String name) {
+        return getStates().isDefined(name);
+    }
+
+    @Override
+    public Function<RandomGenerator, SlamState> getConfiguration(String name, double[] args) {
+        return null;
+    }
+
+
+    public boolean isAState(String name) {
+        return getStates().isDefined(name);
+    }
+
+    @Override
+    public int defaultConfigurationArity() {
+        return getStates().arity();
+    }
+
+    @Override
+    public int configurationArity(String name) {
+        return getStates().arity(name);
+    }
+
+    @Override
+    public String[] configurations() {
+        return getStates().states();
+    }
+
+
+    @Override
+    public Function<RandomGenerator,SlamState> getDefaultConfiguration(double... args) {
+        return getStates().get(args);
+    }
+
+    @Override
+    public String getStateInfo(String name) {
+        return getStates().getInfo(name);
     }
 }

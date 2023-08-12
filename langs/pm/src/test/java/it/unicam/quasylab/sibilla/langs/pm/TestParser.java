@@ -387,7 +387,7 @@ public class TestParser {
         PopulationRegistry reg = pmg.generatePopulationRegistry(env);
         PopulationModelDefinition def = pmg.getPopulationModelDefinition();
         PopulationModel model = def.createModel();
-        PopulationState state = def.state("balanced").apply(new DefaultRandomGenerator());
+        PopulationState state = def.getConfiguration("balanced").apply(new DefaultRandomGenerator());
         //model.getTransitions()
 
     }

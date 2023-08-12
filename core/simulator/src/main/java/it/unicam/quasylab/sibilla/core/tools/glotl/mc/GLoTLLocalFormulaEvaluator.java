@@ -23,7 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.tools.glotl.mc;
 
-import it.unicam.quasylab.sibilla.core.models.lio.Agent;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgent;
 import it.unicam.quasylab.sibilla.core.models.lio.LIOMixedState;
 import it.unicam.quasylab.sibilla.core.tools.ProbabilityVector;
 import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalFormula;
@@ -36,11 +36,11 @@ import java.util.Queue;
 
 public class GLoTLLocalFormulaEvaluator implements GLoTLbLocalPathProbabilityEvaluator {
 
-    private final LocalFormula<Agent> formula;
+    private final LocalFormula<LIOAgent> formula;
 
-    private final Map<Pair<LIOMixedState, LocalFormula<Agent>>, Double> cache;
+    private final Map<Pair<LIOMixedState, LocalFormula<LIOAgent>>, Double> cache;
 
-    public GLoTLLocalFormulaEvaluator(LocalFormula<Agent> formula) {
+    public GLoTLLocalFormulaEvaluator(LocalFormula<LIOAgent> formula) {
         this.formula = formula;
         cache = new HashMap<>();
     }
@@ -54,11 +54,11 @@ public class GLoTLLocalFormulaEvaluator implements GLoTLbLocalPathProbabilityEva
         if (formula.isRejecting()) {
             return 0.0;
         }
-        Pair<LIOMixedState,LocalFormula<Agent>> element = new Pair<>(state, formula);
+        Pair<LIOMixedState,LocalFormula<LIOAgent>> element = new Pair<>(state, formula);
         return compute(element);
     }
 
-    private double compute(Pair<LIOMixedState, LocalFormula<Agent>> element) {
+    private double compute(Pair<LIOMixedState, LocalFormula<LIOAgent>> element) {
         Queue<PendingElement> elements = new LinkedList<>();
         elements.add(new PendingElement(element));
         double sum = 0.0;
@@ -80,18 +80,18 @@ public class GLoTLLocalFormulaEvaluator implements GLoTLbLocalPathProbabilityEva
         return sum;
     }
 
-    private void addToQueueIfNotInCache(Pair<LIOMixedState, LocalFormula<Agent>> element, Queue<PendingElement> elements) {
+    private void addToQueueIfNotInCache(Pair<LIOMixedState, LocalFormula<LIOAgent>> element, Queue<PendingElement> elements) {
 
     }
 
 
     private class PendingElement {
 
-        private final Pair<LIOMixedState, LocalFormula<Agent>> element;
+        private final Pair<LIOMixedState, LocalFormula<LIOAgent>> element;
 
-        private ProbabilityVector<Pair<LIOMixedState, LocalFormula<Agent>>> vector;
+        private ProbabilityVector<Pair<LIOMixedState, LocalFormula<LIOAgent>>> vector;
 
-        private PendingElement(Pair<LIOMixedState, LocalFormula<Agent>> element) {
+        private PendingElement(Pair<LIOMixedState, LocalFormula<LIOAgent>> element) {
             this.element = element;
         }
 

@@ -23,12 +23,11 @@
 
 package it.unicam.quasylab.sibilla.langs.lio;
 
-import it.unicam.quasylab.sibilla.core.models.lio.AgentsDefinition;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgentDefinitions;
 import it.unicam.quasylab.sibilla.core.util.ImmutableList;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaInteger;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
-import org.antlr.v4.runtime.tree.RuleNode;
 
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,7 @@ public class LIOModelAgentStatesGenerator extends LIOModelAgentDependentChecker 
 
 
 
-    public LIOModelAgentStatesGenerator(ErrorCollector errors, AgentsDefinition definition, Map<String, SibillaValue> constantsAndParameters) {
+    public LIOModelAgentStatesGenerator(ErrorCollector errors, LIOAgentDefinitions definition, Map<String, SibillaValue> constantsAndParameters) {
         super(errors, definition, constantsAndParameters);
     }
 
@@ -75,7 +74,7 @@ public class LIOModelAgentStatesGenerator extends LIOModelAgentDependentChecker 
     private List<SibillaValue> generateValuesFromInterval(LIOModelParser.ExprContext from, LIOModelParser.ExprContext to) {
         return generateValuesFromInterval(
                 evalGlobalExpression(from).intOf(),
-                evalGlobalExpression(to).intOf()
+                evalGlobalExpression(to).intOf()+1
         );
     }
 

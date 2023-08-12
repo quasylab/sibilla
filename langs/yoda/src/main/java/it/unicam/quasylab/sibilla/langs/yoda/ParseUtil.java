@@ -39,13 +39,13 @@ public class ParseUtil {
     private static final String DUPLICATED_ACTION = "Action %s has been already used";
     private static final String EXPECTED_NUMBER_ERROR = "Expected numeric type while is %s";
     private static final String UNKNOWN_ACTION_ERROR = "Action %s can not be resolved";
-    private static final String UNKNOWN_AGENT_ERROR = "Agent or System %s can not be resolved";
+    private static final String UNKNOWN_AGENT_ERROR = "LIOAgent or System %s can not be resolved";
     private static final String UNKNOWN_SYMBOL_ERROR = "Symbol %s can not be resolved";
     private static final String ILLEGAL_SYMBOL_ERROR = "Symbol %s can not be used in this context";
     private static final String UNKNOWN_VARIABLE_ERROR = "Variable %s can not be resolved";
     private static final String WRONG_TYPE_ERROR = "Wrong type! Expected %s actual is %s";
     private static final String ILLEGAL_TYPE_ERROR_ARITHMETIC = "Illegal type! Type %s can not be used in arithmetic expression";
-    private static final String UNKNOWN_ENTITY_ERROR = "Agent or Variable %s can not be resolved";
+    private static final String UNKNOWN_ENTITY_ERROR = "LIOAgent or Variable %s can not be resolved";
     private static final String ILLEGAL_USE_OF_GROUP_EXPRESSION = "Illegal use of a group expression!";
     private static final String RECORD_TYPE_EXECTED = "Record expected where %s is provided";
     private static final String UNKNOWN_FIELD_NAME = "Field %s is not available in type %s";

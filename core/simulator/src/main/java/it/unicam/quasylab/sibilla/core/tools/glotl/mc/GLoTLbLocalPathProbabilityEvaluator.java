@@ -23,9 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.tools.glotl.mc;
 
-import it.unicam.quasylab.sibilla.core.models.lio.Agent;
 import it.unicam.quasylab.sibilla.core.models.lio.LIOMixedState;
-import it.unicam.quasylab.sibilla.core.models.lio.LIOState;
 
 public interface GLoTLbLocalPathProbabilityEvaluator {
 

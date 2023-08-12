@@ -23,9 +23,7 @@
 
 package it.unicam.quasylab.sibilla.langs.lio;
 
-import it.unicam.quasylab.sibilla.core.models.lio.AgentsDefinition;
-import it.unicam.quasylab.sibilla.core.models.lio.LIOCollective;
-import it.unicam.quasylab.sibilla.core.models.lio.LIOModel;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgentDefinitions;
 import it.unicam.quasylab.sibilla.core.models.lio.LIOState;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
@@ -44,7 +42,7 @@ public class LIOModelMeasuresGenerator extends LIOModelAgentDependentChecker {
 
     private final Map<String, ToDoubleFunction<? super LIOState>> measures;
 
-    public LIOModelMeasuresGenerator(ErrorCollector errors, AgentsDefinition definition, Map<String, SibillaValue> constantsAndParameters) {
+    public LIOModelMeasuresGenerator(ErrorCollector errors, LIOAgentDefinitions definition, Map<String, SibillaValue> constantsAndParameters) {
         super(errors, definition, constantsAndParameters);
         this.measures = new HashMap<>();
     }

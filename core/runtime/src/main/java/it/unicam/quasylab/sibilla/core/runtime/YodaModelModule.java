@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.runtime;
 
 
+import it.unicam.quasylab.sibilla.core.models.yoda.YodaSystemState;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaModelGenerationException;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaModelGenerator;
 
@@ -34,6 +35,8 @@ public class YodaModelModule extends AbstractSibillaModule{
 
     public final static String MODULE_NAME = "yoda";
 
+    private ModuleEngine<YodaSystemState> moduleEngine;
+
     @Override
     public String getModuleName() {
         return MODULE_NAME;
@@ -42,7 +45,7 @@ public class YodaModelModule extends AbstractSibillaModule{
     @Override
     public void load(File file) throws CommandExecutionException {
         try {
-            generateDefinition(new YodaModelGenerator(file));
+            generateModuleEngine(new YodaModelGenerator(file));
         } catch (YodaModelGenerationException | IOException e){
             throw new CommandExecutionException(e.getMessage());
         }
@@ -51,7 +54,7 @@ public class YodaModelModule extends AbstractSibillaModule{
     @Override
     public void load(String code) throws CommandExecutionException {
         try {
-            generateDefinition(new YodaModelGenerator(code));
+            generateModuleEngine(new YodaModelGenerator(code));
         } catch (YodaModelGenerationException e){
             throw new CommandExecutionException(e.getMessage());
 
@@ -64,9 +67,13 @@ public class YodaModelModule extends AbstractSibillaModule{
         return null;
     }
 
-    private void generateDefinition(YodaModelGenerator yodaModelGenerator) throws YodaModelGenerationException {
-        setModelDefinition(yodaModelGenerator.getYodaModelDefinition());
+    private void generateModuleEngine(YodaModelGenerator yodaModelGenerator) throws YodaModelGenerationException {
+        this.moduleEngine = new ModuleEngine<>(yodaModelGenerator.getYodaModelDefinition());
     }
 
 
+    @Override
+    protected ModuleEngine<?> getModuleEngine() {
+        return moduleEngine;
+    }
 }

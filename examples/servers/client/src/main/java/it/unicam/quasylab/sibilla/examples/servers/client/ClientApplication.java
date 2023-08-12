@@ -94,7 +94,7 @@ public class ClientApplication implements Serializable {
                 // def.setParameter("N",1000);
                 PopulationModel model = def.createModel();
 
-                new ClientSimulationEnvironment<>(RANDOM_GENERATOR, def, model, def.state().apply(RANDOM_GENERATOR),
+                new ClientSimulationEnvironment<>(RANDOM_GENERATOR, def, model, def.getDefaultConfiguration().apply(RANDOM_GENERATOR),
                                 model.getSamplingFunction(SAMPLINGS, DEADLINE / SAMPLINGS), REPLICA, DEADLINE,
                                 masterServerInfo, SerializerType.FST, submitRepetitions);
 

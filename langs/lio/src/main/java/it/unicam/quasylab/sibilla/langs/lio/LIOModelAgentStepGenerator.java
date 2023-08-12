@@ -23,8 +23,9 @@
 
 package it.unicam.quasylab.sibilla.langs.lio;
 
-import it.unicam.quasylab.sibilla.core.models.lio.Agent;
-import it.unicam.quasylab.sibilla.core.models.lio.AgentsDefinition;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgent;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgentDefinitions;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgentName;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
 public class LIOModelAgentStepGenerator extends LIOModelAgentDependentChecker {
 
     public LIOModelAgentStepGenerator(ErrorCollector errors,
-                                      AgentsDefinition definition,
+                                      LIOAgentDefinitions definition,
                                       Map<String, SibillaValue> constantsAndParameters) {
         super(errors, definition, constantsAndParameters);
     }
@@ -58,13 +59,20 @@ public class LIOModelAgentStepGenerator extends LIOModelAgentDependentChecker {
                 getStepAgentFunction(variableIndexes, step.nextState.getText(), step.stateArguments));
     }
 
-    private Function<SibillaValue[], Agent> getStepAgentFunction(Map<String, Integer> variableIndexes, String name, List<LIOModelParser.ExprContext> stateArguments) {
+    private Function<SibillaValue[], LIOAgent> getStepAgentFunction(Map<String, Integer> variableIndexes, String name, List<LIOModelParser.ExprContext> stateArguments) {
         if (stateArguments.isEmpty()) {
-            Agent nextAgent = definition.getAgent(name);
+            LIOAgent nextAgent = definition.getAgent(name);
             return args -> nextAgent;
         } else {
             List<Function<SibillaValue[], SibillaValue>> argumentEvaluationFunction = stateArguments.stream().map(expr -> expr.accept(ParametricExpressionEvaluator.getAgentDependentExpressionEvaluator(this.errors, variableIndexes, constantsAndParameters))).collect(Collectors.toList());
-            return args -> definition.getAgent(name, argumentEvaluationFunction.stream().map(f -> f.apply(args)).toArray(SibillaValue[]::new));
+            return args -> {
+                LIOAgentName agentName = new LIOAgentName(name, argumentEvaluationFunction.stream().map(f -> f.apply(args)).toArray(SibillaValue[]::new));
+                LIOAgent agent = definition.getAgent(agentName);
+                if (agent == null) {
+                    throw new IllegalStateException("Agent "+agentName+"is unknown");
+                }
+                return agent;
+            };
         }
     }
 

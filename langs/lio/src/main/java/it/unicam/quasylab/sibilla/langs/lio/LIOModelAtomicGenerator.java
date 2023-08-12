@@ -23,17 +23,15 @@
 
 package it.unicam.quasylab.sibilla.langs.lio;
 
-import it.unicam.quasylab.sibilla.core.models.lio.Agent;
-import it.unicam.quasylab.sibilla.core.models.lio.AgentName;
-import it.unicam.quasylab.sibilla.core.models.lio.AgentsDefinition;
-import it.unicam.quasylab.sibilla.core.models.lio.LIOCollective;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgent;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgentName;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgentDefinitions;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -42,9 +40,9 @@ import java.util.stream.Collectors;
  */
 public class LIOModelAtomicGenerator extends LIOModelAgentDependentChecker {
 
-    private final Map<String, Predicate<Agent>> atomic;
+    private final Map<String, Predicate<LIOAgent>> atomic;
 
-    public LIOModelAtomicGenerator(ErrorCollector errors, AgentsDefinition definition, Map<String, SibillaValue> constantsAndParameters) {
+    public LIOModelAtomicGenerator(ErrorCollector errors, LIOAgentDefinitions definition, Map<String, SibillaValue> constantsAndParameters) {
         super(errors, definition, constantsAndParameters);
         this.atomic = new HashMap<>();
     }
@@ -52,12 +50,12 @@ public class LIOModelAtomicGenerator extends LIOModelAgentDependentChecker {
 
     @Override
     public Boolean visitElementAtomic(LIOModelParser.ElementAtomicContext ctx) {
-        List<Predicate<AgentName>> predicates = ctx.states.stream().map(this::getAgentPredicate).collect(Collectors.toList());
+        List<Predicate<LIOAgentName>> predicates = ctx.states.stream().map(this::getAgentPredicate).collect(Collectors.toList());
         this.atomic.put(ctx.name.getText(), a -> predicates.stream().anyMatch(p -> p.test(a.getName())));
         return true;
     }
 
-    private Predicate<AgentName> getAgentPredicate(LIOModelParser.AgentPatternContext agentPatternContext) {
+    private Predicate<LIOAgentName> getAgentPredicate(LIOModelParser.AgentPatternContext agentPatternContext) {
         Map<String, Integer> variableIndexes = getAgentPatternVariableIndexes(agentPatternContext.patternElements);
         String name = agentPatternContext.name.getText();
         Predicate<SibillaValue[]> agentIndexPredicate = getAgentIndexPredicate(variableIndexes, agentPatternContext.guard);
@@ -81,7 +79,7 @@ public class LIOModelAtomicGenerator extends LIOModelAgentDependentChecker {
      *
      * @return the map containing the predicates defined in the model.
      */
-    public Map<String, Predicate<Agent>> getAtomicPropositions() {
+    public Map<String, Predicate<LIOAgent>> getAtomicPropositions() {
         return atomic;
     }
 }

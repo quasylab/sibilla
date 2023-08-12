@@ -92,20 +92,20 @@ public class MainQest {
 	}
 
 
-	private static void runAndPrintExact(int scale, String label, Function<AgentsDefinition,GlobalFormula<Agent, LIOIndividualState>> formulaBuilder, int range) {
-		AgentsDefinition def = getAgentDefinition();
+	private static void runAndPrintExact(int scale, String label, Function<LIOAgentDefinitions,GlobalFormula<LIOAgent, LIOIndividualState>> formulaBuilder, int range) {
+		LIOAgentDefinitions def = getAgentDefinition();
 		LIOModel model = new LIOModel(def);
 		GLoTLDiscreteTimeModelChecker modelChecker = new GLoTLDiscreteTimeModelChecker();
 		ChachedFunction<LIOIndividualState, ProbabilityVector<LIOIndividualState>> cachedNext = new ChachedFunction<>(LIOIndividualState::next);
 		LIOIndividualState initial = getInitialState(def, scale);
-		GlobalFormula<Agent, LIOIndividualState> formula = formulaBuilder.apply(def);
+		GlobalFormula<LIOAgent, LIOIndividualState> formula = formulaBuilder.apply(def);
 		double values = modelChecker.computeProbability(cachedNext, initial, formula, 0.001);
 		//System.out.printf("#SCALE %d STEPS %d REPLICA %d\n\n",scale, range, replica);
 		//System.out.println(label+" = ["+(DoubleStream.of(values).boxed().map(Object::toString).collect(Collectors.joining(",")))+"]");
 	}
 
-	private static void runAndPrintRange(int scale, int replica, int size, String label, BiFunction<Integer, AgentsDefinition,GlobalFormula<Agent, LIOIndividualState>> formulaBuilder) {
-		AgentsDefinition def = getAgentDefinition();
+	private static void runAndPrintRange(int scale, int replica, int size, String label, BiFunction<Integer, LIOAgentDefinitions,GlobalFormula<LIOAgent, LIOIndividualState>> formulaBuilder) {
+		LIOAgentDefinitions def = getAgentDefinition();
 		LIOModel model = new LIOModel(def);
 		GLoTLStatisticalModelChecker modelChecker = new GLoTLStatisticalModelChecker();
 		LIOIndividualState initial = getInitialState(def, scale);
@@ -117,8 +117,8 @@ public class MainQest {
 		System.out.println(label+"_"+scale+"_"+replica+" = ["+(DoubleStream.of(values).boxed().map(Object::toString).collect(Collectors.joining(",")))+"]");
 	}
 
-	private static void runAndPrintRangeExact(int scale, int replica, int size, String label, BiFunction<Integer, AgentsDefinition,GlobalFormula<Agent, LIOIndividualState>> formulaBuilder) {
-		AgentsDefinition def = getAgentDefinition();
+	private static void runAndPrintRangeExact(int scale, int replica, int size, String label, BiFunction<Integer, LIOAgentDefinitions,GlobalFormula<LIOAgent, LIOIndividualState>> formulaBuilder) {
+		LIOAgentDefinitions def = getAgentDefinition();
 		LIOModel model = new LIOModel(def);
 		GLoTLStatisticalModelChecker modelChecker = new GLoTLStatisticalModelChecker();
 		LIOIndividualState initial = getInitialState(def, scale);
@@ -130,17 +130,17 @@ public class MainQest {
 
 	private static void runAllChecking( ) {
 		StringBuilder output = new StringBuilder();
-		AgentsDefinition def = getAgentDefinition();
+		LIOAgentDefinitions def = getAgentDefinition();
 		LIOModel model = new LIOModel(def);
 		GLoTLStatisticalModelChecker modelChecker = new GLoTLStatisticalModelChecker();
 
 		for( int scale: SCALES) {
-			Map<String, GlobalFormula<Agent, LIOIndividualState>> map = getFormulas(def);
+			Map<String, GlobalFormula<LIOAgent, LIOIndividualState>> map = getFormulas(def);
 			LIOIndividualState initial = getInitialState(def, scale);
 			for( int replica: REPLICAS) {
-				for (Map.Entry<String, GlobalFormula<Agent, LIOIndividualState>> e:map.entrySet()) {
+				for (Map.Entry<String, GlobalFormula<LIOAgent, LIOIndividualState>> e:map.entrySet()) {
 					String name = e.getKey();
-					GlobalFormula<Agent, LIOIndividualState> formula = e.getValue();
+					GlobalFormula<LIOAgent, LIOIndividualState> formula = e.getValue();
 					System.out.printf("Checking %s: scale=%d replica=%d\n",name,scale, replica);
 					long start = System.currentTimeMillis();
 					double p = modelChecker.computeProbability(model.nextIndividuals(), initial, formula, replica);
@@ -156,8 +156,8 @@ public class MainQest {
 
 	}
 
-	private static Map<String, GlobalFormula<Agent, LIOIndividualState>> getFormulas(AgentsDefinition def) {
-		Map<String, GlobalFormula<Agent, LIOIndividualState>> map = new HashMap<>();
+	private static Map<String, GlobalFormula<LIOAgent, LIOIndividualState>> getFormulas(LIOAgentDefinitions def) {
+		Map<String, GlobalFormula<LIOAgent, LIOIndividualState>> map = new HashMap<>();
 		map.put("\\phi_{bal}",getPhiBal(def));
 		map.put("\\phi_{1}",getPhi1(def));
 		map.put("\\phi_{2}",getPhi2(def));
@@ -166,43 +166,43 @@ public class MainQest {
 		return map;
 	}
 
-	private static LIOIndividualState getInitialState(AgentsDefinition def, int scale) {
+	private static LIOIndividualState getInitialState(LIOAgentDefinitions def, int scale) {
 		String[] agents = IntStream.range(0, N*scale).boxed().map(i -> getAgent(def,scale,i)).toArray(String[]::new);
 		return new LIOIndividualState(def,agents);
 	}
 
-	private static String getAgent(AgentsDefinition def, int scale, Integer i) {
+	private static String getAgent(LIOAgentDefinitions def, int scale, Integer i) {
 		if (i<=INIT_B*scale) { return B; }
 		return R;
 	}
 
-	public static AgentsDefinition getAgentDefinition() {
-		AgentsDefinition def = new AgentsDefinition();
-		Agent agentR = def.addAgent("R");
-		Agent agentB = def.addAgent("B");
-		AgentAction redAction = def.addAction( "red", s -> s.fractionOf(agentB)*meet_probability );
-		AgentAction blueAction = def.addAction( "blue" , s -> s.fractionOf(agentR)*meet_probability );
+	public static LIOAgentDefinitions getAgentDefinition() {
+		LIOAgentDefinitions def = new LIOAgentDefinitions();
+		LIOAgent agentR = def.addAgent("R");
+		LIOAgent agentB = def.addAgent("B");
+		LIOAgentAction redAction = def.addAction( "red", s -> s.fractionOf(agentB)*meet_probability );
+		LIOAgentAction blueAction = def.addAction( "blue" , s -> s.fractionOf(agentR)*meet_probability );
 		agentR.addAction(blueAction, agentB);
 		agentB.addAction(redAction, agentR);
 		return def;
 	}
 
-	public static LocalFormula<Agent> balancedLocalFormula(AgentsDefinition def) {
-		Agent agentB = def.getAgent("B");
+	public static LocalFormula<LIOAgent> balancedLocalFormula(LIOAgentDefinitions def) {
+		LIOAgent agentB = def.getAgent("B");
 		return new LocalAtomicFormula<>(agentB::equals);
 	}
 
-	public static LocalFormula<Agent> hasChanged(Agent a1, Agent a2) {
+	public static LocalFormula<LIOAgent> hasChanged(LIOAgent a1, LIOAgent a2) {
 		return LocalFormula.imply(new LocalAtomicFormula<>(a1::equals),new LocalNextFormula<>(new LocalAtomicFormula<>(a2::equals)));
 	}
 
-	public static LocalFormula<Agent> hasChanged(AgentsDefinition def) {
-		Agent agentB = def.getAgent("B");
-		Agent agentR = def.getAgent("R");
+	public static LocalFormula<LIOAgent> hasChanged(LIOAgentDefinitions def) {
+		LIOAgent agentB = def.getAgent("B");
+		LIOAgent agentR = def.getAgent("R");
 		return LocalFormula.disjunction(hasChanged(agentB,agentR),hasChanged(agentR,agentB));
 	}
 
-	public static LocalFormula<Agent> phiStable(Agent a1, Agent a2) {
+	public static LocalFormula<LIOAgent> phiStable(LIOAgent a1, LIOAgent a2) {
 		return LocalFormula.imply(new LocalAtomicFormula<>(a1::equals),
 					new LocalNextFormula<>(
 						LocalFormula.imply(new LocalAtomicFormula<>(a2::equals),
@@ -212,9 +212,9 @@ public class MainQest {
 				);
 	}
 
-	public static LocalFormula<Agent> phiStable(AgentsDefinition def) {
-		Agent agentB = def.getAgent("B");
-		Agent agentR = def.getAgent("R");
+	public static LocalFormula<LIOAgent> phiStable(LIOAgentDefinitions def) {
+		LIOAgent agentB = def.getAgent("B");
+		LIOAgent agentR = def.getAgent("R");
 		return LocalFormula.conjunction(
 			phiStable(agentB, agentR),
 			phiStable(agentR, agentB)
@@ -222,33 +222,33 @@ public class MainQest {
 	}
 
 
-	public static GlobalFormula<Agent, LIOIndividualState> getPhiBal(AgentsDefinition def) {
+	public static GlobalFormula<LIOAgent, LIOIndividualState> getPhiBal(LIOAgentDefinitions def) {
 		DoublePredicate dPred = d -> (d>=0.5-EPS)&&(d<=0.5+EPS);
 		return new GlobalFractionOfFormula<>(balancedLocalFormula(def), dPred);
 	}
 
-	public static GlobalFormula<Agent, LIOIndividualState> getPhi1( AgentsDefinition def) {
+	public static GlobalFormula<LIOAgent, LIOIndividualState> getPhi1(LIOAgentDefinitions def) {
 		return getPhi1(K1, def);
 	}
 
-	public static GlobalFormula<Agent, LIOIndividualState> getPhi1(int k, AgentsDefinition def) {
+	public static GlobalFormula<LIOAgent, LIOIndividualState> getPhi1(int k, LIOAgentDefinitions def) {
 		return new GlobalEventuallyFormula<>(0, k, getPhiBal(def));
 	}
 
 
-	public static GlobalFormula<Agent, LIOIndividualState> getPhi2(AgentsDefinition def) {
+	public static GlobalFormula<LIOAgent, LIOIndividualState> getPhi2(LIOAgentDefinitions def) {
 		return getPhi2(K1, K2, def);
 	}
 
-	private static GlobalFormula<Agent, LIOIndividualState> getPhi2(int k1, int k2, AgentsDefinition def) {
+	private static GlobalFormula<LIOAgent, LIOIndividualState> getPhi2(int k1, int k2, LIOAgentDefinitions def) {
 		return new GlobalEventuallyFormula<>(0, k1, new GlobalAlwaysFormula<>(0, k2, getPhiBal(def)));
 	}
 
-	public static GlobalFormula<Agent, LIOIndividualState> getPhi3(AgentsDefinition def) {
+	public static GlobalFormula<LIOAgent, LIOIndividualState> getPhi3(LIOAgentDefinitions def) {
 		return getPhi3(K4, def);
 	}
 
-	private static GlobalFormula<Agent, LIOIndividualState> getPhi3(int k4, AgentsDefinition def) {
+	private static GlobalFormula<LIOAgent, LIOIndividualState> getPhi3(int k4, LIOAgentDefinitions def) {
 		return new GlobalAlwaysFormula<>(0, k4,
 				GlobalFormula.imply(getPhiBal(def),
 						new GlobalFractionOfFormula<>(
@@ -257,7 +257,7 @@ public class MainQest {
 				));
 	}
 
-	private static GlobalFormula<Agent, LIOIndividualState> localStableAfter(int k4, AgentsDefinition def) {
+	private static GlobalFormula<LIOAgent, LIOIndividualState> localStableAfter(int k4, LIOAgentDefinitions def) {
 		return new GlobalAferFormula<>(k4,
 				new GlobalFractionOfFormula<>(
 								phiStable(def),

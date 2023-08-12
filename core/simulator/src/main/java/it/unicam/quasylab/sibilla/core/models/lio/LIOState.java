@@ -32,7 +32,7 @@ import org.apache.commons.math3.random.RandomGenerator;
  * This interface is implemented by LIO representations that are able to perform a computational step.
  *
  */
-public interface LIOState extends LIOCollective, IndexedState<Agent> {
+public interface LIOState extends LIOCollective, IndexedState<LIOAgent> {
 
     /**
      * Given a random generator and the probability matrix, this method returns a sampling of next
@@ -42,7 +42,7 @@ public interface LIOState extends LIOCollective, IndexedState<Agent> {
      * @param matrix          probability matrix
      * @return a sampling of next state.
      */
-    LIOState step(RandomGenerator randomGenerator, ProbabilityMatrix<Agent> matrix);
+    LIOState step(RandomGenerator randomGenerator, ProbabilityMatrix<LIOAgent> matrix);
 
 
     /**
@@ -51,7 +51,7 @@ public interface LIOState extends LIOCollective, IndexedState<Agent> {
      * @param matrix probability matrix representing behaviour of each single agent.
      * @return the probability distribution of states reachable from this one in one state.
      */
-    ProbabilityVector<? extends LIOState> next(ProbabilityMatrix<Agent> matrix);
+    ProbabilityVector<? extends LIOState> next(ProbabilityMatrix<LIOAgent> matrix);
 
 
     ProbabilityVector<? extends LIOState> next();
@@ -61,7 +61,7 @@ public interface LIOState extends LIOCollective, IndexedState<Agent> {
      *
      * @return the agents definition in this state.
      */
-    AgentsDefinition getAgentsDefinition();
+    LIOAgentDefinitions getAgentsDefinition();
 
 
     /**
@@ -75,7 +75,7 @@ public interface LIOState extends LIOCollective, IndexedState<Agent> {
 
 
     @Override
-    default Agent get(int i) {
+    default LIOAgent get(int i) {
         throw new UnsupportedOperationException();
     }
 

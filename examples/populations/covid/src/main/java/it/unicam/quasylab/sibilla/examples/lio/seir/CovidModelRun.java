@@ -46,7 +46,7 @@ public class CovidModelRun {
         ExecutionEnvironment<PopulationState> ee = new ExecutionEnvironment<PopulationState>(
                 new DefaultRandomGenerator(),
                 def.createModel(),
-                def.state()
+                def.getDefaultConfiguration()
         );
         start2(ee);
     }

@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.models.lio;
 
+import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
 import it.unicam.quasylab.sibilla.core.tools.ProbabilityMatrix;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
@@ -35,18 +37,18 @@ import java.util.stream.IntStream;
 /**
  * This class contains the definitions of a set of Interactive Objects.
  */
-public final class AgentsDefinition {
+public final class LIOAgentDefinitions {
 
 
-    private final ArrayList<Agent> agents;
+    private final ArrayList<LIOAgent> agents;
 
-    private final ArrayList<AgentAction> actions;
+    private final ArrayList<LIOAgentAction> actions;
 
-    private final ArrayList<ActionProbabilityFunction> probabilityFunctions;
+    private final ArrayList<LIOActionProbabilityFunction> probabilityFunctions;
 
-    private final Map<AgentName,Agent> agentRegistry;
+    private final Map<LIOAgentName, LIOAgent> agentRegistry;
 
-    private final Map<String,AgentAction> actionRegistry;
+    private final Map<String, LIOAgentAction> actionRegistry;
 
     private final Map<String, Integer> agentArity;
 
@@ -54,7 +56,7 @@ public final class AgentsDefinition {
     /**
      * Create an empty definition.
      */
-    public AgentsDefinition() {
+    public LIOAgentDefinitions() {
         this.agents = new ArrayList<>();
         this.actions = new ArrayList<>();
         this.probabilityFunctions = new ArrayList<>();
@@ -70,7 +72,7 @@ public final class AgentsDefinition {
      * @param name action name.
      * @return the action with the given name.
      */
-    public AgentAction getAction(String name) {
+    public LIOAgentAction getAction(String name) {
         return actionRegistry.get(name);
     }
 
@@ -80,7 +82,7 @@ public final class AgentsDefinition {
      * @param state the state used to compute action probabilities.
      * @return the function associating each action with a probability value.
      */
-    public <S extends LIOCollective> ActionsProbability getActionProbability(S state) {
+    public <S extends LIOCollective> LIOActionsProbability getActionProbability(S state) {
         double[] actionProbabilities = probabilityFunctions.stream().mapToDouble(f -> f.getProbability(state)).toArray();
         return a -> actionProbabilities[a.getIndex()];
     }
@@ -100,8 +102,8 @@ public final class AgentsDefinition {
      * @param state a state.
      * @return the agents probability matrix associated with the given state.
      */
-    public <S extends LIOCollective> ProbabilityMatrix<Agent> getAgentProbabilityMatrix(S state) {
-        ActionsProbability actionsProbability = getActionProbability(state);
+    public <S extends LIOCollective> ProbabilityMatrix<LIOAgent> getAgentProbabilityMatrix(S state) {
+        LIOActionsProbability actionsProbability = getActionProbability(state);
         return new ProbabilityMatrix<>(a -> a.probabilityVector(actionsProbability));
     }
 
@@ -111,7 +113,7 @@ public final class AgentsDefinition {
      * @param i agent index.
      * @return the agent with the given index.
      */
-    public Agent getAgent(int i) {
+    public LIOAgent getAgent(int i) {
         return agents.get(i);
     }
 
@@ -122,8 +124,8 @@ public final class AgentsDefinition {
      * @param indexes indexes of the agent to create
      * @return a reference to the created agent.
      */
-    public Agent addAgent(String name, SibillaValue ... indexes) {
-        return addAgent(new AgentName(name, indexes));
+    public LIOAgent addAgent(String name, SibillaValue ... indexes) {
+        return addAgent(new LIOAgentName(name, indexes));
     }
 
     /**
@@ -134,7 +136,7 @@ public final class AgentsDefinition {
      * @return true if the agent has been successfully created and false if another agent with the same name
      * already exists.
      */
-    public Agent addAgent(AgentName agentName) {
+    public LIOAgent addAgent(LIOAgentName agentName) {
         if (this.agentRegistry.containsKey(agentName)) {
             return this.agentRegistry.get(agentName);
         } else {
@@ -147,7 +149,7 @@ public final class AgentsDefinition {
                         )
                 );
             }
-            Agent newAgent = new Agent(agentName, this.agents.size());
+            LIOAgent newAgent = new LIOAgent(agentName, this.agents.size());
             agents.add(newAgent);
             agentRegistry.put(agentName, newAgent);
             return newAgent;
@@ -172,7 +174,7 @@ public final class AgentsDefinition {
      * @param name the agent name.
      * @return the agent with the given name.
      */
-    public Agent getAgent(AgentName name) {
+    public LIOAgent getAgent(LIOAgentName name) {
         return agentRegistry.get(name);
     }
 
@@ -182,8 +184,8 @@ public final class AgentsDefinition {
      * @param name agent name.
      * @return the index of agent with the given name.
      */
-    public int getAgentIndex(AgentName name) {
-        Agent a = agentRegistry.get(name);
+    public int getAgentIndex(LIOAgentName name) {
+        LIOAgent a = agentRegistry.get(name);
         if (a == null) {
             return -1;
         } else {
@@ -199,7 +201,7 @@ public final class AgentsDefinition {
      * @return the index of agent with the given name and indexes.
      */
     public int getAgentIndex(String name, SibillaValue ... indexes) {
-        return getAgentIndex(new AgentName(name, indexes));
+        return getAgentIndex(new LIOAgentName(name, indexes));
     }
 
     /**
@@ -208,10 +210,10 @@ public final class AgentsDefinition {
      * @param agents a list of agents.
      * @return the multiplicity array of the given list of agents.
      */
-    public int[] getMultiplicity(List<Agent> agents) {
+    public int[] getMultiplicity(List<LIOAgent> agents) {
         return IntStream.range(0, numberOfAgents())
                 .parallel()
-                .map(i -> (int) agents.stream().mapToInt(Agent::getIndex).filter(j -> i==j).count())
+                .map(i -> (int) agents.stream().mapToInt(LIOAgent::getIndex).filter(j -> i==j).count())
                 .toArray();
     }
 
@@ -223,7 +225,7 @@ public final class AgentsDefinition {
      * @return the instance of the new created instance. If an action with the same name already exists,
      * the old instance is returned.
      */
-    public AgentAction addAction(String name) {
+    public LIOAgentAction addAction(String name) {
         return addAction(name, s -> 0.0);
     }
 
@@ -236,11 +238,11 @@ public final class AgentsDefinition {
      * @return the instance of the new created instance or, if an action with the same name already exists,
      * the old instance is returned.
      */
-    public AgentAction addAction(String name, ActionProbabilityFunction function) {
+    public LIOAgentAction addAction(String name, LIOActionProbabilityFunction function) {
         if (actionRegistry.containsKey(name)) {
             return actionRegistry.get(name);
         } else {
-            AgentAction newAction = new AgentAction(name, this.actions.size());
+            LIOAgentAction newAction = new LIOAgentAction(name, this.actions.size());
             this.actionRegistry.put(name, newAction);
             this.actions.add(newAction);
             this.probabilityFunctions.add(function);
@@ -255,8 +257,8 @@ public final class AgentsDefinition {
      * @param function probability function.
      * @return the reference to the changed action.
      */
-    public boolean setActionProbability(String name, ActionProbabilityFunction function) {
-        AgentAction action = getAction(name);
+    public boolean setActionProbability(String name, LIOActionProbabilityFunction function) {
+        LIOAgentAction action = getAction(name);
         if (action == null) {
             return false;
         } else {
@@ -270,7 +272,7 @@ public final class AgentsDefinition {
      * @param action agent action.
      * @param function probability function
      */
-    public void setActionProbability(AgentAction action, ActionProbabilityFunction function) {
+    public void setActionProbability(LIOAgentAction action, LIOActionProbabilityFunction function) {
         probabilityFunctions.set(action.getIndex(), function);
     }
 
@@ -278,7 +280,7 @@ public final class AgentsDefinition {
         return new LIOPopulationFraction(this, agents.stream().mapToDouble(state::fractionOf).toArray());
     }
 
-    public Set<Agent> getAgents(int[] agents) {
+    public Set<LIOAgent> getAgents(int[] agents) {
         return IntStream.of(agents).mapToObj(this::getAgent).collect(Collectors.toSet());
     }
 
@@ -289,18 +291,38 @@ public final class AgentsDefinition {
      * @param indexes agent index values
      * @return the agent with the given name and indexes
      */
-    public Agent getAgent(String name, SibillaValue ... indexes) {
-        return getAgent(new AgentName(name, indexes));
+    public LIOAgent getAgent(String name, SibillaValue ... indexes) {
+        return getAgent(new LIOAgentName(name, indexes));
     }
 
 
-    public void addAgentStep(String name, Predicate<SibillaValue[]> guard, AgentAction action, Function<SibillaValue[],Agent> step) {
-        this.agentRegistry.entrySet().stream().filter(e -> e.getKey().getName().equals(name)).forEach(e -> {
+    public void addAgentStep(String name, Predicate<SibillaValue[]> guard, LIOAgentAction action, Function<SibillaValue[], LIOAgent> step) {
+        this.agentRegistry.entrySet().stream().filter(e -> e.getKey().getName().equals(name)).filter(e -> guard.test(e.getKey().getIndexes())).forEach(e -> {
             e.getValue().addAction(action, step.apply(e.getKey().getIndexes()));
         });
     }
 
-    public Set<Agent> getAgents(Predicate<AgentName> predicate) {
+    public Set<LIOAgent> getAgents(Predicate<LIOAgentName> predicate) {
         return this.agentRegistry.entrySet().stream().filter(e -> predicate.test(e.getKey())).map(Map.Entry::getValue).collect(Collectors.toSet());
     }
+
+    public Map<String,? extends Measure<? super LIOState>> getMeasures() {
+        return this.agents.stream()
+                .map(a -> new SimpleMeasure<LIOState>("%"+a.getName(), s -> s.fractionOf(a)))
+                .collect(Collectors.toMap(SimpleMeasure::getName, sm -> sm));
+    }
+
+    public LIOState getCountingState(int[] occupancy) {
+        if (this.numberOfAgents() != occupancy.length) {
+            throw new IllegalArgumentException(String.format("Illegal argument: Expected an array with %d elements, are %d", this.numberOfAgents(), occupancy.length));
+        }
+        return new LIOCountingState(this, IntStream.of(occupancy).map(i -> (Math.max(i, 0))).toArray());
+    }
+
+    public LIOState getCountingState(Map<LIOAgent, Integer> countingMap) {
+        int[] occupancy = new int[numberOfAgents()];
+        countingMap.forEach((a,i) -> occupancy[a.getIndex()]+=i);
+        return getCountingState(occupancy);
+    }
+
 }

@@ -26,18 +26,18 @@ package it.unicam.quasylab.sibilla.core.models.lio;
 /**
  * Identifies an action performed by an agent.
  */
-public final class AgentAction {
+public final class LIOAgentAction {
 
     private final int index;
     private final String name;
 
     /**
-     * Create a new AgentAction.
+     * Create a new LIOAgentAction.
      *
      * @param name action name.
      * @param index action index.
      */
-    public AgentAction(String name, int index) {
+    public LIOAgentAction(String name, int index) {
         this.name = name;
         this.index = index;
     }

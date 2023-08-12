@@ -1,10 +1,10 @@
 param NUMBER_OF_RED = 10
 param NUMBER_OF_BLUE = 10
 
-param meetingProbability = 0.75
+param meetingProbability = 0.25
 
-action changeInBlue = %B
-action changeInRed  = %R
+action changeInBlue = %R*meetingProbability
+action changeInRed  = %B*meetingProbability
 
 state B =
     changeInRed.R
@@ -14,7 +14,6 @@ state R =
     changeInBlue.B
 endstate
 
-
-system Balanced =
+system InitialConfiguration =
     B#100 | R#100
 endsystem

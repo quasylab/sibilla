@@ -27,7 +27,6 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * This interface implements a factory that can be used to build a model according
@@ -38,12 +37,12 @@ import java.util.function.Predicate;
 public interface ModelDefinition<S extends State> {
 
     /**
-     * Reset the EvaluationEnvironment of the model to its default values.
+     * Reset all the model parameters to their default values.
      */
     void reset();
 
     /**
-     * Reset the parameter name to its default value.
+     * Resets the parameter having the given name to its default value.
      *
      * @param name the name of parameter to reset.
      */
@@ -52,14 +51,15 @@ public interface ModelDefinition<S extends State> {
     /**
      * Return the value associated with the given parameter.
      *
-     * @param name name of parameter.
+     * @param name name of parameter whose value is returned.
      * @return the value associated with the given parameter.
      */
     SibillaValue getParameterValue(String name);
 
     /**
-     * Return the used EvaluationEnvironment.
-     * @return the used EvaluationEnvironment.
+     * Returns the {@link EvaluationEnvironment} containing all the parameters in this model.
+     *
+     * @return the {@link EvaluationEnvironment} containing all the parameters in this model.
      */
     EvaluationEnvironment getEnvironment();
 
@@ -68,35 +68,34 @@ public interface ModelDefinition<S extends State> {
      *
      * @return the number of parameters needed to build default initial state.
      */
-    int stateArity();
-
-    ParametricDataSet<Function<RandomGenerator,S>> getStates();
+    int defaultConfigurationArity();
 
     /**
-     * Returns the number of parameters needed to build initial state <code>name</code>.
+     * Returns the number of parameters needed to build initial configuration having the given name.
      *
-     * @return the number of parameters needed to build initial state <code>name</code>.
+     * @param name the name of the configuration whose number of parameters is returned.
+     * @return the number of parameters needed to build initial configuration having the given name.
      */
-    int stateArity(String name);
+    int configurationArity(String name);
 
     /**
-     * Returns the number of parameters needed to build a model.
+     * Returns the array containing the names of all the parameters in this model.
      *
-     * @return the number of parameters needed to build a model.
+     * @return the array containing the names of all the parameters in this model.
      */
     default String[] getModelParameters() {
-        return new String[0];
+        return getEnvironment().getParameters();
     }
 
     /**
      * Sets the value of parameter <code>name</code>. An {@link IllegalArgumentException} is
      * thrown if the parameter is unknowns.
      *
-     * @param name name of parameter to set.
+     * @param name  name of parameter to set.
      * @param value value of parameter.
      */
     default void setParameter(String name, SibillaValue value) {
-        throw new IllegalArgumentException(String.format("Species %s is unknown!",name));
+        throw new IllegalArgumentException(String.format("Species %s is unknown!", name));
     }
 
     /**
@@ -104,15 +103,15 @@ public interface ModelDefinition<S extends State> {
      *
      * @return the array of possible initial states defined in the model.
      */
-    String[] states();
+    String[] configurations();
 
     /**
-     * Create the state with the given name by using the given arguments.
+     * Returns the configuration associated with the given name by using the given arguments.
      *
      * @param args arguments to use in state creation.
      * @return the default state associated the given arguments.
      */
-    Function<RandomGenerator,S> state(String name, double ... args);
+    Function<RandomGenerator, S> getConfiguration(String name, double... args);
 
     /**
      * Create the default state (that is the first one in the array) with
@@ -121,8 +120,16 @@ public interface ModelDefinition<S extends State> {
      * @param args arguments to use in state creation.
      * @return the default state associated the given arguments.
      */
-    Function<RandomGenerator,S> state(double ... args);
+    Function<RandomGenerator, S> getDefaultConfiguration(double... args);
 
+
+    /**
+     * Returns a string describing the state having the given name.
+     *
+     * @param name the name of the state whose info are provided
+     * @return a string describing the state having the given name.
+     */
+    String getStateInfo(String name);
 
     /**
      * Creates a new {@link Model}.
@@ -131,22 +138,13 @@ public interface ModelDefinition<S extends State> {
      */
     Model<S> createModel();
 
-    /**
-     * Return the array of strings containing all the atomic propositions defined in the model.
-     *
-     * @return the array of strings containing all the atomic propositions defined in the model.
-     */
-    default String[] getPropositions() {
-        return new String[] {};
-    }
 
     /**
-     * Return the atomic proposition, that is a predicate, associated with the given name.
+     * Returns true if the given name is associated with an initial configuration.
      *
-     * @return the atomic proposition, that is a predicate, associated with the given name.
+     * @param name the name is tested the association with an initial configuration.
+     * @return true if the given name is associated with an initial configuration.
      */
-    default Predicate<S> getProposition(String name) {
-        return null;
-    }
+    boolean isAnInitialConfiguration(String name);
 
 }

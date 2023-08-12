@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.models.markov;
 
 import it.unicam.quasylab.sibilla.core.models.*;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.models.util.MappingState;
 import it.unicam.quasylab.sibilla.core.models.util.VariableTable;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
@@ -72,7 +73,6 @@ public class MarkovChainDefinition<M extends MarkovChainModel> extends AbstractM
         this.rules = null;
     }
 
-    @Override
     public ParametricDataSet<Function<RandomGenerator, MappingState>> getStates() {
         if (states == null) {
             states = stateSetBuilder.apply(getEnvironment(),getVariables());
@@ -87,6 +87,11 @@ public class MarkovChainDefinition<M extends MarkovChainModel> extends AbstractM
             model = modelBuilder.apply(getVariables(),getRules(),getMeasures());
         }
         return model;
+    }
+
+    @Override
+    public boolean isAnInitialConfiguration(String name) {
+        return getStates().isDefined(name);
     }
 
     private List<MappingStateUpdate> getRules() {
@@ -110,6 +115,42 @@ public class MarkovChainDefinition<M extends MarkovChainModel> extends AbstractM
         return measures;
     }
 
+
+
+
+    public boolean isAState(String name) {
+        return getStates().isDefined(name);
+    }
+
+    @Override
+    public int defaultConfigurationArity() {
+        return getStates().arity();
+    }
+
+    @Override
+    public int configurationArity(String name) {
+        return getStates().arity(name);
+    }
+
+    @Override
+    public String[] configurations() {
+        return getStates().states();
+    }
+
+    @Override
+    public Function<RandomGenerator,MappingState> getConfiguration(String name, double... args) {
+        return getStates().state(name,args);
+    }
+
+    @Override
+    public Function<RandomGenerator,MappingState> getDefaultConfiguration(double... args) {
+        return getStates().get(args);
+    }
+
+    @Override
+    public String getStateInfo(String name) {
+        return getStates().getInfo(name);
+    }
 
 
 }

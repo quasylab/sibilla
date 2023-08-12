@@ -53,7 +53,7 @@ public class CovidReachability {
         int A = model.indexOf("A");
         int G = model.indexOf("G");
         double p = simulator.reachability(0.01,0.01,200,def.createModel(),
-                def.state(),
+                def.getDefaultConfiguration(),
                 s ->(s.getFraction(A)+s.getFraction(G))>0.5);
         System.out.println("\n\n***"+lambda+"->"+p+"****\n\n");
     }

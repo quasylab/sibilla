@@ -33,7 +33,7 @@ import java.util.function.Predicate;
  */
 public class LIOMeanFieldTrajectory {
 
-    private final AgentsDefinition agentsDefinition;
+    private final LIOAgentDefinitions agentsDefinition;
     private final ArrayList<LIOPopulationFraction> trajectory;
     private  LIOPopulationFraction lastStep;
 
@@ -56,7 +56,7 @@ public class LIOMeanFieldTrajectory {
      * @param a an agent state.
      * @return the fraction of agents in the given state at the given time.
      */
-    public double fractionOf(int time, Agent a) {
+    public double fractionOf(int time, LIOAgent a) {
         return get(time).fractionOf(a);
     }
 
@@ -67,7 +67,7 @@ public class LIOMeanFieldTrajectory {
      * @param predicate an agent predicate.
      * @return the fraction of agents satisfying the given predicate at the given time.
      */
-    public double fractionOf(int time, Predicate<Agent> predicate) {
+    public double fractionOf(int time, Predicate<LIOAgent> predicate) {
         return get(time).fractionOf(predicate);
     }
 
@@ -76,7 +76,7 @@ public class LIOMeanFieldTrajectory {
      *
      * @return the agents definition occurring in this trajectory.
      */
-    public AgentsDefinition getAgentsDefinition() {
+    public LIOAgentDefinitions getAgentsDefinition() {
         return agentsDefinition;
     }
 

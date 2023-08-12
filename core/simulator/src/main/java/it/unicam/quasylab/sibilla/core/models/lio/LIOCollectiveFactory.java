@@ -23,8 +23,6 @@
 
 package it.unicam.quasylab.sibilla.core.models.lio;
 
-import java.util.function.Supplier;
-
 /**
  * This class is used to instantiate a collective in its different representations.
  */
@@ -47,11 +45,11 @@ public class LIOCollectiveFactory {
         return null;
     }
 
-    public LIOMixedState getMixedState(Agent agent) {
+    public LIOMixedState getMixedState(LIOAgent agent) {
         return null;
     }
 
-    public LIOMeanFieldState getMeanFieldState(Agent agent) {
+    public LIOMeanFieldState getMeanFieldState(LIOAgent agent) {
         return null;
     }
 

@@ -52,7 +52,7 @@ public class CovidModel {
         def.setParameter("lambdaMeet",new SibillaDouble(4));
         PopulationModel model = def.createModel();
         SamplingFunction<PopulationState> collection = model.getSamplingFunction(SAMPLINGS,DEADLINE/SAMPLINGS);
-        simulator.simulate(model,def.state(),collection::getSamplingHandler,REPLICA,DEADLINE);
+        simulator.simulate(model,def.getDefaultConfiguration(),collection::getSamplingHandler,REPLICA,DEADLINE);
         collection.printTimeSeries("data","covid_",".data");
     }
 

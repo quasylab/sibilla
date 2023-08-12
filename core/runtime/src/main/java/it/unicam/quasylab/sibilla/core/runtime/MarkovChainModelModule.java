@@ -39,6 +39,8 @@ public class MarkovChainModelModule extends AbstractSibillaModule {
 
     public final static String MODULE_NAME = "markov_chains";
 
+    private ModuleEngine<MappingState> moduleEngine;
+
 
     @Override
     public String getModuleName() {
@@ -76,4 +78,8 @@ public class MarkovChainModelModule extends AbstractSibillaModule {
     }
 
 
+    @Override
+    protected ModuleEngine<?> getModuleEngine() {
+        return moduleEngine;
+    }
 }

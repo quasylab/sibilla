@@ -23,9 +23,9 @@
 
 package it.unicam.quasylab.sibilla.langs.lio;
 
-import it.unicam.quasylab.sibilla.core.models.lio.Agent;
-import it.unicam.quasylab.sibilla.core.models.lio.AgentName;
-import it.unicam.quasylab.sibilla.core.models.lio.AgentsDefinition;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgent;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgentDefinitions;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgentName;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaBoolean;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaInteger;
@@ -43,13 +43,13 @@ import java.util.function.Predicate;
  */
 public class StateExpressionEvaluator extends LIOModelBaseVisitor<CollectiveExpressionEvaluationFunction> {
 
-    private final AgentsDefinition definition;
+    private final LIOAgentDefinitions definition;
 
     private final Map<String, SibillaValue> evaluationContext;
 
     private final ErrorCollector errors;
 
-    public StateExpressionEvaluator(ErrorCollector errors, AgentsDefinition definition, Map<String, SibillaValue> evaluationContext) {
+    public StateExpressionEvaluator(ErrorCollector errors, LIOAgentDefinitions definition, Map<String, SibillaValue> evaluationContext) {
         this.definition = definition;
         this.evaluationContext = evaluationContext;
         this.errors = errors;
@@ -186,17 +186,17 @@ public class StateExpressionEvaluator extends LIOModelBaseVisitor<CollectiveExpr
         if (this.definition == null) {
             return  s -> SibillaValue.ERROR_VALUE;
         }
-        Predicate<AgentName> predicate = getAgentNamePredicate(ctx.agentPattern());
-        Set<Agent> agents = definition.getAgents(predicate);
+        Predicate<LIOAgentName> predicate = getAgentNamePredicate(ctx.agentPattern());
+        Set<LIOAgent> agents = definition.getAgents(predicate);
         if (agents.size()==1) {
-            Agent a = agents.stream().findAny().get();
+            LIOAgent a = agents.stream().findAny().get();
             return s -> new SibillaDouble(s.fractionOf(a));
         } else {
             return s -> new SibillaDouble(s.fractionOf(agents));
         }
     }
 
-    private Predicate<AgentName> getAgentNamePredicate(LIOModelParser.AgentPatternContext agentPattern) {
+    private Predicate<LIOAgentName> getAgentNamePredicate(LIOModelParser.AgentPatternContext agentPattern) {
         String name = agentPattern.name.getText();
         Map<String, Integer> localVariables = getLocalVariables(agentPattern);
         if (agentPattern.guard != null) {

@@ -89,12 +89,12 @@ public class Main {
 	}
 
 
-	private static void runAndPrint(int scale, int step, int replica, String label, BiFunction<Integer,AgentsDefinition,DiscreteTimePathChecker<LIOIndividualState, Boolean>> builder) {
-		AgentsDefinition def = getAgentDefinition();
+	private static void runAndPrint(int scale, int step, int replica, String label, BiFunction<Integer, LIOAgentDefinitions,DiscreteTimePathChecker<LIOIndividualState, Boolean>> builder) {
+		LIOAgentDefinitions def = getAgentDefinition();
 		LIOModel model = new LIOModel(def);
 		DiscreteTimePathChecker<LIOIndividualState, Boolean> f = builder.apply(scale,def);
 		LIOIndividualState initial = getInitialState(def, scale);
-		DiscreteTimeAgentSMC<LIOIndividualState,Agent> smc = new DiscreteTimeAgentSMC<>(model.nextIndividuals(),LIOIndividualState[]::new);
+		DiscreteTimeAgentSMC<LIOIndividualState, LIOAgent> smc = new DiscreteTimeAgentSMC<>(model.nextIndividuals(),LIOIndividualState[]::new);
 		double[] values = smc.compute(initial,f,step,replica);
 		System.out.printf("#SCALE %d STEPS %d REPLICA %d\n\n",scale, step, replica);
 		System.out.println(label+" = ["+(DoubleStream.of(values).boxed().map(Object::toString).collect(Collectors.joining(",")))+"]");
@@ -102,7 +102,7 @@ public class Main {
 
 	private static void runAllChecking( ) {
 		StringBuilder output = new StringBuilder();
-		AgentsDefinition def = getAgentDefinition();
+		LIOAgentDefinitions def = getAgentDefinition();
 		LIOModel model = new LIOModel(def);
 
 		for( int scale: SCALES) {
@@ -113,7 +113,7 @@ public class Main {
 					for (Map.Entry<String, DiscreteTimePathChecker<LIOIndividualState, Boolean>> e:map.entrySet()) {
 						String name = e.getKey();
 						DiscreteTimePathChecker<LIOIndividualState, Boolean> formula = e.getValue();
-						DiscreteTimeAgentSMC<LIOIndividualState,Agent> smc = new DiscreteTimeAgentSMC<>(model.nextIndividuals(),LIOIndividualState[]::new);
+						DiscreteTimeAgentSMC<LIOIndividualState, LIOAgent> smc = new DiscreteTimeAgentSMC<>(model.nextIndividuals(),LIOIndividualState[]::new);
 						System.out.printf("Checking %s: scale=%d step=%d replica=%d\n",name,scale,step,replica);
 						long start = System.currentTimeMillis();
 						smc.compute(initial,formula,step,replica);
@@ -130,7 +130,7 @@ public class Main {
 
 	}
 
-	private static Map<String, DiscreteTimePathChecker<LIOIndividualState, Boolean>> getFormulas(int scale, AgentsDefinition def) {
+	private static Map<String, DiscreteTimePathChecker<LIOIndividualState, Boolean>> getFormulas(int scale, LIOAgentDefinitions def) {
 		Map<String, DiscreteTimePathChecker<LIOIndividualState, Boolean>> map = new HashMap<>();
 //		map.put("\\phi_{bal}",getPhiBal(scale,def));
 		map.put("\\phi_{1}",getPhi1(scale,def));
@@ -140,43 +140,43 @@ public class Main {
 		return map;
 	}
 
-	private static LIOIndividualState getInitialState(AgentsDefinition def, int scale) {
+	private static LIOIndividualState getInitialState(LIOAgentDefinitions def, int scale) {
 		String[] agents = IntStream.range(0, N*scale).boxed().map(i -> getAgent(def,scale,i)).toArray(String[]::new);
 		return new LIOIndividualState(def,agents);
 	}
 
-	private static String getAgent(AgentsDefinition def, int scale, Integer i) {
+	private static String getAgent(LIOAgentDefinitions def, int scale, Integer i) {
 		if (i<=INIT_B*scale) { return B; }
 		return R;
 	}
 
-	public static AgentsDefinition getAgentDefinition() {
-		AgentsDefinition def = new AgentsDefinition();
-		Agent agentR = def.addAgent("R");
-		Agent agentB = def.addAgent("B");
-		AgentAction redAction = def.addAction( "red", s -> s.fractionOf(agentB)*meet_probability );
-		AgentAction blueAction = def.addAction( "blue" , s -> s.fractionOf(agentR)*meet_probability );
+	public static LIOAgentDefinitions getAgentDefinition() {
+		LIOAgentDefinitions def = new LIOAgentDefinitions();
+		LIOAgent agentR = def.addAgent("R");
+		LIOAgent agentB = def.addAgent("B");
+		LIOAgentAction redAction = def.addAction( "red", s -> s.fractionOf(agentB)*meet_probability );
+		LIOAgentAction blueAction = def.addAction( "blue" , s -> s.fractionOf(agentR)*meet_probability );
 		agentR.addAction(blueAction, agentB);
 		agentB.addAction(redAction, agentR);
 		return def;
 	}
 
-	public static DiscreteTimePathChecker<Agent,Boolean> balancedLocalFormula(AgentsDefinition def) {
-		Agent agentB = def.getAgent("B");
+	public static DiscreteTimePathChecker<LIOAgent,Boolean> balancedLocalFormula(LIOAgentDefinitions def) {
+		LIOAgent agentB = def.getAgent("B");
 		return DiscreteTimeAgentSMC.getAtomic(agentB::equals);
 	}
 
-	public static DiscreteTimePathChecker<Agent,Boolean> hasChanged(Agent a1, Agent a2) {
+	public static DiscreteTimePathChecker<LIOAgent,Boolean> hasChanged(LIOAgent a1, LIOAgent a2) {
 		return DiscreteTimeAgentSMC.getImply(DiscreteTimeAgentSMC.getAtomic(a1::equals),DiscreteTimeAgentSMC.getNext(DiscreteTimeAgentSMC.getAtomic(a2::equals)));
 	}
 
-	public static DiscreteTimePathChecker<Agent,Boolean> hasChanged(AgentsDefinition def) {
-		Agent agentB = def.getAgent("B");
-		Agent agentR = def.getAgent("R");
+	public static DiscreteTimePathChecker<LIOAgent,Boolean> hasChanged(LIOAgentDefinitions def) {
+		LIOAgent agentB = def.getAgent("B");
+		LIOAgent agentR = def.getAgent("R");
 		return DiscreteTimeAgentSMC.getDisjunction(hasChanged(agentB,agentR),hasChanged(agentR,agentB));
 	}
 
-	public static DiscreteTimePathChecker<Agent,Boolean> phiStable(Agent a1, Agent a2) {
+	public static DiscreteTimePathChecker<LIOAgent,Boolean> phiStable(LIOAgent a1, LIOAgent a2) {
 		return DiscreteTimeAgentSMC.getImply(
 			DiscreteTimeAgentSMC.getAtomic(a1::equals) ,
 			DiscreteTimeAgentSMC.getNext(
@@ -188,9 +188,9 @@ public class Main {
 		);
 	}
 
-	public static DiscreteTimePathChecker<Agent,Boolean> phiStable(AgentsDefinition def) {
-		Agent agentB = def.getAgent("B");
-		Agent agentR = def.getAgent("R");
+	public static DiscreteTimePathChecker<LIOAgent,Boolean> phiStable(LIOAgentDefinitions def) {
+		LIOAgent agentB = def.getAgent("B");
+		LIOAgent agentR = def.getAgent("R");
 		return DiscreteTimeAgentSMC.getConjunction(
 			phiStable(agentB, agentR),
 			phiStable(agentR, agentB)
@@ -198,26 +198,26 @@ public class Main {
 	}
 
 
-	public static DiscreteTimePathChecker<LIOIndividualState, Boolean> getPhiBal(int scale, AgentsDefinition def) {
+	public static DiscreteTimePathChecker<LIOIndividualState, Boolean> getPhiBal(int scale, LIOAgentDefinitions def) {
 		DoublePredicate dPred = d -> (d>=0.5-EPS)&&(d<=0.5+EPS);
 		return DiscreteTimeAgentSMC.getFractionOf(scale*N, balancedLocalFormula(def), dPred);
 	}
 
-	public static DiscreteTimePathChecker<LIOIndividualState, Boolean> getPhi1(int scale, AgentsDefinition def) {
+	public static DiscreteTimePathChecker<LIOIndividualState, Boolean> getPhi1(int scale, LIOAgentDefinitions def) {
 		return DiscreteTimeAgentSMC.getEventually(K1, getPhiBal(scale, def));
 	}
 
-	public static DiscreteTimePathChecker<LIOIndividualState, Boolean> getPhi2(int scale, AgentsDefinition def) {
+	public static DiscreteTimePathChecker<LIOIndividualState, Boolean> getPhi2(int scale, LIOAgentDefinitions def) {
 		DiscreteTimePathChecker<LIOIndividualState, Boolean> phiBal = getPhiBal(scale,def);
 		return DiscreteTimeAgentSMC.getImply(DiscreteTimeAgentSMC.getNegation(phiBal),DiscreteTimeAgentSMC.getEventually(K3,DiscreteTimeAgentSMC.getGlobally(K4,phiBal)));
 	}
 
-	public static DiscreteTimePathChecker<LIOIndividualState, Boolean> getPhi3(int scale, AgentsDefinition def) {
+	public static DiscreteTimePathChecker<LIOIndividualState, Boolean> getPhi3(int scale, LIOAgentDefinitions def) {
 		DiscreteTimePathChecker<LIOIndividualState, Boolean> phiBal = getPhiBal(scale,def);
 		return DiscreteTimeAgentSMC.getImply(phiBal,DiscreteTimeAgentSMC.getFractionOf(scale*N,hasChanged(def),d -> d<EPS2));
 	}
 
-	public static DiscreteTimePathChecker<LIOIndividualState, Boolean> getPhi4(int scale, AgentsDefinition def) {
+	public static DiscreteTimePathChecker<LIOIndividualState, Boolean> getPhi4(int scale, LIOAgentDefinitions def) {
 		return DiscreteTimeAgentSMC.getFractionOf(
 				scale*N,
 				phiStable(def),

@@ -53,7 +53,7 @@ public class InteractiveSimulation extends Application {
         ExecutionEnvironment<PopulationState> ee = new ExecutionEnvironment<>(
                 new DefaultRandomGenerator(),
                 def.createModel(),
-                def.state()
+                def.getDefaultConfiguration()
         );
 
 

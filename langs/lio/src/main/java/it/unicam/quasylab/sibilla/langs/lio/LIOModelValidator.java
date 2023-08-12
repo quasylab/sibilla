@@ -160,7 +160,7 @@ public class LIOModelValidator extends LIOModelParseTreeChecker {
 
     private void validateAgentStep(Map<String, LIOType> localParameters, LIOModelParser.AgentStepContext agentStepContext) {
         if (agentStepContext.guard != null) {
-            checkType(LIOType.LIO_BOOLEAN, new TypeInferenceVisitor(LIOTypeResolver.resolverOf(localParameters), errors), agentStepContext.guard);
+            checkType(LIOType.LIO_BOOLEAN, new TypeInferenceVisitor(LIOTypeResolver.resolverOf(localParameters).orElse(LIOTypeResolver.resolverOf(typeMap)), errors), agentStepContext.guard);
         }
         checkAgentPrototype(localParameters, agentStepContext.nextState, agentStepContext.stateArguments);
     }
@@ -369,7 +369,7 @@ public class LIOModelValidator extends LIOModelParseTreeChecker {
 
         @Override
         public Boolean visitPopulationExpressionIfThenElse(LIOModelParser.PopulationExpressionIfThenElseContext ctx) {
-            return checkBoolean(LIOTypeResolver.resolverOf(arguments), ctx.guard)
+            return checkBoolean(LIOTypeResolver.resolverOf(arguments).orElse(LIOTypeResolver.resolverOf(typeMap)), ctx.guard)
                     & ctx.thenPopulation.accept(this)
                     & ctx.elsePopulation.accept(this);
         }
@@ -382,7 +382,7 @@ public class LIOModelValidator extends LIOModelParseTreeChecker {
         @Override
         public Boolean visitPopulationExpressionAgent(LIOModelParser.PopulationExpressionAgentContext ctx) {
             return checkStateArity(ctx.name, ctx.stateArguments.size())
-                    & ctx.stateArguments.stream().allMatch(expr -> checkInteger(LIOTypeResolver.resolverOf(arguments), expr))
+                    & ctx.stateArguments.stream().allMatch(expr -> checkInteger(LIOTypeResolver.resolverOf(arguments).orElse(LIOTypeResolver.resolverOf(typeMap)), expr))
                     & (ctx.size == null || checkInteger(LIOTypeResolver.resolverOf(arguments), ctx.size));
         }
     }

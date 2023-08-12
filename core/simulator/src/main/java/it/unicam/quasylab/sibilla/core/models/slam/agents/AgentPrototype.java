@@ -31,7 +31,7 @@ import it.unicam.quasylab.sibilla.core.models.slam.data.SlamValue;
 import java.util.function.Function;
 
 /**
- * Instances of this class are used to build an Agent given a set of arguments.
+ * Instances of this class are used to build an LIOAgent given a set of arguments.
  */
 public class AgentPrototype {
     private final AgentName agentName;

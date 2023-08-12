@@ -33,12 +33,12 @@ import java.util.stream.Collector;
 /**
  * Describes the behaviour of a single agent in a network of interactive objects.
  */
-public final class Agent {
+public final class LIOAgent {
 
     private final int index;
-    private final AgentName name;
+    private final LIOAgentName name;
 
-    private final List<Pair<AgentAction,Agent>> actions;
+    private final List<Pair<LIOAgentAction, LIOAgent>> actions;
 
     /**
      * Create a new agent with the given name and given index.
@@ -46,7 +46,7 @@ public final class Agent {
      * @param name agent name.
      * @param index agent index.
      */
-    public Agent(AgentName name, int index) {
+    public LIOAgent(LIOAgentName name, int index) {
         this.index = index;
         this.name = name;
         this.actions = new LinkedList<>();
@@ -57,7 +57,7 @@ public final class Agent {
      * @param action action performed.
      * @param next next agent state.
      */
-    public void addAction(AgentAction action, Agent next) {
+    public void addAction(LIOAgentAction action, LIOAgent next) {
         actions.add(new Pair<>(action,next));
     }
 
@@ -68,8 +68,8 @@ public final class Agent {
      * @param distribution a function associating each action with a probability value.
      * @return List of pairs used to compute agent next state
      */
-    public ProbabilityVector<Agent> probabilityVector(ActionsProbability distribution) {
-        ProbabilityVector<Agent> result =  actions.stream()
+    public ProbabilityVector<LIOAgent> probabilityVector(LIOActionsProbability distribution) {
+        ProbabilityVector<LIOAgent> result =  actions.stream()
                 .map(p -> new Pair<>(distribution.probabilityOf(p.getKey()),p.getValue()))
                 .filter(p -> p.getKey() > 0.0 )
                 .collect(Collector.of(ProbabilityVector::new, (v,p) -> v.add(p.getValue(),
@@ -92,7 +92,7 @@ public final class Agent {
      *
      * @return agent name.
      */
-    public AgentName getName() {
+    public LIOAgentName getName() {
         return name;
     }
 
@@ -105,7 +105,7 @@ public final class Agent {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Agent agent = (Agent) o;
+        LIOAgent agent = (LIOAgent) o;
         return index == agent.index;
     }
 

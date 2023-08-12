@@ -32,31 +32,31 @@ import java.util.stream.IntStream;
 public class LIOPopulationFraction implements LIOCollective {
 
     private final double[] populationFraction;
-    private final AgentsDefinition agentsDefinition;
+    private final LIOAgentDefinitions agentsDefinition;
 
-    protected LIOPopulationFraction(AgentsDefinition agentsDefinition, double[] populationFraction) {
+    protected LIOPopulationFraction(LIOAgentDefinitions agentsDefinition, double[] populationFraction) {
         this.agentsDefinition = agentsDefinition;
         this.populationFraction = populationFraction;
     }
 
     @Override
-    public double fractionOf(Agent a) {
+    public double fractionOf(LIOAgent a) {
         return populationFraction[a.getIndex()];
     }
 
     @Override
-    public double fractionOf(Predicate<Agent> predicate) {
+    public double fractionOf(Predicate<LIOAgent> predicate) {
         return IntStream.range(0, populationFraction.length)
                 .filter(i -> predicate.test(agentsDefinition.getAgent(i)))
                 .mapToDouble(i -> populationFraction[i]).sum();
     }
 
     @Override
-    public Set<Agent> getAgents() {
+    public Set<LIOAgent> getAgents() {
         return agentsDefinition.getAgents(IntStream.range(0, populationFraction.length).filter(i -> i>0).toArray());
     }
 
-    public LIOPopulationFraction multuply(ProbabilityMatrix<Agent> matrix) {
+    public LIOPopulationFraction multuply(ProbabilityMatrix<LIOAgent> matrix) {
         double[] result = new double[populationFraction.length];
         matrix.iterate((a1, pv) -> pv.iterate((a2,p) -> {
                 result[a2.getIndex()] += populationFraction[a1.getIndex()]*p;

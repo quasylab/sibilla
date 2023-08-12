@@ -1,0 +1,37 @@
+param NUMBER_OF_RED = 10
+param NUMBER_OF_BLUE = 10
+
+param meetingProbability = 0.25
+
+param K = 5
+
+action perceiveR = %R[_]*meetingProbability
+action perceiveB  = %B[_]*meetingProbability
+
+state B[ i:0 .. K ] =
+    [i>0] perceiveB.B[i-1]
+    + [i==0] perceiveB.R[0]
+    + [i<K] perceiveR.B[i+1]
+endstate
+
+state R[ i:0 .. K ] =
+   [i>0] perceiveR.R[i-1]
+   + [i==0] perceiveR.R[0]
+   + [i<K] perceiveB.R[i+1]
+endstate
+
+system InitialConfiguration =
+    B[K]#100 | R[K]#100
+endsystem
+
+measure fractionOfR = %R[_]
+
+measure fractionOfB = %B[_]
+
+measure fractionOfRWithHighConfidence = %R[i | i>3 ]
+
+measure fractionOfBWithHighConfidence = %B[i | i>3 ]
+
+measure fractionOfRWithLowConfidence = %R[i | i<2 ]
+
+measure fractionOfBWithLowConfidence = %B[i | i<2 ]

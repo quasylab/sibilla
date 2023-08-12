@@ -23,12 +23,10 @@
 
 package it.unicam.quasylab.sibilla.core.tools.glotl.mc;
 
-import it.unicam.quasylab.sibilla.core.models.lio.Agent;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgent;
 import it.unicam.quasylab.sibilla.core.models.lio.LIOCountingState;
 import it.unicam.quasylab.sibilla.core.models.lio.LIOMixedState;
-import it.unicam.quasylab.sibilla.core.models.lio.LIOState;
 
-import java.util.HashMap;
 import java.util.function.DoublePredicate;
 
 public class GLoTLbModelCheckerLocalProbability extends GLoTLbModelCheckerAbstract {
@@ -36,9 +34,9 @@ public class GLoTLbModelCheckerLocalProbability extends GLoTLbModelCheckerAbstra
 
     private final DoublePredicate guard;
 
-    private final Agent agent;
+    private final LIOAgent agent;
 
-    public GLoTLbModelCheckerLocalProbability(Agent agent, GLoTLbLocalPathProbabilityEvaluator prop, DoublePredicate guard) {
+    public GLoTLbModelCheckerLocalProbability(LIOAgent agent, GLoTLbLocalPathProbabilityEvaluator prop, DoublePredicate guard) {
         this.agent = agent;
         this.prop = prop;
         this.guard = guard;

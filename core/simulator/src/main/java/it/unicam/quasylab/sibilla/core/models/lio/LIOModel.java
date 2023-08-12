@@ -25,7 +25,6 @@ package it.unicam.quasylab.sibilla.core.models.lio;
 
 import it.unicam.quasylab.sibilla.core.models.AbstractModel;
 import it.unicam.quasylab.sibilla.core.models.DiscreteTimeModel;
-import it.unicam.quasylab.sibilla.core.models.TimeStep;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultSimulationCursor;
 import it.unicam.quasylab.sibilla.core.simulator.DiscreteTimeSimulationStepFunction;
 import it.unicam.quasylab.sibilla.core.simulator.SimulatorCursor;
@@ -34,7 +33,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Optional;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -44,15 +43,15 @@ import java.util.function.Predicate;
  */
 public class LIOModel extends AbstractModel<LIOState> implements DiscreteTimeModel<LIOState> {
 
-    private final AgentsDefinition definitions;
+    private final LIOAgentDefinitions definitions;
 
     /**
      * Creates a new model with the given definitions.
      *
      * @param definitions agent definitions.
      */
-    public LIOModel(AgentsDefinition definitions) {
-        this(definitions, Map.of(), Map.of());
+    public LIOModel(LIOAgentDefinitions definitions) {
+        this(definitions, new TreeMap<>(), Map.of());
     }
 
 
@@ -62,9 +61,10 @@ public class LIOModel extends AbstractModel<LIOState> implements DiscreteTimeMod
      *
      * @param definitions agent definitions.
      */
-    public LIOModel(AgentsDefinition definitions, Map<String, Measure<? super LIOState>> measures, Map<String, Predicate<? super LIOState>> predicates) {
+    public LIOModel(LIOAgentDefinitions definitions, Map<String, Measure<? super LIOState>> measures, Map<String, Predicate<? super LIOState>> predicates) {
         super(measures, predicates);
         this.definitions = definitions;
+        super.measuresTable.putAll(this.definitions.getMeasures());
     }
 
     @Override
@@ -107,4 +107,7 @@ public class LIOModel extends AbstractModel<LIOState> implements DiscreteTimeMod
         return (rg, state) -> state.step(rg, definitions.getAgentProbabilityMatrix(state));
     }
 
+    public LIOAgentDefinitions getAgentDefinitions() {
+        return this.definitions;
+    }
 }

@@ -41,6 +41,9 @@ public class LIOMeanFieldState implements LIOState {
 
     private final int time;
 
+    public LIOMeanFieldState(LIOState state) {
+        this(new LIOMeanFieldTrajectory(state), 0);
+    }
 
 
     public LIOMeanFieldState(LIOMeanFieldTrajectory trajectory, int time) {
@@ -50,23 +53,23 @@ public class LIOMeanFieldState implements LIOState {
 
 
     @Override
-    public double fractionOf(Agent a) {
+    public double fractionOf(LIOAgent a) {
         return trajectory.fractionOf(time, a);
     }
 
     @Override
-    public double fractionOf(Predicate<Agent> predicate) {
+    public double fractionOf(Predicate<LIOAgent> predicate) {
         return trajectory.fractionOf(time, predicate);
     }
 
     @Override
-    public Set<Agent> getAgents() {
+    public Set<LIOAgent> getAgents() {
         return null;
     }
 
 
     @Override
-    public LIOMeanFieldState step(RandomGenerator randomGenerator, ProbabilityMatrix<Agent> matrix) {
+    public LIOMeanFieldState step(RandomGenerator randomGenerator, ProbabilityMatrix<LIOAgent> matrix) {
         return step();
     }
 
@@ -76,7 +79,7 @@ public class LIOMeanFieldState implements LIOState {
 
 
     @Override
-    public ProbabilityVector<LIOMeanFieldState> next(ProbabilityMatrix<Agent> matrix) {
+    public ProbabilityVector<LIOMeanFieldState> next(ProbabilityMatrix<LIOAgent> matrix) {
         return next();
     }
 
@@ -86,7 +89,7 @@ public class LIOMeanFieldState implements LIOState {
     }
 
     @Override
-    public AgentsDefinition getAgentsDefinition() {
+    public LIOAgentDefinitions getAgentsDefinition() {
         return trajectory.getAgentsDefinition();
     }
 

@@ -23,10 +23,10 @@
 
 package it.unicam.quasylab.sibilla.core.tools.glotl;
 
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgent;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgentDefinitions;
 import it.unicam.quasylab.sibilla.core.tools.ProbabilityVector;
-import it.unicam.quasylab.sibilla.core.models.lio.Agent;
-import it.unicam.quasylab.sibilla.core.models.lio.AgentAction;
-import it.unicam.quasylab.sibilla.core.models.lio.AgentsDefinition;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgentAction;
 import it.unicam.quasylab.sibilla.core.models.lio.LIOIndividualState;
 import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalEventuallyFormula;
 import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalFormula;
@@ -44,7 +44,7 @@ class DiscreteTimeModelCheckerTest {
     @Test
     public void testProbabilityTime() {
         GLoTLDiscreteTimeModelChecker dtmc = new GLoTLDiscreteTimeModelChecker();
-        AgentsDefinition def = getAgentDefinition();
+        LIOAgentDefinitions def = getAgentDefinition();
         int stateZero = def.getAgentIndex("0");
         int stateOne = def.getAgentIndex("1");
         LIOIndividualState start = getInitialState(def,5, 5);
@@ -86,7 +86,7 @@ class DiscreteTimeModelCheckerTest {
     @Test
     public void testInsertionTime() {
         GLoTLDiscreteTimeModelChecker dtmc = new GLoTLDiscreteTimeModelChecker();
-        AgentsDefinition def = getAgentDefinition();
+        LIOAgentDefinitions def = getAgentDefinition();
         int stateZero = def.getAgentIndex("0");
         int stateOne = def.getAgentIndex("1");
         long startTime = System.currentTimeMillis();
@@ -152,7 +152,7 @@ class DiscreteTimeModelCheckerTest {
     @Test
     public void testReachAllZeros() {
         GLoTLDiscreteTimeModelChecker dtmc = new GLoTLDiscreteTimeModelChecker();
-        AgentsDefinition def = getAgentDefinition();
+        LIOAgentDefinitions def = getAgentDefinition();
         int stateZero = def.getAgentIndex("0");
         int stateOne = def.getAgentIndex("1");
         long startTime = System.currentTimeMillis();
@@ -167,26 +167,26 @@ class DiscreteTimeModelCheckerTest {
     }
 
 
-    public GlobalFormula<Agent, LIOIndividualState> getAllOneFormula(int stateZero, int stateOne) {
+    public GlobalFormula<LIOAgent, LIOIndividualState> getAllOneFormula(int stateZero, int stateOne) {
         return new GlobalFractionOfFormula<>(new LocalAtomicFormula<>(a -> (a.getIndex()==stateOne)), d -> d>=1.0);
     }
 
-    public GlobalFormula<Agent, LIOIndividualState> getEventuallyAllOneFormula(int from, int to, int stateZero, int stateOne) {
+    public GlobalFormula<LIOAgent, LIOIndividualState> getEventuallyAllOneFormula(int from, int to, int stateZero, int stateOne) {
         return new GlobalEventuallyFormula<>(from, to, getAllOneFormula(stateZero, stateOne));
     }
 
-    public AgentsDefinition getAgentDefinition() {
-        AgentsDefinition def = new AgentsDefinition();
-        Agent stateZero = def.addAgent("0");
-        Agent stateOne = def.addAgent("1");
-        AgentAction beOne = def.addAction( "be1", s -> 0.5 );
-        AgentAction beZero = def.addAction( "be0" , s -> 0.5 );
+    public LIOAgentDefinitions getAgentDefinition() {
+        LIOAgentDefinitions def = new LIOAgentDefinitions();
+        LIOAgent stateZero = def.addAgent("0");
+        LIOAgent stateOne = def.addAgent("1");
+        LIOAgentAction beOne = def.addAction( "be1", s -> 0.5 );
+        LIOAgentAction beZero = def.addAction( "be0" , s -> 0.5 );
         stateZero.addAction(beOne, stateOne);
         stateOne.addAction(beZero, stateZero);
         return def;
     }
 
-    private static LIOIndividualState getInitialState(AgentsDefinition def, int numberOfZeros, int numberOfOnes) {
+    private static LIOIndividualState getInitialState(LIOAgentDefinitions def, int numberOfZeros, int numberOfOnes) {
         int stateZero = def.getAgentIndex("0");
         int stateOne = def.getAgentIndex("1");
         return new LIOIndividualState(def, IntStream.range(0,numberOfOnes+numberOfZeros).map(i -> (i<numberOfOnes?stateZero:stateOne)).toArray());

@@ -46,7 +46,7 @@ public class RBTest {
 
     @Test
     public void testAgentDefinition() {
-        AgentsDefinition def = getAgentDefinition(0.5);
+        LIOAgentDefinitions def = getAgentDefinition(0.5);
         assertNotNull(def.getAgent("B"));
         assertNotNull(def.getAgent("R"));
     }
@@ -54,22 +54,22 @@ public class RBTest {
 
     @Test
     public void testBehaviourOfAgentB() {
-        AgentsDefinition def = getAgentDefinition(0.5);
-        Agent a = def.getAgent("B");
-        Agent b = def.getAgent("R");
-        ActionsProbability prob = def.getActionProbability(getInitialState(def,10,10));
-        ProbabilityVector<Agent> next = a.probabilityVector(prob);
+        LIOAgentDefinitions def = getAgentDefinition(0.5);
+        LIOAgent a = def.getAgent("B");
+        LIOAgent b = def.getAgent("R");
+        LIOActionsProbability prob = def.getActionProbability(getInitialState(def,10,10));
+        ProbabilityVector<LIOAgent> next = a.probabilityVector(prob);
         assertEquals(2,next.size());
         assertEquals(0.25,next.getProbability(b));
     }
 
     @Test
     public void testBehaviourOfAgentR() {
-        AgentsDefinition def = getAgentDefinition(0.5);
-        Agent a = def.getAgent("R");
-        Agent b = def.getAgent("B");
-        ActionsProbability prob = def.getActionProbability(getInitialState(def,10,10));
-        ProbabilityVector<Agent> next = a.probabilityVector(prob);
+        LIOAgentDefinitions def = getAgentDefinition(0.5);
+        LIOAgent a = def.getAgent("R");
+        LIOAgent b = def.getAgent("B");
+        LIOActionsProbability prob = def.getActionProbability(getInitialState(def,10,10));
+        ProbabilityVector<LIOAgent> next = a.probabilityVector(prob);
         assertEquals(2,next.size());
         assertEquals(0.25,next.getProbability(b));
     }
@@ -77,9 +77,9 @@ public class RBTest {
     @Test
     public void testStep() {
         DefaultRandomGenerator rg = new DefaultRandomGenerator();
-        AgentsDefinition def = getAgentDefinition(1);
-        Agent agentR = def.getAgent("R");
-        Agent agentB = def.getAgent("B");
+        LIOAgentDefinitions def = getAgentDefinition(1);
+        LIOAgent agentR = def.getAgent("R");
+        LIOAgent agentB = def.getAgent("B");
         LIOIndividualState s = getInitialState(def,100000,100000);
         assertEquals(0.5,s.fractionOf(agentB));
         assertEquals(0.5,s.fractionOf(agentR));
@@ -93,38 +93,38 @@ public class RBTest {
 
     @Test
     public void testAtomic() {
-        AgentsDefinition def = getAgentDefinition(0.5);
+        LIOAgentDefinitions def = getAgentDefinition(0.5);
         LIOModel model = new LIOModel(def);
-        LIOIndividualState initial = getInitialState(def, 200000,0);
+        LIOIndividualState initial = getInitialState(def, 100,0);
         DiscreteTimePathChecker<LIOIndividualState, Boolean> phi = getPhiBal(100,0.1,def);
-        DiscreteTimeAgentSMC<LIOIndividualState,Agent> smc = new DiscreteTimeAgentSMC<>(model.nextIndividuals(), LIOIndividualState[]::new);
+        DiscreteTimeAgentSMC<LIOIndividualState, LIOAgent> smc = new DiscreteTimeAgentSMC<>(model.nextIndividuals(), LIOIndividualState[]::new);
         smc.compute(initial,phi,100,100);
         assertTrue(true);
     }
 
-    public DiscreteTimePathChecker<Agent,Boolean> balancedLocalFormula(AgentsDefinition def) {
-        Agent agentB = def.getAgent("B");
+    public DiscreteTimePathChecker<LIOAgent,Boolean> balancedLocalFormula(LIOAgentDefinitions def) {
+        LIOAgent agentB = def.getAgent("B");
         return DiscreteTimeAgentSMC.getAtomic(agentB::equals);
     }
 
-    public DiscreteTimePathChecker<LIOIndividualState, Boolean> getPhiBal(int size, double eps, AgentsDefinition def) {
+    public DiscreteTimePathChecker<LIOIndividualState, Boolean> getPhiBal(int size, double eps, LIOAgentDefinitions def) {
         DoublePredicate dPred = d -> (d>=0.5-eps)&&(d<=0.5-eps);
         return DiscreteTimeAgentSMC.getFractionOf(size, balancedLocalFormula(def), dPred);
     }
 
 
-    public AgentsDefinition getAgentDefinition(double meet_probability) {
-        AgentsDefinition def = new AgentsDefinition();
-        Agent agentR = def.addAgent("R");
-        Agent agentB = def.addAgent("B");
-        AgentAction redAction = def.addAction( "red", s -> s.fractionOf(agentB)*meet_probability );
-        AgentAction blueAction = def.addAction( "blue" , s -> s.fractionOf(agentR)*meet_probability );
+    public LIOAgentDefinitions getAgentDefinition(double meet_probability) {
+        LIOAgentDefinitions def = new LIOAgentDefinitions();
+        LIOAgent agentR = def.addAgent("R");
+        LIOAgent agentB = def.addAgent("B");
+        LIOAgentAction redAction = def.addAction( "red", s -> s.fractionOf(agentB)*meet_probability );
+        LIOAgentAction blueAction = def.addAction( "blue" , s -> s.fractionOf(agentR)*meet_probability );
         agentR.addAction(blueAction, agentB);
         agentB.addAction(redAction, agentR);
         return def;
     }
 
-    private static LIOIndividualState getInitialState(AgentsDefinition def, int red, int blue) {
+    private static LIOIndividualState getInitialState(LIOAgentDefinitions def, int red, int blue) {
         int agentB = def.getAgentIndex("B");
         int agentR = def.getAgentIndex("R");
         return new LIOIndividualState(def,IntStream.range(0,red+blue).map(i -> (i<red?agentR:agentB)).toArray());
@@ -132,10 +132,10 @@ public class RBTest {
 
     @Test
     public void shouldNotBeLocalStable() {
-        AgentsDefinition def = getAgentDefinition(0.5);
-        Agent red = def.getAgent("R");
-        Agent blue = def.getAgent("B");
-        LocalFormula<Agent> formula = LocalFormula.conjunction(phiStable(2, red, blue), phiStable(2, blue, red));
+        LIOAgentDefinitions def = getAgentDefinition(0.5);
+        LIOAgent red = def.getAgent("R");
+        LIOAgent blue = def.getAgent("B");
+        LocalFormula<LIOAgent> formula = LocalFormula.conjunction(phiStable(2, red, blue), phiStable(2, blue, red));
 
         formula = formula.next(red);
         assertFalse(formula.isAccepting());
@@ -150,10 +150,10 @@ public class RBTest {
 
     @Test
     public void shouldBeLocalStable() {
-        AgentsDefinition def = getAgentDefinition(0.5);
-        Agent red = def.getAgent("R");
-        Agent blue = def.getAgent("B");
-        LocalFormula<Agent> formula = LocalFormula.conjunction(phiStable(2, red, blue), phiStable(2, blue, red));
+        LIOAgentDefinitions def = getAgentDefinition(0.5);
+        LIOAgent red = def.getAgent("R");
+        LIOAgent blue = def.getAgent("B");
+        LocalFormula<LIOAgent> formula = LocalFormula.conjunction(phiStable(2, red, blue), phiStable(2, blue, red));
 
         formula = formula.next(red);
         assertFalse(formula.isAccepting());
@@ -174,7 +174,7 @@ public class RBTest {
 
     }
 
-    public static LocalFormula<Agent> phiStable(int k, Agent a1, Agent a2) {
+    public static LocalFormula<LIOAgent> phiStable(int k, LIOAgent a1, LIOAgent a2) {
         return LocalFormula.imply(new LocalAtomicFormula<>(a1::equals),
                 new LocalNextFormula<>(
                         LocalFormula.imply(new LocalAtomicFormula<>(a2::equals),
@@ -185,13 +185,13 @@ public class RBTest {
     }
 
 
-    public static GlobalFormula<Agent, LIOIndividualState> getPhiBal(double eps, AgentsDefinition def) {
+    public static GlobalFormula<LIOAgent, LIOIndividualState> getPhiBal(double eps, LIOAgentDefinitions def) {
         DoublePredicate dPred = d -> (d>=0.5-eps)&&(d<=0.5+eps);
         return new GlobalFractionOfFormula<>(balancedLocalFormula2(def), dPred);
     }
 
-    public static LocalFormula<Agent> balancedLocalFormula2(AgentsDefinition def) {
-        Agent agentB = def.getAgent("B");
+    public static LocalFormula<LIOAgent> balancedLocalFormula2(LIOAgentDefinitions def) {
+        LIOAgent agentB = def.getAgent("B");
         return new LocalAtomicFormula<>(agentB::equals);
     }
 

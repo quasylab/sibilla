@@ -23,8 +23,7 @@
 
 package it.unicam.quasylab.sibilla.langs.lio;
 
-import it.unicam.quasylab.sibilla.core.models.lio.Agent;
-import it.unicam.quasylab.sibilla.core.models.lio.AgentsDefinition;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgentDefinitions;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 
@@ -36,11 +35,11 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class LIOModelAgentDependentChecker extends LIOModelParseTreeChecker {
-    protected final AgentsDefinition definition;
+    protected final LIOAgentDefinitions definition;
 
     protected final Map<String, SibillaValue> constantsAndParameters;
 
-    public LIOModelAgentDependentChecker(ErrorCollector errors, AgentsDefinition definition, Map<String, SibillaValue> constantsAndParameters) {
+    public LIOModelAgentDependentChecker(ErrorCollector errors, LIOAgentDefinitions definition, Map<String, SibillaValue> constantsAndParameters) {
         super(errors);
         this.definition = definition;
         this.constantsAndParameters = constantsAndParameters;

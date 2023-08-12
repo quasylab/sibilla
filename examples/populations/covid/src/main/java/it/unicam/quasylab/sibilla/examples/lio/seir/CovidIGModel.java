@@ -32,11 +32,9 @@ import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.FileNotFoundException;
 import java.net.UnknownHostException;
-import java.util.function.Function;
 
 /**
  * @author loreti
@@ -60,7 +58,7 @@ public class CovidIGModel {
         SimulationEnvironment simulator = new SimulationEnvironment();
         Model<PopulationState> model = def.createModel();
         SamplingFunction<PopulationState> collection = model.selectSamplingFunction(SAMPLINGS,DEADLINE/SAMPLINGS);
-        simulator.simulate(model,def.state(),collection::getSamplingHandler,REPLICA,DEADLINE);
+        simulator.simulate(model,def.getDefaultConfiguration(),collection::getSamplingHandler,REPLICA,DEADLINE);
         collection.printTimeSeries("data","sir_",".data");
     }
 

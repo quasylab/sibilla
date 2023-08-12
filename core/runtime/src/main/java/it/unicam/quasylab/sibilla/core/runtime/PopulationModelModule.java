@@ -37,6 +37,8 @@ public class PopulationModelModule extends AbstractSibillaModule {
 
     public final static String MODULE_NAME = "population";
 
+    private ModuleEngine<PopulationState> moduleEngine;
+
     @Override
     public String getModuleName() {
         return MODULE_NAME;
@@ -45,7 +47,7 @@ public class PopulationModelModule extends AbstractSibillaModule {
     @Override
     public void load(File file) throws CommandExecutionException {
         try {
-            generateDefinition(new PopulationModelGenerator(file));
+            generateModuleEngine(new PopulationModelGenerator(file));
         } catch (ModelGenerationException e) {
             throw new CommandExecutionException(e.getErrors().stream().sequential().map(ModelBuildingError::toString).collect(Collectors.toList()));
         } catch (IOException e) {
@@ -56,14 +58,14 @@ public class PopulationModelModule extends AbstractSibillaModule {
     @Override
     public void load(String code) throws CommandExecutionException {
         try {
-            generateDefinition(new PopulationModelGenerator(code));
+            generateModuleEngine(new PopulationModelGenerator(code));
         } catch (ModelGenerationException e) {
             throw new CommandExecutionException(e.getErrors().stream().sequential().map(ModelBuildingError::toString).collect(Collectors.toList()));
         }
     }
 
-    private void generateDefinition(PopulationModelGenerator pmg) throws ModelGenerationException {
-        setModelDefinition(pmg.getPopulationModelDefinition());
+    private void generateModuleEngine(PopulationModelGenerator pmg) throws ModelGenerationException {
+        this.moduleEngine = new ModuleEngine<>(pmg.getPopulationModelDefinition());
     }
 
     @Override
@@ -72,6 +74,10 @@ public class PopulationModelModule extends AbstractSibillaModule {
         return null;
     }
 
+    @Override
+    protected ModuleEngine<?> getModuleEngine() {
+        return moduleEngine;
+    }
 
 
 }

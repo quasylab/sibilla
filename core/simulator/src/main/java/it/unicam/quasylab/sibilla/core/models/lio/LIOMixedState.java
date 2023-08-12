@@ -32,13 +32,13 @@ import java.util.function.Predicate;
 
 public class LIOMixedState implements LIOState {
 
-    private final AgentsDefinition definition;
+    private final LIOAgentDefinitions definition;
 
-    private final Agent thisAgent;
+    private final LIOAgent thisAgent;
 
     private final LIOCountingState otherAgents;
 
-    public LIOMixedState(AgentsDefinition definition, Agent thisAgent, LIOCountingState otherAgents) {
+    public LIOMixedState(LIOAgentDefinitions definition, LIOAgent thisAgent, LIOCountingState otherAgents) {
         this.definition = definition;
         this.thisAgent = thisAgent;
         this.otherAgents = otherAgents;
@@ -49,21 +49,21 @@ public class LIOMixedState implements LIOState {
     }
 
     @Override
-    public double fractionOf(Agent a) {
+    public double fractionOf(LIOAgent a) {
         return numberOf(a)/size();
     }
 
     @Override
-    public double fractionOf(Predicate<Agent> predicate) {
+    public double fractionOf(Predicate<LIOAgent> predicate) {
         return numberOf(predicate)/size();
     }
 
     @Override
-    public Set<Agent> getAgents() {
+    public Set<LIOAgent> getAgents() {
         return null;
     }
 
-    public double numberOf(Agent a) {
+    public double numberOf(LIOAgent a) {
         if (thisAgent.equals(a)) {
             return 1+this.otherAgents.numberOf(a);
         } else {
@@ -71,7 +71,7 @@ public class LIOMixedState implements LIOState {
         }
     }
 
-    public double numberOf(Predicate<Agent> predicate) {
+    public double numberOf(Predicate<LIOAgent> predicate) {
         if (predicate.test(thisAgent)) {
             return 1+this.otherAgents.numberOf(predicate);
         } else {
@@ -80,13 +80,13 @@ public class LIOMixedState implements LIOState {
     }
 
     @Override
-    public LIOMixedState step(RandomGenerator randomGenerator, ProbabilityMatrix<Agent> matrix) {
+    public LIOMixedState step(RandomGenerator randomGenerator, ProbabilityMatrix<LIOAgent> matrix) {
         return new LIOMixedState(definition, matrix.sample(randomGenerator, thisAgent), otherAgents.step(randomGenerator, matrix));
     }
 
     @Override
-    public ProbabilityVector<LIOMixedState> next(ProbabilityMatrix<Agent> matrix) {
-        ProbabilityVector<Agent> agentNext = matrix.getRowOf(thisAgent);
+    public ProbabilityVector<LIOMixedState> next(ProbabilityMatrix<LIOAgent> matrix) {
+        ProbabilityVector<LIOAgent> agentNext = matrix.getRowOf(thisAgent);
         ProbabilityVector<LIOCountingState> otherNext = otherAgents.next(matrix);
         ProbabilityVector<LIOMixedState> next = new ProbabilityVector<>();
         agentNext.iterate((a,p1) -> otherNext.iterate((o,p2) -> next.add(new LIOMixedState(definition, a, o), p1*p2)));
@@ -99,11 +99,11 @@ public class LIOMixedState implements LIOState {
     }
 
     @Override
-    public AgentsDefinition getAgentsDefinition() {
+    public LIOAgentDefinitions getAgentsDefinition() {
         return definition;
     }
 
-    public Agent getAgent() {
+    public LIOAgent getAgent() {
         return this.thisAgent;
     }
 }

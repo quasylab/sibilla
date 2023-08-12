@@ -152,7 +152,7 @@ public class SymbolTable {
         if (agentName != null) {
             info.addAttribute(attributeName, type);
         } else {
-            throw new IllegalArgumentException("Agent "+agentName+" is unknown!");
+            throw new IllegalArgumentException("LIOAgent "+agentName+" is unknown!");
         }
     }
 
@@ -163,7 +163,7 @@ public class SymbolTable {
 //            info.addView(viewName, getOrRecordVariable(viewName, type));
 //            views.add(viewName);
         } else {
-            throw new IllegalArgumentException("Agent "+agentName+" is unknown!");
+            throw new IllegalArgumentException("LIOAgent "+agentName+" is unknown!");
         }
     }
 
@@ -306,7 +306,7 @@ public class SymbolTable {
     public Function<String, SlamType> attributeDeclarationTypeSolver(String agentName) {
         AgentInfo info = this.agents.get(agentName);
         if (info == null) {
-            throw new IllegalArgumentException("Agent "+agentName+" is unknown!");
+            throw new IllegalArgumentException("LIOAgent "+agentName+" is unknown!");
         }
         return null;//info::attributeDeclarationTypeSolver;
     }
@@ -314,7 +314,7 @@ public class SymbolTable {
     public boolean isAParameterOf(String agentName, String attributeName) {
         AgentInfo info = this.agents.get(agentName);
         if (info == null) {
-            throw new IllegalArgumentException("Agent "+agentName+" is unknown!");
+            throw new IllegalArgumentException("LIOAgent "+agentName+" is unknown!");
         }
         return info.isAParameter(attributeName);
     }
@@ -322,7 +322,7 @@ public class SymbolTable {
     public Function<String, SlamType> viewDeclarationTypeSolver(String agentName) {
         AgentInfo info = this.agents.get(agentName);
         if (info == null) {
-            throw new IllegalArgumentException("Agent "+agentName+" is unknown!");
+            throw new IllegalArgumentException("LIOAgent "+agentName+" is unknown!");
         }
         return null;//info::viewDeclarationTypeSolver;
     }
@@ -330,7 +330,7 @@ public class SymbolTable {
     public Function<String, SlamType> getAgentStateTypeSolver(String agentName) {
         AgentInfo info = this.agents.get(agentName);
         if (info == null) {
-            throw new IllegalArgumentException("Agent "+agentName+" is unknown!");
+            throw new IllegalArgumentException("LIOAgent "+agentName+" is unknown!");
         }
         return null;//info::viewDeclarationTypeSolver;
     }
@@ -351,7 +351,7 @@ public class SymbolTable {
     public SlamType getTypeOf(String agentName, String attribute) {
         AgentInfo info = this.agents.get(agentName);
         if (info == null) {
-            throw new IllegalArgumentException("Agent "+agentName+" is unknown!");
+            throw new IllegalArgumentException("LIOAgent "+agentName+" is unknown!");
         }
         return null;//info.getTypeOf(attribute);
     }

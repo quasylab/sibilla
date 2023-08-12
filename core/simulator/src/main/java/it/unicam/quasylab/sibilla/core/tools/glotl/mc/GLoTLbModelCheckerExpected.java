@@ -23,11 +23,10 @@
 
 package it.unicam.quasylab.sibilla.core.tools.glotl.mc;
 
-import it.unicam.quasylab.sibilla.core.models.lio.Agent;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgent;
 import it.unicam.quasylab.sibilla.core.models.lio.LIOCountingState;
 import it.unicam.quasylab.sibilla.core.models.lio.LIOMixedState;
 
-import java.util.HashMap;
 import java.util.function.DoublePredicate;
 
 public class GLoTLbModelCheckerExpected extends GLoTLbModelCheckerAbstract {
@@ -44,7 +43,7 @@ public class GLoTLbModelCheckerExpected extends GLoTLbModelCheckerAbstract {
 
     protected boolean compute(LIOCountingState state) {
         double expected = 0;
-        for(Agent a: state.getAgents()) {
+        for(LIOAgent a: state.getAgents()) {
             expected += state.fractionOf(a)*this.prop.eval(new LIOMixedState(state.getAgentsDefinition(), a, state.remove(a)));
         }
         return guard.test(expected);

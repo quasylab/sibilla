@@ -23,8 +23,7 @@
 
 package it.unicam.quasylab.sibilla.langs.lio;
 
-import it.unicam.quasylab.sibilla.core.models.lio.AgentsDefinition;
-import it.unicam.quasylab.sibilla.core.models.lio.LIOCollective;
+import it.unicam.quasylab.sibilla.core.models.lio.LIOAgentDefinitions;
 import it.unicam.quasylab.sibilla.core.models.lio.LIOState;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
@@ -40,7 +39,7 @@ public class LIOModelPredicateGenerator extends LIOModelAgentDependentChecker {
 
     private final Map<String, Predicate<? super LIOState>> predicates;
 
-    public LIOModelPredicateGenerator(ErrorCollector errors, AgentsDefinition definition, Map<String, SibillaValue> constantsAndParameters) {
+    public LIOModelPredicateGenerator(ErrorCollector errors, LIOAgentDefinitions definition, Map<String, SibillaValue> constantsAndParameters) {
         super(errors, definition, constantsAndParameters);
         this.predicates = new HashMap<>();
     }

@@ -25,6 +25,7 @@ package it.unicam.quasylab.sibilla.core.util.values;
 
 import java.util.Optional;
 import java.util.function.*;
+import java.util.stream.DoubleStream;
 
 /**
  * Instances of this interface represent values in a Sibilla model.
@@ -189,6 +190,10 @@ public interface SibillaValue {
 
     static <T> Function<T,SibillaValue> access(Function<T, SibillaValue> f, String name) {
         return arg -> SibillaValue.access(f.apply(arg), name);
+    }
+
+    static SibillaValue[] of(double[] values) {
+        return DoubleStream.of(values).mapToObj(SibillaValue::of).toArray(SibillaValue[]::new);
     }
 
 

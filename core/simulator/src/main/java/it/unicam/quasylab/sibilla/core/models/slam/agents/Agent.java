@@ -33,7 +33,7 @@ import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
 /**
- * The class <code>Agent</code> represents running agents. Each agent is characterised by:
+ * The class <code>LIOAgent</code> represents running agents. Each agent is characterised by:
  * <ul>
  *     <li>an identifier, an integer that univocally identifying the agent in the system;</li>
  *     <li>a memory, associating variables to names;</li>

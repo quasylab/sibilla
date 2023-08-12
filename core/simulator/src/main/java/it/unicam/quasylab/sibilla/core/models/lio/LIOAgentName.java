@@ -32,7 +32,7 @@ import java.util.Objects;
  * The instances of this class are used to represent the name of an agent.
  * This consists of a string and an array of indexes.
  */
-public final class AgentName {
+public final class LIOAgentName {
 
     private final String name;
 
@@ -44,7 +44,7 @@ public final class AgentName {
      * @param name agent name
      * @param indexes agent indexes
      */
-    public AgentName(String name, SibillaValue ... indexes) {
+    public LIOAgentName(String name, SibillaValue ... indexes) {
         this.name = name;
         this.indexes = indexes;
     }
@@ -80,7 +80,7 @@ public final class AgentName {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AgentName agentName = (AgentName) o;
+        LIOAgentName agentName = (LIOAgentName) o;
         return Objects.equals(name, agentName.name) && Arrays.equals(indexes, agentName.indexes);
     }
 

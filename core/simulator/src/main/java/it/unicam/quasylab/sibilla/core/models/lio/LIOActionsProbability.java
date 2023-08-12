@@ -23,9 +23,18 @@
 
 package it.unicam.quasylab.sibilla.core.models.lio;
 
+/**
+ * Functional interface used to associated each action with a probability value.
+ */
 @FunctionalInterface
-public interface ActionProbabilityFunction {
+public interface LIOActionsProbability {
 
-    double getProbability(LIOCollective c);
+    /**
+     * Return the probability associated with the given action.
+     *
+     * @param action an agent action.
+     * @return the probability associated with the given action.
+     */
+    double probabilityOf(LIOAgentAction action);
 
 }

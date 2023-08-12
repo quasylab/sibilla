@@ -85,12 +85,12 @@ public class Main {
 	}
 
 
-	private static void runAndPrint() {//int scale, int step, int replica, String label, BiFunction<Integer,AgentsDefinition,DiscreteTimePathChecker<LIOIndividualState, Boolean>> builder) {
-//		AgentsDefinition def = getAgentDefinition();
+	private static void runAndPrint() {//int scale, int step, int replica, String label, BiFunction<Integer,LIOAgentDefinitions,DiscreteTimePathChecker<LIOIndividualState, Boolean>> builder) {
+//		LIOAgentDefinitions def = getAgentDefinition();
 //		LIOModel<LIOIndividualState> model = new LIOModel<>(def);
 //		DiscreteTimePathChecker<LIOIndividualState, Boolean> f = builder.apply(scale,def);
 //		LIOIndividualState initial = getInitialState(def, scale);
-//		DiscreteTimeAgentSMC<LIOIndividualState,Agent> smc = new DiscreteTimeAgentSMC<>(model,LIOIndividualState[]::new);
+//		DiscreteTimeAgentSMC<LIOIndividualState,LIOAgent> smc = new DiscreteTimeAgentSMC<>(model,LIOIndividualState[]::new);
 //		double[] values = smc.compute(initial,f,step,replica);
 //		System.out.printf("#SCALE %d STEPS %d REPLICA %d\n\n",scale, step, replica);
 //		System.out.println(label+" = ["+(DoubleStream.of(values).boxed().map(Object::toString).collect(Collectors.joining(",")))+"]");

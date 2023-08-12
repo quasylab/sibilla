@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 import it.unicam.quasylab.sibilla.core.models.AbstractModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -64,7 +65,6 @@ public class YodaModelDefinition extends AbstractModelDefinition<YodaSystemState
     }
 
     //TODO
-    @Override
     public ParametricDataSet<Function<RandomGenerator, YodaSystemState>> getStates() {
         if (states == null){
             this.states = statesGenerationFunction.apply(getEnvironment());
@@ -81,6 +81,16 @@ public class YodaModelDefinition extends AbstractModelDefinition<YodaSystemState
         return model;
     }
 
+    @Override
+    public boolean isAnInitialConfiguration(String name) {
+        return getStates().isDefined(name);
+    }
+
+    @Override
+    public Function<RandomGenerator, YodaSystemState> getConfiguration(String name, double[] args) {
+        return getStates().state(name, args);
+    }
+
     private Map<String, Predicate<YodaSystemState>> getPredicates() {
         if (this.predicates == null) {
             this.predicates = preducatesGenerationFunction.apply(getEnvironment());
@@ -93,6 +103,37 @@ public class YodaModelDefinition extends AbstractModelDefinition<YodaSystemState
             this.measures = measuresGenerationFunction.apply(getEnvironment());
         }
         return this.measures;
+    }
+
+
+
+    public boolean isAState(String name) {
+        return getStates().isDefined(name);
+    }
+
+    @Override
+    public int defaultConfigurationArity() {
+        return getStates().arity();
+    }
+
+    @Override
+    public int configurationArity(String name) {
+        return getStates().arity(name);
+    }
+
+    @Override
+    public String[] configurations() {
+        return getStates().states();
+    }
+
+    @Override
+    public Function<RandomGenerator,YodaSystemState> getDefaultConfiguration(double... args) {
+        return getStates().get(args);
+    }
+
+    @Override
+    public String getStateInfo(String name) {
+        return getStates().getInfo(name);
     }
 
 }

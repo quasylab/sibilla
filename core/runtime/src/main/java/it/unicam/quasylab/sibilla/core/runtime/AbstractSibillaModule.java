@@ -42,62 +42,62 @@ import java.util.function.Predicate;
 
 public abstract class AbstractSibillaModule implements SibillaModule {
 
-    protected ModuleEngine<?> moduleEngine;
-    private Set<String> enabledMeasures;
+    private Set<String> enabledMeasures = new TreeSet<>();
     private boolean summary = true;
     private final SimulationEnvironment simulator = new SimulationEnvironment();
 
 
-    protected final void setModelDefinition(ModelDefinition<?> moduleEngine) {
-        this.moduleEngine = new ModuleEngine<>(moduleEngine);
-        this.clear();
-    }
+    protected abstract ModuleEngine<?> getModuleEngine();
 
-    private void checkForLoadedDefinition() {
-        if (moduleEngine == null) {
+    private ModuleEngine<?> checkForLoadedDefinition() {
+        ModuleEngine<?> engine = getModuleEngine();
+        if (engine == null) {
             throw new IllegalStateException("No model has been loaded!");
         }
+        return engine;
     }
 
     @Override
     public void setParameter(String name, double value) {
-        checkForLoadedDefinition();
-        this.moduleEngine.setParameter(name, new SibillaDouble(value));
+        checkForLoadedDefinition().setParameter(name, new SibillaDouble(value));
     }
 
     @Override
     public double getParameter(String name) {
-        checkForLoadedDefinition();
-        return this.moduleEngine.getParameter(name).doubleOf();
+        return checkForLoadedDefinition().getParameter(name).doubleOf();
     }
 
     @Override
     public String[] getParameters() {
-        checkForLoadedDefinition();
-        return this.moduleEngine.getParameters();
+        return checkForLoadedDefinition().getParameters();
     }
 
     @Override
     public Map<String, SibillaValue> getEvaluationEnvironment() {
-        checkForLoadedDefinition();
-        return this.moduleEngine.getEnvironment();
+        return checkForLoadedDefinition().getEnvironment();
     }
 
     @Override
     public void addMeasure(String name) {
-        checkForLoadedDefinition();
-        this.enabledMeasures.add(name);
+        if (checkForLoadedDefinition().isAMeasure(name)) {
+            this.enabledMeasures.add(name);
+        } else {
+            throw new IllegalArgumentException(String.format("Measure %s does not exists", name));
+        }
     }
 
     @Override
     public void removeMeasure(String name) {
-        this.enabledMeasures.remove(name);
+        if (this.enabledMeasures.contains(name)) {
+            this.enabledMeasures.remove(name);
+        } else {
+            throw new IllegalArgumentException(String.format("Measure %s is not enabled", name));
+        }
     }
 
     @Override
     public void addAllMeasures() {
-        checkForLoadedDefinition();
-        this.enabledMeasures.addAll(List.of(moduleEngine.getMeasures()));
+        this.enabledMeasures.addAll(List.of(checkForLoadedDefinition().getMeasures()));
     }
 
     @Override
@@ -106,27 +106,23 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     }
 
     @Override
-    public Map<String, double[][]> simulate(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt) {
-        checkForLoadedDefinition();
-        return moduleEngine.simulate(this.simulator, monitor, rg, replica, deadline, dt, this.enabledMeasures.toArray(new String[0]),summary);
+    public Map<String, double[][]> simulate(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt) {;
+        return checkForLoadedDefinition().simulate(this.simulator, monitor, rg, replica, deadline, dt, this.enabledMeasures.toArray(new String[0]),summary);
     }
 
     @Override
     public FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt, String predicateName) {
-        checkForLoadedDefinition();
-        return moduleEngine.firstPassageTime(simulator, monitor, rg, replica, deadline, dt, predicateName);
+        return checkForLoadedDefinition().firstPassageTime(simulator, monitor, rg, replica, deadline, dt, predicateName);
     }
 
     @Override
     public double estimateReachability(SimulationMonitor monitor, RandomGenerator rg,  String targetCondition, double time, double pError, double delta) {
-        checkForLoadedDefinition();
-        return moduleEngine.estimateReachability(simulator, monitor, rg, targetCondition, time, pError, delta);
+        return checkForLoadedDefinition().estimateReachability(simulator, monitor, rg, targetCondition, time, pError, delta);
     }
 
     @Override
     public double estimateReachability(SimulationMonitor monitor, RandomGenerator rg, String transientCondition, String targetCondition, double time, double pError, double delta) {
-        checkForLoadedDefinition();
-        return moduleEngine.estimateReachability(simulator, monitor, rg, transientCondition, targetCondition, time, pError, delta);
+        return checkForLoadedDefinition().estimateReachability(simulator, monitor, rg, transientCondition, targetCondition, time, pError, delta);
     }
 
     @Override
@@ -136,53 +132,54 @@ public abstract class AbstractSibillaModule implements SibillaModule {
 
     @Override
     public void clear() {
-        if (this.moduleEngine != null) {
-            this.moduleEngine.clear();
+        ModuleEngine<?> engine = getModuleEngine();
+        if (engine != null) {
+            engine.clear();
         }
         this.enabledMeasures = new TreeSet<>();
     }
 
     @Override
     public void reset() {
-        checkForLoadedDefinition();
-        this.moduleEngine.reset();
+        ModuleEngine<?> engine = getModuleEngine();
+        if (engine != null) {
+            engine.reset();
+        }
     }
 
     @Override
     public void reset(String name) {
-        checkForLoadedDefinition();
-        moduleEngine.reset(name);
+        ModuleEngine<?> engine = getModuleEngine();
+        if (engine != null) {
+            engine.reset(name);
+        }
     }
 
     @Override
     public String[] getInitialConfigurations() {
-        checkForLoadedDefinition();
-        return this.moduleEngine.getInitialConfigurations();
+        return checkForLoadedDefinition().getInitialConfigurations();
     }
 
 
 
     @Override
     public String getConfigurationInfo(String name) {
-        checkForLoadedDefinition();
-        return this.moduleEngine.getConfigurationInfo(name);
+        return checkForLoadedDefinition().getConfigurationInfo(name);
     }
 
     @Override
     public boolean setConfiguration(String name, double... args) {
-        return moduleEngine.setConfiguration(name, args);
+        return checkForLoadedDefinition().setConfiguration(name, args);
     }
 
     @Override
     public String[] getMeasures() {
-        checkForLoadedDefinition();
-        return moduleEngine.getMeasures();
+        return checkForLoadedDefinition().getMeasures();
     }
 
     @Override
     public String[] getPredicates() {
-        checkForLoadedDefinition();
-        return moduleEngine.getPredicates();
+        return checkForLoadedDefinition().getPredicates();
     }
 
     @Override

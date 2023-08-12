@@ -48,4 +48,9 @@ public class SlamModelModule extends AbstractSibillaModule  {
     public String info() {
         return null;
     }
+
+    @Override
+    protected ModuleEngine<?> getModuleEngine() {
+        return null;
+    }
 }

@@ -44,7 +44,10 @@ public class ModuleEngine<S extends State> {
     private final ModelDefinition<S>          modelDefinition;
     private ParametricDataSet<Function<RandomGenerator,S>> states;
     private Model<S>                    currentModel;
-    private Function<RandomGenerator,S> state;
+    protected Function<RandomGenerator,S> state;
+
+    protected String selectedConfigurationName;
+    private double[] selectedConfigurationArgs;
 
 
     public ModuleEngine(ModelDefinition<S> modelDefinition) {
@@ -90,38 +93,43 @@ public class ModuleEngine<S extends State> {
         return currentModel.predicates();
     }
 
-    private void loadStates() {
-        states = modelDefinition.getStates();
-    }
 
     public String[] getInitialConfigurations() {
-        return this.modelDefinition.states();
+        return this.modelDefinition.configurations();
     }
 
 
     public String getConfigurationInfo(String name) {
         loadModel();
-        loadStates();
-        return states.getInfo(name);
+        return modelDefinition.getStateInfo(name);
     }
 
     public boolean setConfiguration(String name, double... args) {
         loadModel();
-        loadStates();
-        if (!states.isDefined(name)) {
+        if (!modelDefinition.isAnInitialConfiguration(name)) {
             throw new IllegalStateException("Unknown configuration "+name);
         }
-        if (states.arity(name)!=args.length) {
+        if (modelDefinition.configurationArity(name)!=args.length) {
             throw new IllegalStateException(String.format("Wrong number of parameters for state %s (expected %d are %d)",name,states.arity(name),args.length));
         }
-        state = states.state(name, args);
+        state = getConfiguration(name, args);
+        selectedConfigurationName = name;
+        selectedConfigurationArgs = args;
         return true;
     }
 
-    private void loadState() {
+    protected Function<RandomGenerator,S> getConfiguration(String name, double ... args) {
+        return modelDefinition.getConfiguration(name, args);
+    }
+
+    protected void setDefaultConfiguration() {
         if (state == null) {
-            state = modelDefinition.state();
+            state = getDefaultConfiguration();
         }
+    }
+
+    protected Function<RandomGenerator,S> getDefaultConfiguration(double ... args) {
+        return modelDefinition.getDefaultConfiguration(args);
     }
 
     public Map<String, double[][]> simulate(SimulationEnvironment simulationEnvironment,
@@ -133,7 +141,7 @@ public class ModuleEngine<S extends State> {
                                             String[] measures,
                                             boolean summary) {
         loadModel();
-        loadState();
+        setDefaultConfiguration();
         SamplingFunction<S> samplingFunction = currentModel.selectSamplingFunction(summary, deadline, dt, measures);
         try {
             simulationEnvironment.simulate(monitor, rg, currentModel, state, samplingFunction::getSamplingHandler, replica, deadline);
@@ -151,7 +159,7 @@ public class ModuleEngine<S extends State> {
                                                     double dt,
                                                     String predicateName) {
         loadModel();
-        loadState();
+        setDefaultConfiguration();
         Predicate<? super S> predicate = currentModel.getPredicate(predicateName);
         if (predicate == null) {
             throw new IllegalStateException("Predicate "+predicateName+" is unknown!");
@@ -173,7 +181,7 @@ public class ModuleEngine<S extends State> {
                                        double pError,
                                        double delta) {
         loadModel();
-        loadState();
+        setDefaultConfiguration();
         Predicate<? super S> targetPredicate = currentModel.getPredicate(targetName);
         try {
             return simulationEnvironment.reachability(monitor, rg, pError,delta,time, currentModel, state, s -> true, targetPredicate::test);
@@ -191,7 +199,7 @@ public class ModuleEngine<S extends State> {
                                        double pError,
                                        double delta) {
         loadModel();
-        loadState();
+        setDefaultConfiguration();
         Predicate<? super S> transientPredicate = currentModel.getPredicate(transientCondition);
         Predicate<? super S> targetPredicate = currentModel.getPredicate(targetCondition);
         try {
@@ -214,5 +222,10 @@ public class ModuleEngine<S extends State> {
     public void reset(String name) {
         this.modelDefinition.reset(name);
         clear();
+    }
+
+    public boolean isAMeasure(String name) {
+        loadModel();
+        return this.currentModel.getMeasure(name) != null;
     }
 }
