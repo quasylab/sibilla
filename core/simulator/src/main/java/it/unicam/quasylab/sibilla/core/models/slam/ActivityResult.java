@@ -23,7 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
-import it.unicam.quasylab.sibilla.core.models.slam.agents.Agent;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.SlamAgent;
 import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentMessage;
 
 import java.util.List;
@@ -35,7 +35,7 @@ import java.util.List;
 public class ActivityResult {
 
     private final List<AgentMessage> sentMessages;
-    private final Agent involvedAgent;
+    private final SlamAgent involvedAgent;
 
     /**
      * Creates a new instance of agent results.
@@ -43,7 +43,7 @@ public class ActivityResult {
      * @param sender agent performing the step.
      * @param sentMessages list of sent messages.
      */
-    public ActivityResult(Agent sender, List<AgentMessage> sentMessages) {
+    public ActivityResult(SlamAgent sender, List<AgentMessage> sentMessages) {
         this.involvedAgent = sender;
         this.sentMessages = sentMessages;
     }
@@ -62,7 +62,7 @@ public class ActivityResult {
      *
      * @return the agent performing the step.
      */
-    public Agent getAgent() {
+    public SlamAgent getAgent() {
         return involvedAgent;
     }
 

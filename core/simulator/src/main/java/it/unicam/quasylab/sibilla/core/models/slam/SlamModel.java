@@ -25,7 +25,7 @@ package it.unicam.quasylab.sibilla.core.models.slam;
 
 import it.unicam.quasylab.sibilla.core.models.AbstractModel;
 import it.unicam.quasylab.sibilla.core.simulator.SimulatorCursor;
-import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentDefinition;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.SlamAgentDefinitions;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -39,7 +39,7 @@ import java.util.function.Predicate;
  */
 public class SlamModel extends AbstractModel<SlamState> {
 
-    private final AgentDefinition agentDefinitions;
+    private final SlamAgentDefinitions agentDefinitions;
     private final MessageRepository messageRepository;
 
     /**
@@ -50,7 +50,7 @@ public class SlamModel extends AbstractModel<SlamState> {
      * @param measuresTable measures defined in the model;
      * @param predicatesTable predicates defined in the model.
      */
-    public SlamModel(AgentDefinition agentDefinitions, MessageRepository messageRepository, Map<String, Measure<? super SlamState>> measuresTable, Map<String, Predicate<? super SlamState>> predicatesTable) {
+    public SlamModel(SlamAgentDefinitions agentDefinitions, MessageRepository messageRepository, Map<String, Measure<? super SlamState>> measuresTable, Map<String, Predicate<? super SlamState>> predicatesTable) {
         super(measuresTable, predicatesTable);
         this.agentDefinitions = agentDefinitions;
         this.messageRepository = messageRepository;
@@ -80,7 +80,7 @@ public class SlamModel extends AbstractModel<SlamState> {
      * Returns the definitions of agent prototypes in this model.
      * @return the definitions of agent prototypes in this model.
      */
-    public AgentDefinition getAgents() {
+    public SlamAgentDefinitions getAgents() {
         return this.agentDefinitions;
     }
 

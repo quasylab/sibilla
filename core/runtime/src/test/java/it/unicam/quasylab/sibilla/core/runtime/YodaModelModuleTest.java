@@ -47,6 +47,10 @@ class YodaModelModuleTest {
     void robotAgentScenario() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithModule();
         sr.load( getResource("yoda/robotAgent2.yoda"));
+        sr.setDt(0.1);
+        sr.setDeadline(100);
+        sr.setReplica(1);
+        sr.simulate("test");
     }
 
     private URL getResource(String name) {

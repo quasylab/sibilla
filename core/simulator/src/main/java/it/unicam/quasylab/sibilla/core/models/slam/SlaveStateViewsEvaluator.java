@@ -23,7 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
-import it.unicam.quasylab.sibilla.core.models.slam.agents.Agent;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.SlamAgent;
 import it.unicam.quasylab.sibilla.core.models.slam.data.SlamValue;
 
 import java.util.HashMap;
@@ -43,9 +43,9 @@ public class SlaveStateViewsEvaluator {
 
     private Map<String, SlamValue> cachedGlobalViews = new HashMap<>();
 
-    private Map<Agent, Map<String, Function<SlamState, SlamValue>>> cachedLocalFunctions = new HashMap<>();
+    private Map<SlamAgent, Map<String, Function<SlamState, SlamValue>>> cachedLocalFunctions = new HashMap<>();
 
-    private Map<Agent, Map<String, SlamValue>> cachedLocalViews = new HashMap<>();
+    private Map<SlamAgent, Map<String, SlamValue>> cachedLocalViews = new HashMap<>();
 
     /**
      * Creates a new evaluator that resolves the given views on the given state.

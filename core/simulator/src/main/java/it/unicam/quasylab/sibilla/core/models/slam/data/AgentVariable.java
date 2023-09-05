@@ -23,7 +23,6 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam.data;
 
-import java.util.Objects;
 
 /**
  * Instances of this class are used to represent agent variables. Each variable is identified by:
@@ -38,7 +37,7 @@ import java.util.Objects;
  *
  * To support creation of variables, the class {@link VariableRegistry} can be used.
  */
-public final class AgentVariable {
+public final class AgentVariable implements Comparable<AgentVariable> {
 
     private final String name;
     private final int index;
@@ -78,5 +77,10 @@ public final class AgentVariable {
     @Override
     public int hashCode() {
         return index;
+    }
+
+    @Override
+    public int compareTo(AgentVariable o) {
+        return this.index - o.index;
     }
 }

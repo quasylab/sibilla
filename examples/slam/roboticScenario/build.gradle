@@ -1,0 +1,11 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+dependencies {
+    implementation project(':core:simulator')
+}
+
+mainClassName = 'it.unicam.quasylab.sibilla.examples.slam.roboticScenario.RobotScenario'
+

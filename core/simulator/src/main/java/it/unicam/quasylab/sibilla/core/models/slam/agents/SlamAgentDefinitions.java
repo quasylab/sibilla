@@ -27,6 +27,7 @@ import it.unicam.quasylab.sibilla.core.models.slam.*;
 import it.unicam.quasylab.sibilla.core.models.slam.data.AgentStore;
 import it.unicam.quasylab.sibilla.core.models.slam.data.SlamType;
 import it.unicam.quasylab.sibilla.core.models.slam.data.SlamValue;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,18 +37,18 @@ import java.util.function.Function;
 /**
  * An agent definition is a container for a set of agent prototypes.
  */
-public class AgentDefinition {
+public class SlamAgentDefinitions {
 
     private int agentCounter = 0;
 
     private final Map<String, AgentName> agentNames = new HashMap<>();
 
-    private final Map<AgentName, AgentPrototype> agentPrototypes = new TreeMap<>();
+    private final Map<AgentName, SlamAgentPrototype> agentPrototypes = new TreeMap<>();
 
     /**
      * Creates an empty agent definition.
      */
-    public AgentDefinition() {
+    public SlamAgentDefinitions() {
 
     }
 
@@ -82,12 +83,12 @@ public class AgentDefinition {
      * @param values
      * @return the factory used to build the agent with the given name according to the given values.
      */
-    public AgentFactory getAgentFactory(String name, SlamValue[] values) {
+    public AgentFactory getAgentFactory(String name, SibillaValue[] values) {
         AgentName agentName = agentNames.get(name);
         if (agentName == null) {
             return null;
         }
-        AgentPrototype agentPrototype = agentPrototypes.get(name);
+        SlamAgentPrototype agentPrototype = agentPrototypes.get(name);
         if (agentPrototype != null) {
             return agentPrototype.getAgentFactory(values);
         }
@@ -97,16 +98,18 @@ public class AgentDefinition {
     /**
      * Adds new agent to this definition.
      *
-     * @param name                  agent name.
-     * @param parameters            array of prototype parameters.
+     * @param name       agent name.
+     * @param parameters array of prototype parameters.
+     * @return returns the name of the agent
      */
-    public void addAgent(String name,
-            SlamType[] parameters) {
+    public AgentName addAgent(String name,
+                              SlamType[] parameters) {
         AgentName agentName = addAgent(name);
         agentPrototypes.put(
             agentName,
-            new AgentPrototype(agentName, parameters)
+            new SlamAgentPrototype(agentName, parameters)
         );
+        return agentName;
     }
 
     /**
@@ -125,12 +128,12 @@ public class AgentDefinition {
      * @param agentName agent name.
      * @return the prototype associated with the given name.
      */
-    public AgentPrototype getPrototype(String agentName) {
+    public SlamAgentPrototype getPrototype(String agentName) {
         return agentPrototypes.get(agentName);
     }
 
-    public void setStateProvider(String agentName, Function<SlamValue[], AgentStore> storeFunction) {
-        AgentPrototype prototype = agentPrototypes.get(agentName);
+    public void setStateProvider(String agentName, Function<SibillaValue[], AgentStore> storeFunction) {
+        SlamAgentPrototype prototype = agentPrototypes.get(agentName);
         if (prototype != null) {
             prototype.setStoreProvider(storeFunction);
         } else {
@@ -138,8 +141,8 @@ public class AgentDefinition {
         }
     }
 
-    public void setAgentBehaviour(String agentName, AgentBehaviourOld agentBehaviour) {
-        AgentPrototype prototype = agentPrototypes.get(agentName);
+    public void setAgentBehaviour(String agentName, SlamAgentBehaviour agentBehaviour) {
+        SlamAgentPrototype prototype = agentPrototypes.get(agentName);
         if (prototype != null) {
             prototype.setAgentBehaviour(agentBehaviour);
         } else {
@@ -148,7 +151,7 @@ public class AgentDefinition {
     }
 
     public void setPerceptionFunction(String agentName, PerceptionFunction perceptionFunction) {
-        AgentPrototype prototype = agentPrototypes.get(agentName);
+        SlamAgentPrototype prototype = agentPrototypes.get(agentName);
         if (prototype != null) {
             prototype.setPerceptionFunction(perceptionFunction);
         } else {
@@ -157,11 +160,15 @@ public class AgentDefinition {
     }
 
     public void setAgentTimePassingFunction(String agentName, AgentTimePassingFunction timePassingFunction) {
-        AgentPrototype prototype = agentPrototypes.get(agentName);
+        SlamAgentPrototype prototype = agentPrototypes.get(agentName);
         if (prototype != null) {
             prototype.setTimePassingFunctionProvider(timePassingFunction);
         } else {
             throw new IllegalArgumentException();//TODO: Add message here!
         }
+    }
+
+    public AgentName getAgentName(String name) {
+        return agentNames.get(name);
     }
 }

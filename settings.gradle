@@ -35,7 +35,8 @@ include 'core:simulator',
     	'examples:lio:seir',
 		'examples:lio:rb',
 		'examples:glio:tsp',
-		'examples:yoda:roboticScenario'
+		'examples:yoda:roboticScenario',
+		'examples:slam:roboticScenario'
 
 /* 		'examples:agents:RobotAgents',
 */

@@ -39,7 +39,7 @@ public interface AgentTimePassingFunction {
      * @param dt passed time units.
      * @param memory current agent memory.
      */
-    void update(RandomGenerator rg, double dt, AgentStore memory);
+    AgentStore update(RandomGenerator rg, double dt, AgentStore memory);
 
 
 }

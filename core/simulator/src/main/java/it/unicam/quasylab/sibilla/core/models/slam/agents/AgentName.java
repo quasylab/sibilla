@@ -29,7 +29,7 @@ import java.util.Objects;
  * This is a class that is used to identify univocally an agent behaviour. It consists of an agentId, that is an
  * integer, and an agentName, that is a nonempty String.
  */
-public final class AgentName {
+public final class AgentName implements Comparable<AgentName> {
 
     /**
      * This is a unique id that is associated to each agent name. The
@@ -79,5 +79,10 @@ public final class AgentName {
      */
     public String getAgentName() {
         return agentName;
+    }
+
+    @Override
+    public int compareTo(AgentName o) {
+        return this.agentName.compareTo(o.agentName);
     }
 }

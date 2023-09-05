@@ -25,8 +25,7 @@ package it.unicam.quasylab.sibilla.langs.slam;
 
 import it.unicam.quasylab.sibilla.core.models.slam.data.SlamType;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -37,6 +36,8 @@ public class AgentTable {
     private final Map<String, AgentInfo> agents = new HashMap<>();
 
     private final Map<String, SlamType> agentProperties = new HashMap<>();
+
+    private Set<String> sharedAttributes;
 
     public SlamType getPropertyType(String name) {
         return agentProperties.getOrDefault(name, SlamType.NONE_TYPE);
@@ -54,12 +55,79 @@ public class AgentTable {
         return true;
     }
 
-    public boolean recordAgentAttribute(String agentName, String attributeName, SlamType type) {
+    public void recordAgentAttribute(String agentName, String attributeName, SlamType type) {
         SlamType currentType = getPropertyType(attributeName);
-        //
+        if (SlamType.NONE_TYPE.equals(currentType)||Objects.equals(currentType, type)) {
+            agents.get(agentName).recordAttribute(attributeName, type);
+            agentProperties.put(attributeName, type);
+        }
+    }
+
+    public void recordAgentParameter(String agentName, String parameterName, SlamType parameterType) {
+        AgentInfo agentInfo = agents.get(agentName);
+        if (agentInfo != null) {
+            agentInfo.recordParameter(parameterName, parameterType);
+        }
+    }
+
+    public SlamType getTypeOf(String agentName, String name) {
+        AgentInfo agentInfo = agents.get(agentName);
+        if (agentInfo != null) {
+            return agentInfo.getTypeOf(name);
+        } else {
+            return SlamType.NONE_TYPE;
+        }
+    }
+
+    public boolean recordAgentView(String agentName, String attributeName, SlamType type) {
+        SlamType currentType = getPropertyType(attributeName);
+        if (SlamType.NONE_TYPE.equals(currentType)||Objects.equals(currentType, type)) {
+            agents.get(agentName).recordView(attributeName, type);
+            agentProperties.put(attributeName, type);
+            return true;
+        }
         return false;
     }
 
+    public boolean isAttribute(String agentName, String attributeName) {
+        AgentInfo info = agents.get(agentName);
+        if (info != null) {
+            return info.isAttribute(attributeName);
+        }
+        return false;
+    }
+
+    public boolean isView(String agentName, String name) {
+        AgentInfo info = agents.get(agentName);
+        if (info != null) {
+            return info.isView(name);
+        }
+        return false;
+    }
+
+    public boolean isDefined(String name) {
+        return agents.containsKey(name);
+    }
+
+    public Set<String> getSharedAttributes() {
+        Set<String> shared = new HashSet<>(this.agentProperties.keySet());
+        for (AgentInfo agentInfo : agents.values()) {
+            shared.retainAll(agentInfo.attributes.keySet());
+            shared.retainAll(agentInfo.views.keySet());
+        }
+        return shared;
+    }
+
+    public SlamType getSharedAttributesTypeSolver(String name) {
+        if (this.sharedAttributes == null) {
+            this.sharedAttributes = getSharedAttributes();
+        }
+        if (this.sharedAttributes.contains(name)) {
+            return this.agentProperties.get(name);
+        } else {
+            return SlamType.NONE_TYPE;
+        }
+    }
 
     public class AgentInfo {
         private final String agentName;
@@ -102,6 +170,25 @@ public class AgentTable {
             } else {
                 return views.getOrDefault(name, SlamType.NONE_TYPE);
             }
+        }
+
+        public void recordAttribute(String attributeName, SlamType type) {
+            attributes.put(attributeName, type);
+        }
+
+        public void recordParameter(String parameterName, SlamType parameterType) {
+            parameters.put(parameterName, parameterType);
+        }
+
+        public SlamType getTypeOf(String name) {
+            if (parameters.containsKey(name)) return parameters.get(name);
+            if (attributes.containsKey(name)) return attributes.get(name);
+            if (views.containsKey(name)) return attributes.get(name);
+            return SlamType.NONE_TYPE;
+        }
+
+        public void recordView(String attributeName, SlamType type) {
+            views.put(attributeName, type);
         }
     }
 

@@ -23,7 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.markov;
 
-import it.unicam.quasylab.sibilla.core.util.Pair;
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
 import org.apache.commons.math3.linear.*;
 
 import java.util.HashSet;

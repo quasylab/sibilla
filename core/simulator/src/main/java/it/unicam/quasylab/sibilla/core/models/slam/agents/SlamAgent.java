@@ -25,8 +25,10 @@ package it.unicam.quasylab.sibilla.core.models.slam.agents;
 
 import it.unicam.quasylab.sibilla.core.models.slam.*;
 import it.unicam.quasylab.sibilla.core.models.slam.data.AgentStore;
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -40,26 +42,41 @@ import java.util.function.ToDoubleFunction;
  *     <li>a state, characterising agent behaviour.</li>
  * </ul>
  */
-public final class Agent {
+public final class SlamAgent {
 
     private final int agentId;
 
-    private final AgentPrototype agentPrototype;
+    private final SlamAgentPrototype agentPrototype;
 
     private final AgentStore agentMemory;
-    private AgentBehaviouralState state;
-    private final AgentTimePassingFunction timePassingFunction;
-    private final PerceptionFunction perceptionFunction;
-    private double schedulingTime;
+    private final SlamAgentState state;
+    private final double timeOfNextStep;
 
-    public Agent(AgentPrototype agentPrototype, int agentId,  AgentStore agentMemory, AgentBehaviouralState state, AgentTimePassingFunction timePassingFunction, PerceptionFunction perceptionFunction) {
+    public SlamAgent(SlamAgentPrototype agentPrototype, int agentId, SlamAgentState state, AgentStore agentMemory, double timeOfNextStep) {
         this.agentId = agentId;
         this.agentPrototype = agentPrototype;
         this.agentMemory = agentMemory;
         this.state = state;
-        this.timePassingFunction = timePassingFunction;
-        this.perceptionFunction = perceptionFunction;
+        this.timeOfNextStep = timeOfNextStep;
     }
+
+
+    public SlamAgent(SlamAgent agent, SlamAgentState nextAgentState, AgentStore nextAgentStore, double agentSchedulingTime) {
+        this(agent.agentPrototype, agent.agentId, nextAgentState, nextAgentStore, agentSchedulingTime);
+    }
+
+    public SlamAgent(RandomGenerator rg, SlamAgent agent, SlamAgentState nextAgentState, AgentStore nextAgentStore) {
+        this(agent.agentPrototype, agent.agentId, nextAgentState, nextAgentStore, nextAgentState.sampleTimeOfNextStep(rg, nextAgentStore));
+    }
+
+    public SlamAgent(SlamAgent agent, AgentStore agentStore) {
+        this(agent.agentPrototype, agent.agentId, agent.state, agentStore, agent.timeOfNextStep);
+    }
+
+    public SlamAgent(SlamAgentPrototype agentPrototype, int agentId, SlamAgentState agentBehaviouralState, AgentStore agentStore) {
+        this(agentPrototype, agentId, agentBehaviouralState, agentStore, Double.NaN);
+    }
+
 
     /**
      * Returns a mapping associating each variable with its value in the current agent memory.
@@ -76,7 +93,7 @@ public final class Agent {
      *
      * @return agent state.
      */
-    public AgentBehaviouralState getAgentState() {
+    public SlamAgentState getAgentState() {
         return state;
     }
 
@@ -104,18 +121,16 @@ public final class Agent {
      * This method is executed to notify an agent that a new message has been received. The method returns the
      * list of messages that have been sent when the receives is handled.
      *
-     * @param msg received message.
+     * @param message received message.
      * @return list of messages that have been sent when as a consequence of the received message.
      */
-    public Optional<ActivityResult> receive(RandomGenerator rg, StateExpressionEvaluator evaluator, DeliveredMessage msg) {
-        return state.onReceive(this.agentMemory, msg).map(f -> this.execute(rg, evaluator, f));
+    public Optional<Pair<List<OutgoingMessage>, SlamAgent>> receive(RandomGenerator rg, DeliveredMessage message) {
+        return state.onReceive(rg, agentMemory, message).map(e -> this.apply(rg, e));
     }
 
-    private ActivityResult execute(RandomGenerator rg, StateExpressionEvaluator evaluator, AgentStepFunction function) {
-        AgentStepEffect effect = function.apply(rg, evaluator, agentMemory);
-        this.state = effect.getNextState();
-        this.schedulingTime = this.state.getSojournTimeFunction().applyAsDouble(rg, agentMemory);
-        return new ActivityResult(this, effect.getSentMessages());
+    private Pair<List<OutgoingMessage>, SlamAgent> apply(RandomGenerator rg, SlamAgentStepEffect effect) {
+        SlamAgent nextAgent = new SlamAgent(rg, this, effect.getNextState(), effect.getNextAgentStore());
+        return Pair.of(effect.getSentMessages(), nextAgent);
     }
 
     /**
@@ -124,8 +139,8 @@ public final class Agent {
      * @param rg random generator used to sample random values.
      * @return the result of agent step.
      */
-    public ActivityResult execute(RandomGenerator rg, StateExpressionEvaluator evaluator) {
-        return execute(rg, evaluator, this.state.getStepFunction());
+    public Optional<Pair<List<OutgoingMessage>, SlamAgent>> execute(RandomGenerator rg) {
+            return this.state.step(rg, this.agentMemory).map(e -> apply(rg, e));
     }
 
 
@@ -135,19 +150,20 @@ public final class Agent {
      * @return the time at which this agent will execute its step.
      */
     public double timeOfNextStep() {
-        return this.schedulingTime;
+        return this.timeOfNextStep;
     }
 
     /**
-     * This method is invoked on the agent to notify that <code>dt</code> time units are passed.
+     * This method is invoked on the agent to notify the passage of time to this agent.
      *
      * @param rg random generator used to sample random values.
-     * @param dt passed time units.
+     * @param time progress agent time to the given value.
      */
-    public void timeStep(RandomGenerator rg, double dt) {
-        this.timePassingFunction.update(rg, dt, agentMemory);
-        this.state.applyStateDynamic(rg, dt, agentMemory);
-        agentMemory.recordTime(dt);
+    public SlamAgent progressTime(RandomGenerator rg, double time) {
+        if (time > timeOfNextStep) throw new SlamInternalRuntimeException("Time step missed for agent"+this);
+        return new SlamAgent(this,
+                this.state.applyStateDynamic(rg, time-agentMemory.now(), this.agentPrototype.getTimePassingFunctionProvider().update(rg, time-agentMemory.now(), agentMemory)).
+                recordTime(time));
     }
 
     /**
@@ -164,7 +180,7 @@ public final class Agent {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Agent agent = (Agent) o;
+        SlamAgent agent = (SlamAgent) o;
         return agentId == agent.agentId;
     }
 
@@ -178,11 +194,17 @@ public final class Agent {
      *
      * @return the prototype describing the behaviour of this agent.
      */
-    public AgentPrototype getAgentPrototype() {
+    public SlamAgentPrototype getAgentPrototype() {
         return agentPrototype;
     }
 
-    public void perceive(RandomGenerator rg, SlamState slamState) {
-        this.perceptionFunction.perceive(rg,slamState,agentMemory);
+    public SlamAgent perceive(RandomGenerator rg, StateExpressionEvaluator stateExpressionEvaluator) {
+        PerceptionFunction perceptionFunction = agentPrototype.getPerceptionFunction();
+        if (perceptionFunction == null) return this;
+        return new SlamAgent(this, perceptionFunction.perceive(rg, stateExpressionEvaluator, agentMemory));
+    }
+
+    public AgentName getAgentName() {
+        return agentPrototype.getAgentName();
     }
 }

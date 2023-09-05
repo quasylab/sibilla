@@ -24,7 +24,7 @@
 package it.unicam.quasylab.sibilla.core.models.lio;
 
 import it.unicam.quasylab.sibilla.core.tools.ProbabilityVector;
-import it.unicam.quasylab.sibilla.core.util.Pair;
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
 
 import java.util.LinkedList;
 import java.util.List;

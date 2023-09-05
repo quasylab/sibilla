@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.core.models.slam;
 import it.unicam.quasylab.sibilla.core.simulator.SimulatorCursor;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 public class SlamSimulationCursor implements SimulatorCursor<SlamState> {
@@ -46,9 +47,9 @@ public class SlamSimulationCursor implements SimulatorCursor<SlamState> {
 
     @Override
     public boolean step() {
-        Activity activity = currentState.nextScheduledActivity();
-        if (activity != null) {
-            activity.execute(rg, currentState);
+        Optional<SlamState> next = currentState.next(rg);
+        if (next.isPresent()) {
+            currentState = next.get();
             return true;
         } else {
             return false;

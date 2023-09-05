@@ -21,9 +21,12 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.util;
+package it.unicam.quasylab.sibilla.core.util.datastructures;
 
 
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 
 /**
@@ -32,6 +35,10 @@ import java.util.function.IntFunction;
  * @param <T> the type of elements stored in the list.
  */
 public interface ImmutableList<T>  {
+
+    static <T> ImmutableList<T> of(T element) {
+        return new NonEmptyList<>(element, new EmptyList<>());
+    }
 
     /**
      * Returns true if this list is empty, false otherwise.
@@ -85,6 +92,51 @@ public interface ImmutableList<T>  {
      */
     ImmutableList<T> reverse();
 
+    /**
+     * Returns the list obtained by applying the given function to
+     * all the element of this list.
+     *
+     * @param function function to apply
+     * @return the list obtained by applying the given function to all the element of this list.
+     * @param <V> type of the elements in the resulting list
+     */
+    <V> ImmutableList<V> apply(Function<T,V> function);
+
+
+    /**
+     * Applies the given action to all the elements in this list.
+     *
+     * @param action the action to perform on the elements of this list.
+     */
+    void forEach(Consumer<T> action);
+
+
+    /**
+     * Returns the value obtained by applying the given function to all the elements of this,
+     * starting from the end. If the list is empty, the initial value is returned, otherwise
+     * l.redubuceFromLast(f, v) = f.apply(l.head(), tail.reduceFromLast(f, v)).
+     *
+     * @param function the function to apply
+     * @param initial the initial value
+     * @return the value obtained by applying the given function to all the elements of this,
+     * starting from the end.
+     * @param <V> type of the result
+     */
+    <V> V reduceFromLast(BiFunction<T,V,V> function, V initial);
+
+    /**
+     * Returns the value obtained by applying the given function to all the elements of this,
+     * starting from the beginning. If the list is empty, the initial value is returned, otherwise
+     * l.reduceFromFirst(f, v) = tail.reduceFromFirst(f, f.apply(l.head(), v)).
+     *
+     * @param function the function to apply
+     * @param initial the initial value
+     * @return the value obtained by applying the given function to all the elements of this,
+     * starting from the end.
+     * @param <V> type of the result
+     */
+    <V> V reduceFromFirst(BiFunction<T,V,V> function, V initial);
+
     static <T> ImmutableList<T> empty(Class<T> clazz) {
         return new EmptyList<>();
     }
@@ -118,6 +170,24 @@ public interface ImmutableList<T>  {
         @Override
         public ImmutableList<T> reverse() {
             return this;
+        }
+
+        @Override
+        public <V> ImmutableList<V> apply(Function<T, V> function) {
+            return new EmptyList<>();
+        }
+
+        @Override
+        public void forEach(Consumer<T> action) {}
+
+        @Override
+        public <V> V reduceFromLast(BiFunction<T, V, V> function, V initial) {
+            return initial;
+        }
+
+        @Override
+        public <V> V reduceFromFirst(BiFunction<T, V, V> function, V initial) {
+            return initial;
         }
     }
 
@@ -174,6 +244,27 @@ public interface ImmutableList<T>  {
                 scan = scan.tail();
             }
             return result;
+        }
+
+        @Override
+        public <V> ImmutableList<V> apply(Function<T, V> function) {
+            return new NonEmptyList<>(function.apply(this.head), this.tail.apply(function));
+        }
+
+        @Override
+        public void forEach(Consumer<T> action) {
+            action.accept(this.head);
+            this.tail.forEach(action);
+        }
+
+        @Override
+        public <V> V reduceFromLast(BiFunction<T, V, V> function, V initial) {
+            return function.apply(this.head, this.tail.reduceFromLast(function, initial));
+        }
+
+        @Override
+        public <V> V reduceFromFirst(BiFunction<T, V, V> function, V initial) {
+            return this.tail.reduceFromLast(function, function.apply(this.head, initial));
         }
     }
 

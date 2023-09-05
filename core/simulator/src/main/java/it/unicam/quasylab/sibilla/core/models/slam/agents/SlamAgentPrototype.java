@@ -27,19 +27,20 @@ import it.unicam.quasylab.sibilla.core.models.slam.*;
 import it.unicam.quasylab.sibilla.core.models.slam.data.AgentStore;
 import it.unicam.quasylab.sibilla.core.models.slam.data.SlamType;
 import it.unicam.quasylab.sibilla.core.models.slam.data.SlamValue;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.function.Function;
 
 /**
  * Instances of this class are used to build an LIOAgent given a set of arguments.
  */
-public class AgentPrototype {
+public class SlamAgentPrototype {
     private final AgentName agentName;
     private final SlamType[] parameters;
-    private Function<SlamValue[], AgentStore> storeProvider = s -> new AgentStore();
-    private AgentBehaviourOld agentBehaviour = null;
-    private AgentTimePassingFunction timePassingFunctionProvider =  (r, t, s) -> {};
-    private PerceptionFunction perceptionFunction = (r, s, m) -> {};
+    private Function<SibillaValue[], AgentStore> storeProvider = s -> new AgentStore();
+    private SlamAgentBehaviour agentBehaviour = null;
+    private AgentTimePassingFunction timePassingFunctionProvider =  (r, t, s) -> s;
+    private PerceptionFunction perceptionFunction = (r, s, m) -> m;
 
 
     /**
@@ -47,7 +48,7 @@ public class AgentPrototype {
      *
      * @param agentName                     agent name.
      */
-    public AgentPrototype(AgentName agentName, SlamType[] parameters) {
+    public SlamAgentPrototype(AgentName agentName, SlamType[] parameters) {
         this.agentName = agentName;
         this.parameters = parameters;
     }
@@ -60,13 +61,34 @@ public class AgentPrototype {
      * @param values    values used to build the agent.
      * @return          a new agent having the given id and built by using the given values.
      */
-    public Agent getAgent(int agentId, SlamValue[] values) {
-        return new Agent(this,
+    public SlamAgent getAgent(int agentId, SibillaValue[] values) {
+        return getAgent(agentId, values, agentBehaviour.initialState());
+    }
+
+    /**
+     * Returns a new agent having the given id, starting at the given state, and built by using the given
+     * values.
+     *
+     * @param agentId the id of the new created agent
+     * @param values the values used to build the agent
+     * @param stateName the name of the state at which the created agent starts its behaviour
+     * @return a new agent having the given id, starting at the given state, and built by using the given
+     * values
+     * @throws  IllegalStateException when this.hasState(stateName) is false
+     */
+    public SlamAgent getAgent(int agentId, SibillaValue[] values, String stateName) {
+        SlamAgentState agentState = agentBehaviour.getAgentState(stateName);
+        if (agentState == null) {
+            throw new IllegalArgumentException(String.format("State %s is unknown in agent %s", stateName, this.agentName.getAgentName()));
+        }
+        return getAgent(agentId, values, agentState);
+    }
+
+    private SlamAgent getAgent(int agentId, SibillaValue[] values, SlamAgentState agentState) {
+        return new SlamAgent(this,
                 agentId,
-                storeProvider.apply(values),
-                agentBehaviour.initialState(),
-                timePassingFunctionProvider,
-                perceptionFunction
+                agentState,
+                storeProvider.apply(values)
         );
     }
 
@@ -76,7 +98,7 @@ public class AgentPrototype {
      * @param values values used to build the agent in the returned factory.
      * @return the agent factory function used to create an agent from the given value.
      */
-    public AgentFactory getAgentFactory(SlamValue[] values) {
+    public AgentFactory getAgentFactory(SibillaValue[] values) {
         return i -> this.getAgent(i, values);
     }
 
@@ -92,7 +114,7 @@ public class AgentPrototype {
      * Returns the function used to build the agent store.
      * @return the function used to build the agent store.
      */
-    public Function<SlamValue[], AgentStore> getStoreProvider() {
+    public Function<SibillaValue[], AgentStore> getStoreProvider() {
         return storeProvider;
     }
 
@@ -100,7 +122,7 @@ public class AgentPrototype {
      * Sets the function used to build the agent store.
      * @param storeProvider the function to use to build the agent store.
      */
-    public void setStoreProvider(Function<SlamValue[], AgentStore> storeProvider) {
+    public void setStoreProvider(Function<SibillaValue[], AgentStore> storeProvider) {
         this.storeProvider = storeProvider;
     }
 
@@ -108,7 +130,7 @@ public class AgentPrototype {
      * Returns the behaviour of this template.
      * @return the behaviour of this template.
      */
-    public AgentBehaviourOld getAgentBehaviour() {
+    public SlamAgentBehaviour getAgentBehaviour() {
         return agentBehaviour;
     }
 
@@ -117,7 +139,7 @@ public class AgentPrototype {
      *
      * @param agentBehaviour the behaviour to use in this template.
      */
-    public void setAgentBehaviour(AgentBehaviourOld agentBehaviour) {
+    public void setAgentBehaviour(SlamAgentBehaviour agentBehaviour) {
         this.agentBehaviour = agentBehaviour;
     }
 
@@ -163,5 +185,15 @@ public class AgentPrototype {
      */
     public AgentName getAgentName() {
         return agentName;
+    }
+
+    /**
+     * Returns true if a state with the given name is defined.
+     *
+     * @param stateName the name of the state for which the presence is tested
+     * @return true if a state with the given name is defined.
+     */
+    public boolean hasState(String stateName) {
+        return (this.agentBehaviour!=null)&&this.agentBehaviour.hasState(stateName);
     }
 }

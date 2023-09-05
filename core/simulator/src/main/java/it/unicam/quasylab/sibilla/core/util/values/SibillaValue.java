@@ -23,6 +23,10 @@
 
 package it.unicam.quasylab.sibilla.core.util.values;
 
+import it.unicam.quasylab.sibilla.core.models.slam.data.AgentStore;
+import it.unicam.quasylab.sibilla.core.models.slam.data.AgentVariable;
+import org.apache.commons.math3.random.RandomGenerator;
+
 import java.util.Optional;
 import java.util.function.*;
 import java.util.stream.DoubleStream;
@@ -194,6 +198,30 @@ public interface SibillaValue {
 
     static SibillaValue[] of(double[] values) {
         return DoubleStream.of(values).mapToObj(SibillaValue::of).toArray(SibillaValue[]::new);
+    }
+
+    static SibillaValue min(SibillaValue v1, SibillaValue v2) {
+        if (v1.doubleOf()<v2.doubleOf()) {
+            return v1;
+        } else {
+            return v2;
+        }
+    }
+
+    static SibillaValue max(SibillaValue v1, SibillaValue v2) {
+        if (v1.doubleOf()<v2.doubleOf()) {
+            return v2;
+        } else {
+            return v1;
+        }
+    }
+
+    static <T,R> BiFunction<T, R, SibillaValue> apply(DoubleUnaryOperator op, BiFunction<T, R, SibillaValue> function) {
+        return (t, r) -> SibillaValue.apply(op, function.apply(t, r));
+    }
+
+    static <R, T> BiFunction<R, T, SibillaValue> apply(UnaryOperator<SibillaValue> op, BiFunction<R, T, SibillaValue> function) {
+        return (r, t) -> op.apply(function.apply(r, t));
     }
 
 

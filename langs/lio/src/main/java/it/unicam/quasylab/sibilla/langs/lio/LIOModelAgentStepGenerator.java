@@ -69,7 +69,7 @@ public class LIOModelAgentStepGenerator extends LIOModelAgentDependentChecker {
                 LIOAgentName agentName = new LIOAgentName(name, argumentEvaluationFunction.stream().map(f -> f.apply(args)).toArray(SibillaValue[]::new));
                 LIOAgent agent = definition.getAgent(agentName);
                 if (agent == null) {
-                    throw new IllegalStateException("Agent "+agentName+"is unknown");
+                    throw new IllegalStateException("SlamAgent "+agentName+"is unknown");
                 }
                 return agent;
             };

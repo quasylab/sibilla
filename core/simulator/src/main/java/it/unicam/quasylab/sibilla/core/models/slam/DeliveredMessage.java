@@ -23,8 +23,11 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
-import it.unicam.quasylab.sibilla.core.models.slam.agents.Agent;
-import it.unicam.quasylab.sibilla.core.models.slam.data.SlamValue;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentMessage;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.SlamAgent;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+
+import java.util.function.Predicate;
 
 /**
  * Identifies a message that must be delivered at a given agent.
@@ -32,63 +35,28 @@ import it.unicam.quasylab.sibilla.core.models.slam.data.SlamValue;
 public class DeliveredMessage {
 
 
-    private final Agent target;
-    private final MessageTag tag;
-    private final SlamValue[] items;
-    private final double deliveryTime;
+    private final SlamAgent sender;
 
-    /**
-     * Creates a new message that must be delivered at agent <code>target</code> at time <code>deliveryTime</code>,
-     * having tag <code>tag</code> and items <code>items</code>.
-     *
-     * @param target message target.
-     * @param tag message tag.
-     * @param items items in the message.
-     * @param deliveryTime time at which the message is delivered at the target.
-     */
-    public DeliveredMessage(Agent target, MessageTag tag, SlamValue[] items, double deliveryTime) {
-        this.target = target;
-        this.tag = tag;
-        this.items = items;
-        this.deliveryTime = deliveryTime;
+    private final int receiverId;
+
+    private final AgentMessage message;
+
+    public DeliveredMessage(SlamAgent sender, AgentMessage message, int receiverId) {
+        this.sender = sender;
+        this.receiverId = receiverId;
+        this.message = message;
     }
 
-    /**
-     * Returns message target.
-     *
-     * @return message target.
-     */
-    public Agent getTarget() {
-        return target;
+    public SlamAgent getSender() {
+        return sender;
     }
 
-    /**
-     * Returns message tag.
-     *
-     * @return message tag.
-     */
-    public MessageTag getTag() {
-        return tag;
+    public int getReceiverId() {
+        return receiverId;
     }
 
-    /**
-     * Returns message delivery time.
-     *
-     * @return message delivery time.
-     */
-    public double getDeliveryTime() {
-        return deliveryTime;
+    public AgentMessage getMessage() {
+        return message;
     }
-
-    /**
-     * Returns the <code>idx</code>th item in the message.
-     *
-     * @param idx item index.
-     * @return the <code>idx</code>th item in the message.
-     */
-    public SlamValue getItem(int idx) {
-        return this.items[idx];
-    }
-
 
 }

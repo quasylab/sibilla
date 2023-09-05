@@ -38,7 +38,9 @@ public enum ExpressionContext {
     AGENT_ATTRIBUTE,
     AGENT_SOJOURN_TIME,
     AGENT_TIME_UPDATE,
-    SYSTEM;
+    SYSTEM,
+
+    AGENT_PATTERN;
 
     public boolean randomExpressionAllowed() {
         switch (this) {
@@ -47,12 +49,13 @@ public enum ExpressionContext {
             case CONSTANT:
             case PREDICATE:
             case MEASURE:
-            case SYSTEM:
+            case AGENT_ATTRIBUTE:
+            case AGENT_PATTERN:
                 return false;
+            case SYSTEM:
             case AGENT_MESSAGE_HANDLER:
             case AGENT_VIEW:
             case AGENT_COMMAND:
-            case AGENT_ATTRIBUTE:
             case AGENT_SOJOURN_TIME:
             case AGENT_TIME_UPDATE:
                 return true;
@@ -68,11 +71,12 @@ public enum ExpressionContext {
             case PREDICATE:
             case MEASURE:
             case SYSTEM:
+            case AGENT_ATTRIBUTE:
+            case AGENT_PATTERN:
                 return false;
             case AGENT_MESSAGE_HANDLER:
             case AGENT_VIEW:
             case AGENT_COMMAND:
-            case AGENT_ATTRIBUTE:
             case AGENT_SOJOURN_TIME:
             case AGENT_TIME_UPDATE:
                 return true;
@@ -89,5 +93,33 @@ public enum ExpressionContext {
             default:
                 return false;
         }
+    }
+
+    public boolean thisPatternReferenceAllowed() {
+        return this==AGENT_PATTERN;
+    }
+
+    public boolean accessToAttributesAllowed() {
+        switch (this) {
+            case NONE:
+            case PARAMETER:
+            case CONSTANT:
+            case PREDICATE:
+            case MEASURE:
+            case AGENT_ATTRIBUTE:
+                return false;
+            case AGENT_MESSAGE_HANDLER:
+            case AGENT_VIEW:
+            case AGENT_COMMAND:
+            case AGENT_SOJOURN_TIME:
+            case AGENT_TIME_UPDATE:
+            case SYSTEM:
+                return true;
+        }
+        return false;
+    }
+
+    public boolean deltaTimeAllowed() {
+        return this == AGENT_TIME_UPDATE;
     }
 }

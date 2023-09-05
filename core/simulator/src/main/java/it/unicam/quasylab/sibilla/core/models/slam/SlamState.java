@@ -24,16 +24,15 @@
 package it.unicam.quasylab.sibilla.core.models.slam;
 
 import it.unicam.quasylab.sibilla.core.models.State;
-import it.unicam.quasylab.sibilla.core.models.slam.agents.Agent;
-import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentFactory;
-import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentMessage;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.OutgoingMessage;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.SlamAgent;
 import it.unicam.quasylab.sibilla.core.models.slam.data.AgentStore;
+import it.unicam.quasylab.sibilla.core.util.datastructures.*;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
-import java.util.PriorityQueue;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Stream;
@@ -43,145 +42,297 @@ import java.util.stream.Stream;
  */
 public final class SlamState implements State, StateExpressionEvaluator {
 
-    private int agentCounter = 0;
-    private final HashMap<Integer, Agent> agents;
-    private double now;
-    private final HashMap<Integer,Activity> agentsActivities;
-    private final PriorityQueue<Activity> scheduledActivities;
 
-    public SlamState(AgentFactory... agents) {
-        this(0.0, agents);
-    }
+    private final Activity.ActivityFactory activityFactory;
 
-    public SlamState(double now, AgentFactory ... agents) {
-        this.agents = new HashMap<>();
+    private final SibillaMap<Integer, SlamAgent> agents;
+
+    private final double now;
+    private final Scheduler<Activity> scheduledActivities;
+
+    private final SibillaMap<Integer, Activity.AgentStepActivity> agentActivities;
+
+
+    public SlamState(Activity.ActivityFactory activityFactory, double now, SibillaMap<Integer, SlamAgent> agents, Scheduler<Activity> scheduledActivities, SibillaMap<Integer, Activity.AgentStepActivity> agentActivities) {
+        this.activityFactory = activityFactory;
         this.now = now;
-        this.scheduledActivities = new PriorityQueue<>();
-        this.agentsActivities = new HashMap<>();
-        Arrays.stream(agents).forEach(this::addAgent);
+        this.scheduledActivities = scheduledActivities;
+        this.agents = agents;
+        this.agentActivities = agentActivities;
     }
 
-    public void addAgent(AgentFactory agentFactory) {
-        Agent newAgent= agentFactory.getAgent(agentCounter++);
-        agents.put(newAgent.agentId(), newAgent);
+    public static SlamState set(SlamState slamState, SibillaMap<Integer, SlamAgent> agents) {
+        return new SlamState(slamState.activityFactory, slamState.now, agents, slamState.scheduledActivities, slamState.agentActivities);
     }
+
+    public static SlamState set(SlamState slamState, Scheduler<Activity> scheduledActivities) {
+        return new SlamState(slamState.activityFactory, slamState.now, slamState.agents, scheduledActivities, slamState.agentActivities);
+    }
+
+    public static SlamState set(SlamState slamState, Scheduler<Activity> scheduledActivities, SibillaMap<Integer, Activity.AgentStepActivity> agentActivities) {
+        return new SlamState(slamState.activityFactory, slamState.now, slamState.agents, scheduledActivities, agentActivities);
+    }
+
+
+    public static SlamState updateAgentStepActivity(SlamState slamState, int agentIndex) {
+        Optional<SlamAgent> oAgent = slamState.agents.get(agentIndex);
+        if (oAgent.isEmpty()) return slamState;
+        Optional<Activity.AgentStepActivity> optionalAgentStepActivity = slamState.agentActivities.get(agentIndex);
+        if (optionalAgentStepActivity.isEmpty()) {
+            return addAgentStateActivity(slamState, oAgent.get());
+        } else {
+            return updateAgentStepActivity(slamState, optionalAgentStepActivity.get(), oAgent.get());
+        }
+    }
+
+    private static SlamState updateAgentStepActivity(SlamState slamState, Activity.AgentStepActivity agentStepActivity, SlamAgent slamAgent) {
+        double time = slamAgent.timeOfNextStep();
+        if (!Double.isFinite(time)) return slamState;
+        Activity.AgentStepActivity activity = slamState.activityFactory.agentStepActivity(time, slamAgent.agentId());
+        return SlamState.set(slamState, slamState.scheduledActivities.unscheduled(agentStepActivity.getScheduledTime(), agentStepActivity).schedule(activity, time), slamState.agentActivities.add(slamAgent.agentId(), activity));
+    }
+
+    private static SlamState addAgentStateActivity(SlamState slamState, SlamAgent slamAgent) {
+        double time = slamAgent.timeOfNextStep();
+        if (!Double.isFinite(time)) return slamState;
+        Activity.AgentStepActivity activity = slamState.activityFactory.agentStepActivity(time, slamAgent.agentId());
+        return SlamState.set(slamState, slamState.scheduledActivities.schedule(activity, time), slamState.agentActivities.add(slamAgent.agentId(), activity));
+    }
+
+
 
     @Override
     public synchronized double getMinOf(ToDoubleFunction<AgentStore> expr) {
-        return agents.values().stream().mapToDouble(a -> a.eval(expr)).min().orElse(Double.NaN);
+        return agents.streamOfValues().mapToDouble(a -> a.eval(expr)).min().orElse(Double.NaN);
     }
 
-    @Override
-    public synchronized double getMinOf(ToDoubleFunction<AgentStore> expr, Predicate<Agent> filter) {
-        return agents.values().stream().filter(filter).mapToDouble(a -> a.eval(expr)).min().orElse(Double.NaN);
+    public synchronized double getMinOf(SlamAgent agent, ToDoubleFunction<AgentStore> expr) {
+        return agents.streamOfValues().filter(a -> !a.equals(agent)).mapToDouble(a -> a.eval(expr)).min().orElse(Double.NaN);
     }
+
+
+    @Override
+    public synchronized double getMinOf(ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter) {
+        return agents.streamOfValues().filter(filter).mapToDouble(a -> a.eval(expr)).min().orElse(Double.NaN);
+    }
+
+    public synchronized double getMinOf(SlamAgent agent, ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter) {
+        return agents.streamOfValues().filter(a -> !a.equals(agent)).filter(filter).mapToDouble(a -> a.eval(expr)).min().orElse(Double.NaN);
+    }
+
 
     @Override
     public synchronized double getMaxOf(ToDoubleFunction<AgentStore> expr) {
-        return agents.values().stream().mapToDouble(a -> a.eval(expr)).max().orElse(Double.NaN);
+        return agents.streamOfValues().mapToDouble(a -> a.eval(expr)).max().orElse(Double.NaN);
+    }
+
+    public synchronized double getMaxOf(SlamAgent agent, ToDoubleFunction<AgentStore> expr) {
+        return agents.streamOfValues().filter(a -> !a.equals(agent)).mapToDouble(a -> a.eval(expr)).max().orElse(Double.NaN);
     }
 
     @Override
-    public synchronized double getMaxOf(ToDoubleFunction<AgentStore> expr, Predicate<Agent> filter) {
-        return agents.values().stream().filter(filter).mapToDouble(a -> a.eval(expr)).max().orElse(Double.NaN);
+    public synchronized double getMaxOf(ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter) {
+        return agents.streamOfValues().filter(filter).mapToDouble(a -> a.eval(expr)).max().orElse(Double.NaN);
+    }
+
+    public synchronized double getMaxOf(SlamAgent agent, ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter) {
+        return agents.streamOfValues().filter(a -> !a.equals(agent)).filter(filter).mapToDouble(a -> a.eval(expr)).max().orElse(Double.NaN);
     }
 
     @Override
     public synchronized double getMeanOf(ToDoubleFunction<AgentStore> expr) {
-        return agents.values().stream().mapToDouble(a -> a.eval(expr)).average().orElse(Double.NaN);
+        return agents.streamOfValues().mapToDouble(a -> a.eval(expr)).average().orElse(Double.NaN);
+    }
+
+    public synchronized double getMeanOf(SlamAgent agent, ToDoubleFunction<AgentStore> expr) {
+        return agents.streamOfValues().filter(a -> !a.equals(agent)).mapToDouble(a -> a.eval(expr)).average().orElse(Double.NaN);
     }
 
     @Override
-    public synchronized double getMeanOf(ToDoubleFunction<AgentStore> expr, Predicate<Agent> filter) {
-        return agents.values().stream().filter(filter).mapToDouble(a -> a.eval(expr)).average().orElse(Double.NaN);
+    public synchronized double getMeanOf(ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter) {
+        return agents.streamOfValues().filter(filter).mapToDouble(a -> a.eval(expr)).average().orElse(Double.NaN);
+    }
+
+    public synchronized double getMeanOf(SlamAgent agent, ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter) {
+        return agents.streamOfValues().filter(a -> !a.equals(agent)).filter(filter).mapToDouble(a -> a.eval(expr)).average().orElse(Double.NaN);
+    }
+
+    public synchronized double getSumOf(SlamAgent agent, ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter) {
+        return agents.streamOfValues().filter(a -> !a.equals(agent)).filter(filter).mapToDouble(a -> a.eval(expr)).sum();
+    }
+
+    public synchronized double getSumOf(SlamAgent agent, ToDoubleFunction<AgentStore> expr) {
+        return agents.streamOfValues().filter(a -> !a.equals(agent)).mapToDouble(a -> a.eval(expr)).sum();
+    }
+
+    public synchronized int count(SlamAgent agent, Predicate<SlamAgent> filter) {
+        return (int) agents.streamOfValues().filter(a -> !a.equals(agent)).filter(filter).count();
+    }
+
+
+    @Override
+    public synchronized boolean exists(Predicate<SlamAgent> p) {
+        return agents.streamOfValues().anyMatch(p);
+    }
+
+    public synchronized boolean exists(SlamAgent agent, Predicate<SlamAgent> p) {
+        return agents.streamOfValues().filter(a -> !a.equals(agent)).anyMatch(p);
     }
 
     @Override
-    public synchronized boolean exists(Predicate<Agent> p) {
-        return agents.values().stream().anyMatch(p);
+    public synchronized boolean forAll(Predicate<SlamAgent> p) {
+        return agents.streamOfValues().allMatch(p);
     }
 
     @Override
-    public synchronized boolean forAll(Predicate<Agent> p) {
-        return agents.values().stream().allMatch(p);
+    public double getSumOf(ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter) {
+        return agents.streamOfValues().filter(filter).mapToDouble(a -> a.eval(expr)).sum();
     }
 
-    public Stream<Agent> stream() {
-        return agents.values().stream();
+    @Override
+    public double getSumOf(ToDoubleFunction<AgentStore> expr) {
+        return agents.streamOfValues().mapToDouble(a -> a.eval(expr)).sum();
     }
 
-    public void timeStep(RandomGenerator rg, double time) {
-        double dt = time - now;
-        if (dt < 0) {
-            throw new IllegalStateException();//TODO: Add Message!
-        }
-        if (dt > 0) {
-            agents.values().forEach(a -> a.timeStep(rg, dt));
-            agents.values().forEach(a -> a.perceive(rg, this));
-            now = time;
-        }
+    @Override
+    public int count(Predicate<SlamAgent> filter) {
+        return (int) agents.streamOfValues().filter(filter).count();
     }
 
-    public void executeAgentStep(RandomGenerator rg, Agent agent) {
-        agentsActivities.remove(agent.agentId());
-        applyActivityResult(rg, agent.execute(rg, this));
+    public synchronized boolean forAll(SlamAgent agent, Predicate<SlamAgent> p) {
+        return agents.streamOfValues().filter(a -> !a.equals(agent)).allMatch(p);
     }
 
-    private void applyActivityResult(RandomGenerator rg, ActivityResult result) {
-        Agent agent = result.getAgent();
-        if (!Double.isNaN(result.getAgent().timeOfNextStep())) {
-            assert agent.timeOfNextStep() > now;
-            scheduleAgentStep(agent);
-        }
-        result.getSentMessages().forEach(m -> this.sendMessage(rg, agent, m));
+    public Stream<SlamAgent> stream() {
+        return agents.streamOfValues();
     }
 
-    private void scheduleAgentStep(Agent agent) {
-        Activity activity = new Activity.AgentStepActivity(agent);
-        recordActivity(activity);
-        agentsActivities.put(agent.agentId(), activity);
+    public SlamState progressTimeAt(RandomGenerator rg, double time) {
+        return new SlamState(activityFactory, time, agents.apply(a -> a.progressTime(rg, time)).apply(a -> a.perceive(rg, getStateExpressionEvaluator(a))), scheduledActivities, agentActivities);
     }
 
-    public void sendMessage(RandomGenerator rg, Agent sender, AgentMessage agentMessage) {
-        this.agents.values()
-                .stream()
-                .filter(a -> a != sender)
-                .map(a -> agentMessage.apply(rg, a))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .forEach(this::scheduleMessage);
-    }
-
-    public void scheduleMessage(DeliveredMessage m) {
-        recordActivity(new Activity.MessageDeliveryActivity(m));
-    }
-
-    public void recordActivity(Activity activity) {
-        this.scheduledActivities.add(activity);
-    }
-
-    public void deliverMessage(RandomGenerator rg, DeliveredMessage message) {
-        Agent target = message.getTarget();
-        Optional<ActivityResult> optionalResult = target.receive(rg, this, message);
-        if (optionalResult.isPresent()) {
-            ActivityResult result = optionalResult.get();
-            Activity activity = agentsActivities.remove(result.getAgent().agentId());
-            if (activity != null) {
-                scheduledActivities.remove(activity);
+    private StateExpressionEvaluator getStateExpressionEvaluator(SlamAgent agent) {
+        return new StateExpressionEvaluator() {
+            @Override
+            public double getMinOf(ToDoubleFunction<AgentStore> expr) {
+                return SlamState.this.getMinOf(agent, expr);
             }
-            applyActivityResult(rg, result);
-        }
+
+            @Override
+            public double getMinOf(ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter) {
+                return SlamState.this.getMinOf(agent, expr, filter);
+            }
+
+            @Override
+            public double getMaxOf(ToDoubleFunction<AgentStore> expr) {
+                return SlamState.this.getMaxOf(agent, expr);
+            }
+
+            @Override
+            public double getMaxOf(ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter) {
+                return SlamState.this.getMaxOf(agent, expr, filter);
+            }
+
+            @Override
+            public double getMeanOf(ToDoubleFunction<AgentStore> expr) {
+                return SlamState.this.getMeanOf(agent, expr);
+            }
+
+            @Override
+            public double getMeanOf(ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter) {
+                return SlamState.this.getMeanOf(agent, expr, filter);
+            }
+
+            @Override
+            public boolean exists(Predicate<SlamAgent> p) {
+                return SlamState.this.exists(agent, p);
+            }
+
+            @Override
+            public boolean forAll(Predicate<SlamAgent> p) {
+                return SlamState.this.forAll(agent, p);
+            }
+
+            @Override
+            public double getSumOf(ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter) {
+                return SlamState.this.getSumOf(agent, expr, filter);
+            }
+
+            @Override
+            public double getSumOf(ToDoubleFunction<AgentStore> expr) {
+                return SlamState.this.getSumOf(agent, expr);
+            }
+
+            @Override
+            public int count(Predicate<SlamAgent> filter) {
+                return SlamState.this.count(agent, filter);
+            }
+        };
     }
 
-    public Activity nextScheduledActivity() {
-        return scheduledActivities.poll();
+    public SlamState deliverMessage(RandomGenerator rg, DeliveredMessage message) {
+        Function<SlamAgent, Optional<Pair<List<OutgoingMessage>, SlamAgent>>> deliverFunction = a -> a.receive(rg, message);
+        int receiverId = message.getReceiverId();
+        Optional<Pair<List<OutgoingMessage>, SibillaMap<Integer, SlamAgent>>> result = agents.apply(receiverId, deliverFunction);
+        if (result.isEmpty()) {
+            return this;
+        }
+        Pair<List<OutgoingMessage>, SibillaMap<Integer, SlamAgent>> pair = result.get();
+        SlamState state =  SlamState.updateAgentStepActivity(SlamState.set(this, pair.getValue()), receiverId);
+        Optional<SlamAgent> receiver = pair.getValue().get(message.getReceiverId());
+        return receiver.map(slamAgent -> state.send(rg, slamAgent, pair.getKey())).orElse(state);
+    }
+
+    private SlamState send(RandomGenerator rg, SlamAgent sender, List<OutgoingMessage> messages) {
+        if (messages.isEmpty()) {
+            return this;
+        }
+        Scheduler<Activity> queue = this.scheduledActivities;
+        for (OutgoingMessage message: messages) {
+            for(int i=0; i<agents.size(); i++) {
+                DeliveredMessage dm = new DeliveredMessage(sender, message.getMessage(), i);
+                double time = message.getDeliveryTime().applyAsDouble(rg, sender.getAgentMemory());
+                queue = queue.schedule(activityFactory.messageDeliveryActivity(time, dm), time);
+            }
+        }
+        return SlamState.set(this, queue);
+    }
+
+
+    public SlamState executeAgentStep(RandomGenerator rg, int agent) {
+        Function<SlamAgent, Optional<Pair<List<OutgoingMessage>, SlamAgent>>> stepFunction = a -> a.execute(rg);
+        Optional<Pair<List<OutgoingMessage>, SibillaMap<Integer, SlamAgent>>> result = agents.apply(agent, stepFunction);
+        if (result.isEmpty()) {
+            return this;
+        }
+        Pair<List<OutgoingMessage>, SibillaMap<Integer, SlamAgent>> pair = result.get();
+        SlamState state =  SlamState.updateAgentStepActivity(SlamState.set(this, pair.getValue()), agent);
+        Optional<SlamAgent> receiver = state.agents.get(agent);
+        return receiver.map(slamAgent -> state.send(rg, slamAgent, pair.getKey())).orElse(state);
+
+    }
+
+
+
+    public boolean isTerminal() {
+        return scheduledActivities.isEmpty();
+    }
+
+
+    public Optional<SlamState> next(RandomGenerator rg) {
+        Optional<Pair<ScheduledElements<Activity>, Scheduler<Activity>>> scheduledElementsSibillaSchedulerInterafacePair = this.scheduledActivities.scheduleNext();
+        return scheduledElementsSibillaSchedulerInterafacePair.map(p -> SlamState.set(this, p.getValue()).schedule(rg, p.getKey()));
+    }
+
+    private SlamState schedule(RandomGenerator rg, ScheduledElements<Activity> activities) {
+        SlamState state = this.progressTimeAt(rg, activities.getTime());
+        for (Activity activity: activities.getScheduledElements()) {
+            state = activity.execute(rg, state);
+        }
+        return state;
     }
 
     public double now() {
         return now;
-    }
-
-    public boolean isTerminal() {
-        return scheduledActivities.isEmpty();
     }
 }

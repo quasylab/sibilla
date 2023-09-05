@@ -21,7 +21,8 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.core.util;
+package it.unicam.quasylab.sibilla.core.util.datastructures;
+
 
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,6 +45,21 @@ public class Pair<K,V> implements Map.Entry<K,V> {
 	public Pair( K key, V value ) {
 		this.key = key;
 		this.value = value;
+	}
+
+    public static <K, V> Pair<K,V> of(K first, V second) {
+		return new Pair<>(first, second);
+    }
+
+	public static <K1,K2,V1,V2> Function<Pair<K1,V1>, Pair<K2,V2>> combine(
+			Function<? super K1,? extends K2> f1,
+			Function<? super V1,? extends V2> f2
+	) {
+		return p -> Pair.of(f1.apply(p.key), f2.apply(p.value));
+	}
+
+	public <K2, V2> Pair<K2,V2> apply(Function<K, K2> f1, Function<V, V2> f2) {
+		return new Pair<>(f1.apply(key), f2.apply(value));
 	}
 
 	@Override
@@ -104,10 +120,21 @@ public class Pair<K,V> implements Map.Entry<K,V> {
 	}
 	
 	public static <K,V,T> Pair<K,T> apply(Map.Entry<K,V> p, Function<V,T> f) {
-		return new Pair<K,T>(p.getKey(),f.apply(p.getValue()));
+		return new Pair<>(p.getKey(),f.apply(p.getValue()));
 	}
 	
 	public Pair<K,V> apply( BiFunction<K, V, V> f ) {
 		return new Pair<>(key, f.apply(key,value));
 	}
+
+    public <T> Pair<K,T> applyToSecond(Function<V, T> function) {
+		return new Pair<>(this.key, function.apply(this.value));
+    }
+
+	public <T> Pair<T,V> applyToFirst(Function<K, T> function) {
+		return new Pair<>(function.apply(this.key), this.value);
+	}
+
+
+
 }

@@ -24,21 +24,19 @@
 package it.unicam.quasylab.sibilla.langs.slam;
 
 import it.unicam.quasylab.sibilla.core.models.slam.data.SlamType;
-import it.unicam.quasylab.sibilla.langs.util.ParseError;
+import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 import org.antlr.v4.runtime.Token;
-
-import java.util.List;
 
 /**
  * This visitor is used to infer types of expressions.
  */
 public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
 
+    private final TypeSolver patternTypeSolver;
     private final TypeSolver typeResolver;
-    private final List<ParseError> errors;
+    private final ErrorCollector errors;
     private final ExpressionContext context;
 
-    private final SymbolTable table;
 
     /**
      * Creates a new visitor that is used to infer the type of expressions occurring in the
@@ -48,17 +46,21 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
      * @param typeResolver function used to resolve types
      * @param errors list where errors are stored.
      */
-    public TypeInferenceVisitor(ExpressionContext context,  SymbolTable table, TypeSolver typeResolver, List<ParseError> errors) {
+    public TypeInferenceVisitor(ExpressionContext context, TypeSolver typeResolver, TypeSolver patternTypeSolver, ErrorCollector errors) {
         this.context = context;
         this.typeResolver = typeResolver;
+        this.patternTypeSolver = patternTypeSolver;
         this.errors = errors;
-        this.table = table;
+    }
+
+    public TypeInferenceVisitor(ExpressionContext context,  TypeSolver typeResolver, ErrorCollector errors) {
+        this(context, typeResolver, typeResolver, errors);
     }
 
     public boolean checkType(SlamType expected, SlamModelParser.ExprContext expr) {
         SlamType actual = expr.accept(this);
         if (!expected.equals(actual)) {
-            errors.add(ParseUtil.typeError(expected, actual, expr.start));
+            errors.record(ParseUtil.typeError(expected, actual, expr.start));
             return false;
         } else {
             return true;
@@ -72,7 +74,7 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
     private SlamType checkAndReturn(SlamType result, SlamType expected, SlamModelParser.ExprContext expr) {
         SlamType actual = expr.accept(this);
         if (!expected.equals(actual)) {
-            errors.add(ParseUtil.typeError(SlamType.REAL_TYPE, actual, expr.start));
+            errors.record(ParseUtil.typeError(SlamType.REAL_TYPE, actual, expr.start));
         }
         return result;
     }
@@ -86,7 +88,7 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
     public SlamType visitExpressionReference(SlamModelParser.ExpressionReferenceContext ctx) {
         SlamType referenceType = typeResolver.typeOf(ctx.reference.getText());
         if (referenceType == SlamType.NONE_TYPE) {
-            this.errors.add(ParseUtil.unknownSymbolError(ctx.reference));
+            this.errors.record(ParseUtil.unknownSymbolError(ctx.reference));
         }
         return referenceType;
     }
@@ -111,11 +113,11 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
                 if (type.isNumericType()) {
                     return type;
                 } else {
-                    this.errors.add(ParseUtil.illegalTypeInArithmeticExpressionError(type,expr.start));
+                    this.errors.record(ParseUtil.illegalTypeInArithmeticExpressionError(type,expr.start));
                     return SlamType.NONE_TYPE;
                 }
             default:
-                this.errors.add(ParseUtil.illegalAgentExpressionError(start));
+                this.errors.record(ParseUtil.illegalAgentExpressionError(start));
                 return SlamType.NONE_TYPE;
         }
     }
@@ -145,7 +147,7 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
     public SlamType visitExpressionRelation(SlamModelParser.ExpressionRelationContext ctx) {
         SlamType leftType = ctx.left.accept(this);
         if (!leftType.isComparable()) {
-            errors.add(ParseUtil.incomparableTypeError(leftType,ctx.left.start));
+            errors.record(ParseUtil.incomparableTypeError(leftType,ctx.left.start));
         } else {
             checkType(leftType, ctx.right);
         }
@@ -163,7 +165,7 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
     public SlamType visitExpressionMin(SlamModelParser.ExpressionMinContext ctx) {
         SlamType typeOfFirstArgument = ctx.firstArgument.accept(this);
         if (typeOfFirstArgument.isComparable()) {
-            errors.add(ParseUtil.incomparableTypeError(typeOfFirstArgument,ctx.firstArgument.start));
+            errors.record(ParseUtil.incomparableTypeError(typeOfFirstArgument,ctx.firstArgument.start));
         }
         return checkAndReturn(typeOfFirstArgument, ctx.secondArgument);
     }
@@ -173,14 +175,29 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
         return checkAndReturn(checkAndReturn(SlamType.BOOLEAN_TYPE, ctx.left), ctx.right);
     }
 
+
     @Override
-    public SlamType visitExpressionCast(SlamModelParser.ExpressionCastContext ctx) {
-        SlamType argumentType = ctx.expr().accept(this);
-        SlamType resultType = SlamType.getTypeOf(ctx.type.getText());
-        if (!argumentType.canCastTo(resultType)) {
-            errors.add(ParseUtil.illegalCastError(argumentType, resultType, ctx.expr().start));
+    public SlamType visitExpressionPatternReference(SlamModelParser.ExpressionPatternReferenceContext ctx) {
+        //FIXME!
+        if (this.context.thisPatternReferenceAllowed()) {
+            SlamType referenceType = patternTypeSolver.typeOf(ctx.reference.getText());
+            if (referenceType == SlamType.NONE_TYPE) {
+                this.errors.record(ParseUtil.unknownSymbolError(ctx.reference));
+            }
+            return referenceType;
+        } else {
+            errors.record(ParseUtil.itIsNotAllowedHere(ctx.start));
+            return SlamType.NONE_TYPE;
         }
-        return resultType;
+    }
+
+    @Override
+    public SlamType visitExpressionCastToInteger(SlamModelParser.ExpressionCastToIntegerContext ctx) {
+        SlamType argumentType = ctx.expr().accept(this);
+        if (!argumentType.isNumericType()) {
+            errors.record(ParseUtil.illegalCastError(argumentType, SlamType.INTEGER_TYPE, ctx.expr().start));
+        }
+        return SlamType.INTEGER_TYPE;
     }
 
     @Override
@@ -188,7 +205,7 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
         if (context.timedExpressionAllowed()) {
             return SlamType.REAL_TYPE;
         } else {
-            errors.add(ParseUtil.illegalUseOfTimedExpression(ctx.start));
+            errors.record(ParseUtil.illegalUseOfTimedExpression(ctx.start));
             return SlamType.NONE_TYPE;
         }
     }
@@ -212,7 +229,7 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
     public SlamType visitExpressionUnaryOperator(SlamModelParser.ExpressionUnaryOperatorContext ctx) {
         SlamType argumentType = ctx.arg.accept(this);
         if (!argumentType.isNumericType()) {
-            errors.add(ParseUtil.illegalTypeInArithmeticExpressionError(argumentType, ctx.arg.start));
+            errors.record(ParseUtil.illegalTypeInArithmeticExpressionError(argumentType, ctx.arg.start));
             return SlamType.NONE_TYPE;
         } else {
             return argumentType;
@@ -248,7 +265,7 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
     public SlamType visitExpressionMulDiv(SlamModelParser.ExpressionMulDivContext ctx) {
         SlamType leftType = ctx.left.accept(this);
         if (!leftType.isNumericType()) {
-            errors.add(ParseUtil.illegalTypeInArithmeticExpressionError(leftType, ctx.left.start));
+            errors.record(ParseUtil.illegalTypeInArithmeticExpressionError(leftType, ctx.left.start));
             return SlamType.NONE_TYPE;
         } else {
             return checkAndReturn(leftType, ctx.right);
@@ -259,7 +276,7 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
     public SlamType visitExpressionMax(SlamModelParser.ExpressionMaxContext ctx) {
         SlamType leftType = ctx.firstArgument.accept(this);
         if (!leftType.isNumericType()) {
-            errors.add(ParseUtil.illegalTypeInArithmeticExpressionError(leftType, ctx.firstArgument.start));
+            errors.record(ParseUtil.illegalTypeInArithmeticExpressionError(leftType, ctx.firstArgument.start));
             return SlamType.NONE_TYPE;
         } else {
             return checkAndReturn(leftType, ctx.secondArgument);
@@ -270,7 +287,7 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
     public SlamType visitExpressionSamplingUniform(SlamModelParser.ExpressionSamplingUniformContext ctx) {
         SlamType leftType = ctx.from.accept(this);
         if (!leftType.isNumericType()) {
-            errors.add(ParseUtil.illegalTypeInArithmeticExpressionError(leftType, ctx.from.start));
+            errors.record(ParseUtil.illegalTypeInArithmeticExpressionError(leftType, ctx.from.start));
             return SlamType.NONE_TYPE;
         } else {
             return checkAndReturn(leftType, ctx.to);
@@ -297,7 +314,7 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
         if (context == ExpressionContext.AGENT_TIME_UPDATE) {
             return SlamType.REAL_TYPE;
         } else {
-            this.errors.add(ParseUtil.illegalExpressionError(ctx.start));
+            this.errors.record(ParseUtil.illegalExpressionError(ctx.start));
             return SlamType.NONE_TYPE;
         }
     }
@@ -361,7 +378,7 @@ public class TypeInferenceVisitor extends SlamModelBaseVisitor<SlamType> {
     public SlamType visitExpressionAbs(SlamModelParser.ExpressionAbsContext ctx) {
         SlamType argumentType = ctx.argument.accept(this);
         if (!argumentType.isNumericType()) {
-            errors.add(ParseUtil.illegalTypeInArithmeticExpressionError(argumentType, ctx.argument.start));
+            errors.record(ParseUtil.illegalTypeInArithmeticExpressionError(argumentType, ctx.argument.start));
             return SlamType.NONE_TYPE;
         } else {
             return argumentType;

@@ -23,32 +23,27 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam.agents;
 
-import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentBehaviouralState;
-import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentMessage;
+import it.unicam.quasylab.sibilla.core.models.slam.data.AgentStore;
+import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.List;
+import java.util.function.ToDoubleBiFunction;
 
-/**
- * This class represents the effects that are consequences of an agent step.
- */
-public class AgentStepEffect {
+public class OutgoingMessage {
 
-    private final List<AgentMessage> sentMessages;
-    private final AgentBehaviouralState nextState;
+    private final AgentMessage message;
 
+    private final ToDoubleBiFunction<RandomGenerator, AgentStore> deliveryTime;
 
-    public AgentStepEffect(AgentBehaviouralState nextState, List<AgentMessage> sentMessages) {
-        this.sentMessages = sentMessages;
-        this.nextState = nextState;
+    public OutgoingMessage(AgentMessage message, ToDoubleBiFunction<RandomGenerator, AgentStore> deliveryTime) {
+        this.message = message;
+        this.deliveryTime = deliveryTime;
     }
 
-    public List<AgentMessage> getSentMessages() {
-        return sentMessages;
+    public AgentMessage getMessage() {
+        return message;
     }
 
-    public AgentBehaviouralState getNextState() {
-        return nextState;
+    public ToDoubleBiFunction<RandomGenerator, AgentStore> getDeliveryTime() {
+        return deliveryTime;
     }
-
-
 }

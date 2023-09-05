@@ -27,11 +27,10 @@ import it.unicam.quasylab.sibilla.core.models.slam.data.SlamType;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import org.antlr.v4.runtime.Token;
 
-import java.util.Locale;
-
 public class ParseUtil {
 
 
+    private static final String DUPLICATED_STATE_NAME_MESSAGE = "State name %s at line %d:%d has been already used at line %d:%d.";
     private static final String DUPLICATED_AGENT_NAME_MESSAGE = "Duplicated agent name %s at line %d:%d.";
     private static final String DUPLICATED_NAME_MESSAGE = "Name %s has at line %d:%d has been already declared at line %d:%d.";
     private static final String TYPE_ERROR_MESSAGE = "Type error at line %d:%d: expected %s while it is %s.";
@@ -42,7 +41,7 @@ public class ParseUtil {
     private static final String INCOMPATIBLE_TYPE_DECLARATION = "Incompatible type for %s at line %d:%d: expected %s is %s!";
     private static final String UNKNOWN_AGENT_MESSAGE = "Unknown agent %s at line %d:%d";
     private static final String ILLEGAL_NUMBER_OF_PARAMETERS = "Illegal number of parameters for %s at line %d:%d: expected %d are %d!";
-    private static final String DUPLICATE_INITIAL_STATE = "Duplicated initial state at line %d:%d!";
+    private static final String DUPLICATE_INITIAL_STATE = "Duplicated initial state %s at line %d:%d! Another state %s is declared initial at line %d:%d";
     private static final String UNKNOWN_TAG_MESSAGE = "Message tag %s at line %d:%d is unknown.";
     private static final String ILLEGAL_NUMBER_OF_MESSAGE_ELEMENTS = "Wrong number of message elements for tag %s at line %d:%d: expected %d are %d!";
     private static final String ILLEGAL_AGENT_EXPRESSION = "Illegal agent expression at line %d:%d";
@@ -55,6 +54,7 @@ public class ParseUtil {
     private static final String UNKNOWN_SYMBOL_STATE = "State %s at line %d:%d is unknown in agent %s!";
     private static final String ILLEGAL_ASSIGNMENT = "Values cannot be assigned to %s at line %d:%d!";
     private static final String ILLEGAL_RANDOM_EXPRESSION = "Illegal use of random expression at line %d:%d!";
+    private static final String IT_IS_NOT_ALLOWED_HERE_MESSAGE = "Use of 'it' is not allowed at line %d:%d.";
 
     public static String duplicatedAgentName(Token agentName) {
         return String.format(DUPLICATED_AGENT_NAME_MESSAGE, agentName.getText(), agentName.getLine(), agentName.getCharPositionInLine());
@@ -167,16 +167,17 @@ public class ParseUtil {
         return String.format(ILLEGAL_NUMBER_OF_PARAMETERS, name, line, charPositionInLine, expected, actual);
     }
 
-    public static ParseError duplicatedInitialStateError(Token token) {
+    public static ParseError duplicatedInitialStateError(Token token, Token initialState) {
         return new ParseError(
-                duplicatedInitialStateMessage(token),
+                duplicatedInitialStateMessage(token, initialState),
                 token.getLine(),
                 token.getCharPositionInLine()
         );
     }
 
-    private static String duplicatedInitialStateMessage(Token token) {
-        return String.format(DUPLICATE_INITIAL_STATE, token.getLine(), token.getCharPositionInLine());
+    private static String duplicatedInitialStateMessage(Token token, Token initialState) {
+        return String.format(DUPLICATE_INITIAL_STATE, token.getText(), token.getLine(), token.getCharPositionInLine(),
+                initialState.getText(), initialState.getLine(), initialState.getCharPositionInLine());
     }
 
     public static ParseError unknownTagError(Token token) {
@@ -199,7 +200,7 @@ public class ParseUtil {
         );
     }
 
-    private static String illegalNumberOfMessageElementsMessage(Token token, int expected, int actual) {
+    public static String illegalNumberOfMessageElementsMessage(Token token, int expected, int actual) {
         return String.format(ILLEGAL_NUMBER_OF_MESSAGE_ELEMENTS, token.getText(), token.getLine(), token.getCharPositionInLine(), expected, actual);
     }
 
@@ -215,7 +216,7 @@ public class ParseUtil {
         );
     }
 
-    private static String illegalAgentExpressionMessage(Token token) {
+    public static String illegalAgentExpressionMessage(Token token) {
         return String.format(ILLEGAL_AGENT_EXPRESSION, token.getLine(), token.getCharPositionInLine());
     }
 
@@ -339,7 +340,31 @@ public class ParseUtil {
         );
     }
 
-    private static String illegalUseOfTimedExpressionMessage(Token token) {
+    static String illegalUseOfTimedExpressionMessage(Token token) {
         return String.format(ILLEGAL_TIME_EXPRESSION, token.getLine(), token.getCharPositionInLine());
     }
+
+    public static ParseError duplicatedStateName(Token state, Token existingState) {
+        return new ParseError(
+                duplicatedStateNameMessage(state, existingState),
+                state.getLine(),
+                state.getCharPositionInLine());
+    }
+
+    private static String duplicatedStateNameMessage(Token state, Token existingState) {
+        return String.format(DUPLICATED_STATE_NAME_MESSAGE, state.getText(), state.getLine(), state.getCharPositionInLine(), existingState.getLine(), existingState.getCharPositionInLine());
+    }
+
+    public static ParseError itIsNotAllowedHere(Token token) {
+        return new ParseError(
+            itIsNotAllowedHereMessage(token),
+            token.getLine(),
+            token.getCharPositionInLine()
+        );
+    }
+
+    public static String itIsNotAllowedHereMessage(Token token) {
+        return String.format(IT_IS_NOT_ALLOWED_HERE_MESSAGE, token.getLine(), token.getCharPositionInLine());
+    }
+
 }

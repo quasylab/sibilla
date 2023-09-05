@@ -24,7 +24,7 @@
 package it.unicam.quasylab.sibilla.langs.lio;
 
 import it.unicam.quasylab.sibilla.core.models.lio.LIOAgentDefinitions;
-import it.unicam.quasylab.sibilla.core.util.ImmutableList;
+import it.unicam.quasylab.sibilla.core.util.datastructures.ImmutableList;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaInteger;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;

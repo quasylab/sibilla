@@ -32,6 +32,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 @FunctionalInterface
 public interface PerceptionFunction {
 
-    void perceive(RandomGenerator rg, SlamState state, AgentStore memory);
+
+    AgentStore perceive(RandomGenerator rg, StateExpressionEvaluator expressionEvaluator, AgentStore store);
 
 }

@@ -23,8 +23,6 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam.agents;
 
-import it.unicam.quasylab.sibilla.core.models.slam.agents.Agent;
-
 /**
  * This is a functional interface used to create a new agent from its id.
  */
@@ -37,6 +35,6 @@ public interface AgentFactory {
      * @param agentId agentId of the created agent.
      * @return a new agent with the given id.
      */
-    Agent getAgent(int agentId);
+    SlamAgent getAgent(int agentId);
 
 }

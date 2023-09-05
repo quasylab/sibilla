@@ -27,7 +27,7 @@ import it.unicam.quasylab.sibilla.core.models.lio.LIOAgent;
 import it.unicam.quasylab.sibilla.core.models.lio.LIOMixedState;
 import it.unicam.quasylab.sibilla.core.tools.ProbabilityVector;
 import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalFormula;
-import it.unicam.quasylab.sibilla.core.util.Pair;
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
 
 import java.util.HashMap;
 import java.util.LinkedList;

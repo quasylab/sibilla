@@ -10,7 +10,7 @@ model   :
 ;
 
 modelElement :
-    declarationParameter
+        declarationParameter
     | declarationConstant
     | declarationMessage
     | declarationAgent
@@ -44,7 +44,7 @@ declarationSystem:
 
 
 agentExpression:
-    name=ID '(' (args += expr (','  args += expr)*)? ')' ('#' copies=expr)
+    name=ID ('@' state=ID)? '(' (args += expr (','  args += expr)*)? ')' ('#' copies=expr)
 ;
 
 
@@ -64,7 +64,7 @@ declarationAgent:
             (states += agentStateDeclaration)*
         '}'
         ('on' 'time'  '{'
-            (commands += assignmentCommand)*
+            (commands += agentCommandAssignment)*
         '}')?
     '}'
     ;
@@ -81,15 +81,15 @@ slamType:
     ;
 
 attributeDeclaration:
-        name=ID '=' expr ';'
+       type=slamType name=ID '=' expr ';'
     ;
 
 agentStateDeclaration:
     (isInit='init')? 'state' name=ID '{'
         (handlers += stateMessageHandler)*
-        ('after' sojournTimeExpression=expr activityBlock)
+        ('after' sojournTimeExpression=expr activityBlock)?
         ('on' 'time' '{'
-            (commands += assignmentCommand)*
+            (commands += agentCommandAssignment)*
         '}')?
     '}'
 ;
@@ -99,6 +99,7 @@ stateMessageHandler:
 ;
 
 valuePattern:
+    //TODO: Add a pattern element where a specific value is provided
     '_'                     # patternAnyValue
     | '?' name=ID           # patternVariable
 ;
@@ -106,7 +107,6 @@ valuePattern:
 activityBlock:
     nextStateBlock
     | probabilitySelectionBlock
-    | skipBlock
 ;
 
 probabilitySelectionBlock: 'select' '{'
@@ -123,7 +123,7 @@ skipBlock:
 ;
 
 nextStateBlock:
-    '->' name=ID (block=agentCommandBlock|';')
+    '->' name=ID (block=agentCommandBlock)
 ;
 
 agentCommandBlock:
@@ -133,27 +133,33 @@ agentCommandBlock:
 ;
 
 agentCommand:
-    ifThenElseCommand
-    | sendCommand
-    | assignmentCommand
-    | spawnCommand
+    agentCommandIfThenElse
+    | agentCommandSend
+    | agentCommandAssignment
+    | agentCommandLet
+    /*
+    | spawnCommand */
 ;
 
-ifThenElseCommand:
-    'if' guard=expr thenCommand=agentCommand ('else' elseCommand=agentCommand)?
+agentCommandLet: 'let' name=ID '=' value=expr 'in' agentCommandBlock;
+
+agentCommandIfThenElse:
+    'if' guard=expr thenCommand=agentCommandBlock ('else' elseCommand=agentCommandBlock)?
 ;
 
-sendCommand:
+agentCommandSend:
     'send' content=messageExpression ('to' target=agentPattern)? 'in' time=expr ';'
 ;
 
-assignmentCommand:
+agentCommandAssignment:
     name=ID '=' expr ';'
 ;
 
+/*
 spawnCommand:
     'spawn' agent=agentExpression 'in' time=expr ';'
 ;
+*/
 
 
 agentPattern:
@@ -254,18 +260,20 @@ expr    :
     | 'min' '{' expr ':' agentPattern '}'               # expressionMinAgents
     | 'max' '{' expr ':' agentPattern '}'               # expressionMaxAgents
     | 'mean' '{' expr ':' agentPattern '}'               # expressionMeanAgents
+    | 'count' '{' agentPattern '}'                      # expressionCountAgents
     | '!' arg=expr                                      # expressionNegation
     | guard=expr '?' thenBranch=expr ':' elseBranch=expr             # expressionIfThenElse
     | op=('-'|'+') arg=expr                            # expressionUnaryOperator
     | '(' expr ')'                                     # expressionBracket
-    | '(' type=slamType ')' expr                   # expressionCast
+    | 'int' '(' expr ')'                   # expressionCastToInteger
     | INTEGER                                      # expressionInteger
     | REAL                                         # expressionReal
     | 'false'                                      # expressionFalse
     | 'true'                                       # expressionTrue
     | 'now'                                        # expressionNow
     | 'dt'                                         # expressionDt
-    | ('this' '.') reference=ID                                 # expressionReference
+    | reference=ID                                 # expressionReference
+    | 'it' '.' reference=ID                      # expressionPatternReference
     | 'abs' '(' argument=expr ')'                             # expressionAbs
 //    | 'head' '(' argument=expr ')'                          # expressionHead
 //    | 'tail' '(' argument=expr ')'                          # expressionTail

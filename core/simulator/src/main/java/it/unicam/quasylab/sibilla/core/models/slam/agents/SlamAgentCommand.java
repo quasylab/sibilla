@@ -26,7 +26,8 @@ package it.unicam.quasylab.sibilla.core.models.slam.agents;
 import it.unicam.quasylab.sibilla.core.models.slam.*;
 import it.unicam.quasylab.sibilla.core.models.slam.data.AgentStore;
 import it.unicam.quasylab.sibilla.core.models.slam.data.AgentVariable;
-import it.unicam.quasylab.sibilla.core.models.slam.data.SlamValue;
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.LinkedList;
@@ -40,17 +41,16 @@ import java.util.function.*;
  *
  */
 @FunctionalInterface
-public interface AgentCommand {
+public interface SlamAgentCommand {
 
     /**
      * Executes an agent command and returns the list of messages sent by the agent.
      *
      * @param rg random generator used to sample random values.
-     * @param evaluator object used to evaluate expressions at global level.
      * @param memory agent memory where the command is executed.
      * @return the list of messages sent by the agent during the execution.
      */
-    List<AgentMessage> execute(RandomGenerator rg, StateExpressionEvaluator evaluator, AgentStore memory);
+    Pair<List<OutgoingMessage>, List<Pair<AgentVariable, SibillaValue>>> execute(RandomGenerator rg, AgentStore memory);
 
     /**
      * Returns an agent command that sequentially exectues each of the commands received as arguments and returns
@@ -58,34 +58,33 @@ public interface AgentCommand {
      * @param commands arrays of commands to execute.
      * @return the list of messages sent by the agent during the execution.
      */
-    static AgentCommand combine(AgentCommand ... commands) {
-        return (rg, evaluator, m) ->  {
-            LinkedList<AgentMessage> messages = new LinkedList<>();
-            for (AgentCommand c: commands) {
-                messages.addAll(c.execute(rg, evaluator, m));
+    static SlamAgentCommand combine(SlamAgentCommand... commands) {
+        return (rg, m) ->  {
+            LinkedList<OutgoingMessage> messages = new LinkedList<>();
+            LinkedList<Pair<AgentVariable, SibillaValue>> assignments = new LinkedList<>();
+            for (SlamAgentCommand c: commands) {
+                Pair<List<OutgoingMessage>, List<Pair<AgentVariable, SibillaValue>>> result = c.execute(rg, m);
+                messages.addAll(result.getKey());
+                assignments.addAll(result.getValue());
             }
-            return messages;
+            return Pair.of(messages, assignments);
         };
     }
 
     /**
-     * Returns a command that randomly executes one of the command received as arguments. The command to be
-     * executed is selected according to the weights passed as the first argument.
+     * Returns a command that randomly executes one of the command received as arguments.
      *
-     * @param weights weights associated with each command.
-     * @param options the array of commands to execute.
-     * @return the list of messages sent by the agent during the execution.
+     * @param options a list of pairs each of which contains the function used to compute the probability to select a
+     *                command and the command to execute.
+     * @return a command that randomly selects one of the given options.
      */
-    static AgentCommand select(ToDoubleBiFunction<RandomGenerator, AgentStore>[] weights, AgentCommand[] options) {
-        if (weights.length != options.length) {
-            throw new IllegalArgumentException();//TODO: Add Message!
-        }
-        return (rg, evaluator, m) -> {
-            AgentCommand selected = Util.select(rg, m, weights, options);
+    static SlamAgentCommand select(List<Pair<ToDoubleBiFunction<RandomGenerator, AgentStore>,SlamAgentCommand>> options) {
+        return (rg, m) -> {
+            SlamAgentCommand selected = Util.select(rg, m, options);
             if (selected != null) {
-                return selected.execute(rg, evaluator, m);
+                return selected.execute(rg, m);
             } else {
-                return List.of();
+                return Pair.of(List.of(), List.of());
             }
         };
     }
@@ -99,12 +98,12 @@ public interface AgentCommand {
      * @param elseCommand command that is executed if the condition is false.
      * @return the list of messages sent by the agent during the execution.
      */
-    static AgentCommand ifThenElse(Predicate<AgentStore> condition, AgentCommand thenCommand, AgentCommand elseCommand ) {
-        return (rg, evaluator, m) -> {
-            if (condition.test(m)) {
-                return thenCommand.execute(rg, evaluator, m);
+    static SlamAgentCommand ifThenElse(BiFunction<RandomGenerator, AgentStore, SibillaValue> condition, SlamAgentCommand thenCommand, SlamAgentCommand elseCommand ) {
+        return (rg, m) -> {
+            if (condition.apply(rg, m).booleanOf()) {
+                return thenCommand.execute(rg, m);
             } else {
-                return elseCommand.execute(rg, evaluator, m);
+                return elseCommand.execute(rg, m);
             }
         };
     }
@@ -117,7 +116,7 @@ public interface AgentCommand {
      * @param thenCommand command that is executed if the condition is true.
      * @return the list of messages sent by the agent during the execution.
      */
-    static AgentCommand ifCommand(Predicate<AgentStore> condition, AgentCommand thenCommand) {
+    static SlamAgentCommand ifCommand(BiFunction<RandomGenerator, AgentStore, SibillaValue> condition, SlamAgentCommand thenCommand) {
         return ifThenElse(condition, thenCommand, SKIP);
     }
 
@@ -125,7 +124,7 @@ public interface AgentCommand {
      * Is an agent command that does not execute any update on the memory and that does not
      * send any message.
      */
-    AgentCommand SKIP  = (rg, evaluator, m) -> List.of();
+    SlamAgentCommand SKIP  = (rg, m) -> Pair.of(List.of(), List.of());
 
     /**
      * Returns an agent command that updates the given memory by setting the given variable
@@ -135,11 +134,8 @@ public interface AgentCommand {
      * @param expr epression.
      * @return an empty list.
      */
-    static AgentCommand setCommand(AgentVariable var, BiFunction<RandomGenerator, AgentStore, SlamValue> expr) {
-        return (rg, evaluator, m) -> {
-            m.set(var, expr.apply(rg,m));
-            return List.of();
-        };
+    static SlamAgentCommand setCommand(AgentVariable var, BiFunction<RandomGenerator, AgentStore, SibillaValue> expr) {
+        return (rg, m) -> Pair.of(List.of(), List.of(Pair.of(var, expr.apply(rg,m))));
     }
 
     /**
@@ -148,7 +144,11 @@ public interface AgentCommand {
      * @param message the expression used to obtain the message to send.
      * @return the list containing the single sent message.
      */
-    static AgentCommand send(BiFunction<RandomGenerator, AgentStore, AgentMessage> message) {
-        return (rg, evaluator, m) -> List.of(message.apply(rg,m));
+    static SlamAgentCommand send(BiFunction<RandomGenerator, AgentStore, AgentMessage> message, ToDoubleBiFunction<RandomGenerator, AgentStore> deliveryTime) {
+        return (rg, m) -> Pair.of(List.of(new OutgoingMessage(message.apply(rg,m), deliveryTime)), List.of());
+    }
+
+    static SlamAgentCommand letIn(AgentVariable variable, BiFunction<RandomGenerator, AgentStore, SibillaValue> expr, SlamAgentCommand command) {
+        return (rg, m) -> command.execute(rg, m.set(variable, expr.apply(rg, m)));
     }
 }

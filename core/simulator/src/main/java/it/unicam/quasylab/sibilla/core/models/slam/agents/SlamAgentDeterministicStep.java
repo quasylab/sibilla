@@ -24,33 +24,33 @@
 package it.unicam.quasylab.sibilla.core.models.slam.agents;
 
 import it.unicam.quasylab.sibilla.core.models.slam.data.AgentStore;
-import it.unicam.quasylab.sibilla.core.models.slam.StateExpressionEvaluator;
-import it.unicam.quasylab.sibilla.core.models.slam.Util;
+import it.unicam.quasylab.sibilla.core.models.slam.data.AgentVariable;
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.function.ToDoubleBiFunction;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * This functional interface is used to compute next configuration of an agent. This function takes
  * a random generator and an agent memory and returns an instance of AgentStepEffects.
  */
-@FunctionalInterface
-public interface AgentStepFunction {
+public class SlamAgentDeterministicStep implements SlamAgentStep {
 
-    AgentStepEffect apply(RandomGenerator rg, StateExpressionEvaluator evaluator, AgentStore m);
+    private final SlamAgentCommand stepCommand;
 
-    static AgentStepFunction step(AgentBehaviouralState state, AgentCommand command) {
-        return (rg, evaluator, m) -> new AgentStepEffect(state, command.execute(rg, evaluator, m));
+    private final SlamAgentState nextState;
+
+    public SlamAgentDeterministicStep(SlamAgentCommand stepCommand, SlamAgentState nextState) {
+        this.stepCommand = stepCommand;
+        this.nextState = nextState;
     }
 
-    static AgentStepFunction select(ToDoubleBiFunction<RandomGenerator, AgentStore>[] weights, AgentStepFunction[] functions) {
-        return (rg, evaluator, m) -> {
-            AgentStepFunction selected = Util.select(rg, m, weights, functions);
-            if (selected != null) {
-                return selected.apply(rg, evaluator, m);
-            } else {
-                return null;
-            }
-        };
+    @Override
+    public Optional<SlamAgentStepEffect> apply(RandomGenerator rg, AgentStore m) {
+        Pair<List<OutgoingMessage>, List<Pair<AgentVariable, SibillaValue>>> effects = this.stepCommand.execute(rg, m);
+        return Optional.of(new SlamAgentStepEffect(nextState, effects.getKey(), m.set(effects.getValue())));
     }
+
 }

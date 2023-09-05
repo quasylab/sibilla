@@ -23,50 +23,63 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
-import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentStepFunction;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.SlamAgent;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.SlamAgentDeterministicStep;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.SlamAgentStep;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.SlamAgentStepEffect;
 import it.unicam.quasylab.sibilla.core.models.slam.data.AgentStore;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * Describes how a given message received by an agent can be handled.
  */
 public class MessageHandler {
 
-    private final BiPredicate<AgentStore,DeliveredMessage> predicate;
-    private final Function<DeliveredMessage, AgentStepFunction> handlingFunction;
+    private final MessageTag handledTag;
+
+    private final BiFunction<AgentStore, SibillaValue[], AgentStore> handlerBindings;
+
+    private final BiPredicate<AgentStore, SlamAgent> predicateOnSender;
+
+    private final BiPredicate<RandomGenerator, AgentStore> predicateOnContent;
+    private final SlamAgentStep triggeredStep;
 
     /**
      * Creates a new handler that handles messages satisfying the given predicate and that when received triggers
      * the execution of the given handling function. The predicate is evaluated according to the current agent memory
-     * and the content of the received message. The handling function generates the {@link AgentStepFunction}
+     * and the content of the received message. The handling function generates the {@link SlamAgentDeterministicStep}
      * from the received message.
      *
-     * @param predicate predicate used to check if the message must be handled or not.
-     * @param handlingFunction a function used to generate the step function that is consequent to the received message.
+     * @param handledTag
+     * @param handlerBindings
+     * @param predicateOnSender
+     * @param predicateOnContent
+     * @param triggeredStep      a function used to generate the step function that is consequent to the received message.
      */
-    public MessageHandler(BiPredicate<AgentStore,DeliveredMessage> predicate, Function<DeliveredMessage, AgentStepFunction> handlingFunction) {
-        this.predicate = predicate;
-        this.handlingFunction = handlingFunction;
+    public MessageHandler(MessageTag handledTag, BiFunction<AgentStore, SibillaValue[], AgentStore> handlerBindings, BiPredicate<AgentStore, SlamAgent> predicateOnSender, BiPredicate<RandomGenerator, AgentStore> predicateOnContent, SlamAgentStep triggeredStep) {
+        this.handledTag = handledTag;
+        this.handlerBindings = handlerBindings;
+        this.predicateOnSender = predicateOnSender;
+        this.predicateOnContent = predicateOnContent;
+        this.triggeredStep = triggeredStep;
     }
 
-    /**
-     * Returns the predicate used to select received messages.
-     *
-     * @return the predicate used to select received messages.
-     */
-    public BiPredicate<AgentStore,DeliveredMessage> getPredicate() {
-        return predicate;
+
+    public Optional<SlamAgentStepEffect> doReceive(RandomGenerator rg, AgentStore receiverStore, DeliveredMessage message) {
+        if (this.handledTag.equals(message.getMessage().getTag())) {
+            AgentStore handlerStore = handlerBindings.apply(receiverStore, message.getMessage().getContent());
+            if (this.predicateOnSender.test(handlerStore, message.getSender())&&this.predicateOnContent.test(rg, handlerStore)) {
+                return triggeredStep.apply(rg, handlerStore);
+            }
+        }
+        return Optional.empty();
     }
 
-    /**
-     * Returns the function used to generate the {@link AgentStepFunction} triggered by the received message.
-     *
-     * @return the function used to generate the {@link AgentStepFunction} triggered by the received message.
-     */
-    public Function<DeliveredMessage, AgentStepFunction> getHandlingFunction() {
-        return handlingFunction;
-    }
 
 }

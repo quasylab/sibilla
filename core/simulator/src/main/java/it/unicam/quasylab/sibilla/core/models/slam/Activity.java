@@ -23,13 +23,18 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam;
 
-import it.unicam.quasylab.sibilla.core.models.slam.agents.Agent;
 import org.apache.commons.math3.random.RandomGenerator;
 
 /**
  * Represents an activity that is scheduled at a given time.
  */
 public abstract class Activity implements Comparable<Activity> {
+
+    /**
+     * Order of the activity.
+     */
+    private final int activityCounter;
+
 
     private final double scheduledTime;
 
@@ -38,13 +43,14 @@ public abstract class Activity implements Comparable<Activity> {
      *
      * @param scheduledTime time when the created activity is scheduled.
      */
-    public Activity(double scheduledTime) {
+    private Activity(int activityCounter, double scheduledTime) {
+        this.activityCounter = activityCounter;
         this.scheduledTime = scheduledTime;
     }
 
     @Override
     public int compareTo(Activity o) {
-        return 0;
+        return this.activityCounter -o.activityCounter;
     }
 
     /**
@@ -56,24 +62,25 @@ public abstract class Activity implements Comparable<Activity> {
         return scheduledTime;
     }
 
-    public abstract void execute(RandomGenerator rg, SlamState state);
+    public abstract SlamState execute(RandomGenerator rg, SlamState state);
 
     public static class AgentStepActivity extends Activity {
 
-        private final Agent scheduledAgent;
+        private final int scheduledAgentId;
 
-        public AgentStepActivity(Agent scheduledAgent) {
-            super(scheduledAgent.timeOfNextStep());
-            this.scheduledAgent = scheduledAgent;
+        private AgentStepActivity(int activityCounter, double time, int scheduledAgentId) {
+            super(activityCounter, time);
+            this.scheduledAgentId = scheduledAgentId;
         }
 
-        public Agent getScheduledAgent() {
-            return this.scheduledAgent;
+
+        public int getScheduledAgentId() {
+            return this.scheduledAgentId;
         }
 
         @Override
-        public void execute(RandomGenerator rg, SlamState state) {
-            state.executeAgentStep(rg, scheduledAgent);
+        public SlamState execute(RandomGenerator rg, SlamState state) {
+            return state.executeAgentStep(rg, getScheduledAgentId());
         }
     }
 
@@ -81,8 +88,9 @@ public abstract class Activity implements Comparable<Activity> {
 
         private final DeliveredMessage message;
 
-        public MessageDeliveryActivity(DeliveredMessage message) {
-            super(message.getDeliveryTime());
+
+        private  MessageDeliveryActivity(int activityCounter, double time, DeliveredMessage message) {
+            super(activityCounter, time);
             this.message = message;
         }
 
@@ -91,9 +99,23 @@ public abstract class Activity implements Comparable<Activity> {
         }
 
         @Override
-        public void execute(RandomGenerator rg, SlamState state) {
-            state.deliverMessage(rg, message);
+        public SlamState execute(RandomGenerator rg, SlamState state) {
+            return state.deliverMessage(rg, message);
         }
+    }
+
+    public static class ActivityFactory {
+
+        private int activityCounter = 0;
+
+        public Activity.AgentStepActivity agentStepActivity(double time, int scheduledAgentId) {
+            return new AgentStepActivity(activityCounter++, time, scheduledAgentId);
+        }
+
+        public Activity.MessageDeliveryActivity messageDeliveryActivity(double time, DeliveredMessage deliveredMessage) {
+            return new MessageDeliveryActivity(activityCounter++, time, deliveredMessage);
+        }
+
     }
 
 }

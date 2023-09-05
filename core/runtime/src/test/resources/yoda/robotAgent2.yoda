@@ -1,5 +1,5 @@
 param height = 10;
-param length = 10;
+param width = 10;
 param no = 10;
 param na = 3;
 

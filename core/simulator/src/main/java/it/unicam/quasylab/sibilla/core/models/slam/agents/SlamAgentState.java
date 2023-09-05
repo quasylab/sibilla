@@ -36,7 +36,7 @@ import java.util.function.ToDoubleBiFunction;
  * This class represents the definition of an agent state. Each state is identified by
  * a name and by an index and it is equipped with a set of handlers
  */
-public final class AgentBehaviouralState {
+public final class SlamAgentState {
 
     private final String stateName;
 
@@ -46,7 +46,7 @@ public final class AgentBehaviouralState {
 
     private final List<MessageHandler> messageHandlers;
 
-    private AgentStepFunction step;
+    private SlamAgentStep step;
     private AgentTimePassingFunction timePassingFunction;
 
     /**
@@ -55,7 +55,7 @@ public final class AgentBehaviouralState {
      * @param stateIndex index of the created state.
      * @param stateName name of the created state.
      */
-    public AgentBehaviouralState(int stateIndex, String stateName) {
+    public SlamAgentState(int stateIndex, String stateName) {
         this.stateIndex = stateIndex;
         this.messageHandlers = new LinkedList<>();
         this.stateName = stateName;
@@ -89,15 +89,6 @@ public final class AgentBehaviouralState {
     }
 
     /**
-     * Sets the function used to compute the sojourn time.
-     *
-     * @param sojournTimeFunction the function used to compute the sojourn time.
-     */
-    public void setSoujournTimeFunction(ToDoubleBiFunction<RandomGenerator, AgentStore> sojournTimeFunction) {
-        this.sojournTimeFunction = sojournTimeFunction;
-    }
-
-    /**
      * Adds the given message handler to this state.
      *
      * @param messageHandler the message handler to add to this state.
@@ -114,22 +105,18 @@ public final class AgentBehaviouralState {
      * @param message received message.
      * @return the step function to execute when the message is received.
      */
-    public Optional<AgentStepFunction> onReceive(AgentStore memory, DeliveredMessage message) {
+    public Optional<SlamAgentStepEffect> onReceive(RandomGenerator rg, AgentStore memory, DeliveredMessage message) {
         for (MessageHandler mh : messageHandlers) {
-            if (mh.getPredicate().test(memory, message)) {
-                return Optional.of(mh.getHandlingFunction().apply(message));
-            }
+            Optional<SlamAgentStepEffect> optionalEffect = mh.doReceive(rg, memory, message);
+            if (optionalEffect.isPresent()) return optionalEffect;
         }
         return Optional.empty();
     }
 
-    /**
-     * Returns the function that is executed when this state is left.
-     *
-     * @return the function that is executed when this state is left.
-     */
-    public AgentStepFunction getStepFunction() {
-        return step;
+
+    public Optional<SlamAgentStepEffect> step(RandomGenerator rg, AgentStore m) {
+        if (this.step == null) return Optional.empty();
+        return this.step.apply(rg, m);
     }
 
     /**
@@ -137,8 +124,9 @@ public final class AgentBehaviouralState {
      *
      * @param step the function that is executed when this state is left.
      */
-    public void setStep(AgentStepFunction step) {
+    public void setTimeDependentStep(ToDoubleBiFunction<RandomGenerator, AgentStore> sojournTimeFunction, SlamAgentStep step) {
         this.step = step;
+        this.sojournTimeFunction = sojournTimeFunction;
     }
 
     /**
@@ -157,9 +145,15 @@ public final class AgentBehaviouralState {
      * @param dt passed time units.
      * @param agentMemory agent memory.
      */
-    public void applyStateDynamic(RandomGenerator rg, double dt, AgentStore agentMemory) {
+    public AgentStore applyStateDynamic(RandomGenerator rg, double dt, AgentStore agentMemory) {
         if (this.timePassingFunction != null) {
-            this.timePassingFunction.update(rg, dt, agentMemory);
+            return this.timePassingFunction.update(rg, dt, agentMemory);
+        } else {
+            return agentMemory;
         }
+    }
+
+    public double sampleTimeOfNextStep(RandomGenerator rg, AgentStore agentStore) {
+        return this.sojournTimeFunction.applyAsDouble(rg, agentStore);
     }
 }

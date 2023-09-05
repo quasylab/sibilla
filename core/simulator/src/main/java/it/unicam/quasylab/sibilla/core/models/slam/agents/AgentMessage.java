@@ -27,6 +27,7 @@ package it.unicam.quasylab.sibilla.core.models.slam.agents;
 import it.unicam.quasylab.sibilla.core.models.slam.DeliveredMessage;
 import it.unicam.quasylab.sibilla.core.models.slam.MessageTag;
 import it.unicam.quasylab.sibilla.core.models.slam.data.SlamValue;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Arrays;
@@ -42,24 +43,20 @@ import java.util.function.ToDoubleBiFunction;
 public class AgentMessage {
 
     private final MessageTag tag;
-    private final SlamValue[] items;
-    private final Predicate<Agent> target;
-    private final ToDoubleBiFunction<RandomGenerator,Agent> deliveryTime;
-
+    private final SibillaValue[] items;
+    private final Predicate<SlamAgent> target;
 
     /**
      * Creates a new message with the given tag and the given items.
      *
      * @param tag message tag.
      * @param target a predicate used to check if an agent can receive or not the message.
-     * @param deliveryTime a function used to compute the time needed to deliver the message to an agent.
      * @param items message items.
      */
-    public AgentMessage(MessageTag tag, SlamValue[] items, Predicate<Agent> target, ToDoubleBiFunction<RandomGenerator,Agent> deliveryTime) {
+    public AgentMessage(MessageTag tag, SibillaValue[] items, Predicate<SlamAgent> target) {
         this.tag = tag;
         this.items = items;
         this.target = target;
-        this.deliveryTime = deliveryTime;
     }
 
     /**
@@ -87,7 +84,7 @@ public class AgentMessage {
      * @param i item index.
      * @return the ith item in the message.
      */
-    public SlamValue getItem(int i) {
+    public SibillaValue getItem(int i) {
         return items[i];
     }
 
@@ -118,31 +115,11 @@ public class AgentMessage {
      *
      * @return the predicate identifying the target of the message.
      */
-    public Predicate<Agent> getTarget() {
+    public Predicate<SlamAgent> getTarget() {
         return target;
     }
 
-    /**
-     * Returns the function that is used to compute the delivery time.
-     *
-     * @return the function that is used to compute the delivery time.
-     */
-    public ToDoubleBiFunction<RandomGenerator, Agent> getDeliveryTime() {
-        return deliveryTime;
-    }
-
-    /**
-     * Returns an optional value that contains the message delivered at agent <code>a</code>. The optional is empty,
-     * if such message should not be delivered to the given agent.
-     *
-     * @param rg random generator used to sample random values.
-     * @param a agent that can receive the message.
-     * @return an optional value that contains the message delivered at agent <code>a</code>.
-     */
-    public Optional<DeliveredMessage> apply(RandomGenerator rg, Agent a) {
-        if (this.target.test(a)) {
-            return Optional.of(new DeliveredMessage(a, this.tag, this.items, this.deliveryTime.applyAsDouble(rg, a)));
-        }
-        return Optional.empty();
+    public SibillaValue[] getContent() {
+        return this.items;
     }
 }

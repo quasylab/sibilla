@@ -26,20 +26,18 @@ package it.unicam.quasylab.sibilla.langs.yoda;
 import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import it.unicam.quasylab.sibilla.core.models.ParametricValue;
 import it.unicam.quasylab.sibilla.core.models.yoda.*;
-import it.unicam.quasylab.sibilla.core.util.SibillaMap;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class YodaConfigurationsGenerator extends YodaModelBaseVisitor<Boolean> {
 
 
-    private static final YodaExpressionEvaluationContext<RandomGenerator> RANDOM_EXPRESSION_EVALUATION_CONTEXT = new YodaExpressionEvaluationContext<RandomGenerator>() {
+    private static final YodaExpressionEvaluationContext<RandomGenerator> RANDOM_EXPRESSION_EVALUATION_CONTEXT = new YodaExpressionEvaluationContext<>() {
         @Override
         public SibillaValue rnd(RandomGenerator context) {
             return SibillaValue.of(context.nextDouble());
@@ -52,7 +50,9 @@ public class YodaConfigurationsGenerator extends YodaModelBaseVisitor<Boolean> {
     };
 
 
-    private Map<String, Function<RandomGenerator, YodaSystemState>> stateSuppliers;
+    private final Map<String, Function<RandomGenerator, YodaSystemState>> stateSuppliers;
+
+    private Function<RandomGenerator, YodaSystemState> defaultStateSupplier;
 
     private final Function<String, Optional<SibillaValue>> constantsAndParameters;
 
@@ -84,7 +84,11 @@ public class YodaConfigurationsGenerator extends YodaModelBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitConfigurationDeclaration(YodaModelParser.ConfigurationDeclarationContext ctx) {
-        this.stateSuppliers.put(ctx.name.getText(), rg -> generateSystemState(rg, ctx.collectives));
+        Function<RandomGenerator, YodaSystemState> supplier = rg -> generateSystemState(rg, ctx.collectives);
+        this.stateSuppliers.put(ctx.name.getText(), supplier);
+        if (defaultStateSupplier == null) {
+            defaultStateSupplier = supplier;
+        }
         return true;
     }
 
@@ -99,6 +103,7 @@ public class YodaConfigurationsGenerator extends YodaModelBaseVisitor<Boolean> {
         for (Map.Entry<String, Function<RandomGenerator, YodaSystemState>> entry: stateSuppliers.entrySet()) {
             dataSet.set(entry.getKey(), new ParametricValue<>(entry.getValue()));
         }
+        dataSet.setDefaultState(new ParametricValue<>(defaultStateSupplier));
         return dataSet;
     }
 

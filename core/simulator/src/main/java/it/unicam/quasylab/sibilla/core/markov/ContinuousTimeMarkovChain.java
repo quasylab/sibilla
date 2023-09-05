@@ -23,7 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.markov;
 
-import it.unicam.quasylab.sibilla.core.util.Pair;
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
 
 import java.util.Map;
 import java.util.stream.Collectors;

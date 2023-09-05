@@ -23,7 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.util;
 
-import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+import it.unicam.quasylab.sibilla.core.util.datastructures.SibillaMap;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -87,4 +87,39 @@ class SibillaMapTest {
         SibillaMap<String, Integer> map = new SibillaMap<>();
         assertTrue(map.isEmpty());
     }
+
+    @Test
+    void rotateLeft() {
+        SibillaMap<Integer, Integer> map = new SibillaMap<>();
+        map.add(0,0);
+        map.add(1,1);
+        map.add(2,2);
+    }
+
+    @Test
+    void rotateRight() {
+        SibillaMap<Integer, Integer> map = new SibillaMap<>();
+        map.add(2,2);
+        map.add(1,1);
+        map.add(0,0);
+    }
+
+    @Test
+    void rotateLeftRight() {
+        SibillaMap<Integer, Integer> map = new SibillaMap<>();
+        map.add(2,2);
+        map.add(4,4);
+        map.add(3,3);
+    }
+
+    @Test
+    void rotateRightLeft() {
+        SibillaMap<Integer, Integer> map = new SibillaMap<>();
+        map.add(4,4);
+        map.add(2,2);
+        map.add(3,3);
+    }
+
+
+
 }

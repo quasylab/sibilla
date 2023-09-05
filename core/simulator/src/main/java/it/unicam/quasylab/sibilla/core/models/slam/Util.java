@@ -24,26 +24,29 @@
 package it.unicam.quasylab.sibilla.core.models.slam;
 
 import it.unicam.quasylab.sibilla.core.models.slam.data.AgentStore;
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.ToDoubleBiFunction;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 public class Util {
 
 
-    public static <T> T select(RandomGenerator rg, AgentStore m, ToDoubleBiFunction<RandomGenerator, AgentStore>[] weights, T[] options) {
-        double[] actualWeights = Arrays.stream(weights).mapToDouble(f -> f.applyAsDouble(rg, m)).toArray();
-        double totalWeight = DoubleStream.of(actualWeights).sum();
+    public static <T> T select(RandomGenerator rg, AgentStore m, List<Pair<ToDoubleBiFunction<RandomGenerator, AgentStore>,T>> options) {
+        List<Pair<Double, T>> evaluatedOptions = options.stream().map(p -> p.applyToFirst(f -> f.applyAsDouble(rg, m))).collect(Collectors.toList());
+        double totalWeight = evaluatedOptions.stream().mapToDouble(Pair::getKey).sum();
         double selected = rg.nextDouble()*totalWeight;
-        for(int i=0; i<actualWeights.length; i++) {
-            if (selected<actualWeights[i]) {
-                return options[i];
+        for (Pair<Double, T> evaluatedOption : evaluatedOptions) {
+            if (selected<evaluatedOption.getKey()) {
+                return evaluatedOption.getValue();
             } else {
-                selected -= actualWeights[i];
+                selected -= evaluatedOption.getKey();
             }
         }
-        return null;
+        throw new IllegalStateException("Internal error!");
     }
 }

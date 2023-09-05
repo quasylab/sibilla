@@ -23,7 +23,11 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam.data;
 
-import java.util.HashMap;
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
+import it.unicam.quasylab.sibilla.core.util.datastructures.SibillaMap;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,9 +35,9 @@ import java.util.Map;
  */
 public final class AgentStore {
 
-    private double now;
+    private final double now;
 
-    private final Map<AgentVariable, SlamValue> content;
+    private final SibillaMap<AgentVariable, SibillaValue> content;
 
     /**
      * Creates an empty memory at time 0.
@@ -47,7 +51,7 @@ public final class AgentStore {
      *
      * @param content memory content.
      */
-    public AgentStore(Map<AgentVariable, SlamValue> content) {
+    public AgentStore(Map<AgentVariable, SibillaValue> content) {
         this(0.0, content);
     }
 
@@ -56,9 +60,13 @@ public final class AgentStore {
      * @param now current time.
      * @param content initial content.
      */
-    public AgentStore(double now, Map<AgentVariable, SlamValue> content) {
+    public AgentStore(double now, Map<AgentVariable, SibillaValue> content) {
+        this(now, SibillaMap.of(content));
+    }
+
+    public AgentStore(double now, SibillaMap<AgentVariable, SibillaValue> content) {
         this.now = now;
-        this.content = new HashMap<>(content);
+        this.content = content;
     }
 
     /**
@@ -68,17 +76,8 @@ public final class AgentStore {
      * @param var variable.
      * @return the value of the variable associated with the given index.
      */
-    public SlamValue getValue(AgentVariable var) {
-        return content.getOrDefault(var, SlamValue.NONE);
-    }
-
-    /**
-     * Returns the number of cells used in this memory.
-     *
-     * @return the number of cells used in this memory.
-     */
-    public synchronized int size() {
-        return content.size();
+    public SibillaValue getValue(AgentVariable var) {
+        return content.getOrDefault(var, SibillaValue.ERROR_VALUE);
     }
 
     /**
@@ -86,17 +85,38 @@ public final class AgentStore {
      * @param var variable to assign.
      * @param value  variable value.
      */
-    public synchronized void set(AgentVariable var, SlamValue value) {
-        content.put(var, value);
+    public AgentStore set(AgentVariable var, SibillaValue value) {
+        return new AgentStore(this.now, this.content.add(var, value));
     }
 
     public synchronized double now() {
         return now;
     }
 
-    public synchronized void recordTime(double dt) {
-        this.now += dt;
-
+    public AgentStore recordTime(double dt) {
+        return new AgentStore(this.now+dt, this.content);
     }
 
+    public AgentStore remove(AgentVariable variable) {
+        return new AgentStore(now, content.remove(variable));
+    }
+
+    public static AgentStore of(AgentVariable[] variables, SibillaValue[] values) {
+        if (variables.length != values.length) {
+            throw new IllegalArgumentException(String.format("Illegal number of values! Expected %d are %d", variables.length, values.length));
+        }
+        AgentStore result = new AgentStore();
+        for(int i=0; i<variables.length; i++) {
+            result = result.set(variables[i], values[i]);
+        }
+        return result;
+    }
+
+    public AgentStore set(List<Pair<AgentVariable, SibillaValue>> assignments) {
+        AgentStore store = this;
+        for (Pair<AgentVariable, SibillaValue> a : assignments) {
+            store = store.set(a.getKey(), a.getValue());
+        }
+        return store;
+    }
 }

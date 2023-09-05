@@ -23,7 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
-import it.unicam.quasylab.sibilla.core.util.SibillaMap;
+import it.unicam.quasylab.sibilla.core.util.datastructures.SibillaMap;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.Map;

@@ -23,15 +23,15 @@
 
 package it.unicam.quasylab.sibilla.langs.slam;
 
+import it.unicam.quasylab.sibilla.core.models.slam.MessageRepository;
 import it.unicam.quasylab.sibilla.core.models.slam.MessageTag;
 import it.unicam.quasylab.sibilla.core.models.slam.data.SlamType;
+import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.RuleNode;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.function.IntFunction;
 
 
 /**
@@ -39,15 +39,17 @@ import java.util.stream.Collectors;
  */
 public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
 
-    private final SymbolTable table = new SymbolTable();
+    private final Map<String, Token> uniqueTokens = new HashMap<>();
 
-    private final List<ParseError> errors = new LinkedList<>();
+    private final ErrorCollector errors = new ErrorCollector();
 
     private final TypeRegistry registry = new TypeRegistry();
 
-    private String agentContext;
 
-    private ExpressionContext context = ExpressionContext.NONE;
+    private final AgentTable agentTable = new AgentTable();
+
+    private final MessageRepository messageRepository = new MessageRepository();
+    private final Map<String, AgentValidator> agentValidators = new HashMap<>();
 
     /**
      * A model is valid if all its elements are valid.
@@ -74,512 +76,458 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
      */
     @Override
     public Boolean visitDeclarationConstant(SlamModelParser.DeclarationConstantContext ctx) {
-        try {
-            String constantName = ctx.name.getText();
-            if (table.isDeclaredElementWithName(constantName)) {
-                this.errors.add(new ParseError(ParseUtil.duplicatedName(ctx.name, table.getDeclarationToken(constantName)), ctx.name.getLine(), ctx.name.getCharPositionInLine()));
-                return false;
+        if (checkAndRecordGlobalName(ctx.name)&&ctx.value.accept(this)) {
+            SlamType constType = ctx.expr().accept(new TypeInferenceVisitor(ExpressionContext.CONSTANT, registry, this.errors));
+            if (!SlamType.NONE_TYPE.equals(constType)) {
+                registry.add(ctx.name.getText(), constType);
+                return true;
             }
-            if (ctx.value.accept(this)) {
-                SlamType constType = ctx.expr().accept(new TypeInferenceVisitor(ExpressionContext.CONSTANT, table, table.getGlobalTypeSolver(), this.errors));
-                if (!SlamType.NONE_TYPE.equals(constType)) {
-                    table.addConstant(ctx, constType);
-                    return true;
-                }
-            }
-            return false;
-        } finally {
-            this.context = ExpressionContext.NONE;
         }
-    }
-
-    private boolean recordAgentViews(List<SlamModelParser.DeclarationAgentContext> agents) {
-        boolean result = true;
-        for (SlamModelParser.DeclarationAgentContext agent : agents) {
-            result &= recordAgentViews(agent);
-        }
-        return result;
-    }
-
-    private boolean recordAgentAttributes(List<SlamModelParser.DeclarationAgentContext> agents) {
-        boolean result = true;
-        for (SlamModelParser.DeclarationAgentContext agent : agents) {
-            result &= recordAgentAttributes(agent);
-        }
-        return result;
-    }
-
-    private boolean recordAgentAttributes(SlamModelParser.DeclarationAgentContext agent) {
-        boolean result = true;
-        String agentName = agent.name.getText();
-        for (SlamModelParser.AttributeDeclarationContext attribute : agent.attributes) {
-            result &= recordAgentAttribute(agentName, attribute);
-        }
-        return result;
-    }
-
-    private boolean recordAgentViews(SlamModelParser.DeclarationAgentContext agent) {
-        boolean result = true;
-        String agentName = agent.name.getText();
-        for (SlamModelParser.AttributeDeclarationContext view : agent.views) {
-            result &= recordAgentView(agentName, view);
-        }
-        return result;
-    }
-
-    private boolean recordAgentAttribute(String agentName, SlamModelParser.AttributeDeclarationContext attribute) {
-        String attributeName = attribute.name.getText();
-        if (table.isDeclaredElementWithName(attributeName)) {
-            this.errors.add(new ParseError(ParseUtil.duplicatedName(attribute.name, table.getDeclarationToken(agentName)), attribute.name.getLine(), attribute.name.getCharPositionInLine()));
-            return false;
-        }
-        if (table.isAParameterOf(agentName, attributeName) || table.isAgentAttribute(agentName, attributeName)) {
-            this.errors.add(ParseUtil.illegalAttributeDeclarationError(attribute.name));
-            return false;
-        }
-//        SlamType attributeType = attribute.expr().accept(new TypeInferenceVisitor(ExpressionContext.AGENT_ATTRIBUTE,
-//                table.attributeDeclarationTypeSolver(agentName),
-//                this.errors
-//        ));
-//        if (SlamType.NONE_TYPE.equals(attributeType)) {
-//            return false;
-//        } else {
-//            table.recordAgentAttribute(agentName, attributeName, attributeType);
-//            return true;
-//        }
         return false;
-    }
-
-    private boolean recordAgentView(String agentName, SlamModelParser.AttributeDeclarationContext view) {
-        String attributeName = view.name.getText();
-        if (table.isDeclaredElementWithName(attributeName)) {
-            this.errors.add(new ParseError(ParseUtil.duplicatedName(view.name, table.getDeclarationToken(agentName)), view.name.getLine(), view.name.getCharPositionInLine()));
-            return false;
-        }
-        if (table.isAParameterOf(agentName, attributeName) || table.isAgentAttribute(agentName, attributeName) || table.isAgentView(agentName, attributeName)) {
-            this.errors.add(ParseUtil.illegalAttributeDeclarationError(view.name));
-            return false;
-        }
-//        SlamType attributeType = view.expr().accept(new TypeInferenceVisitor(ExpressionContext.AGENT_ATTRIBUTE,
-//                table,
-//                Map.of(),
-//                table.viewDeclarationTypeSolver(agentName),
-//                this.errors
-//        ));
-//        if (SlamType.NONE_TYPE.equals(attributeType)) {
-//            return false;
-//        } else {
-//            table.recordAgentView(agentName, attributeName, attributeType);
-//            return true;
-//        }
-        return false;
-    }
-
-    private boolean recordAgents(List<SlamModelParser.DeclarationAgentContext> agents) {
-        boolean result = true;
-        for (SlamModelParser.DeclarationAgentContext agent : agents) {
-            String agentName = agent.name.getText();
-            if (table.isDeclaredElementWithName(agentName)) {
-                this.errors.add(new ParseError(ParseUtil.duplicatedName(agent.name, table.getDeclarationToken(agentName)), agent.name.getLine(), agent.name.getCharPositionInLine()));
-                result = false;
-            } else {
-//                table.addAgent(agent);
-                result &= checkAttributesAndParamDeclaration(agent) && recordAgentParameter(agent);
-            }
-        }
-        return result;
-    }
-
-    private boolean checkAttributesAndParamDeclaration(SlamModelParser.DeclarationAgentContext agent) {
-        Map<String, SlamModelParser.AgentParameterContext> parameters = agent.params.stream().collect(Collectors.toMap(p -> p.name.getText(), p -> p));
-        Map<String, SlamModelParser.AttributeDeclarationContext> attributes = agent.attributes.stream().collect(Collectors.toMap(p -> p.name.getText(), p -> p));
-        Map<String, SlamModelParser.AttributeDeclarationContext> views = agent.attributes.stream().collect(Collectors.toMap(p -> p.name.getText(), p -> p));
-        boolean result = checkForDuplicatedParameters(parameters, agent);
-        result &= checkForDuplicatedAttribute(attributes, agent);
-        result &= checkForDuplicatedView(views, agent);
-        result &= checkIfParametersAreDistinctFromAttributesAndViews(parameters, attributes, views);
-        result &= checkIfAttributesAndViewsAreDistinct(attributes, views);
-        return result;
-    }
-
-    private boolean checkForDuplicatedParameters(Map<String, SlamModelParser.AgentParameterContext> parameters, SlamModelParser.DeclarationAgentContext agent) {
-        boolean result = true;
-        for (String name : parameters.keySet()) {
-            Optional<SlamModelParser.AgentParameterContext> otherDeclaration = agent.params.stream().filter(parameters.get(name)::equals).filter(p -> name.equals(p.name.getText())).findFirst();
-            if (otherDeclaration.isPresent()) {
-                result = false;
-                errors.add(ParseUtil.duplicatedParameterError(parameters.get(name).name, otherDeclaration.get().name));
-            }
-        }
-        return result;
-    }
-
-    private boolean checkForDuplicatedAttribute(Map<String, SlamModelParser.AttributeDeclarationContext> attributes, SlamModelParser.DeclarationAgentContext agent) {
-        boolean result = true;
-        for (String name : attributes.keySet()) {
-            Optional<SlamModelParser.AttributeDeclarationContext> otherDeclaration = agent.attributes.stream().filter(attributes.get(name)::equals).filter(p -> name.equals(p.name.getText())).findFirst();
-            if (otherDeclaration.isPresent()) {
-                result = false;
-                errors.add(ParseUtil.duplicatedAttributeError(attributes.get(name).name, otherDeclaration.get().name));
-            }
-        }
-        return result;
-    }
-
-    private boolean checkForDuplicatedView(Map<String, SlamModelParser.AttributeDeclarationContext> views, SlamModelParser.DeclarationAgentContext agent) {
-        boolean result = true;
-        for (String name : views.keySet()) {
-            Optional<SlamModelParser.AttributeDeclarationContext> otherDeclaration = agent.views.stream().filter(views.get(name)::equals).filter(p -> name.equals(p.name.getText())).findFirst();
-            if (otherDeclaration.isPresent()) {
-                result = false;
-                errors.add(ParseUtil.duplicatedAttributeError(views.get(name).name, otherDeclaration.get().name));
-            }
-        }
-        return result;
-    }
-
-
-    private boolean checkIfAttributesAndViewsAreDistinct(Map<String, SlamModelParser.AttributeDeclarationContext> attributes, Map<String, SlamModelParser.AttributeDeclarationContext> views) {
-        boolean result = true;
-        for (String attributeName : attributes.keySet()) {
-            if (views.containsKey(attributeName)) {
-                this.errors.add(ParseUtil.duplicatedAttributeError(attributes.get(attributeName).name, views.get(attributeName).name));
-                result = false;
-            }
-        }
-        return result;
-    }
-
-    private boolean checkIfParametersAreDistinctFromAttributesAndViews(Map<String, SlamModelParser.AgentParameterContext> parameters, Map<String, SlamModelParser.AttributeDeclarationContext> attributes, Map<String, SlamModelParser.AttributeDeclarationContext> views) {
-        boolean result = true;
-        for (String parameterName : parameters.keySet()) {
-            if (parameters.containsKey(parameterName)) {
-                this.errors.add(ParseUtil.illegalParameterDeclarationError(parameters.get(parameterName), attributes.get(parameterName)));
-                result = false;
-            }
-            if (views.containsKey(parameterName)) {
-                this.errors.add(ParseUtil.illegalParameterDeclarationError(parameters.get(parameterName), views.get(parameterName)));
-                result = false;
-            }
-        }
-        return result;
-    }
-
-    private boolean recordAgentParameter(SlamModelParser.DeclarationAgentContext agent) {
-        boolean result = true;
-        String agentName = agent.name.getText();
-        for (SlamModelParser.AgentParameterContext par : agent.params) {
-            //table.recordAgentParameter(agentName, par.start, par.name.getText(), SlamType.getTypeOf(par.type.getText()));
-        }
-        return result;
     }
 
 
     @Override
     public Boolean visitDeclarationPredicate(SlamModelParser.DeclarationPredicateContext ctx) {
-        try {
-            String predicateName = ctx.name.getText();
-            if (table.isDeclaredElementWithName(predicateName)) {
-                this.errors.add(new ParseError(ParseUtil.duplicatedName(ctx.name, table.getDeclarationToken(predicateName)), ctx.name.getLine(), ctx.name.getCharPositionInLine()));
-                return false;
-            }
-            this.context = ExpressionContext.PREDICATE;
-//            if (ctx.value.accept(this)) {
-//                table.addPredicate(ctx);
-//                SlamType predicateType = ctx.expr().accept(new TypeInferenceVisitor(
-//                        ExpressionContext.PREDICATE,
-//                        this.registry, errors));
-//                return SlamType.NONE_TYPE.equals(predicateType) || SlamType.BOOLEAN_TYPE.equals(predicateType);
-//            }
-            return false;
-        } finally {
-            this.context = ExpressionContext.NONE;
-        }
+        SlamType predicateType = ctx.expr().accept(new TypeInferenceVisitor(
+                ExpressionContext.PREDICATE,
+                this.registry, errors));
+        return SlamType.NONE_TYPE.equals(predicateType) || SlamType.BOOLEAN_TYPE.equals(predicateType);
     }
 
 
 
     @Override
     public Boolean visitDeclarationParameter(SlamModelParser.DeclarationParameterContext ctx) {
-        try {
-            String parameterName = ctx.name.getText();
-            if (table.isDeclaredElementWithName(parameterName)) {
-                this.errors.add(new ParseError(ParseUtil.duplicatedName(ctx.name, table.getDeclarationToken(parameterName)), ctx.name.getLine(), ctx.name.getCharPositionInLine()));
-                return false;
-            }
-            if (new TypeInferenceVisitor(ExpressionContext.PARAMETER, table, table.getGlobalTypeSolver(), errors).checkType(SlamType.REAL_TYPE, ctx.expr())) {
-                table.addParameter(ctx);
-                return true;
-            }
+        if (checkAndRecordGlobalName(ctx.name)) {
+            return new TypeInferenceVisitor(ExpressionContext.PARAMETER, registry, errors).checkType(SlamType.REAL_TYPE, ctx.expr());
+        } else {
             return false;
-        } finally {
-            this.context = ExpressionContext.NONE;
         }
     }
 
     @Override
     public Boolean visitDeclarationMeasure(SlamModelParser.DeclarationMeasureContext ctx) {
-        try {
-            String parameterName = ctx.name.getText();
-            if (table.isDeclaredElementWithName(parameterName)) {
-                this.errors.add(new ParseError(ParseUtil.duplicatedName(ctx.name, table.getDeclarationToken(parameterName)), ctx.name.getLine(), ctx.name.getCharPositionInLine()));
-                return false;
-            }
-            if (ctx.expr().accept(this)) {
-                table.addMeasure(ctx);
-                this.context = ExpressionContext.MEASURE;
-                //SlamType actualType = ctx.expr().accept(new TypeInferenceVisitor(ExpressionContext.PREDICATE, table, Map.of(), table::solveTypeFromMeasuresAndPredicates, errors));
-                //return SlamType.NONE_TYPE.equals(actualType) || SlamType.REAL_TYPE.equals(actualType);
-            }
-            return false;
-        } finally {
-            this.context = ExpressionContext.NONE;
+        if (checkAndRecordGlobalName(ctx.name)&&ctx.expr().accept(this)) {
+            SlamType actualType = ctx.expr().accept(new TypeInferenceVisitor(ExpressionContext.MEASURE, registry,errors));
+            return SlamType.REAL_TYPE.equals(actualType);
         }
+        return false;
     }
 
     @Override
     public Boolean visitDeclarationSystem(SlamModelParser.DeclarationSystemContext ctx) {
-        try {
-            String systemName = ctx.name.getText();
-            if (table.isDeclaredElementWithName(systemName)) {
-                this.errors.add(new ParseError(ParseUtil.duplicatedName(ctx.name, table.getDeclarationToken(systemName)), ctx.name.getLine(), ctx.name.getCharPositionInLine()));
-                return false;
-            }
-            table.addSystem(ctx);
-            this.context = ExpressionContext.SYSTEM;
-            return ctx.agentExpression.accept(this);
-        } finally {
-            this.context = ExpressionContext.NONE;
+        if (checkAndRecordGlobalName(ctx.name)) {
+            return new SystemValidator(ctx).vaidate();
         }
+        return false;
     }
 
     @Override
     public Boolean visitDeclarationMessage(SlamModelParser.DeclarationMessageContext ctx) {
-        String tagName = ctx.tag.getText();
-        if (table.isDeclaredElementWithName(tagName)) {
-            this.errors.add(new ParseError(ParseUtil.duplicatedName(ctx.tag, table.getDeclarationToken(tagName)), ctx.tag.getLine(), ctx.tag.getCharPositionInLine()));
+        if (checkAndRecordGlobalName(ctx.tag)) {
+
+        }
+        return false;
+    }
+
+    private boolean checkAndRecordGlobalName(Token tag) {
+        if (isValidName(tag)) {
+            uniqueTokens.put(tag.getText(), tag);
+            return true;
+        } else {
             return false;
         }
-        table.addMessage(ctx);
-        return true;
+    }
+
+    private boolean isValidName(Token tag) {
+        String name = tag.getText();
+        if (uniqueTokens.containsKey(name)) {
+            this.errors.record(new ParseError(ParseUtil.duplicatedName(tag, uniqueTokens.get(name)), tag.getLine(), tag.getCharPositionInLine()));
+            return false;
+        } else {
+            return true;
+        }
     }
 
     @Override
     public Boolean visitDeclarationAgent(SlamModelParser.DeclarationAgentContext ctx) {
-        try {
-            this.agentContext = ctx.name.getText();
-            return validateAgentStateDeclaration(ctx.states) && validateTimePassingFunction(ctx.commands);
-        } finally {
-            this.agentContext = null;
+        if (uniqueTokens.containsKey(ctx.name.getText())) {
+            AgentValidator validator = new AgentValidator(ctx);
+            agentValidators.put(ctx.name.getText(), validator);
+            return validator.recordAttributes();
         }
+        return false;
     }
 
-    private boolean validateTimePassingFunction(List<SlamModelParser.AssignmentCommandContext> commands) {
-        try {
-            this.context = ExpressionContext.AGENT_TIME_UPDATE;
-            boolean result = true;
-            for (SlamModelParser.AssignmentCommandContext command : commands) {
-                result &= command.accept(this);
+
+    private class AgentValidator extends SlamModelBaseVisitor<Boolean> {
+
+        private final Map<String, Token> agentParametersAndAttributes = new HashMap<>();
+
+        private final Map<String, Token> agentStates = new HashMap<>();
+
+        private final Map<String, SlamType> localVariables = new HashMap<>();
+
+        private final String agentName;
+
+        private final SlamModelParser.DeclarationAgentContext agentDeclaration;
+        private boolean validationFlag = true;
+        private Token initialState;
+
+        public AgentValidator(SlamModelParser.DeclarationAgentContext ctx) {
+            this.agentDeclaration = ctx;
+            this.agentName = ctx.name.getText();
+            agentTable.addAgent(agentName, agentDeclaration);
+        }
+
+        @Override
+        protected Boolean defaultResult() {
+            return true;
+        }
+
+        @Override
+        protected Boolean aggregateResult(Boolean aggregate, Boolean nextResult) {
+            return aggregate&&nextResult;
+        }
+
+        public boolean validate() {
+            checkStates();
+            agentDeclaration.commands.forEach(this::checkViewAssignment);
+            return validationFlag;
+        }
+
+        private void checkViewAssignment(SlamModelParser.AgentCommandAssignmentContext agentCommandAssignmentContext) {
+            if (agentTable.isView(agentName, agentCommandAssignmentContext.name.getText())) {
+                validationFlag &= new TypeInferenceVisitor(ExpressionContext.AGENT_VIEW, this::getTypeOf, errors).checkType(agentTable.getTypeOf(agentName, agentCommandAssignmentContext.name.getText()), agentCommandAssignmentContext.expr());
+            } else {
+                errors.record(ParseUtil.illegalAssignmentError(agentCommandAssignmentContext.name));
+                validationFlag = false;
             }
-            return result;
-        } finally {
-            this.context = ExpressionContext.NONE;
         }
-    }
+
+        private void checkStates() {
+            agentDeclaration.states.forEach(this::recordState);
+            agentDeclaration.states.forEach(this::checkState);
+        }
+
+        private void checkState(SlamModelParser.AgentStateDeclarationContext stateDeclaration) {
+            if (stateDeclaration.isInit != null) {
+                setInitialState(stateDeclaration.name);
+            }
+            stateDeclaration.handlers.forEach(h -> h.accept(this));
+            if (stateDeclaration.sojournTimeExpression != null) {
+                validationFlag &= new TypeInferenceVisitor(ExpressionContext.AGENT_SOJOURN_TIME, this::getTypeOf, errors).checkType(SlamType.REAL_TYPE, stateDeclaration.sojournTimeExpression);
+                stateDeclaration.activityBlock().accept(this);
+            }
+            stateDeclaration.handlers.forEach(h -> h.accept(this));
+            stateDeclaration.commands.forEach(this::checkAttributeAssignment);
+        }
+
+        private void checkAttributeAssignment(SlamModelParser.AgentCommandAssignmentContext agentCommandAssignmentContext) {
+            if (agentTable.isAttribute(agentName, agentCommandAssignmentContext.name.getText())) {
+                validationFlag &= new TypeInferenceVisitor(ExpressionContext.AGENT_COMMAND, this::getTypeOf, errors).checkType(agentTable.getTypeOf(agentName, agentCommandAssignmentContext.name.getText()), agentCommandAssignmentContext.expr());
+            } else {
+                errors.record(ParseUtil.illegalAssignmentError(agentCommandAssignmentContext.name));
+                validationFlag = false;
+            }
+        }
+
+        @Override
+        public Boolean visitNextStateBlock(SlamModelParser.NextStateBlockContext ctx) {
+            if (!agentStates.containsKey(ctx.name.getText())) {
+                errors.record(ParseUtil.unknownAgentStateError(agentName, ctx.name));
+                validationFlag = false;
+            }
+            ctx.block.accept(this);
+            return validationFlag;
+        }
 
 
-    private boolean validateAgentStateDeclaration(List<SlamModelParser.AgentStateDeclarationContext> states) {
-        SlamModelParser.AgentStateDeclarationContext initialState = null;
-        boolean result = true;
-        for (SlamModelParser.AgentStateDeclarationContext s : states) {
-            if (s.isInit != null) {
-                if (initialState != null) {
-                    this.errors.add(ParseUtil.duplicatedInitialStateError(s.isInit));
-                    result = false;
+        @Override
+        public Boolean visitProbabilitySelectionBlock(SlamModelParser.ProbabilitySelectionBlockContext ctx) {
+            ctx.cases.forEach(c -> c.accept(this));
+            return validationFlag;
+        }
+
+        @Override
+        public Boolean visitSelectCase(SlamModelParser.SelectCaseContext ctx) {
+            TypeInferenceVisitor visitor = new TypeInferenceVisitor(ExpressionContext.AGENT_COMMAND, this::getTypeOf, errors);
+            validationFlag &= visitor.checkType(SlamType.REAL_TYPE, ctx.weight);
+            if (ctx.guard != null) {
+                validationFlag &= visitor.checkType(SlamType.BOOLEAN_TYPE, ctx.guard);
+            }
+            ctx.nextStateBlock().accept(this);
+            return validationFlag;
+        }
+
+        @Override
+        public Boolean visitAgentCommandBlock(SlamModelParser.AgentCommandBlockContext ctx) {
+            ctx.commands.forEach(c -> c.accept(this));
+            return validationFlag;
+        }
+
+
+        @Override
+        public Boolean visitAgentCommandLet(SlamModelParser.AgentCommandLetContext ctx) {
+            if (validationFlag &= isValidName(ctx.name)) {
+                SlamType type = ctx.expr().accept(new TypeInferenceVisitor(ExpressionContext.AGENT_COMMAND,this::getTypeOf,errors));
+                SlamType oldType = localVariables.put(ctx.name.getText(), type);
+                ctx.agentCommandBlock().accept(this);
+                if (oldType != null) {
+                    localVariables.put(ctx.name.getText(), oldType);
                 } else {
-                    initialState = s;
+                    localVariables.remove(ctx.name.getText());
                 }
             }
-            result &= s.accept(this);
+            return validationFlag;
         }
-        return result;
-    }
 
-    @Override
-    public Boolean visitAgentStateDeclaration(SlamModelParser.AgentStateDeclarationContext ctx) {
-        boolean result = true;
-        for (SlamModelParser.StateMessageHandlerContext mh : ctx.handlers) {
-            result &= mh.accept(this);
-        }
-        result &= ctx.sojournTimeExpression.accept(this);
-        if (agentContext != null) {
-            result &= hasType(ExpressionContext.AGENT_SOJOURN_TIME, Map.of(), table.getAgentStateTypeSolver(agentContext), SlamType.REAL_TYPE, ctx.sojournTimeExpression);
-        }
-        result &= ctx.activityBlock().accept(this);
-        result &= validateTimePassingFunction(ctx.commands);
-        return result;
-    }
-
-
-    @Override
-    public Boolean visitAgentExpression(SlamModelParser.AgentExpressionContext ctx) {
-        boolean result = true;
-        String agentName = ctx.name.getText();
-        if (!table.isAnAgent(agentName)) {
-            this.errors.add(ParseUtil.unknownAgentError(ctx.name));
-            return false;
-        }
-        SlamType[] agentParameters = table.getAgentParameters(agentName);
-        if (ctx.args.size() != agentParameters.length) {
-            this.errors.add(ParseUtil.illegalNumberOfParameters(ctx.name, agentParameters.length, ctx.args.size()));
-            return false;
-        }
-//        for (int i = 0; i < agentParameters.length; i++) {
-//            SlamType argType = ctx.args.get(i).accept(new TypeInferenceVisitor(ExpressionContext.SYSTEM, table, Map.of(), table::solveTypeFromConstants, errors));
-//            if (!SlamType.NONE_TYPE.equals(argType) && !agentParameters[i].equals(argType)) {
-//                //this.errors.add(ParseUtil.typeError(agentParameters[i], argType, ctx.args.get(i).start));
-//                result = false;
-//            }
-//        }
-        if (ctx.copies != null) {
-            //result &= SlamType.INTEGER_TYPE.equals(ctx.copies.accept(new TypeInferenceVisitor(ExpressionContext.SYSTEM, table, Map.of(), table::solveTypeFromConstants, errors)));
-        }
-        return result;
-    }
-
-    private Boolean hasType(ExpressionContext context, Map<String, SlamType> localVariables, Function<String, SlamType> typeSolver, SlamType expected, SlamModelParser.ExprContext expr) {
-//        SlamType actual = expr.accept(new TypeInferenceVisitor(context, table, localVariables, typeSolver, errors));
-//        if (!SlamType.NONE_TYPE.equals(actual) && !expected.equals(actual)) {
-//            this.errors.add(ParseUtil.typeError(expected, actual, expr.start));
-//            return false;
-//        } else {
-//            return true;
-//        }
-        return false;
-    }
-
-    @Override
-    public Boolean visitStateMessageHandler(SlamModelParser.StateMessageHandlerContext ctx) {
-        String tagName = ctx.tag.getText();
-        if (!table.isAMessageTag(tagName)) {
-            this.errors.add(ParseUtil.unknownTagError(ctx.tag));
-            return false;
-        }
-        this.context = ExpressionContext.AGENT_MESSAGE_HANDLER;
-        boolean result = recordHandlerVariables(ctx.tag, ctx.content, table.getMessageTag(tagName));
-        result &= ctx.agentGuard.accept(this);
-        result &= ctx.guard.accept(this);
-        result &= ctx.activityBlock().accept(this);
-        this.context = ExpressionContext.NONE;
-        //this.localVariables = new HashMap<>();
-        return result;
-    }
-
-    private boolean recordHandlerVariables(Token tag, List<SlamModelParser.ValuePatternContext> patterns, MessageTag messageTag) {
-        if (patterns.size() != messageTag.getArity()) {
-            this.errors.add(ParseUtil.illegalNumberOfMessageElements(tag, messageTag.getArity(), patterns.size()));
-            return false;
-        }
-        int counter = 0;
-        boolean result = true;
-        for (SlamModelParser.ValuePatternContext p : patterns) {
-            if (p instanceof SlamModelParser.PatternVariableContext) {
-                SlamModelParser.PatternVariableContext patternVariableContext = (SlamModelParser.PatternVariableContext) p;
-                SlamType type = messageTag.getTypeOf(counter);
-                String localVariableName = patternVariableContext.name.getText();
-//                if (localVariables.containsKey(localVariableName)) {
-//                    this.errors.add(ParseUtil.nameAlreadyUsedInMessagePattern(patternVariableContext.name));
-//                    result = false;
-//                } else {
-//                    localVariables.put(localVariableName, type);
-//                }
+        @Override
+        public Boolean visitAgentCommandIfThenElse(SlamModelParser.AgentCommandIfThenElseContext ctx) {
+            validationFlag &= new TypeInferenceVisitor(ExpressionContext.AGENT_COMMAND, this::getTypeOf, errors).checkType(SlamType.BOOLEAN_TYPE, ctx.expr());
+            ctx.thenCommand.accept(this);
+            if (ctx.elseCommand != null) {
+                ctx.elseCommand.accept(this);
             }
-            counter++;
+            return validationFlag;
         }
-        return result;
-    }
 
-    @Override
-    public Boolean visitProbabilitySelectionBlock(SlamModelParser.ProbabilitySelectionBlockContext ctx) {
-        boolean result = true;
-        for (SlamModelParser.SelectCaseContext selectCase : ctx.cases) {
-            result &= selectCase.accept(this);
+        @Override
+        public Boolean visitAgentCommandSend(SlamModelParser.AgentCommandSendContext ctx) {
+            ctx.messageExpression().accept(this);
+            if (ctx.agentPattern() != null) {
+                ctx.agentPattern().accept(this);
+            }
+            validationFlag &= new  TypeInferenceVisitor(ExpressionContext.AGENT_COMMAND, this::getTypeOf, errors).checkType(SlamType.REAL_TYPE, ctx.time);
+            return validationFlag;
         }
-        return result;
+
+        @Override
+        public Boolean visitMessageExpression(SlamModelParser.MessageExpressionContext ctx) {
+            MessageTag tag = messageRepository.getTag(ctx.tag.getText());
+            if (tag == null) {
+                errors.record(ParseUtil.unknownTagError(ctx.tag));
+                validationFlag = false;
+            } else {
+                if (tag.getArity() != ctx.elements.size()) {
+                    errors.record(ParseUtil.illegalNumberOfMessageElements(ctx.tag, tag.getArity(), ctx.elements.size()));
+                } else {
+                    TypeInferenceVisitor typeVisitor = new TypeInferenceVisitor(ExpressionContext.AGENT_COMMAND, this::getTypeOf, errors);
+                    for(int i=0; i< tag.getArity(); i++) {
+                        validationFlag &= typeVisitor.checkType(tag.getTypeOf(i), ctx.elements.get(i));
+                    }
+                }
+            }
+            return validationFlag;
+        }
+
+
+        @Override
+        public Boolean visitAgentCommandAssignment(SlamModelParser.AgentCommandAssignmentContext ctx) {
+            if (!agentTable.isAttribute(agentName, ctx.name.getText())) {
+                errors.record(ParseUtil.illegalAssignmentError(ctx.name));
+                return (validationFlag = false);
+            }
+            SlamType expectedType = agentTable.getTypeOf(agentName, ctx.name.getText());
+            return (validationFlag &= new TypeInferenceVisitor(ExpressionContext.AGENT_COMMAND, this::getTypeOf, errors).checkType(expectedType, ctx.expr()));
+        }
+
+        @Override
+        public Boolean visitStateMessageHandler(SlamModelParser.StateMessageHandlerContext ctx) {
+            MessageTag tag = messageRepository.getTag(ctx.tag.getText());
+            if (tag == null) {
+                errors.record(ParseUtil.unknownTagError(ctx.tag));
+                validationFlag = false;
+            } else {
+                if (tag.getArity() != ctx.content.size()) {
+                    errors.record(ParseUtil.illegalNumberOfMessageElements(ctx.tag, tag.getArity(), ctx.content.size()));
+                    validationFlag = false;
+                } else {
+                    String[] templateVariables = getTemplateVariables(ctx.content);
+                    SlamType[] oldTypes = recordLocalVariables(templateVariables, tag::getTypeOf);
+                    if (ctx.agentGuard != null) {
+                        ctx.agentGuard.accept(this);
+                    }
+                    if (ctx.guard != null) {
+                        validationFlag &= new TypeInferenceVisitor(ExpressionContext.AGENT_MESSAGE_HANDLER, this::getTypeOf, errors).checkType(SlamType.BOOLEAN_TYPE, ctx.guard);
+                    }
+                    ctx.activityBlock().accept(this);
+                    removeLocalVariables(templateVariables, oldTypes);
+                }
+            }
+            return validationFlag;
+
+        }
+
+        private void removeLocalVariables(String[] templateVariables, SlamType[] oldTypes) {
+            for (int i = 0; i < templateVariables.length; i++) {
+                if (templateVariables[i] != null) {
+                    if (oldTypes[i] != null) {
+                        this.localVariables.put(templateVariables[i], oldTypes[i]);
+                    } else {
+                        this.localVariables.remove(templateVariables[i]);
+                    }
+                }
+            }
+        }
+
+        private SlamType[] recordLocalVariables(String[] templateVariables, IntFunction<SlamType> typeOf) {
+            SlamType[] oldTypes = new SlamType[templateVariables.length];
+            for (int i = 0; i < templateVariables.length; i++) {
+                if (templateVariables[i] != null) {
+                    oldTypes[i] = localVariables.put(templateVariables[i], typeOf.apply(i));
+                }
+            }
+            return oldTypes;
+        }
+
+        private String[] getTemplateVariables(List<SlamModelParser.ValuePatternContext> content) {
+            return content.stream().map(this::getTemplateVariable).toArray(String[]::new);
+        }
+
+        private String getTemplateVariable(SlamModelParser.ValuePatternContext valuePatternContext) {
+            if (valuePatternContext instanceof SlamModelParser.PatternVariableContext) {
+                Token name = ((SlamModelParser.PatternVariableContext) valuePatternContext).name;
+                if (isValidName(name)) {
+                    return name.getText();
+                }
+            }
+            return null;
+        }
+
+        private void setInitialState(Token state) {
+            if (initialState != null) {
+                errors.record(ParseUtil.duplicatedInitialStateError(state, initialState));
+            } else {
+                initialState = state;
+            }
+        }
+
+        private void recordState(SlamModelParser.AgentStateDeclarationContext state) {
+            if (agentStates.containsKey(state.name.getText())) {
+                errors.record(ParseUtil.duplicatedStateName(state.name, agentStates.get(state.name.getText())));
+                validationFlag = false;
+            } else {
+                agentStates.put(state.name.getText(), state.name);
+            }
+        }
+
+        private void checkViews() {
+            for (SlamModelParser.AttributeDeclarationContext view : agentDeclaration.views) {
+                if (isValidName(view.name)&&record(view.name)) {
+                    SlamType currentType = agentTable.getPropertyType(view.name.getText());
+                    SlamType declaredType = SlamType.getTypeOf(view.type.getText());
+                    if (SlamType.NONE_TYPE.equals(currentType)||currentType.equals(declaredType)) {
+                        agentTable.recordAgentView(agentName, view.name.getText(), declaredType);
+                    } else {
+                        validationFlag = false;
+                    }
+                }
+            }
+        }
+
+        private void checkAttributes() {
+            for (SlamModelParser.AttributeDeclarationContext attribute : agentDeclaration.attributes) {
+                if (isValidName(attribute.name)&&record(attribute.name)) {
+                    SlamType currentType = agentTable.getPropertyType(attribute.name.getText());
+                    SlamType declaredType = SlamType.getTypeOf(attribute.type.getText());
+                    if (SlamType.NONE_TYPE.equals(currentType)||currentType.equals(declaredType)) {
+                        agentTable.recordAgentAttribute(agentName, attribute.name.getText(), declaredType);
+                    } else {
+                        validationFlag = false;
+                    }
+                }
+            }
+
+        }
+
+        private SlamType getTypeOf(String name) {
+            if (localVariables.containsKey(name)) {
+                return localVariables.get(name);
+            }
+            SlamType type = agentTable.getTypeOf(agentName, name);
+            if (SlamType.NONE_TYPE.equals(type)) {
+                return registry.typeOf(name);
+            }
+            return type;
+        }
+
+        private void recordParameters() {
+            for (SlamModelParser.AgentParameterContext param : agentDeclaration.params) {
+                if (isValidName(param.name)&&record(param.name)) {
+                    agentTable.recordAgentParameter(agentName, param.name.getText(),SlamType.getTypeOf(param.type.getText()));
+                } else {
+                    validationFlag = false;
+                }
+            }
+        }
+
+        private boolean record(Token tag) {
+            if (agentParametersAndAttributes.containsKey(tag.getText())) {
+                SlamModelValidator.this.errors.record(new ParseError(ParseUtil.duplicatedName(tag, agentParametersAndAttributes.get(tag.getText())), tag.getLine(), tag.getCharPositionInLine()));
+                return false;
+            } else {
+                agentParametersAndAttributes.put(tag.getText(), tag);
+                return true;
+            }
+        }
+
+        @Override
+        public Boolean visitAgentPatternNegation(SlamModelParser.AgentPatternNegationContext ctx) {
+            return ctx.arg.accept(this);
+        }
+
+        @Override
+        public Boolean visitAgentPatternBrackets(SlamModelParser.AgentPatternBracketsContext ctx) {
+            return ctx.agentPattern().accept(this);
+        }
+
+        @Override
+        public Boolean visitAgentPatternAny(SlamModelParser.AgentPatternAnyContext ctx) {
+            return true;
+        }
+
+        @Override
+        public Boolean visitAgentPatternNamed(SlamModelParser.AgentPatternNamedContext ctx) {
+            if (agentTable.isDefined(ctx.name.getText())) {
+                return new TypeInferenceVisitor(ExpressionContext.AGENT_VIEW, a -> agentTable.getTypeOf(ctx.name.getText(), a), a -> agentTable.getTypeOf(agentName, a), errors).checkType(SlamType.BOOLEAN_TYPE, ctx.guard);
+            } else {
+                errors.record(ParseUtil.unknownAgentError(ctx.name));
+                return (validationFlag = false);
+            }
+        }
+
+        @Override
+        public Boolean visitAgentPatternProperty(SlamModelParser.AgentPatternPropertyContext ctx) {
+            validationFlag &= new TypeInferenceVisitor(ExpressionContext.AGENT_PATTERN, this::getTypeOf, agentTable::getSharedAttributesTypeSolver, errors).checkType(SlamType.BOOLEAN_TYPE, ctx.guard);
+            return super.visitAgentPatternProperty(ctx);
+        }
+
+        @Override
+        public Boolean visitAgentPatternConjunction(SlamModelParser.AgentPatternConjunctionContext ctx) {
+            return ctx.left.accept(this)&&ctx.right.accept(this);
+        }
+
+        @Override
+        public Boolean visitAgentPatternDisjunction(SlamModelParser.AgentPatternDisjunctionContext ctx) {
+            return ctx.left.accept(this)&&ctx.right.accept(this);
+        }
+
+        public boolean recordAttributes() {
+            recordParameters();
+            checkAttributes();
+            checkViews();
+            return validationFlag;
+        }
     }
 
-    @Override
-    public Boolean visitSelectCase(SlamModelParser.SelectCaseContext ctx) {
-//        boolean result = hasType(ExpressionContext.AGENT_COMMAND,localVariables,table.getAgentStateTypeSolver(agentContext),SlamType.REAL_TYPE, ctx.weight);
-//        result &= hasType(ExpressionContext.AGENT_COMMAND,localVariables,table.getAgentStateTypeSolver(agentContext),SlamType.BOOLEAN_TYPE, ctx.guard);
-//        result &= ctx.nextStateBlock().accept(this);
-//        return result;
-        return false;
-    }
+    private class SystemValidator {
+        public SystemValidator(SlamModelParser.DeclarationSystemContext ctx) {
+        }
 
-    @Override
-    public Boolean visitSkipBlock(SlamModelParser.SkipBlockContext ctx) {
-        return true;
-    }
-
-    @Override
-    public Boolean visitNextStateBlock(SlamModelParser.NextStateBlockContext ctx) {
-        if (!table.hasState(agentContext, ctx.name.getText())) {
-            this.errors.add(ParseUtil.unknownAgentStateError(agentContext, ctx.name));
+        public boolean vaidate() {
             return false;
         }
-        return ctx.agentCommandBlock().accept(this);
     }
-
-    @Override
-    public Boolean visitAgentCommandBlock(SlamModelParser.AgentCommandBlockContext ctx) {
-        boolean result = true;
-        for (SlamModelParser.AgentCommandContext cmd: ctx.commands) {
-            result &= ctx.agentCommand.accept(this);
-        }
-        return result;
-    }
-
-    @Override
-    public Boolean visitIfThenElseCommand(SlamModelParser.IfThenElseCommandContext ctx) {
-//        boolean result = hasType(context, localVariables, table.getAgentStateTypeSolver(agentContext), SlamType.BOOLEAN_TYPE, ctx.guard);
-//        result &= ctx.thenCommand.accept(this);
-//        result &= ctx.elseCommand.accept(this);
-//        return result;
-        return false;
-    }
-
-    @Override
-    public Boolean visitSendCommand(SlamModelParser.SendCommandContext ctx) {
-        SlamModelParser.MessageExpressionContext message = ctx.content;
-        String tagName = message.tag.getText();
-        if (!table.isAMessageTag(tagName)) {
-            this.errors.add(ParseUtil.unknownTagError(message.tag));
-            return false;
-        }
-        MessageTag messageTag = table.getMessageTag(tagName);
-        if (message.elements.size() != messageTag.getArity()) {
-            this.errors.add(ParseUtil.illegalNumberOfMessageElements(message.tag, messageTag.getArity(), message.elements.size()));
-            return false;
-        }
-        boolean result = true;
-//        for(int i=0; i< messageTag.getArity(); i++) {
-//            result = hasType(context, localVariables, table.getAgentStateTypeSolver(agentContext), messageTag.getTypeOf(i), message.elements.get(i));
-//        }
-//        result &= ctx.target.accept(this);
-//        result &= hasType(context, localVariables, table.getAgentStateTypeSolver(agentContext), SlamType.REAL_TYPE, ctx.time);
-        return result;
-    }
-
-    @Override
-    public Boolean visitAssignmentCommand(SlamModelParser.AssignmentCommandContext ctx) {
-        if (!table.isAssignable(context, agentContext, ctx.name.getText())) {
-            this.errors.add(ParseUtil.illegalAssignmentError(ctx.name));
-            return false;
-        }
-        SlamType targetType = table.getTypeOf(agentContext, ctx.name.getText());
-//        return hasType(context, localVariables, table.getAgentStateTypeSolver(agentContext), targetType, ctx.expr());
-        return false;
-    }
-
 }

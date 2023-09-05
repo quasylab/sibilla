@@ -24,7 +24,7 @@
 package it.unicam.quasylab.sibilla.core.models.slam;
 
 
-import it.unicam.quasylab.sibilla.core.models.slam.agents.Agent;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.SlamAgent;
 import it.unicam.quasylab.sibilla.core.models.slam.data.AgentStore;
 
 import java.util.function.Predicate;
@@ -51,7 +51,7 @@ public interface StateExpressionEvaluator {
      * @param filter filter used to select agents.
      * @return the min value among all the evaluations.
      */
-    double getMinOf(ToDoubleFunction<AgentStore> expr, Predicate<Agent> filter);
+    double getMinOf(ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter);
 
     /**
      * Evaluates the expression on all the agents satisfying the given predicate and return the max value.
@@ -68,7 +68,7 @@ public interface StateExpressionEvaluator {
      * @param filter filter used to select agents.
      * @return the max value among all the evaluations.
      */
-    double getMaxOf(ToDoubleFunction<AgentStore> expr, Predicate<Agent> filter);
+    double getMaxOf(ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter);
 
     /**
      * Evaluates the expression on all the agents satisfying the given predicate and return the mean value.
@@ -85,7 +85,7 @@ public interface StateExpressionEvaluator {
      * @param filter filter used to select agents.
      * @return the mean value among all the evaluations.
      */
-    double getMeanOf(ToDoubleFunction<AgentStore> expr, Predicate<Agent> filter);
+    double getMeanOf(ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter);
 
     /**
      * Checks if there exists an agent satisfying the given predicate.
@@ -93,7 +93,7 @@ public interface StateExpressionEvaluator {
      * @param p a predicate on agent memory
      * @return true there exists an agent satisfying the given predicate.
      */
-    boolean exists(Predicate<Agent> p);
+    boolean exists(Predicate<SlamAgent> p);
 
     /**
      * Checks if there all the agents satisfy the given predicate.
@@ -101,6 +101,31 @@ public interface StateExpressionEvaluator {
      * @param p a predicate on agent memory
      * @return true there all the agents satisfying the given predicate.
      */
-    boolean forAll(Predicate<Agent> p);
+    boolean forAll(Predicate<SlamAgent> p);
+
+    /**
+     * Returns the sum of the given expression evaluated with the store of the agents satisfying the given predicate.
+     *
+     * @param expr the expression to sum
+     * @param filter the predicate used to select the agents
+     * @return the sum of the given expression evaluated with the store of the agents satisfying the given predicate.
+     */
+    double getSumOf(ToDoubleFunction<AgentStore> expr, Predicate<SlamAgent> filter);
+
+    /**
+     * Returns the sum of the given expression evaluated with the store of all the agents.
+     *
+     * @param expr the expression to sum
+     * @return the sum of the given expression evaluated with the store of the all the agents.
+     */
+    double getSumOf(ToDoubleFunction<AgentStore> expr);
+
+    /**
+     * Returns the number of agents satisfying the given predicate.
+     *
+     * @param filter the predicate used to select agents to cound.
+     * @return the number of agents satisfying the given predicate
+     */
+    int count(Predicate<SlamAgent> filter);
 
 }

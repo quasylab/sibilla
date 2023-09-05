@@ -25,23 +25,26 @@ package it.unicam.quasylab.sibilla.core.models.slam.agents;
 
 import it.unicam.quasylab.sibilla.core.models.slam.AgentTimePassingFunction;
 import it.unicam.quasylab.sibilla.core.models.slam.MessageHandler;
+import it.unicam.quasylab.sibilla.core.models.slam.data.AgentStore;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.ToDoubleBiFunction;
 
 /**
  * This is a container for the set of states defining the agent behaviour.
  */
-public class AgentBehaviourOld {
+public class SlamAgentBehaviour {
 
 
-    private AgentBehaviouralState initialState;
-    private Map<String, AgentBehaviouralState> states;
+    private SlamAgentState initialState;
+    private Map<String, SlamAgentState> states;
 
     /**
      * Creates an empty agent behaviour.
      */
-    public AgentBehaviourOld() {
+    public SlamAgentBehaviour() {
         this.states = new TreeMap<>();
     }
 
@@ -50,7 +53,7 @@ public class AgentBehaviourOld {
      *
      * @return the initial state of this behaviour.
      */
-    public AgentBehaviouralState initialState() {
+    public SlamAgentState initialState() {
         return null;
     }
 
@@ -63,7 +66,19 @@ public class AgentBehaviourOld {
         if (this.states.containsKey(stateName)) {
             throw new IllegalArgumentException();//TODO: Add Message Here!
         }
-        this.states.put(stateName, new AgentBehaviouralState(states.size(), stateName));
+        SlamAgentState newState = new SlamAgentState(states.size(), stateName);
+        this.states.put(stateName, newState);
+        if (initialState == null) {
+            initialState = newState;
+        }
+    }
+
+    public void setInitialState(String stateName) {
+        SlamAgentState state = this.states.get(stateName);
+        if (state == null) {
+            throw new IllegalArgumentException();//TODO: Add Message Here!
+        }
+        this.initialState = state;
     }
 
     /**
@@ -73,7 +88,7 @@ public class AgentBehaviourOld {
      * @param timePassingFunction time passing function.
      */
     public void setTimePassingFunction(String stateName, AgentTimePassingFunction timePassingFunction) {
-        AgentBehaviouralState state = this.states.get(stateName);
+        SlamAgentState state = this.states.get(stateName);
         if (state != null) {
             state.setTimePassingFunction(timePassingFunction);
         } else {
@@ -88,7 +103,7 @@ public class AgentBehaviourOld {
      * @param messageHandler the message handler to add to this state.
      */
     public void addMessageHandler(String stateName, MessageHandler messageHandler) {
-        AgentBehaviouralState state = this.states.get(stateName);
+        SlamAgentState state = this.states.get(stateName);
         if (state != null) {
             state.addMessageHandler(messageHandler);
         } else {
@@ -97,55 +112,38 @@ public class AgentBehaviourOld {
     }
 
     /**
-     * Sets the step function associated with the given state.
+     * Sets the behaviour of the state associated with the passage of time.
      *
-     * @param stateName state name.
-     * @param step the function that is executed when this state is left.
+     * @param stateName           state name.
+     * @param sojournTimeFunction the function used to compute the sojourn time in the given state.
+     * @param step                the step performed when the given time is passed.
      */
-    public void setStep(String stateName, AgentStepFunction step) {
-        AgentBehaviouralState state = this.states.get(stateName);
+    public void setTimeDependentStep(String stateName, ToDoubleBiFunction<RandomGenerator, AgentStore> sojournTimeFunction, SlamAgentStep step) {
+        SlamAgentState state = this.states.get(stateName);
         if (state != null) {
-            state.setStep(step);
+            state.setTimeDependentStep(sojournTimeFunction, step);
         } else {
             throw new IllegalArgumentException();//TODO: Add Message!
         }
     }
-
 
     /**
-     * Sets the step function associated with the given state name so to jump to the
-     * state named <code>nextState</code> by executing command <code>commande</code>.
+     * Returns the state with the given name.
      *
-     * @param stateName state name
-     * @param nextState name of the state reached after the step
-     * @param command command executed in the step
+     * @param stateName the name of the state to return
+     * @return the state with the given name.
      */
-    public void setStep(String stateName, String nextState, AgentCommand command) {
-        if (states.containsKey(nextState)) {
-            setStep(stateName, AgentStepFunction.step(states.get(nextState), command));
-        } else {
-            throw new IllegalArgumentException();//TODO: Add Message!
-        }
+    public SlamAgentState getAgentState(String stateName) {
+        return this.states.get(stateName);
     }
-
 
     /**
-     * Returns the agent step function that leads to the state named <code>nextState</code> and
-     * that executes the given command.
+     * Returns true if a state with the given name is defined.
      *
-     * @param nextState state reached with the step.
-     * @param command command executed in the transition.
-     * @return the agent step function that leads to the state named <code>nextState</code> and
-     * that executes the given command.
+     * @param stateName the name of the state for which the presence is tested
+     * @return true if a state with the given name is defined.
      */
-    public AgentStepFunction getAgentStepFunction(String nextState, AgentCommand command) {
-        if (states.containsKey(nextState)) {
-            return AgentStepFunction.step(states.get(nextState), command);
-        } else {
-            throw new IllegalArgumentException();//TODO: Add Message!
-        }
+    public boolean hasState(String stateName) {
+        return this.states.containsKey(stateName);
     }
-
-
-
 }
