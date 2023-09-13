@@ -66,10 +66,12 @@ public class ModuleEngine<S extends State> {
     }
 
     public SibillaValue getParameter(String name) {
+        loadModel();
         return this.modelDefinition.getParameterValue(name);
     }
 
     public String[] getParameters() {
+        loadModel();
         return this.modelDefinition.getModelParameters();
     }
 

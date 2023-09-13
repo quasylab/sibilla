@@ -56,5 +56,9 @@ environment:
     for ox sampled distinct 5 time from U[0, width] do
        Obstacle[ x = ox; y = 10; ]
     endfor
-    Robot[ x = U[0, 20]; y = 0; ]
+    Robot[ x = 10   ; y = 0; ]
  end
+
+measure meanX = mean . x
+
+measure meanY = mean . y

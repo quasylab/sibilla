@@ -38,6 +38,7 @@ import java.util.stream.StreamSupport;
  */
 public final class SibillaMap<K extends Comparable<K>, V> implements Iterable<Map.Entry<K,V>> {
 
+
     /**
      * The internal data structure used to store bindings in this map.
      */
@@ -86,6 +87,11 @@ public final class SibillaMap<K extends Comparable<K>, V> implements Iterable<Ma
      */
     private static <K extends Comparable<K>> boolean doContainsKey(K key, Node<K, ?> map) {
         return (map != null) && (map.containsKey(key));
+    }
+
+    @Override
+    public String toString() {
+        return "["+(this.node != null?this.node.toString():"")+"]";
     }
 
 
@@ -645,6 +651,13 @@ public final class SibillaMap<K extends Comparable<K>, V> implements Iterable<Ma
             } else {
                 return new Node<>(this.entry, doRemove(leftNode, key), rightNode).rebalance();
             }
+        }
+
+        @Override
+        public String toString() {
+            return (this.leftNode!=null?this.leftNode.toString()+", ":"")+
+                    entry.toString()+
+                    (this.rightNode!=null?", "+this.rightNode.toString():"");
         }
     }
 

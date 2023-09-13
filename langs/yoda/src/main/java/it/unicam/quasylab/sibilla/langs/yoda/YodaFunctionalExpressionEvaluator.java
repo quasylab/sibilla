@@ -33,6 +33,7 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -163,8 +164,8 @@ public class YodaFunctionalExpressionEvaluator<T> extends YodaModelBaseVisitor<F
     public Function<T, SibillaValue> visitExpressionRelation(YodaModelParser.ExpressionRelationContext ctx) {
         Function<T, SibillaValue> firstArgumentEvaluation = ctx.leftOp.accept(this);
         Function<T, SibillaValue> secondArgumentEvaluation = ctx.rightOp.accept(this);
-        BinaryOperator<SibillaValue> op = SibillaValue.getOperator(ctx.oper.getText());
-        return SibillaValue.apply(op, firstArgumentEvaluation, secondArgumentEvaluation);
+        BiPredicate<SibillaValue, SibillaValue> op = SibillaValue.getRelationOperator(ctx.oper.getText());
+        return arg -> SibillaValue.of(op.test(firstArgumentEvaluation.apply(arg), secondArgumentEvaluation.apply(arg)));
     }
 
     @Override

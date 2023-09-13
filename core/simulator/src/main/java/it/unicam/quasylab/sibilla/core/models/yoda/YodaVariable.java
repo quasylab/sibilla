@@ -49,4 +49,9 @@ public class YodaVariable implements Comparable<YodaVariable> {
     public int compareTo(YodaVariable o) {
         return this.idx - o.idx;
     }
+
+    @Override
+    public String toString() {
+        return this.name;
+    }
 }

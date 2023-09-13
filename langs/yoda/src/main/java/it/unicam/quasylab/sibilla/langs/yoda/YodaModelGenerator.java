@@ -39,6 +39,8 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -64,6 +66,10 @@ public class YodaModelGenerator {
 
     public YodaModelGenerator(File file) throws IOException, YodaModelGenerationException {
         this(CharStreams.fromReader(new FileReader(file)));
+    }
+
+    public YodaModelGenerator (URL url) throws URISyntaxException, IOException, YodaModelGenerationException{
+        this(new File(url.toURI()));
     }
 
     public void getParseTree() throws YodaModelGenerationException {
@@ -155,7 +161,7 @@ public class YodaModelGenerator {
     }
 
     private YodaAgentsDefinitions getYodaAgentsDefinitions(Function<String, Optional<SibillaValue>> nameResolver) {
-        YodaAgentsDefinitionsGenerator generator = new YodaAgentsDefinitionsGenerator(this.elementNameRegistry, this.variableRegistry, nameResolver);
+        YodaAgentsDefinitionsGenerator generator = new YodaAgentsDefinitionsGenerator(this.elementNameRegistry, getYodaVariableRegistry(), nameResolver);
         this.parseTree.accept(generator);
         return generator.getAgentsDefinitions();
     }

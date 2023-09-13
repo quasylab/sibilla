@@ -119,4 +119,9 @@ public class YodaVariableMapping {
     public SibillaValue getOrDefault(YodaVariable var, SibillaValue value) {
         return this.map.get(var).orElse(value);
     }
+
+    @Override
+    public String toString() {
+        return map.toString();
+    }
 }

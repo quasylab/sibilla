@@ -51,8 +51,8 @@ public class YodaAgentPrototype {
     public YodaAgent getAgent(YodaVariableMapping initialAssignment, int agentId) {
         return new YodaAgent(agentId,
                 agentName,
-                initialEnvironmentalAttributes.setAll(initialAssignment),
                 initialAgentAttributes.setAll(initialAssignment),
+                initialEnvironmentalAttributes.setAll(initialAssignment),
                 initialAgentObservations.setAll(initialAssignment), agentBehaviour, observationsUpdateFunction, environmentalAttributeUpdateFunction);
     }
 

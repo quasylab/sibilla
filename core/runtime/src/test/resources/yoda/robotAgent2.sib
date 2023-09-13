@@ -1,0 +1,9 @@
+module "yoda"
+load "/Users/nicoladelgiudice/Documents/GitHub/newSibilla/core/runtime/src/test/resources/yoda/robotAgent2.yoda"
+init "Main"
+add all measures
+deadline 100
+dt 0.5
+replica 100
+simulate
+save output "/Users/nicoladelgiudice/Documents/Risultati/Robot" prefix "robot" postfix "__"
