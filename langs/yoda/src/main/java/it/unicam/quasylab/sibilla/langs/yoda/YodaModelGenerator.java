@@ -147,7 +147,7 @@ public class YodaModelGenerator {
         return evaluator.getConstantsAndParameters();
     }
 
-    private YodaVariableRegistry getYodaVariableRegistry() {
+    public YodaVariableRegistry getYodaVariableRegistry() {
         if (this.variableRegistry == null) {
             YodaVariableCollector collector = new YodaVariableCollector();
             this.parseTree.accept(collector);
@@ -160,7 +160,7 @@ public class YodaModelGenerator {
         return this.elementNameRegistry;
     }
 
-    private YodaAgentsDefinitions getYodaAgentsDefinitions(Function<String, Optional<SibillaValue>> nameResolver) {
+    public YodaAgentsDefinitions getYodaAgentsDefinitions(Function<String, Optional<SibillaValue>> nameResolver) {
         YodaAgentsDefinitionsGenerator generator = new YodaAgentsDefinitionsGenerator(this.elementNameRegistry, getYodaVariableRegistry(), nameResolver);
         this.parseTree.accept(generator);
         return generator.getAgentsDefinitions();

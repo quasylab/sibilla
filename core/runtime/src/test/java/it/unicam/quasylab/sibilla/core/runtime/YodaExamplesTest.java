@@ -121,7 +121,7 @@ class YodaExamplesTest {
     public void shouldSimulateRobotScenario() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/robotAgent2.yoda"));
-        sr.setConfiguration("Main");
+        sr.setConfiguration("Alone");
         sr.addAllMeasures();
         sr.setDeadline(100);
         sr.setDt(1);

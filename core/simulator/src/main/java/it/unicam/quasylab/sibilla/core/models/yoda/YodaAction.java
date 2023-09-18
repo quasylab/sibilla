@@ -81,7 +81,7 @@ public interface YodaAction extends Serializable {
         return actionOf(name, (rg, vm) -> {
             YodaVariableMapping result = vm;
             for (Map.Entry<YodaVariable, BiFunction<RandomGenerator, YodaVariableMapping, SibillaValue>> e: updates.entrySet()) {
-                result = vm.setValue(e.getKey(), e.getValue().apply(rg, vm));
+                result = result.setValue(e.getKey(), e.getValue().apply(rg, vm));
             }
             return result;
         });

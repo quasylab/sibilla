@@ -91,32 +91,32 @@ class SibillaMapTest {
     @Test
     void rotateLeft() {
         SibillaMap<Integer, Integer> map = new SibillaMap<>();
-        map.add(0,0);
-        map.add(1,1);
+        map = map.add(0,0);
+        map = map.add(1,1);
         map.add(2,2);
     }
 
     @Test
     void rotateRight() {
         SibillaMap<Integer, Integer> map = new SibillaMap<>();
-        map.add(2,2);
-        map.add(1,1);
+        map = map.add(2,2);
+        map = map.add(1,1);
         map.add(0,0);
-    }
-
-    @Test
-    void rotateLeftRight() {
-        SibillaMap<Integer, Integer> map = new SibillaMap<>();
-        map.add(2,2);
-        map.add(4,4);
-        map.add(3,3);
     }
 
     @Test
     void rotateRightLeft() {
         SibillaMap<Integer, Integer> map = new SibillaMap<>();
-        map.add(4,4);
-        map.add(2,2);
+        map = map.add(2,2);
+        map = map.add(4,4);
+        map.add(3,3);
+    }
+
+    @Test
+    void rotateLeftRight() {
+        SibillaMap<Integer, Integer> map = new SibillaMap<>();
+        map = map.add(4,4);
+        map = map.add(2,2);
         map.add(3,3);
     }
 

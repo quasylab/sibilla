@@ -26,7 +26,6 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 import it.unicam.quasylab.sibilla.core.models.AbstractModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
-import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -39,7 +38,7 @@ public class YodaModelDefinition extends AbstractModelDefinition<YodaSystemState
 
     private final Function<EvaluationEnvironment, Map<String, Measure<YodaSystemState>>> measuresGenerationFunction;
 
-    private final Function<EvaluationEnvironment, Map<String, Predicate<YodaSystemState>>> preducatesGenerationFunction;
+    private final Function<EvaluationEnvironment, Map<String, Predicate<YodaSystemState>>> predicatesGenerationFunction;
 
     private final Function<EvaluationEnvironment, ParametricDataSet<Function<RandomGenerator, YodaSystemState>>> statesGenerationFunction;
 
@@ -49,10 +48,10 @@ public class YodaModelDefinition extends AbstractModelDefinition<YodaSystemState
     private Map<String, Predicate<YodaSystemState>> predicates;
 
     public YodaModelDefinition(
-            EvaluationEnvironment environment, Function<EvaluationEnvironment, Map<String, Measure<YodaSystemState>>> measuresGenerationFunction, Function<EvaluationEnvironment, Map<String, Predicate<YodaSystemState>>> preducatesGenerationFunction, Function<EvaluationEnvironment, ParametricDataSet<Function<RandomGenerator, YodaSystemState>>> statesGenerationFunction){
+            EvaluationEnvironment environment, Function<EvaluationEnvironment, Map<String, Measure<YodaSystemState>>> measuresGenerationFunction, Function<EvaluationEnvironment, Map<String, Predicate<YodaSystemState>>> predicatesGenerationFunction, Function<EvaluationEnvironment, ParametricDataSet<Function<RandomGenerator, YodaSystemState>>> statesGenerationFunction){
         super(environment);
         this.measuresGenerationFunction = measuresGenerationFunction;
-        this.preducatesGenerationFunction = preducatesGenerationFunction;
+        this.predicatesGenerationFunction = predicatesGenerationFunction;
         this.statesGenerationFunction = statesGenerationFunction;
     }
 
@@ -93,7 +92,7 @@ public class YodaModelDefinition extends AbstractModelDefinition<YodaSystemState
 
     private Map<String, Predicate<YodaSystemState>> getPredicates() {
         if (this.predicates == null) {
-            this.predicates = preducatesGenerationFunction.apply(getEnvironment());
+            this.predicates = predicatesGenerationFunction.apply(getEnvironment());
         }
         return this.predicates;
     }

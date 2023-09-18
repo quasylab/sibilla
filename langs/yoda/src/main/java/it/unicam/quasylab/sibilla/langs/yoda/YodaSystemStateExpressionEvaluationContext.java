@@ -78,17 +78,17 @@ class YodaSystemStateExpressionEvaluationContext implements YodaExpressionEvalua
 
     @Override
     public SibillaValue mean(YodaSystemState context, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> guard, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression) {
-        return context.max(YodaGroupExpressionEvaluationParameters.getPredicate(guard), YodaGroupExpressionEvaluationParameters.getDoubleFunction(expression));
+        return context.mean(YodaGroupExpressionEvaluationParameters.getPredicate(guard), YodaGroupExpressionEvaluationParameters.getDoubleFunction(expression));
     }
 
     @Override
     public SibillaValue mean(YodaSystemState context, Set<YodaElementName> group, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression) {
-        return context.max(group, YodaGroupExpressionEvaluationParameters.getDoubleFunction(expression));
+        return context.mean(group, YodaGroupExpressionEvaluationParameters.getDoubleFunction(expression));
     }
 
     @Override
     public SibillaValue mean(YodaSystemState context, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression) {
-        return context.max(YodaGroupExpressionEvaluationParameters.getDoubleFunction(expression));
+        return context.mean(YodaGroupExpressionEvaluationParameters.getDoubleFunction(expression));
     }
 
     @Override
