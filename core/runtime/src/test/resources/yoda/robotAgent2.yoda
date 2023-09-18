@@ -31,17 +31,17 @@ agent Robot =
 end
 
 element Obstacle =
-    int x = 0;
-    int y = 0;
+    int posx = 0;
+    int posy = 0;
 end
 
 environment:
     sensing :
         Robot [
-            north <- any Obstacle : (y==it.y+1)&&(x==it.y);
-            south <- any Obstacle : (y==it.y-1)&&(x==it.y);
-            east <- any Obstacle : (y==it.y-1)&&(x==it.y);
-            west <- any Obstacle : (y==it.y-1)&&(x==it.y);
+            north <- any Obstacle : (posy==it.y+1)&&(posx==it.x);
+            south <- any Obstacle : (posy==it.y-1)&&(posx==it.x);
+            east <- any Obstacle : (posx==it.x+1)&&(posy==it.y);
+            west <- any Obstacle : (posx==it.x-1)&&(posy==it.y);
             goal <- it.y==height+1;
         ]
 
@@ -54,9 +54,9 @@ environment:
 
  configuration Main :
     for ox sampled distinct 5 time from U[0, width] do
-       Obstacle[ x = ox; y = 10; ]
+       Obstacle[ posx = ox; posy = 7; ]
     endfor
-    Robot[ x = 10   ; y = 0; ]
+    Robot[ x = 9 ; y = 0 ; ]
  end
 
 measure meanX = mean . x

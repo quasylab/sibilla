@@ -134,7 +134,7 @@ class YodaExamplesTest {
     public void shouldSimulateRobotAndChangeParam() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/robotAgent2.yoda"));
-        sr.setParameter("na", 4);
+        sr.setParameter("no", 4);
         sr.setConfiguration("Main");
         sr.addAllMeasures();
         sr.setDeadline(100);
