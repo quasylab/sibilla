@@ -63,7 +63,7 @@ public class YodaAgentsDefinitions {
      *
      * @param agentId the id to use in the new created agent.
      * @param agentName the name of the new created agent.
-     * @param args a mapping containing the parameters used to instantiate the agents
+     * @param initialAssignment a mapping containing the parameters used to instantiate the agents
      * @return an agent with the given id and name.
      */
     public YodaAgent getAgent(int agentId, YodaElementName agentName, YodaVariableMapping initialAssignment) {

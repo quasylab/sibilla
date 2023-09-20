@@ -1,8 +1,12 @@
 package it.unicam.quasylab.sibilla.core.runtime;
 
-import it.unicam.quasylab.sibilla.core.models.yoda.YodaAgentsDefinitions;
-import it.unicam.quasylab.sibilla.core.models.yoda.YodaModelDefinition;
+import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
+import it.unicam.quasylab.sibilla.core.models.yoda.*;
+import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
+import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+import it.unicam.quasylab.sibilla.langs.yoda.YodaAgentsDefinitionsGenerator;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaModelGenerationException;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaModelGenerator;
 import org.junit.jupiter.api.Test;
@@ -11,6 +15,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -148,10 +153,58 @@ class YodaExamplesTest {
         return new YodaModelGenerator(getResource(s)).getYodaModelDefinition();
     }
 
+    private YodaModelGenerator loadModelGenerator(String s) throws YodaModelGenerationException, URISyntaxException, IOException {
+        return new YodaModelGenerator(getResource(s));
+    }
+
+
     @Test
-    public void shouldBeAgentRobot() throws CommandExecutionException {
-        SibillaRuntime sr = getRuntimeWithYodaModule();
-        sr.load(getResource("yoda/robotAgent2.yoda"));
+    public void testRobotMeasures() throws YodaModelGenerationException, URISyntaxException, IOException {
+        YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent2.yoda");
+        generator.getParseTree();
+        EvaluationEnvironment env = generator.getEvaluationEnvironment();
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
+        YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
+        YodaAgent agent = agentsDefinitions.getAgent(0,elementNameRegistry.get("Robot"), new YodaVariableMapping());
+
+        assertEquals(SibillaValue.of(0), agent.get(variableRegistry.get("dirx")));
+        assertEquals(SibillaValue.of(0), agent.get(variableRegistry.get("diry")));
+
+        agent = agent.next(new DefaultRandomGenerator(), new YodaSystemState(List.of(agent), List.of()));
+        assertEquals(SibillaValue.of(0), agent.get(variableRegistry.get("dirx")));
+        assertEquals(SibillaValue.of(1), agent.get(variableRegistry.get("diry")));
+    }
+
+    @Test
+    public void testRobotNext() throws YodaModelGenerationException, URISyntaxException, IOException {
+        YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent2.yoda");
+        generator.getParseTree();
+        EvaluationEnvironment env = generator.getEvaluationEnvironment();
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
+        YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
+        //Aggiungere modo per recuperare info da conf iniziale
+        YodaAgent agent = agentsDefinitions.getAgent(0,elementNameRegistry.get("Robot"), new YodaVariableMapping());
+        YodaSystemState state = new YodaSystemState(List.of(agent), List.of());
+        assertEquals(SibillaValue.of(0), state.get(0).get(variableRegistry.get("dirx")));
+        assertEquals(SibillaValue.of(0), state.get(0).get(variableRegistry.get("diry")));
+
+        WeightedStructure<YodaAction> actions = agent.getAgentBehaviour().evaluate(agent.getAgentAttributes(), agent.getAgentObservations());
+
+        assertEquals(1, actions.getTotalWeight());
+        assertEquals(1, actions.getAll().get(0).getTotalWeight());
+        assertEquals("moveNorth",actions.getAll().get(0).getElement().getName());
+        YodaVariableMapping newMap = actions.getAll().get(0).getElement().performAction(new DefaultRandomGenerator(), agent.getAgentAttributes());
+
+        assertEquals(SibillaValue.of(0), newMap.getValue(variableRegistry.get("dirx")));
+        assertEquals(SibillaValue.of(1), newMap.getValue(variableRegistry.get("diry")));
+
+/*        state = state.next(null);
+        assertEquals(SibillaValue.of(0), state.get(0).get(variableRegistry.get("dirx")));
+        assertEquals(SibillaValue.of(1), state.get(0).get(variableRegistry.get("diry")));
+        assertEquals(SibillaValue.of(0), state.get(0).get(variableRegistry.get("x")));
+        assertEquals(SibillaValue.of(1), state.get(0).get(variableRegistry.get("y")));*/
     }
 
 }

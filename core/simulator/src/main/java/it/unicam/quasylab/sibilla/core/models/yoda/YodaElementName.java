@@ -43,7 +43,7 @@ public class YodaElementName {
      * Creates a new instance with the given name and index.
      *
      * @param name agent name
-     * @param agentId agent name id
+     * @param elementId agent name id
      */
     protected YodaElementName(String name, int elementId) {
         this.name = name;

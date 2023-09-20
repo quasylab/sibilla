@@ -156,7 +156,7 @@ public class YodaModelGenerator {
         return this.variableRegistry;
     }
 
-    private YodaElementNameRegistry getYodaElementNameRegistry() {
+    public YodaElementNameRegistry getYodaElementNameRegistry() {
         return this.elementNameRegistry;
     }
 

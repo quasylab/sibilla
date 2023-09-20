@@ -71,7 +71,6 @@ public class YodaVariableMapping {
         return new YodaVariableMapping(this.map.add(variable, value));
     }
 
-
     /**
      * Returns the variable mapping obtained from this one by setting each variable to the value associated to it
      * in the given map.
