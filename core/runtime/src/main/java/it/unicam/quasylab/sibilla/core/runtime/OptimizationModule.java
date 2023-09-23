@@ -9,7 +9,7 @@ import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.Interval;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateMetrics;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateModel;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateModelRegistry;
-import it.unicam.quasylab.sibilla.core.optimization.surrogate.TrainingSet;
+import it.unicam.quasylab.sibilla.core.optimization.surrogate.DataSet;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -54,8 +54,7 @@ public class OptimizationModule {
 
     private Map<String,Double> optimalCoordinates;
 
-    private TrainingSet trainingSet;
-
+    private DataSet dataSet;
     OptimizationTask optimizationTask;
 
 
@@ -160,24 +159,25 @@ public class OptimizationModule {
     }
 
     public void generateSurrogateModel(){
-        if(this.trainingSet == null)
+        //TODO CHANGE GRAMMAR FOR ADD TRAINING PORTION
+        if(this.dataSet == null)
             generateTrainingSet();
         this.surrogateModel = SurrogateModelRegistry
                 .getInstance()
                 .get(surrogateName)
-                .getSurrogateModel(this.trainingSet,properties);
-        this.surrogateMetrics = this.surrogateModel.getInSampleMetrics();
+                .getSurrogateModel(this.dataSet,0.85,properties);
+        this.surrogateMetrics = this.surrogateModel.getTrainingSetMetrics();
     }
 
     public void generateSurrogateFunction(){
         generateSurrogateModel();
-        this.surrogateFunction = this.surrogateModel.getSurrogateFunction();
+        this.surrogateFunction = this.surrogateModel.getSurrogateFunction(true);
     }
 
 
     public void generateTrainingSet(){
         generateSearchSpace();
-        this.trainingSet = new TrainingSet(
+        this.dataSet = new DataSet(
                 this.searchSpace,
                 SamplingStrategyRegistry.getInstance().get(samplingName).getSamplingTask(),
                 this.trainingSetSize,
@@ -228,6 +228,13 @@ public class OptimizationModule {
             this.properties.setProperty(this.optimizationName+"."+propertyName,property);
         else
             throw new IllegalArgumentException(this.getUnknownOptimizationPropertyMessage(this.optimizationName));
+    }
+
+    public double getSurrogatePrediction(Map<String,Double> parameters){
+        if(surrogateFunction != null)
+            return this.surrogateFunction.applyAsDouble(parameters);
+        else
+            throw new NullPointerException("No Surrogate was generated");
     }
 
 
@@ -311,8 +318,8 @@ public class OptimizationModule {
         return this.usingASurrogate;
     }
 
-    public TrainingSet getTrainingSet() {
-        return trainingSet;
+    public DataSet getTrainingSet() {
+        return dataSet;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -366,11 +373,11 @@ public class OptimizationModule {
     public String infoTrainingSet(){
         StringBuilder info = new StringBuilder();
         String emptySpace = "    ";
-        info.append("Size: ").append(this.trainingSet.rowCount()).append("\n");
-        info.append("Result info: ").append(this.trainingSet.rowCount()).append("\n");
-        info.append(emptySpace).append("Mean               : ").append(this.trainingSet.getResultMean()).append("\n");
-        info.append(emptySpace).append("Standard Deviation : ").append(this.trainingSet.getResultSD()).append("\n");
-        info.append(emptySpace).append("Mode               : ").append(this.trainingSet.getResultMode()).append("\n");
+        info.append("Size: ").append(this.dataSet.rowCount()).append("\n");
+        info.append("Result info: ").append(this.dataSet.rowCount()).append("\n");
+        info.append(emptySpace).append("Mean               : ").append(this.dataSet.getResultMean()).append("\n");
+        info.append(emptySpace).append("Standard Deviation : ").append(this.dataSet.getResultSD()).append("\n");
+        info.append(emptySpace).append("Mode               : ").append(this.dataSet.getResultMode()).append("\n");
         return info.toString();
     }
 

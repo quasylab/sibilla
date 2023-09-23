@@ -8,11 +8,12 @@ import java.util.Properties;
 import java.util.function.ToDoubleFunction;
 
 public interface SurrogateFactory {
-    SurrogateModel getSurrogateModel(TrainingSet trainingSet, Properties properties);
+    SurrogateModel getSurrogateModel(DataSet dataSet,double trainingPortion, Properties properties);
     SurrogateModel getSurrogateModel(ToDoubleFunction<Map<String,Double>> functionToBeSurrogate,
                                      SamplingTask samplingTask,
                                      HyperRectangle sampleSpace,
                                      int numberOfSamples,
+                                     double trainingPortion,
                                      Properties properties);
 
 }

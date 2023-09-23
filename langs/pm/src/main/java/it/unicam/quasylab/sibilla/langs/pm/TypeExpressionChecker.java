@@ -130,6 +130,22 @@ public class TypeExpressionChecker extends PopulationModelBaseVisitor<SymbolType
         return t1;
     }
 
+
+
+    /*
+        forStatement: 'for' '(' assignment=expr ';' condition=expr ';' update=expr ')' expr;
+     */
+//    public SymbolType visitForStatementExpression(PopulationModelParser.forStatment ctx){
+//        int assignment  = visit(ctx.assignment);
+//        Predicate condition  = visit(ctx.codition);
+//
+//
+//        while (evaluateCondition(ctx.condition)) {
+//            visit(ctx.expr);
+//
+//        }
+//    }
+
     @Override
     public SymbolType visitIntValue(PopulationModelParser.IntValueContext ctx) {
         return SymbolType.NUMBER;

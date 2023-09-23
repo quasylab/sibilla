@@ -44,6 +44,7 @@ public abstract class AbstractMADSTask implements OptimizationTask {
     @Override
     public Map<String, Double> minimize(ToDoubleFunction<Map<String, Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints, Properties properties) {
         this.searchSpace = searchSpace;
+        constraints.addAll(getSearchSpaceAsConstraintList(searchSpace));
         this.setProperties(properties);
         this.barrierFunction = new BarrierFunction(objectiveFunction,constraints);
 
@@ -63,8 +64,8 @@ public abstract class AbstractMADSTask implements OptimizationTask {
         double DELTA_POLL = 1.0;
         double TAU = 4.0;
         double EPSILON = Double.POSITIVE_INFINITY;
-        int ITERATION = 1000;
-        int SEARCH_POINTS = 10;
+        int ITERATION = 500;
+        int SEARCH_POINTS = 20;
         boolean OPPORTUNISTIC = false;
 
         this.searchMethod = getSearchMethod();

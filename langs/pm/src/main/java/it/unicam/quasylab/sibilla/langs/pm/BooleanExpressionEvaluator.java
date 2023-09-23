@@ -55,7 +55,14 @@ public class BooleanExpressionEvaluator extends PopulationModelBaseVisitor<Boole
 
     @Override
     public Boolean visitAndExpression(PopulationModelParser.AndExpressionContext ctx) {
-        return ctx.left.accept(this)&&ctx.right.accept(this);
+        boolean b1 = ctx.left.accept(this);
+        boolean b2 = ctx.right.accept(this);
+        return b1 & b2;
+    }
+
+    @Override
+    public Boolean visitBracketExpression(PopulationModelParser.BracketExpressionContext ctx) {
+        return ctx.expr().accept(this);
     }
 
     @Override

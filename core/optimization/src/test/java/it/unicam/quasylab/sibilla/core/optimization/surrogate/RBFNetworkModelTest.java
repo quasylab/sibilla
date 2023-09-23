@@ -23,9 +23,9 @@ class RBFNetworkModelTest {
                 new ContinuousInterval("y",-2.0,2.0)
         );
 
-        TrainingSet ts = new TrainingSet(searchSpace,new LatinHyperCubeSamplingTask(),10000,funToOpt);
+        DataSet ts = new DataSet(searchSpace,new LatinHyperCubeSamplingTask(),10000,funToOpt);
 
-        RBFNetworkModel rbfNetworkSurrogate = new RBFNetworkModel(ts,new Properties());
+        RBFNetworkModel rbfNetworkSurrogate = new RBFNetworkModel(ts,0.85,new Properties());
 
         rbfNetworkSurrogate.fit();
 

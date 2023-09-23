@@ -13,5 +13,5 @@ public interface TrainingSetRearranger {
      * @return <code>TrainingSet</code> a re-arranged version of
      * the one passed as parameter
      */
-    TrainingSet rearrange(TrainingSet ts);
+    DataSet rearrange(DataSet ts);
 }

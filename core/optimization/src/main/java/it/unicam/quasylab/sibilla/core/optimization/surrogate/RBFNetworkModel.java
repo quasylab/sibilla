@@ -21,12 +21,12 @@ public class RBFNetworkModel extends AbstractSurrogateModel{
     private int rbfNeuronsToLearn;
     private boolean normalized;
 
-    public RBFNetworkModel(TrainingSet trainingSet, Properties properties) {
-        super(trainingSet, properties);
+    public RBFNetworkModel(DataSet dataSet,double trainingPortion, Properties properties) {
+        super(dataSet, trainingPortion, properties);
     }
 
-    public RBFNetworkModel(ToDoubleFunction<Map<String, Double>> functionToBeSurrogate, SamplingTask samplingTask, HyperRectangle sampleSpace, int numberOfSamples, Properties properties) {
-        super(functionToBeSurrogate, samplingTask, sampleSpace, numberOfSamples, properties);
+    public RBFNetworkModel(ToDoubleFunction<Map<String, Double>> functionToBeSurrogate, SamplingTask samplingTask, HyperRectangle sampleSpace, int numberOfSamples,double trainingPortion, Properties properties) {
+        super(functionToBeSurrogate, samplingTask, sampleSpace, numberOfSamples, trainingPortion, properties);
     }
 
     @Override
