@@ -1,12 +1,9 @@
 package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 
-import it.unicam.quasylab.sibilla.core.optimization.sampling.LatinHyperCubeSamplingTask;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.SamplingTask;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 import smile.data.formula.Formula;
 
-import javax.swing.*;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.ToDoubleFunction;
@@ -15,13 +12,19 @@ import static it.unicam.quasylab.sibilla.core.optimization.Constants.DEFAULT_COL
 
 public abstract class AbstractSurrogateModel implements SurrogateModel{
 
-    protected final TrainingSet trainingSet;
+    //protected final DataSet dataSet;
+    protected final DataSet trainingSet;
+    protected final DataSet testSet;
+
     protected Properties properties;
     protected Formula DEFAULT_FORMULA = Formula.lhs(DEFAULT_COLUMN_RESULT_NAME);
     protected double fitTime;
 
-    public AbstractSurrogateModel(TrainingSet trainingSet, Properties properties){
-        this.trainingSet = trainingSet;
+    public AbstractSurrogateModel(DataSet dataSet,double trainingPortion, Properties properties){
+        //this.dataSet = dataSet;
+        DataSet[] splitDataset = dataSet.trainTestSplit(trainingPortion);
+        this.trainingSet = splitDataset[0];
+        this.testSet = splitDataset[1];
         this.setProperties(properties);
 
     }
@@ -30,16 +33,25 @@ public abstract class AbstractSurrogateModel implements SurrogateModel{
                                   SamplingTask samplingTask,
                                   HyperRectangle sampleSpace,
                                   int numberOfSamples,
+                                  double trainingPortion,
                                   Properties properties){
-        this.trainingSet = new TrainingSet(sampleSpace, samplingTask, numberOfSamples,functionToBeSurrogate);
+        DataSet dataSet = new DataSet(sampleSpace, samplingTask, numberOfSamples,functionToBeSurrogate);
+        DataSet[] splitDataset = dataSet.trainTestSplit(trainingPortion);
+        this.trainingSet = splitDataset[0];
+        this.testSet = splitDataset[1];
         this.setProperties(properties);
     }
 
 
     @Override
-    public ToDoubleFunction<Map<String,Double>> getSurrogateFunction(){
-        this.fit();
-        return input -> this.predict(trainingSet.columnNames().stream().limit(trainingSet.columnNames().size()-1).map(input::get).toArray(Double[]::new));
+    public ToDoubleFunction<Map<String,Double>> getSurrogateFunction(boolean performTraining){
+        if(performTraining)
+            this.fit();
+        return input -> this.predict(trainingSet.columnNames().stream()
+                .limit(trainingSet.columnNames().size()-1)
+                .map(input::get)
+                .toArray(Double[]::new)
+        );
     }
 
     /**
@@ -56,13 +68,13 @@ public abstract class AbstractSurrogateModel implements SurrogateModel{
     abstract void fit();
 
     @Override
-    public SurrogateMetrics getInSampleMetrics() {
-        return new SurrogateMetrics(this,this.trainingSet,this.fitTime);
+    public SurrogateMetrics getTrainingSetMetrics() {
+        return new SurrogateMetrics(this,this.trainingSet,trainingSet.rowCount(),testSet.rowCount(),this.fitTime);
     }
 
     @Override
-    public SurrogateMetrics getOutOfSampleMetrics(TrainingSet outOfSampleTrainingSet) {
-        return new SurrogateMetrics(this,outOfSampleTrainingSet,this.fitTime);
+    public SurrogateMetrics getTestSetMetrics() {
+        return new SurrogateMetrics(this, this.testSet,trainingSet.rowCount(),testSet.rowCount(),this.fitTime);
     }
 
     @Override
@@ -70,7 +82,6 @@ public abstract class AbstractSurrogateModel implements SurrogateModel{
         if(this.properties.containsKey(key))
             this.properties.setProperty(key, value);
     }
-
 
 
 

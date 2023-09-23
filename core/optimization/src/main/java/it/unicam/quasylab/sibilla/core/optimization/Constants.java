@@ -1,11 +1,5 @@
 package it.unicam.quasylab.sibilla.core.optimization;
 
-import tech.tablesaw.api.Table;
-
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
-
 /**
  * A class to handle constants shared by multiple classes
  *
@@ -14,7 +8,7 @@ import java.util.function.ToDoubleFunction;
 public final class Constants {
 
     public static final String DEFAULT_INTERVAL_ID = "V";
-    public static final String DEFAULT_TRAINING_SET_NAME = "Training Set";
+    public static final String DEFAULT_DATASET_NAME = "Training Set";
     public static final String DEFAULT_COLUMN_RESULT_NAME = "result";
 
     public static final String EXCEPT_INTERVALS_WITH_SAME_ID = "there cannot be more intervals with the same identifier";

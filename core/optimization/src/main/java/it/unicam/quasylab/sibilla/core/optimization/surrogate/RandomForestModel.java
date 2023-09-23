@@ -2,16 +2,13 @@ package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 
 import it.unicam.quasylab.sibilla.core.optimization.sampling.SamplingTask;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
-import smile.data.DataFrame;
 import smile.data.Tuple;
-import smile.data.formula.Formula;
 import smile.regression.RandomForest;
 
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.ToDoubleFunction;
 
-import static it.unicam.quasylab.sibilla.core.optimization.Constants.DEFAULT_COLUMN_RESULT_NAME;
 /**
  * class representing a surrogate model, specifically the model is the random forest regression
  *
@@ -28,12 +25,12 @@ public class RandomForestModel extends AbstractSurrogateModel{
     private int nodeSize;
     private double subSample;
 
-    public RandomForestModel(TrainingSet trainingSet, Properties properties) {
-        super(trainingSet, properties);
+    public RandomForestModel(DataSet dataSet,double trainingPortion, Properties properties) {
+        super(dataSet, trainingPortion, properties);
     }
 
-    public RandomForestModel(ToDoubleFunction<Map<String, Double>> functionToBeSurrogate, SamplingTask samplingTask, HyperRectangle sampleSpace, int numberOfSamples, Properties properties) {
-        super(functionToBeSurrogate, samplingTask, sampleSpace, numberOfSamples, properties);
+    public RandomForestModel(ToDoubleFunction<Map<String, Double>> functionToBeSurrogate, SamplingTask samplingTask, HyperRectangle sampleSpace, int numberOfSamples,double trainingPortion, Properties properties) {
+        super(functionToBeSurrogate, samplingTask, sampleSpace, numberOfSamples, trainingPortion, properties);
     }
 
     @Override

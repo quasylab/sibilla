@@ -28,7 +28,7 @@ class RandomForestModelTest {
                     return 7 * ( x * y )/(Math.pow(Math.E,(Math.pow(x,2)+Math.pow(y,2))));
                 }
         );
-        TrainingSet trainingSet = new TrainingSet(
+        DataSet dataSet = new DataSet(
                 new HyperRectangle(
                         new ContinuousInterval("x",-2.0,2.0),
                         new ContinuousInterval("y",-2.0,2.0)
@@ -37,10 +37,10 @@ class RandomForestModelTest {
                 1000,
                 functionToLearn)
                 ;
-        RandomForestModel rfr = new RandomForestModel(trainingSet, new Properties());
+        RandomForestModel rfr = new RandomForestModel(dataSet,0.85, new Properties());
         rfr.fit();
         System.out.println("metrics 1 ");
-        System.out.println(rfr.getInSampleMetrics().toString());
+        System.out.println(rfr.getTrainingSetMetrics().toString());
 //        System.out.println(rfr.getInSampleMetrics().getTruthVsPredictedTable());
 //        Properties newProp = new Properties();
 //        newProp.put("rf.trees","10000");
@@ -51,8 +51,41 @@ class RandomForestModelTest {
 //        System.out.println("metrics 2 ");
 //        System.out.println(rfr.getInSampleMetrics().toString());
 //        System.out.println(rfr.getInSampleMetrics().getTruthVsPredictedTable());
-        String csvString = getCsvFromTable(rfr.getInSampleMetrics().getTruthVsPredictedTable());
+        String csvString = getCsvFromTable(rfr.getTrainingSetMetrics().getTruthVsPredictedTable());
         System.out.println(csvString);
+    }
+
+    @Test
+    void testOutOfSample(){
+        ToDoubleFunction<Map<String,Double>> functionToLearn = (
+                stringDoubleMap -> {
+                    double x = stringDoubleMap.get("x");
+                    double y = stringDoubleMap.get("y");
+                    return 7 * ( x * y )/(Math.pow(Math.E,(Math.pow(x,2)+Math.pow(y,2))));
+                }
+        );
+
+        DataSet dataSet = new DataSet(
+                new HyperRectangle(
+                        new ContinuousInterval("x",-10.0,10.0),
+                        new ContinuousInterval("y",-10.0,10.0)
+                ),
+                new LatinHyperCubeSamplingTask(),
+                100,
+                functionToLearn
+        );
+
+
+
+        RandomForestModel rfr = new RandomForestModel(dataSet, 0.85,new Properties());
+        rfr.fit();
+
+        System.out.println("metrics  in Sample ");
+        System.out.println(rfr.getTrainingSetMetrics().toString());
+
+        System.out.println("metrics out Sample ");
+        System.out.println(rfr.getTestSetMetrics().toString());
+
     }
 
 //    @Test

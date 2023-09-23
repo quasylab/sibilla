@@ -1,6 +1,5 @@
 package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.ToDoubleFunction;
@@ -22,9 +21,7 @@ public interface SurrogateModel {
      *
      * @return the function trained by using the training set
      */
-    ToDoubleFunction<Map<String,Double>> getSurrogateFunction();
-
-
+    ToDoubleFunction<Map<String,Double>> getSurrogateFunction(boolean performTraining);
 
     /**
      * Return an RegressionMetrics object that contains the surrogate metrics.
@@ -61,8 +58,8 @@ public interface SurrogateModel {
      * @see <a href="https://medium.com/analytics-vidhya/mae-mse-rmse-coefficient-of-determination-adjusted-r-squared-which-metric-is-better-cd0326a5697e">Useful website</a>
      * @return   the surrogate metrics
      */
-    SurrogateMetrics getInSampleMetrics();
-    SurrogateMetrics getOutOfSampleMetrics(TrainingSet outOfSampleTrainingSet);
+    SurrogateMetrics getTrainingSetMetrics();
+    SurrogateMetrics getTestSetMetrics();
     void setProperties( Properties properties);
     void setProperty(String key,String value);
 

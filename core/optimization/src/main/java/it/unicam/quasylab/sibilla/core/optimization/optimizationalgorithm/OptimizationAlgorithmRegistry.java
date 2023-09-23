@@ -9,7 +9,7 @@ import java.util.Map;
 public class OptimizationAlgorithmRegistry {
 
     private static final String PSO_ALGORITHM_ID = "pso";
-    private static final String LTMADS_ALGORITHM_ID = "mads";
+    private static final String LTMADS_ALGORITHM_ID = "ltmads";
     private static final OptimizationAlgorithm PSO_ALGORITHM = new PSOAlgorithm();
     private static final OptimizationAlgorithm LTMADS_ALGORITHM = new LTMADSAlgorithm();
     private final Map<String, OptimizationAlgorithm> registry;

@@ -14,13 +14,16 @@ import java.util.function.ToDoubleFunction;
 
 public class SurrogateMetrics {
 
+    int trainingSize;
+    int testSize;
+
     double mse;
     double rmse;
     double rss;
     double mad;
     double rSquared;
     double fitTime;
-    TrainingSet trainingSet;
+    DataSet dataSet;
     Table truthVsPredictedTable;
 
     double[] truth;
@@ -28,15 +31,17 @@ public class SurrogateMetrics {
 
     SurrogateModel surrogate;
 
-    public SurrogateMetrics(SurrogateModel surrogate, TrainingSet trainingSet, double fitTime){
+    public SurrogateMetrics(SurrogateModel surrogate, DataSet dataSet,int trainingSize, int testSize, double fitTime){
 
-        this.trainingSet = trainingSet;
-        this.truth = trainingSet.getResultColumn().asDoubleArray();
-        this.predicted = getPredictedValues(surrogate,trainingSet);
+        this.dataSet = dataSet;
+        this.trainingSize = trainingSize;
+        this.testSize = testSize;
+        this.truth = dataSet.getResultColumn().asDoubleArray();
+        this.predicted = getPredictedValues(surrogate, dataSet);
         this.fitTime = fitTime;
         this.surrogate = surrogate;
 
-        truthVsPredictedTable = Table.create(trainingSet.columns());
+        truthVsPredictedTable = Table.create(dataSet.columns());
         truthVsPredictedTable.addColumns(DoubleColumn.create("predicted", predicted));
 
         this.mse = MSE.of(this.truth,this.predicted);
@@ -49,16 +54,25 @@ public class SurrogateMetrics {
 
 
 
-    private double[] getPredictedValues(SurrogateModel surrogate, TrainingSet trainingSet) {
+    private double[] getPredictedValues(SurrogateModel surrogate, DataSet dataSet) {
         double[] predicted = new double[truth.length];
-        ToDoubleFunction<Map<String,Double>> surrogateFunction = surrogate.getSurrogateFunction();
-        List<Map<String,Double>> listOfRowsAsMaps = trainingSet.toMapList();
+        ToDoubleFunction<Map<String,Double>> surrogateFunction = surrogate.getSurrogateFunction(false);
+        List<Map<String,Double>> listOfRowsAsMaps = dataSet.toMapList();
         for (int i = 0; i < truth.length; i++) {
             Map<String,Double> row = listOfRowsAsMaps.get(i);
             predicted[i] = surrogateFunction.applyAsDouble(row);
         }
         return predicted;
     }
+
+    public int getTrainingSize() {
+        return trainingSize;
+    }
+
+    public int getTestSize() {
+        return testSize;
+    }
+
 
     public double getMse() {
         return mse;
@@ -84,8 +98,8 @@ public class SurrogateMetrics {
         return fitTime;
     }
 
-    public TrainingSet getTrainingSet() {
-        return trainingSet;
+    public DataSet getDataSet() {
+        return dataSet;
     }
 
     public String getFitTimeInSeconds(){
@@ -105,6 +119,6 @@ public class SurrogateMetrics {
                 "R^2  : " + getrSquared() +"\n"+
                 "\n"+
                 "Fit time : "+ getFitTimeInSeconds()+"\n"+
-                "Training set size : "+ getTrainingSet().rowCount()+"\n";
+                "Training set size : "+ getTrainingSize() + " | Test set size : "+ getTestSize()+"\n";
     }
 }

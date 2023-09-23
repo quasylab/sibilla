@@ -10,7 +10,6 @@ import tech.tablesaw.api.Row;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.DEFAULT_COLUMN_RESULT_NAME;
@@ -21,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author      Lorenzo Matteucci
  */
 @SuppressWarnings({"UnusedDeclaration"})
-class TrainingSetTest {
+class DataSetTest {
 
 
     @Test
@@ -34,7 +33,7 @@ class TrainingSetTest {
         ToDoubleFunction<Map<String,Double>> function = (
                 stringDoubleMap -> stringDoubleMap.get("x") + stringDoubleMap.get("y")
         );
-        TrainingSet ts = new TrainingSet(
+        DataSet ts = new DataSet(
                 hr,
                 SamplingStrategyRegistry.getInstance().get("lhs").getSamplingTask(),
                 1000,
@@ -52,7 +51,7 @@ class TrainingSetTest {
         ToDoubleFunction<Map<String,Double>> function = (
                 stringDoubleMap -> stringDoubleMap.get("x") + stringDoubleMap.get("y")
         );
-        TrainingSet ts = new TrainingSet(hr,new RandomSamplingTask(),50,function);
+        DataSet ts = new DataSet(hr,new RandomSamplingTask(),50,function);
         boolean sumCondition = true;
         for (int i = 0; i < ts.rowCount(); i++) {
             Row row = ts.row(i);
@@ -71,7 +70,7 @@ class TrainingSetTest {
         ToDoubleFunction<Map<String,Double>> function = (
                 map -> map.get("x") + map.get("y")
         );
-        TrainingSet ts = new TrainingSet(hr,new RandomSamplingTask(),50,function);
+        DataSet ts = new DataSet(hr,new RandomSamplingTask(),50,function);
         assertTrue(ts.getResultSD() != 0);
         assertTrue(ts.getResultMean() >= 5.0 && ts.getResultMean() <= 15.0);
     }
@@ -82,7 +81,7 @@ class TrainingSetTest {
                 new ContinuousInterval("x",0.0,1.0)
         );
         ToDoubleFunction<Map<String,Double>> function = ( map -> map.get("x") > 0.8 ? 0.0 : 1.0 );
-        TrainingSet ts = new TrainingSet(hr,new RandomSamplingTask(),50,function);
+        DataSet ts = new DataSet(hr,new RandomSamplingTask(),50,function);
         assertEquals(1.0, ts.getResultMode());
     }
 
@@ -92,7 +91,7 @@ class TrainingSetTest {
                 new ContinuousInterval("x",0.0,1.0)
         );
         ToDoubleFunction<Map<String,Double>> function = ( map -> 1.0 );
-        TrainingSet ts = new TrainingSet(hr,new RandomSamplingTask(),50,function);
+        DataSet ts = new DataSet(hr,new RandomSamplingTask(),50,function);
         assertEquals(0.0, ts.getResultSD());
         assertEquals(1.0, ts.getResultMode());
     }
@@ -111,8 +110,8 @@ class TrainingSetTest {
         ToDoubleFunction<Map<String,Double>>  function = (
                 map -> map.get("x") + map.get("y")
         );
-        TrainingSet ts =  new TrainingSet(searchSpace1,new RandomSamplingTask(),50,function);
-        TrainingSet newTS = ts.filterBy(searchSpace2);
+        DataSet ts =  new DataSet(searchSpace1,new RandomSamplingTask(),50,function);
+        DataSet newTS = ts.filterBy(searchSpace2);
         assertTrue(ts.rowCount() > newTS.rowCount());
     }
 
@@ -127,9 +126,9 @@ class TrainingSetTest {
                 map -> map.get("x") + map.get("y")
         );
 
-        TrainingSet ts1 = new TrainingSet(searchSpace,new RandomSamplingTask(),2,function);
-        TrainingSet ts2 = new TrainingSet(searchSpace,new RandomSamplingTask(),2,function);
-        TrainingSet ts3 = ts1.appendTrainingSet(ts2);
+        DataSet ts1 = new DataSet(searchSpace,new RandomSamplingTask(),2,function);
+        DataSet ts2 = new DataSet(searchSpace,new RandomSamplingTask(),2,function);
+        DataSet ts3 = ts1.appendTrainingSet(ts2);
 
         //System.out.println("ts1 - "+ts1.rowCount());
         //System.out.println("ts2 - "+ts2.rowCount());
@@ -154,7 +153,7 @@ class TrainingSetTest {
                 map -> map.get("x") + map.get("y")
         );
 
-        TrainingSet ts = new TrainingSet(searchSpace,new RandomSamplingTask(),10,function);
+        DataSet ts = new DataSet(searchSpace,new RandomSamplingTask(),10,function);
 
         System.out.println(ts);
 

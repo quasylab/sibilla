@@ -16,5 +16,5 @@ public interface TrainingSetEvalCriteria {
      * @return      <code>true</code> If the training set is
      * evaluated positively
      */
-    boolean eval(TrainingSet ts);
+    boolean eval(DataSet ts);
 }

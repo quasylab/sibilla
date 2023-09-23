@@ -3,21 +3,16 @@ package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.SamplingTask;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
 import smile.base.cart.Loss;
-import smile.data.DataFrame;
 import smile.data.Tuple;
-import smile.data.formula.Formula;
 import smile.regression.GradientTreeBoost;
 
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.ToDoubleFunction;
 
-import static it.unicam.quasylab.sibilla.core.optimization.Constants.DEFAULT_COLUMN_RESULT_NAME;
-
 public class GradientTreeBoostModel extends AbstractSurrogateModel{
 
     private GradientTreeBoost gradientTreeBoost;
-
 
     private int ntrees;
     private Loss loss;
@@ -27,12 +22,12 @@ public class GradientTreeBoostModel extends AbstractSurrogateModel{
     private double shrinkage;
     private double subsample;
 
-    public GradientTreeBoostModel(TrainingSet trainingSet, Properties properties) {
-        super(trainingSet, properties);
+    public GradientTreeBoostModel(DataSet dataSet,double trainingPortion, Properties properties) {
+        super(dataSet, trainingPortion, properties);
     }
 
-    public GradientTreeBoostModel(ToDoubleFunction<Map<String, Double>> functionToBeSurrogate, SamplingTask samplingTask, HyperRectangle sampleSpace, int numberOfSamples, Properties properties) {
-        super(functionToBeSurrogate, samplingTask, sampleSpace, numberOfSamples, properties);
+    public GradientTreeBoostModel(ToDoubleFunction<Map<String, Double>> functionToBeSurrogate, SamplingTask samplingTask, HyperRectangle sampleSpace, int numberOfSamples,double trainingPortion, Properties properties) {
+        super(functionToBeSurrogate, samplingTask, sampleSpace, numberOfSamples, trainingPortion, properties);
     }
 
     @Override

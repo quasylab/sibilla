@@ -385,6 +385,239 @@ class SibillaRuntimeTest {
             "predicate allRecovered = (#S+#I==0);";
 
 
+
+    public String TEST_TSP_BATTERY = """
+            param meetRate = 1;
+                                  
+            param scale = 10;
+                                
+            const b_size = 10;  /* battery max capacity         */
+            const f_size = 2;   /* active flag size on and off  */
+                        
+            const startRED = 10;
+            const startBLUE = 10;
+                        
+            param recharge_rate = 1; 
+            param reactivation_rate = 1;
+            param deactivation_rate = 1;
+                                  
+            species BLUE of [0,b_size]*[0,f_size];
+            species RED of [0,b_size]*[0,f_size];
+                        
+            rule BLUE_persuades_RED for b in [0,b_size] and f in [0,f_size] when ((f==1) && (b>=1)) {
+                BLUE[b,f] | RED[b,f] -[ #BLUE[b,f] * meetRate * %RED[b,f] ]-> BLUE[b-1,f]|BLUE[b-1,f]
+            }
+                                            
+            rule RED_persuades_BLUE for b in [0,b_size] and f in [0,f_size] when ((f==1) && (b>=1)){
+                BLUE[b,f]|RED[b,f] -[#RED[b,f] * meetRate * %BLUE[b,f] ]-> RED[b-1,f]|RED[b-1,f]
+            }
+                                          
+            rule BLUE_deactivation for b in [0,b_size] and f in [0,f_size] when ((f==1) && (b<b_size)){
+                BLUE[b,f] -[ deactivation_rate ]-> BLUE[b,0]
+            }
+                                             
+            rule RED_deactivation for b in [0,b_size] and f in [0,f_size] when ((f==1) && (b<b_size)){
+                RED[b,f] -[ deactivation_rate ]-> RED[b,0]
+            }
+                                             
+            rule BLUE_recharging for b in [0,b_size] and f in [0,f_size] when ((f==0) && (b<b_size-1)){
+                BLUE[b,f] -[ recharge_rate ]-> BLUE[b+1,f]
+            }
+                                           
+            rule RED_recharging for b in [0,b_size] and f in [0,f_size] when ((f==0) && (b<b_size-1)) {
+                RED[b,f] -[ recharge_rate ]-> RED[b+1,f]
+            }
+                                           
+            rule BLUE_reactivation for b in [0,b_size] and f in [0,f_size] when ((f==0) && (b>0)){
+                BLUE[b,f] -[ reactivation_rate ]-> BLUE[b,1]
+            }
+                                             
+            rule RED_reactivation for b in [0,b_size] and f in [0,f_size] when ((f==0) && (b>0)){
+                RED[b,f] -[ reactivation_rate ]-> RED[b,1]
+            }
+                        
+                        
+            system fair = RED[9,1]<startRED>|BLUE[9,1]<startBLUE>;                      
+                        
+            system balanced = RED[b_size-1,1]<1*scale>|BLUE[b_size-1,1]<1*scale>;
+            system favor_of_RED = RED[b_size-1,1]<2*scale>|BLUE[b_size-1,1]<1*scale>;
+            system favor_of_BLUE = RED[b_size-1,1]<1*scale>|BLUE[b_size-1,1]<2*scale>;
+                        
+            predicate RED_WIN = ( %RED[0,0] + %RED[1,0] + %RED[2,0] + %RED[3,0] + %RED[4,0] + %RED[5,0] + %RED[6,0] + %RED[7,0] + %RED[8,0] + %RED[9,0] + %RED[0,1] + %RED[1,1] +  %RED[2,1] + %RED[3,1] + %RED[4,1] + %RED[5,1] + %RED[6,1] + %RED[7,1] + %RED[8,1] + %RED[9,1] ) > 0.99 ;
+            predicate BLUE_WIN = ( %BLUE[0,0] + %BLUE[1,0] + %BLUE[2,0] + %BLUE[3,0] + %BLUE[4,0] + %BLUE[5,0] + %BLUE[6,0] + %BLUE[7,0] + %BLUE[8,0] + %BLUE[9,0] + %BLUE[0,1] + %BLUE[1,1] +  %BLUE[2,1] + %BLUE[3,1] + %BLUE[4,1] + %BLUE[5,1] + %BLUE[6,1] + %BLUE[7,1] + %BLUE[8,1] + %BLUE[9,1]) > 0.99 ;         
+            predicate consensus = ((( %RED[0,0] + %RED[1,0] + %RED[2,0] + %RED[3,0] + %RED[4,0] + %RED[5,0] + %RED[6,0] + %RED[7,0] + %RED[8,0] + %RED[9,0] + %RED[0,1] + %RED[1,1] +  %RED[2,1] + %RED[3,1] + %RED[4,1] + %RED[5,1] + %RED[6,1] + %RED[7,1] + %RED[8,1] + %RED[9,1] ) > 0.99 ) || (( %BLUE[0,0] + %BLUE[1,0] + %BLUE[2,0] + %BLUE[3,0] + %BLUE[4,0] + %BLUE[5,0] + %BLUE[6,0] + %BLUE[7,0] + %BLUE[8,0] + %BLUE[9,0] + %BLUE[0,1] + %BLUE[1,1] +  %BLUE[2,1] + %BLUE[3,1] + %BLUE[4,1] + %BLUE[5,1] + %BLUE[6,1] + %BLUE[7,1] + %BLUE[8,1] + %BLUE[9,1]) > 0.99)); /* predicate consensus = ( (RED_WIN) || (BLUE_WIN) ); */
+            predicate consensus_and_charged = ((( %RED[0,0] + %RED[1,0] + %RED[2,0] + %RED[3,0] + %RED[4,0] + %RED[5,0] + %RED[6,0] + %RED[7,0] + %RED[8,0] + %RED[9,0] + %RED[0,1] + %RED[1,1] +  %RED[2,1] + %RED[3,1] + %RED[4,1] + %RED[5,1] + %RED[6,1] + %RED[7,1] + %RED[8,1] + %RED[9,1] ) > 0.99 ) || (( %BLUE[0,0] + %BLUE[1,0] + %BLUE[2,0] + %BLUE[3,0] + %BLUE[4,0] + %BLUE[5,0] + %BLUE[6,0] + %BLUE[7,0] + %BLUE[8,0] + %BLUE[9,0] + %BLUE[0,1] + %BLUE[1,1] +  %BLUE[2,1] + %BLUE[3,1] + %BLUE[4,1] + %BLUE[5,1] + %BLUE[6,1] + %BLUE[7,1] + %BLUE[8,1] + %BLUE[9,1]) > 0.99)) && (( %BLUE[7,1] + %BLUE[8,1] + %BLUE[9,1] + %BLUE[7,0] + %BLUE[8,0] + %BLUE[9,0] + %RED[7,1] + %RED[8,1] + %RED[9,1] + %RED[7,0] + %RED[8,0] + %RED[9,0] )>0.7);
+            """;
+
+    public String TEST_THE_THING = """
+            param infection_rate = 1.0;
+            param paranoia = 1.0;
+            param meet_rate = 1.0;
+            param moral_decay_rate = 0.25;
+            param suicide_rate = 0.05;
+                        
+            const max_sanity = 3;
+                        
+            species human of [0,max_sanity];
+            species infected_human;
+            species deceased;
+                        
+            rule loss_of_sanity for i in [0,max_sanity] when i>0 {
+                human[i] -[ moral_decay_rate ]-> human[i-1]
+            }
+                        
+            rule moral_support for i in [0,max_sanity] and j in [0,max_sanity]  when ((i<max_sanity-1)&&(j<max_sanity-1)) {
+                human[i]|human[j] -[ (#human[0] + #human[1] + #human[2]) * meet_rate ]-> human[i+1]|human[j+1]
+            }
+                        
+            rule human_get_infected for i in [0,max_sanity-1] {
+                human[i]|infected_human -[ (#human[0] + #human[1] + #human[2]) * %infected_human * meet_rate ]-> infected_human|infected_human
+            }
+                        
+            rule killing_human for i in [0,max_sanity-1] {
+                human[i]|human[i] -[ (#human[0] + #human[1] + #human[2]) * meet_rate * paranoia ]-> human[i]|deceased
+            }
+                        
+            rule killing_infected_human for i in [0,max_sanity-1] {
+                human[i]|infected_human -[ (#human[0] + #human[1] + #human[2]) * %infected_human * meet_rate * paranoia  ]-> human[i]|deceased
+            }
+                        
+            rule committing_suicide for i in [0,max_sanity] when i==0 {
+                human[i] -[ suicide_rate ]-> deceased
+            }
+                        
+            system initial = human[max_sanity-1]<10>|infected_human<3>;
+                        
+            predicate alien_eradicated = (%infected_human == 0.0);
+            predicate most_humans_survived = ((%human[0] + %human[1] + %human[2])>=0.75);
+            predicate half_humans_survived_and_alien_eradicated = ((%human[0] + %human[1] + %human[2])>=0.75) && (%infected_human == 0.0);
+            """;
+
+
+
+    public String TEST_FUNGI = """
+            /* VARIABLES  */
+                        
+            param t = 19; /* current temperature */
+            param h = 0.5;  /*  current humidity  */
+                        
+            /* CONSTANTS */
+                        
+            const e  = 2.7182818284590452353602874713527; /* euler number */
+                        
+            /* A */
+                        
+            const ideal_t_A = 15;
+            const ideal_h_A = 0.7;
+            const var_t_A = 1.6;
+            const var_h_A = 0.8;
+                        
+            /* B */
+                        
+            const ideal_t_B = 22;
+            const ideal_h_B = 0.4;
+            const var_t_B = 1.0;
+            const var_h_B = 0.7;
+                        
+            /* Common */
+                        
+            const interaction_rate = 0.005;
+                        
+            /* SPECIES */
+                        
+            /* species VOID;  To represent nothingness */
+            species A;  /* Fungi type A */
+            species B;  /* Fungi type B */
+                        
+            /* Reproduction rules */
+                        
+            rule reproduction_of_A {
+                A -[  %A * (e^(-1*(( ideal_t_A - t )/(var_t_A))^2)  *  e^(-1*(( ideal_h_A - h )/(var_h_A))^2))  ]-> A|A
+            }
+                        
+            rule reproduction_B {
+                B -[  %B * (e^(-1*(( ideal_t_B - t )/(var_t_B))^2)  *  e^(-1*(( ideal_h_B - h )/(var_h_B))^2)) ]-> B|B
+            }
+                        
+                        
+            /* Killing rules */
+                        
+            rule A_kill_B {
+                A|B -[ %A * interaction_rate * %B ]-> A
+            }
+                        
+            rule B_kill_A {
+                A|B -[ %B * interaction_rate * %A ]-> B
+            }
+                        
+            /* SYSTEM */
+                        
+            system fair = A<10>|B<10>;
+                        
+            /* PREDICATE */
+                        
+            predicate balanced = (%A >= 0.45) && (%B >= 0.45) && ((#A+#B)>=15);
+                        
+            predicate majorityA = (%A >= 0.65) && (%B >= 0.25) && (#B>0);
+            predicate majorityB = (%B >= 0.65) && (%A >= 0.25);
+                        
+            predicate onlyA = (%A == 1.0);
+            predicate onlyB = (%B == 1.0);
+            """;
+
+    @Test
+    public void testFungi() throws CommandExecutionException, IOException {
+        SibillaRuntime sr = new SibillaRuntime();
+        sr.load(TEST_FUNGI);
+        sr.setConfiguration("fair");
+        sr.addAllMeasures();
+        sr.setReplica(5);
+        sr.setDeadline(100);
+        sr.setDt(1);
+        sr.setSamplingStrategy("ffs");
+        sr.setTrainingSetSize(40);
+        sr.addSpaceInterval("t",-40,40);
+        sr.addSpaceInterval("h",-5,5);
+        sr.setProbReachAsObjectiveFunction(null,"majorityA",0.05,0.05);
+        sr.generateTrainingSet();
+        sr.saveTable("fungiBalanced","/Users/lorenzomatteucci/phd",null,null);
+    }
+    @Test
+    public void testTheThing() throws CommandExecutionException, IOException {
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.load(TEST_THE_THING);
+        sr.setConfiguration("initial");
+        sr.addAllMeasures();
+        sr.setReplica(5);
+        sr.setDeadline(100);
+        sr.setDt(1);
+        sr.setSamplingStrategy("ffs");
+        sr.setTrainingSetSize(50);
+        sr.addSpaceInterval("paranoia",0.05,2);
+        sr.addSpaceInterval("meet_rate",0.05,2);
+        sr.setProbReachAsObjectiveFunction(null,"half_humans_survived_and_alien_eradicated",0.05,0.05);
+        sr.generateTrainingSet();
+        sr.saveTable("alien","/Users/lorenzomatteucci/phd",null,null);
+    }
+
+    @Test
+    public void testNewTSPBattery() throws CommandExecutionException, IOException {
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.load(TEST_TSP_BATTERY);
+        sr.setConfiguration("fair");
+        sr.addAllMeasures();
+        sr.setReplica(5);
+        sr.setDeadline(100);
+        sr.setDt(1);
+        sr.setSamplingStrategy("ffs");
+        sr.setTrainingSetSize(10);
+        sr.addSpaceInterval("recharge_rate",0.05,2);
+        sr.addSpaceInterval("reactivation_rate",0.05,2);
+        sr.addSpaceInterval("deactivation_rate",0.05,2);
+        sr.setProbReachAsObjectiveFunction(null,"consensus_and_charged",0.05,0.05);
+        sr.generateTrainingSet();
+        sr.saveTable("TSP_BATTERY","/Users/lorenzomatteucci/phd/tsp_battery",null,null);
+    }
     @Test
     public void testNewSIR() throws CommandExecutionException, IOException {
         SibillaRuntime sr = getRuntimeWithModule();
@@ -395,7 +628,7 @@ class SibillaRuntimeTest {
         sr.setDeadline(100);
         sr.setDt(1);
         sr.setSamplingStrategy("ffs");
-        sr.setTrainingSetSize(20);
+        sr.setTrainingSetSize(50);
         sr.addSpaceInterval("infectionRate",0.005,1.5);
         sr.addSpaceInterval("recoverRate",0.005,1.5);
         sr.setProbReachAsObjectiveFunction(null,"allRecovered",0.05,0.05);
@@ -403,8 +636,26 @@ class SibillaRuntimeTest {
         //sr.saveTable("SIR_Sample","/Users/lorenzomatteucci/phd",null,null);
     }
 
+//    @Test
+//    public void testNewTSP() throws CommandExecutionException, IOException {
+//        SibillaRuntime sr = getRuntimeWithModule();
+//        sr.load(TEST_TSP_OPT);
+//        sr.setConfiguration("start");
+//        sr.addAllMeasures();
+//        sr.setReplica(5);
+//        sr.setDeadline(50);
+//        sr.setDt(1);
+//        sr.setSamplingStrategy("ffs");
+//        sr.setTrainingSetSize(10);
+//        sr.addSpaceInterval("meetRate",0.2,2);
+//        sr.addSpaceInterval("pError",0.005,0.5);
+//        sr.setProbReachAsObjectiveFunction(null,"win0",0.05,0.05);
+//        sr.generateTrainingSet();
+//        sr.saveTable("TSP_Sample","/Users/lorenzomatteucci/phd",null,null);
+//    }
+
     @Test
-    public void testNewTSP() throws CommandExecutionException, IOException {
+    public void testNewTSP_Optimization() throws CommandExecutionException, IOException {
         SibillaRuntime sr = getRuntimeWithModule();
         sr.load(TEST_TSP_OPT);
         sr.setConfiguration("start");
@@ -414,11 +665,55 @@ class SibillaRuntimeTest {
         sr.setDt(1);
         sr.setSamplingStrategy("ffs");
         sr.setTrainingSetSize(20);
-        sr.addSpaceInterval("meetRate",0.005,1.5);
-        sr.addSpaceInterval("pError",0.005,1.5);
+        sr.usingSurrogate(true);
+        sr.addSpaceInterval("meetRate",0.2,2);
+        sr.addSpaceInterval("pError",0.005,0.5);
         sr.setProbReachAsObjectiveFunction(null,"win0",0.05,0.05);
-        sr.generateTrainingSet();
-        //sr.saveTable("TSP_Sample","/Users/lorenzomatteucci/phd",null,null);
+        sr.setOptimizationAsMinimization(false);
+        sr.performOptimization();
+        System.out.println(sr.getOptimizationInfo());
+    }
+
+
+
+//    @Test
+//    public void testNewTSP_data_set() throws CommandExecutionException, IOException {
+//        SibillaRuntime sr = getRuntimeWithModule();
+//        sr.load(TEST_TSP_OPT);
+//        sr.setConfiguration("start");
+//        sr.addAllMeasures();
+//        sr.setReplica(5);
+//        sr.setDeadline(50);
+//        sr.setDt(1);
+//        sr.setSamplingStrategy("ffs");
+//        sr.setTrainingSetSize(20);
+//        sr.usingSurrogate(true);
+//        sr.addSpaceInterval("meetRate",0.2,2);
+//        sr.addSpaceInterval("maxConviction",2,11);
+//        sr.setProbReachAsObjectiveFunction(null,"consensus",0.05,0.05);
+//        sr.generateTrainingSet();
+//        sr.saveTable("TSP_Sample_consensus","/Users/lorenzomatteucci/phd",null,null);
+//
+//    }
+
+
+    @Test
+    public void testNewTSP_Optimization_LTMADS() throws CommandExecutionException, IOException {
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.load(TEST_TSP_OPT);
+        sr.setConfiguration("start");
+        sr.addAllMeasures();
+        sr.setReplica(5);
+        sr.setDeadline(50);
+        sr.setDt(1);
+        sr.usingSurrogate(false);
+        sr.setOptimizationStrategy("ltmads");
+        sr.addSpaceInterval("meetRate",0.2,2);
+        sr.addSpaceInterval("pError",0.005,0.5);
+        sr.setProbReachAsObjectiveFunction(null,"win0",0.05,0.05);
+        sr.setOptimizationAsMinimization(false);
+        sr.performOptimization();
+        System.out.println(sr.getOptimizationInfo());
     }
 
     @Test

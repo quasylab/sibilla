@@ -220,11 +220,11 @@ class SibillaRuntime:
     def get_predicates(self):
         return self.__runtime()
 
-    def evaluate_frist_passage_time(self, predicate_name: str,monitor: SimulationMonitor = None):
+    def evaluate_first_passage_time(self, predicate_name: str,monitor: SimulationMonitor = None):
 
         def ftp_runtime( predicate_name: str,monitor: SimulationMonitor = None):
             fpt_result_runtime = self.__runtime.firstPassageTime(monitor,predicate_name)
-            fpt_result = SibillaFristPassageTimeResult(fpt_result_runtime)
+            fpt_result = SibillaFirstPassageTimeResult(fpt_result_runtime)
             return fpt_result
 
         profiler = Profiler(running_message="Evaluating fpt",done_message="The ftp evaluation has been successfully completed")
@@ -268,8 +268,8 @@ class SibillaRuntime:
         cls.load_from_file(file_path)
         cls.intial_congiruations = cls.sr.get_initial_configurations
         if configuration == None:
-            frist_configuration_found = cls.intial_congiruations[0]
-            cls.set_configuration(frist_configuration_found)
+            first_configuration_found = cls.intial_congiruations[0]
+            cls.set_configuration(first_configuration_found)
         else:
             cls.set_configuration(configuration)
         cls.add_all_measures()
@@ -319,7 +319,7 @@ class SibillaSimulationResult:
     def get_results(self):
         return self.results
 
-class SibillaFristPassageTimeResult:
+class SibillaFirstPassageTimeResult:
 
     def __init__(self,fpt_result : FirstPassageTimeResults):
 

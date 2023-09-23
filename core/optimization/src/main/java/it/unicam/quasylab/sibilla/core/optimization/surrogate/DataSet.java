@@ -11,22 +11,28 @@ import java.util.function.ToDoubleFunction;
 
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.*;
 
-public class TrainingSet extends Table {
+public class DataSet extends Table {
     private final ToDoubleFunction<Map<String,Double>> function;
     private final HyperRectangle searchSpace;
     private final String resultColumnName;
 
-    public TrainingSet(HyperRectangle searchSpace,SamplingTask samplingTask, int trainingSetSize, ToDoubleFunction<Map<String,Double>>function){
-        this(searchSpace,samplingTask,trainingSetSize,function,DEFAULT_COLUMN_RESULT_NAME);
+    public DataSet(HyperRectangle searchSpace, SamplingTask samplingTask, int dataSetSize, ToDoubleFunction<Map<String,Double>>function){
+        this(searchSpace,samplingTask,dataSetSize,function,DEFAULT_COLUMN_RESULT_NAME);
     }
-    public TrainingSet(HyperRectangle searchSpace,SamplingTask samplingTask, int trainingSetSize, ToDoubleFunction<Map<String,Double>> function,String resultColumnName){
-        super(DEFAULT_TRAINING_SET_NAME);
+    public DataSet(HyperRectangle searchSpace, SamplingTask samplingTask, int dataSetSize, ToDoubleFunction<Map<String,Double>> function, String resultColumnName){
+        super(DEFAULT_DATASET_NAME);
         this.function = function;
         this.searchSpace = searchSpace;
         this.resultColumnName = resultColumnName;
-        Table samples = samplingTask.getSampleTable(trainingSetSize,searchSpace);
+        Table samples = samplingTask.getSampleTable(dataSetSize,searchSpace);
         this.addColumns(samples.columns().toArray(Column[]::new));
         this.addColumns(computeResultColumn(samples,function,resultColumnName));
+    }
+    private DataSet(Table trainingSet, HyperRectangle searchSpace, ToDoubleFunction<Map<String,Double>> function, String resultColumnName){
+        super(DEFAULT_DATASET_NAME,trainingSet.columns());
+        this.searchSpace = searchSpace;
+        this.function = function;
+        this.resultColumnName = resultColumnName;
     }
 
     private DoubleColumn computeResultColumn(Table input, ToDoubleFunction<Map<String,Double>> function, String columnID){
@@ -40,12 +46,6 @@ public class TrainingSet extends Table {
         return DoubleColumn.create(columnID,results);
     }
 
-    private TrainingSet(Table trainingSet,HyperRectangle searchSpace, ToDoubleFunction<Map<String,Double>> function,String resultColumnName){
-        super(DEFAULT_TRAINING_SET_NAME,trainingSet.columns());
-        this.searchSpace = searchSpace;
-        this.function = function;
-        this.resultColumnName = resultColumnName;
-    }
 
 
     private List<Map<String,Double>> toMapList(Table table){
@@ -122,7 +122,7 @@ public class TrainingSet extends Table {
        return getResultColumn().mean();
     }
 
-    public TrainingSet filterBy(HyperRectangle searchSpace){
+    public DataSet filterBy(HyperRectangle searchSpace){
         List<Integer> rowToDropList = new LinkedList<>();
         Map<String, Interval> searchSpaceMap = searchSpace.getIntervalsMappedByID();
         for (int i = 0; i < this.rowCount(); i++) {
@@ -136,23 +136,32 @@ public class TrainingSet extends Table {
                 }
             }
         }
-        return new TrainingSet( dropRows( rowToDropList.stream().mapToInt(i->i).toArray()),
+        return new DataSet( dropRows( rowToDropList.stream().mapToInt(i->i).toArray()),
                 this.getSearchSpace(),
                 this.getFunction(),
                 this.getResultColumnName());
     }
 
-    public TrainingSet appendTrainingSet(TrainingSet trainingSetToAppend){
-        if(this.columnNames().equals(trainingSetToAppend.columnNames())){
-            int size = trainingSetToAppend.rowCount();
+    public DataSet appendTrainingSet(DataSet dataSetToAppend){
+        if(this.columnNames().equals(dataSetToAppend.columnNames())){
+            int size = dataSetToAppend.rowCount();
             for (int i = 0; i < size; i++) {
-                this.append(trainingSetToAppend.row(i));
+                this.append(dataSetToAppend.row(i));
             }
             return this;
         }else
             throw new IllegalArgumentException("the training set to be added must have " +
                     "the same structure as the current training set");
 
+    }
+
+
+    public DataSet[] trainTestSplit(double trainingPortion){
+        Table[] tables = this.sampleSplit(trainingPortion);
+        return new DataSet[]{
+                new DataSet(tables[0],this.searchSpace,this.function,this.resultColumnName),
+                new DataSet(tables[1],this.searchSpace,this.function,this.resultColumnName)
+        };
     }
 
     public ToDoubleFunction<Map<String,Double>> getFunction() {

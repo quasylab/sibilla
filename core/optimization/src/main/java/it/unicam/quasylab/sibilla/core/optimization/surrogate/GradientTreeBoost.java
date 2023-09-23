@@ -9,12 +9,12 @@ import java.util.function.ToDoubleFunction;
 
 public class GradientTreeBoost implements SurrogateFactory {
     @Override
-    public SurrogateModel getSurrogateModel(TrainingSet trainingSet, Properties properties) {
-        return new GradientTreeBoostModel(trainingSet,properties);
+    public SurrogateModel getSurrogateModel(DataSet dataSet,double trainingPortion, Properties properties) {
+        return new GradientTreeBoostModel(dataSet, trainingPortion,properties);
     }
 
     @Override
-    public SurrogateModel getSurrogateModel(ToDoubleFunction<Map<String, Double>> functionToBeSurrogate, SamplingTask samplingTask, HyperRectangle sampleSpace, int numberOfSamples, Properties properties) {
-        return new GradientTreeBoostModel(functionToBeSurrogate,samplingTask,sampleSpace,numberOfSamples,properties);
+    public SurrogateModel getSurrogateModel(ToDoubleFunction<Map<String, Double>> functionToBeSurrogate, SamplingTask samplingTask, HyperRectangle sampleSpace, int numberOfSamples,double trainingPortion, Properties properties) {
+        return new GradientTreeBoostModel(functionToBeSurrogate,samplingTask,sampleSpace,numberOfSamples, trainingPortion,properties);
     }
 }

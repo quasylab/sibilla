@@ -653,7 +653,7 @@ public final class SibillaRuntime {
                 map -> {
                     map.keySet().forEach(key -> this.setParameter(key,map.get(key)));
                     this.addAllMeasures();
-                    System.out.println("testing for parameters : " + map);
+                    //System.out.println("testing for parameters : " + map);
                     try {
                         this.setConfiguration(this.currentModule.getCurrentConfiguration().name(),this.currentModule.getCurrentConfiguration().args());
                         return this.computeProbReach(monitor,goal,alpha,eps);

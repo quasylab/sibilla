@@ -42,9 +42,9 @@ class SurrogationTest {
         // OPTIMIZATION WITH SURROGATE
 
         SurrogateFactory surrogateFactory = new RandomForest();
-        SurrogateModel randomForestModel = surrogateFactory.getSurrogateModel(ROSENBROCK_FUNCTION, new LatinHyperCubeSamplingTask(),searchSpace,10000,new Properties());
+        SurrogateModel randomForestModel = surrogateFactory.getSurrogateModel(ROSENBROCK_FUNCTION, new LatinHyperCubeSamplingTask(),searchSpace,10000,0.85,new Properties());
 
-        ToDoubleFunction<Map<String,Double>> surrogateFunction = randomForestModel.getSurrogateFunction();
+        ToDoubleFunction<Map<String,Double>> surrogateFunction = randomForestModel.getSurrogateFunction(true);
         Map<String,Double> minimizingValuesSurrogate  = optimizationTask.minimize(surrogateFunction,searchSpace);
 
         // RESULT COMPARISON
@@ -81,9 +81,9 @@ class SurrogationTest {
         // OPTIMIZATION WITH SURROGATE
 
         SurrogateFactory surrogateFactory = new RandomForest();
-        SurrogateModel randomForestModel = surrogateFactory.getSurrogateModel(SIMPLE_FUNCTION, new LatinHyperCubeSamplingTask(),searchSpace,1000,new Properties());
+        SurrogateModel randomForestModel = surrogateFactory.getSurrogateModel(SIMPLE_FUNCTION, new LatinHyperCubeSamplingTask(),searchSpace,1000,0.85,new Properties());
 
-        ToDoubleFunction<Map<String,Double>> surrogateFunction = randomForestModel.getSurrogateFunction();
+        ToDoubleFunction<Map<String,Double>> surrogateFunction = randomForestModel.getSurrogateFunction(true);
         Map<String,Double> minimizingValuesSurrogate  = optimizationTask.minimize(surrogateFunction,searchSpace);
 
         // RESULT COMPARISON

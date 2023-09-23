@@ -21,7 +21,7 @@ class GradientTreeBoostModelTest {
                     return 7 * ( x * y )/(Math.pow(Math.E,(Math.pow(x,2)+Math.pow(y,2))));
                 }
         );
-        TrainingSet trainingSet = new TrainingSet(
+        DataSet dataSet = new DataSet(
                 new HyperRectangle(
                         new ContinuousInterval("x",-2.0,2.0),
                         new ContinuousInterval("y",-2.0,2.0)
@@ -30,9 +30,9 @@ class GradientTreeBoostModelTest {
                 1000,
                 functionToLearn)
                 ;
-        GradientTreeBoostModel rfr = new GradientTreeBoostModel(trainingSet,new Properties());
+        GradientTreeBoostModel rfr = new GradientTreeBoostModel(dataSet,0.85,new Properties());
         rfr.fit();
-        System.out.println(rfr.getInSampleMetrics().toString());
+        System.out.println(rfr.getTrainingSetMetrics().toString());
 
     }
 
@@ -48,7 +48,7 @@ class GradientTreeBoostModelTest {
                     return 7 * ( x * y )/(Math.pow(Math.E,(Math.pow(x,2)+Math.pow(y,2))));
                 }
         );
-        TrainingSet trainingSet = new TrainingSet(
+        DataSet dataSet = new DataSet(
                 new HyperRectangle(
                         new ContinuousInterval("x",-2.0,2.0),
                         new ContinuousInterval("y",-2.0,2.0)
@@ -57,9 +57,9 @@ class GradientTreeBoostModelTest {
                 1000,
                 functionToLearn)
                 ;
-        GradientTreeBoostModel rfr = new GradientTreeBoostModel(trainingSet,new Properties());
+        GradientTreeBoostModel rfr = new GradientTreeBoostModel(dataSet,0.85,new Properties());
         rfr.fit();
-        System.out.println(rfr.getInSampleMetrics().toString());
+        System.out.println(rfr.getTrainingSetMetrics().toString());
 
     }
 
