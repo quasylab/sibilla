@@ -54,7 +54,6 @@ public final class SibillaRuntime {
     private double deadline = Double.NaN;
     private double dt = Double.NaN;
 
-
     public SibillaRuntime() {
         initModules();
     }

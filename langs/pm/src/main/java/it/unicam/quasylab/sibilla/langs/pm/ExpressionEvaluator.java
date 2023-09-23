@@ -29,6 +29,7 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaInteger;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.Optional;
+import java.util.HashMap;
 import java.util.function.Function;
 
 /**
