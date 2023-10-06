@@ -87,6 +87,9 @@ public class YodaElementNameRegistry {
     }
 
     public Set<YodaElementName> getGroup(String name) {
+        if (this.names.containsKey(name)) {
+            return Set.of(this.names.get(name));
+        }
         return this.groups.getOrDefault(name, Set.of());
     }
 }

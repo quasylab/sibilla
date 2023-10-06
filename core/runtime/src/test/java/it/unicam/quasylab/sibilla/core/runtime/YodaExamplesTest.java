@@ -21,67 +21,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class YodaExamplesTest {
 
-    public static final String ROBOT =
-            "param height = 10;\n" +
-                    "param width = 10;\n" +
-                    "param no = 10;\n" +
-                    "param na = 3;\n" +
-                    "\n" +
-                    "agent Robot =\n" +
-                    "    state:\n" +
-                    "        int dirx = 0;\n" +
-                    "        int diry = 0;\n" +
-                    "    features:\n" +
-                    "        int x = 0;\n" +
-                    "        int y = 0;\n" +
-                    "    observations:\n" +
-                    "        bool north = false;\n" +
-                    "        bool south = false;\n" +
-                    "        bool east = false;\n" +
-                    "        bool west = false;\n" +
-                    "        bool goal = false;\n" +
-                    "    actions :\n" +
-                    "        moveNorth [ dirx <- 0; diry <- 1;]\n" +
-                    "        moveSouth [ dirx <- 0; diry <- 1;]\n" +
-                    "        moveEast [ dirx <- 0; diry <- 1;]\n" +
-                    "        moveWest [ dirx <- 0; diry <- 1;]\n" +
-                    "        stop [ dirx <- 0; diry <- 0; ]\n" +
-                    "    behaviour :\n" +
-                    "        when goal -> [ stop: 1 ]\n" +
-                    "        orwhen !north -> [ moveNorth: 1 ]\n" +
-                    "        orwhen !east -> [ moveEast: 1 ]\n" +
-                    "        orwhen !west -> [ moveWest: 1 ]\n" +
-                    "        otherwise [ stop: 1 ]\n" +
-                    "end\n" +
-                    "\n" +
-                    "element Obstacle =\n" +
-                    "    int x = 0;\n" +
-                    "    int y = 0;\n" +
-                    "end\n" +
-                    "\n" +
-                    "environment:\n" +
-                    "    sensing :\n" +
-                    "        Robot [\n" +
-                    "            north <- any Obstacle : (y==it.y+1)&&(x==it.y);\n" +
-                    "            south <- any Obstacle : (y==it.y-1)&&(x==it.y);\n" +
-                    "            east <- any Obstacle : (y==it.y-1)&&(x==it.y);\n" +
-                    "            west <- any Obstacle : (y==it.y-1)&&(x==it.y);\n" +
-                    "            goal <- it.y==height+1;\n" +
-                    "        ]\n" +
-                    "\n" +
-                    "    dynamic :\n" +
-                    "        Robot [\n" +
-                    "           x <- x + dirx;\n" +
-                    "           y <- y + diry;\n" +
-                    "        ]\n" +
-                    " end\n" +
-                    "\n" +
-                    " configuration Main :\n" +
-                    "    for ox sampled distinct 5 time from U[0, width] do\n" +
-                    "       Obstacle[ x = ox; y = 10; ]\n" +
-                    "    endfor\n" +
-                    "    Robot[ x = U[0, 20]; y = 0; ]\n" +
-                    " end";
+
+    /* BEGIN TESTS ON ROBOT SCENARIO */
 
 
     @Test
@@ -102,11 +43,6 @@ class YodaExamplesTest {
     private URL getResource(String s) {
         return getClass().getClassLoader().getResource(s);
     }
-    @Test
-    public void shouldLoadSpecificationFromString() throws CommandExecutionException {
-        SibillaRuntime sr = getRuntimeWithYodaModule();
-        sr.load(ROBOT);
-    }
 
     @Test
     public void shouldLoadResource() throws CommandExecutionException {
@@ -126,7 +62,7 @@ class YodaExamplesTest {
     public void shouldSimulateRobotScenario() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/robotAgent2.yoda"));
-        sr.setConfiguration("Alone");
+        sr.setConfiguration("Main");
         sr.addAllMeasures();
         sr.setDeadline(100);
         sr.setDt(1);
@@ -184,27 +120,125 @@ class YodaExamplesTest {
         YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
         YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
         YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
-        //Aggiungere modo per recuperare info da conf iniziale
-        YodaAgent agent = agentsDefinitions.getAgent(0,elementNameRegistry.get("Robot"), new YodaVariableMapping());
+
+        YodaVariableMapping initialAssignment = new YodaVariableMapping();
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("y"), SibillaValue.of(0));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("x"), SibillaValue.of(5));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("diry"), SibillaValue.of(0));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("dirx"), SibillaValue.of(0));
+
+        //YodaAgent agent = agentsDefinitions.getAgent(0,elementNameRegistry.get("Robot"), new YodaVariableMapping());
+        YodaAgent agent = agentsDefinitions.getAgent(0,elementNameRegistry.get("Robot"), initialAssignment);
+        DefaultRandomGenerator rg = new DefaultRandomGenerator();
         YodaSystemState state = new YodaSystemState(List.of(agent), List.of());
+
         assertEquals(SibillaValue.of(0), state.get(0).get(variableRegistry.get("dirx")));
         assertEquals(SibillaValue.of(0), state.get(0).get(variableRegistry.get("diry")));
+
+        state = state.next(rg);
+        assertEquals(SibillaValue.of(0), state.get(0).get(variableRegistry.get("dirx")));
+        assertEquals(SibillaValue.of(1), state.get(0).get(variableRegistry.get("diry")));
+        assertEquals(SibillaValue.of(5), state.get(0).get(variableRegistry.get("x")));
+        assertEquals(SibillaValue.of(1), state.get(0).get(variableRegistry.get("y")));
+
+        for (int i = 0; i<10; i++){
+            state = state.next(rg);
+        }
+        assertEquals(SibillaValue.of(5), state.get(0).get(variableRegistry.get("x")));
+        assertEquals(SibillaValue.of(11), state.get(0).get(variableRegistry.get("y")));
+    }
+
+    @Test
+    public void testRobotActions() throws YodaModelGenerationException, URISyntaxException, IOException {
+        YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent2.yoda");
+        generator.getParseTree();
+        EvaluationEnvironment env = generator.getEvaluationEnvironment();
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
+        YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
+
+        YodaVariableMapping initialAssignment = new YodaVariableMapping();
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("y"), SibillaValue.of(0));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("x"), SibillaValue.of(5));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("diry"), SibillaValue.of(0));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("dirx"), SibillaValue.of(0));
+
+        //YodaAgent agent = agentsDefinitions.getAgent(0,elementNameRegistry.get("Robot"), new YodaVariableMapping());
+        YodaAgent agent = agentsDefinitions.getAgent(0,elementNameRegistry.get("Robot"), initialAssignment);
 
         WeightedStructure<YodaAction> actions = agent.getAgentBehaviour().evaluate(agent.getAgentAttributes(), agent.getAgentObservations());
 
         assertEquals(1, actions.getTotalWeight());
         assertEquals(1, actions.getAll().get(0).getTotalWeight());
         assertEquals("moveNorth",actions.getAll().get(0).getElement().getName());
+
+        /*
         YodaVariableMapping newMap = actions.getAll().get(0).getElement().performAction(new DefaultRandomGenerator(), agent.getAgentAttributes());
 
         assertEquals(SibillaValue.of(0), newMap.getValue(variableRegistry.get("dirx")));
-        assertEquals(SibillaValue.of(1), newMap.getValue(variableRegistry.get("diry")));
+        assertEquals(SibillaValue.of(1), newMap.getValue(variableRegistry.get("diry")));*/
 
-/*        state = state.next(null);
-        assertEquals(SibillaValue.of(0), state.get(0).get(variableRegistry.get("dirx")));
-        assertEquals(SibillaValue.of(1), state.get(0).get(variableRegistry.get("diry")));
-        assertEquals(SibillaValue.of(0), state.get(0).get(variableRegistry.get("x")));
-        assertEquals(SibillaValue.of(1), state.get(0).get(variableRegistry.get("y")));*/
+    }
+
+    @Test
+    public void testRobotCollision() throws YodaModelGenerationException, URISyntaxException, IOException {
+        YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent2.yoda");
+        generator.getParseTree();
+        EvaluationEnvironment env = generator.getEvaluationEnvironment();
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
+        YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
+
+        YodaVariableMapping initialAssignment = new YodaVariableMapping();
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("y"), SibillaValue.of(0));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("x"), SibillaValue.of(5));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("diry"), SibillaValue.of(0));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("dirx"), SibillaValue.of(0));
+        YodaAgent agent = agentsDefinitions.getAgent(0, elementNameRegistry.get("Robot"), initialAssignment);
+
+        YodaVariableMapping initialOb1Assignment = new YodaVariableMapping();
+        initialOb1Assignment = initialOb1Assignment.setValue(variableRegistry.get("posx"), SibillaValue.of(5));
+        initialOb1Assignment = initialOb1Assignment.setValue(variableRegistry.get("posy"), SibillaValue.of(2));
+        YodaSceneElement obs1 = agentsDefinitions.getElement(1, elementNameRegistry.get("Obstacle"), initialOb1Assignment);
+
+        YodaVariableMapping initialOb2Assignment = new YodaVariableMapping();
+        initialOb2Assignment = initialOb2Assignment.setValue(variableRegistry.get("posx"), SibillaValue.of(6));
+        initialOb2Assignment = initialOb2Assignment.setValue(variableRegistry.get("posy"), SibillaValue.of(1));
+        YodaSceneElement obs2 = agentsDefinitions.getElement(2, elementNameRegistry.get("Obstacle"), initialOb2Assignment);
+
+        DefaultRandomGenerator rg = new DefaultRandomGenerator();
+        YodaSystemState state = new YodaSystemState(List.of(agent), List.of(obs1,obs2));
+
+        state = state.next(rg);
+        YodaVariableMapping observations = state.get(0).observe(rg, state);
+        WeightedStructure<YodaAction> acts = state.get(0).getAgentBehaviour().evaluate(agent.getAgentAttributes(), observations);
+        assertEquals(1, acts.getTotalWeight());
+        assertEquals(1, acts.getAll().get(0).getTotalWeight());
+        assertEquals("moveWest", acts.getAll().get(0).getElement().getName());
+
+        state = state.next(rg);
+        observations = state.get(0).observe(rg, state);
+        acts = state.get(0).getAgentBehaviour().evaluate(agent.getAgentAttributes(), observations);
+        assertEquals(1, acts.getTotalWeight());
+        assertEquals(1, acts.getAll().get(0).getTotalWeight());
+        assertEquals("moveNorth", acts.getAll().get(0).getElement().getName());
+
+        for (int i = 0; i<10;i++){
+            state = state.next(rg);
+        }
+        observations = state.get(0).observe(rg, state);
+        acts = state.get(0).getAgentBehaviour().evaluate(agent.getAgentAttributes(), observations);
+        assertEquals(1, acts.getTotalWeight());
+        assertEquals(1, acts.getAll().get(0).getTotalWeight());
+        assertEquals("stop", acts.getAll().get(0).getElement().getName());
+
+        /* END TESTS ON ROBOT SCENARIO */
+
+
+        /* BEGIN TESTS ON RESCUEBOT */
+
+        /* END TESTS ON RESCUEBOT */
+
     }
 
 }

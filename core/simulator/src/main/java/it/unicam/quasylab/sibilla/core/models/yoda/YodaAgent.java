@@ -116,7 +116,7 @@ public final class YodaAgent extends YodaSceneElement {
      * @return the next state of this agent.
      */
     public YodaAgent next(RandomGenerator rg, YodaSystemState state) {
-        YodaVariableMapping newObservations = this.observationsUpdateFunction.compute(rg, state, this);
+        YodaVariableMapping newObservations = observe(rg, state);
         WeightedStructure<YodaAction> actionSet = this.agentBehaviour.evaluate(this.agentAttributes, newObservations);
         YodaAction selectedAction = this.agentBehaviour.selectAction(rg, actionSet);
         YodaVariableMapping newKnowledge = this.agentAttributes;
@@ -125,6 +125,17 @@ public final class YodaAgent extends YodaSceneElement {
         }
         YodaVariableMapping newEnvironmentalAttributes = this.environmentalAttributeUpdateFunction.compute(rg, newKnowledge, this.environmentalAttributes);
         return new YodaAgent(this.getId(), this.getName(), newKnowledge, newEnvironmentalAttributes, newObservations, this.agentBehaviour, this.observationsUpdateFunction, this.environmentalAttributeUpdateFunction);
+    }
+
+    /**
+     * Returns the agent observations when it is running in a given system state.
+     *
+     * @param rg random generator used to sample random values
+     * @param state the state where the observations are computed
+     * @return the agent observations when it is running in a given system state.
+     */
+    public YodaVariableMapping observe(RandomGenerator rg, YodaSystemState state) {
+        return this.observationsUpdateFunction.compute(rg, state, this);
     }
 
     public SibillaValue get(YodaVariable var) {
