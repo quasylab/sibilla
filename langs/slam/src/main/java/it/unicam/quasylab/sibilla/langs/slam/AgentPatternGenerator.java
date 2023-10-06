@@ -34,6 +34,9 @@ import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
+/**
+ * Generates
+ */
 public class AgentPatternGenerator extends SlamModelBaseVisitor<BiPredicate<AgentStore, SlamAgent>> {
     private final Function<String, Optional<SibillaValue>> globalAssignments;
     private final VariableRegistry registry;

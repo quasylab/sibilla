@@ -24,7 +24,7 @@
 package it.unicam.quasylab.sibilla.core.tools;
 
 import it.unicam.quasylab.sibilla.core.util.Interval;
-import it.unicam.quasylab.sibilla.core.util.SequenceOfPositiveIntervals;
+import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -47,8 +47,8 @@ class SequenceOfPositiveIntervalsTest {
     private DoublePredicate COS_GENERATOR = d -> Math.sin(d)>0;
 
 
-    public static SequenceOfPositiveIntervals getSequence(double dt, int size, DoublePredicate predicate) {
-        SequenceOfPositiveIntervals sequence = new SequenceOfPositiveIntervals();
+    public static BooleanSignal getSequence(double dt, int size, DoublePredicate predicate) {
+        BooleanSignal sequence = new BooleanSignal();
         for(int i=0; i<size; i++) {
             if (predicate.test(i*dt)) {
                 sequence.add(i*dt, (i+1)*dt);
@@ -60,8 +60,8 @@ class SequenceOfPositiveIntervalsTest {
 
     @Test
     void negate() {
-        SequenceOfPositiveIntervals sequence = SequenceOfPositiveIntervals.of(INTERVALS1);
-        SequenceOfPositiveIntervals negatedSequence = sequence.negate();
+        BooleanSignal sequence = BooleanSignal.of(INTERVALS1);
+        BooleanSignal negatedSequence = sequence.negate();
         assertEquals(2,negatedSequence.size());
         assertEquals(new Interval(10, 20), negatedSequence.get(0));
         assertEquals(new Interval(30, Double.POSITIVE_INFINITY), negatedSequence.get(1));
@@ -69,15 +69,15 @@ class SequenceOfPositiveIntervalsTest {
 
     @Test
     void shift() {
-        SequenceOfPositiveIntervals sequence = SequenceOfPositiveIntervals.of(INTERVALS2);
-        SequenceOfPositiveIntervals shiftedSequence = sequence.shift(new Interval(5, 10));
+        BooleanSignal sequence = BooleanSignal.of(INTERVALS2);
+        BooleanSignal shiftedSequence = sequence.shift(new Interval(5, 10));
         assertEquals(1,shiftedSequence.size());
         assertEquals(new Interval(0, 45), shiftedSequence.get(0));
     }
 
     @Test
     void getValuesAt() {
-        SequenceOfPositiveIntervals sequence = getSequence(1.5, 100, SIN_GENERATOR);
+        BooleanSignal sequence = getSequence(1.5, 100, SIN_GENERATOR);
         double[] steps = IntStream.range(0, 100).mapToDouble(i -> i*1.5).toArray();
         boolean[] values = sequence.getValuesAt(steps);
         for(int i=0 ; i<values.length; i++) {
@@ -88,9 +88,9 @@ class SequenceOfPositiveIntervalsTest {
 
     @Test
     void computeConjunction() {
-        SequenceOfPositiveIntervals sequence1 = SequenceOfPositiveIntervals.of(INTERVALS1);
-        SequenceOfPositiveIntervals sequence2 = SequenceOfPositiveIntervals.of(INTERVALS3);
-        SequenceOfPositiveIntervals sequence3 = sequence1.computeConjunction(sequence2);
+        BooleanSignal sequence1 = BooleanSignal.of(INTERVALS1);
+        BooleanSignal sequence2 = BooleanSignal.of(INTERVALS3);
+        BooleanSignal sequence3 = sequence1.computeConjunction(sequence2);
         assertEquals(2, sequence3.size());
         assertEquals(new Interval(5, 10), sequence3.get(0));
         assertEquals(new Interval(20, 23), sequence3.get(1));
@@ -98,9 +98,9 @@ class SequenceOfPositiveIntervalsTest {
 
     @Test
     void computeConjunction2() {
-        SequenceOfPositiveIntervals sequence1 = SequenceOfPositiveIntervals.of(INTERVALS3);
-        SequenceOfPositiveIntervals sequence2 = SequenceOfPositiveIntervals.of(INTERVALS4);
-        SequenceOfPositiveIntervals sequence3 = sequence1.computeConjunction(sequence2);
+        BooleanSignal sequence1 = BooleanSignal.of(INTERVALS3);
+        BooleanSignal sequence2 = BooleanSignal.of(INTERVALS4);
+        BooleanSignal sequence3 = sequence1.computeConjunction(sequence2);
         assertEquals(4, sequence3.size());
         assertEquals(new Interval(5, 16), sequence3.get(0));
         assertEquals(new Interval(18, 20), sequence3.get(1));
@@ -110,9 +110,9 @@ class SequenceOfPositiveIntervalsTest {
 
     @Test
     void computeDisjunction() {
-        SequenceOfPositiveIntervals sequence1 = SequenceOfPositiveIntervals.of(INTERVALS1);
-        SequenceOfPositiveIntervals sequence2 = SequenceOfPositiveIntervals.of(INTERVALS3);
-        SequenceOfPositiveIntervals sequence3 = sequence1.computeDisjunction(sequence2);
+        BooleanSignal sequence1 = BooleanSignal.of(INTERVALS1);
+        BooleanSignal sequence2 = BooleanSignal.of(INTERVALS3);
+        BooleanSignal sequence3 = sequence1.computeDisjunction(sequence2);
         assertEquals(3, sequence3.size());
         assertEquals(new Interval(0, 16), sequence3.get(0));
         assertEquals(new Interval(18, 30), sequence3.get(1));

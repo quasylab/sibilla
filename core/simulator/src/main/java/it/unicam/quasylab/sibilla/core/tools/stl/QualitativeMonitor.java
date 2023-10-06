@@ -25,17 +25,16 @@ package it.unicam.quasylab.sibilla.core.tools.stl;
 
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.util.Interval;
-import it.unicam.quasylab.sibilla.core.util.SequenceOfPositiveIntervals;
+import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.DoublePredicate;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.IntStream;
 
 /**
- * This interface implements a monitor that, given a trajectory returns the {@link SequenceOfPositiveIntervals}
+ * This interface implements a monitor that, given a trajectory returns the {@link BooleanSignal}
  * representing the time intervals when the evalutaion of the monitor is true.
  *
  * @param <S> type of states in the trajectory.
@@ -43,7 +42,7 @@ import java.util.stream.IntStream;
 @FunctionalInterface
 public interface QualitativeMonitor<S> {
 
-    SequenceOfPositiveIntervals monitor(Trajectory<S> trj);
+    BooleanSignal monitor(Trajectory<S> trj);
 
     static <S> double[] computeProbability(QualitativeMonitor<S> monitor, Supplier<Trajectory<S>> trajectoryProvider, int runs, int samplings, double dt) {
         return computeProbability(monitor, trajectoryProvider, runs, IntStream.range(0, samplings).mapToDouble(i -> i*dt).toArray());
@@ -83,7 +82,7 @@ public interface QualitativeMonitor<S> {
         }
 
         @Override
-        public SequenceOfPositiveIntervals monitor(Trajectory<S> trj) {
+        public BooleanSignal monitor(Trajectory<S> trj) {
             return trj.test(s -> guard.test(measure.applyAsDouble(s)));
         }
     }
@@ -97,7 +96,7 @@ public interface QualitativeMonitor<S> {
         }
 
         @Override
-        public SequenceOfPositiveIntervals monitor(Trajectory<S> trj) {
+        public BooleanSignal monitor(Trajectory<S> trj) {
             return argument.monitor(trj).negate();
         }
     }
@@ -114,7 +113,7 @@ public interface QualitativeMonitor<S> {
         }
 
         @Override
-        public SequenceOfPositiveIntervals monitor(Trajectory<S> trj) {
+        public BooleanSignal monitor(Trajectory<S> trj) {
             return this.firstArgument.monitor(trj).computeConjunction(this.secondArgument.monitor(trj));
         }
     }
@@ -131,7 +130,7 @@ public interface QualitativeMonitor<S> {
         }
 
         @Override
-        public SequenceOfPositiveIntervals monitor(Trajectory<S> trj) {
+        public BooleanSignal monitor(Trajectory<S> trj) {
             return this.firstArgument.monitor(trj).computeDisjunction(this.secondArgument.monitor(trj));
         }
     }
@@ -148,7 +147,7 @@ public interface QualitativeMonitor<S> {
         }
 
         @Override
-        public SequenceOfPositiveIntervals monitor(Trajectory<S> trj) {
+        public BooleanSignal monitor(Trajectory<S> trj) {
             return this.firstArgument.monitor(trj).negate().computeDisjunction(this.secondArgument.monitor(trj));
         }
     }
@@ -170,7 +169,7 @@ public interface QualitativeMonitor<S> {
 
 
         @Override
-        public SequenceOfPositiveIntervals monitor(Trajectory<S> trj) {
+        public BooleanSignal monitor(Trajectory<S> trj) {
             return firstArgument.monitor(trj).computeConjunction(secondArgument.monitor(trj).shift(interval));
         }
     }
@@ -190,7 +189,7 @@ public interface QualitativeMonitor<S> {
 
 
         @Override
-        public SequenceOfPositiveIntervals monitor(Trajectory<S> trj) {
+        public BooleanSignal monitor(Trajectory<S> trj) {
             return argument.monitor(trj).shift(interval);
         }
     }
@@ -210,7 +209,7 @@ public interface QualitativeMonitor<S> {
 
 
         @Override
-        public SequenceOfPositiveIntervals monitor(Trajectory<S> trj) {
+        public BooleanSignal monitor(Trajectory<S> trj) {
             return argument.monitor(trj).negate().shift(interval).negate();
         }
     }

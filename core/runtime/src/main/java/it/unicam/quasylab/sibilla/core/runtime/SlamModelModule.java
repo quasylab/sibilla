@@ -29,9 +29,13 @@ import java.io.File;
 
 public class SlamModelModule extends AbstractSibillaModule  {
 
+    public final static String MODULE_NAME = "slam";
+
+    private ModuleEngine<SlamState> slamStateModuleEngine;
+
     @Override
     public String getModuleName() {
-        return null;
+        return MODULE_NAME;
     }
 
     @Override
@@ -46,11 +50,13 @@ public class SlamModelModule extends AbstractSibillaModule  {
 
     @Override
     public String info() {
-        return null;
+        //TODO: Add info here.
+        return "SLAM ";
     }
 
     @Override
     protected ModuleEngine<?> getModuleEngine() {
         return null;
+
     }
 }
