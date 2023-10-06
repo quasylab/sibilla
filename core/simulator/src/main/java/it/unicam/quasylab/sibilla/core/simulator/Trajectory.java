@@ -23,11 +23,10 @@
 
 package it.unicam.quasylab.sibilla.core.simulator;
 
-import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Sample;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
-import it.unicam.quasylab.sibilla.core.util.SequenceOfPositiveIntervals;
+import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
+import it.unicam.quasylab.sibilla.core.util.Signal;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -38,6 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -178,8 +178,8 @@ public class Trajectory<S> implements Externalizable {
     }
 
 
-    public SequenceOfPositiveIntervals test(Predicate<S> predicate) {
-        SequenceOfPositiveIntervals result = new SequenceOfPositiveIntervals();
+    public BooleanSignal test(Predicate<S> predicate) {
+        BooleanSignal result = new BooleanSignal();
         boolean flag = false;
         double lastPositive = 0.0;
         for (Sample<S> interval: data) {
@@ -195,6 +195,12 @@ public class Trajectory<S> implements Externalizable {
         if (flag) {
             result.add(lastPositive, this.end);
         }
+        return result;
+    }
+
+    public Signal apply(ToDoubleFunction<S> function) {
+        Signal result = new Signal();
+        data.forEach(s -> result.add(s.getTime(), function.applyAsDouble(s.getValue())));
         return result;
     }
 }

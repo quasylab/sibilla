@@ -25,13 +25,12 @@ package it.unicam.quasylab.sibilla.core.util;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
  * Represents a sequence of (disjoint) unitary intervals.
  */
-public class SequenceOfPositiveIntervals {
+public final class BooleanSignal {
 
     private final LinkedList<Interval> intervals = new LinkedList<>();
 
@@ -40,10 +39,10 @@ public class SequenceOfPositiveIntervals {
      * Create an empty sequence.
      *
      */
-    public SequenceOfPositiveIntervals() {}
+    public BooleanSignal() {}
 
-    public static SequenceOfPositiveIntervals of(List<Interval> intervals) {
-        SequenceOfPositiveIntervals sequence = new SequenceOfPositiveIntervals();
+    public static BooleanSignal of(List<Interval> intervals) {
+        BooleanSignal sequence = new BooleanSignal();
         intervals.forEach(sequence::add);
         return sequence;
     }
@@ -106,8 +105,8 @@ public class SequenceOfPositiveIntervals {
         }
     }
 
-    public SequenceOfPositiveIntervals negate() {
-        SequenceOfPositiveIntervals result = new SequenceOfPositiveIntervals();
+    public BooleanSignal negate() {
+        BooleanSignal result = new BooleanSignal();
         double last = 0.0;
         for (Interval current: this.intervals) {
             if (!current.startsAt(last)) {
@@ -126,8 +125,8 @@ public class SequenceOfPositiveIntervals {
      * @param interval a positive interval.
      * @return the sequence obtained from this one by shifting each positive interval by the given interval.
      */
-    public SequenceOfPositiveIntervals shift(Interval interval) {
-        SequenceOfPositiveIntervals result = new SequenceOfPositiveIntervals();
+    public BooleanSignal shift(Interval interval) {
+        BooleanSignal result = new BooleanSignal();
         for(Interval current: this.intervals) {
             current.shiftBack(interval).ifPresent(result::add);
         }
@@ -157,7 +156,7 @@ public class SequenceOfPositiveIntervals {
      * @return the trajectory obtained by applying boolean conjunction of this trajectory with the one passed as
      * parameter.
      */
-    public SequenceOfPositiveIntervals computeConjunction(SequenceOfPositiveIntervals other) {
+    public BooleanSignal computeConjunction(BooleanSignal other) {
         if (this.isEmpty()) {
             return other;
         }
@@ -194,7 +193,7 @@ public class SequenceOfPositiveIntervals {
      * @return the trajectory obtained by applying boolean conjunction of this trajectory with the one passed as
      * parameter.
      */
-    public SequenceOfPositiveIntervals computeDisjunction(SequenceOfPositiveIntervals other) {
+    public BooleanSignal computeDisjunction(BooleanSignal other) {
         if (this.isEmpty()) { return this; }
         if (other.isEmpty()) { return other; }
         return new DisjunctionMerger(this, other).getResult();
@@ -243,14 +242,14 @@ public class SequenceOfPositiveIntervals {
         private Interval currentRight;
         private Interval currentResult;
 
-        private SequenceOfPositiveIntervals result;
+        private BooleanSignal result;
 
-        public ConjunctionMerger(SequenceOfPositiveIntervals left, SequenceOfPositiveIntervals right) {
+        public ConjunctionMerger(BooleanSignal left, BooleanSignal right) {
             leftIterator = left.iterator();
             rightIterator = right.iterator();
         }
 
-        public SequenceOfPositiveIntervals getResult() {
+        public BooleanSignal getResult() {
             if (result == null) {
                 compute();
             }
@@ -259,7 +258,7 @@ public class SequenceOfPositiveIntervals {
 
 
         private void compute() {
-            result = new SequenceOfPositiveIntervals();
+            result = new BooleanSignal();
             while (((currentLeft != null)||leftIterator.hasNext())&&
                     ((currentRight != null)||rightIterator.hasNext())) {
                 advanceLeft();
@@ -319,14 +318,14 @@ public class SequenceOfPositiveIntervals {
         private Interval currentRight;
         private Interval currentResult;
 
-        private SequenceOfPositiveIntervals result;
+        private BooleanSignal result;
 
-        public DisjunctionMerger(SequenceOfPositiveIntervals left, SequenceOfPositiveIntervals right) {
+        public DisjunctionMerger(BooleanSignal left, BooleanSignal right) {
             leftIterator = left.iterator();
             rightIterator = right.iterator();
         }
 
-        public SequenceOfPositiveIntervals getResult() {
+        public BooleanSignal getResult() {
             if (result == null) {
                 compute();
             }
@@ -335,7 +334,7 @@ public class SequenceOfPositiveIntervals {
 
 
         private void compute() {
-            result = new SequenceOfPositiveIntervals();
+            result = new BooleanSignal();
             advanceLeft();
             advanceRight();
             while ((currentLeft!=null)||(currentRight!=null)) {
