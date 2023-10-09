@@ -37,8 +37,8 @@ import java.util.UUID;
 
 public class SibillaCompiler {
 
-    private File workingDirectory;
-    private ClassLoader classLoader;
+    private final File workingDirectory;
+    private final ClassLoader classLoader;
 
     public SibillaCompiler() throws IOException {
         this(Files.createTempDirectory(UUID.randomUUID().toString()));
@@ -58,7 +58,7 @@ public class SibillaCompiler {
             if (create) {
                 this.workingDirectory.mkdir();
             } else {
-                throw new IllegalArgumentException("Working directory " + path.toString() + " does not exits!");
+                throw new IllegalArgumentException("Working directory " + path + " does not exits!");
             }
         }
         this.classLoader = URLClassLoader.newInstance(new URL[]{this.workingDirectory.toURI().toURL()});

@@ -30,7 +30,7 @@ import java.util.Arrays;
  */
 public class Tuple {
 
-	private Object[] data;
+	private final Object[] data;
 
 	public Tuple(Object... data) {
 		this.data = data;

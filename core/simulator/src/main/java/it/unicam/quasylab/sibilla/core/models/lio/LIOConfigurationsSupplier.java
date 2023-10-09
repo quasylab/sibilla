@@ -38,7 +38,7 @@ public class LIOConfigurationsSupplier {
     private final LIOAgentDefinitions agentsDefinition;
     private final Map<String, Integer> configurationsArity;
     private final Map<String, Function<SibillaValue[], Map<LIOAgent, Integer>>> configurations;
-    private String defaultConfiguration;
+    private final String defaultConfiguration;
 
     public LIOConfigurationsSupplier(LIOAgentDefinitions agentsDefinition, Map<String, Integer> systemArity, Map<String, Function<SibillaValue[], Map<LIOAgent, Integer>>> systems, String defaultConfiguration) {
         this.agentsDefinition = agentsDefinition;

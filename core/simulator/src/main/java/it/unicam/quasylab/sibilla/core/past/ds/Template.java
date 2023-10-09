@@ -30,7 +30,7 @@ import java.util.Arrays;
  */
 public class Template {
 
-	private TemplateField[] fields;
+	private final TemplateField[] fields;
 
 	public Template(TemplateField... fields) {
 		this.fields = fields;
@@ -94,10 +94,6 @@ public class Template {
 	}
 
 	public boolean implies(Template t) {
-		if (size() != t.size()) {
-			return false;
-		}
-
-		return true;
-	}
+        return size() == t.size();
+    }
 }

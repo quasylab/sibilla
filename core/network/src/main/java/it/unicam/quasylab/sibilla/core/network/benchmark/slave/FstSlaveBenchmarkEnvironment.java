@@ -46,7 +46,7 @@ import java.util.List;
  */
 public class FstSlaveBenchmarkEnvironment<S extends State> extends SlaveBenchmarkEnvironment {
 
-    private Serializer fstSerializer;
+    private final Serializer fstSerializer;
 
     public FstSlaveBenchmarkEnvironment(String benchmarkName, String trajectoryFileDir, String trajectoryFileName, NetworkInfo localInfo, ComputationResultSerializerType type, Model<S> model) throws IOException {
         super(benchmarkName, trajectoryFileDir, trajectoryFileName, localInfo, type, model);

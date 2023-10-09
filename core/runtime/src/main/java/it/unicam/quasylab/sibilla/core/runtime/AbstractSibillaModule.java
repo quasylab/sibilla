@@ -46,6 +46,7 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     private boolean summary = true;
     private final SimulationEnvironment simulator = new SimulationEnvironment();
 
+    private Configuration currentConfiguration;
 
     protected abstract ModuleEngine<?> getModuleEngine();
 
@@ -106,7 +107,7 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     }
 
     @Override
-    public Map<String, double[][]> simulate(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt) {;
+    public Map<String, double[][]> simulate(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt) {
         return checkForLoadedDefinition().simulate(this.simulator, monitor, rg, replica, deadline, dt, this.enabledMeasures.toArray(new String[0]),summary);
     }
 
@@ -168,7 +169,13 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     }
 
     @Override
+    public Configuration getCurrentConfiguration() {
+        return currentConfiguration;
+    }
+
+    @Override
     public boolean setConfiguration(String name, double... args) {
+        this.currentConfiguration = new Configuration(name, args);
         return checkForLoadedDefinition().setConfiguration(name, args);
     }
 

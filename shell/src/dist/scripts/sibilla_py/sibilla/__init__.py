@@ -1,13 +1,14 @@
 from .plotting_module import SibillaDataPlotter
 from .profiler_module import Profiler
-from .sibilla_runtime import SibillaRuntime, Map, SibillaReachabilityResult, SibillaFristPassageTimeResult, SibillaReachabilityResult
+from .sibilla_runtime import SibillaRuntime, Map, SibillaReachabilityResult, SibillaFirstPassageTimeResult, SibillaReachabilityResult
 
 
 __all__= (
     SibillaRuntime,
     Map,
     SibillaReachabilityResult,
-    SibillaFristPassageTimeResult,
+    SibillaFirstPassageTimeResult,
+    SibillaFirstPassageTimeResult,
     SibillaReachabilityResult,
     SibillaDataPlotter,
     Profiler,

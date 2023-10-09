@@ -521,9 +521,7 @@ public class MainView implements Initializable {
             newFileItem.setDisable(false);
             newDirectoryItem.setDisable(false);
             if(!treeViewModels.getSelectionModel().isEmpty()){
-                if (treeViewModels.getRoot().getValue().equals(treeViewModels.getSelectionModel().getSelectedItem().getValue())){
-                    newFileItem.setDisable(true);
-                }else newFileItem.setDisable(false);
+                newFileItem.setDisable(treeViewModels.getRoot().getValue().equals(treeViewModels.getSelectionModel().getSelectedItem().getValue()));
             }else newFileItem.setDisable(true);
         }else{
             buildButton.setDisable(true);
@@ -957,10 +955,7 @@ public class MainView implements Initializable {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION, message, ButtonType.YES, ButtonType.CANCEL);
         alert.setTitle(title);
         Optional<ButtonType> answer = alert.showAndWait();
-        if (answer.isPresent()&&answer.get() == ButtonType.YES) {
-            return true;
-        }
-        return false;
+        return answer.isPresent() && answer.get() == ButtonType.YES;
     }
 
     private boolean overwriteAlertMessage(String title, String yesMessage, String noMessage){

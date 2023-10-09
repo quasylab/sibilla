@@ -35,7 +35,7 @@ import java.util.LinkedList;
  */
 public class TupleSpace {
 
-	private Node root;
+	private final Node root;
 	private Weighter<Tuple> weighter;
 
 	public TupleSpace() {

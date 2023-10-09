@@ -45,7 +45,7 @@ public abstract class QueuedSimulationManager<S extends State> extends AbstractS
 
     private final BlockingQueue<SimulationTask<S>> pendingTasks = new LinkedBlockingQueue<>();
     private int runningTasks = 0;
-    private boolean running = true;
+    private final boolean running = true;
 
     public QueuedSimulationManager(RandomGenerator random, SimulationMonitor monitor) {
         super(random, monitor);

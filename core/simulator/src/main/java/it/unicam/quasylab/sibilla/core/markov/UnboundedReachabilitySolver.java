@@ -40,9 +40,9 @@ import java.util.stream.Collectors;
  */
 public class UnboundedReachabilitySolver<S> {
 
-	private Predicate<S> condition;
-	private Predicate<S> goal;
-	private MarkovChain<S> chain;
+	private final Predicate<S> condition;
+	private final Predicate<S> goal;
+	private final MarkovChain<S> chain;
 	private Set<S> yesNodes;
 	private Set<S> computingNodes;
 	private Map<S,Integer> index;

@@ -81,7 +81,7 @@ public class RobotState {
 
 
 
-    private Map<YodaVariable, SibillaValue> map;
+    private final Map<YodaVariable, SibillaValue> map;
 
     public RobotState(Map<YodaVariable, SibillaValue> map) {
         this.map = map;

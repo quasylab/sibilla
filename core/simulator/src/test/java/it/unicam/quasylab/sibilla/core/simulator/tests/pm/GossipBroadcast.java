@@ -90,11 +90,11 @@ public class GossipBroadcast {
 		System.exit(1);
 	}
 
-	private double lambda_s;
+	private final double lambda_s;
 
-	private double lambda_a;
+	private final double lambda_a;
 
-	private double k;
+	private final double k;
 
 	public GossipBroadcast(double k, double lambda_s, double lambda_a) {
 		this.k = k;

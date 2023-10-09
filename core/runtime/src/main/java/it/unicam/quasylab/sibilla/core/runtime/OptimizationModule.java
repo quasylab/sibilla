@@ -39,14 +39,15 @@ public class OptimizationModule {
     private ToDoubleFunction<Map<String, Double>> objectiveFunction;
     private ToDoubleFunction<Map<String, Double>> surrogateFunction;
 
-
     private SurrogateModel surrogateModel;
     private SurrogateMetrics surrogateMetrics;
 
     private String surrogateName;
     private String optimizationName;
     private String samplingName;
-    private int trainingSetSize;
+    private int dataSetSize;
+
+    private double trainingDatasetPortion;
     private List<Predicate<Map<String, Double>>> constraints= new ArrayList<>();
     private List<Interval> intervals= new ArrayList<>();
     private HyperRectangle searchSpace;
@@ -59,14 +60,15 @@ public class OptimizationModule {
 
 
     public OptimizationModule(){
-        this.reset();
+        this.initialise();
     }
 
     public void setDefaultParameter(){
         this.samplingName = "lhs";
         this.surrogateName = "rf";
         this.optimizationName = "pso";
-        this.trainingSetSize = 50;
+        this.dataSetSize = 50;
+        this.trainingDatasetPortion = 0.9;
         resetProperties();
         resetConstraints();
         resetInterval();
@@ -81,7 +83,7 @@ public class OptimizationModule {
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    public void reset(){
+    public void initialise(){
         setDefaultParameter();
     }
 
@@ -165,13 +167,14 @@ public class OptimizationModule {
         this.surrogateModel = SurrogateModelRegistry
                 .getInstance()
                 .get(surrogateName)
-                .getSurrogateModel(this.dataSet,0.85,properties);
-        this.surrogateMetrics = this.surrogateModel.getTrainingSetMetrics();
+                .getSurrogateModel(this.dataSet,this.trainingDatasetPortion,properties);
+        //this.surrogateMetrics = this.surrogateModel.getTrainingSetMetrics();
     }
 
     public void generateSurrogateFunction(){
         generateSurrogateModel();
         this.surrogateFunction = this.surrogateModel.getSurrogateFunction(true);
+        this.surrogateMetrics = this.surrogateModel.getTrainingSetMetrics();
     }
 
 
@@ -180,7 +183,7 @@ public class OptimizationModule {
         this.dataSet = new DataSet(
                 this.searchSpace,
                 SamplingStrategyRegistry.getInstance().get(samplingName).getSamplingTask(),
-                this.trainingSetSize,
+                this.dataSetSize,
                 this.objectiveFunction);
     }
 
@@ -191,9 +194,17 @@ public class OptimizationModule {
         this.searchSpace = new HyperRectangle(this.intervals);
     }
 
-    public void setTrainingSetSize(int trainingSetSize) {
-        this.trainingSetSize = trainingSetSize;
+    public void setDataSetSize(int dataSetSize) {
+        this.dataSetSize = dataSetSize;
     }
+
+
+
+    public void setTrainingDatasetPortion(double trainingDatasetPortion) {
+        this.trainingDatasetPortion = trainingDatasetPortion;
+    }
+
+
 
     public void addInterval(String intervalName, double lowerBound, double upperBound){
         OptionalInt indexOpt = IntStream.range(0, intervals.size())

@@ -42,9 +42,9 @@ class SequenceOfPositiveIntervalsTest {
 
     private static final List<Interval> INTERVALS4 = List.of(new Interval(1, 20), new Interval(22, 25), new Interval(30, 50));
 
-    private DoublePredicate SIN_GENERATOR = d -> Math.sin(d)>0;
+    private final DoublePredicate SIN_GENERATOR = d -> Math.sin(d)>0;
 
-    private DoublePredicate COS_GENERATOR = d -> Math.sin(d)>0;
+    private final DoublePredicate COS_GENERATOR = d -> Math.sin(d)>0;
 
 
     public static BooleanSignal getSequence(double dt, int size, DoublePredicate predicate) {

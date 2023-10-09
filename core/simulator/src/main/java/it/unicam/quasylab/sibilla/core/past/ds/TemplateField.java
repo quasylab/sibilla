@@ -28,8 +28,8 @@ package it.unicam.quasylab.sibilla.core.past.ds;
  */
 public interface TemplateField {
 
-	public boolean match(Object o);
+	boolean match(Object o);
 
-	public boolean implies(TemplateField f);
+	boolean implies(TemplateField f);
 
 }

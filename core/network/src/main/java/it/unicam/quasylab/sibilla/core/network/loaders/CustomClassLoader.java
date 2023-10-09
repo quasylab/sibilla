@@ -41,7 +41,7 @@ public class CustomClassLoader extends ClassLoader {
      * Map that contains the names of all the classes loaded into memory through this loader.
      * All the names are associated with the byte array containing the datas of the .class file of the class related to the given name.
      */
-    private static Map<String, byte[]> classes = new HashMap<>();
+    private static final Map<String, byte[]> classes = new HashMap<>();
 
     /**
      * Retrieves the byte array associated to a class name that was previously loaded through this loader.

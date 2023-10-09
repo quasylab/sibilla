@@ -59,10 +59,10 @@ public class Common {
 
 
 
-    public static void print1D(int arr[]){
+    public static void print1D(int[] arr){
         System.out.println(Arrays.toString(arr));
     }
-    public static void print2D(int mat[][]){
+    public static void print2D(int[][] mat){
         for (int[] row : mat)
             System.out.println(Arrays.toString(row));
     }
@@ -99,7 +99,7 @@ public class Common {
     }
 
     // Function to get determinant of matrix
-    static int determinantOfMatrix(int mat[][], int n)
+    static int determinantOfMatrix(int[][] mat, int n)
     {
         int num1, num2, det = 1, index,
                 total = 1; // Initialize result

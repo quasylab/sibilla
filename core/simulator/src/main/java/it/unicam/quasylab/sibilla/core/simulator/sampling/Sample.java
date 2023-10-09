@@ -74,17 +74,14 @@ public class Sample<S> implements Externalizable {
         if (Double.doubleToLongBits(time) != Double.doubleToLongBits(other.time))
             return false;
         if (value == null) {
-            if (other.value != null)
-                return false;
-        } else if (!value.equals(other.value))
-            return false;
-        return true;
+            return other.value == null;
+        } else return value.equals(other.value);
     }
 
 
     @Override
     public String toString() {
-        return time + ":" + value;
+        return time + ":" + value.toString();
     }
 
     public double getTime() {
@@ -106,4 +103,6 @@ public class Sample<S> implements Externalizable {
         this.time = in.readDouble();
         this.value = (S) in.readObject();
     }
+
+
 }

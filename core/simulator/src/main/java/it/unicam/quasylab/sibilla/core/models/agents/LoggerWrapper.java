@@ -25,8 +25,8 @@ package it.unicam.quasylab.sibilla.core.models.agents;
 
 public class LoggerWrapper<W extends World> implements AgentModelBuilder<W> {
 
-    private AgentModelBuilder<W> modelBuilder;
-    private AgentLogBuilder loggerBuilder;
+    private final AgentModelBuilder<W> modelBuilder;
+    private final AgentLogBuilder loggerBuilder;
 
     public LoggerWrapper(AgentModelBuilder<W> modelBuilder, AgentLogBuilder loggerBuilder) {
         this.modelBuilder = modelBuilder;

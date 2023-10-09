@@ -39,13 +39,13 @@ public class SlaveStateViewsEvaluator {
     private final SlamStateViews views;
     private final SlamState state;
 
-    private Map<String, Boolean> cachedPredicate = new HashMap<>();
+    private final Map<String, Boolean> cachedPredicate = new HashMap<>();
 
-    private Map<String, SlamValue> cachedGlobalViews = new HashMap<>();
+    private final Map<String, SlamValue> cachedGlobalViews = new HashMap<>();
 
-    private Map<SlamAgent, Map<String, Function<SlamState, SlamValue>>> cachedLocalFunctions = new HashMap<>();
+    private final Map<SlamAgent, Map<String, Function<SlamState, SlamValue>>> cachedLocalFunctions = new HashMap<>();
 
-    private Map<SlamAgent, Map<String, SlamValue>> cachedLocalViews = new HashMap<>();
+    private final Map<SlamAgent, Map<String, SlamValue>> cachedLocalViews = new HashMap<>();
 
     /**
      * Creates a new evaluator that resolves the given views on the given state.

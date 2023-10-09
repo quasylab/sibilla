@@ -44,7 +44,7 @@ public class PopulationRuleGenerator extends PopulationModelBaseVisitor<List<Pop
 
     private final EvaluationEnvironment environment;
     private final PopulationRegistry registry;
-    private List<PopulationRule> rules;
+    private final List<PopulationRule> rules;
 
 
     public PopulationRuleGenerator(EvaluationEnvironment environment, PopulationRegistry registry) {

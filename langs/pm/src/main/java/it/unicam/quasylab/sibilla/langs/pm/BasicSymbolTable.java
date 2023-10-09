@@ -210,10 +210,10 @@ public class BasicSymbolTable implements SymbolTable {
         if (constants.containsKey(name)) { return constants.get(name); }
         if (parameters.containsKey(name)) { return parameters.get(name); }
         if (variables.containsKey(name)) { return variables.get(name).getContext(); }
-        if (measures.containsKey(name)) { return measures.get(name); };
-        if (rules.containsKey(name)) { return rules.get(name); };
-        if (species.containsKey(name)) { return species.get(name); };
-        if (systems.containsKey(name)) { return systems.get(name); };
+        if (measures.containsKey(name)) { return measures.get(name); }
+        if (rules.containsKey(name)) { return rules.get(name); }
+        if (species.containsKey(name)) { return species.get(name); }
+        if (systems.containsKey(name)) { return systems.get(name); }
         return null;
     }
 

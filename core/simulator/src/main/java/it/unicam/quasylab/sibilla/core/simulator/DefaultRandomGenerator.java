@@ -34,7 +34,7 @@ import java.util.Random;
 public class DefaultRandomGenerator extends AbstractRandomGenerator implements Serializable{
 
 	private static final long serialVersionUID = -8354414629214279876L;
-	private Random random = new Random();
+	private final Random random = new Random();
 
 	public DefaultRandomGenerator(long seed) {
 		super();

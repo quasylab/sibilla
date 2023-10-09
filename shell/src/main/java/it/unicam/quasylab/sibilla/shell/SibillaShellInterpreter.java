@@ -613,11 +613,30 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
         return false;
     }
 
+//    @Override
+//    public Boolean visitTraining_set_setting(SibillaScriptParser.Training_set_settingContext ctx) {
+//        try {
+//            runtime.setDataSetSize(Integer.parseInt(ctx.training_set_size.getText()));
+//            Optional<String> samplingNameOptional = Optional.ofNullable(getStringContent(ctx.sampling_strategy_name));
+//            samplingNameOptional.ifPresent(runtime::setSamplingStrategy);
+//            showMessage(OK_MESSAGE);
+//            return true;
+//        } catch (Exception e){
+//            showErrorMessage(e.getMessage());
+//        }
+//        return false;
+//    }
+
+
     @Override
-    public Boolean visitTraining_set_setting(SibillaScriptParser.Training_set_settingContext ctx) {
+    public Boolean visitDataset_setting(SibillaScriptParser.Dataset_settingContext ctx) {
         try {
-            runtime.setTrainingSetSize(Integer.parseInt(ctx.training_set_size.getText()));
+            runtime.setDataSetSize(Integer.parseInt(ctx.dataset_size.getText()));
             Optional<String> samplingNameOptional = Optional.ofNullable(getStringContent(ctx.sampling_strategy_name));
+            //TODO
+            //if (ctx.test_percentage != null) runtime.setTrainingSetProportion(ctx.sampling_strategy_name);
+            Optional<Double> testPercentageOptional = Optional.of(Double.parseDouble(ctx.test_percentage.getText()));
+            testPercentageOptional.ifPresent(aDouble -> runtime.setTrainingSetProportion(1 - aDouble));
             samplingNameOptional.ifPresent(runtime::setSamplingStrategy);
             showMessage(OK_MESSAGE);
             return true;
@@ -693,7 +712,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
             if(ctx.sampling_strategy.getText() != null)
                 runtime.setSamplingStrategy(ctx.sampling_strategy.getText());
             if(ctx.number_of_samples.getText() != null)
-                runtime.setTrainingSetSize(Integer.parseInt(ctx.number_of_samples.getText()));
+                runtime.setDataSetSize(Integer.parseInt(ctx.number_of_samples.getText()));
             runtime.generateTrainingSet();
             String messageStringBuilder = "Training set generated : \n"+runtime.getTrainingSetInfo();
             showMessage(messageStringBuilder);

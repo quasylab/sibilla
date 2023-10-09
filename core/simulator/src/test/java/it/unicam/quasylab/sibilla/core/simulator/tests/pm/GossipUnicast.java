@@ -88,9 +88,9 @@ public class GossipUnicast {
 
 	private double p_d;
 
-	private double lambda_s;
+	private final double lambda_s;
 
-	private double lambda_a;
+	private final double lambda_a;
 
 	private double p_channge;
 

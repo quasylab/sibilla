@@ -41,7 +41,7 @@ public interface SimulationMonitor {
 
 	boolean isCancelled();
 	
-	default void update(double time) { };
+	default void update(double time) { }
 
-	void registerPropertyChangeListener(PropertyChangeListener l);
+    void registerPropertyChangeListener(PropertyChangeListener l);
 }

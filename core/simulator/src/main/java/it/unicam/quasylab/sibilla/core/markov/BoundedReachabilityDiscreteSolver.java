@@ -43,9 +43,9 @@ import java.util.stream.Collectors;
  */
 public class BoundedReachabilityDiscreteSolver<S> {
 
-	private Predicate<S> condition;
-	private Predicate<S> goal;
-	private DiscreteTimeMarkovChain<S> chain;
+	private final Predicate<S> condition;
+	private final Predicate<S> goal;
+	private final DiscreteTimeMarkovChain<S> chain;
 	private RealMatrix matrix;
 	private RealVector p0;
 	private LinkedList<RealVector> vectorResults;

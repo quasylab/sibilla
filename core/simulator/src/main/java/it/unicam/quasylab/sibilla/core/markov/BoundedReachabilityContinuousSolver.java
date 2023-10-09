@@ -44,16 +44,16 @@ import java.util.stream.IntStream;
  */
 public class BoundedReachabilityContinuousSolver<S> {
 
-	private Predicate<S> condition;
-	private Predicate<S> goal;
-	private ContinuousTimeMarkovChain<S> chain;
+	private final Predicate<S> condition;
+	private final Predicate<S> goal;
+	private final ContinuousTimeMarkovChain<S> chain;
 	private RealMatrix matrix;
 	private RealVector p0;
 	private LinkedList<RealVector> vectorResults;
 	private Set<S> yesNodes;
 	private Set<S> computingNodes;
 	private Map<S, Integer> index;
-	private double epsilon;
+	private final double epsilon;
 	
 	public BoundedReachabilityContinuousSolver( 
 			ContinuousTimeMarkovChain<S> chain,
@@ -140,7 +140,7 @@ public class BoundedReachabilityContinuousSolver<S> {
 	private void computeStateIndex() {
 		AtomicInteger counter = new AtomicInteger(0);
 		index = computingNodes.stream().collect(Collectors.toConcurrentMap(s -> s,s -> counter.getAndIncrement()));
-		yesNodes.stream().forEach(s -> index.put(s, counter.getAndIncrement()));;
+		yesNodes.stream().forEach(s -> index.put(s, counter.getAndIncrement()));
 	}
 
 

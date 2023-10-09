@@ -38,8 +38,8 @@ import java.util.function.Predicate;
  */
 public class ExecutionEnvironment<S extends ImmutableState> {
 
-    private RandomGenerator rg;
-    private InteractiveModel<S> model;
+    private final RandomGenerator rg;
+    private final InteractiveModel<S> model;
     private LinkedList<TimeStep<S>> history;
     private boolean completed = false;
     private double time;

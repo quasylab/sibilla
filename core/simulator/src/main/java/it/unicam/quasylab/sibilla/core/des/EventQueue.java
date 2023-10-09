@@ -33,7 +33,7 @@ public class EventQueue<S> {
 
     private final PriorityQueue<Event<S>> scheduledEvents;
     private final List<Event<S>> pendingEvents;
-    private double time = 0.0;
+    private final double time = 0.0;
 
     public EventQueue() {
         this.scheduledEvents = new PriorityQueue<>(INITIAL_CAPACITY, new EventComparator<>());

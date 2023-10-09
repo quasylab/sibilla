@@ -34,10 +34,10 @@ import java.util.List;
 
 public class TypeExpressionChecker extends PopulationModelBaseVisitor<SymbolType> {
 
-    private SymbolTable table;
-    private boolean populationAllowed;
-    private boolean timeDependent;
-    private List<ModelBuildingError> errors;
+    private final SymbolTable table;
+    private final boolean populationAllowed;
+    private final boolean timeDependent;
+    private final List<ModelBuildingError> errors;
 
     public TypeExpressionChecker(SymbolTable table) {
         this(table, new LinkedList<>());

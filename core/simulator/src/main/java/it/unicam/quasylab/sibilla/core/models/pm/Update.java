@@ -80,7 +80,7 @@ public class Update implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		return name + ":" + update.toString();
+		return name + ":" + update;
 	}
 
 

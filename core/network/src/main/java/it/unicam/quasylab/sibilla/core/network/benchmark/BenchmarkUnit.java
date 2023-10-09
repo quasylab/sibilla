@@ -44,8 +44,8 @@ import java.util.concurrent.Callable;
 public class BenchmarkUnit {
 
     private int executedRuns = 0;
-    private String fileName;
-    private String dirName;
+    private final String fileName;
+    private final String dirName;
 
     /**
      * Initializes a new unit

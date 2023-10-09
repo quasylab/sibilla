@@ -48,6 +48,7 @@ public class SlidingWindow {
             result.add(doubleSample.getTime(), doubleSample.getValue());
         }
         complete(result, w, s.getEnd());
+        result.setEnd(s.getEnd());
         return result;
     }
 

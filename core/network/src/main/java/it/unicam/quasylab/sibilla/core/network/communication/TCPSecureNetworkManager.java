@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  */
 public class TCPSecureNetworkManager implements TCPNetworkManager {
 
-    private Logger LOGGER;
+    private final Logger LOGGER;
 
     private Socket socket;
     private DataInputStream dataInputStream;

@@ -44,7 +44,7 @@ import java.util.List;
  * @author Zamponi Marco
  */
 public class FstMasterBenchmarkEnvironment<S extends State> extends MasterBenchmarkEnvironment {
-    private Serializer fstSerializer;
+    private final Serializer fstSerializer;
 
     FstMasterBenchmarkEnvironment(String benchmarkName, NetworkInfo slaveInfo, ComputationResultSerializerType type, int step, int threshold, int repetitions, int resultsSize) throws IOException {
         super(benchmarkName, slaveInfo, type, step, threshold, repetitions, resultsSize);

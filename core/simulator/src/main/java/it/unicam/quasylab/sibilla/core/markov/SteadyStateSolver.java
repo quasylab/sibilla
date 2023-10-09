@@ -32,13 +32,13 @@ import java.util.*;
  */
 public class SteadyStateSolver<S> {
 
-	private ContinuousTimeMarkovChain<S> chain;
+	private final ContinuousTimeMarkovChain<S> chain;
 	private LinkedList<Set<S>> bscc;
-	private S init;
-	private Map<S,Integer> bsccIndex = new HashMap<S,Integer>();
-	private Map<S,Integer> lowIndex = new HashMap<S,Integer>();
-	private List<S> bsccQueue = new LinkedList<>();
-	private Set<S> inQueue = new HashSet<S>();
+	private final S init;
+	private final Map<S,Integer> bsccIndex = new HashMap<S,Integer>();
+	private final Map<S,Integer> lowIndex = new HashMap<S,Integer>();
+	private final List<S> bsccQueue = new LinkedList<>();
+	private final Set<S> inQueue = new HashSet<S>();
 	private int indexCounter = 0;
 	
 	public SteadyStateSolver(ContinuousTimeMarkovChain<S> chain, S init) {

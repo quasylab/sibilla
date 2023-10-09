@@ -113,10 +113,10 @@ public class DiscoverableBasicSimulationServer extends BasicSimulationServer {
         try {
             this.knownMasters.add(masterInfo);
             manager.writeObject(serializer.serialize(this.localServerInfo), masterInfo.getAddress(), masterInfo.getPort());
-            LOGGER.info(String.format("Sent the discovery response to the master: %s", masterInfo.toString()));
+            LOGGER.info(String.format("Sent the discovery response to the master: %s", masterInfo));
             LOGGER.info(String.format("Currently known masters - %s", knownMasters.toString()));
         } catch (IOException e) {
-            LOGGER.severe(String.format("[%s] Network communication failure during the discovery message management - Master: %s", e.getMessage(), masterInfo.toString()));
+            LOGGER.severe(String.format("[%s] Network communication failure during the discovery message management - Master: %s", e.getMessage(), masterInfo));
         }
     }
 }

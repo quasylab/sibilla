@@ -132,6 +132,14 @@ public interface SibillaModule {
      */
     String getConfigurationInfo(String name);
 
+
+    /**
+     * Get the configuration that was set
+     *
+     * @return returns the configuration that was set
+     */
+    Configuration getCurrentConfiguration();
+
     /**
      * Set initial configuration for simulations and property checking.
      *
@@ -141,12 +149,6 @@ public interface SibillaModule {
      */
     boolean setConfiguration(String name, double ... args);
 
-    /**
-     * Get the configuration that was set
-     *
-     * @return returns the configuration that was set
-     */
-    Configuration getCurrentConfiguration();
 
     /**
      * Returns the array of measures defined in the module.

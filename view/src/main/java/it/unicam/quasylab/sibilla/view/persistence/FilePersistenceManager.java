@@ -6,7 +6,7 @@ import java.io.*;
 
 public class FilePersistenceManager implements PersistenceManager<String>{
     File DEFAULT_JSON_FILE = new File("view\\src\\main\\resources\\persistence\\ProjectLoadedPersistence.json");
-    private Gson gson;
+    private final Gson gson;
 
     public FilePersistenceManager(Gson gson) {
         this.gson = gson;
@@ -36,7 +36,7 @@ public class FilePersistenceManager implements PersistenceManager<String>{
         }else {
             FileWriter writer = new FileWriter(DEFAULT_JSON_FILE);
             writer.close();
-        };
+        }
     }
 
     @Override

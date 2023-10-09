@@ -77,9 +77,7 @@ public class VectorState<S> {
 		if (getClass() != obj.getClass())
 			return false;
 		VectorState<?> other = (VectorState<?>) obj;
-		if (!Arrays.deepEquals(state, other.state))
-			return false;
-		return true;
+		return Arrays.deepEquals(state, other.state);
 	}
 
 	@Override

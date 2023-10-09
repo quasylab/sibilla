@@ -49,7 +49,7 @@ command : module_command
         | search_space_interval
         | constraints_definition
         | optimization_command
-        | training_set_setting
+        | dataset_setting
         | reset_optimization_command
         | sample_command
         | save_samples_command
@@ -171,8 +171,8 @@ constraints_definition :
     'add' 'constraint' constraint=expr
 ;
 
-training_set_setting :
-    'training''set' 'size' training_set_size=INTEGER ('sampling' sampling_strategy_name=STRING)?
+dataset_setting :
+    'dataset' 'size' dataset_size=INTEGER ('test' test_percentage=REAL)? ('sampling' sampling_strategy_name=STRING)?
 ;
 
 optimization_command :

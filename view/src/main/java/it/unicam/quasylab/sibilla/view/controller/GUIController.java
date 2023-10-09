@@ -42,7 +42,7 @@ public class GUIController {
     private File persistenceFile;
     private BasicSettings lastSimulatedSettings;
     private Map<File, TextArea> modifiedFile;
-    private Map<File, TableView<MainView.TableViewRow>> readOnlyFile;
+    private final Map<File, TableView<MainView.TableViewRow>> readOnlyFile;
 
     private final SibillaRuntime sibillaRuntime;
     private final FilePersistenceManager filePersistenceManager;

@@ -34,8 +34,8 @@ import java.util.List;
  */
 public class WeightedElement<S> implements WeightedStructure<S> {
 
-	private double w;
-	private S s;
+	private final double w;
+	private final S s;
 
 	public WeightedElement(double w, S s) {
 		this.w = w;

@@ -42,11 +42,11 @@ import java.util.stream.IntStream;
  */
 public class TransientProbabilityContinuousSolver<S> {
 
-	private ContinuousTimeMarkovChain<S> chain;
+	private final ContinuousTimeMarkovChain<S> chain;
 	private RealMatrix matrix;
-	private S init;
+	private final S init;
 	private LinkedList<RealVector> vectorResults;
-	private double epsilon;
+	private final double epsilon;
 	private Map<S, Integer> index;
 	
 	public TransientProbabilityContinuousSolver( 

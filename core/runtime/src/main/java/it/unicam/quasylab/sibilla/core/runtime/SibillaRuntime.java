@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Predicate;
@@ -632,8 +631,12 @@ public final class SibillaRuntime {
         this.optimizationModule.addConstraint(predicate);
     }
 
-    public void setTrainingSetSize(int trainingSetSize){
-        this.optimizationModule.setTrainingSetSize(trainingSetSize);
+    public void setDataSetSize(int dataSetSize){
+        this.optimizationModule.setDataSetSize(dataSetSize);
+    }
+
+    public void setTrainingSetProportion(double proportion){
+        this.optimizationModule.setTrainingDatasetPortion(proportion);
     }
 
     public void setSamplingStrategy(String samplingName){
@@ -712,7 +715,7 @@ public final class SibillaRuntime {
     public Table getTrainingSet() {
         return this.optimizationModule.getTrainingSet();
     }
-    public void resetOptimizationSettings(){ this.optimizationModule.reset();}
+    public void resetOptimizationSettings(){ this.optimizationModule.initialise();}
 
     public Map<String,Double> getOptimalSolution(){
         return this.optimizationModule.getOptimalCoordinates();

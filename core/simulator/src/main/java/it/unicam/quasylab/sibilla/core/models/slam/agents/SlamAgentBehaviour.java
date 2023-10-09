@@ -39,7 +39,7 @@ public class SlamAgentBehaviour {
 
 
     private SlamAgentState initialState;
-    private Map<String, SlamAgentState> states;
+    private final Map<String, SlamAgentState> states;
 
     /**
      * Creates an empty agent behaviour.

@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 public class ThreadSimulationManager<S extends State> extends AbstractSimulationManager<S> {
 
     private static final Logger LOGGER = Logger.getLogger(ThreadSimulationManager.class.getName());
-    private ExecutorService executor;
+    private final ExecutorService executor;
     private int pendingTasks = 0;
 
     public ThreadSimulationManager(RandomGenerator random, SimulationMonitor monitor) {

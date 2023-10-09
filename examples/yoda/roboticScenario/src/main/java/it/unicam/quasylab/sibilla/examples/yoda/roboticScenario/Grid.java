@@ -74,10 +74,7 @@ public class Grid implements YodaScene {
         if ((posy == -1)) {
             return true;
         }
-        if (this.obstacles.stream().anyMatch(o -> o.isPlacedAt(posx, posy))){
-            return true;
-        }
-        return false;
+        return this.obstacles.stream().anyMatch(o -> o.isPlacedAt(posx, posy));
     }
 
 
@@ -103,7 +100,7 @@ public class Grid implements YodaScene {
         int multi = 0;
         int counter = 0;
         while (counter < numberOfObstacles) {
-            multi = (int) counter/width;
+            multi = counter /width;
             int x = counter-(width*multi);
             int y = 1+rg.nextInt(height-2);
             if (!coordinates[x][y]) {
@@ -153,7 +150,7 @@ public class Grid implements YodaScene {
 
     public static Grid generateCulDeSac(RandomGenerator rg, int width, int height) {
         LinkedList<Obstacle> obstacles = new LinkedList<>();
-        int numberOfCulDeSac = (int) width/10;
+        int numberOfCulDeSac = width /10;
         for (int i = 0; i<numberOfCulDeSac; i++){
             int startingX = i*10 + rg.nextInt(7);
             int startingY = 1+ rg.nextInt(height-4);

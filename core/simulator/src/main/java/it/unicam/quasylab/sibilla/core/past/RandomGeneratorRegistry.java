@@ -42,9 +42,9 @@ public class RandomGeneratorRegistry {
 	
 	private static RandomGeneratorRegistry instance;
 	
-	private RandomGenerator rg;
+	private final RandomGenerator rg;
 	
-	private HashMap<Thread, RandomGenerator> registry;
+	private final HashMap<Thread, RandomGenerator> registry;
 	
 	private RandomGeneratorRegistry() {
 		this.registry = new HashMap<>();

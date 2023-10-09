@@ -53,14 +53,14 @@ public abstract class MasterBenchmarkEnvironment<S extends State> {
     protected ComputationResultSerializerType benchmarkType;
     protected BenchmarkUnit mainBenchmarkUnit;
     protected BenchmarkUnit sendBenchmarkUnit;
-    private Serializer serializer;
+    private final Serializer serializer;
     protected Logger LOGGER;
-    private TCPNetworkManager netManager;
+    private final TCPNetworkManager netManager;
     protected final String benchmarkName;
     private final int step;
     private final int threshold;
     private final int repetitions;
-    private int resultsSize;
+    private final int resultsSize;
     private int sentTasksCount;
 
     protected MasterBenchmarkEnvironment(String benchmarkName, NetworkInfo slaveInfo, ComputationResultSerializerType benchmarkType, int step, int threshold, int repetitions, int resultsSize) throws IOException {
