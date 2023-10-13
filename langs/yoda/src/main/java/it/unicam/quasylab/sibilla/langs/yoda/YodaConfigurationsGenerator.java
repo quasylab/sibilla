@@ -116,7 +116,7 @@ public class YodaConfigurationsGenerator extends YodaModelBaseVisitor<Boolean> {
 
         private int agentCounter;
 
-        private Map<String, SibillaValue> localVariables = new HashMap<>();
+        private final Map<String, SibillaValue> localVariables = new HashMap<>();
 
         public YodaCollectiveExpressionEvaluator(RandomGenerator rg) {
             this.rg = rg;

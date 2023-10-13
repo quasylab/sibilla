@@ -47,8 +47,8 @@ class TestKnutYaoAlgorithm {
 		D4,
 		D5,
 		D6		
-	};
-	
+	}
+
 	private Map<STATES,Double> getForwardStep0() {
 		HashMap<STATES,Double> toReturn = new HashMap<>();
 		toReturn.put(STATES.S1, 1.0);

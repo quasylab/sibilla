@@ -655,9 +655,9 @@ public final class SibillaMap<K extends Comparable<K>, V> implements Iterable<Ma
 
         @Override
         public String toString() {
-            return (this.leftNode!=null?this.leftNode.toString()+", ":"")+
+            return (this.leftNode!=null? this.leftNode +", ":"")+
                     entry.toString()+
-                    (this.rightNode!=null?", "+this.rightNode.toString():"");
+                    (this.rightNode!=null?", "+ this.rightNode :"");
         }
     }
 

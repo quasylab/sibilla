@@ -23,9 +23,13 @@
 
 package it.unicam.quasylab.sibilla.core.runtime;
 
+import tech.tablesaw.api.Row;
+import tech.tablesaw.api.Table;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -98,7 +102,8 @@ public class CSVWriter {
      * @return the row of a CSV file resulting from the given array of double
      */
     public static String getCSVRow(double[] row) {
-        return Arrays.stream(row).boxed().map(d -> String.format("%f",d)).collect(Collectors.joining(", "));
+        return Arrays.stream(row).boxed().map(d -> String.format(java.util.Locale.US,"%f", d)).collect(Collectors.joining(", "));
+        //return Arrays.stream(row).boxed().map(d -> String.format("%f",d)).collect(Collectors.joining(", "));
     }
 
     /**
@@ -112,6 +117,37 @@ public class CSVWriter {
                 .map(CSVWriter::getCSVRow)
                 .collect(Collectors.joining("\n"));
     }
+
+    /**
+     * Returns the String containing the CSV document associated with the given table.
+     *
+     * @param table data to save in CSV format
+     * @return the String containing the CSV document associated with the given table.
+     */
+    public static String getCSVStringFromTable(Table table){
+        StringBuilder csvString = new StringBuilder();
+
+        List<String> titles = table.columnNames();
+        int numberOfColumn = table.columnCount();
+        int numberOfRow = table.rowCount();
+
+
+        for (int i = 0; i < numberOfColumn-1; i++) {
+            csvString.append(titles.get(i)).append(",");
+        }
+
+        csvString.append(titles.get(numberOfColumn-1)).append("\n");
+
+        for (int i = 0; i < numberOfRow; i++) {
+            Row row = table.row(i);
+            for (int j = 0; j < numberOfColumn-1; j++) {
+                csvString.append(row.getDouble(j)).append(",");
+            }
+            csvString.append(row.getDouble(numberOfColumn-1)).append("\n");
+        }
+        return csvString.toString();
+    }
+
 
     /**
      * Prints the CSV document resulting from the given data with the given {@link PrintWriter}.
@@ -138,6 +174,23 @@ public class CSVWriter {
         File output = new File(outputFolder,prefix+name+postfix+".csv");
         PrintWriter writer = new PrintWriter(output);
         writeCSV(writer, data);
+        writer.close();
+    }
+
+
+    /**
+     * Saves the table with a given name. The generated file will be placed in {@link #getOutputFolder()}.
+     * The name of the file will be <code>getPrefix()+name+getPostfix()+".csv"</code>.
+     *
+     *
+     * @param name name of the data to save
+     * @param table data to save in CSV format
+     * @throws IOException if an error occurred while saving data
+     */
+    public void write(String name, Table table) throws IOException {
+        File output = new File(outputFolder,prefix+name+postfix+".csv");
+        FileWriter writer = new FileWriter(output);
+        writer.write(getCSVStringFromTable(table));
         writer.close();
     }
 

@@ -31,8 +31,6 @@ import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import java.io.FileNotFoundException;
 import java.net.UnknownHostException;
 
-;
-
 /**
  * @author loreti
  *

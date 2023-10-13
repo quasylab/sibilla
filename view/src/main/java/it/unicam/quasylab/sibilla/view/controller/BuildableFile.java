@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BuildableFile<T extends Settings> implements Buildable<T>{
-    private String file;
+    private final String file;
     private String module;
     private List<T> settingsList;
 

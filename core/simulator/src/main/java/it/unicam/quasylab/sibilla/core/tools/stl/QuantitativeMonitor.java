@@ -33,25 +33,20 @@ public interface QuantitativeMonitor<S> {
     Signal monitor(Trajectory<S> trajectory);
 
     class AtomicMonitor<S> implements QuantitativeMonitor<S> {
-
         private final ToDoubleFunction<S> atomicFunction;
-
         public AtomicMonitor(ToDoubleFunction<S> atomicFunction) {
             this.atomicFunction = atomicFunction;
         }
-
         @Override
-        public Signal monitor(Trajectory<S> trajectory) {
-            return null;
-        }
+        public Signal monitor(Trajectory<S> trajectory) {return trajectory.apply(atomicFunction);}
     }
 
     static <S> QuantitativeMonitor<S> conjunction(QuantitativeMonitor<S> m1, QuantitativeMonitor<S> m2) {
-        return trj -> Signal.apply(m1.monitor(trj), Math::max, m2.monitor(trj));
+        return trj -> Signal.apply(m1.monitor(trj), Math::min, m2.monitor(trj));
     }
 
     static <S> QuantitativeMonitor<S> disjunction(QuantitativeMonitor<S> m1, QuantitativeMonitor<S> m2) {
-        return trj -> Signal.apply(m1.monitor(trj), Math::min, m2.monitor(trj));
+        return trj -> Signal.apply(m1.monitor(trj), Math::max, m2.monitor(trj));
     }
 
     static <S> QuantitativeMonitor<S> negation(QuantitativeMonitor<S> m) {

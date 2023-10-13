@@ -7,7 +7,7 @@ import java.io.*;
 
 public class SettingsPersistenceManager implements PersistenceManager<BasicBuildableLedger> {
     File DEFAULT_JSON_FILE = new File("view\\src\\main\\resources\\persistence\\SettingsPersistence.json");
-    private Gson gson;
+    private final Gson gson;
 
     public SettingsPersistenceManager(Gson gson) {
         this.gson = gson;

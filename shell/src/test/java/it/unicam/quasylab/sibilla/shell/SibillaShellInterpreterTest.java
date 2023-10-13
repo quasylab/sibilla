@@ -37,4 +37,59 @@ class SibillaShellInterpreterTest {
         interpreter.execute("run \"groupies.sib\"");
     }
 
+    @Test
+    public void testOptimizationProperty() {
+        SibillaShellInterpreter interpreter = new SibillaShellInterpreter();
+        interpreter.execute("optimizes using pso with surrogate rfr");
+        try{
+            interpreter.execute("set optimization property \"not_an_optimization_property\" \"5\" ");
+        } catch(Exception e){
+            assertTrue(e.getMessage().contains("particles_number"));
+            assertTrue(e.getMessage().contains("Integer"));
+        }
+    }
+
+    @Test
+    public void testSurrogateProperty() {
+        SibillaShellInterpreter interpreter = new SibillaShellInterpreter();
+        interpreter.execute("optimizes using pso with surrogate rfr");
+        try{
+            interpreter.execute("set optimization property \"not_an_surrogate_property\" \"5\" ");
+        } catch(Exception e){
+            assertTrue(e.getMessage().contains("shrinkage"));
+            assertTrue(e.getMessage().contains("Real number"));
+        }
+    }
+
+    /**
+     *      search_space_interval :
+     *          'search' 'in' variable=STRING 'in' '[' lower_bound=expr',' upper_bound=expr ']'
+     *      ;
+     */
+    @Test
+    public void testInterval() {
+        SibillaShellInterpreter interpreter = new SibillaShellInterpreter();
+        interpreter.execute("search in \"interval\" in [1.5,3^3^2]");
+        interpreter.execute("search in \"interval\" in [1.5,3^(3^2)]");
+    }
+
+
+    @Test
+    public void testConstraint() {
+        SibillaShellInterpreter interpreter = new SibillaShellInterpreter();
+        //interpreter.execute("add constraint \"x\" >= \"y\" + 2 ");
+        interpreter.execute("add constraint (x >= y + 2) ");
+        interpreter.execute("add constraint x >= y + 2 ");
+    }
+
+    @Test
+    public void testExprOpt() {
+        SibillaShellInterpreter interpreter = new SibillaShellInterpreter();
+
+        interpreter.execute("optimizes using \"pso\" with surrogate \"rf\"");
+        interpreter.execute("search in \"x\" in [-10,10]");
+        interpreter.execute("min x^2+x+3");
+
+    }
+
 }

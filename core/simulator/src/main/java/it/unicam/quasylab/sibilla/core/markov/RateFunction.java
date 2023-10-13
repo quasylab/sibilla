@@ -30,6 +30,6 @@ package it.unicam.quasylab.sibilla.core.markov;
 @FunctionalInterface
 public interface RateFunction<S> {
 
-	public double valueOf(S s);
+	double valueOf(S s);
 	
 }

@@ -196,7 +196,7 @@ public  abstract class MarkovChain<S> {
 		index.forEach((s1,i1) -> {
 			rowFunction.apply(s1).forEach(p -> {
 				rm.addToEntry(i1, index.get(p.getKey()), p.getValue());
-			});;
+			});
 		});
 		return rm;
 	}

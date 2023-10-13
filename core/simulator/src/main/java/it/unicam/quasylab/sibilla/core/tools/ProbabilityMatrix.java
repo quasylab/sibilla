@@ -23,7 +23,6 @@
 
 package it.unicam.quasylab.sibilla.core.tools;
 
-import it.unicam.quasylab.sibilla.core.models.pm.Population;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.HashMap;

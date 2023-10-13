@@ -44,7 +44,7 @@ import java.util.List;
  * @author Zamponi Marco
  */
 public class ApacheMasterBenchmarkEnvironment<S extends State> extends MasterBenchmarkEnvironment {
-    private Serializer apacheSerializer;
+    private final Serializer apacheSerializer;
 
     public ApacheMasterBenchmarkEnvironment(String benchmarkName, NetworkInfo slaveInfo, ComputationResultSerializerType type, int step, int threshold, int repetitions, int resultsSize) throws IOException {
         super(benchmarkName, slaveInfo, type, step, threshold, repetitions, resultsSize);

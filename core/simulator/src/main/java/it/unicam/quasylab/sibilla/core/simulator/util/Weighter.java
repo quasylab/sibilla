@@ -31,8 +31,8 @@ package it.unicam.quasylab.sibilla.core.simulator.util;
  */
 public interface Weighter<T> {
 
-	public double weight(T t, int occurrences);
+	double weight(T t, int occurrences);
 
-	public double weight(T t);
+	double weight(T t);
 
 }

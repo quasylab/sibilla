@@ -39,4 +39,4 @@ public enum TCPNetworkManagerType implements NetworkManagerType {
      * The implementation that relies upon SSL.
      */
     SECURE
-};
+}

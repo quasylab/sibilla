@@ -21,7 +21,7 @@ public class SibillaView {
      * Type of views
      */
     public enum SIBILLA_TYPE {
-        BASIC;
+        BASIC
     }
 
     public SibillaView(View view) {

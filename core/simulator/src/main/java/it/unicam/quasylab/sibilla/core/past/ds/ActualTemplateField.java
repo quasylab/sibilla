@@ -28,7 +28,7 @@ package it.unicam.quasylab.sibilla.core.past.ds;
  */
 public class ActualTemplateField implements TemplateField {
 
-	private Object o;
+	private final Object o;
 
 	public ActualTemplateField(Object o) {
 		this.o = o;

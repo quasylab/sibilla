@@ -29,6 +29,7 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaInteger;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.Optional;
+import java.util.HashMap;
 import java.util.function.Function;
 
 /**
@@ -118,7 +119,6 @@ public class ExpressionEvaluator extends PopulationModelBaseVisitor<SibillaValue
     public SibillaValue visitMulDivExpression(PopulationModelParser.MulDivExpressionContext ctx) {
         return SibillaValue.getOperator(ctx.op.getText()).apply(ctx.left.accept(this),ctx.right.accept(this));
     }
-
 
     @Override
     public SibillaValue visitAddSubExpression(PopulationModelParser.AddSubExpressionContext ctx) {

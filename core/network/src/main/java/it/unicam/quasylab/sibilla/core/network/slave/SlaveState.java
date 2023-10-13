@@ -92,7 +92,7 @@ public class SlaveState implements Serializable, Cloneable {
     /**
      * To manage the {@link java.beans.PropertyChangeListener} instances.
      */
-    private transient PropertyChangeSupport updateSupport;
+    private final transient PropertyChangeSupport updateSupport;
 
     public SlaveState(SimulationState simulationState, NetworkInfo slaveInfo) {
         this.slaveInfo = slaveInfo;

@@ -66,12 +66,12 @@ public class CovidAGDefinition {
 
     public static List<PopulationRule> generateRules(EvaluationEnvironment environment, PopulationRegistry registry) {
         int S = registry.indexOf("S");
-        int A = registry.indexOf("A");;
-        int G = registry.indexOf("G");;
-        int R = registry.indexOf("R");;
-        int D = registry.indexOf("D");;
-        int IG = registry.indexOf("IG");;
-        int IA = registry.indexOf("IA");;
+        int A = registry.indexOf("A");
+        int G = registry.indexOf("G");
+        int R = registry.indexOf("R");
+        int D = registry.indexOf("D");
+        int IG = registry.indexOf("IG");
+        int IA = registry.indexOf("IA");
         PopulationRule rule_S_A_A = new ReactionRule(
                 "S->A",
                 new Population[] { new Population(S), new Population(A)} ,

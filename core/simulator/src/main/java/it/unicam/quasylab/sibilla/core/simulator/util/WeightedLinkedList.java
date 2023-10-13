@@ -36,7 +36,7 @@ public class WeightedLinkedList<S> implements WeightedStructure<S> {
 
 	private double totalWeight;
 
-	private LinkedList<WeightedElement<S>> list;
+	private final LinkedList<WeightedElement<S>> list;
 
 	public WeightedLinkedList() {
 		this.totalWeight = 0.0;

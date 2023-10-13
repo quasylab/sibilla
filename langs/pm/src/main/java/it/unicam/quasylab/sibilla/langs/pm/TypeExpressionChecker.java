@@ -34,10 +34,10 @@ import java.util.List;
 
 public class TypeExpressionChecker extends PopulationModelBaseVisitor<SymbolType> {
 
-    private SymbolTable table;
-    private boolean populationAllowed;
-    private boolean timeDependent;
-    private List<ModelBuildingError> errors;
+    private final SymbolTable table;
+    private final boolean populationAllowed;
+    private final boolean timeDependent;
+    private final List<ModelBuildingError> errors;
 
     public TypeExpressionChecker(SymbolTable table) {
         this(table, new LinkedList<>());
@@ -129,6 +129,22 @@ public class TypeExpressionChecker extends PopulationModelBaseVisitor<SymbolType
         }
         return t1;
     }
+
+
+
+    /*
+        forStatement: 'for' '(' assignment=expr ';' condition=expr ';' update=expr ')' expr;
+     */
+//    public SymbolType visitForStatementExpression(PopulationModelParser.forStatment ctx){
+//        int assignment  = visit(ctx.assignment);
+//        Predicate condition  = visit(ctx.codition);
+//
+//
+//        while (evaluateCondition(ctx.condition)) {
+//            visit(ctx.expr);
+//
+//        }
+//    }
 
     @Override
     public SymbolType visitIntValue(PopulationModelParser.IntValueContext ctx) {

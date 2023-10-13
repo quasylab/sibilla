@@ -31,7 +31,7 @@ import org.apache.commons.math3.random.RandomGenerator;
  */
 public class GetActivity implements Activity {
 
-	private TupleSpace.Node node;
+	private final TupleSpace.Node node;
 
 	public GetActivity(TupleSpace.Node node) {
 		this.node = node;

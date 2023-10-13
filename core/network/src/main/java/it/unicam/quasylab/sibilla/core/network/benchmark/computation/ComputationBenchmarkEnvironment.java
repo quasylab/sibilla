@@ -25,7 +25,7 @@ public abstract class ComputationBenchmarkEnvironment<S extends it.unicam.quasyl
     private int repetitions = 1;
     private int threshold = 900;
     private int step = 20;
-    private int tasksCount;
+    private final int tasksCount;
 
     protected ComputationBenchmarkEnvironment(Type type, String benchmarkName, ModelDefinition<S> modelDefinition,
                                               int repetitions, int threshold, int step) {

@@ -93,8 +93,8 @@ public final class Signal implements Iterable<Sample<Double>> {
      */
     public void add(double time, double value) {
         if (Double.isFinite(time)&&(time >= 0)&&isAfter(time)) {
-            if ((last == null)||(last.getValue() != value)) {
-                this.last = new Sample<>();
+            if (last == null || !Objects.equals(last.getValue(), value)) {
+                this.last = new Sample<>(time,value);
                 if (Double.isNaN(this.start)) {
                     this.start = time;
                 }
@@ -176,12 +176,16 @@ public final class Signal implements Iterable<Sample<Double>> {
             Sample<Double> previous = null;
             int i = optionalInt.getAsInt();
             for (Sample<Double> value : values) {
-                while ((previous != null)&&((previous.getTime()<=times[i])&&(times[i]<value.getTime()))) {
-                    data[i++] = previous.getValue();
+                while (previous != null && i < times.length) {
+                    if (previous.getTime() <= times[i] && times[i] < value.getTime()) {
+                        data[i++] = previous.getValue();
+                    } else {
+                        break;
+                    }
                 }
                 previous = value;
             }
-            for(;(previous != null)&&(i<times.length)&&(!isAfter(times[i]));i++) {
+            for (; previous != null && i < times.length && !isAfter(times[i]); i++) {
                 data[i] = previous.getValue();
             }
         }
@@ -204,6 +208,7 @@ public final class Signal implements Iterable<Sample<Double>> {
         double[] values2 = s2.valuesAt(times);
         Signal result = new Signal();
         IntStream.range(0, times.length).forEach(i -> result.add(times[i], op.applyAsDouble(values1[i], values2[i])));
+        result.setEnd(Math.min(s1.getEnd(), s2.getEnd()));
         return result;
     }
 
@@ -211,7 +216,16 @@ public final class Signal implements Iterable<Sample<Double>> {
         double start = Math.max(s1.start, s2.start);
         double end = Math.min(s1.end, s2.end);
         if (Double.isFinite(start)&&Double.isFinite(end)&&(start<=end)) {
-            return DoubleStream.concat(DoubleStream.of(s1.timePoints(start, end)), DoubleStream.of(s2.timePoints(start, end))).sorted().toArray();
+            return DoubleStream.concat(
+                            DoubleStream.of(s1.timePoints(start, end)),
+                            DoubleStream.of(s2.timePoints(start, end))
+                    )
+                    .boxed()
+                    .collect(Collectors.toCollection(LinkedHashSet::new))
+                    .stream()
+                    .mapToDouble(Double::doubleValue)
+                    .sorted()
+                    .toArray();
         } else {
             return new double[0];
         }
@@ -226,6 +240,7 @@ public final class Signal implements Iterable<Sample<Double>> {
             double[] values = s.values();
             IntStream.range(0, times.length).forEach(i -> result.add(times[i], op.applyAsDouble(values[i])));
         }
+        result.setEnd(s.getEnd());
         return result;
     }
 
@@ -249,5 +264,46 @@ public final class Signal implements Iterable<Sample<Double>> {
 
     public double getStart() {
         return start;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder valuesString = new StringBuilder();
+        for (int i = 0; i < values.size(); i++) {
+            if(values.size() != (i+1))
+                valuesString.append("[")
+                        .append(values.get(i).getTime()).append("->")
+                        .append(values.get(i + 1).getTime()).append(") : ")
+                        .append(values.get(i).getValue()).append(" -- ");
+            else
+                valuesString.append("[")
+                        .append(values.get(i).getTime()).append("->").append(this.end)
+                        .append(") : ")
+                        .append(values.get(i).getValue());
+
+        }
+
+        return "start=" + start + ", end=" + end + "\n" + valuesString;
+    }
+
+    public void setStart(double start) {
+        this.start = start;
+    }
+
+    public void setEnd(double end) {
+        this.end = end;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Signal samples = (Signal) o;
+        return Objects.equals(values, samples.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(values);
     }
 }

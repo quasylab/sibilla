@@ -93,12 +93,12 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
      */
     private final Set<TCPNetworkManager> networkManagers;
 
-    private Serializer serializer;
+    private final Serializer serializer;
 
-    private BenchmarkUnit decDesBenchmark;
-    private ComputationResultSerializerType crSerializerType;
-    private Map<NetworkInfo, BenchmarkUnit> slaveBenchmarks;
-    private NetworkInfo clientInfo;
+    private final BenchmarkUnit decDesBenchmark;
+    private final ComputationResultSerializerType crSerializerType;
+    private final Map<NetworkInfo, BenchmarkUnit> slaveBenchmarks;
+    private final NetworkInfo clientInfo;
 
     /**
      * Creates a NetworkSimulationManager with the parameters given in input
@@ -118,13 +118,13 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
         this.crSerializerType = crSerializerType;
         this.decDesBenchmark = new BenchmarkUnit(
                 String.format("sibillaBenchmarks/masterBenchmarking/ComputationResultSerializer_%s/", this.crSerializerType.getFullName()),
-                String.format("%s_resultsDecompressAndDeserialize", this.crSerializerType.toString()), "csv",
+                String.format("%s_resultsDecompressAndDeserialize", this.crSerializerType), "csv",
                 this.crSerializerType.getLabel(), List.of("decomprtime", "desertime", "trajectories"));
 
         List<NetworkInfo> slaveNetworkInfos = simulationState.getSlaveServersStates().stream()
                 .map(SlaveState::getSlaveInfo).collect(Collectors.toList());
         LOGGER.info(String.format("Creating a new NetworkSimulationManager to contact the slaves: [%s]",
-                slaveNetworkInfos.toString()));
+                slaveNetworkInfos));
         this.simulationState = simulationState;
         this.modelDefinitionClassName = simulationState.getSimulationModelName();
         executor = Executors.newCachedThreadPool();
@@ -139,7 +139,7 @@ public class NetworkSimulationManager<S extends State> extends QueuedSimulationM
                 BenchmarkUnit newSlaveBenchmark = new BenchmarkUnit(
                         String.format("sibillaBenchmarks/masterBenchmarking/Client_%s/Slave_%s/ComputationResultSerializer_%s/",
                                 this.clientInfo.getAddress().toString().split("/")[0], serverInfo.getAddress().toString().split("/")[0], this.crSerializerType.getFullName()),
-                        String.format("%s_sendAndReceive", this.crSerializerType.toString()), "csv",
+                        String.format("%s_sendAndReceive", this.crSerializerType), "csv",
                         this.crSerializerType.getLabel(), List.of("sendandreceivetime", "tasks", "results"));
                 this.slaveBenchmarks.put(serverInfo, newSlaveBenchmark);
                 return server;

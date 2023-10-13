@@ -70,7 +70,7 @@ public class MasterState implements Serializable, Comparable<MasterState>, Prope
     /**
      * To manage the {@link java.beans.PropertyChangeListener} instances.
      */
-    private PropertyChangeSupport updateSupport;
+    private final PropertyChangeSupport updateSupport;
 
 
     /**

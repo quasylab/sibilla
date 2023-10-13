@@ -61,7 +61,7 @@ public class CovidDefinition {
 
     public static List<PopulationRule> getRules(EvaluationEnvironment environment, PopulationRegistry registry) {
         int S = registry.indexOf("S");
-        int A = registry.indexOf( "A");
+        int A = registry.indexOf("A");
         int G = registry.indexOf("G");
         int R = registry.indexOf("R");
         int D = registry.indexOf("D");

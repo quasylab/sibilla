@@ -29,6 +29,6 @@ package it.unicam.quasylab.sibilla.core.simulator;
  */
 public enum SimulationStatus {
 	
-	INIT, RUNNING, COMPLETED, CANCELLED;
+	INIT, RUNNING, COMPLETED, CANCELLED
 
 }

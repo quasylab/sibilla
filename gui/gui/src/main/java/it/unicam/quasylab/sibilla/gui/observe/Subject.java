@@ -25,7 +25,7 @@ package it.unicam.quasylab.sibilla.gui.observe;
 
 public interface Subject {
 
-    public void register(Observer o);
-    public void unregister(Observer o);
-    public void notifyObservers();
+    void register(Observer o);
+    void unregister(Observer o);
+    void notifyObservers();
 }

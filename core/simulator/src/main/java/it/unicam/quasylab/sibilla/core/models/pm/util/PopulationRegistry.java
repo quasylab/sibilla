@@ -191,9 +191,7 @@ public class PopulationRegistry implements Serializable {
             if (getClass() != obj.getClass())
                 return false;
             Tuple other = (Tuple) obj;
-            if (!this.label.equals(other.label) || !Arrays.deepEquals(values, other.values))
-                return false;
-            return true;
+            return this.label.equals(other.label) && Arrays.deepEquals(values, other.values);
         }
 
         @Override

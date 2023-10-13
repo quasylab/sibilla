@@ -60,7 +60,7 @@ public abstract class SlaveBenchmarkEnvironment<S extends State> {
     protected BenchmarkUnit mainBenchmarkUnit;
     protected BenchmarkUnit sendBenchmarkUnit;
     protected String benchmarkName;
-    private Serializer serializer;
+    private final Serializer serializer;
     protected Logger LOGGER;
     private ServerSocket serverSocket;
     protected TCPNetworkManager netManager;

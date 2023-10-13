@@ -60,7 +60,7 @@ public class ClientSimulationEnvironment<S extends State> {
     /**
      * The {@link SimulationDataSet} object to be sent to the master server.
      */
-    private SimulationDataSet<S> data;
+    private final SimulationDataSet<S> data;
 
     /**
      * Manages the network communication with the master server.
@@ -68,10 +68,10 @@ public class ClientSimulationEnvironment<S extends State> {
     private TCPNetworkManager masterServerNetworkManager;
 
 
-    private Serializer serializer;
+    private final Serializer serializer;
 
-    private int submitRepetitions;
-    private BenchmarkUnit clientBenchmark;
+    private final int submitRepetitions;
+    private final BenchmarkUnit clientBenchmark;
 
     /**
      * Initiates a new client that submits simulations using the parameters of
@@ -111,7 +111,7 @@ public class ClientSimulationEnvironment<S extends State> {
 
                 this.masterServerNetworkManager = TCPNetworkManager.createNetworkManager(masterNetworkInfo);
                 LOGGER.info(String.format("Starting a new client that will submit the simulation to the master: %s",
-                        masterNetworkInfo.toString()));
+                        masterNetworkInfo));
 
                 this.initConnection(masterServerNetworkManager);
                 this.sendSimulationInfo(masterServerNetworkManager);

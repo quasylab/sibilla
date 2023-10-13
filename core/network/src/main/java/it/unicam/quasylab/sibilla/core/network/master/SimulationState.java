@@ -107,7 +107,7 @@ public class SimulationState implements Serializable, PropertyChangeListener, Co
     /**
      * To manage the {@link java.beans.PropertyChangeListener} instances.
      */
-    private transient PropertyChangeSupport updateSupport;
+    private final transient PropertyChangeSupport updateSupport;
 
     /**
      * Initializes the state

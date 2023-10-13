@@ -43,7 +43,7 @@ import java.util.List;
  * @author Zamponi Marco
  */
 public class CustomMasterBenchmarkEnvironment<S extends State> extends MasterBenchmarkEnvironment {
-    private Model<S> model;
+    private final Model<S> model;
 
     public CustomMasterBenchmarkEnvironment(String benchmarkName, NetworkInfo slaveInfo, ComputationResultSerializerType type, Model model, int step, int threshold, int repetitions, int resultsSize) throws IOException {
         super(benchmarkName, slaveInfo, type, step, threshold, repetitions, resultsSize);

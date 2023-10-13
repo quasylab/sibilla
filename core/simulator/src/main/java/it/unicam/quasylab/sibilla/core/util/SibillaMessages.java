@@ -29,7 +29,7 @@ package it.unicam.quasylab.sibilla.core.util;
 public class SibillaMessages {
 
     public static final String ILLEGAL_TIME_IN_TIMESTEP = "A time step must be a value greater than 0 (%g is used).";
-    public static final String A_POSITIVE_VALUE_IS_EXPECTED = "A value greater than 0 is expected (%g is used).";;
+    public static final String A_POSITIVE_VALUE_IS_EXPECTED = "A value greater than 0 is expected (%g is used).";
     private static final String ILLEGAL_NUMBER_OF_PARAMETERS = "Illegal number of parameters: expected %d are %d!";
 
 

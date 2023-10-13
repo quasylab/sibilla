@@ -31,6 +31,6 @@ import java.util.Map;
  */
 public interface MarkovProcess<S> {
 
-	public Map<S,Double> next( S state );
+	Map<S,Double> next( S state );
 	
 }

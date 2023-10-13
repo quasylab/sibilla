@@ -25,5 +25,5 @@ package it.unicam.quasylab.sibilla.gui.observe;
 
 public interface Observer {
 
-    public void update();
+    void update();
 }

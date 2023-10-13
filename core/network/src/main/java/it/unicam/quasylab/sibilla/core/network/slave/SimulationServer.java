@@ -40,5 +40,5 @@ public interface SimulationServer {
      * @param port port used by the slave server to manage the incoming requests from the master servers
      * @throws IOException when problems arise in network interfaces usage
      */
-    public void start(int port) throws IOException;
+    void start(int port) throws IOException;
 }

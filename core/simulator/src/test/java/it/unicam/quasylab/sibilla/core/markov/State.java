@@ -27,7 +27,7 @@ import java.util.Arrays;
 
 public class State {
 		
-		private int[] state;
+		private final int[] state;
 		
 		public State(int ... state) {
 			this.state = state;
@@ -58,9 +58,7 @@ public class State {
 			if (getClass() != obj.getClass())
 				return false;
 			State other = (State) obj;
-			if (!Arrays.equals(state, other.state))
-				return false;
-			return true;
+			return Arrays.equals(state, other.state);
 		}
 
 		@Override

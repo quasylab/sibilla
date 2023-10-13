@@ -219,6 +219,17 @@ public final class BooleanSignal {
         return intervals.get(i);
     }
 
+
+    /**
+     * Returns the sequence of intervals
+     *
+     * @return the sequence of intervals
+     */
+
+    public LinkedList<Interval> getIntervals(){
+        return intervals;
+    }
+
     /**
      * Returns the time points where the
      *
@@ -231,6 +242,10 @@ public final class BooleanSignal {
         return Stream.concat(intervals.stream().map(Interval::start), intervals.stream().map(Interval::end)).collect(Collectors.toSet());
     }
 
+    @Override
+    public String toString() {
+        return intervals.toString();
+    }
 
     private static class ConjunctionMerger {
 
@@ -403,6 +418,7 @@ public final class BooleanSignal {
                 currentRight = null;
             }
         }
+
 
     }
 

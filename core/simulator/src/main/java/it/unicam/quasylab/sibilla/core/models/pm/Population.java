@@ -29,9 +29,9 @@ public class Population implements Serializable {
 
     private static final long serialVersionUID = 5501961970972786801L;
 
-    private int index;
+    private final int index;
 
-    private int size;
+    private final int size;
 
     /**
      * @param index

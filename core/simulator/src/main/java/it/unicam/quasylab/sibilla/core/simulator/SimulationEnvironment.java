@@ -28,6 +28,7 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.TrajectoryCollector;
+import it.unicam.quasylab.sibilla.core.tools.stl.QualitativeMonitor;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
@@ -327,6 +328,14 @@ public class SimulationEnvironment implements Serializable {
 		return reachabilityChecker.numberOfSuccessful() / n;
 	}
 
+	public <S extends State> double robustnessAtZero(
+			SimulationMonitor monitor,
+			RandomGenerator randomGenerator,
+			QualitativeMonitor<? extends S> qualitativeMonitor
+	){
+		return 0.0;
+	}
+
 	private static class ReachabilityChecker<S extends State> implements Supplier<SamplingHandler<S>> {
 
 		private int counter = 0;
@@ -384,7 +393,7 @@ public class SimulationEnvironment implements Serializable {
 			BiFunction<RandomGenerator, Function<RandomGenerator, S>, SimulatorCursor<S>> cursorSupplier,
 			S state,
 			double deadline) {
-		TrajectoryCollector<S> collector = new TrajectoryCollector<>();
+		TrajectoryCollector<S> collector = new TrajectoryCollector<>(deadline);
 		SimulationUnit<S> unit = new SimulationUnit<>(cursorSupplier, state, collector, SamplePredicate.timeDeadlinePredicate(deadline),
 				s -> true);
 		SimulationTask<S> simulationRun = new SimulationTask<>(0, random, unit);
@@ -430,8 +439,8 @@ public class SimulationEnvironment implements Serializable {
 			RandomGenerator random,
 			ContinuousTimeMarkovProcess<S> model,
 			S state,
-																	 double deadline, StatePredicate<? super S> reachPredicate) {
-		TrajectoryCollector<S> collector = new TrajectoryCollector<>();
+			double deadline, StatePredicate<? super S> reachPredicate) {
+		TrajectoryCollector<S> collector = new TrajectoryCollector<>(deadline);
 		SimulationUnit<S> unit = new SimulationUnit<S>(model::createSimulationCursor, state, collector,
 				SamplePredicate.samplePredicate(deadline, reachPredicate), reachPredicate);
 		SimulationTask<S> simulationRun = new SimulationTask<>(random, unit);

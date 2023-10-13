@@ -87,10 +87,10 @@ public class BasicSimulationServer implements SimulationServer {
     /**
      * The SimulationExecutor used to execute simulations by the server.
      */
-    private SimulationExecutor simulationExecutor;
+    private final SimulationExecutor simulationExecutor;
 
     //TODO
-    private ComputationResultSerializerType crSerializerType;
+    private final ComputationResultSerializerType crSerializerType;
 
     /**
      * Creates a simulation server with the given network manager type

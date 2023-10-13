@@ -46,7 +46,7 @@ public class ConsoleOutputCapturer {
     }
 
     private static class OutputStreamCombiner extends OutputStream {
-        private List<OutputStream> outputStreams;
+        private final List<OutputStream> outputStreams;
 
         public OutputStreamCombiner(List<OutputStream> outputStreams) {
             this.outputStreams = outputStreams;

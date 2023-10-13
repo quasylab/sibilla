@@ -42,7 +42,7 @@ public class ParseUtil {
     private static final String UNKNOWN_STATE_MESSAGE = "Action %s is unknown at line %d:%d.";
     private static final String UNKNOWN_SYMBOL_MESSAGE = "Symbol %s is unknown at line %d:%d.";
     private static final String ILLEGAL_USE_OF_STATE_EXPRESSION_MESSAGE = "Illegal use of a state expression at line %d:%d.";
-    private static final String WRONG_NUMBER_OF_AGENT_PARAMETERS = "Wrong number of parameters for agent %s at line %d:%d. Expected %d are %d.";;
+    private static final String WRONG_NUMBER_OF_AGENT_PARAMETERS = "Wrong number of parameters for agent %s at line %d:%d. Expected %d are %d.";
 
     public static String duplicatedNameErrorMessage(Token declaredToken, Token existingToken) {
         return String.format(DUPLICATED_NAME_MESSAGE,

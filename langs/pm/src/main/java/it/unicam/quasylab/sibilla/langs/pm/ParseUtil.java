@@ -51,7 +51,7 @@ public class ParseUtil {
     private static final String MEASURE_PATTER = "computeMeasure_%s";
     private static final String ILLEGAL_INTERVAL_MESSAGE = "Illegal interval %d>=%d at line %d char %d!";
     private static final String ILLEGAL_USE_OF_SPECIES_TEMPLATE_MESSAGE = "Species template are not allowed at line %d char %d!";
-    private static final String WRONG_NUMBER_OF_LABEL_PARAMETERS_MESSAGE = "Wrong number of agent parameters a line %d char %d (expected %d are %d)!";;
+    private static final String WRONG_NUMBER_OF_LABEL_PARAMETERS_MESSAGE = "Wrong number of agent parameters a line %d char %d (expected %d are %d)!";
 
 
     public static String getDuplicatedSymbolErrorMessage(String name, ParserRuleContext existing, ParserRuleContext duplicated) {
