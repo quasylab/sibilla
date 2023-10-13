@@ -46,7 +46,8 @@ public class SlidingWindow {
         if (isFull(w)) {
             Sample<Double> doubleSample = w.removeFirst();
             result.add(doubleSample.getTime(), doubleSample.getValue());
-        }
+        }else
+            result.setStart(s.getStart());
         complete(result, w, s.getEnd());
         result.setEnd(s.getEnd());
         return result;

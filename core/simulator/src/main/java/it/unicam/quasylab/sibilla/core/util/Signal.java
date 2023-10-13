@@ -208,7 +208,7 @@ public final class Signal implements Iterable<Sample<Double>> {
         double[] values2 = s2.valuesAt(times);
         Signal result = new Signal();
         IntStream.range(0, times.length).forEach(i -> result.add(times[i], op.applyAsDouble(values1[i], values2[i])));
-        result.setEnd(Math.max(s1.getEnd(), s2.getEnd()));
+        result.setEnd(Math.min(s1.getEnd(), s2.getEnd()));
         return result;
     }
 
@@ -286,6 +286,9 @@ public final class Signal implements Iterable<Sample<Double>> {
         return "start=" + start + ", end=" + end + "\n" + valuesString;
     }
 
+    public void setStart(double start) {
+        this.start = start;
+    }
 
     public void setEnd(double end) {
         this.end = end;

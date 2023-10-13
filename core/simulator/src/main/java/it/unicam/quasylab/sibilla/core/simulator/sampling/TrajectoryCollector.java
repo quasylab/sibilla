@@ -33,7 +33,10 @@ public class TrajectoryCollector<S> implements Supplier<SamplingHandler<S>> {
 
     private final LinkedList<Trajectory<S>> trajectories;
 
-    public TrajectoryCollector() {
+    private final double deadline;
+
+    public TrajectoryCollector(double deadline) {
+        this.deadline = deadline;
         this.trajectories = new LinkedList<>();
     }
 
@@ -70,6 +73,7 @@ public class TrajectoryCollector<S> implements Supplier<SamplingHandler<S>> {
 
             @Override
             public void end(double time) {
+                this.trajectory.setEnd(Math.max(time, deadline));
                 recordTrajectory(this.trajectory);
             }
         };

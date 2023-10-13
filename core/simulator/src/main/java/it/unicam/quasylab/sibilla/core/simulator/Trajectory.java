@@ -201,6 +201,28 @@ public class Trajectory<S> implements Externalizable {
     public Signal apply(ToDoubleFunction<S> function) {
         Signal result = new Signal();
         data.forEach(s -> result.add(s.getTime(), function.applyAsDouble(s.getValue())));
+        if(!Double.isNaN(this.end))
+         result.setEnd(this.end);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result= new StringBuilder();
+        result.append("start : ").append(this.start).append(" ends : ").append(this.end).append("\n");
+        result.append("Trajectory samples : ").append(data.size()).append("\n");
+        if(this.data.size() <= 10){
+            for (int i = 0; i < data.size()-1; i++) {
+                result.append(data.get(0).toString()).append(" --> ");
+            }
+            result.append(data.get(data.size() - 1));
+        }else{
+            for (int i = 0; i < 3; i++) {
+                result.append(data.get(0).toString()).append(" --> ");
+            }
+            result.append("... -->").append(data.get(data.size() - 2)).append(data.get(data.size() - 1));
+        }
+
+        return result.toString();
     }
 }
