@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.models.slam;
 
 import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.models.slam.agents.AgentFactory;
 import it.unicam.quasylab.sibilla.core.models.slam.agents.OutgoingMessage;
 import it.unicam.quasylab.sibilla.core.models.slam.agents.SlamAgent;
 import it.unicam.quasylab.sibilla.core.models.slam.data.AgentStore;
@@ -33,6 +34,7 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Stream;
@@ -52,6 +54,14 @@ public final class SlamState implements State, StateExpressionEvaluator {
 
     private final SibillaMap<Integer, Activity.AgentStepActivity> agentActivities;
 
+    public static SlamState newSlamState(List<AgentFactory> initialPopulation) {
+        SibillaMap<Integer, SlamAgent> agents = new SibillaMap<>();
+        int i = 0;
+        for (AgentFactory f: initialPopulation) {
+            agents.add(i++, f.getAgent(i));
+        }
+        return new SlamState(new Activity.ActivityFactory(), 0.0, agents, new MapScheduler<>(), new SibillaMap<>());
+    }
 
     public SlamState(Activity.ActivityFactory activityFactory, double now, SibillaMap<Integer, SlamAgent> agents, Scheduler<Activity> scheduledActivities, SibillaMap<Integer, Activity.AgentStepActivity> agentActivities) {
         this.activityFactory = activityFactory;

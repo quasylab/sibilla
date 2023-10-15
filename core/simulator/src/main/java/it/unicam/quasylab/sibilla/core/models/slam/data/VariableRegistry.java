@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.models.slam.data;
 
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -70,4 +72,19 @@ public class VariableRegistry {
         }
     }
 
+    public AgentStore getStore(String[] parameters, double[] args) {
+        if (parameters.length != args.length) {
+            throw new IllegalArgumentException(String.format("Inconsistent number of parameters: expected %d are %d!", parameters.length, args.length));
+        }
+        AgentStore store = new AgentStore();
+        for (int i = 0; i < parameters.length; i++) {
+            Optional<AgentVariable> optionalAgentVariable = getVariable(parameters[i]);
+            if (optionalAgentVariable.isPresent()) {
+                store = store.set(optionalAgentVariable.get(), SibillaValue.of(args[i]));
+            } else {
+                throw new IllegalArgumentException(String.format("Unknown variable %s", parameters[i]));
+            }
+        }
+        return store;
+    }
 }

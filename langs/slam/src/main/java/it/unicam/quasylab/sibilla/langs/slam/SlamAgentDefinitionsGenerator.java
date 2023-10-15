@@ -39,7 +39,7 @@ import java.util.Optional;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
-public class SlamAgentDefinitionsGenerator {
+public class SlamAgentDefinitionsGenerator extends SlamModelBaseVisitor<Boolean> {
 
 
     private final SlamAgentDefinitions agentDefinitions = new SlamAgentDefinitions();
@@ -53,7 +53,21 @@ public class SlamAgentDefinitionsGenerator {
         this.messageRepository = messageRepository;
     }
 
+    @Override
+    protected Boolean defaultResult() {
+        return true;
+    }
 
+    @Override
+    public Boolean visitDeclarationAgent(SlamModelParser.DeclarationAgentContext ctx) {
+        generateAgentBehaviour(ctx);
+        return true;
+    }
+
+    @Override
+    protected Boolean aggregateResult(Boolean aggregate, Boolean nextResult) {
+        return aggregate && nextResult;
+    }
 
     private void generateAgentBehaviour(SlamModelParser.DeclarationAgentContext ctx) {
         if (agentDefinitions.contains(ctx.name.getText())) {
@@ -195,6 +209,10 @@ public class SlamAgentDefinitionsGenerator {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toArray(AgentVariable[]::new);
+    }
+
+    public SlamAgentDefinitions getAgentDefinitions() {
+        return this.agentDefinitions;
     }
 
     public class MessageHandlerTemplateAssignments extends SlamModelBaseVisitor<BiFunction<AgentStore,SibillaValue[],AgentStore>> {

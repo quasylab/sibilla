@@ -56,4 +56,8 @@ public class SlamVariableRegistryGenerator extends SlamModelBaseVisitor<Boolean>
     protected Boolean aggregateResult(Boolean aggregate, Boolean nextResult) {
         return aggregate&&nextResult;
     }
+
+    public VariableRegistry getVariableRegistry() {
+        return variableRegistry;
+    }
 }

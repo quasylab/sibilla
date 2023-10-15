@@ -23,9 +23,13 @@
 
 package it.unicam.quasylab.sibilla.core.runtime;
 
+import it.unicam.quasylab.sibilla.core.models.slam.SlamModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.slam.SlamState;
+import it.unicam.quasylab.sibilla.langs.slam.SlamModelGenerationException;
+import it.unicam.quasylab.sibilla.langs.slam.SlamModelGenerator;
 
 import java.io.File;
+import java.io.IOException;
 
 public class SlamModelModule extends AbstractSibillaModule  {
 
@@ -40,12 +44,24 @@ public class SlamModelModule extends AbstractSibillaModule  {
 
     @Override
     public void load(File file) throws CommandExecutionException {
-
+        try {
+            generateModuleEngine(new SlamModelGenerator(file));
+        } catch (IOException|SlamModelGenerationException e) {
+            throw new CommandExecutionException(e.getMessage());
+        }
     }
 
     @Override
     public void load(String code) throws CommandExecutionException {
+        try {
+            generateModuleEngine(new SlamModelGenerator(code));
+        } catch (SlamModelGenerationException e) {
+            throw new CommandExecutionException(e.getMessage());
+        }
+    }
 
+    private void generateModuleEngine(SlamModelGenerator slamModelGenerator) throws SlamModelGenerationException {
+        this.slamStateModuleEngine = new ModuleEngine<>(slamModelGenerator.getDefinition());
     }
 
     @Override
@@ -56,7 +72,7 @@ public class SlamModelModule extends AbstractSibillaModule  {
 
     @Override
     protected ModuleEngine<?> getModuleEngine() {
-        return null;
+        return slamStateModuleEngine;
 
     }
 }

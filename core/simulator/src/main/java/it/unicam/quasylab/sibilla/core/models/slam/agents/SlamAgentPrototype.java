@@ -102,6 +102,10 @@ public class SlamAgentPrototype {
         return i -> this.getAgent(i, values);
     }
 
+    public AgentFactory getAgentFactory(String state, SibillaValue[] values) {
+        return i -> this.getAgent(i, values, state);
+    }
+
     /**
      * Returns the array of parameters of this template.
      * @return the array of parameters of this template.

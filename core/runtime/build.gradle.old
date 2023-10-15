@@ -13,6 +13,7 @@ dependencies {
     api project(':langs:pm')
     api project(':langs:lio')
     api project(':langs:yoda')
+    api project(':langs:slam')
 
     implementation group: 'tech.tablesaw', name: 'tablesaw-core', version: '0.43.1'
 

@@ -41,7 +41,7 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
 
     private final Map<String, Token> uniqueTokens = new HashMap<>();
 
-    private final ErrorCollector errors = new ErrorCollector();
+    private final ErrorCollector errors;
 
     private final TypeRegistry registry = new TypeRegistry();
 
@@ -50,6 +50,10 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
 
     private final MessageRepository messageRepository = new MessageRepository();
     private final Map<String, AgentValidator> agentValidators = new HashMap<>();
+
+    public SlamModelValidator(ErrorCollector errors) {
+        this.errors = errors;
+    }
 
     /**
      * A model is valid if all its elements are valid.
@@ -158,6 +162,10 @@ public class SlamModelValidator extends SlamModelBaseVisitor<Boolean> {
             return validator.recordAttributes();
         }
         return false;
+    }
+
+    public MessageRepository getMessageRepository() {
+        return messageRepository;
     }
 
 

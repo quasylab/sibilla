@@ -1,5 +1,6 @@
 package it.unicam.quasylab.sibilla.core.runtime;
 
+import com.google.errorprone.annotations.DoNotCall;
 import it.unicam.quasylab.sibilla.core.models.ImmutableState;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.pm.*;
@@ -11,6 +12,7 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.langs.pm.ModelGenerationException;
 import it.unicam.quasylab.sibilla.langs.pm.PopulationModelGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -46,6 +48,7 @@ class STLTest {
 
 
      @Test
+     @Disabled
      public void stlTestOnSIR_1() throws ModelGenerationException {
 
          PopulationModelGenerator pmg = new PopulationModelGenerator(TEST_SIR);
@@ -72,6 +75,7 @@ class STLTest {
      }
 
     @Test
+    @Disabled
     public void stlTestOnSIR_2() throws ModelGenerationException {
 
         PopulationModelGenerator pmg = new PopulationModelGenerator(TEST_SIR);

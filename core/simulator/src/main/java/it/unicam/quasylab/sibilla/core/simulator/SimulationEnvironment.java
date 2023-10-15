@@ -393,7 +393,7 @@ public class SimulationEnvironment implements Serializable {
 			BiFunction<RandomGenerator, Function<RandomGenerator, S>, SimulatorCursor<S>> cursorSupplier,
 			S state,
 			double deadline) {
-		TrajectoryCollector<S> collector = new TrajectoryCollector<>(deadline);
+		TrajectoryCollector<S> collector = new TrajectoryCollector<>();
 		SimulationUnit<S> unit = new SimulationUnit<>(cursorSupplier, state, collector, SamplePredicate.timeDeadlinePredicate(deadline),
 				s -> true);
 		SimulationTask<S> simulationRun = new SimulationTask<>(0, random, unit);
@@ -440,7 +440,7 @@ public class SimulationEnvironment implements Serializable {
 			ContinuousTimeMarkovProcess<S> model,
 			S state,
 			double deadline, StatePredicate<? super S> reachPredicate) {
-		TrajectoryCollector<S> collector = new TrajectoryCollector<>(deadline);
+		TrajectoryCollector<S> collector = new TrajectoryCollector<>();
 		SimulationUnit<S> unit = new SimulationUnit<S>(model::createSimulationCursor, state, collector,
 				SamplePredicate.samplePredicate(deadline, reachPredicate), reachPredicate);
 		SimulationTask<S> simulationRun = new SimulationTask<>(random, unit);

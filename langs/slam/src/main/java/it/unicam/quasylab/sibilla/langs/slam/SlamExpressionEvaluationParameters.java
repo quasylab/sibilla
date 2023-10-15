@@ -74,6 +74,11 @@ public class SlamExpressionEvaluationParameters {
         this(rg, store, null, stateExpressionEvaluator, null);
     }
 
+    public SlamExpressionEvaluationParameters(StateExpressionEvaluator stateExpressionEvaluator) {
+        this(null, null, null, stateExpressionEvaluator, null);
+    }
+
+
     public SlamExpressionEvaluationParameters(AgentStore store) {
         this(null, null, store, null, null);
     }

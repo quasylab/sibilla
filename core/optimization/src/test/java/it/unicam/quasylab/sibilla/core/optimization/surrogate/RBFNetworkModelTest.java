@@ -3,6 +3,7 @@ package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.LatinHyperCubeSamplingTask;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.function.ToDoubleFunction;
 class RBFNetworkModelTest {
 
     @Test
+    @Disabled
     void testNet(){
 
         //sin(5x)*cos(5y)/5

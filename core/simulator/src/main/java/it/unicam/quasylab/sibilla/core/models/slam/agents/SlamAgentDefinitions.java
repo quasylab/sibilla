@@ -88,9 +88,21 @@ public class SlamAgentDefinitions {
         if (agentName == null) {
             return null;
         }
-        SlamAgentPrototype agentPrototype = agentPrototypes.get(name);
+        SlamAgentPrototype agentPrototype = agentPrototypes.get(agentName);
         if (agentPrototype != null) {
             return agentPrototype.getAgentFactory(values);
+        }
+        return null;
+    }
+
+    public AgentFactory getAgentFactory(String name, String state, SibillaValue[] values) {
+        AgentName agentName = agentNames.get(name);
+        if (agentName == null) {
+            return null;
+        }
+        SlamAgentPrototype agentPrototype = agentPrototypes.get(agentName);
+        if (agentPrototype != null) {
+            return agentPrototype.getAgentFactory(state, values);
         }
         return null;
     }
