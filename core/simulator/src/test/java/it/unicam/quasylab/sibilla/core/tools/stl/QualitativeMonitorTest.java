@@ -35,6 +35,9 @@ class QualitativeMonitorTest {
         LinkedList<Interval> intervals = bs.getIntervals();
     }
 
+
+
+
     @Test
     public void testEventuallyMonitor(){
         QualitativeMonitor.AtomicMonitor<PopulationState> am_1 = new QualitativeMonitor.AtomicMonitor<>(

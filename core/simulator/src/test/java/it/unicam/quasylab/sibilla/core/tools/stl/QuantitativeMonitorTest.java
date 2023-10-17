@@ -6,6 +6,8 @@ import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.util.Signal;
 import org.junit.jupiter.api.Test;
 
+import java.util.SortedMap;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class QuantitativeMonitorTest {
@@ -71,6 +73,51 @@ class QuantitativeMonitorTest {
         assertEquals(s.valueAt(2.0),0.0);
 
 
+    }
+
+
+    /**
+     *
+     *   index 0
+     *   8 |
+     *   7 |
+     *   6 |
+     *   5 |
+     *   4 |
+     *   3 |                        XXX
+     *   2 |
+     *   1 |            XXX XXX XXX
+     *   0  XXX XXX XXX --- --- --- ---
+     *       1   2   3   4   5   6   7
+     * TEST
+     *    ( X >= 3 )
+     * TRAJECTORY:
+     *    X = [(0, 0)(1, 0),(2, 0),(3, 1),(4, 1),(5, 1),(6, 3)]
+     * ROBUSTNESS:
+     *    r = [(0,-3)(1, 5),(2, 0),(3,-1),(4,-2),(5,-2),(6,-2)]
+     */
+    @Test
+    public void testAtomicEventually(){
+        Trajectory<PopulationState> t = getPopulationTrajectory(
+                new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+                1,
+                new double[]{0.0, 0.0, 0.0, 1.0, 1.0, 2.0, 3.0, 3.0}
+        );
+
+        QuantitativeMonitor.AtomicMonitor<PopulationState> biggerThan2Monitor =
+                new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(0) - 2.0);
+
+        QuantitativeMonitor<PopulationState> eventuallyBetween0and3 = QuantitativeMonitor.eventually(biggerThan2Monitor,0,3);
+        QuantitativeMonitor<PopulationState> eventuallyBetween4and6 = QuantitativeMonitor.eventually(biggerThan2Monitor,3,6);
+
+        Signal se1 = eventuallyBetween0and3.monitor(t);
+        Signal se2 = eventuallyBetween4and6.monitor(t);
+
+        System.out.println(t);
+        System.out.println(se1);
+        System.out.println(se2);
+
+        //assertTrue(se1.valueAt(0)<se2.valueAt(0) );
     }
 
 
@@ -154,8 +201,6 @@ class QuantitativeMonitorTest {
 
         System.out.println(s);
 
-        //assertEquals(s.valueAt(0.5),-0.0);
-        //assertEquals(s.valueAt(1.5),-8.0);
     }
 
 
@@ -198,8 +243,6 @@ class QuantitativeMonitorTest {
 
         assertEquals(s.valueAt(0.0),2.0);
 
-        //assertEquals(s.valueAt(0.5),-0.0);
-        //assertEquals(s.valueAt(1.5),-8.0);
     }
 
 
@@ -242,10 +285,33 @@ class QuantitativeMonitorTest {
 
         System.out.println(s);
 
-        //assertEquals(s.valueAt(0.0),2.0);
+    }
 
-        //assertEquals(s.valueAt(0.5),-0.0);
-        //assertEquals(s.valueAt(1.5),-8.0);
+    @Test
+    public void testEventuallyTimeShift(){
+        Trajectory<PopulationState> t = getPopulationTrajectory(
+                new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+                1,
+                new double[]{1.0, 1.0, 1.0, 1.0, 3.0, 4.0, 3.0, 3.0}
+        );
+
+        System.out.println("TRAJECTORY : ");
+        System.out.println(t);
+
+
+        QuantitativeMonitor.AtomicMonitor<PopulationState> aM =
+                new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(0) - 2.0);
+
+        System.out.println("MONITOR : (X >= 2) : ");
+        Signal aMs = aM.monitor(t);
+        System.out.println(aMs);
+
+
+        QuantitativeMonitor<PopulationState> eventually = QuantitativeMonitor.eventually(aM,3,6);
+        Signal s = eventually.monitor(t);
+        System.out.println("MONITOR : E_[3,6](X >= 2) : ");
+        System.out.println(s);
+
     }
 
 
@@ -288,8 +354,7 @@ class QuantitativeMonitorTest {
 
         assertEquals(s.valueAt(0.0),-2.0);
 
-        //assertEquals(s.valueAt(0.5),-0.0);
-        //assertEquals(s.valueAt(1.5),-8.0);
+
     }
 
 
@@ -308,8 +373,6 @@ class QuantitativeMonitorTest {
         QuantitativeMonitor.AtomicMonitor<PopulationState> atomicMonitor =
                 new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(2) - 25);
 
-        Signal aS = new QuantitativeMonitor.AtomicMonitor<PopulationState>(s -> s.getOccupancy(2) - 25).monitor(t);
-
 
         Signal s = QuantitativeMonitor.eventually(atomicMonitor,0,500.0).monitor(t);
 
@@ -317,8 +380,6 @@ class QuantitativeMonitorTest {
 
         assertEquals(s.valueAt(0.0),-17.0);
 
-        //assertEquals(s.valueAt(0.5),-0.0);
-        //assertEquals(s.valueAt(1.5),-8.0);
     }
 
     /**
@@ -384,12 +445,6 @@ class QuantitativeMonitorTest {
 
         Signal s = QuantitativeMonitor.conjunction(eventually_1,eventually_2).monitor(t);
 
-
-        //Signal s = QuantitativeMonitor.disjunction(atomicMonitor_1,atomicMonitor_2).monitor(t);
-
-        //Signal s = atomicMonitor_1.monitor(t);
-
-        System.out.println(s);
 
         Signal sCorrect = new Signal(new double[]{0.0,2.0,5.0},new double[]{4.0,-1.0,-2.0});
 
@@ -461,10 +516,6 @@ class QuantitativeMonitorTest {
         Signal s = QuantitativeMonitor.conjunction(eventually_1,eventually_2).monitor(t);
 
 
-        //Signal s = QuantitativeMonitor.disjunction(atomicMonitor_1,atomicMonitor_2).monitor(t);
-
-        //Signal s = atomicMonitor_1.monitor(t);
-
         double[] element = s.valuesAt(new double[]{5.0});
         System.out.println(element[0]);
 
@@ -474,6 +525,60 @@ class QuantitativeMonitorTest {
         assertEquals(-1.0,s.valueAt(5.0));
         assertEquals(s,sCorrect);
 
+
+    }
+
+
+    /**
+     *
+     *  (X[I] > 0.05  & G[60,90](X[R] > 0.7 ))
+     *
+     *  indexes
+     *  (X[1] > 0.05  & G[60,90](X[2] > 0.7 ))
+     */
+    @Test
+    public void test_formula_SIR(){
+
+        Trajectory<PopulationState> t = getPopulationTrajectory(
+                new double[]{10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0},
+                3,
+                new double[]{90, 60, 30, 15, 10, 10, 10, 10, 10, 15, 15 }, // S
+                new double[]{10, 30, 45, 40, 30, 20, 15, 10, 10, 5, 5}, // I
+                new double[]{0, 30, 25, 55, 60, 70, 75, 80, 80, 80, 80}  // R
+        );
+
+
+        QuantitativeMonitor.AtomicMonitor<PopulationState> infectedAtomicFormula =
+                new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(1) - 5);
+        QuantitativeMonitor.AtomicMonitor<PopulationState> recoveredAtomicFormula =
+                new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(2) - 70);
+
+        System.out.println(t);
+        System.out.println("-----------------------------------------------------------------------------------------");
+
+        System.out.println("I >= 5");
+        System.out.println(infectedAtomicFormula.monitor(t));
+        System.out.println("-----------------------------------------------------------------------------------------");
+        System.out.println("R >= 7");
+        System.out.println(recoveredAtomicFormula.monitor(t));
+        System.out.println("-----------------------------------------------------------------------------------------");
+
+
+        QuantitativeMonitor<PopulationState> globallyRecovered = QuantitativeMonitor
+                .globally(recoveredAtomicFormula,60,90);
+
+        System.out.println("G[60,90](X[2] > 0.7 )");
+        System.out.println(globallyRecovered.monitor(t));
+        System.out.println("-----------------------------------------------------------------------------------------");
+
+
+
+        QuantitativeMonitor<PopulationState> conjunction = QuantitativeMonitor
+                .conjunction(infectedAtomicFormula,globallyRecovered);
+
+        Signal s = conjunction.monitor(t);
+
+        System.out.println(s);
 
     }
 

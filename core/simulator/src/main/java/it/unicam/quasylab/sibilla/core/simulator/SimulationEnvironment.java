@@ -28,7 +28,6 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplePredicate;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.TrajectoryCollector;
-import it.unicam.quasylab.sibilla.core.tools.stl.QualitativeMonitor;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
@@ -328,13 +327,7 @@ public class SimulationEnvironment implements Serializable {
 		return reachabilityChecker.numberOfSuccessful() / n;
 	}
 
-	public <S extends State> double robustnessAtZero(
-			SimulationMonitor monitor,
-			RandomGenerator randomGenerator,
-			QualitativeMonitor<? extends S> qualitativeMonitor
-	){
-		return 0.0;
-	}
+
 
 	private static class ReachabilityChecker<S extends State> implements Supplier<SamplingHandler<S>> {
 

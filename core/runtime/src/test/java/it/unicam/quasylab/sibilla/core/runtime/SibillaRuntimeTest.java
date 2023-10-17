@@ -532,7 +532,7 @@ class SibillaRuntimeTest {
         sr.addSpaceInterval("meet_rate",0.05,2);
         sr.setProbReachAsObjectiveFunction(null,"half_humans_survived_and_alien_eradicated",0.05,0.05);
         sr.generateTrainingSet();
-        sr.saveTable("alien","/Users/lorenzomatteucci/phd",null,null);
+        sr.saveTable("alien","/repository",null,null);
     }
 
 
@@ -552,7 +552,7 @@ class SibillaRuntimeTest {
 //        sr.addSpaceInterval("pError",0.005,0.5);
 //        sr.setProbReachAsObjectiveFunction(null,"win0",0.05,0.05);
 //        sr.generateTrainingSet();
-//        sr.saveTable("TSP_Sample","/Users/lorenzomatteucci/phd",null,null);
+//        sr.saveTable("TSP_Sample","/repository",null,null);
 //    }
 
     @Disabled

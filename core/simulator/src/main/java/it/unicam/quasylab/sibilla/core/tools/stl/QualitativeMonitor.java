@@ -39,7 +39,7 @@ import java.util.stream.IntStream;
  *
  * @param <S> type of states in the trajectory.
  */
-@FunctionalInterface
+//@FunctionalInterface
 public interface QualitativeMonitor<S> {
 
     BooleanSignal monitor(Trajectory<S> trj);
@@ -66,6 +66,13 @@ public interface QualitativeMonitor<S> {
     }
 
     /**
+     * Return the time horizon of interest
+     *
+     * @return the time horizon
+     */
+    double getTimeHorizon();
+
+    /**
      * A monitor used to evaluate an atomic proposition of the form p(m(s)).
      *
      * @param <S>
@@ -85,6 +92,11 @@ public interface QualitativeMonitor<S> {
         public BooleanSignal monitor(Trajectory<S> trj) {
             return trj.test(s -> guard.test(measure.applyAsDouble(s)));
         }
+
+        @Override
+        public double getTimeHorizon() {
+            return 0.0;
+        }
     }
 
     class NegationMonitor<S> implements QualitativeMonitor<S> {
@@ -99,6 +111,11 @@ public interface QualitativeMonitor<S> {
         public BooleanSignal monitor(Trajectory<S> trj) {
             return argument.monitor(trj).negate();
         }
+        @Override
+        public double getTimeHorizon() {
+            return argument.getTimeHorizon();
+        }
+
     }
 
     class ConjunctionMonitor<S> implements QualitativeMonitor<S> {
@@ -116,6 +133,12 @@ public interface QualitativeMonitor<S> {
         public BooleanSignal monitor(Trajectory<S> trj) {
             return this.firstArgument.monitor(trj).computeConjunction(this.secondArgument.monitor(trj));
         }
+
+        @Override
+        public double getTimeHorizon() {
+            return Math.max(firstArgument.getTimeHorizon(),secondArgument.getTimeHorizon());
+        }
+
     }
 
     class DisjunctionMonitor<S> implements QualitativeMonitor<S> {
@@ -133,6 +156,12 @@ public interface QualitativeMonitor<S> {
         public BooleanSignal monitor(Trajectory<S> trj) {
             return this.firstArgument.monitor(trj).computeDisjunction(this.secondArgument.monitor(trj));
         }
+
+        @Override
+        public double getTimeHorizon() {
+            return Math.max(firstArgument.getTimeHorizon(),secondArgument.getTimeHorizon());
+        }
+
     }
 
     class ImplicationMonitor<S> implements QualitativeMonitor<S> {
@@ -150,6 +179,11 @@ public interface QualitativeMonitor<S> {
         public BooleanSignal monitor(Trajectory<S> trj) {
             return this.firstArgument.monitor(trj).negate().computeDisjunction(this.secondArgument.monitor(trj));
         }
+
+        @Override
+        public double getTimeHorizon() {
+            return Math.max(firstArgument.getTimeHorizon(),secondArgument.getTimeHorizon());
+        }
     }
 
     class UntilMonitor<S> implements QualitativeMonitor<S> {
@@ -161,9 +195,9 @@ public interface QualitativeMonitor<S> {
         private final QualitativeMonitor<S> secondArgument;
 
 
-        public UntilMonitor(QualitativeMonitor<S> firstArgument, Interval itnerval, QualitativeMonitor<S> secondArgument) {
+        public UntilMonitor(QualitativeMonitor<S> firstArgument, Interval interval, QualitativeMonitor<S> secondArgument) {
             this.firstArgument = firstArgument;
-            this.interval = itnerval;
+            this.interval = interval;
             this.secondArgument = secondArgument;
         }
 
@@ -171,6 +205,11 @@ public interface QualitativeMonitor<S> {
         @Override
         public BooleanSignal monitor(Trajectory<S> trj) {
             return firstArgument.monitor(trj).computeConjunction(secondArgument.monitor(trj).shift(interval));
+        }
+
+        @Override
+        public double getTimeHorizon() {
+            return interval.end() + Math.max(firstArgument.getTimeHorizon(),secondArgument.getTimeHorizon());
         }
     }
 
@@ -192,6 +231,10 @@ public interface QualitativeMonitor<S> {
         public BooleanSignal monitor(Trajectory<S> trj) {
             return argument.monitor(trj).shift(interval);
         }
+        @Override
+        public double getTimeHorizon() {
+            return interval.end() + argument.getTimeHorizon();
+        }
     }
 
     class GloballyMonitor<S> implements QualitativeMonitor<S> {
@@ -199,8 +242,6 @@ public interface QualitativeMonitor<S> {
         private final QualitativeMonitor<S> argument;
 
         private final Interval interval;
-
-
 
         public GloballyMonitor(QualitativeMonitor<S> argument, Interval interval) {
             this.argument = argument;
@@ -211,6 +252,10 @@ public interface QualitativeMonitor<S> {
         @Override
         public BooleanSignal monitor(Trajectory<S> trj) {
             return argument.monitor(trj).negate().shift(interval).negate();
+        }
+        @Override
+        public double getTimeHorizon() {
+            return interval.end() + argument.getTimeHorizon();
         }
     }
 }

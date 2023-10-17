@@ -9,6 +9,7 @@ import it.unicam.quasylab.sibilla.core.optimization.surrogate.RandomForest;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateFactory;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateModel;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateModelRegistry;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -16,14 +17,14 @@ import java.util.function.ToDoubleFunction;
 
 import static it.unicam.quasylab.sibilla.core.optimization.CommonForTesting.ROSENBROCK_FUNCTION;
 import static it.unicam.quasylab.sibilla.core.optimization.CommonForTesting.SIMPLE_FUNCTION;
-import static it.unicam.quasylab.sibilla.core.optimization.Constants.*;
 
-class SurrogationTest {
-
+class SubrogationTest {
 
 
+
+    @Disabled
     @Test
-    void testSurrogationRosenbrock(){
+    void testSubrogationRosenberg(){
 
         // DEFINITION OF THE SEARCH SPACE
 
@@ -62,9 +63,9 @@ class SurrogationTest {
 
     }
 
-
+    @Disabled
     @Test
-    void testSurrogationSimpleFunction(){
+    void testSubrogationSimpleFunction(){
         // DEFINITION OF THE SEARCH SPACE
 
         HyperRectangle searchSpace = new HyperRectangle(

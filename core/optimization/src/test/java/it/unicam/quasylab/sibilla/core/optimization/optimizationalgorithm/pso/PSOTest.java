@@ -3,6 +3,7 @@ package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.pso;
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationTask;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
@@ -27,7 +28,6 @@ class PSOTest {
 
     /**
      * simple function : <b> 7 * ( x * y )/(e^(x^2+y^2)) </b> minimization
-     *
      * An Interval have :
      * <ul>
      * <li>Global minima : <b>None</b>
@@ -261,7 +261,6 @@ class PSOTest {
     }
 
 
-//    //@Disabled("Disabled : very time consuming")
     @Test
     public void testRosenbrockFunction(){
 

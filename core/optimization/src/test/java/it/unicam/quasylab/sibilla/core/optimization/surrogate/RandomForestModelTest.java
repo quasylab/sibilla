@@ -52,7 +52,7 @@ class RandomForestModelTest {
 //        System.out.println(rfr.getInSampleMetrics().toString());
 //        System.out.println(rfr.getInSampleMetrics().getTruthVsPredictedTable());
         String csvString = getCsvFromTable(rfr.getTrainingSetMetrics().getTruthVsPredictedTable());
-        System.out.println(csvString);
+        //System.out.println(csvString);
     }
 
     @Test
@@ -80,11 +80,11 @@ class RandomForestModelTest {
         RandomForestModel rfr = new RandomForestModel(dataSet, 0.85,new Properties());
         rfr.fit();
 
-        System.out.println("metrics  in Sample ");
-        System.out.println(rfr.getTrainingSetMetrics().toString());
+        //System.out.println("metrics  in Sample ");
+        //System.out.println(rfr.getTrainingSetMetrics().toString());
 
-        System.out.println("metrics out Sample ");
-        System.out.println(rfr.getTestSetMetrics().toString());
+        //System.out.println("metrics out Sample ");
+        //System.out.println(rfr.getTestSetMetrics().toString());
 
     }
 
