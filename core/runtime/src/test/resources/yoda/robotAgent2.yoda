@@ -18,9 +18,9 @@ agent Robot =
         bool goal = false;
     actions :
         moveNorth [ dirx <- 0; diry <- 1;]
-        moveSouth [ dirx <- 0; diry <- 1;]
-        moveEast [ dirx <- 0; diry <- 1;]
-        moveWest [ dirx <- 0; diry <- 1;]
+        moveSouth [ dirx <- 0; diry <- -1;]
+        moveEast [ dirx <- 1; diry <- 0;]
+        moveWest [ dirx <- -1; diry <- 0;]
         stop [ dirx <- 0; diry <- 0; ]
     behaviour :
         when goal -> [ stop: 1 ]
@@ -59,6 +59,8 @@ environment:
     Robot[ x = 9 ; y = 0 ; ]
  end
 
-measure meanX = mean . x
 
-measure meanY = mean . y
+
+measure meanX =  mean Robot . x
+
+measure meanY =  mean Robot . y

@@ -38,6 +38,8 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.abs;
+
 /**
  * This visitor is used to build a function that represents the parametric evaluation of an expression.
  */
@@ -367,5 +369,11 @@ public class YodaFunctionalExpressionEvaluator<T> extends YodaModelBaseVisitor<F
         Function<T, SibillaValue> recordEvaluation = ctx.record.accept(this);
         String fieldName = ctx.fieldName.getText();
         return arg -> SibillaValue.access(recordEvaluation.apply(arg), fieldName);
+    }
+
+    @Override
+    public Function<T, SibillaValue> visitExpressionAbsolute(YodaModelParser.ExpressionAbsoluteContext ctx) {
+        Function<T, SibillaValue> argumentEvaluation = ctx.argument.accept(this);
+        return arg -> SibillaValue.abs(argumentEvaluation.apply(arg));
     }
 }

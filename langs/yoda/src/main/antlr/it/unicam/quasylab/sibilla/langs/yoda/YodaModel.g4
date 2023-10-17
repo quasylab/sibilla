@@ -125,24 +125,25 @@ expr    : INTEGER                                                          # exp
         | '[' fieldAssignment (',' fieldAssignment)* ']'                   # expressionRecord
         | 'U''['min=expr',' max=expr']'                                    # expressionWeightedRandom
         | 'rnd'                                                            # expressionRandom
-        | 'all' (groupName=ID)? ':' expr                            # expressionForAll
-        | 'any' (groupName=ID)? ':' expr                               # expressionExists
+        | 'all' (groupName=ID)? ':' expr                                   # expressionForAll
+        | 'any' (groupName=ID)? ':' expr                                   # expressionExists
         | 'min' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr      # expressionMinimum
         | 'max' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr      # expressionMaximum
         | 'mean' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr     # expressionMean
-        |  record=expr '.' fieldName =ID                                                # expressionRecordAccess
-        | 'it.' ref=ID                                                # expressionItselfRef
-        | 'sin' '(' argument=expr ')'                                 # expressionSin
-        | 'sinh' '(' argument=expr ')'                                # expressionSinh
-        | 'asin' '(' argument=expr ')'                                # expressionAsin
-        | 'cos' '(' argument=expr ')'                                 # expressionCos
-        | 'cosh' '(' argument=expr ')'                                # expressionCosh
-        | 'acos' '(' argument=expr ')'                                # expressionAcos
-        | 'tan' '(' argument=expr ')'                                 # expressionTan
-        | 'tanh' '(' argument=expr ')'                                # expressionTanh
-        | 'atan' '(' argument=expr ')'                                # expressionAtan
-        | 'ceil' '(' argument=expr ')'                                # expressionCeiling
-        | 'floor' '(' argument=expr ')'                               # expressionFloor
+        |  record=expr '.' fieldName =ID                                   # expressionRecordAccess
+        | 'it.' ref=ID                                                     # expressionItselfRef
+        | 'sin' '(' argument=expr ')'                                      # expressionSin
+        | 'sinh' '(' argument=expr ')'                                     # expressionSinh
+        | 'asin' '(' argument=expr ')'                                     # expressionAsin
+        | 'cos' '(' argument=expr ')'                                      # expressionCos
+        | 'cosh' '(' argument=expr ')'                                     # expressionCosh
+        | 'acos' '(' argument=expr ')'                                     # expressionAcos
+        | 'tan' '(' argument=expr ')'                                      # expressionTan
+        | 'tanh' '(' argument=expr ')'                                     # expressionTanh
+        | 'atan' '(' argument=expr ')'                                     # expressionAtan
+        | 'ceil' '(' argument=expr ')'                                     # expressionCeiling
+        | 'floor' '(' argument=expr ')'                                    # expressionFloor
+        | 'abs' '(' argument=expr ')'                                      # expressionAbsolute
 ;
 
 

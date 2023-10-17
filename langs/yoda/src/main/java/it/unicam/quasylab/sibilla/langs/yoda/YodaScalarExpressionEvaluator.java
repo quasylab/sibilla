@@ -209,5 +209,8 @@ public class YodaScalarExpressionEvaluator extends YodaModelBaseVisitor<SibillaV
         return SibillaValue.access(ctx.record.accept(this), ctx.fieldName.getText());
     }
 
-
+    @Override
+    public SibillaValue visitExpressionAbsolute(YodaModelParser.ExpressionAbsoluteContext ctx) {
+        return SibillaValue.apply(Math::abs, ctx.argument.accept(this));
+    }
 }

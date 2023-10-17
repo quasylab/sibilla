@@ -22,7 +22,7 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass = "it.unicam.quasylab.sibilla.app.App"
+    mainClass = "it.unicam.quasylab.sibilla.shell.SibillaShell"
     applicationName = "sshell"
 }
 

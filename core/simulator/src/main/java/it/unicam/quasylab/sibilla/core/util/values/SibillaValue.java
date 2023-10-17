@@ -146,6 +146,24 @@ public interface SibillaValue {
         return SibillaValue.ERROR_VALUE;
     }
 
+    static SibillaValue abs(SibillaValue v){
+        if (v instanceof SibillaInteger) {
+            if (v.intOf() < 0) {
+                return new SibillaInteger(-v.intOf());
+            } else {
+                return new SibillaInteger(v.intOf());
+            }
+        }
+        if (v instanceof SibillaDouble) {
+            if (v.doubleOf() < 0.0) {
+                return new SibillaDouble(-v.doubleOf());
+            } else {
+                return new SibillaDouble(v.doubleOf());
+            }
+        }
+        return SibillaValue.ERROR_VALUE;
+    }
+
     static SibillaValue eval(DoubleBinaryOperator op, SibillaValue v1, SibillaValue v2) {
         return new SibillaDouble(op.applyAsDouble(v1.doubleOf(), v2.doubleOf()));
     }

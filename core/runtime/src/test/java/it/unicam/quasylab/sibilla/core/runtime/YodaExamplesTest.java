@@ -231,14 +231,13 @@ class YodaExamplesTest {
         assertEquals(1, acts.getTotalWeight());
         assertEquals(1, acts.getAll().get(0).getTotalWeight());
         assertEquals("stop", acts.getAll().get(0).getElement().getName());
-
-        /* END TESTS ON ROBOT SCENARIO */
-
-
-        /* BEGIN TESTS ON RESCUEBOT */
-
-        /* END TESTS ON RESCUEBOT */
-
     }
+
+    /* END TESTS ON ROBOT SCENARIO */
+
+
+    /* BEGIN TESTS ON FINDERBOT */
+
+    /* END TESTS ON FINDERBOT */
 
 }

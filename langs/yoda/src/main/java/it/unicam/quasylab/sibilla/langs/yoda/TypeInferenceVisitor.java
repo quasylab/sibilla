@@ -482,6 +482,16 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
     }
 
     @Override
+    public YodaType visitExpressionAbsolute(YodaModelParser.ExpressionAbsoluteContext ctx) {
+        YodaType argType = ctx.argument.accept(this);
+        if (!argType.isNumericType()){
+            errors.record(ParseUtil.illegalTypeError(argType, ctx));
+            return YodaType.NONE_TYPE;
+        }
+        return argType;
+    }
+
+    @Override
     public YodaType visitExpressionRecord(YodaModelParser.ExpressionRecordContext ctx) {
         boolean allFieldsAreCorrect = true;
         YodaType.RecordType recordType = null;
