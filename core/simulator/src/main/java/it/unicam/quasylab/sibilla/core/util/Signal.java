@@ -299,10 +299,12 @@ public final class Signal implements Iterable<Sample<Double>> {
     public Signal extract(double from) {
         Signal result = new Signal();
         Sample<Double> previous = null;
+        boolean flag = true;
         for (Sample<Double> sample : this) {
             if (sample.getTime()>=from) {
-                if ((previous != null)&&(sample.getTime()>from)) {
+                if (flag&&(previous != null)&&(sample.getTime()>from)) {
                     result.add(from, previous.getValue());
+                    flag = false;
                 }
                 result.add(sample.getTime(), sample.getValue());
             }
