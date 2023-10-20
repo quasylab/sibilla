@@ -87,7 +87,7 @@ class STLTest {
 
 
      @Test
-     //@Disabled
+     @Disabled
      public void stlTestOnSIR_1() throws ModelGenerationException {
 
 

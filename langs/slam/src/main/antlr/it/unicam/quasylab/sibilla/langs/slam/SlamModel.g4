@@ -37,9 +37,9 @@ declarationParameter:
 declarationMeasure: 'measure' name=ID '=' expr;
 
 declarationSystem:
-    'system' name=ID '(' (params += agentParameter (',' params += agentParameter)*)? ')' '='
+    'system' name=ID '[' (params += agentParameter (',' params += agentParameter)*)? ']' '='
         agents += agentExpression ('|' agents += agentExpression)* ';'
-
+    'end'
 ;
 
 
@@ -53,20 +53,17 @@ declarationMessage:
     ;
 
 declarationAgent:
-    'agent' name=ID ('(' (params += agentParameter (',' params += agentParameter)*)? ')')? '{'
-        'attributes' '{'
+    'agent' name=ID ('[' (params += agentParameter (',' params += agentParameter)*)? ']')? ':'
+        'attributes' ':'
             (attributes += attributeDeclaration)*
-        '}'
-        ('views' '{'
-            (views += attributeDeclaration)*
-        '}')?
-        'behaviour' '{'
+        ('views' ':'
+            (views += attributeDeclaration)*)?
+        'behaviour' ':'
             (states += agentStateDeclaration)*
-        '}'
-        ('on' 'time'  '{'
+        ('on' 'time'  ':'
             (commands += agentCommandAssignment)*
         '}')?
-    '}'
+    'end'
     ;
 
 agentParameter:

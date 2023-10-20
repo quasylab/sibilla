@@ -25,14 +25,12 @@ package it.unicam.quasylab.sibilla.core.util;
 
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Sample;
 
-import javax.naming.spi.DirObjectFactory;
 import java.util.*;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * A signal represents a (piecewise constant) function associating double values to time.
@@ -40,8 +38,8 @@ import java.util.stream.Stream;
  */
 public final class Signal implements Iterable<Sample<Double>> {
 
-    private double start = Double.NaN;
-    private double end = Double.NaN;
+    private double start;
+    private double end;
 
     private Sample<Double> last;
 
@@ -52,15 +50,6 @@ public final class Signal implements Iterable<Sample<Double>> {
      */
     public Signal() {
         this(Double.NaN, Double.NaN, new LinkedList<>());
-    }
-
-    /**
-     * Creates a copy of the given signal.
-     *
-     * @param signal the signal to copy.
-     */
-    private Signal(Signal signal) {
-        this(signal.start, signal.end, new LinkedList<>(signal.values));
     }
 
     /**
@@ -305,5 +294,20 @@ public final class Signal implements Iterable<Sample<Double>> {
     @Override
     public int hashCode() {
         return Objects.hash(values);
+    }
+
+    public Signal extract(double from) {
+        Signal result = new Signal();
+        Sample<Double> previous = null;
+        for (Sample<Double> sample : this) {
+            if (sample.getTime()>=from) {
+                if ((previous != null)&&(sample.getTime()>from)) {
+                    result.add(from, previous.getValue());
+                }
+                result.add(sample.getTime(), sample.getValue());
+            }
+            previous = sample;
+        }
+        return result;
     }
 }

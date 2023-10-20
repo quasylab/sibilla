@@ -34,6 +34,78 @@ public class SlidingWindow {
 
     private final double to;
 
+    private class Window {
+
+        private final LinkedList<Sample<Double>> content = new LinkedList<>();
+
+        private double windowEnd = Double.NaN;
+
+        private Sample<Double> lastRemoved;
+
+        public void add(Signal result, Sample<Double> sample) {
+            add(result, sample.getTime(), sample.getValue());
+        }
+
+        public void add(Signal result, double nextTime, double nextValue) {
+            while (!isEmpty()&&(getFirstTimeInWindow()+getSize()<nextTime)) {
+                Sample<Double> firstSample = removeFirst();
+                result.add(firstSample.getTime()-from, firstSample.getTime());
+                lastRemoved = firstSample;
+                reinsertIfNeeded(nextTime);
+            }
+            doAdd(nextTime, nextValue);
+        }
+
+        private void reinsertIfNeeded(double nextTime) {
+            if (content.isEmpty()) {
+                content.add(new Sample<>(nextTime-getSize(), lastRemoved.getValue()));
+            } else {
+                double delta1 = getFirstTimeInWindow()-lastRemoved.getTime();
+                double delta2 = nextTime - windowEnd;
+                if (delta1 > delta2) {
+                    content.add(new Sample<>(lastRemoved.getTime()+delta2, lastRemoved.getValue()));
+                }
+            }
+        }
+
+        private double getFirstTimeInWindow() {
+            return content.getFirst().getTime();
+        }
+
+        private void doAdd(double nextTime, double nextValue) {
+            double timeOfInsertedElement = nextTime;
+            while (!content.isEmpty()&&(getLastValue()<=nextValue)) {
+                Sample<Double> lastSampling = content.removeLast();
+                timeOfInsertedElement = lastSampling.getTime();
+            }
+            content.add(new Sample<>(timeOfInsertedElement, nextValue));
+            windowEnd = nextTime;
+        }
+
+        private boolean isEmpty() {
+            return content.isEmpty();
+        }
+
+        private Sample<Double> removeFirst() {
+            return content.removeFirst();
+        }
+
+        public void end(Signal result, double end) {
+            if (end > windowEnd) {
+                add(result, end, getLastValue());
+                if (getFirstTimeInWindow()+getSize()>windowEnd) {
+                    Sample<Double> firstSample = content.getFirst();
+                    result.add(firstSample.getTime()-from, firstSample.getValue());
+                }
+            }
+        }
+
+        private double getLastValue() {
+            if (!content.isEmpty()) return content.getLast().getValue();
+            if (lastRemoved != null) return lastRemoved.getValue();
+            return Double.NaN;
+        }
+    }
 
     public SlidingWindow(double from, double to) {
         this.from = from;
@@ -42,63 +114,17 @@ public class SlidingWindow {
 
     public Signal apply(Signal s) {
         Signal result = new Signal();
-        LinkedList<Sample<Double>> w = new LinkedList<>();
-        //Saltare i valori a tempo < di from
-        for (Sample<Double> sample : s) {
-            if (sample.getTime()>=from) {
-                add(result, w, sample);
-            }
+        Window w = new Window();
+        for (Sample<Double> sample : s.extract(from)) {
+            w.add(result, sample);
         }
-        if (isFull(w)) {
-            Sample<Double> doubleSample = w.removeFirst();
-            result.add(doubleSample.getTime(), doubleSample.getValue());
-        }
-        complete(result, w, s.getEnd());
-        //result.setEnd(s.getEnd());
+        w.end(result, s.getEnd());
         return result;
     }
 
-    private void complete(Signal result, LinkedList<Sample<Double>> w, double end) {
-        while (!w.isEmpty()&&((end-w.getFirst().getTime())>=getSize())) {
-            Sample<Double> doubleSample = w.removeFirst();
-            result.add(doubleSample.getTime()-to, doubleSample.getValue());
-            //Riaggiungere l'elemento se la distanza con quello subito dopo è minore
-            // con la distanza tra la fine della finestra e quello successivo
-        }
-    }
 
     private double getSize() {
         return to-from;
     }
-
-
-    private boolean isFull(LinkedList<Sample<Double>> w) {
-        if (!w.isEmpty()) {
-            return (w.getLast().getTime()-w.getFirst().getTime()) == getSize();
-        } else {
-            return false;
-        }
-    }
-
-
-    private void add(Signal result, LinkedList<Sample<Double>> w, Sample<Double> sample) {
-        while (!w.isEmpty()&&((sample.getTime()-w.getFirst().getTime())>getSize())) {
-            Sample<Double> doubleSample = w.removeFirst();
-            result.add(doubleSample.getTime(), doubleSample.getValue());
-        }
-        append(w, sample);
-    }
-
-    private void append(LinkedList<Sample<Double>> w, Sample<Double> sample) {
-        double time = sample.getTime();
-        double value = sample.getValue();
-        while (!w.isEmpty()&&w.getLast().getValue()<=value) {
-            time = w.removeLast().getTime();
-        }
-        w.add(new Sample<>(time, value));
-    }
-
-
-
 
 }
