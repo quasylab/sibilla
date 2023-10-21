@@ -296,19 +296,41 @@ public final class Signal implements Iterable<Sample<Double>> {
         return Objects.hash(values);
     }
 
+//    public Signal extract(double from) {
+//        Signal result = new Signal();
+//        Sample<Double> previous = null;
+//        boolean flag = true;
+//        for (Sample<Double> sample : this) {
+//            if (sample.getTime()>=from) {
+//                if (flag&&(previous != null)&&(sample.getTime()>from)) {
+//                    result.add(from, previous.getValue());
+//                    flag = false;
+//                }
+//                result.add(sample.getTime(), sample.getValue());
+//            }
+//            previous = flag ? sample : null;
+//        }
+//        return result;
+//    }
+
     public Signal extract(double from) {
         Signal result = new Signal();
-        Sample<Double> previous = null;
+        double valueAtFrom = this.valueAt(from);
         boolean flag = true;
         for (Sample<Double> sample : this) {
-            if (sample.getTime()>=from) {
-                if (flag&&(previous != null)&&(sample.getTime()>from)) {
-                    result.add(from, previous.getValue());
+            if(sample.getTime()>=from){
+                if(flag){
+                    if(sample.getValue()==valueAtFrom)
+                        result.add(from + (sample.getTime()-from), valueAtFrom);
+                    else{
+                        result.add(from,valueAtFrom);
+                        result.add(sample.getTime(),sample.getValue());
+                    }
                     flag = false;
+                }else{
+                    result.add(sample.getTime(), sample.getValue());
                 }
-                result.add(sample.getTime(), sample.getValue());
             }
-            previous = sample;
         }
         return result;
     }

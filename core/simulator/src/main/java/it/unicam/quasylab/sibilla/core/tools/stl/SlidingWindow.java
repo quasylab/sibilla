@@ -49,7 +49,7 @@ public class SlidingWindow {
         public void add(Signal result, double nextTime, double nextValue) {
             while (!isEmpty()&&(getFirstTimeInWindow()+getSize()<nextTime)) {
                 Sample<Double> firstSample = removeFirst();
-                result.add(firstSample.getTime()-from, firstSample.getTime());
+                result.add(firstSample.getTime()-from, firstSample.getValue());
                 lastRemoved = firstSample;
                 reinsertIfNeeded(nextTime);
             }

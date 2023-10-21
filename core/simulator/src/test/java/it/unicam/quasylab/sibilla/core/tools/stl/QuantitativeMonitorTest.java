@@ -31,6 +31,20 @@ class QuantitativeMonitorTest {
         return trajectory;
     }
 
+    public <S> QuantitativeMonitor<S> inefficientEventually(QuantitativeMonitor<S> m, double from, double to){
+        return new QuantitativeMonitor<S>() {
+            @Override
+            public Signal monitor(Trajectory<S> trajectory) {
+                return null;
+            }
+
+            @Override
+            public double getTimeHorizon() {
+                return 0;
+            }
+        };
+    }
+
 
 
     /**
@@ -287,32 +301,51 @@ class QuantitativeMonitorTest {
 
     }
 
-    @Test
-    public void testEventuallyTimeShift(){
+    //@Test
+    public void testEventuallyTimeShift(double a, double b){
         Trajectory<PopulationState> t = getPopulationTrajectory(
                 new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
                 1,
                 new double[]{1.0, 1.0, 1.0, 1.0, 3.0, 4.0, 3.0, 3.0}
         );
 
-        System.out.println("TRAJECTORY : ");
-        System.out.println(t);
+
+//        System.out.println("TRAJECTORY : ");
+//        System.out.println(t);
 
 
         QuantitativeMonitor.AtomicMonitor<PopulationState> aM =
                 new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(0) - 2.0);
-
-        System.out.println("MONITOR : (X >= 2) : ");
         Signal aMs = aM.monitor(t);
-        System.out.println(aMs);
+//        System.out.println("MONITOR : (X >= 2) : ");
+//        Signal aMs = aM.monitor(t);
+//        System.out.println(aMs);
 
 
-        QuantitativeMonitor<PopulationState> eventually = QuantitativeMonitor.eventually(aM,3,6);
+        QuantitativeMonitor<PopulationState> eventually = QuantitativeMonitor.eventually(aM,a,b);
         Signal s = eventually.monitor(t);
-        System.out.println("MONITOR : E_[3,6](X >= 2) : ");
-        System.out.println(s);
+        System.out.println("------------------------------------------------");
+        System.out.println("------------------------------------------------");
+        System.out.println("------------------------------------------------");
+        System.out.println("MONITOR : \n E_["+a+","+b+"](X >= 2) : ");
+        System.out.println("ROBUSTNESS SIGNAL : \n "+s);
+        System.out.println("ROBUSTNESS AT ZERO : \n"+s.valueAt(0));
+        System.out.println("------------------------------------------------");
+        System.out.println("------------------------------------------------");
+        System.out.println("------------------------------------------------");
 
     }
+
+    @Test
+    public void shifting(){
+
+        testEventuallyTimeShift(4,5);
+        testEventuallyTimeShift(3,5);
+        testEventuallyTimeShift(0,3);
+    }
+
+
+
 
 
 

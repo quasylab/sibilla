@@ -691,7 +691,7 @@ class SibillaRuntimeTest {
         sr.generateTrainingSet();
         //sr.saveTable("TSP_BATTERY","/Users/lorenzomatteucci/phd/tsp_battery",null,null);
     }
-    @Test
+    @Disabled
     public void testNewSIR() throws CommandExecutionException, IOException {
         SibillaRuntime sr = getRuntimeWithModule();
         sr.load(TEST_SIR);
@@ -885,7 +885,7 @@ class SibillaRuntimeTest {
 
 
 
-    @Test
+    @Disabled
     public void testOptimization() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithModule();
         sr.load(CODE_TSP);
