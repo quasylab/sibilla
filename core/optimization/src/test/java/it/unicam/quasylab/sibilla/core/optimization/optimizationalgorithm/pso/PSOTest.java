@@ -3,7 +3,6 @@ package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.pso;
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationTask;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;

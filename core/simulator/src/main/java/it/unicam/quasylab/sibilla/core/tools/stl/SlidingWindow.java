@@ -54,6 +54,8 @@ public class SlidingWindow {
                 reinsertIfNeeded(nextTime);
             }
             doAdd(nextTime, nextValue);
+            content.forEach(s -> System.out.print(s.getValue() + "  "));
+            System.out.println("\n");
         }
 
         private void reinsertIfNeeded(double nextTime) {
@@ -63,7 +65,7 @@ public class SlidingWindow {
                 double delta1 = getFirstTimeInWindow()-lastRemoved.getTime();
                 double delta2 = nextTime - windowEnd;
                 if (delta1 > delta2) {
-                    content.add(new Sample<>(lastRemoved.getTime()+delta2, lastRemoved.getValue()));
+                    content.addFirst(new Sample<>(lastRemoved.getTime()+delta2, lastRemoved.getValue()));
                 }
             }
         }

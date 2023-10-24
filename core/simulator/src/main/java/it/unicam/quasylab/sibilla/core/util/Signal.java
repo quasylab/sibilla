@@ -120,7 +120,7 @@ public final class Signal implements Iterable<Sample<Double>> {
      *
      * @return the array of time points occurring in the signal;
      */
-    private double[] timePoints() {
+    public double[] timePoints() {
         if (Double.isNaN(start)) {
             return new double[0];
         }
@@ -272,7 +272,7 @@ public final class Signal implements Iterable<Sample<Double>> {
 
         }
 
-        return "start=" + start + ", end=" + end + "\n" + valuesString;
+        return "s: " + start + " | e: " + end + " | signal : " + (valuesString.isEmpty() ? "[ empty ] " : valuesString);
     }
 
     public void setStart(double start) {
