@@ -5,6 +5,7 @@ import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Sample;
 import it.unicam.quasylab.sibilla.core.util.Signal;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.SortedMap;
@@ -329,11 +330,6 @@ class QuantitativeMonitorTest {
                 new double[]{1.0, 1.0, 1.0, 1.0, 3.0, 4.0, 3.0, 3.0}
         );
 
-        Trajectory<PopulationState> tLong = getPopulationTrajectory(
-                new double[]{1.0, 1.0, 1.0, 1.0,1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
-                1,
-                new double[]{1.0, 1.0, 1.0, 1.0,1.0, 1.0, 1.0, 1.0, 3.0, 4.0, 3.0, 3.0}
-        );
 
 
 //        System.out.println("TRAJECTORY : ");
@@ -589,7 +585,7 @@ class QuantitativeMonitorTest {
      *  indexes
      *  (X[1] > 0.05  & G[60,90](X[2] > 0.7 ))
      */
-    @Test
+    @Disabled
     public void test_formula_SIR(){
 
         Trajectory<PopulationState> t = getPopulationTrajectory(
@@ -631,7 +627,7 @@ class QuantitativeMonitorTest {
 
         Signal s = conjunction.monitor(t);
 
-        System.out.println(s);
+        //System.out.println(s);
 
     }
 

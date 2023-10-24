@@ -176,8 +176,6 @@ public interface QuantitativeMonitor<S> {
             public Signal monitor(Trajectory<S> trajectory) {
                 SlidingWindow sw = new SlidingWindow(from,to);
                 return sw.apply(m.monitor(trajectory));
-//                SlidingWindowMax sWM = new SlidingWindowMax();
-//                return sWM.apply(m.monitor(trajectory),from,to);
             }
 
             @Override

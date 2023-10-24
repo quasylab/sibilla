@@ -54,8 +54,6 @@ public class SlidingWindow {
                 reinsertIfNeeded(nextTime);
             }
             doAdd(nextTime, nextValue);
-            content.forEach(s -> System.out.print(s.getValue() + "  "));
-            System.out.println("\n");
         }
 
         private void reinsertIfNeeded(double nextTime) {
@@ -95,7 +93,7 @@ public class SlidingWindow {
         public void end(Signal result, double end) {
             if (end > windowEnd) {
                 add(result, end, getLastValue());
-                if (getFirstTimeInWindow()+getSize()>windowEnd) {
+                if (getFirstTimeInWindow()+getSize()>=windowEnd) {
                     Sample<Double> firstSample = content.getFirst();
                     result.add(firstSample.getTime()-from, firstSample.getValue());
                 }
