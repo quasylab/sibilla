@@ -147,7 +147,7 @@ public interface QuantitativeMonitor<S> {
             public Signal monitor(Trajectory<S> trajectory) {
                 Signal s1 = m1.monitor(trajectory);
                 Signal s2 = m2.monitor(trajectory);
-                double[] times = Signal.getCommonTimeSteps(s1, s2);
+                double[] times = Signal.getTimeSteps(s1, s2);
                 double[] data = until(s1.valuesAt(times), s2.valuesAt(times));
                 return new Signal(times, data);
             }

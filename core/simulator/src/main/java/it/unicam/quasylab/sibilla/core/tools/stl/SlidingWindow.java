@@ -25,6 +25,7 @@ package it.unicam.quasylab.sibilla.core.tools.stl;
 
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Sample;
 import it.unicam.quasylab.sibilla.core.util.Signal;
+import it.unicam.quasylab.sibilla.core.util.SignalSegment;
 
 import java.util.LinkedList;
 
@@ -42,8 +43,8 @@ public class SlidingWindow {
 
         private Sample<Double> lastRemoved;
 
-        public void add(Signal result, Sample<Double> sample) {
-            add(result, sample.getTime(), sample.getValue());
+        public void add(Signal result, SignalSegment sample) {
+            add(result, sample.getFrom(), sample.getValue());
         }
 
         public void add(Signal result, double nextTime, double nextValue) {
@@ -115,7 +116,7 @@ public class SlidingWindow {
     public Signal apply(Signal s) {
         Signal result = new Signal();
         Window w = new Window();
-        for (Sample<Double> sample : s.extract(from)) {
+        for (SignalSegment sample : s.extract(from)) {
             w.add(result, sample);
         }
         w.end(result, s.getEnd());

@@ -201,8 +201,7 @@ public class Trajectory<S> implements Externalizable {
     public Signal apply(ToDoubleFunction<S> function) {
         Signal result = new Signal();
         data.forEach(s -> result.add(s.getTime(), function.applyAsDouble(s.getValue())));
-        if(!Double.isNaN(this.end))
-         result.setEnd(this.end);
+        if(!Double.isNaN(this.end)) result.setEnd(this.end);
         return result;
     }
 
