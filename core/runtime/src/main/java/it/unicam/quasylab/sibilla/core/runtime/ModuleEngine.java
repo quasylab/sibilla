@@ -33,6 +33,7 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+import it.unicam.quasylab.sibilla.langs.stl.StlMonitorFactory;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.Map;
@@ -48,6 +49,8 @@ public class ModuleEngine<S extends State> {
 
     protected String selectedConfigurationName;
     private double[] selectedConfigurationArgs;
+
+    private StlMonitorFactory<S> monitorFactory;
 
 
     public ModuleEngine(ModelDefinition<S> modelDefinition) {
@@ -230,4 +233,5 @@ public class ModuleEngine<S extends State> {
         loadModel();
         return this.currentModel.getMeasure(name) != null;
     }
+
 }

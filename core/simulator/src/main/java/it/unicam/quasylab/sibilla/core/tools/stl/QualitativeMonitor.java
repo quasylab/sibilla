@@ -29,6 +29,7 @@ import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
 
 import java.util.Arrays;
 import java.util.function.DoublePredicate;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.IntStream;
@@ -41,6 +42,51 @@ import java.util.stream.IntStream;
  */
 //@FunctionalInterface
 public interface QualitativeMonitor<S> {
+
+    static <S> QualitativeMonitor<S> monitorGlobally(Interval interval, QualitativeMonitor<S> m) {
+        return new QualitativeMonitor.GloballyMonitor<>(m, interval);
+    }
+
+    static <S> QualitativeMonitor<S> monitorFinally(Interval interval, QualitativeMonitor<S> m) {
+        return new QualitativeMonitor.FinallyMonitor<>(m, interval);
+    }
+
+    static <S> QualitativeMonitor<S> monitorNegation(QualitativeMonitor<S> m) {
+        return new QualitativeMonitor.NegationMonitor<>(m);
+    }
+
+    static <S> QualitativeMonitor<S> monitorConjunction(QualitativeMonitor<S> m1, QualitativeMonitor<S> m2) {
+        return new QualitativeMonitor.ConjunctionMonitor<>(m1, m2);
+    }
+
+    static <S> QualitativeMonitor<S> monitorDisjuction(QualitativeMonitor<S> m1, QualitativeMonitor<S> m2) {
+        return new QualitativeMonitor.DisjunctionMonitor<>(m1, m2);
+    }
+
+    static <S> QualitativeMonitor<S> monitorImplication(QualitativeMonitor<S> m1, QualitativeMonitor<S> m2) {
+        return new QualitativeMonitor.DisjunctionMonitor<>(monitorNegation(m1), m2);
+    }
+
+    static <S> QualitativeMonitor<S> monitorIfAndOnlyIf(QualitativeMonitor<S> m1, QualitativeMonitor<S> m2) {
+        return monitorConjunction(monitorImplication(m1, m2), monitorImplication(m2, m1));
+    }
+
+
+    static <S> QualitativeMonitor<S> monitorUntil(Interval interval, QualitativeMonitor<S> m1, QualitativeMonitor<S> m2) {
+        return new QualitativeMonitor.UntilMonitor<>(m1, interval, m2);
+    }
+
+    static <S> QualitativeMonitor<S> monitorTrue() {
+        return atomicMonitor(s -> true);
+    }
+
+    static <S> QualitativeMonitor<S> atomicMonitor(Predicate<S> predicate) {
+        return new QualitativeMonitor.AtomicMonitor<>(predicate);
+    }
+
+    static <S> QualitativeMonitor<S> monitorFalse() {
+        return atomicMonitor(s -> false);
+    }
 
     BooleanSignal monitor(Trajectory<S> trj);
 
@@ -79,18 +125,16 @@ public interface QualitativeMonitor<S> {
      */
     class AtomicMonitor<S> implements QualitativeMonitor<S> {
 
-        private final ToDoubleFunction<S> measure;
+        private final Predicate<S> predicate;
 
-        private final DoublePredicate guard;
 
-        public AtomicMonitor(ToDoubleFunction<S> measure, DoublePredicate guard) {
-            this.measure = measure;
-            this.guard = guard;
+        public AtomicMonitor(Predicate<S> predicate) {
+            this.predicate = predicate;
         }
 
         @Override
         public BooleanSignal monitor(Trajectory<S> trj) {
-            return trj.test(s -> guard.test(measure.applyAsDouble(s)));
+            return trj.test(predicate);
         }
 
         @Override

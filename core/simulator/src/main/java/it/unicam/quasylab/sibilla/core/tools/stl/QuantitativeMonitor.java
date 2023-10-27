@@ -116,7 +116,7 @@ public interface QuantitativeMonitor<S> {
      *
      * A monitor used to evaluate the negation of a formula
      *
-     * @param m monitor to negate
+     * @param m monitor to monitorNegation
      * @return the negation monitor
      * @param <S> type of states in the trajectory
      */

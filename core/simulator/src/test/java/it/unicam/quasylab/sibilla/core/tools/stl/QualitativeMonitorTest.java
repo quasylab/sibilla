@@ -28,8 +28,7 @@ class QualitativeMonitorTest {
     @Test
     public void testAtomicMonitor(){
         QualitativeMonitor.AtomicMonitor<PopulationState> am = new QualitativeMonitor.AtomicMonitor<>(
-                s -> s.getOccupancy(0),
-                v -> v >= 2
+                s -> s.getOccupancy(0) >= 2
         );
         BooleanSignal bs = am.monitor(getTestTrajectory_1());
         LinkedList<Interval> intervals = bs.getIntervals();
@@ -41,12 +40,10 @@ class QualitativeMonitorTest {
     @Test
     public void testEventuallyMonitor(){
         QualitativeMonitor.AtomicMonitor<PopulationState> am_1 = new QualitativeMonitor.AtomicMonitor<>(
-                s -> s.getOccupancy(0),
-                v -> v >= 2
+                s -> s.getOccupancy(0) >= 2
         );
         QualitativeMonitor.AtomicMonitor<PopulationState> am_2 = new QualitativeMonitor.AtomicMonitor<>(
-                s -> s.getOccupancy(1),
-                v -> v >= 2
+                s -> s.getOccupancy(1) >= 2
         );
         QualitativeMonitor.FinallyMonitor<PopulationState> fm_1 = new QualitativeMonitor
                 .FinallyMonitor<>(am_1,new Interval(0,1));

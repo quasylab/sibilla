@@ -22,5 +22,5 @@ include("langs:lio")
 include("langs:markov")
 include("langs:yoda")
 include("langs:slam")
+include("langs:stl")
 include("shell")
-
