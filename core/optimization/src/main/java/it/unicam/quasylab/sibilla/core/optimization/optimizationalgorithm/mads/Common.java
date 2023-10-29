@@ -136,10 +136,7 @@ public class Common {
             }
 
             // storing the values of diagonal row elements
-            for (int j = 0; j < n; j++)
-            {
-                temp[j] = mat[i][j];
-            }
+            System.arraycopy(mat[i], 0, temp, 0, n);
 
             // traversing every row below the diagonal
             // element

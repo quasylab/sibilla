@@ -61,7 +61,7 @@ public class StlQualitativeMonitorEvaluator<S> extends StlModelBaseVisitor<Funct
     public Function<Map<String, Double>,QualitativeMonitor<S>> visitStlFomulaGlobally(StlModelParser.StlFomulaGloballyContext ctx) {
         Function<Map<String, Double>, QualitativeMonitor<S>> argumentEvaluationFunction = ctx.arg.accept(this);
         Function<Map<String, Double>, Interval> intervalEvaluationFunction = getInterval(ctx.interval());
-        return m -> QualitativeMonitor.monitorGlobally(intervalEvaluationFunction.apply(m), argumentEvaluationFunction.apply(m));
+        return m -> QualitativeMonitor.globally(intervalEvaluationFunction.apply(m), argumentEvaluationFunction.apply(m));
     }
 
 
@@ -69,27 +69,27 @@ public class StlQualitativeMonitorEvaluator<S> extends StlModelBaseVisitor<Funct
     public Function<Map<String, Double>,QualitativeMonitor<S>> visitStlFormulaEventually(StlModelParser.StlFormulaEventuallyContext ctx) {
         Function<Map<String, Double>, QualitativeMonitor<S>> argumentEvaluationFunction = ctx.arg.accept(this);
         Function<Map<String, Double>, Interval> intervalEvaluationFunction = getInterval(ctx.interval());
-        return m -> QualitativeMonitor.monitorFinally(intervalEvaluationFunction.apply(m), argumentEvaluationFunction.apply(m));
+        return m -> QualitativeMonitor.eventually(intervalEvaluationFunction.apply(m), argumentEvaluationFunction.apply(m));
     }
 
     @Override
     public Function<Map<String, Double>,QualitativeMonitor<S>> visitStlFormulaNot(StlModelParser.StlFormulaNotContext ctx) {
         Function<Map<String, Double>, QualitativeMonitor<S>> argumentEvaluationFunction = ctx.argument.accept(this);
-        return m -> QualitativeMonitor.monitorNegation(argumentEvaluationFunction.apply(m));
+        return m -> QualitativeMonitor.negation(argumentEvaluationFunction.apply(m));
     }
 
     @Override
     public Function<Map<String, Double>,QualitativeMonitor<S>> visitStlFormulaOr(StlModelParser.StlFormulaOrContext ctx) {
         Function<Map<String, Double>, QualitativeMonitor<S>> leftArgumentEvaluation = ctx.left.accept(this);
         Function<Map<String, Double>, QualitativeMonitor<S>> rightArgumentEvaluation = ctx.right.accept(this);
-        return m -> QualitativeMonitor.monitorDisjuction(leftArgumentEvaluation.apply(m), rightArgumentEvaluation.apply(m));
+        return m -> QualitativeMonitor.disjunction(leftArgumentEvaluation.apply(m), rightArgumentEvaluation.apply(m));
     }
 
     @Override
     public Function<Map<String, Double>,QualitativeMonitor<S>> visitStlFormulaAnd(StlModelParser.StlFormulaAndContext ctx) {
         Function<Map<String, Double>, QualitativeMonitor<S>> leftArgumentEvaluation = ctx.left.accept(this);
         Function<Map<String, Double>, QualitativeMonitor<S>> rightArgumentEvaluation = ctx.right.accept(this);
-        return m -> QualitativeMonitor.monitorConjunction(leftArgumentEvaluation.apply(m), rightArgumentEvaluation.apply(m));
+        return m -> QualitativeMonitor.conjunction(leftArgumentEvaluation.apply(m), rightArgumentEvaluation.apply(m));
     }
 
     @Override
@@ -101,7 +101,7 @@ public class StlQualitativeMonitorEvaluator<S> extends StlModelBaseVisitor<Funct
         return m -> {
             ToDoubleFunction<S> leftExpression = leftEvaluation.apply(m);
             ToDoubleFunction<S> rightExpression = rightEvaluation.apply(m);
-            return QualitativeMonitor.atomicMonitor(s -> op.test(leftExpression.applyAsDouble(s), rightExpression.applyAsDouble(s)));
+            return QualitativeMonitor.atomicFormula(s -> op.test(leftExpression.applyAsDouble(s), rightExpression.applyAsDouble(s)));
         };
     }
 
@@ -119,19 +119,19 @@ public class StlQualitativeMonitorEvaluator<S> extends StlModelBaseVisitor<Funct
 
     @Override
     public Function<Map<String, Double>,QualitativeMonitor<S>> visitStlFormulaTrue(StlModelParser.StlFormulaTrueContext ctx) {
-        return m -> QualitativeMonitor.monitorTrue();
+        return m -> QualitativeMonitor.trueFormula();
     }
 
     @Override
     public Function<Map<String, Double>,QualitativeMonitor<S>> visitStlFormulaFalse(StlModelParser.StlFormulaFalseContext ctx) {
-        return m -> QualitativeMonitor.monitorFalse();
+        return m -> QualitativeMonitor.falseFormula();
     }
 
     @Override
     public Function<Map<String, Double>,QualitativeMonitor<S>> visitStlFormulaImply(StlModelParser.StlFormulaImplyContext ctx) {
         Function<Map<String, Double>, QualitativeMonitor<S>> leftArgumentEvaluation = ctx.left.accept(this);
         Function<Map<String, Double>, QualitativeMonitor<S>> rightArgumentEvaluation = ctx.right.accept(this);
-        return m -> QualitativeMonitor.monitorImplication(leftArgumentEvaluation.apply(m), rightArgumentEvaluation.apply(m));
+        return m -> QualitativeMonitor.implication(leftArgumentEvaluation.apply(m), rightArgumentEvaluation.apply(m));
     }
 
     @Override
@@ -143,7 +143,7 @@ public class StlQualitativeMonitorEvaluator<S> extends StlModelBaseVisitor<Funct
     public Function<Map<String, Double>,QualitativeMonitor<S>> visitStlFormulaIfAndOnlyIf(StlModelParser.StlFormulaIfAndOnlyIfContext ctx) {
         Function<Map<String, Double>, QualitativeMonitor<S>> leftArgumentEvaluation = ctx.left.accept(this);
         Function<Map<String, Double>, QualitativeMonitor<S>> rightArgumentEvaluation = ctx.right.accept(this);
-        return m -> QualitativeMonitor.monitorIfAndOnlyIf(leftArgumentEvaluation.apply(m), rightArgumentEvaluation.apply(m));
+        return m -> QualitativeMonitor.ifAndOnlyIf(leftArgumentEvaluation.apply(m), rightArgumentEvaluation.apply(m));
     }
 
     @Override
@@ -151,6 +151,6 @@ public class StlQualitativeMonitorEvaluator<S> extends StlModelBaseVisitor<Funct
         Function<Map<String, Double>, QualitativeMonitor<S>> leftArgumentEvaluation = ctx.left.accept(this);
         Function<Map<String, Double>, QualitativeMonitor<S>> rightArgumentEvaluation = ctx.right.accept(this);
         Function<Map<String, Double>, Interval> intervalEvaluation = getInterval(ctx.interval());
-        return m -> QualitativeMonitor.monitorUntil(intervalEvaluation.apply(m), leftArgumentEvaluation.apply(m), rightArgumentEvaluation.apply(m));
+        return m -> QualitativeMonitor.until( leftArgumentEvaluation.apply(m),intervalEvaluation.apply(m), rightArgumentEvaluation.apply(m));
     }
 }

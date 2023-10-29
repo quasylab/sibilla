@@ -4,12 +4,33 @@ import it.unicam.quasylab.sibilla.core.models.pm.Population;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
-import it.unicam.quasylab.sibilla.core.util.Interval;
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedList;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class QualitativeMonitorTest {
+
+    private Trajectory<PopulationState> getPopulationTrajectory(double[] timeIntervals, int numPopulations, double[]... signals) {
+        Trajectory<PopulationState> trajectory = new Trajectory<>();
+        double time = 0.0;
+
+        for (int i = 0; i < timeIntervals.length; i++) {
+            double currentTimeInterval = timeIntervals[i];
+            Population[] populations = new Population[numPopulations];
+
+            for (int j = 0; j < numPopulations; j++) {
+                populations[j] = new Population(j, (int) signals[j][i]);
+            }
+
+            trajectory.add(time, new PopulationState(numPopulations, populations));
+            time += currentTimeInterval;
+        }
+
+        trajectory.setEnd(time);
+
+        return trajectory;
+    }
     private Trajectory<PopulationState> getTestTrajectory_1(){
         Trajectory<PopulationState> trajectory = new Trajectory<>();
 
@@ -27,36 +48,21 @@ class QualitativeMonitorTest {
 
     @Test
     public void testAtomicMonitor(){
-        QualitativeMonitor.AtomicMonitor<PopulationState> am = new QualitativeMonitor.AtomicMonitor<>(
-                s -> s.getOccupancy(0) >= 2
+
+        Trajectory<PopulationState> t = getPopulationTrajectory(
+                new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+                1,
+                new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0}
         );
-        BooleanSignal bs = am.monitor(getTestTrajectory_1());
-        LinkedList<Interval> intervals = bs.getIntervals();
+
+        BooleanSignal bs = QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(0) >= 2 ).monitor(t);
+
+        assertFalse(bs.getValueAt(0.5));
+        assertTrue(bs.getValueAt(1.0));
+        assertTrue(bs.getValueAt(3.5));
+        assertFalse(bs.getValueAt(4.0));
+        assertFalse(bs.getValueAt(4.5));
     }
 
-
-
-
-    @Test
-    public void testEventuallyMonitor(){
-        QualitativeMonitor.AtomicMonitor<PopulationState> am_1 = new QualitativeMonitor.AtomicMonitor<>(
-                s -> s.getOccupancy(0) >= 2
-        );
-        QualitativeMonitor.AtomicMonitor<PopulationState> am_2 = new QualitativeMonitor.AtomicMonitor<>(
-                s -> s.getOccupancy(1) >= 2
-        );
-        QualitativeMonitor.FinallyMonitor<PopulationState> fm_1 = new QualitativeMonitor
-                .FinallyMonitor<>(am_1,new Interval(0,1));
-        QualitativeMonitor.FinallyMonitor<PopulationState> fm_2 = new QualitativeMonitor
-                .FinallyMonitor<>(am_2,new Interval(0,1));
-
-        QualitativeMonitor.ConjunctionMonitor<PopulationState> cm = new QualitativeMonitor.ConjunctionMonitor<>(
-                fm_1,
-                fm_2
-        );
-
-        BooleanSignal bs = cm.monitor(getTestTrajectory_1());
-        LinkedList<Interval> intervals = bs.getIntervals();
-    }
 
 }

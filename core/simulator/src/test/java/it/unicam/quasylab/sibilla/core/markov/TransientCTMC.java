@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class TransientCTMC {
 	
@@ -92,7 +93,7 @@ class TransientCTMC {
 		assertEquals(2.0/3.0, row0.get(1),0.000001);
 		Map<Integer, Double> row1 = ctmc.uniformisedMatrixRow(1);
 		assertEquals(1.0, row1.get(0),0.000001);
-		assertEquals(null, row1.get(1));
+        assertNull(row1.get(1));
 	}
 	
 	@Test

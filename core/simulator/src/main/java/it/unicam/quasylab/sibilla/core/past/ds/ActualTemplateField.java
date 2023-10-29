@@ -22,6 +22,8 @@
  */
 package it.unicam.quasylab.sibilla.core.past.ds;
 
+import java.util.Objects;
+
 /**
  * @author loreti
  *
@@ -61,7 +63,7 @@ public class ActualTemplateField implements TemplateField {
 	public boolean equals(Object obj) {
 		if (obj instanceof ActualTemplateField) {
 			Object other = ((ActualTemplateField) obj).o;
-			return (o == null ? other == null : o.equals(other));
+			return (Objects.equals(o, other));
 		}
 		return false;
 	}

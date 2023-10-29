@@ -40,7 +40,7 @@ import java.util.function.ToDoubleFunction;
 public class StlMonitorFactoryVisitor<S> extends StlModelBaseVisitor<Boolean> {
     private final Map<String, ToDoubleFunction<S>> measures;
     private final ErrorCollector errors;
-    private StlMonitorFactory<S> monitorFactory = new StlMonitorFactory<>();
+    private final StlMonitorFactory<S> monitorFactory = new StlMonitorFactory<>();
 
     private String[] declaredMeasures;
 
@@ -84,7 +84,7 @@ public class StlMonitorFactoryVisitor<S> extends StlModelBaseVisitor<Boolean> {
     }
 
     private Function<Map<String, Double>, QuantitativeMonitor<S>> getQuantitativeMonitor(StlModelParser.StlFormulaContext formula) {
-        return null;
+        return formula.accept(new StlQuantitativeMonitorEvaluator<>(measures));
     }
 
     private Function<Map<String, Double>, QualitativeMonitor<S>> getQualitativeMonitor(StlModelParser.StlFormulaContext formula) {

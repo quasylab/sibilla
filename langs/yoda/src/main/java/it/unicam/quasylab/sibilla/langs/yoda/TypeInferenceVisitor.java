@@ -357,8 +357,7 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
     @Override
     public YodaType visitExpressionRecordAccess(YodaModelParser.ExpressionRecordAccessContext ctx) {
         YodaType type = ctx.record.accept(this);
-        if (type instanceof YodaType.RecordType) {
-            YodaType.RecordType recordType = (YodaType.RecordType) type;
+        if (type instanceof YodaType.RecordType recordType) {
             if (!recordType.hasField(ctx.fieldName.getText())) {
                 return recordType.getType(ctx.fieldName.getText());
             } else {

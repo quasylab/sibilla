@@ -31,7 +31,7 @@ import java.util.function.Supplier;
 
 public class TrajectoryCollector<S> implements Supplier<SamplingHandler<S>> {
 
-    private LinkedList<Trajectory<S>> trajectories;
+    private final LinkedList<Trajectory<S>> trajectories;
 
     public TrajectoryCollector() {
         this.trajectories = new LinkedList<>();

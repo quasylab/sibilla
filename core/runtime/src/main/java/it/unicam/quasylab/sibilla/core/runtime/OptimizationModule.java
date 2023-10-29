@@ -382,14 +382,13 @@ public class OptimizationModule {
 
 
     public String infoTrainingSet(){
-        StringBuilder info = new StringBuilder();
         String emptySpace = "    ";
-        info.append("Size: ").append(this.dataSet.rowCount()).append("\n");
-        info.append("Result info: ").append(this.dataSet.rowCount()).append("\n");
-        info.append(emptySpace).append("Mean               : ").append(this.dataSet.getResultMean()).append("\n");
-        info.append(emptySpace).append("Standard Deviation : ").append(this.dataSet.getResultSD()).append("\n");
-        info.append(emptySpace).append("Mode               : ").append(this.dataSet.getResultMode()).append("\n");
-        return info.toString();
+        String info = "Size: " + this.dataSet.rowCount() + "\n" +
+                "Result info: " + this.dataSet.rowCount() + "\n" +
+                emptySpace + "Mean               : " + this.dataSet.getResultMean() + "\n" +
+                emptySpace + "Standard Deviation : " + this.dataSet.getResultSD() + "\n" +
+                emptySpace + "Mode               : " + this.dataSet.getResultMode() + "\n";
+        return info;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -406,8 +406,7 @@ public class MasterServerSimulationEnvironment implements PropertyChangeListener
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (evt.getNewValue() instanceof SimulationState) {
-            SimulationState state = (SimulationState) evt.getNewValue();
+        if (evt.getNewValue() instanceof SimulationState state) {
             if (state.isConcluded()) {
                 try {
                     state.clientConnection().writeObject(serializer.serialize(MasterCommand.RESULTS));

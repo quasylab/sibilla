@@ -24,7 +24,7 @@
 package it.unicam.quasylab.sibilla.core.tools.stl;
 
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
-import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
+import it.unicam.quasylab.sibilla.core.util.Interval;
 import it.unicam.quasylab.sibilla.core.util.Signal;
 
 import java.util.function.ToDoubleFunction;
@@ -36,30 +36,83 @@ import java.util.function.ToDoubleFunction;
  */
 public interface QuantitativeMonitor<S> {
 
+
+    /**
+     * Monitor a trajectory and return a quantitative signal representing the robustness.
+     *
+     * @param trajectory The trajectory to monitor.
+     * @return A quantitative signal representing the robustness over time.
+     */
     Signal monitor(Trajectory<S> trajectory);
 
     /**
-     * Return the time horizon of interest
+     * Return the time horizon of interest, which indicates the maximum time duration over which
+     * the monitor is concerned.
      *
-     * @return the time horizon
+     * @return The time horizon of interest.
      */
     double getTimeHorizon();
+
+
 
     /**
      * A monitor used to evaluate an atomic formula
      * @param <S> type of states in the trajectory
      */
-    class AtomicMonitor<S> implements QuantitativeMonitor<S> {
-        private final ToDoubleFunction<S> atomicFunction;
-        public AtomicMonitor(ToDoubleFunction<S> atomicFunction) {
-            this.atomicFunction = atomicFunction;
-        }
-        @Override
-        public Signal monitor(Trajectory<S> trajectory) {return trajectory.apply(atomicFunction);}
-        @Override
-        public double getTimeHorizon() {
-            return 0.0;
-        }
+    static <S> QuantitativeMonitor<S> atomicFormula(ToDoubleFunction<S> function){
+        return new QuantitativeMonitor<>() {
+            @Override
+            public Signal monitor(Trajectory<S> trajectory) {
+                return trajectory.apply(function);
+            }
+
+            @Override
+            public double getTimeHorizon() {
+                return 0;
+            }
+        };
+    }
+
+    /**
+     * Create a quantitative monitor for the true formula.
+     *
+     * @param <S> type of states in the trajectory
+     * @return A quantitative monitor for the true formula.
+     */
+
+    static <S> QuantitativeMonitor<S> trueFormula(){
+        return atomicFormula(s -> Double.POSITIVE_INFINITY);
+    }
+
+    /**
+     * Create a quantitative monitor for the false formula.
+     *
+     * @param <S> type of states in the trajectory
+     * @return A quantitative monitor for the false formula.
+     */
+    static <S> QuantitativeMonitor<S> falseFormula(){
+        return atomicFormula(s -> Double.NEGATIVE_INFINITY);
+    }
+
+    /**
+     *
+     * A monitor used to evaluate the negation of a formula
+     *
+     * @param m monitor to monitorNegation
+     * @return the negation monitor
+     * @param <S> type of states in the trajectory
+     */
+    static <S> QuantitativeMonitor<S> negation(QuantitativeMonitor<S> m) {
+        return new QuantitativeMonitor<>() {
+            @Override
+            public Signal monitor(Trajectory<S> trajectory) {
+                return Signal.apply(m.monitor(trajectory),d->-d);
+            }
+            @Override
+            public double getTimeHorizon() {
+                return m.getTimeHorizon();
+            }
+        };
     }
 
     /**
@@ -112,36 +165,61 @@ public interface QuantitativeMonitor<S> {
     }
 
 
+
     /**
+     * A monitor used to evaluate the implication of two formulae.
      *
-     * A monitor used to evaluate the negation of a formula
-     *
-     * @param m monitor to monitorNegation
-     * @return the negation monitor
+     * @param m1 Left argument of the implication.
+     * @param m2 Right argument of the implication.
      * @param <S> type of states in the trajectory
+     * @return A quantitative monitor representing the implication of the two input monitors.
      */
-    static <S> QuantitativeMonitor<S> negation(QuantitativeMonitor<S> m) {
-        return new QuantitativeMonitor<>() {
+    static <S> QuantitativeMonitor<S> implication(QuantitativeMonitor<S> m1, QuantitativeMonitor<S> m2){
+        return new QuantitativeMonitor<S>() {
             @Override
             public Signal monitor(Trajectory<S> trajectory) {
-                return Signal.apply(m.monitor(trajectory),d->-d);
+                return disjunction(negation(m1),m2).monitor(trajectory);
             }
+
             @Override
             public double getTimeHorizon() {
-                return m.getTimeHorizon();
+                return Math.max(m1.getTimeHorizon(),m2.getTimeHorizon());
+            }
+        };
+    }
+
+
+    /**
+     * A monitor used to evaluate the "if and only if" of two formulae.
+     *
+     * @param m1 Left argument of the "if and only if".
+     * @param m2 Right argument of the "if and only if".
+     * @param <S> type of states in the trajectory
+     * @return A quantitative monitor representing the "if and only if" of the two input monitors.
+     */
+    static <S> QuantitativeMonitor<S> ifAndOnlyIf(QuantitativeMonitor<S> m1, QuantitativeMonitor<S> m2){
+        return new QuantitativeMonitor<S>() {
+            @Override
+            public Signal monitor(Trajectory<S> trajectory) {
+                return conjunction(implication(m1,m2),implication(m2,m1)).monitor(trajectory);
+            }
+
+            @Override
+            public double getTimeHorizon() {
+                return Math.max(m1.getTimeHorizon(),m2.getTimeHorizon());
             }
         };
     }
 
     /**
-     * A monitor used to evaluate an unbounded until monitor
-     * @param m1 left argument
-     * @param m2 right argument
-     * @return unbounded until monitor
+     * A monitor used to evaluate an unbounded "until" monitor.
+     *
+     * @param m1 Left argument of the "until".
+     * @param m2 Right argument of the "until".
      * @param <S> type of states in the trajectory
+     * @return A quantitative monitor representing the unbounded "until" of the two input monitors.
      */
-
-    static <S> QuantitativeMonitor<S> until(QuantitativeMonitor<S> m1, QuantitativeMonitor<S> m2) {
+    private static <S> QuantitativeMonitor<S> until(QuantitativeMonitor<S> m1, QuantitativeMonitor<S> m2) {
         return new QuantitativeMonitor<>() {
             @Override
             public Signal monitor(Trajectory<S> trajectory) {
@@ -159,77 +237,28 @@ public interface QuantitativeMonitor<S> {
         };
     }
 
-
     /**
+     * A monitor used to evaluate an atomic the "until" monitor.
      *
-     * A monitor used to evaluate an atomic the "eventually" monitor
-     * @param m the monitor
-     * @param from start of the interval
-     * @param to end of the interval
-     * @return the "eventually" monitor
-     * @param <S>  a state in the trajectory
+     * @param m1     Left argument of the "until".
+     * @param interval An interval during which the "until" holds.
+     * @param m2    Right argument of the "until".
+     * @param <S>   a state in the trajectory
+     * @return A quantitative monitor representing the "until" of the two input monitors within a specified interval.
      */
-    static <S> QuantitativeMonitor<S> eventually(QuantitativeMonitor<S> m, double from, double to) {
-        if (from>=to) throw new IllegalArgumentException();
+    static <S> QuantitativeMonitor<S> until( QuantitativeMonitor<S> m1,Interval interval, QuantitativeMonitor<S> m2) {
         return new QuantitativeMonitor<>() {
             @Override
             public Signal monitor(Trajectory<S> trajectory) {
-                SlidingWindow sw = new SlidingWindow(from,to);
-                return sw.apply(m.monitor(trajectory));
+                return conjunction(until(m1, m2), eventually(interval,m2)).monitor(trajectory);
             }
 
             @Override
             public double getTimeHorizon() {
-                return to + m.getTimeHorizon();
+                return interval.end() + Math.max(m1.getTimeHorizon(),m2.getTimeHorizon());
             }
         };
     }
-
-    /**
-     * A monitor used to evaluate an atomic the "globally" monitor
-     * @param m the monitor
-     * @param from start of the interval
-     * @param to end of the interval
-     * @return the "globally" monitor
-     * @param <S>  a state in the trajectory
-     */
-    static <S> QuantitativeMonitor<S> globally(QuantitativeMonitor<S> m, double from, double to) {
-        return new QuantitativeMonitor<>() {
-            @Override
-            public Signal monitor(Trajectory<S> trajectory) {
-                return negation(eventually(negation(m), from, to)).monitor(trajectory);
-            }
-
-            @Override
-            public double getTimeHorizon() {
-                return to + m.getTimeHorizon();
-            }
-        };
-    }
-
-    /**
-     * A monitor used to evaluate an atomic the until monitor
-     * @param m1 left argument
-     * @param m2 right argument
-     * @param from start of the interval
-     * @param to end of the interval
-     * @return the until monitor
-     * @param <S>  a state in the trajectory
-     */
-    static <S> QuantitativeMonitor<S> until(QuantitativeMonitor<S> m1, double from, double to, QuantitativeMonitor<S> m2) {
-        return new QuantitativeMonitor<>() {
-            @Override
-            public Signal monitor(Trajectory<S> trajectory) {
-                return conjunction(until(m1, m2), eventually(m2, from, to)).monitor(trajectory);
-            }
-
-            @Override
-            public double getTimeHorizon() {
-                return to + Math.max(m1.getTimeHorizon(),m2.getTimeHorizon());
-            }
-        };
-    }
-
 
     private static double[] until(double[] s1, double[] s2) {
         double[] result = new double[s1.length];
@@ -239,6 +268,55 @@ public interface QuantitativeMonitor<S> {
             next = result[i];
         }
         return result;
+    }
+
+
+    /**
+     * Create a "quantitative eventually" monitor with a specified interval.
+     *
+     * @param interval The time interval over which the "eventually" monitor is applicable.
+     * @param m       The quantitative monitor to apply.
+     * @return A "quantitative eventually" monitor with the specified interval.
+     * @param <S> Type of states in the trajectory.
+     * @throws IllegalArgumentException If the start of the interval is greater than or equal to its end.
+     */
+    static <S> QuantitativeMonitor<S> eventually(Interval interval, QuantitativeMonitor<S> m) {
+        if (interval.start()>=interval.end()) throw new IllegalArgumentException();
+        return new QuantitativeMonitor<>() {
+            @Override
+            public Signal monitor(Trajectory<S> trajectory) {
+                SlidingWindow sw = new SlidingWindow(interval.start(), interval.end());
+                return sw.apply(m.monitor(trajectory));
+            }
+
+            @Override
+            public double getTimeHorizon() {
+                return interval.end() + m.getTimeHorizon();
+            }
+        };
+    }
+
+
+    /**
+     * Create a "quantitative globally" monitor with a specified interval.
+     *
+     * @param interval The time interval over which the "globally" monitor is applicable.
+     * @param m       The quantitative monitor to apply.
+     * @return A "quantitative globally" monitor with the specified interval.
+     * @param <S> Type of states in the trajectory.
+     */
+    static <S> QuantitativeMonitor<S> globally(Interval interval,QuantitativeMonitor<S> m) {
+        return new QuantitativeMonitor<>() {
+            @Override
+            public Signal monitor(Trajectory<S> trajectory) {
+                return negation(eventually(interval, negation(m))).monitor(trajectory);
+            }
+
+            @Override
+            public double getTimeHorizon() {
+                return interval.end() + m.getTimeHorizon();
+            }
+        };
     }
 
 }

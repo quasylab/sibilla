@@ -234,8 +234,7 @@ public class TypeInferenceVisitor extends LIOModelBaseVisitor<LIOType> {
         Map<String, Token> declared = new HashMap<>();
         int counter = 0;
         for (LIOModelParser.PatternElementContext patternElement: patternElements) {
-            if (patternElement instanceof LIOModelParser.PatternElementVariableContext) {
-                LIOModelParser.PatternElementVariableContext localVariable = ((LIOModelParser.PatternElementVariableContext) patternElement);
+            if (patternElement instanceof LIOModelParser.PatternElementVariableContext localVariable) {
                 if (declared.containsKey(localVariable.name.getText())) {
                     recordError(new ParseError(ParseUtil.duplicatedNameErrorMessage(localVariable.name, declared.get(localVariable.name.getText())),localVariable.name.getLine(), localVariable.name.getCharPositionInLine()));
                 } else {

@@ -220,7 +220,7 @@ class TestKnutYaoAlgorithm {
 	
 	@Test
 	void testEquals() {
-		assertTrue(STATES.D1.equals(STATES.D1));
+        assertEquals(STATES.D1, STATES.D1);
 	}
 
 	@Test

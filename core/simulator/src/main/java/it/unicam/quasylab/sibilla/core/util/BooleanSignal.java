@@ -149,6 +149,22 @@ public final class BooleanSignal {
 
 
     /**
+     * Returns the boolean value at the specified time step.
+     *
+     * @param timeStep The time step to check.
+     * @return true if the time step falls within a positive interval, false otherwise.
+     */
+    public boolean getValueAt(double timeStep) {
+        for (Interval interval : intervals) {
+            if (interval.contains(timeStep)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
      * Returns the trajectory obtained by applying boolean conjunction of this trajectory with the one passed as
      * parameter.
      *

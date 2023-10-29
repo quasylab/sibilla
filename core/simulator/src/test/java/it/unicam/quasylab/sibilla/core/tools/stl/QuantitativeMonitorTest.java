@@ -3,6 +3,7 @@ package it.unicam.quasylab.sibilla.core.tools.stl;
 import it.unicam.quasylab.sibilla.core.models.pm.Population;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
+import it.unicam.quasylab.sibilla.core.util.Interval;
 import it.unicam.quasylab.sibilla.core.util.Signal;
 import org.junit.jupiter.api.Test;
 
@@ -59,10 +60,7 @@ class QuantitativeMonitorTest {
                 new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0}
         );
 
-        QuantitativeMonitor.AtomicMonitor<PopulationState> atomicMonitor =
-                new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(0) - 3.0);
-
-        Signal s = atomicMonitor.monitor(t);
+        Signal s = QuantitativeMonitor.atomicFormula((PopulationState sign)-> sign.getOccupancy(0) - 3.0).monitor(t);
         assertEquals(s.valueAt(0.5),-3.0);
         assertEquals(s.valueAt(1.5),5.0);
         assertEquals(s.valueAt(2.5),0.0);
@@ -105,10 +103,7 @@ class QuantitativeMonitorTest {
                 new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0}
         );
 
-        QuantitativeMonitor.AtomicMonitor<PopulationState> atomicMonitor =
-                new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(0));
-
-
+        QuantitativeMonitor<PopulationState> atomicMonitor = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0));
         Signal s = QuantitativeMonitor.negation(atomicMonitor).monitor(t);
 
         assertEquals(s.valueAt(0.5),-0.0);
@@ -145,11 +140,13 @@ class QuantitativeMonitorTest {
                 new double[]{0.0, 0.0, 0.0, 1.0, 1.0, 2.0, 3.0, 3.0}
         );
 
-        QuantitativeMonitor.AtomicMonitor<PopulationState> biggerThan2Monitor =
-                new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(0) - 2.0);
+        QuantitativeMonitor<PopulationState> aM = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0) - 2.0);
 
-        QuantitativeMonitor<PopulationState> eventuallyBetween0and3 = QuantitativeMonitor.eventually(biggerThan2Monitor,0,3);
-        QuantitativeMonitor<PopulationState> eventuallyBetween4and6 = QuantitativeMonitor.eventually(biggerThan2Monitor,3,6);
+        Interval interval1 = new Interval(0,3);
+        Interval interval2 = new Interval(3,6);
+
+        QuantitativeMonitor<PopulationState> eventuallyBetween0and3 = QuantitativeMonitor.eventually(interval1,aM);
+        QuantitativeMonitor<PopulationState> eventuallyBetween4and6 = QuantitativeMonitor.eventually(interval2,aM);
 
         Signal se1 = eventuallyBetween0and3.monitor(t);
         Signal se2 = eventuallyBetween4and6.monitor(t);
@@ -189,17 +186,18 @@ class QuantitativeMonitorTest {
                 new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0}
         );
 
-        QuantitativeMonitor.AtomicMonitor<PopulationState> atomicMonitor =
-                new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(0)- 1.0);
+        QuantitativeMonitor<PopulationState> atomicMonitor =QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0)- 1.0);
 
 
-        Signal s = QuantitativeMonitor.globally(atomicMonitor,1,4).monitor(t);
+
+        //Signal s = QuantitativeMonitor.globally(atomicMonitor,1,4).monitor(t);
+        Signal s = QuantitativeMonitor.globally(new Interval(1,4),atomicMonitor).monitor(t);
 
         assertEquals(s.valueAt(0.0),0.0);
         assertTrue(
-                QuantitativeMonitor.globally(atomicMonitor,0,3).monitor(t).valueAt(0)
+                QuantitativeMonitor.globally(new Interval(0,3),atomicMonitor).monitor(t).valueAt(0)
                         <
-                        QuantitativeMonitor.globally(atomicMonitor,1,4).monitor(t).valueAt(0)
+                        QuantitativeMonitor.globally(new Interval(1,4),atomicMonitor).monitor(t).valueAt(0)
         );
     }
 
@@ -229,10 +227,9 @@ class QuantitativeMonitorTest {
                 new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0}
         );
 
-        QuantitativeMonitor.AtomicMonitor<PopulationState> atomicMonitor =
-                new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(0)- 6.0);
+        QuantitativeMonitor<PopulationState> atomicMonitor = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0)- 6.0);
 
-        Signal s = QuantitativeMonitor.eventually(atomicMonitor,0,4).monitor(t);
+        Signal s = QuantitativeMonitor.eventually(new Interval(0,4),atomicMonitor).monitor(t);
 
         assertEquals(s.valueAt(0.0),2.0);
 
@@ -273,14 +270,11 @@ class QuantitativeMonitorTest {
                 new double[]{0.0, 2.0, 3.0, 3.0, 3.0, 5.0, 1.0}
         );
 
-        QuantitativeMonitor.AtomicMonitor<PopulationState> aM1 =
-                new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(0) - 2.0);
+        QuantitativeMonitor<PopulationState> aM1 = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0) - 2.0);
+        QuantitativeMonitor<PopulationState> aM2 = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0)- 4.0);
 
-        QuantitativeMonitor.AtomicMonitor<PopulationState> aM2 =
-                new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(0)- 4.0);
-
-        Signal s = QuantitativeMonitor.until(aM1,2,4,aM2).monitor(t);
-
+        //Signal s = QuantitativeMonitor.until(aM1,2,4,aM2).monitor(t);
+        Signal s = QuantitativeMonitor.until(aM1,new Interval(2,4),aM2).monitor(t);
 
         assertEquals(s.getEnd(), 6.0);
         assertEquals(s.valueAt(0.0),-2.0);
@@ -296,11 +290,10 @@ class QuantitativeMonitorTest {
                 new double[]{1.0, 1.0, 1.0, 1.0, 3.0, 4.0, 3.0, 3.0}
         );
 
-        QuantitativeMonitor.AtomicMonitor<PopulationState> aM =
-                new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(0) - 2.0);
+        QuantitativeMonitor<PopulationState> aM = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0) - 2.0);
 
-        QuantitativeMonitor<PopulationState> eventuallyFrom0to3 = QuantitativeMonitor.eventually(aM,0.0,3.0);
-        QuantitativeMonitor<PopulationState> eventuallyFrom3to5 = QuantitativeMonitor.eventually(aM,3.0,5.0);
+        QuantitativeMonitor<PopulationState> eventuallyFrom0to3 = QuantitativeMonitor.eventually(new Interval(0,3),aM);
+        QuantitativeMonitor<PopulationState> eventuallyFrom3to5 = QuantitativeMonitor.eventually(new Interval(3,5),aM);
 
         Signal sFrom0To3 = eventuallyFrom0to3.monitor(t);
         Signal sFrom3To5 = eventuallyFrom3to5.monitor(t);
@@ -342,17 +335,13 @@ class QuantitativeMonitorTest {
                 new double[]{0.0, 4.0, 3.0, 2.0, 1.0, 1.0, 1.0}
         );
 
-        QuantitativeMonitor.AtomicMonitor<PopulationState> atomicMonitor =
-                new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(0)- 6.0);
+        QuantitativeMonitor<PopulationState> atomicMonitor = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0)- 6.0);
 
-
-        Signal s = QuantitativeMonitor.eventually(atomicMonitor,0,4).monitor(t);
+        Signal s = QuantitativeMonitor.eventually(new Interval(0,4),atomicMonitor).monitor(t);
         assertEquals(s.valueAt(0.0),-2.0);
 
 
     }
-
-
 
     @Test
     public void testEventuallySIR(){
@@ -365,10 +354,9 @@ class QuantitativeMonitorTest {
         );
 
 
-        QuantitativeMonitor.AtomicMonitor<PopulationState> atomicMonitor =
-                new QuantitativeMonitor.AtomicMonitor<>(s -> s.getOccupancy(2) - 25);
+        QuantitativeMonitor<PopulationState> atomicMonitor =  QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(2) - 25);
 
-        Signal s = QuantitativeMonitor.eventually(atomicMonitor,0,500.0).monitor(t);
+        Signal s = QuantitativeMonitor.eventually(new Interval(0,500),atomicMonitor).monitor(t);
 
         assertEquals(s.valueAt(0.0),-17.0);
 
