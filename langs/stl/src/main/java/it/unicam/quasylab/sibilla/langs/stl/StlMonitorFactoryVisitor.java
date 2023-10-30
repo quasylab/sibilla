@@ -68,7 +68,7 @@ public class StlMonitorFactoryVisitor<S> extends StlModelBaseVisitor<Boolean> {
     }
 
     private boolean checkDeclaredMeasures(List<StlModelParser.DeclarationMeasureContext> declarationMeasureContexts) {
-        StlModelParser.DeclarationMeasureContext[] undefinedMeasures = declarationMeasureContexts.stream().filter(dm -> !measures.containsKey(dm.getText())).toArray(StlModelParser.DeclarationMeasureContext[]::new);
+        StlModelParser.DeclarationMeasureContext[] undefinedMeasures = declarationMeasureContexts.stream().filter(dm -> !measures.containsKey(dm.name.getText())).toArray(StlModelParser.DeclarationMeasureContext[]::new);
         if (undefinedMeasures.length != 0) {
             Arrays.stream(undefinedMeasures).forEach(dm -> errors.record(new ParseError(String.format("Measure %s is not defined in the module", dm.name.getText()), dm.name.getLine(), dm.name.getCharPositionInLine())));
             return false;
@@ -80,7 +80,7 @@ public class StlMonitorFactoryVisitor<S> extends StlModelBaseVisitor<Boolean> {
     @Override
     public Boolean visitDeclarationFormula(StlModelParser.DeclarationFormulaContext ctx) {
         monitorFactory.addMonitor(ctx.name.getText(), ctx.params.stream().map(p -> p.name.getText()).toArray(String[]::new), getQualitativeMonitor(ctx.formula), getQuantitativeMonitor(ctx.formula));
-        return super.visitDeclarationFormula(ctx);
+        return true;
     }
 
     private Function<Map<String, Double>, QuantitativeMonitor<S>> getQuantitativeMonitor(StlModelParser.StlFormulaContext formula) {
@@ -90,4 +90,16 @@ public class StlMonitorFactoryVisitor<S> extends StlModelBaseVisitor<Boolean> {
     private Function<Map<String, Double>, QualitativeMonitor<S>> getQualitativeMonitor(StlModelParser.StlFormulaContext formula) {
         return formula.accept(new StlQualitativeMonitorEvaluator<>(measures));
     }
+
+    @Override
+    protected Boolean defaultResult() {
+        return true;
+    }
+
+    @Override
+    protected Boolean aggregateResult(Boolean aggregate, Boolean nextResult) {
+        return aggregate && nextResult;
+    }
 }
+
+

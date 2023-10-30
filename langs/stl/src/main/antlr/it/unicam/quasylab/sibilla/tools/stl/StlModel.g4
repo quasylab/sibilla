@@ -10,12 +10,10 @@ model   :
     EOF
 ;
 
-declarationMeasure: 'measure' name=ID;
+declarationMeasure: 'measure' name=ID ';';
 
 declarationFormula: 'formula' name=ID ('[' (params+=formulaParameter (',' params+=formulaParameter)*)? ']')? ':'
-    formula = stlFormula
-'endformula'
-;
+    formula = stlFormula ';';
 
 formulaParameter: name=ID '=' expr;
 
@@ -23,11 +21,11 @@ stlFormula:
         'true'                                                # stlFormulaTrue
         | 'false'                                             # stlFormulaFalse
         | '[' left=expr op=RELOP right=expr ']'               # stlFormulaAtomic
-        | left=stlFormula ('&'|'&&') right=stlFormula          # stlFormulaAnd
-        | left=stlFormula ('|'|'||') right=stlFormula          # stlFormulaOr
+        | left=stlFormula ('&'|'&&') right=stlFormula         # stlFormulaAnd
+        | left=stlFormula ('|'|'||') right=stlFormula         # stlFormulaOr
         | left=stlFormula '->' right=stlFormula               # stlFormulaImply
         | left=stlFormula '<->' right=stlFormula              # stlFormulaIfAndOnlyIf
-        | '!' argument=stlFormula                                      # stlFormulaNot
+        | '!' argument=stlFormula                             # stlFormulaNot
         | '(' stlFormula ')'                                  # stlFormulaBracket
         | left=stlFormula '\\U' interval right=stlFormula     # stlFormulaUntil
         | '\\E' interval arg=stlFormula                       # stlFormulaEventually
@@ -45,7 +43,7 @@ expr    :
     | '(' expr ')'                                               # expressionBracket
     | INTEGER                                                    # expressionInteger
     | REAL                                                       # expressionReal
-    | reference=ID                                                 # expressionReference
+    | reference=ID                                               # expressionReference
     | 'abs' '(' argument=expr ')'                                # expressionAbs
     | 'acos' '(' argument=expr ')'                               # expressionACos
     | 'asin' '(' argument=expr ')'                               # expressionASin
@@ -65,7 +63,6 @@ expr    :
     | 'max' '(' firstArgument=expr ',' secondArgument=expr ')'   # expressionMax
     | 'min' '(' firstArgument=expr ',' secondArgument=expr ')'   # expressionMin
     ;
-
 
 
 

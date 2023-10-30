@@ -110,6 +110,35 @@ class QuantitativeMonitorTest {
         assertEquals(s.valueAt(1.5),-8.0);
     }
 
+    @Test
+    public void testConjunctionAndDisjunction(){
+        Trajectory<PopulationState> t = getPopulationTrajectory(
+                new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+                2,
+                new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0},
+                new double[]{2.0, 6.0, 1.0, 1.0, 1.0, 0.0, 0.0}
+        );
+
+        QuantitativeMonitor<PopulationState> leftAtomic = QuantitativeMonitor.atomicFormula((PopulationState s) -> s.getOccupancy(0));
+        QuantitativeMonitor<PopulationState> rightAtomic = QuantitativeMonitor.atomicFormula((PopulationState s) -> s.getOccupancy(1));
+
+        QuantitativeMonitor<PopulationState> conjunctionMonitor = QuantitativeMonitor.conjunction(leftAtomic,rightAtomic);
+        QuantitativeMonitor<PopulationState> disjunctionMonitor = QuantitativeMonitor.disjunction(leftAtomic,rightAtomic);
+
+        Signal conjunctionSignal = conjunctionMonitor.monitor(t);
+        Signal disjunctionSignal = disjunctionMonitor.monitor(t);
+
+        assertEquals(6.0, conjunctionSignal.valueAt(1.5));
+        assertEquals(8.0, disjunctionSignal.valueAt(1.5));
+
+        double timeToCheck = 0.0;
+        for (int i = 0; i < 14; i++) {
+            assertTrue(conjunctionSignal.valueAt(timeToCheck) <= disjunctionSignal.valueAt(timeToCheck));
+            timeToCheck += 0.5;
+        }
+
+    }
+
 
 
     /**
@@ -187,10 +216,6 @@ class QuantitativeMonitorTest {
         );
 
         QuantitativeMonitor<PopulationState> atomicMonitor =QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0)- 1.0);
-
-
-
-        //Signal s = QuantitativeMonitor.globally(atomicMonitor,1,4).monitor(t);
         Signal s = QuantitativeMonitor.globally(new Interval(1,4),atomicMonitor).monitor(t);
 
         assertEquals(s.valueAt(0.0),0.0);
@@ -237,11 +262,6 @@ class QuantitativeMonitorTest {
 
 
 
-
-
-
-
-
     /**
      *
      *   index 0
@@ -273,7 +293,6 @@ class QuantitativeMonitorTest {
         QuantitativeMonitor<PopulationState> aM1 = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0) - 2.0);
         QuantitativeMonitor<PopulationState> aM2 = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0)- 4.0);
 
-        //Signal s = QuantitativeMonitor.until(aM1,2,4,aM2).monitor(t);
         Signal s = QuantitativeMonitor.until(aM1,new Interval(2,4),aM2).monitor(t);
 
         assertEquals(s.getEnd(), 6.0);
@@ -359,6 +378,28 @@ class QuantitativeMonitorTest {
         Signal s = QuantitativeMonitor.eventually(new Interval(0,500),atomicMonitor).monitor(t);
 
         assertEquals(s.valueAt(0.0),-17.0);
+
+    }
+
+    @Test
+    public void testNestedOperator(){
+        Trajectory<PopulationState> t = getPopulationTrajectory(
+                new double[]{11, 3, 28, 28, 40, 20, 16, 6, 6, 14, 77, 62, 49},
+                3,
+                new double[]{95,95,94,94,94,93,92,91,91,91,91,91,91,91},
+                new double[]{ 5, 4, 5, 4, 3, 4, 5, 6, 5, 4, 3, 2, 1, 0},
+                new double[]{ 0, 1, 1, 2, 3, 3, 3, 3, 4, 5, 6, 7, 8, 9}
+        );
+
+
+        QuantitativeMonitor<PopulationState> atomicMonitor =  QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(2) - 25);
+
+        // F[100,150](x >25 & F[1,20](x>25)  )
+        Signal s = QuantitativeMonitor
+                .eventually(new Interval(1,120),QuantitativeMonitor
+                        .conjunction(atomicMonitor,QuantitativeMonitor.eventually(new Interval(1,20),atomicMonitor))).monitor(t);
+
+        assertEquals(s.valueAt(0.0),-22.0);
 
     }
 
