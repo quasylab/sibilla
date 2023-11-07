@@ -405,4 +405,37 @@ class QuantitativeMonitorTest {
 
 
 
+    @Test
+    public void testProblematicCase(){
+
+        Trajectory<PopulationState> t = getPopulationTrajectory(
+                //8+3+11+6+9+11+16+6+6+10+9+15+10
+                new double[]{8, 3, 11, 6, 9, 11, 16, 6, 6, 10, 9, 15, 10},
+                3,
+                new double[]{95,95,94,94,94,93,92,91,91,91,91,91,91,91},
+                new double[]{ 5, 4, 5, 4, 3, 4, 5, 6, 5, 4, 3, 2, 1, 0},
+                new double[]{ 0, 1, 1, 2, 3, 3, 3, 3, 4, 5, 6, 7, 8, 9}
+        );
+
+
+        QuantitativeMonitor<PopulationState> infectedDoNotExist = QuantitativeMonitor.atomicFormula( pm -> 0 - pm.getOccupancy(1));
+        QuantitativeMonitor<PopulationState> infectedExist = QuantitativeMonitor.atomicFormula( pm -> pm.getOccupancy(1));
+        QuantitativeMonitor<PopulationState> eventuallyInfectedDoNotExist = QuantitativeMonitor.eventually(
+                new Interval(100,120),
+                infectedDoNotExist
+        );
+        QuantitativeMonitor<PopulationState> globallyInfectedExist = QuantitativeMonitor.globally(
+                new Interval(0,100),
+                infectedExist
+        );
+
+        QuantitativeMonitor<PopulationState> conjunction = QuantitativeMonitor.conjunction(eventuallyInfectedDoNotExist,globallyInfectedExist);
+        Signal signal = conjunction.monitor(t);
+        System.out.println(signal);
+        System.out.println(signal.valueAt(0));
+
+    }
+
+
+
 }

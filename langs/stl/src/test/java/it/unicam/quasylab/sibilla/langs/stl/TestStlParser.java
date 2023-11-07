@@ -412,7 +412,7 @@ public class TestStlParser {
     @Test
     public void testParsedAtomicFormulaQualitative() throws StlModelGenerationException {
         String TEST_FORMULA = """
-                 measure mes_1;\s
+                measure mes_1;\s
                 measure mes_2;\s
                 formula atomicF [] : [mes_1 > 3] ;""";
 
@@ -446,7 +446,6 @@ public class TestStlParser {
         assertEquals(signal.getValueAt(5.0),signalParsed.getValueAt(5.0));
         assertEquals(signal.getValueAt(6.0),signalParsed.getValueAt(6.0));
         assertEquals(signal.getValueAt(7.0),signalParsed.getValueAt(7.0));
-
     }
 
 

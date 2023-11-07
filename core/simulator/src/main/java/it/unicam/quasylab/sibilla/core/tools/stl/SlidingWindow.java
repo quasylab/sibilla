@@ -116,6 +116,7 @@ public class SlidingWindow {
     public Signal apply(Signal s) {
         Signal result = new Signal();
         Window w = new Window();
+        Signal extractS = s.extract(from);
         for (SignalSegment sample : s.extract(from)) {
             w.add(result, sample);
         }

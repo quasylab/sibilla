@@ -70,7 +70,7 @@ expr    :
 fragment DIGIT  :   [0-9];
 fragment LETTER :   [a-zA-Z_];
 
-ID              :   LETTER (DIGIT|LETTER)*;
+ID              :   ('#'|'%')? LETTER (DIGIT|LETTER)*;
 INTEGER         :   DIGIT+;
 REAL            :   ((DIGIT* '.' DIGIT+)|DIGIT+ '.')(('E'|'e')('-')?DIGIT+)?;
 RELOP           :   '<'|'<='|'=='|'!='|'>='|'>';

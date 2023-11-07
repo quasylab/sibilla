@@ -8,7 +8,6 @@ import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRecta
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.RandomForest;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateFactory;
 import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateModel;
-import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateModelRegistry;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +42,11 @@ class SubrogationTest {
         // OPTIMIZATION WITH SURROGATE
 
         SurrogateFactory surrogateFactory = new RandomForest();
-        SurrogateModel randomForestModel = surrogateFactory.getSurrogateModel(ROSENBROCK_FUNCTION, new LatinHyperCubeSamplingTask(),searchSpace,10000,0.85,new Properties());
+        SurrogateModel randomForestModel = surrogateFactory.getSurrogateModel(ROSENBROCK_FUNCTION,
+                new LatinHyperCubeSamplingTask(),searchSpace,
+                10000,
+                0.85,
+                new Properties());
 
         ToDoubleFunction<Map<String,Double>> surrogateFunction = randomForestModel.getSurrogateFunction(true);
         Map<String,Double> minimizingValuesSurrogate  = optimizationTask.minimize(surrogateFunction,searchSpace);
@@ -102,11 +105,6 @@ class SubrogationTest {
         System.out.println("distance coordinates : "+distanceCoordinates(minimizingValuesFunction,minimizingValuesSurrogate));
         System.out.println("-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_");
 
-
-    }
-    @Test
-    void testRegistry(){
-        Map<String,String> a = SurrogateModelRegistry.getInstance().getSurrogateProperties("gtb");
 
     }
 

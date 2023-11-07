@@ -79,7 +79,9 @@ public class StlMonitorFactoryVisitor<S> extends StlModelBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitDeclarationFormula(StlModelParser.DeclarationFormulaContext ctx) {
-        monitorFactory.addMonitor(ctx.name.getText(), ctx.params.stream().map(p -> p.name.getText()).toArray(String[]::new), getQualitativeMonitor(ctx.formula), getQuantitativeMonitor(ctx.formula));
+        monitorFactory.addMonitor(ctx.name.getText(),
+                ctx.params.stream().map(p -> p.name.getText()).toArray(String[]::new),
+                getQualitativeMonitor(ctx.formula), getQuantitativeMonitor(ctx.formula));
         return true;
     }
 
