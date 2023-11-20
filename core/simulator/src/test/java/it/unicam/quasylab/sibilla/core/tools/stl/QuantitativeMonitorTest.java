@@ -3,9 +3,15 @@ package it.unicam.quasylab.sibilla.core.tools.stl;
 import it.unicam.quasylab.sibilla.core.models.pm.Population;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
+import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
 import it.unicam.quasylab.sibilla.core.util.Interval;
 import it.unicam.quasylab.sibilla.core.util.Signal;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -417,22 +423,88 @@ class QuantitativeMonitorTest {
                 new double[]{ 0, 1, 1, 2, 3, 3, 3, 3, 4, 5, 6, 7, 8, 9}
         );
 
+        System.out.println(t);
+
 
         QuantitativeMonitor<PopulationState> infectedDoNotExist = QuantitativeMonitor.atomicFormula( pm -> 0 - pm.getOccupancy(1));
         QuantitativeMonitor<PopulationState> infectedExist = QuantitativeMonitor.atomicFormula( pm -> pm.getOccupancy(1));
+
+
         QuantitativeMonitor<PopulationState> eventuallyInfectedDoNotExist = QuantitativeMonitor.eventually(
                 new Interval(100,120),
                 infectedDoNotExist
         );
+        System.out.println("EVENTUALLY infected not exist 100  120");
+        System.out.println(eventuallyInfectedDoNotExist.monitor(t));
         QuantitativeMonitor<PopulationState> globallyInfectedExist = QuantitativeMonitor.globally(
                 new Interval(0,100),
                 infectedExist
         );
+        System.out.println("globally infected exist 0 100");
+        System.out.println(globallyInfectedExist.monitor(t));
 
         QuantitativeMonitor<PopulationState> conjunction = QuantitativeMonitor.conjunction(eventuallyInfectedDoNotExist,globallyInfectedExist);
         Signal signal = conjunction.monitor(t);
+        System.out.println(" E");
         System.out.println(signal);
         System.out.println(signal.valueAt(0));
+
+    }
+
+
+
+
+
+    @Test
+    public void testComputeProbability(){
+
+        Supplier<Trajectory<PopulationState>> trajectorySupplier = () -> {
+
+            List<Trajectory<PopulationState>> trajectoryList = new ArrayList<>();
+            trajectoryList.add(
+                    getPopulationTrajectory(
+                            new double[]{1.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0},
+                            1,
+                            new double[]{2.0, 2.0, 3.0, 3.0, 3.0, 5.0, 1.0}
+                    )
+            );
+            trajectoryList.add(
+                    getPopulationTrajectory(
+                            new double[]{1.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0},
+                            1,
+                            new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+                    )
+            );
+            trajectoryList.add(
+                    getPopulationTrajectory(
+                            new double[]{1.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0},
+                            1,
+                            new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}
+                    )
+            );
+            Random random = new Random();
+            return trajectoryList.get(random.nextInt(trajectoryList.size()));
+        };
+
+        QuantitativeMonitor<PopulationState> am = QuantitativeMonitor.atomicFormula(pm -> pm.getOccupancy(0));
+
+        double[] timeSteps = {1.0 , 2.0 , 3.0 , 4.0 , 5.0 , 6.0 , 7.0};
+        double[] probabilities = QuantitativeMonitor.computeProbability(am, trajectorySupplier, 100, timeSteps);
+
+        for (int i = 0; i < probabilities.length; i++) {
+            System.out.println(probabilities[i]);
+        }
+
+        assertEquals(probabilities[0],0.66,0.15);
+        assertEquals(probabilities[1],0.33,0.15);
+
+        List<Trajectory<PopulationState>> trajectoryList = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            trajectoryList.add(trajectorySupplier.get());
+        }
+        double[] probabilitiesFromList = QuantitativeMonitor.computeProbability(am,trajectoryList,timeSteps);
+        assertEquals(probabilitiesFromList[0],0.66,0.15);
+        assertEquals(probabilitiesFromList[1],0.33,0.15);
 
     }
 

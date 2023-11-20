@@ -4,6 +4,7 @@ import it.unicam.quasylab.sibilla.core.models.pm.Population;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -31,19 +32,6 @@ class QualitativeMonitorTest {
 
         return trajectory;
     }
-    private Trajectory<PopulationState> getTestTrajectory_1(){
-        Trajectory<PopulationState> trajectory = new Trajectory<>();
-
-        trajectory.add(0.0, new PopulationState(2,new Population(0,0),new Population(1,2)));
-        trajectory.add(1.0, new PopulationState(2,new Population(0,8),new Population(1,6)));
-        trajectory.add(2.0, new PopulationState(2,new Population(0,3),new Population(1,1)));
-        trajectory.add(3.0, new PopulationState(2,new Population(0,2),new Population(1,1)));
-        trajectory.add(4.0, new PopulationState(2,new Population(0,1),new Population(1,1)));
-        trajectory.add(5.0, new PopulationState(2,new Population(0,3),new Population(1,1)));
-        trajectory.add(6.0, new PopulationState(2,new Population(0,1),new Population(1,0)));
-
-        return trajectory;
-    }
 
 
     @Test
@@ -55,7 +43,10 @@ class QualitativeMonitorTest {
                 new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0}
         );
 
-        BooleanSignal bs = QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(0) >= 2 ).monitor(t);
+        BooleanSignal bs =
+                QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(0) >= 2 ).monitor(t);
+
+        System.out.println(bs);
 
         assertFalse(bs.getValueAt(0.5));
         assertTrue(bs.getValueAt(1.0));
@@ -63,6 +54,57 @@ class QualitativeMonitorTest {
         assertFalse(bs.getValueAt(4.0));
         assertFalse(bs.getValueAt(4.5));
     }
+
+
+    @Test
+    public void testNegationMonitor(){
+        Trajectory<PopulationState> t = getPopulationTrajectory(
+                new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+                1,
+                new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0}
+        );
+
+        QualitativeMonitor<PopulationState> bs =
+                QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(0) >= 2 );
+        BooleanSignal nbs = QualitativeMonitor.negation(bs).monitor(t);
+        System.out.println(nbs);
+
+
+    }
+
+    @Disabled
+    @Test
+    public void testConjunctionAndDisjunction(){
+        Trajectory<PopulationState> t = getPopulationTrajectory(
+                new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+                2,
+                new double[]{0.0, 8.0, 3.0, 2.0, 2.0, 1.0, 1.0},
+                new double[]{2.0, 6.0, 1.0, 1.0, 1.0, 0.0, 0.0}
+        );
+
+
+        QualitativeMonitor<PopulationState> leftAtomic =
+                QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(0) >= 2 );
+        QualitativeMonitor<PopulationState> rightAtomic =
+                QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(1) <= 0 );
+
+
+        //System.out.println(leftAtomic.monitor(t));
+        //System.out.println(rightAtomic.monitor(t));
+
+
+        QualitativeMonitor<PopulationState> conjunction = QualitativeMonitor.conjunction(leftAtomic,rightAtomic);
+        QualitativeMonitor<PopulationState> disjunction= QualitativeMonitor.disjunction(leftAtomic,rightAtomic);
+
+        BooleanSignal cbs = conjunction.monitor(t);
+        BooleanSignal dbs = disjunction.monitor(t);
+//
+//        System.out.println(cbs);
+//        System.out.println(dbs);
+
+    }
+
+
 
 
 }

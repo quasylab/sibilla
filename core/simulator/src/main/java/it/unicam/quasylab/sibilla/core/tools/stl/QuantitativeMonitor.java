@@ -27,7 +27,12 @@ import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.util.Interval;
 import it.unicam.quasylab.sibilla.core.util.Signal;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
+import java.util.stream.IntStream;
+
 /**
  * This interface implements a monitor that, given a trajectory returns the {@link Signal}
  * representing the robustness for each time intervals.
@@ -44,6 +49,44 @@ public interface QuantitativeMonitor<S> {
      * @return A quantitative signal representing the robustness over time.
      */
     Signal monitor(Trajectory<S> trajectory);
+
+
+    /**
+     * Calculate the probability of a given qualitative monitor being satisfied over time using
+     * sampled trajectories
+     *
+     * @param monitor The qualitative monitor to be evaluated.
+     * @param trajectoryProvider A supplier for generating trajectories.
+     * @param runs The number of simulation runs.
+     * @param timeStep An array of time steps at which the probabilities are calculated.
+     * @return An array of probabilities for the monitor satisfaction at different time steps.
+     */
+    static <S> double[] computeProbability(QuantitativeMonitor<S> monitor, Supplier<Trajectory<S>> trajectoryProvider, int runs, double[] timeStep) {
+        int[] counter = new int[timeStep.length];
+        for(int i=0; i<runs; i++) {
+            double[] evaluations = monitor.monitor(trajectoryProvider.get()).valuesAt(timeStep);
+            IntStream.range(0, counter.length).filter(j -> evaluations[j]>0).forEach(j -> counter[j]++);
+        }
+        return Arrays.stream(counter).mapToDouble(j -> j / ((double) runs)).toArray();
+    }
+
+    /**
+     * Calculate the probability of a given qualitative monitor being satisfied over time using
+     * pre-generated trajectories.
+     *
+     * @param monitor The qualitative monitor to be evaluated.
+     * @param trajectories A list of pre-generated trajectories for evaluation.
+     * @param timeStep An array of time steps at which the probabilities are calculated.
+     * @return An array of probabilities for the monitor satisfaction at different time steps.
+     */
+    static <S> double[] computeProbability(QuantitativeMonitor<S> monitor, List<Trajectory<S>> trajectories, double[] timeStep) {
+        int[] counter = new int[timeStep.length];
+        for (Trajectory<S> trajectory : trajectories) {
+            double[] evaluations = monitor.monitor(trajectory).valuesAt(timeStep);
+            IntStream.range(0, counter.length).filter(j -> evaluations[j] > 0).forEach(j -> counter[j]++);
+        }
+        return Arrays.stream(counter).mapToDouble(j -> j / ((double) trajectories.size())).toArray();
+    }
 
     /**
      * Return the time horizon of interest, which indicates the maximum time duration over which
@@ -175,7 +218,7 @@ public interface QuantitativeMonitor<S> {
      * @return A quantitative monitor representing the implication of the two input monitors.
      */
     static <S> QuantitativeMonitor<S> implication(QuantitativeMonitor<S> m1, QuantitativeMonitor<S> m2){
-        return new QuantitativeMonitor<S>() {
+        return new QuantitativeMonitor<>() {
             @Override
             public Signal monitor(Trajectory<S> trajectory) {
                 return disjunction(negation(m1),m2).monitor(trajectory);
@@ -198,7 +241,7 @@ public interface QuantitativeMonitor<S> {
      * @return A quantitative monitor representing the "if and only if" of the two input monitors.
      */
     static <S> QuantitativeMonitor<S> ifAndOnlyIf(QuantitativeMonitor<S> m1, QuantitativeMonitor<S> m2){
-        return new QuantitativeMonitor<S>() {
+        return new QuantitativeMonitor<>() {
             @Override
             public Signal monitor(Trajectory<S> trajectory) {
                 return conjunction(implication(m1,m2),implication(m2,m1)).monitor(trajectory);

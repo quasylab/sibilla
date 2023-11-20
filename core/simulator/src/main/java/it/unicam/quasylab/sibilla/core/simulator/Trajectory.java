@@ -131,7 +131,6 @@ public class Trajectory<S> implements Externalizable {
         this.generationTime = generationTime;
     }
 
-
     public void setStart(double start) {
         this.start = start;
     }
@@ -210,7 +209,7 @@ public class Trajectory<S> implements Externalizable {
         StringBuilder result= new StringBuilder();
         result.append("start : ").append(this.start).append(" ends : ").append(this.end).append("\n");
         result.append("Trajectory samples : ").append(data.size()).append("\n");
-        if(this.data.size() <= 10){
+        if(this.data.size() <= 20){
             for (int i = 0; i < data.size()-1; i++) {
                 result.append(data.get(i).toString()).append(" --> ");
             }
@@ -223,5 +222,14 @@ public class Trajectory<S> implements Externalizable {
         }
 
         return result.toString();
+    }
+
+    public void removeSampleOverTheEnd(){
+        if(Double.isNaN(end) || this.data.get(data.size()-1).getTime() <= this.end)
+            return;
+        else
+           while(this.data.get(data.size()-1).getTime() > this.end){
+               this.data.remove(data.size()-1);
+           }
     }
 }

@@ -94,7 +94,7 @@ public interface QualitativeMonitor<S> {
 
     /**
      * Calculate the probability of a given qualitative monitor being satisfied over time using
-     * Monte Carlo simulation with a specified error probability and confidence interval.
+     * sampled simulations with a specified error probability and confidence interval.
      *
      * @param monitor The qualitative monitor to be evaluated.
      * @param trajectoryProvider A supplier for generating trajectories.
@@ -108,7 +108,7 @@ public interface QualitativeMonitor<S> {
     }
     /**
      * Calculate the probability of a given qualitative monitor being satisfied over time using
-     * Monte Carlo simulation with a specified error probability and confidence interval.
+     * sampled simulation with a specified error probability and confidence interval.
      *
      * @param monitor The qualitative monitor to be evaluated.
      * @param trajectoryProvider A supplier for generating trajectories.
