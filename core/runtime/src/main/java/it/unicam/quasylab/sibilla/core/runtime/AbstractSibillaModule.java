@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.core.runtime;
 import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
+import it.unicam.quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
@@ -124,6 +125,11 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     @Override
     public double estimateReachability(SimulationMonitor monitor, RandomGenerator rg, String transientCondition, String targetCondition, double time, double pError, double delta) {
         return checkForLoadedDefinition().estimateReachability(simulator, monitor, rg, transientCondition, targetCondition, time, pError, delta);
+    }
+
+    @Override
+    public void setSimulationManagerFactory(SimulationManagerFactory factory) {
+        this.simulator.setSimulationManagerFactory(factory);
     }
 
     @Override

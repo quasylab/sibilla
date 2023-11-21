@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.runtime;
 
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import it.unicam.quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
@@ -728,5 +729,14 @@ public final class SibillaRuntime {
         return this.optimizationModule.evaluateSurrogateFunction(value);
     }
 
+
+    public void setSimulationManagerFactory(SimulationManagerFactory factory) throws CommandExecutionException {
+        checkLoadedModule();
+        this.currentModule.setSimulationManagerFactory(factory);
+    }
+
+    public void loadStlFormulas() {
+
+    }
 
 }

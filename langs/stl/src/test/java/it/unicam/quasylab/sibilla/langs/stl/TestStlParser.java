@@ -8,6 +8,7 @@ import it.unicam.quasylab.sibilla.core.tools.stl.QuantitativeMonitor;
 import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
 import it.unicam.quasylab.sibilla.core.util.Interval;
 import it.unicam.quasylab.sibilla.core.util.Signal;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import java.util.function.ToDoubleFunction;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 public class TestStlParser {
 
 

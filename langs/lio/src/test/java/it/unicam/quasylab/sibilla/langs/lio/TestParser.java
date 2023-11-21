@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TestParser {
 
     public final String CODE1 =
-                    "const alpha = 0.25;\n" +
+                    "const pMeet = 0.25;\n" +
                     "const beta = 0.25;\n" +
                     "action toRed = alpha;\n" +
                     "action toBlue = beta;\n" +

@@ -36,7 +36,7 @@ import java.util.function.Supplier;
  */
 @FunctionalInterface
 public interface SimulationManagerFactory {
-	
+
 	<S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random, SimulationMonitor monitor);
 
 }

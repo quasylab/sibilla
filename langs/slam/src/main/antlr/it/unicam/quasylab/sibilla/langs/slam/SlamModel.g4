@@ -10,7 +10,7 @@ model   :
 ;
 
 modelElement :
-        declarationParameter
+      declarationParameter
     | declarationConstant
     | declarationMessage
     | declarationAgent

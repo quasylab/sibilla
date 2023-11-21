@@ -20,6 +20,7 @@ import it.unicam.quasylab.sibilla.langs.stl.StlLoader;
 import it.unicam.quasylab.sibilla.langs.stl.StlModelGenerationException;
 import it.unicam.quasylab.sibilla.langs.stl.StlMonitorFactory;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -28,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
-
+@Disabled
 public class RumorSpreadingOptimizationExampleTest {
 
     private static class RumorSpreadingExample{

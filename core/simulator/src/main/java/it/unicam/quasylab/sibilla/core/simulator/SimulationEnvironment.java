@@ -48,10 +48,12 @@ public class SimulationEnvironment implements Serializable {
 	 * Default simulation manager factory.
 	 */
 	public final static SimulationManagerFactory DEFAULT_FACTORY = SequentialSimulationManager::new;
+
+
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOGGER = Logger.getLogger(SimulationEnvironment.class.getName());
 	public static boolean silent = true;
-	private final SimulationManagerFactory simulationManagerFactory;
+	private SimulationManagerFactory simulationManagerFactory;
 
 	/**
 	 * Creates a new simulation environment with default simulation factory. The
@@ -177,6 +179,7 @@ public class SimulationEnvironment implements Serializable {
 		for (long i = 0; (((monitor == null) || (!monitor.isCancelled())) && (i < iterations)); i++) {
 			simulationManager.simulate(unit);
 		}
+		simulationManager.join();
 		//TODO: check if we have to add this code --> simulationManager.join();
 		simulationManager.shutdown();
 		LOGGER.info("The simulation has concluded with success");
@@ -327,6 +330,9 @@ public class SimulationEnvironment implements Serializable {
 		return reachabilityChecker.numberOfSuccessful() / n;
 	}
 
+	public void setSimulationManagerFactory(SimulationManagerFactory simulationManagerFactory) {
+		this.simulationManagerFactory = simulationManagerFactory;
+	}
 
 
 	private static class ReachabilityChecker<S extends State> implements Supplier<SamplingHandler<S>> {

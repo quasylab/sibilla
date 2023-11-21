@@ -27,6 +27,7 @@ import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingHandler;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.security.Provider;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,6 +44,15 @@ public class ThreadSimulationManager<S extends State> extends AbstractSimulation
     private final ExecutorService executor;
     private int pendingTasks = 0;
 
+
+    public static <S extends State> ThreadSimulationManager<S> getCachedTreadPoolSimulationManager(RandomGenerator random, SimulationMonitor monitor) {
+        return new ThreadSimulationManager<>(Executors.newCachedThreadPool(), random, monitor);
+    }
+
+    public static <S extends State> ThreadSimulationManager<S> getFixedThreadPoolSimulationManager(int nThreads, RandomGenerator random, SimulationMonitor monitor) {
+        return new ThreadSimulationManager<>(Executors.newFixedThreadPool(nThreads), random, monitor);
+    }
+
     public ThreadSimulationManager(RandomGenerator random, SimulationMonitor monitor) {
         this(Executors.newCachedThreadPool(), random, monitor);
     }
@@ -52,25 +62,25 @@ public class ThreadSimulationManager<S extends State> extends AbstractSimulation
         this.executor = executor;
     }
 
-    public static SimulationManagerFactory getThreadSimulationManagerFactory(ExecutorService executor) {
+    public static SimulationManagerFactory getThreadSimulationManagerFactory(Supplier<ExecutorService> executor) {
         return new SimulationManagerFactory() {
             @Override
             public <S extends State> SimulationManager<S> getSimulationManager(RandomGenerator random, SimulationMonitor monitor) {
-                return new ThreadSimulationManager<>(executor, random, monitor);
+                return new ThreadSimulationManager<>(executor.get(), random, monitor);
             }
         };
     }
 
     public static SimulationManagerFactory getFixedThreadSimulationManagerFactory(int n) {
-        return getThreadSimulationManagerFactory(Executors.newFixedThreadPool(n));
+        return getThreadSimulationManagerFactory(() -> Executors.newFixedThreadPool(n));
     }
 
     public static SimulationManagerFactory getCachedThreadSimulationManagerFactory() {
-        return getThreadSimulationManagerFactory(Executors.newCachedThreadPool());
+        return getThreadSimulationManagerFactory(Executors::newCachedThreadPool);
     }
 
     public static SimulationManagerFactory getWorkStealingPoolSimulationManagerFactory() {
-        return getThreadSimulationManagerFactory(Executors.newWorkStealingPool());
+        return getThreadSimulationManagerFactory(Executors::newWorkStealingPool);
     }
 
 

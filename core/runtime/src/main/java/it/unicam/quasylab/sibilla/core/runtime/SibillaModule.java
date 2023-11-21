@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.runtime;
 
+import it.unicam.quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
@@ -303,4 +304,32 @@ public interface SibillaModule {
      */
     double estimateReachability(SimulationMonitor monitor, RandomGenerator rg, String transientCondition, String targetCondition, double time, double pError, double delta);
 
+
+    /**
+     * Load a set of formulas from the given file.
+     *
+     * @param file the file containing the formulas to load.
+     */
+    default void loadFormulas(File file) throws CommandExecutionException {
+        throw new CommandExecutionException("Command not supported");
+    }
+
+
+    /**
+     * Load a set of formulas from the given string.
+     *
+     * @param code the string containing the set of formulas.
+     */
+    default void loadFormulas(String code) throws CommandExecutionException {
+        throw new CommandExecutionException("Command not supported");
+    }
+
+
+    /**
+     * Sets the factory to use to instantiate the simulation manager. By default, a {@link it.unicam.quasylab.sibilla.core.simulator.SequentialSimulationManager}
+     * is used.
+     *
+     * @param factory the factory to use to instantiate the simulation manager.
+     */
+    void setSimulationManagerFactory(SimulationManagerFactory factory);
 }

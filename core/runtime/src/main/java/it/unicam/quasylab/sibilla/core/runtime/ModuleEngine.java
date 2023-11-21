@@ -32,6 +32,8 @@ import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
+import it.unicam.quasylab.sibilla.core.util.Signal;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.stl.StlMonitorFactory;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -51,7 +53,6 @@ public class ModuleEngine<S extends State> {
     private double[] selectedConfigurationArgs;
 
     private StlMonitorFactory<S> monitorFactory;
-
 
     public ModuleEngine(ModelDefinition<S> modelDefinition) {
         this.modelDefinition = modelDefinition;
@@ -232,6 +233,17 @@ public class ModuleEngine<S extends State> {
     public boolean isAMeasure(String name) {
         loadModel();
         return this.currentModel.getMeasure(name) != null;
+    }
+
+    public BooleanSignal monitorQualitative(String name, double[] args, int replica) {
+        loadModel();
+        return null;
+    }
+
+
+    public Signal quantitativeMonitor(String name, double[] args, int replica) {
+        loadModel();
+        return null;
     }
 
 }
