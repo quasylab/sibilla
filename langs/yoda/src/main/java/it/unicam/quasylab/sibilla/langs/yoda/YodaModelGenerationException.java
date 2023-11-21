@@ -27,6 +27,7 @@ import it.unicam.quasylab.sibilla.langs.util.ErrorCollector;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class YodaModelGenerationException extends Throwable{
     private final ErrorCollector errors;
@@ -43,5 +44,8 @@ public class YodaModelGenerationException extends Throwable{
         return errors.getSyntaxErrorList();
     }
 
+    public List<String> getErrorMessages() {
+        return getErrors().stream().map(e -> e.getMessage()).collect(Collectors.toList());
+    }
 
 }

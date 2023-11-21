@@ -46,7 +46,9 @@ public class YodaModelModule extends AbstractSibillaModule{
     public void load(File file) throws CommandExecutionException {
         try {
             generateModuleEngine(new YodaModelGenerator(file));
-        } catch (YodaModelGenerationException | IOException e){
+        } catch (YodaModelGenerationException e){
+            throw new CommandExecutionException(e.getErrorMessages());
+        } catch (IOException e) {
             throw new CommandExecutionException(e.getMessage());
         }
     }

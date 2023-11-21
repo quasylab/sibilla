@@ -9,6 +9,7 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaAgentsDefinitionsGenerator;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaModelGenerationException;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaModelGenerator;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -21,19 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class YodaExamplesTest {
 
-
-    /* BEGIN TESTS ON ROBOT SCENARIO */
-
-
-    @Test
-    public void shouldSelectYODAModule() throws CommandExecutionException{
-        SibillaRuntime sr = new SibillaRuntime();
-        assertTrue(Arrays.deepEquals(new String[] {
-                LIOModelModule.MODULE_NAME, PopulationModelModule.MODULE_NAME, YodaModelModule.MODULE_NAME
-        }, sr.getModules()));
-        sr.loadModule(YodaModelModule.MODULE_NAME);
-    }
-
     private SibillaRuntime getRuntimeWithYodaModule() throws CommandExecutionException {
         SibillaRuntime sr = new SibillaRuntime();
         sr.loadModule(YodaModelModule.MODULE_NAME);
@@ -44,13 +32,32 @@ class YodaExamplesTest {
         return getClass().getClassLoader().getResource(s);
     }
 
+    private YodaModelDefinition loadModelDefinition(String s) throws YodaModelGenerationException, URISyntaxException, IOException {
+        return new YodaModelGenerator(getResource(s)).getYodaModelDefinition();
+    }
+
+    private YodaModelGenerator loadModelGenerator(String s) throws YodaModelGenerationException, URISyntaxException, IOException {
+        return new YodaModelGenerator(getResource(s));
+    }
+
     @Test
-    public void shouldLoadResource() throws CommandExecutionException {
+    public void shouldSelectYODAModule() throws CommandExecutionException{
+        SibillaRuntime sr = new SibillaRuntime();
+        assertTrue(Arrays.deepEquals(new String[] {
+                LIOModelModule.MODULE_NAME, PopulationModelModule.MODULE_NAME, YodaModelModule.MODULE_NAME
+        }, sr.getModules()));
+        sr.loadModule(YodaModelModule.MODULE_NAME);
+    }
+
+    /* BEGIN TESTS ON ROBOT SCENARIO */
+
+    @Test
+    public void shouldLoadResourceRobotScenario() {
         assertNotNull(getResource("yoda/robotAgent2.yoda"));
     }
 
     @Test
-    public void shouldInstantiateAInitialConfigurationFromString() throws CommandExecutionException {
+    public void shouldInstantiateAInitialConfigurationFromStringRobotScenario() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/robotAgent2.yoda"));
         assertEquals(1, sr.getInitialConfigurations().length);
@@ -84,15 +91,6 @@ class YodaExamplesTest {
         sr.simulate("TestRobotScenario");
         sr.printData("TestRobotScenario");
     }
-
-    private YodaModelDefinition loadModelDefinition(String s) throws YodaModelGenerationException, URISyntaxException, IOException {
-        return new YodaModelGenerator(getResource(s)).getYodaModelDefinition();
-    }
-
-    private YodaModelGenerator loadModelGenerator(String s) throws YodaModelGenerationException, URISyntaxException, IOException {
-        return new YodaModelGenerator(getResource(s));
-    }
-
 
     @Test
     public void testRobotMeasures() throws YodaModelGenerationException, URISyntaxException, IOException {
@@ -238,6 +236,40 @@ class YodaExamplesTest {
 
     /* BEGIN TESTS ON FINDERBOT */
 
+    @Test
+    public void shouldLoadResourceFinderBot() {
+        assertNotNull(getResource("yoda/finderBot.yoda"));
+    }
+
+    //TODO not working on sr.load
+    @Test
+    @Disabled
+    public void shouldInstantiateAInitialConfigurationFromFileFinderBot() throws CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/finderBot.yoda"));
+        assertEquals(1, sr.getInitialConfigurations().length);
+        assertEquals("Main", sr.getInitialConfigurations()[0]);
+        sr.setConfiguration("Main");
+    }
+
     /* END TESTS ON FINDERBOT */
+
+    /* BEGIN TESTS ON FLOCK */
+
+    /*
+    @Test
+    public void shouldLoadResourceFlock() {
+        assertNotNull(getResource("yoda/flock.yoda"));
+    }
+
+    @Test
+    public void shouldInstantiateAInitialConfigurationFromFileFlock() throws CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load("yoda/flock.yoda");
+        assertEquals(1, sr.getInitialConfigurations().length);
+    }
+     */
+
+    /* END TESTS ON FLOCK */
 
 }

@@ -2,45 +2,35 @@ param na = 3;
 
 agent Finder =
     state:
-        int dirx = 0;
-        int diry = 0;
+        real dirx = 0.0;
+        real diry = 0.0;
     features:
-        int x = 0;
-        int y = 0;
+        real x = 0.0;
+        real y = 0.0;
     observations:
         bool found = false;
-        bool closest = false;
-        int distx = 0;
-        int disty = 0;
+        real angle = 0.0;
     actions:
-        moveNorth [ dirx <- 0; diry <- 1;]
-        moveSouth [ dirx <- 0; diry <- 1;]
-        moveEast [ dirx <- 0; diry <- 1;]
-        moveWest [ dirx <- 0; diry <- 1;]
-        stop [ dirx <- 0; diry <- 0; ]
+        stop [ dirx <- 0.0; diry <- 0.0; ]
+        roam [ dirx <- U[-1.0 , 1.0]; diry <- U[-1.0 , 1.0]; ]
+        moveto [ dirx <- cos(angle); diry <- sin(angle); ]
     behaviour:
-        when !closest -> [ stop: 1 ]
-        orwhen goal -> [ stop: 1]
-        orwhen distx>0 -> [moveWest: 1]
-        orwhen distx<0 -> [moveEast: 1]
-        orwhen disty>0 -> [moveNorth: 1]
-        orwhen disty<0 -> [moveSouth: 1]
+        when found -> [ stop:1 ]
+        orwhen angle != 0.0 -> [ moveto:1 ]
+        otherwise [ roam:1 ]
 end
 
 element Target =
-    int posx = 0;
-    int posy = 0;
+    real posx = 0;
+    real posy = 0;
 end
 
-environment:
+environment :
     sensing:
         Finder [
-            closest <- min Target : ( abs(it.x - posx) + abs(it.y - posy) )
-            goal <- any Target : (posy==it.y)&&(posx==it.x);
-            distx <- any Target : (it.x - posx);
-            disty <- any Target : (it.y - posy);
+            found <- (any Target : (abs(it.x - posx) < 2.0)) && (any Target : ( abs(it.y - posy) < 2.0));
+            angle <- atan ((mean Finder [found] . y - it.y) / (mean Finder [found] . x - it.x));
         ]
-
     dynamic:
         Finder [
            x <- x + dirx;
@@ -48,7 +38,9 @@ environment:
         ]
 end
 
-configuration Main:
-    Target [ posx = 5; posy = 5; ]
-    Finder [ x = 2; y = 3 ]
+configuration Main :
+    Target [ posx = 5.0; posy = 5.0; ]
+    for ox sampled distinct na time from U[0, width] do
+        Finder [ x = ox; y = 2.0; ]
+    endfor
 end
