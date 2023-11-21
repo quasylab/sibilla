@@ -4,18 +4,19 @@ agent Finder =
     state:
         real dirx = 0.0;
         real diry = 0.0;
+        bool found = false;
     features:
         real x = 0.0;
         real y = 0.0;
     observations:
-        bool found = false;
+        bool target_sensor = false;
         real angle = 0.0;
     actions:
-        stop [ dirx <- 0.0; diry <- 0.0; ]
+        stop [ dirx <- 0.0; diry <- 0.0; found <- true; ]
         roam [ dirx <- U[-1.0 , 1.0]; diry <- U[-1.0 , 1.0]; ]
         moveto [ dirx <- cos(angle); diry <- sin(angle); ]
     behaviour:
-        when found -> [ stop:1 ]
+        when target_sensor -> [ stop:1 ]
         orwhen angle != 0.0 -> [ moveto:1 ]
         otherwise [ roam:1 ]
 end
@@ -28,7 +29,7 @@ end
 environment :
     sensing:
         Finder [
-            found <- (any Target : (abs(it.x - posx) < 2.0)) && (any Target : ( abs(it.y - posy) < 2.0));
+            target_sensor <- (any Target : (abs(it.x - posx) < 2.0)) && (any Target : ( abs(it.y - posy) < 2.0));
             angle <- atan ((mean Finder [found] . y - it.y) / (mean Finder [found] . x - it.x));
         ]
     dynamic:

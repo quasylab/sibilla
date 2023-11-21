@@ -44,7 +44,7 @@ public class YodaElementAttributeTable {
 
     private final Map<String, YodaType> attributeTypes;
 
-    private Set<String> globalCommonEnvironmentalAttributes;
+    private Set<String> globalCommonAttributes;
 
     public YodaElementAttributeTable() {
         elementAttributes = new HashMap<>();
@@ -69,18 +69,20 @@ public class YodaElementAttributeTable {
 
     public void recordAgentAttributes(String name,
                                       Map<String, YodaType> environmentalAttributes,
-                                      Map<String, YodaType> agentAttributees,
+                                      Map<String, YodaType> agentAttributes,
                                       Map<String, YodaType> observationAttributes) {
-        if (checkTypes(environmentalAttributes)&&checkTypes(agentAttributees)&&checkTypes(observationAttributes)) {
+        if (checkTypes(environmentalAttributes)&&checkTypes(agentAttributes)&&checkTypes(observationAttributes)) {
             recordTypes(environmentalAttributes);
-            recordTypes(agentAttributees);
+            recordTypes(agentAttributes);
             recordTypes(observationAttributes);
-            if (this.globalCommonEnvironmentalAttributes == null) {
-                this.globalCommonEnvironmentalAttributes = new HashSet<>(environmentalAttributes.keySet());
+            HashSet<String> attributes = new HashSet<>(environmentalAttributes.keySet());
+            attributes.addAll(agentAttributes.keySet());
+            if (this.globalCommonAttributes == null) {
+                this.globalCommonAttributes = new HashSet<>(attributes);
             } else {
-                this.globalCommonEnvironmentalAttributes.retainAll(environmentalAttributes.keySet());
+                this.globalCommonAttributes.retainAll(attributes);
             }
-            elementAttributes.put(name, new YodaElementAttribute(environmentalAttributes.keySet(), agentAttributees.keySet(), observationAttributes.keySet()));
+            elementAttributes.put(name, new YodaElementAttribute(environmentalAttributes.keySet(), agentAttributes.keySet(), observationAttributes.keySet()));
         }
     }
 
@@ -113,28 +115,28 @@ public class YodaElementAttributeTable {
         return this.elementAttributes.values().stream().allMatch(e -> e.isValidObservationsAttribute(name));
     }
 
-    public Map<String, YodaType> getEnvironmentalAttributesOf(String name) {
+    public Map<String, YodaType> getSensingAttributesOf(String name) {
         if (isGroup(name)) {
-            return getEnvironmentalAttributesOfGroup(name);
+            return getSensingAttributesOfGroup(name);
         } else {
-            return getEnvironmentalAttributesOfAgent(name);
+            return getSensingAttributesOfAgent(name);
         }
     }
 
-    public Predicate<String> getEnvironmentalAttibutePredicateOf(String name) {
-        Map<String, YodaType> map = getEnvironmentalAttributesOf(name);
+    public Predicate<String> getSensingAttributePredicateOf(String name) {
+        Map<String, YodaType> map = getSensingAttributesOf(name);
         return map::containsKey;
     }
 
-    private Map<String, YodaType> getEnvironmentalAttributesOfAgent(String name) {
+    private Map<String, YodaType> getSensingAttributesOfAgent(String name) {
         if (this.elementAttributes.containsKey(name)) {
-            return getTypeOf(this.elementAttributes.get(name).environmentalAttributes);
+            return getTypeOf(this.elementAttributes.get(name).getSensingAttributes());
         } else {
             return Map.of();
         }
     }
 
-    private Map<String, YodaType> getEnvironmentalAttributesOfGroup(String name) {
+    private Map<String, YodaType> getSensingAttributesOfGroup(String name) {
         return getTypeOf(getSetOfEnvironmentAttributesOfGroup(name));
     }
 
@@ -146,12 +148,7 @@ public class YodaElementAttributeTable {
         return this.elementAttributes
                 .values()
                 .stream()
-                .map(e -> e.environmentalAttributes).reduce(
-                        new HashSet<>(),
-                        (s1, s2) -> {
-                            s1.retainAll(s2);
-                            return s1;
-                        });
+                .map(YodaElementAttribute::getSensingAttributes).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
     public boolean isAttribute(String name) {
@@ -163,7 +160,7 @@ public class YodaElementAttributeTable {
     }
 
     public Predicate<String> getGroupExpressionValidAttributePredicate() {
-        return s -> this.globalCommonEnvironmentalAttributes.contains(s);
+        return s -> this.globalCommonAttributes.contains(s);
     }
 
     public boolean isGroupOrElement(String name) {
@@ -228,6 +225,12 @@ public class YodaElementAttributeTable {
 
         public boolean isValidObservationsAttribute(String name) {
             return !this.agentAttributes.contains(name)&&!this.observationsAttribute.contains(name);
+        }
+
+        public Set<String> getSensingAttributes() {
+            HashSet<String> sensingAttributes = new HashSet<>(this.environmentalAttributes);
+            sensingAttributes.addAll(this.agentAttributes);
+            return sensingAttributes;
         }
 
     }

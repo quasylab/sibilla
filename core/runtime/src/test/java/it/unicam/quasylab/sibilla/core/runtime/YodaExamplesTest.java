@@ -241,9 +241,7 @@ class YodaExamplesTest {
         assertNotNull(getResource("yoda/finderBot.yoda"));
     }
 
-    //TODO not working on sr.load
     @Test
-    @Disabled
     public void shouldInstantiateAInitialConfigurationFromFileFinderBot() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/finderBot.yoda"));

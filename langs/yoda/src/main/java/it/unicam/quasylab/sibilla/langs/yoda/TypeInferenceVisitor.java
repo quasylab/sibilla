@@ -275,7 +275,7 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         if (groupExpressionsAllowed) {
             Predicate<String> validAttributePredicate = getValidGroupPredicate(groupName);
             TypeInferenceVisitor visitor = new TypeInferenceVisitor(this.errors, typeFunction, elementAttributeTable, fieldsRecordType, validAttributePredicate, validItAttributePredicates, false, false);
-            if (visitor.checkNumericType(value)&&((guard == null)||(visitor.checkType(YodaType.BOOLEAN_TYPE, ctx)))) {
+            if (visitor.checkNumericType(value)&&((guard == null)||(visitor.checkType(YodaType.BOOLEAN_TYPE, guard)))) {
                 return YodaType.REAL_TYPE;
             }
         }
@@ -287,7 +287,7 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         Predicate<String> validAttributePredicate = elementAttributeTable.getGroupExpressionValidAttributePredicate();
         if (groupName != null) {
             if (elementAttributeTable.isGroupOrElement(groupName.getText())) {
-                validAttributePredicate = elementAttributeTable.getEnvironmentalAttibutePredicateOf(groupName.getText());
+                validAttributePredicate = elementAttributeTable.getSensingAttributePredicateOf(groupName.getText());
             } else {
                 this.errors.record(ParseUtil.unknownSymbolError(groupName));
             }

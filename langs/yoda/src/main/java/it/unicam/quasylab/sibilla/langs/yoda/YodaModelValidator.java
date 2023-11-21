@@ -324,7 +324,7 @@ public class YodaModelValidator {
 
         private boolean checkAgentDynamic(YodaModelParser.AgentAttributesUpdateContext agentSensingContext) {
             String agentName = agentSensingContext.agentName.getText();
-            return agentSensingContext.updates.stream().allMatch(fu -> checkAttributeUpdate(agentName, elementAttributeTable.getEnvironmentalAttibutePredicateOf(agentName), elementAttributeTable.getSensingAttributeOf(agentName), elementAttributeTable.getSensingAttributeOf(agentName), fu, true));
+            return agentSensingContext.updates.stream().allMatch(fu -> checkAttributeUpdate(agentName, elementAttributeTable.getSensingAttributePredicateOf(agentName), elementAttributeTable.getSensingAttributeOf(agentName), elementAttributeTable.getSensingAttributeOf(agentName), fu, true));
         }
 
         @Override
