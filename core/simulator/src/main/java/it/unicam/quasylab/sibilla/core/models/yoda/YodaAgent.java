@@ -27,6 +27,10 @@ import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.ToDoubleFunction;
+
 /**
  * The class <code>YodaAgent</code> represents
  * the agents available in the simulation
@@ -148,11 +152,11 @@ public final class YodaAgent extends YodaSceneElement {
         return environmentalAttributes.getValue(var);
     }
 
-    /**
-     * Returns the application of the given function to the information associated with this agent.
-     *
-     * @param f the function to apply.
-     * @return the application of the given function to the information associated with this agent.
-     * @param <T> type returned by the given function.
-     */
+    public Map<String, ToDoubleFunction<YodaSystemState>> getTraceFunctions() {
+        HashMap<String, ToDoubleFunction<YodaSystemState>> result = new HashMap<>();
+        this.agentAttributes.forEach((var, val) -> result.put(var.getName(), s -> s.get(this.getId()).get(var).doubleOf()));
+        this.agentObservations.forEach((var, val) -> result.put(var.getName(), s -> s.get(this.getId()).get(var).doubleOf()));
+        return result;
+    }
+
 }

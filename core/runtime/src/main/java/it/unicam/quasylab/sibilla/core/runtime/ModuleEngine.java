@@ -29,18 +29,22 @@ import it.unicam.quasylab.sibilla.core.models.ParametricDataSet;
 import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
+import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
+import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.Signal;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.stl.StlMonitorFactory;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
 
 public class ModuleEngine<S extends State> {
 
@@ -244,6 +248,17 @@ public class ModuleEngine<S extends State> {
     public Signal quantitativeMonitor(String name, double[] args, int replica) {
         loadModel();
         return null;
+    }
+
+    public List<SimulationData> trace(SimulationEnvironment simulationEnvironment,
+                                      RandomGenerator rg,
+                                      double deadline) {
+        loadModel();
+        setDefaultConfiguration();
+        S initialState = state.apply(rg);
+        Trajectory<S> trajectory = simulationEnvironment.sampleTrajectory(rg, currentModel, initialState, deadline);
+        Map<String, Map<String, ToDoubleFunction<S>>> traceFunctions = currentModel.trace(initialState);
+        return traceFunctions.entrySet().stream().map(e -> SimulationData.getDataSet(e.getKey(), trajectory, e.getValue())).toList();
     }
 
 }

@@ -382,12 +382,12 @@ public class SimulationEnvironment implements Serializable {
 		}
 	}
 
-	public <S extends ImmutableState> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state,
+	public <S extends State> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state,
 			double deadline) {
 		return sampleTrajectory(random, model::createSimulationCursor, state, deadline);
 	}
 
-	public <S extends ImmutableState> Trajectory<S> sampleTrajectory(
+	public <S extends State> Trajectory<S> sampleTrajectory(
 			RandomGenerator random,
 			BiFunction<RandomGenerator, Function<RandomGenerator, S>, SimulatorCursor<S>> cursorSupplier,
 			S state,
@@ -405,7 +405,7 @@ public class SimulationEnvironment implements Serializable {
 		}
 	}
 
-	public <S extends ImmutableState> Trajectory<S> sampleTrajectory(
+	public <S extends State> Trajectory<S> sampleTrajectory(
 			RandomGenerator random,
 			SimulationStepFunction<S> stepFunction,
 			S state,

@@ -23,14 +23,11 @@
 
 package it.unicam.quasylab.sibilla.core.runtime;
 
-import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
-import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -39,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Predicate;
 
 public abstract class AbstractSibillaModule implements SibillaModule {
 
@@ -130,6 +126,11 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     @Override
     public void setSimulationManagerFactory(SimulationManagerFactory factory) {
         this.simulator.setSimulationManagerFactory(factory);
+    }
+
+    @Override
+    public List<SimulationData> trace( RandomGenerator rg, double dealine) {
+        return checkForLoadedDefinition().trace(simulator, rg, dealine);
     }
 
     @Override

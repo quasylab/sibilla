@@ -27,6 +27,7 @@ import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
+import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 import tech.tablesaw.api.Table;
@@ -36,6 +37,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Predicate;
@@ -737,6 +739,17 @@ public final class SibillaRuntime {
 
     public void loadStlFormulas() {
 
+    }
+
+
+    public void trace(String outputFolder, boolean header) throws CommandExecutionException, IOException {
+        checkLoadedModule();
+        checkDeadline();
+        CSVWriter writer = new CSVWriter(outputFolder);
+        List<SimulationData> trace = this.currentModule.trace(this.rg, this.deadline);
+        for (SimulationData simulationData : trace) {
+            writer.write(simulationData, header);
+        }
     }
 
 }

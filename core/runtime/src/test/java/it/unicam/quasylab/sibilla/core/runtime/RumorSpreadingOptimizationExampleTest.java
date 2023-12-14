@@ -166,7 +166,7 @@ public class RumorSpreadingOptimizationExampleTest {
     }
 
     /**
-     *
+     * //TODO: Check
      * Refer to <a href="https://openportal.isti.cnr.it/data/2015/424157/2015_424157.postprint.pdf">the case</a>
      * k_s  [0.0001, 2.0]
      * k_r  [0.0001, 0.5]

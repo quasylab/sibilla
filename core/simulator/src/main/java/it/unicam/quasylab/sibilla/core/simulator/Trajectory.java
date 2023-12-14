@@ -32,18 +32,17 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author loreti
  */
-public class Trajectory<S> implements Externalizable {
+public class Trajectory<S> implements Externalizable, Iterable<Sample<S>> {
 
     private static final long serialVersionUID = -9039722623650234376L;
     private List<Sample<S>> data;
@@ -99,8 +98,8 @@ public class Trajectory<S> implements Externalizable {
     }
 
     public IntFunction<S> getSteps() {
-        ArrayList<S> values = new ArrayList<>(data.stream().map(s -> s.getValue()).collect(Collectors.toList()));
-        return i -> values.get(i);
+        ArrayList<S> values = data.stream().map(Sample::getValue).collect(Collectors.toCollection(ArrayList::new));
+        return values::get;
     }
 
     /**
@@ -231,5 +230,14 @@ public class Trajectory<S> implements Externalizable {
            while(this.data.get(data.size()-1).getTime() > this.end){
                this.data.remove(data.size()-1);
            }
+    }
+
+    @Override
+    public Iterator<Sample<S>> iterator() {
+        return data.iterator();
+    }
+
+    public Stream<Sample<S>> stream() {
+        return this.data.stream();
     }
 }

@@ -53,7 +53,10 @@ command : module_command
         | reset_optimization_command
         | sample_command
         | save_samples_command
+        | trace_command
         ;
+
+trace_command: 'trace' (output=STRING)?;
 
 reachability_command: 'probreach' goal=STRING ('while' condition=STRING)? 'with' 'alpha' '='  alpha=REAL 'and' 'delta' '=' delta=REAL;
 

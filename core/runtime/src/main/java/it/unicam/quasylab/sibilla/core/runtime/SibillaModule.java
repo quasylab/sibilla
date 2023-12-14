@@ -27,6 +27,7 @@ import it.unicam.quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
+import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -332,4 +333,7 @@ public interface SibillaModule {
      * @param factory the factory to use to instantiate the simulation manager.
      */
     void setSimulationManagerFactory(SimulationManagerFactory factory);
+
+
+    List<SimulationData> trace(RandomGenerator rg, double deadline);
 }

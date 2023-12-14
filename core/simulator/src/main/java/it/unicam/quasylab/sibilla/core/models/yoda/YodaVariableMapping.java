@@ -27,6 +27,7 @@ import it.unicam.quasylab.sibilla.core.util.datastructures.SibillaMap;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 /**
  * Instances of this class are used to associate values with variables.
@@ -122,5 +123,9 @@ public class YodaVariableMapping {
     @Override
     public String toString() {
         return map.toString();
+    }
+
+    public void forEach(BiConsumer<YodaVariable, SibillaValue> consumer) {
+        map.forEach(consumer);
     }
 }

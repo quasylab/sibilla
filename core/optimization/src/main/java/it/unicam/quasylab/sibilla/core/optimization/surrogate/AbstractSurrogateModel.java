@@ -12,7 +12,7 @@ import static it.unicam.quasylab.sibilla.core.optimization.Constants.DEFAULT_COL
 
 public abstract class AbstractSurrogateModel implements SurrogateModel{
 
-    //protected final DataSet dataSet;
+    //protected final SimulationData dataSet;
     protected final DataSet trainingSet;
     protected final DataSet testSet;
 

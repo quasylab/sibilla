@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.runtime;
 
+import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import tech.tablesaw.api.Row;
 import tech.tablesaw.api.Table;
 
@@ -32,6 +33,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * This class is used to store data in a CSV file.
@@ -230,4 +234,22 @@ public class CSVWriter {
     public String getPostfix() {
         return postfix;
     }
+
+    public void write(SimulationData data, boolean header) throws FileNotFoundException {
+        File output = new File(outputFolder,prefix+data.getName()+postfix+".csv");
+        PrintWriter writer = new PrintWriter(output);
+        writeCSV(writer, data, header);
+        writer.close();
+    }
+
+    private void writeCSV(PrintWriter pw, SimulationData data, boolean header) {
+        if (header) {
+            pw.println(Stream.concat(Stream.of("time"), IntStream.range(0, data.getNumberOfEntries()).mapToObj(data::getLabel)).collect(Collectors.joining(", ")));
+        }
+        IntStream.range(0, data.size()).forEach(i -> {
+            pw.println(getCSVRow(data.getRow(i)));
+        });
+    }
+
+
 }

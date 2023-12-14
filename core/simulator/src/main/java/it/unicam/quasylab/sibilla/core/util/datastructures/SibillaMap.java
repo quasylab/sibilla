@@ -94,6 +94,9 @@ public final class SibillaMap<K extends Comparable<K>, V> implements Iterable<Ma
         return "["+(this.node != null?this.node.toString():"")+"]";
     }
 
+    public void forEach(BiConsumer<K, V> consumer) {
+        this.forEach(e -> consumer.accept(e.getKey(), e.getValue()));
+    }
 
     private static <K extends Comparable<K>, V> Optional<V> doGet(K key, Node<K, V> node) {
         if (node == null) {

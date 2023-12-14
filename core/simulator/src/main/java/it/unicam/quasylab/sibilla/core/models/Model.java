@@ -25,6 +25,7 @@ package it.unicam.quasylab.sibilla.core.models;
 
 import it.unicam.quasylab.sibilla.core.simulator.SimulatorCursor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.*;
+import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;
@@ -32,6 +33,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
 
 /**
  * Represents a <i>Stochastic Process</i>.
@@ -191,5 +193,8 @@ public interface Model<S extends State> extends Serializable {
         return toReturn;
     }
 
+    default Map<String, Map<String, ToDoubleFunction<S>>> trace(S state) {
+        throw new IllegalStateException("Trace is not implemented in this model!");
+    }
 
 }

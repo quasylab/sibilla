@@ -31,6 +31,8 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.io.IOException;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.function.ToDoubleFunction;
+import java.util.stream.Collectors;
 
 public class YodaModel implements DiscreteTimeModel<YodaSystemState> {
 
@@ -98,4 +100,10 @@ public class YodaModel implements DiscreteTimeModel<YodaSystemState> {
     public DiscreteTimeSimulationStepFunction<YodaSystemState> getDiscreteTimeStepFunction() {
         return (rg,state) -> state.next(rg);
     }
+
+    @Override
+    public Map<String, Map<String, ToDoubleFunction<YodaSystemState>>> trace(YodaSystemState state) {
+        return state.getAgents().stream().collect(Collectors.toMap(a -> a.getName().getName()+"_"+a.getId(), YodaAgent::getTraceFunctions));
+    }
+
 }
