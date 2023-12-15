@@ -355,7 +355,7 @@ class YodaExamplesTest {
         sr.setParameter("nbirds", 5);
         sr.setConfiguration("Main");
         sr.setDeadline(100);
-        sr.trace("/Users/loreti/tmp/TEST", true);
+        sr.trace("./results/", true);
         //sr.printData("TestFlock");
     }
 
