@@ -1,5 +1,5 @@
 module "yoda"
-load "/Users/nicoladelgiudice/Documents/GitHub/newSibilla/core/runtime/src/test/resources/yoda/robotAgent2.yoda"
+load "yoda/robotAgent2.yoda"
 init "Main"
 add all measures
 deadline 100

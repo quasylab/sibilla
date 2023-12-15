@@ -69,7 +69,7 @@ public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> 
 
 
     public YodaSystemState next(RandomGenerator rg) {
-        List<YodaAgent> newAgents = this.agents.stream().map(a -> a.next(rg, this)).collect(Collectors.toList());
+        List<YodaAgent> newAgents = this.agents.stream().parallel().map(a -> a.next(rg, this)).collect(Collectors.toList());
         return new YodaSystemState(newAgents, this.sceneElements);
     }
 

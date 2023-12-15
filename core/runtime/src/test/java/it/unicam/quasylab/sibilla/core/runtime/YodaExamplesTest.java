@@ -3,10 +3,8 @@ package it.unicam.quasylab.sibilla.core.runtime;
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.yoda.*;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
-import it.unicam.quasylab.sibilla.langs.yoda.YodaAgentsDefinitionsGenerator;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaModelGenerationException;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaModelGenerator;
 import org.junit.jupiter.api.Disabled;
@@ -161,14 +159,13 @@ class YodaExamplesTest {
         initialAssignment = initialAssignment.setValue(variableRegistry.get("diry"), SibillaValue.of(0));
         initialAssignment = initialAssignment.setValue(variableRegistry.get("dirx"), SibillaValue.of(0));
 
-        //YodaAgent agent = agentsDefinitions.getAgent(0,elementNameRegistry.get("Robot"), new YodaVariableMapping());
         YodaAgent agent = agentsDefinitions.getAgent(0,elementNameRegistry.get("Robot"), initialAssignment);
 
         WeightedStructure<YodaAction> actions = agent.getAgentBehaviour().evaluate(agent.getAgentAttributes(), agent.getAgentObservations());
 
         assertEquals(1, actions.getTotalWeight());
         assertEquals(1, actions.getAll().get(0).getTotalWeight());
-        assertEquals("moveNorth",actions.getAll().get(0).getElement().getName());
+        assertEquals("moveNorth", actions.getAll().get(0).getElement().getName());
 
         /*
         YodaVariableMapping newMap = actions.getAll().get(0).getElement().performAction(new DefaultRandomGenerator(), agent.getAgentAttributes());
@@ -250,11 +247,93 @@ class YodaExamplesTest {
         sr.setConfiguration("Main");
     }
 
+    @Test
+    public void shouldSimulateFinderBot() throws CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/finderBot.yoda"));
+        sr.setConfiguration("Main");
+        sr.addAllMeasures();
+        sr.setDeadline(100);
+        sr.setDt(1);
+        sr.setReplica(1);
+        sr.simulate("TestFinderBot");
+        sr.printData("TestFinderBot");
+    }
+
+    @Test
+    @Disabled
+    public void testFinderActionRoam() throws YodaModelGenerationException, URISyntaxException, IOException {
+        YodaModelGenerator generator = loadModelGenerator("yoda/finderBot.yoda");
+        generator.getParseTree();
+        EvaluationEnvironment env = generator.getEvaluationEnvironment();
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
+        YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
+
+        YodaVariableMapping initialAssignment = new YodaVariableMapping();
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("dirx"), SibillaValue.of(0.0));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("diry"), SibillaValue.of(0.0));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("found"), SibillaValue.of(false));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("x"), SibillaValue.of(0.0));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("y"), SibillaValue.of(0.0));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("target_sensor"), SibillaValue.of(false));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("angle"), SibillaValue.of(0.0));
+        YodaAgent agent = agentsDefinitions.getAgent(0, elementNameRegistry.get("Finder"), initialAssignment);
+
+        YodaVariableMapping initialTargetAssignment = new YodaVariableMapping();
+        initialTargetAssignment = initialTargetAssignment.setValue(variableRegistry.get("posx"), SibillaValue.of(5.0));
+        initialTargetAssignment = initialTargetAssignment.setValue(variableRegistry.get("posy"), SibillaValue.of(5.0));
+        YodaSceneElement target = agentsDefinitions.getElement(1, elementNameRegistry.get("Target"), initialTargetAssignment);
+
+        DefaultRandomGenerator rg = new DefaultRandomGenerator();
+        YodaSystemState state = new YodaSystemState(List.of(agent), List.of(target));
+
+        YodaVariableMapping observations = state.get(0).observe(rg, state);
+        WeightedStructure<YodaAction> actions = state.get(0).getAgentBehaviour().evaluate(agent.getAgentAttributes(), observations);
+        assertEquals(1, actions.getTotalWeight());
+        assertEquals(1, actions.getAll().get(0).getTotalWeight());
+        assertEquals("moveto", actions.getAll().get(0).getElement().getName());
+    }
+
+    @Test
+    @Disabled
+    public void testFinderActionStop() throws  YodaModelGenerationException, URISyntaxException, IOException {
+        YodaModelGenerator generator = loadModelGenerator("yoda/finderBot.yoda");
+        generator.getParseTree();
+        EvaluationEnvironment env = generator.getEvaluationEnvironment();
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
+        YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
+
+        YodaVariableMapping initialAssignment = new YodaVariableMapping();
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("dirx"), SibillaValue.of(0.0));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("diry"), SibillaValue.of(0.0));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("found"), SibillaValue.of(false));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("x"), SibillaValue.of(6.0));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("y"), SibillaValue.of(6.5));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("target_sensor"), SibillaValue.of(false));
+        initialAssignment = initialAssignment.setValue(variableRegistry.get("angle"), SibillaValue.of(0.0));
+        YodaAgent agent = agentsDefinitions.getAgent(0, elementNameRegistry.get("Finder"), initialAssignment);
+
+        YodaVariableMapping initialTargetAssignment = new YodaVariableMapping();
+        initialTargetAssignment = initialTargetAssignment.setValue(variableRegistry.get("posx"), SibillaValue.of(5.0));
+        initialTargetAssignment = initialTargetAssignment.setValue(variableRegistry.get("posy"), SibillaValue.of(5.0));
+        YodaSceneElement target = agentsDefinitions.getElement(1, elementNameRegistry.get("Target"), initialTargetAssignment);
+
+        DefaultRandomGenerator rg = new DefaultRandomGenerator();
+        YodaSystemState state = new YodaSystemState(List.of(agent), List.of(target));
+
+        YodaVariableMapping observations = state.get(0).observe(rg, state);
+        WeightedStructure<YodaAction> actions = state.get(0).getAgentBehaviour().evaluate(agent.getAgentAttributes(), observations);
+        assertEquals(1, actions.getTotalWeight());
+        assertEquals(1, actions.getAll().get(0).getTotalWeight());
+        assertEquals("stop", actions.getAll().get(0).getElement().getName());
+    }
+
     /* END TESTS ON FINDERBOT */
 
     /* BEGIN TESTS ON FLOCK */
 
-    /*
     @Test
     public void shouldLoadResourceFlock() {
         assertNotNull(getResource("yoda/flock.yoda"));
@@ -263,10 +342,108 @@ class YodaExamplesTest {
     @Test
     public void shouldInstantiateAInitialConfigurationFromFileFlock() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
-        sr.load("yoda/flock.yoda");
+        sr.load(getResource("yoda/flock.yoda"));
         assertEquals(1, sr.getInitialConfigurations().length);
+        assertEquals("Main", sr.getInitialConfigurations()[0]);
+        sr.setConfiguration("Main");
     }
-     */
+
+    @Test
+    public void shouldSimulateFlock() throws CommandExecutionException, IOException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/flock.yoda"));
+        sr.setParameter("nbirds", 45);
+        sr.setConfiguration("Main");
+        sr.setDeadline(100);
+        sr.trace("TestFlock", true);
+        //sr.printData("TestFlock");
+    }
+
+    @Test
+    @Disabled
+    public void testFlockSeparate() throws YodaModelGenerationException, URISyntaxException, IOException {
+        YodaModelGenerator generator = loadModelGenerator("yoda/flock.yoda");
+        generator.getParseTree();
+        EvaluationEnvironment env = generator.getEvaluationEnvironment();
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
+        YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
+
+        YodaVariableMapping initialBird1Assignment = new YodaVariableMapping();
+        initialBird1Assignment = initialBird1Assignment.setValue(variableRegistry.get("angle"), SibillaValue.of(80.0));
+        initialBird1Assignment = initialBird1Assignment.setValue(variableRegistry.get("x"), SibillaValue.of(3.0));
+        initialBird1Assignment = initialBird1Assignment.setValue(variableRegistry.get("y"), SibillaValue.of(3.5));
+        YodaAgent bird1 = agentsDefinitions.getAgent(0, elementNameRegistry.get("Bird"), initialBird1Assignment);
+
+        YodaVariableMapping initialBird2Assignment = new YodaVariableMapping();
+        initialBird2Assignment = initialBird2Assignment.setValue(variableRegistry.get("angle"), SibillaValue.of(85.0));
+        initialBird2Assignment = initialBird2Assignment.setValue(variableRegistry.get("x"), SibillaValue.of(3.0));
+        initialBird2Assignment = initialBird2Assignment.setValue(variableRegistry.get("y"), SibillaValue.of(2.5));
+        YodaAgent bird2 = agentsDefinitions.getAgent(1, elementNameRegistry.get("Bird"), initialBird2Assignment);
+
+        YodaVariableMapping initialBird3Assignment = new YodaVariableMapping();
+        initialBird3Assignment = initialBird3Assignment.setValue(variableRegistry.get("angle"), SibillaValue.of(75.0));
+        initialBird3Assignment = initialBird3Assignment.setValue(variableRegistry.get("x"), SibillaValue.of(2.5));
+        initialBird3Assignment = initialBird3Assignment.setValue(variableRegistry.get("y"), SibillaValue.of(3.0));
+        YodaAgent bird3 = agentsDefinitions.getAgent(2, elementNameRegistry.get("Bird"), initialBird3Assignment);
+
+        DefaultRandomGenerator rg = new DefaultRandomGenerator();
+        YodaSystemState state = new YodaSystemState(List.of(bird1, bird2, bird3), List.of());
+
+        YodaVariableMapping obs1 = state.get(0).observe(rg, state);
+        YodaVariableMapping obs2 = state.get(1).observe(rg, state);
+        YodaVariableMapping obs3 = state.get(2).observe(rg, state);
+        WeightedStructure<YodaAction> acts1 = state.get(0).getAgentBehaviour().evaluate(bird1.getAgentAttributes(), obs1);
+        WeightedStructure<YodaAction> acts2 = state.get(1).getAgentBehaviour().evaluate(bird2.getAgentAttributes(), obs2);
+        WeightedStructure<YodaAction> acts3 = state.get(2).getAgentBehaviour().evaluate(bird3.getAgentAttributes(), obs3);
+
+        assertEquals("moveA", acts1.getAll().get(0).getElement().getName());
+        assertEquals("moveD", acts2.getAll().get(0).getElement().getName());
+        assertEquals("moveC", acts3.getAll().get(0).getElement().getName());
+    }
+
+    @Test
+    @Disabled
+    public void testFlockAlign()throws YodaModelGenerationException, URISyntaxException, IOException {
+        YodaModelGenerator generator = loadModelGenerator("yoda/flock.yoda");
+        generator.getParseTree();
+        EvaluationEnvironment env = generator.getEvaluationEnvironment();
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
+        YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
+
+        YodaVariableMapping initialBird1Assignment = new YodaVariableMapping();
+        initialBird1Assignment = initialBird1Assignment.setValue(variableRegistry.get("angle"), SibillaValue.of(80.0));
+        initialBird1Assignment = initialBird1Assignment.setValue(variableRegistry.get("x"), SibillaValue.of(5.0));
+        initialBird1Assignment = initialBird1Assignment.setValue(variableRegistry.get("y"), SibillaValue.of(5.5));
+        YodaAgent bird1 = agentsDefinitions.getAgent(0, elementNameRegistry.get("Bird"), initialBird1Assignment);
+
+        YodaVariableMapping initialBird2Assignment = new YodaVariableMapping();
+        initialBird2Assignment = initialBird2Assignment.setValue(variableRegistry.get("angle"), SibillaValue.of(85.0));
+        initialBird2Assignment = initialBird2Assignment.setValue(variableRegistry.get("x"), SibillaValue.of(3.5));
+        initialBird2Assignment = initialBird2Assignment.setValue(variableRegistry.get("y"), SibillaValue.of(5.0));
+        YodaAgent bird2 = agentsDefinitions.getAgent(1, elementNameRegistry.get("Bird"), initialBird2Assignment);
+
+        YodaVariableMapping initialBird3Assignment = new YodaVariableMapping();
+        initialBird3Assignment = initialBird3Assignment.setValue(variableRegistry.get("angle"), SibillaValue.of(75.0));
+        initialBird3Assignment = initialBird3Assignment.setValue(variableRegistry.get("x"), SibillaValue.of(2.0));
+        initialBird3Assignment = initialBird3Assignment.setValue(variableRegistry.get("y"), SibillaValue.of(1.5));
+        YodaAgent bird3 = agentsDefinitions.getAgent(2, elementNameRegistry.get("Bird"), initialBird3Assignment);
+
+        DefaultRandomGenerator rg = new DefaultRandomGenerator();
+        YodaSystemState state = new YodaSystemState(List.of(bird1, bird2, bird3), List.of());
+
+        YodaVariableMapping obs1 = state.get(0).observe(rg, state);
+        YodaVariableMapping obs2 = state.get(1).observe(rg, state);
+        YodaVariableMapping obs3 = state.get(2).observe(rg, state);
+        WeightedStructure<YodaAction> acts1 = state.get(0).getAgentBehaviour().evaluate(bird1.getAgentAttributes(), obs1);
+        WeightedStructure<YodaAction> acts2 = state.get(1).getAgentBehaviour().evaluate(bird2.getAgentAttributes(), obs2);
+        WeightedStructure<YodaAction> acts3 = state.get(2).getAgentBehaviour().evaluate(bird3.getAgentAttributes(), obs3);
+
+        assertEquals("moveC", acts1.getAll().get(0).getElement().getName());
+        assertEquals("moveD", acts2.getAll().get(0).getElement().getName());
+        assertEquals("moveA", acts3.getAll().get(0).getElement().getName());
+    }
 
     /* END TESTS ON FLOCK */
 

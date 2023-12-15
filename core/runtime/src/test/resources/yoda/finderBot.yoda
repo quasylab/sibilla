@@ -22,8 +22,8 @@ agent Finder =
 end
 
 element Target =
-    real posx = 0;
-    real posy = 0;
+    real posx = 0.0;
+    real posy = 0.0;
 end
 
 environment :
@@ -41,7 +41,7 @@ end
 
 configuration Main :
     Target [ posx = 5.0; posy = 5.0; ]
-    for ox sampled distinct na time from U[0, width] do
+    for ox sampled distinct na time from U[0, 10] do
         Finder [ x = ox; y = 2.0; ]
     endfor
 end

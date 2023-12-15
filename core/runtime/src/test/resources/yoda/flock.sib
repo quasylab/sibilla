@@ -1,0 +1,9 @@
+module "yoda"
+load "yoda/flock.yoda"
+init "Main"
+add all measures
+deadline 100
+dt 1
+replica 100
+simulate
+trace "/Users/nicoladelgiudice/Documents/Risultati/Flock"
