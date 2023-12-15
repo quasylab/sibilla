@@ -154,6 +154,7 @@ public final class YodaAgent extends YodaSceneElement {
 
     public Map<String, ToDoubleFunction<YodaSystemState>> getTraceFunctions() {
         HashMap<String, ToDoubleFunction<YodaSystemState>> result = new HashMap<>();
+        this.environmentalAttributes.forEach((var, val) -> result.put(var.getName(), s -> s.get(this.getId()).get(var).doubleOf()));
         this.agentAttributes.forEach((var, val) -> result.put(var.getName(), s -> s.get(this.getId()).get(var).doubleOf()));
         this.agentObservations.forEach((var, val) -> result.put(var.getName(), s -> s.get(this.getId()).get(var).doubleOf()));
         return result;

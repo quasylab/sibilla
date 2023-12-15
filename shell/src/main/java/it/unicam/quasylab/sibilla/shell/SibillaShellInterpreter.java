@@ -739,7 +739,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
     @Override
     public Boolean visitTrace_command(SibillaScriptParser.Trace_commandContext ctx) {
         try {
-            runtime.trace((ctx.output==null?null:ctx.output.getText()), true);
+            runtime.trace(getStringContent(ctx.output), true);
             return true;
         } catch (CommandExecutionException e) {
             printErrorMessages(e.getErrorMessages());

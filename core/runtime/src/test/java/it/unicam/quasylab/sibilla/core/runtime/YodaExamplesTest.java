@@ -352,10 +352,10 @@ class YodaExamplesTest {
     public void shouldSimulateFlock() throws CommandExecutionException, IOException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/flock.yoda"));
-        sr.setParameter("nbirds", 45);
+        sr.setParameter("nbirds", 5);
         sr.setConfiguration("Main");
         sr.setDeadline(100);
-        sr.trace("TestFlock", true);
+        sr.trace("/Users/loreti/tmp/TEST", true);
         //sr.printData("TestFlock");
     }
 
