@@ -214,7 +214,7 @@ public class YodaFunctionalExpressionEvaluator<T> extends YodaModelBaseVisitor<F
                 new YodaFunctionalExpressionEvaluator<>(this.constantsAndParameters, YodaGroupExpressionEvaluationParameters.EXPRESSION_EVALUATION_CONTEXT, registry, groupSolver)
         );
         if (ctx.guard != null) {
-            Function<YodaGroupExpressionEvaluationParameters, SibillaValue> groupGuard = ctx.value.accept(
+            Function<YodaGroupExpressionEvaluationParameters, SibillaValue> groupGuard = ctx.guard.accept(
                     new YodaFunctionalExpressionEvaluator<>(this.constantsAndParameters, YodaGroupExpressionEvaluationParameters.EXPRESSION_EVALUATION_CONTEXT, registry, groupSolver)
             );
             if (ctx.groupName != null) {
