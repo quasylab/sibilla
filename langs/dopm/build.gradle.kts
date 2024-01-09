@@ -24,21 +24,6 @@
 
 
 plugins {
-    id("it.unicam.quasylab.sibilla.java-library-conventions")
+    id("it.unicam.quasylab.sibilla.api-lang-conventions")
 }
 
-dependencies {
-    // https://mvnrepository.com/artifact/tech.tablesaw/tablesaw-core
-    implementation("tech.tablesaw:tablesaw-core:0.43.1")
-
-    implementation(project(":core:simulator"))
-    implementation(project(":core:optimization"))
-    implementation(project(":langs:pm"))
-    implementation(project(":langs:lio"))
-    implementation(project(":langs:dopm"))
-    implementation(project(":langs:markov"))
-    implementation(project(":langs:slam"))
-    implementation(project(":langs:yoda"))
-    implementation(project(":langs:stl"))
-
-}

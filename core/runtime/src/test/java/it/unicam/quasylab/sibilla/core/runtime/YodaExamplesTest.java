@@ -42,7 +42,7 @@ class YodaExamplesTest {
     public void shouldSelectYODAModule() throws CommandExecutionException{
         SibillaRuntime sr = new SibillaRuntime();
         assertTrue(Arrays.deepEquals(new String[] {
-                LIOModelModule.MODULE_NAME, PopulationModelModule.MODULE_NAME, YodaModelModule.MODULE_NAME
+                DataOrientedPopulationModelModule.MODULE_NAME,LIOModelModule.MODULE_NAME, PopulationModelModule.MODULE_NAME, YodaModelModule.MODULE_NAME
         }, sr.getModules()));
         sr.loadModule(YodaModelModule.MODULE_NAME);
     }

@@ -24,3 +24,5 @@ include("langs:yoda")
 include("langs:slam")
 include("langs:stl")
 include("shell")
+include("langs:dopm")
+findProject(":langs:dopm")?.name = "dopm"

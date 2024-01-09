@@ -771,7 +771,7 @@ class SibillaRuntimeTest {
     @Test
     public void shouldSelectPopulationModule() throws CommandExecutionException {
         SibillaRuntime sr = new SibillaRuntime();
-        assertTrue(Arrays.deepEquals(new String[] {LIOModelModule.MODULE_NAME, PopulationModelModule.MODULE_NAME, YodaModelModule.MODULE_NAME}, sr.getModules()));
+        assertTrue(Arrays.deepEquals(new String[] {DataOrientedPopulationModelModule.MODULE_NAME,LIOModelModule.MODULE_NAME, PopulationModelModule.MODULE_NAME, YodaModelModule.MODULE_NAME}, sr.getModules()));
         sr.loadModule(PopulationModelModule.MODULE_NAME);
     }
 

@@ -21,24 +21,18 @@
  *  limitations under the License.
  */
 
+package it.unicam.quasylab.sibilla.langs.dopm.symbols.exceptions;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 
-plugins {
-    id("it.unicam.quasylab.sibilla.java-library-conventions")
-}
-
-dependencies {
-    // https://mvnrepository.com/artifact/tech.tablesaw/tablesaw-core
-    implementation("tech.tablesaw:tablesaw-core:0.43.1")
-
-    implementation(project(":core:simulator"))
-    implementation(project(":core:optimization"))
-    implementation(project(":langs:pm"))
-    implementation(project(":langs:lio"))
-    implementation(project(":langs:dopm"))
-    implementation(project(":langs:markov"))
-    implementation(project(":langs:slam"))
-    implementation(project(":langs:yoda"))
-    implementation(project(":langs:stl"))
-
+public class DuplicatedSymbolException extends Exception {
+    public DuplicatedSymbolException(String name, ParserRuleContext existing, ParserRuleContext duplicated) {
+        super(String.format("Symbol %s at line %d char %d is already defined at line %d char %d!",
+                name,
+                duplicated.start.getLine(),
+                duplicated.start.getCharPositionInLine(),
+                existing.start.getLine(),
+                existing.start.getCharPositionInLine()
+        ));
+    }
 }
