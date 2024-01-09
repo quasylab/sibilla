@@ -60,6 +60,7 @@ public class DataOrientedPopulationState implements ImmutableState {
 
     public DataOrientedPopulationState addAgent(Agent a) {
         List<Agent> cagents = new ArrayList<>(this.agents);
+        cagents.add(a);
         return new DataOrientedPopulationState(cagents);
     }
 

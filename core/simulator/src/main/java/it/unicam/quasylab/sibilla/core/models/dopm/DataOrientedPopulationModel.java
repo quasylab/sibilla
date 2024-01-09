@@ -12,6 +12,7 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedElement;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedLinkedList;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;
@@ -40,6 +41,7 @@ public class DataOrientedPopulationModel implements Model<DataOrientedPopulation
         WeightedLinkedList<StepFunction<DataOrientedPopulationState>> result = new WeightedLinkedList<>();
         for(Rule rule : this.rules.values()) {
             WeightedStructure<DataOrientedPopulationState> ruleTransitions = getTransitions(rule, dataOrientedPopulationState);
+
             for(WeightedElement<DataOrientedPopulationState> ruleTransition : ruleTransitions.getAll()) {
                 result.add(ruleTransition.getTotalWeight(), (rnd, t, dt) -> ruleTransition.getElement());
             }
@@ -53,11 +55,8 @@ public class DataOrientedPopulationModel implements Model<DataOrientedPopulation
         for(Agent sender : dataOrientedPopulationState.getAgents()) {
             if(r.getOutput().getPredicate().test(sender)) {
                 WeightedStructure<DataOrientedPopulationState> senderResults = new WeightedLinkedList<>();
-                WeightedElement<DataOrientedPopulationState> outputRes = new WeightedElement<>(
-                        r.getOutput().getRate().apply(dataOrientedPopulationState),
-                        new DataOrientedPopulationState(r.getOutput().getPost().apply(sender))
-                );
-                senderResults.add(outputRes);
+                senderResults.add(r.getOutput().getRate().apply(dataOrientedPopulationState), new DataOrientedPopulationState(r.getOutput().getPost().apply(sender)));
+
                 for(Agent receiver : dataOrientedPopulationState.getAgents()) {
                     if(receiver != sender) {
                         WeightedStructure<DataOrientedPopulationState> newSenderResults = new WeightedLinkedList<>();
@@ -69,12 +68,16 @@ public class DataOrientedPopulationModel implements Model<DataOrientedPopulation
                                         oldSenderResult.getTotalWeight() * inputResult.getTotalWeight(),
                                         oldSenderResult.getElement().addAgent(inputResult.getElement())
                                 );
+
                             }
                         }
                         senderResults = newSenderResults;
                     }
                 }
-                result.add(senderResults);
+                //result.add(senderResults);
+                for(WeightedElement<DataOrientedPopulationState> e : senderResults.getAll()) {
+                    result.add(e.getTotalWeight(), e.getElement());
+                }
             }
         }
         return result;
