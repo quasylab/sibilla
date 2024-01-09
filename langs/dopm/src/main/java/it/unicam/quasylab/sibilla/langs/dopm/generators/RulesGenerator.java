@@ -3,14 +3,13 @@ package it.unicam.quasylab.sibilla.langs.dopm.generators;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.InputTransition;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.OutputTransition;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.Rule;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaBoolean;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
+import it.unicam.quasylab.sibilla.langs.dopm.evaluators.ExpressionEvaluator;
 import it.unicam.quasylab.sibilla.langs.dopm.evaluators.PopulationExpressionEvaluator;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<Map<String, Rule>> {
 
@@ -42,8 +41,14 @@ public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<Map<S
         List<InputTransition> inputs = new ArrayList<>();
         for(DataOrientedPopulationModelParser.Input_transitionContext ictx : ctx.inputs.input_transition()) {
             inputs.add(new InputTransition(
-                    ictx.pre.predicate.accept(new AgentPredicateGenerator()),
-                    ictx.sender_predicate.accept(new AgentSenderPredicateGenerator()),
+                    ictx.pre.accept(new AgentPredicateGenerator()),
+                    (a) -> ictx.sender_predicate.accept(new ExpressionEvaluator(name -> {
+                        if(name.startsWith("sender.")) {
+                            return Optional.ofNullable(a.getValues().get(name.split("sender.")[1]));
+                        } else {
+                            return Optional.ofNullable(a.getValues().get(name));
+                        }
+                    })) == SibillaBoolean.TRUE,
                     state -> ictx.probability.accept(new PopulationExpressionEvaluator(state)).doubleOf(),
                     ictx.post.accept(new AgentReceiverExpressionGenerator())
             ));

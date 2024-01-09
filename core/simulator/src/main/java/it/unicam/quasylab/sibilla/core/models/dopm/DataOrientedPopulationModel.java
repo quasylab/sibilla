@@ -44,6 +44,7 @@ public class DataOrientedPopulationModel implements Model<DataOrientedPopulation
                 result.add(ruleTransition.getTotalWeight(), (rnd, t, dt) -> ruleTransition.getElement());
             }
         }
+
         return result;
     }
 

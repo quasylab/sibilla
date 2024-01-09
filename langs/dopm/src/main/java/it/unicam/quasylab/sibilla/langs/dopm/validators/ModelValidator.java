@@ -164,7 +164,7 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
         }
         if(ctx.vars != null) {
             for (DataOrientedPopulationModelParser.Var_assContext c : ctx.vars.var_ass()) {
-                String name = c.getText();
+                String name = c.name.getText();
                 if(this.table.isDefined(name)) {
                     this.errors.add(ModelBuildingError.duplicatedName(name, this.table.getContext(name), ctx));
                     return false;

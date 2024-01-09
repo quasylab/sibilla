@@ -58,7 +58,7 @@ public class ExpressionEvaluator extends DataOrientedPopulationModelBaseVisitor<
 
     @Override
     public SibillaValue visitSenderReferenceExpression(DataOrientedPopulationModelParser.SenderReferenceExpressionContext ctx) {
-        return nameResolver.apply("sender."+ctx.reference.getText()).orElse(SibillaValue.ERROR_VALUE);
+        return nameResolver.apply(ctx.getText()).orElse(SibillaValue.ERROR_VALUE);
     }
 
     @Override

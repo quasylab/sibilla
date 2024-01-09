@@ -6,6 +6,7 @@ import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisi
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
 import it.unicam.quasylab.sibilla.langs.dopm.evaluators.ExpressionEvaluator;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -22,16 +23,18 @@ public class AgentReceiverExpressionGenerator extends DataOrientedPopulationMode
         return (sender, receiver) -> {
             String species = ctx.name.getText();
             Map<String, SibillaValue> values = new HashMap<>(receiver.getValues());
+            if(ctx.vars != null) {
             for(DataOrientedPopulationModelParser.Var_assContext vctx : ctx.vars.var_ass()) {
                 values.put(vctx.name.getText(), vctx.expr().accept(
                         new ExpressionEvaluator(name -> {
-                            if(name.startsWith("sender.")) {
-                                return Optional.ofNullable(sender.getValues().get(name.split("sender.")[0]));
+                            if(name.contains("sender.")) {
+                                return Optional.ofNullable(sender.getValues().get(name.split("sender.")[1]));
                             } else {
                                 return Optional.ofNullable(receiver.getValues().get(name));
                             }
                         })
                 ));
+            }
             }
             return new Agent(species, values);
         };

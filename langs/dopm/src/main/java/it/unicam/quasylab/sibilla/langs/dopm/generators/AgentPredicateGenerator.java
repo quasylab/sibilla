@@ -22,9 +22,11 @@ public class AgentPredicateGenerator extends DataOrientedPopulationModelBaseVisi
             if(!a.getSpecies().equals(ctx.name.getText())) {
                 return false;
             }
-            for(TerminalNode node : ctx.vars.ID()) {
-                if (!a.getValues().containsKey(node.getText())) {
-                    return false;
+            if(ctx.vars != null) {
+                for (TerminalNode node : ctx.vars.ID()) {
+                    if (!a.getValues().containsKey(node.getText())) {
+                        return false;
+                    }
                 }
             }
             return ctx.predicate.accept(new ExpressionEvaluator(name -> Optional.ofNullable(a.getValues().get(name)))) == SibillaBoolean.TRUE;
