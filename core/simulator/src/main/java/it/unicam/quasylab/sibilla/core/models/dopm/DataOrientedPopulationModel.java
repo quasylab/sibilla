@@ -16,10 +16,7 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class DataOrientedPopulationModel implements Model<DataOrientedPopulationState>,ContinuousTimeMarkovProcess<DataOrientedPopulationState> {
@@ -31,6 +28,7 @@ public class DataOrientedPopulationModel implements Model<DataOrientedPopulation
 
     public DataOrientedPopulationModel(Map<String, Measure<DataOrientedPopulationState>> measures, Map<String, Predicate<DataOrientedPopulationState>> predicates, Map<String, Rule> rules) {
         this.measures = measures;
+        System.out.println(Arrays.toString(this.measures.keySet().toArray()));
         this.predicates = predicates;
         this.rules = rules;
     }
