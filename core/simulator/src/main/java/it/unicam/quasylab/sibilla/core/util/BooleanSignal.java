@@ -174,10 +174,10 @@ public final class BooleanSignal {
      */
     public BooleanSignal computeConjunction(BooleanSignal other) {
         if (this.isEmpty()) {
-            return other;
+            return this;
         }
         if (other.isEmpty()) {
-            return this;
+            return other;
         }
         return new ConjunctionMerger(this, other).getResult();
     }
@@ -187,7 +187,7 @@ public final class BooleanSignal {
      *
      * @return true if this sequence is empty.
      */
-    private boolean isEmpty() {
+    public boolean isEmpty() {
         return intervals.isEmpty();
     }
 
@@ -210,8 +210,8 @@ public final class BooleanSignal {
      * parameter.
      */
     public BooleanSignal computeDisjunction(BooleanSignal other) {
-        if (this.isEmpty()) { return this; }
-        if (other.isEmpty()) { return other; }
+        if (this.isEmpty()) { return other; }
+        if (other.isEmpty()) { return this; }
         return new DisjunctionMerger(this, other).getResult();
     }
 

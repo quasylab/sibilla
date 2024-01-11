@@ -250,4 +250,20 @@ public final class Signal implements Iterable<SignalSegment> {
         }
         return result;
     }
+
+    public Signal truncate(double cutoffTime){
+        Signal result = new Signal();
+        for(SignalSegment ss : this){
+            if(ss.getTo() > cutoffTime){
+                if(ss.getFrom() < cutoffTime)
+                    result.add(new SignalSegment(ss.getFrom(),cutoffTime,true,ss.getValue()));
+            } else
+                result.add(new SignalSegment(ss.getFrom(), ss.getTo(),ss.isClosedOnRight(),ss.getValue()));
+
+        }
+        return result;
+    }
+
+
+
 }

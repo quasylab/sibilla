@@ -170,7 +170,7 @@ public class Interval {
      * @return true if this interval <i>is before</i> the given one.
      */
     public boolean isBefore(Interval other) {
-        return this.end<other.start;
+        return this.end<=other.start;
     }
 
     /**
@@ -248,7 +248,7 @@ public class Interval {
         if (other.contains(this)) {
             return Optional.of(other);
         }
-        if (this.isBefore(other)||this.isAfter(other)) {
+        if ((this.isBefore(other) && (this.end !=other.start ))||this.isAfter(other)) {
             return Optional.empty();
         }
         return Optional.of(new Interval(Math.min(this.start, other.start), Math.max(this.end, other.end)));
@@ -306,6 +306,6 @@ public class Interval {
 
     @Override
     public String toString() {
-        return " [ " + start + " , " + end +" ] ";
+        return " [ " + start + " , " + end +" ) ";
     }
 }

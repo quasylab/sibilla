@@ -1,52 +1,33 @@
 package it.unicam.quasylab.sibilla.core.tools.stl;
 
-import it.unicam.quasylab.sibilla.core.models.pm.Population;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
-import org.junit.jupiter.api.Disabled;
+import it.unicam.quasylab.sibilla.core.util.Interval;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Supplier;
+
+import static it.unicam.quasylab.sibilla.core.tools.stl.CommonForMonitorTesting.getPopulationTrajectory;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 class QualitativeMonitorTest {
-
-    private Trajectory<PopulationState> getPopulationTrajectory(double[] timeIntervals, int numPopulations, double[]... signals) {
-        Trajectory<PopulationState> trajectory = new Trajectory<>();
-        double time = 0.0;
-
-        for (int i = 0; i < timeIntervals.length; i++) {
-            double currentTimeInterval = timeIntervals[i];
-            Population[] populations = new Population[numPopulations];
-
-            for (int j = 0; j < numPopulations; j++) {
-                populations[j] = new Population(j, (int) signals[j][i]);
-            }
-
-            trajectory.add(time, new PopulationState(numPopulations, populations));
-            time += currentTimeInterval;
-        }
-
-        trajectory.setEnd(time);
-
-        return trajectory;
-    }
-
 
     @Test
     public void testAtomicMonitor(){
 
         Trajectory<PopulationState> t = getPopulationTrajectory(
                 new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
-                1,
-                new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0}
+                new int[]{0, 8, 3, 2, 1, 1, 1}
         );
 
         BooleanSignal bs =
                 QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(0) >= 2 ).monitor(t);
 
-        System.out.println(bs);
 
         assertFalse(bs.getValueAt(0.5));
         assertTrue(bs.getValueAt(1.0));
@@ -60,26 +41,35 @@ class QualitativeMonitorTest {
     public void testNegationMonitor(){
         Trajectory<PopulationState> t = getPopulationTrajectory(
                 new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
-                1,
-                new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0}
+                new int[]{0, 8, 3, 2, 1, 1, 1}
         );
 
         QualitativeMonitor<PopulationState> bs =
                 QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(0) >= 2 );
         BooleanSignal nbs = QualitativeMonitor.negation(bs).monitor(t);
-        System.out.println(nbs);
+        assertTrue(nbs.getValueAt(0.5));
+        assertFalse(nbs.getValueAt(1.0));
+        assertFalse(nbs.getValueAt(3.5));
+        assertTrue(nbs.getValueAt(4.0));
+        assertTrue(nbs.getValueAt(4.5));
 
 
     }
 
-    @Disabled
+    /**
+     *  s1 AND s2 expected [ [ 5.0 , 6.0 ) ]
+     *  s1 OR  s2 expected [ [ 1.0 , 7.0 ) ]
+     */
     @Test
     public void testConjunctionAndDisjunction(){
         Trajectory<PopulationState> t = getPopulationTrajectory(
-                new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
-                2,
-                new double[]{0.0, 8.0, 3.0, 2.0, 2.0, 1.0, 1.0},
-                new double[]{2.0, 6.0, 1.0, 1.0, 1.0, 0.0, 0.0}
+                new int[]{0, 8, 3, 2, 2, 3, 1},
+                new int[]{2, 6, 1, 1, 1, 1, 0}
+        );
+
+        Trajectory<PopulationState> t2 = getPopulationTrajectory(
+                new int[]{0, 8, 3, 2, 2, 3, 1},
+                new int[]{2, 6, 1, 1, 1, 0, 0}
         );
 
 
@@ -88,21 +78,162 @@ class QualitativeMonitorTest {
         QualitativeMonitor<PopulationState> rightAtomic =
                 QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(1) <= 0 );
 
-
-        //System.out.println(leftAtomic.monitor(t));
-        //System.out.println(rightAtomic.monitor(t));
-
-
         QualitativeMonitor<PopulationState> conjunction = QualitativeMonitor.conjunction(leftAtomic,rightAtomic);
         QualitativeMonitor<PopulationState> disjunction= QualitativeMonitor.disjunction(leftAtomic,rightAtomic);
 
         BooleanSignal cbs = conjunction.monitor(t);
         BooleanSignal dbs = disjunction.monitor(t);
-//
-//        System.out.println(cbs);
-//        System.out.println(dbs);
+        BooleanSignal c2bs = conjunction.monitor(t2);
+
+
+        assertEquals(0, cbs.getIntervals().size());
+
+        assertFalse(c2bs.getValueAt(1.5));
+        assertFalse(c2bs.getValueAt(2.5));
+        assertFalse(c2bs.getValueAt(3.5));
+        assertFalse(c2bs.getValueAt(4.5));
+        assertTrue(c2bs.getValueAt(5.5));
+        assertFalse(c2bs.getValueAt(6.0));
+
+
+        assertFalse(dbs.getValueAt(0.5));
+        assertTrue(dbs.getValueAt(2.5));
+        assertTrue(dbs.getValueAt(3.5));
+        assertTrue(dbs.getValueAt(4.5));
+        assertTrue(dbs.getValueAt(5.5));
+        assertTrue(dbs.getValueAt(6.0));
+        assertFalse(dbs.getValueAt(7.5));
+    }
+
+
+    @Test
+    public void testConjunctionAndDisjunctionDisjointInterval(){
+
+        Trajectory<PopulationState> t = getPopulationTrajectory(
+                new int[]{5, 5, 5, 1, 1, 1, 1},
+                new int[]{1, 1, 1, 1, 5, 5, 5}
+        );
+
+        QualitativeMonitor<PopulationState> leftAtomic =
+                QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(0) > 3 );
+        QualitativeMonitor<PopulationState> rightAtomic =
+                QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(1) > 3 );
+
+        QualitativeMonitor<PopulationState> disjunction = QualitativeMonitor.disjunction(leftAtomic,rightAtomic);
+        QualitativeMonitor<PopulationState> conjunction = QualitativeMonitor.conjunction(leftAtomic,rightAtomic);
+
+        assertEquals(disjunction.monitor(t).size(),2);
+        assertTrue(conjunction.monitor(t).isEmpty());
+    }
+
+
+    @Test
+    public void testConjunctionAndDisjunctionEmptyOne(){
+
+        Trajectory<PopulationState> t = getPopulationTrajectory(
+                new int[]{5, 5, 5, 1, 1, 1, 1},
+                new int[]{1, 1, 1, 1, 1, 1, 1}
+        );
+
+        QualitativeMonitor<PopulationState> leftAtomic =
+                QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(0) > 3 );
+        QualitativeMonitor<PopulationState> rightAtomic =
+                QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(1) > 3 );
+
+        QualitativeMonitor<PopulationState> disjunction = QualitativeMonitor.disjunction(leftAtomic,rightAtomic);
+        QualitativeMonitor<PopulationState> conjunction = QualitativeMonitor.conjunction(leftAtomic,rightAtomic);
+
+        assertEquals(disjunction.monitor(t).size(),1);
+        assertTrue(conjunction.monitor(t).isEmpty());
+    }
+
+
+    @Test
+    public void testUntil(){
+
+        Trajectory<PopulationState> t = getPopulationTrajectory(
+                new int[]{0, 3, 3, 3, 3, 4, 1, 3, 3, 5, 4, 1, 1, 1}
+        );
+
+        QualitativeMonitor<PopulationState> leftAtomicMonitor =
+                QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(0) == 3 );
+        QualitativeMonitor<PopulationState> rightAtomicMonitor =
+                QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(0) >= 3 );
+
+        QualitativeMonitor<PopulationState> untilMonitor = QualitativeMonitor.until(leftAtomicMonitor,new Interval(0.1),rightAtomicMonitor);
+        BooleanSignal untilSignal = untilMonitor.monitor(t);
+        assertEquals(untilSignal.getIntervals().size(), 2);
+        assertEquals(untilSignal.getIntervals().get(0), new Interval(1.0, 5.0));
+        assertEquals(untilSignal.getIntervals().get(1), new Interval(7.0, 9.0));
 
     }
+
+
+    @Test
+    public void testGlobally(){
+
+        Trajectory<PopulationState> t = getPopulationTrajectory(
+                new int[]{0, 3, 3, 3, 3, 4, 1, 3, 3, 5, 4, 1, 1, 1}
+        );
+
+        QualitativeMonitor<PopulationState> atomicMonitor =
+                QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(0) >= 3 );
+
+
+        QualitativeMonitor<PopulationState> globallyMonitor =
+                QualitativeMonitor.globally( new Interval(0,1),atomicMonitor);
+
+        BooleanSignal globalSignal = globallyMonitor.monitor(t);
+        assertEquals(globalSignal.getIntervals().size(), 2);
+        assertEquals(globalSignal.getIntervals().get(0), new Interval(1.0, 5.0));
+        assertEquals(globalSignal.getIntervals().get(1), new Interval(7.0, 10.0));
+
+    }
+
+
+    @Test
+    public void testEventually(){
+
+        Trajectory<PopulationState> t = getPopulationTrajectory(
+                new int[]{0, 3, 3, 3, 3, 4, 1, 1, 2, 5, 4, 1, 1, 1}
+        );
+
+        QualitativeMonitor<PopulationState> atomicMonitor =
+                QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(0) >= 3 );
+
+
+        QualitativeMonitor<PopulationState> eventuallyMonitor =
+                QualitativeMonitor.eventually( new Interval(0,1),atomicMonitor);
+
+        BooleanSignal eventuallySignal = eventuallyMonitor.monitor(t);
+        assertEquals(eventuallySignal.getIntervals().get(0), new Interval(0.0, 6.0));
+        assertEquals(eventuallySignal.getIntervals().get(1), new Interval(8.0, 11.0));
+
+    }
+
+    @Test
+    public void testProbability(){
+
+        Supplier<Trajectory<PopulationState>> trajectorySupplier = () -> {
+            List<Trajectory<PopulationState>> trajectoryList = new ArrayList<>();
+            trajectoryList.add(getPopulationTrajectory(new int[]{3,3,3,3,3}));
+            trajectoryList.add(getPopulationTrajectory(new int[]{3,3,3,3,3}));
+            trajectoryList.add(getPopulationTrajectory(new int[]{1,1,1,1,1}));
+            Random random = new Random();
+            return trajectoryList.get(random.nextInt(trajectoryList.size()));
+        };
+
+        QualitativeMonitor<PopulationState> atomicMonitor =
+                QualitativeMonitor.atomicFormula( (PopulationState s) -> s.getOccupancy(0) == 3 );
+
+        double[] timeSteps = {1.0 , 2.0 , 3.0 , 4.0 , 5.0 , 6.0 , 7.0};
+        double[] probabilities = QualitativeMonitor.computeProbability(atomicMonitor, trajectorySupplier, 100,timeSteps);
+        assertEquals(0.66, probabilities[0], 0.2);
+    }
+
+
+
+
 
 
 

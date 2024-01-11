@@ -190,7 +190,7 @@ public class Trajectory<S> implements Externalizable, Iterable<Sample<S>> {
             }
             flag = newFlag;
         }
-        if (flag) {
+        if (flag && lastPositive < this.end) {
             result.add(lastPositive, this.end);
         }
         return result;
@@ -198,7 +198,10 @@ public class Trajectory<S> implements Externalizable, Iterable<Sample<S>> {
 
     public Signal apply(ToDoubleFunction<S> function) {
         Signal result = new Signal();
-        data.forEach(s -> result.add(s.getTime(), function.applyAsDouble(s.getValue())));
+        data.forEach(s -> {
+            if(s.getTime() <= this.end)
+                result.add(s.getTime(), function.applyAsDouble(s.getValue()));
+        });
         if(!Double.isNaN(this.end)) result.setEnd(this.end);
         return result;
     }

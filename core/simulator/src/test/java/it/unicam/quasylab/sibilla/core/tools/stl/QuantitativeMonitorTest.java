@@ -1,11 +1,11 @@
 package it.unicam.quasylab.sibilla.core.tools.stl;
 
-import it.unicam.quasylab.sibilla.core.models.pm.Population;
+
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
-import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
 import it.unicam.quasylab.sibilla.core.util.Interval;
 import it.unicam.quasylab.sibilla.core.util.Signal;
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -13,30 +13,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
 
+
+import static it.unicam.quasylab.sibilla.core.tools.stl.CommonForMonitorTesting.getPopulationTrajectory;
 import static org.junit.jupiter.api.Assertions.*;
 
 class QuantitativeMonitorTest {
 
-    private Trajectory<PopulationState> getPopulationTrajectory(double[] timeIntervals, int numPopulations, double[]... signals) {
-        Trajectory<PopulationState> trajectory = new Trajectory<>();
-        double time = 0.0;
-
-        for (int i = 0; i < timeIntervals.length; i++) {
-            double currentTimeInterval = timeIntervals[i];
-            Population[] populations = new Population[numPopulations];
-
-            for (int j = 0; j < numPopulations; j++) {
-                populations[j] = new Population(j, (int) signals[j][i]);
-            }
-
-            trajectory.add(time, new PopulationState(numPopulations, populations));
-            time += currentTimeInterval;
-        }
-
-        trajectory.setEnd(time);
-
-        return trajectory;
-    }
 
     /**
      *
@@ -61,9 +43,7 @@ class QuantitativeMonitorTest {
     @Test
     public void testAtomicFormula(){
         Trajectory<PopulationState> t = getPopulationTrajectory(
-                new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
-                1,
-                new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0}
+                new int[]{0, 8, 3, 2, 1, 1, 1}
         );
 
         Signal s = QuantitativeMonitor.atomicFormula((PopulationState sign)-> sign.getOccupancy(0) - 3.0).monitor(t);
@@ -104,9 +84,7 @@ class QuantitativeMonitorTest {
     @Test
     public void testNegationAtomicFormula(){
         Trajectory<PopulationState> t = getPopulationTrajectory(
-                new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
-                1,
-                new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0}
+                new int[]{0, 8, 3, 2, 1, 1, 1}
         );
 
         QuantitativeMonitor<PopulationState> atomicMonitor = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0));
@@ -119,10 +97,8 @@ class QuantitativeMonitorTest {
     @Test
     public void testConjunctionAndDisjunction(){
         Trajectory<PopulationState> t = getPopulationTrajectory(
-                new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
-                2,
-                new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0},
-                new double[]{2.0, 6.0, 1.0, 1.0, 1.0, 0.0, 0.0}
+                new int[]{0, 8, 3, 2, 1, 1, 1},
+                new int[]{2, 6, 1, 1, 1, 0, 0}
         );
 
         QuantitativeMonitor<PopulationState> leftAtomic = QuantitativeMonitor.atomicFormula((PopulationState s) -> s.getOccupancy(0));
@@ -170,9 +146,7 @@ class QuantitativeMonitorTest {
     @Test
     public void testEventuallyWithTwoDifferentInterval(){
         Trajectory<PopulationState> t = getPopulationTrajectory(
-                new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
-                1,
-                new double[]{0.0, 0.0, 0.0, 1.0, 1.0, 2.0, 3.0, 3.0}
+                new int[]{0, 0, 0, 1, 1, 2, 3, 3}
         );
 
         QuantitativeMonitor<PopulationState> aM = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0) - 2.0);
@@ -216,9 +190,7 @@ class QuantitativeMonitorTest {
     @Test
     public void testGlobally(){
         Trajectory<PopulationState> t = getPopulationTrajectory(
-                new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
-                1,
-                new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0}
+                new int[]{0, 8, 3, 2, 1, 1, 1}
         );
 
         QuantitativeMonitor<PopulationState> atomicMonitor =QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0)- 1.0);
@@ -231,6 +203,7 @@ class QuantitativeMonitorTest {
                         QuantitativeMonitor.globally(new Interval(1,4),atomicMonitor).monitor(t).valueAt(0)
         );
     }
+
 
 
 
@@ -254,8 +227,7 @@ class QuantitativeMonitorTest {
     public void testEventually(){
         Trajectory<PopulationState> t = getPopulationTrajectory(
                 new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 9.0, 14.0},
-                1,
-                new double[]{0.0, 8.0, 3.0, 2.0, 1.0, 1.0, 1.0}
+                new int[]{0, 8, 3, 2, 1, 1, 1}
         );
 
         QuantitativeMonitor<PopulationState> atomicMonitor = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0)- 6.0);
@@ -292,8 +264,7 @@ class QuantitativeMonitorTest {
     public void testUntil(){
         Trajectory<PopulationState> t = getPopulationTrajectory(
                 new double[]{1.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0},
-                1,
-                new double[]{0.0, 2.0, 3.0, 3.0, 3.0, 5.0, 1.0}
+                new int[]{0, 2, 3, 3, 3, 5, 1}
         );
 
         QuantitativeMonitor<PopulationState> aM1 = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0) - 2.0);
@@ -310,9 +281,7 @@ class QuantitativeMonitorTest {
     @Test
     public void testEventuallyTimeShift(){
         Trajectory<PopulationState> t = getPopulationTrajectory(
-                new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
-                1,
-                new double[]{1.0, 1.0, 1.0, 1.0, 3.0, 4.0, 3.0, 3.0}
+                new int[]{1, 1, 1, 1, 3, 4, 3, 3}
         );
 
         QuantitativeMonitor<PopulationState> aM = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0) - 2.0);
@@ -354,10 +323,9 @@ class QuantitativeMonitorTest {
      */
     @Test
     public void testEventuallyNotSatisfied(){
+
         Trajectory<PopulationState> t = getPopulationTrajectory(
-                new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
-                1,
-                new double[]{0.0, 4.0, 3.0, 2.0, 1.0, 1.0, 1.0}
+                new int[]{0, 4, 3, 2, 1, 1, 1}
         );
 
         QuantitativeMonitor<PopulationState> atomicMonitor = QuantitativeMonitor.atomicFormula(s -> s.getOccupancy(0)- 6.0);
@@ -372,10 +340,9 @@ class QuantitativeMonitorTest {
     public void testEventuallySIR(){
         Trajectory<PopulationState> t = getPopulationTrajectory(
                 new double[]{11, 3, 28, 28, 40, 20, 16, 6, 6, 14, 77, 62, 49},
-                3,
-                new double[]{95,95,94,94,94,93,92,91,91,91,91,91,91,91},
-                new double[]{ 5, 4, 5, 4, 3, 4, 5, 6, 5, 4, 3, 2, 1, 0},
-                new double[]{ 0, 1, 1, 2, 3, 3, 3, 3, 4, 5, 6, 7, 8, 9}
+                new int[]{95,95,94,94,94,93,92,91,91,91,91,91,91,91},
+                new int[]{ 5, 4, 5, 4, 3, 4, 5, 6, 5, 4, 3, 2, 1, 0},
+                new int[]{ 0, 1, 1, 2, 3, 3, 3, 3, 4, 5, 6, 7, 8, 9}
         );
 
 
@@ -391,10 +358,9 @@ class QuantitativeMonitorTest {
     public void testNestedOperator(){
         Trajectory<PopulationState> t = getPopulationTrajectory(
                 new double[]{11, 3, 28, 28, 40, 20, 16, 6, 6, 14, 77, 62, 49},
-                3,
-                new double[]{95,95,94,94,94,93,92,91,91,91,91,91,91,91},
-                new double[]{ 5, 4, 5, 4, 3, 4, 5, 6, 5, 4, 3, 2, 1, 0},
-                new double[]{ 0, 1, 1, 2, 3, 3, 3, 3, 4, 5, 6, 7, 8, 9}
+                new int[]{95,95,94,94,94,93,92,91,91,91,91,91,91,91},
+                new int[]{ 5, 4, 5, 4, 3, 4, 5, 6, 5, 4, 3, 2, 1, 0},
+                new int[]{ 0, 1, 1, 2, 3, 3, 3, 3, 4, 5, 6, 7, 8, 9}
         );
 
 
@@ -412,88 +378,34 @@ class QuantitativeMonitorTest {
 
 
     @Test
-    public void testProblematicCase(){
-
-        Trajectory<PopulationState> t = getPopulationTrajectory(
-                //8+3+11+6+9+11+16+6+6+10+9+15+10
-                new double[]{8, 3, 11, 6, 9, 11, 16, 6, 6, 10, 9, 15, 10},
-                3,
-                new double[]{95,95,94,94,94,93,92,91,91,91,91,91,91,91},
-                new double[]{ 5, 4, 5, 4, 3, 4, 5, 6, 5, 4, 3, 2, 1, 0},
-                new double[]{ 0, 1, 1, 2, 3, 3, 3, 3, 4, 5, 6, 7, 8, 9}
-        );
-
-        System.out.println(t);
-
-
-        QuantitativeMonitor<PopulationState> infectedDoNotExist = QuantitativeMonitor.atomicFormula( pm -> 0 - pm.getOccupancy(1));
-        QuantitativeMonitor<PopulationState> infectedExist = QuantitativeMonitor.atomicFormula( pm -> pm.getOccupancy(1));
-
-
-        QuantitativeMonitor<PopulationState> eventuallyInfectedDoNotExist = QuantitativeMonitor.eventually(
-                new Interval(100,120),
-                infectedDoNotExist
-        );
-        System.out.println("EVENTUALLY infected not exist 100  120");
-        System.out.println(eventuallyInfectedDoNotExist.monitor(t));
-        QuantitativeMonitor<PopulationState> globallyInfectedExist = QuantitativeMonitor.globally(
-                new Interval(0,100),
-                infectedExist
-        );
-        System.out.println("globally infected exist 0 100");
-        System.out.println(globallyInfectedExist.monitor(t));
-
-        QuantitativeMonitor<PopulationState> conjunction = QuantitativeMonitor.conjunction(eventuallyInfectedDoNotExist,globallyInfectedExist);
-        Signal signal = conjunction.monitor(t);
-        System.out.println(" E");
-        System.out.println(signal);
-        System.out.println(signal.valueAt(0));
-
-    }
-
-
-
-
-
-    @Test
     public void testComputeProbability(){
 
-        Supplier<Trajectory<PopulationState>> trajectorySupplier = () -> {
-
-            List<Trajectory<PopulationState>> trajectoryList = new ArrayList<>();
-            trajectoryList.add(
-                    getPopulationTrajectory(
-                            new double[]{1.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0},
-                            1,
-                            new double[]{2.0, 2.0, 3.0, 3.0, 3.0, 5.0, 1.0}
-                    )
-            );
-            trajectoryList.add(
-                    getPopulationTrajectory(
-                            new double[]{1.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0},
-                            1,
-                            new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
-                    )
-            );
-            trajectoryList.add(
-                    getPopulationTrajectory(
-                            new double[]{1.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0},
-                            1,
-                            new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0}
-                    )
-            );
-            Random random = new Random();
-            return trajectoryList.get(random.nextInt(trajectoryList.size()));
-        };
+        List<Trajectory<PopulationState>> supplierTrajectoryList = new ArrayList<>();
+        supplierTrajectoryList.add(
+                getPopulationTrajectory(
+                        new double[]{1.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0},
+                        new int[]{2, 2, 3, 3, 3, 5, 1}
+                )
+        );
+        supplierTrajectoryList.add(
+                getPopulationTrajectory(
+                        new double[]{1.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0},
+                        new int[]{0, 0, 0, 0, 0, 0, 0}
+                )
+        );
+        supplierTrajectoryList.add(
+                getPopulationTrajectory(
+                        new double[]{1.0, 1.0, 2.0, 1.0, 1.0, 3.0, 1.0},
+                        new int[]{0, 1, 0, 0, 0, 0, 0}
+                )
+        );
+        Random random = new Random();
+        Supplier<Trajectory<PopulationState>> trajectorySupplier = () -> supplierTrajectoryList.get(random.nextInt(supplierTrajectoryList.size()));
 
         QuantitativeMonitor<PopulationState> am = QuantitativeMonitor.atomicFormula(pm -> pm.getOccupancy(0));
 
         double[] timeSteps = {1.0 , 2.0 , 3.0 , 4.0 , 5.0 , 6.0 , 7.0};
         double[] probabilities = QuantitativeMonitor.computeProbability(am, trajectorySupplier, 100, timeSteps);
-
-        for (int i = 0; i < probabilities.length; i++) {
-            System.out.println(probabilities[i]);
-        }
 
         assertEquals(probabilities[0],0.66,0.15);
         assertEquals(probabilities[1],0.33,0.15);
@@ -507,6 +419,65 @@ class QuantitativeMonitorTest {
         assertEquals(probabilitiesFromList[1],0.33,0.15);
 
     }
+
+
+    @Test
+    public void testMeanRobustness(){
+        QuantitativeMonitor<PopulationState> am = QuantitativeMonitor.atomicFormula(pm -> pm.getOccupancy(0));
+        double[] timeSteps = { 0.5, 1.5, 2.5};
+        double[] meanValuesFromSupplier = QuantitativeMonitor.computeMeanRobustness(am,supplierOfTrajectoryForTest(3),100,timeSteps);
+        double[] meanValuesFromList = QuantitativeMonitor.computeMeanRobustness(am,listOfTrajectoryForTest(),timeSteps);
+        assertEquals(meanValuesFromList[0],1.0);
+        assertEquals(meanValuesFromList[1],353.3, 1.0);
+        assertEquals(meanValuesFromList[2], 2.5);
+        assertEquals(meanValuesFromList[0],meanValuesFromSupplier[0]);
+        assertEquals(meanValuesFromList[1],meanValuesFromSupplier[1],25);
+        assertEquals(meanValuesFromList[2],meanValuesFromSupplier[2],0.25);
+    }
+
+    @Test
+    public void testNormalDistributionRobustness(){
+        QuantitativeMonitor<PopulationState> am = QuantitativeMonitor.atomicFormula(pm -> pm.getOccupancy(0));
+        double[] timeSteps = { 0.5, 1.5, 2.5};
+        NormalDistribution[] normDistFromSupplier = QuantitativeMonitor.computeNormalDistributionRobustness(am,supplierOfTrajectoryForTest(2),100,timeSteps);
+        NormalDistribution[] normDistFromList = QuantitativeMonitor.computeNormalDistributionRobustness(am,listOfTrajectoryForTest(),timeSteps);
+
+        assertEquals(1,normDistFromList[0].getMean());
+        assertEquals(1,normDistFromSupplier[0].getMean());
+        assertEquals(0,normDistFromList[0].getStandardDeviation(),1e-3);
+        assertEquals(0,normDistFromSupplier[0].getStandardDeviation(),1e-3);
+
+        assertEquals(353.333,normDistFromList[1].getMean(),1e-2);
+        assertEquals(357.0,normDistFromSupplier[1].getMean(),1e-3);
+        assertEquals(807.605,normDistFromList[1].getStandardDeviation(),1e-3);
+        assertEquals(748.048,normDistFromSupplier[1].getStandardDeviation(),1e-3);
+
+        assertEquals(2.5,normDistFromList[2].getMean(),1e-3);
+        assertEquals(2.44,normDistFromSupplier[2].getMean(),1e-3);
+        assertEquals(0.547,normDistFromList[2].getStandardDeviation(),1e-3);
+        assertEquals(0.498,normDistFromSupplier[2].getStandardDeviation(),1e-3);
+
+    }
+
+
+
+    private List<Trajectory<PopulationState>> listOfTrajectoryForTest(){
+        List<Trajectory<PopulationState>> trajectoryList = new ArrayList<>();
+        trajectoryList.add(getPopulationTrajectory(new int[]{ 1,  100, 2}));
+        trajectoryList.add(getPopulationTrajectory(new int[]{ 1,    0, 3}));
+        trajectoryList.add(getPopulationTrajectory(new int[]{ 1,   10, 2}));
+        trajectoryList.add(getPopulationTrajectory(new int[]{ 1, 2000, 3}));
+        trajectoryList.add(getPopulationTrajectory(new int[]{ 1,    0, 2}));
+        trajectoryList.add(getPopulationTrajectory(new int[]{ 1,   10, 3}));
+        return trajectoryList;
+    }
+
+
+    private Supplier<Trajectory<PopulationState>>  supplierOfTrajectoryForTest(long seed){
+        Random random = new Random(seed);
+        return () -> listOfTrajectoryForTest().get(random.nextInt(listOfTrajectoryForTest().size()));
+    }
+
 
 
 

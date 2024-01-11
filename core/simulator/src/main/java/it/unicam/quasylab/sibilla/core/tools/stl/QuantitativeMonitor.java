@@ -26,6 +26,8 @@ package it.unicam.quasylab.sibilla.core.tools.stl;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.util.Interval;
 import it.unicam.quasylab.sibilla.core.util.Signal;
+import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.Arrays;
 import java.util.List;
@@ -70,6 +72,9 @@ public interface QuantitativeMonitor<S> {
         return Arrays.stream(counter).mapToDouble(j -> j / ((double) runs)).toArray();
     }
 
+
+
+
     /**
      * Calculate the probability of a given qualitative monitor being satisfied over time using
      * pre-generated trajectories.
@@ -87,6 +92,123 @@ public interface QuantitativeMonitor<S> {
         }
         return Arrays.stream(counter).mapToDouble(j -> j / ((double) trajectories.size())).toArray();
     }
+
+
+    /**
+     * Computes the mean robustness of a monitor over multiple runs.
+     *
+     * @param <S>                the type of states in the trajectory
+     * @param monitor            the monitor to compute the mean robustness for
+     * @param trajectoryProvider a supplier for generating trajectories
+     * @param runs               the number of simulation runs
+     * @param timeStep           an array of time steps at which the mean robustness is calculated
+     * @return an array representing the mean robustness at different time steps
+     */
+    static <S> double[] computeMeanRobustness(QuantitativeMonitor<S> monitor, Supplier<Trajectory<S>> trajectoryProvider, int runs, double[] timeStep){
+        double[] meanEvaluations = new double[timeStep.length];
+        for(int run = 0; run < runs; run++) {
+            double[] currentRobustnessEvaluation = monitor.monitor(trajectoryProvider.get()).valuesAt(timeStep);
+            for(int i = 0; i < timeStep.length; i++) {
+                meanEvaluations[i] += currentRobustnessEvaluation[i];
+            }
+        }
+        for(int i = 0; i < timeStep.length; i++) {
+            meanEvaluations[i] /= runs;
+        }
+        return meanEvaluations;
+    }
+
+
+    /**
+     * Compute the mean robustness of a monitor over multiple runs.
+     *
+     * @param monitor The quantitative monitor to compute the mean robustness for.
+     * @param trajectories A list of pre-generated trajectories for evaluation.
+     * @param timeStep An array of time steps at which the mean robustness is calculated.
+     * @return An array representing the mean robustness at different time steps.
+     */
+    static <S> double[] computeMeanRobustness(QuantitativeMonitor<S> monitor, List<Trajectory<S>> trajectories, double[] timeStep){
+        double[] meanEvaluations = new double[timeStep.length];
+        int runs = trajectories.size();
+        for (Trajectory<S> trajectory : trajectories) {
+            double[] currentRobustnessEvaluation = monitor.monitor(trajectory).valuesAt(timeStep);
+            for (int i = 0; i < timeStep.length; i++) {
+                meanEvaluations[i] += currentRobustnessEvaluation[i];
+            }
+        }
+        for(int i = 0; i < timeStep.length; i++) {
+            meanEvaluations[i] /= runs;
+        }
+        return meanEvaluations;
+    }
+
+
+
+    /**
+     * Computes the robustness of a quantitative monitor using normal distribution.
+     * Note : the standard deviation is evaluated using Sample Standard Deviation
+     *
+     * @param monitor           the quantitative monitor to evaluate
+     * @param trajectoryProvider the supplier of trajectories
+     * @param runs              the number of runs to perform
+     * @param timeStep          the time steps at which to evaluate the monitor
+     * @param <S>               the type of the monitor state
+     * @return an array of NormalDistribution objects representing the robustness of the monitor at each time step
+     */
+    static <S> NormalDistribution[] computeNormalDistributionRobustness(
+            QuantitativeMonitor<S> monitor,
+            Supplier<Trajectory<S>> trajectoryProvider,
+            int runs,
+            double[] timeStep) {
+
+        DescriptiveStatistics[] stats = Arrays.stream(timeStep).mapToObj(i -> new DescriptiveStatistics())
+                .toArray(DescriptiveStatistics[]::new);
+
+        for (int run = 0; run < runs; run++) {
+            double[] currentRobustnessEvaluation = monitor.monitor(trajectoryProvider.get()).valuesAt(timeStep);
+            for (int i = 0; i < timeStep.length; i++) {
+                stats[i].addValue(currentRobustnessEvaluation[i]);
+            }
+        }
+
+        return Arrays.stream(stats)
+                .map(stat -> new NormalDistribution(stat.getMean(), stat.getStandardDeviation() == 0 ? Double.MIN_VALUE : stat.getStandardDeviation()))
+                .toArray(NormalDistribution[]::new);
+    }
+
+
+
+    /**
+     * Calculates the normal distribution of robustness values for a given monitor, set of trajectories, and time steps.
+     * Note : the standard deviation is evaluated using Sample Standard Deviation
+     *
+     * @param monitor       The quantitative monitor for evaluating trajectories.
+     * @param trajectories  The list of trajectories to evaluate.
+     * @param timeStep      The array of time steps at which to evaluate the robustness.
+     * @param <S>           The type of states in the trajectories.
+     * @return An array of NormalDistribution objects representing the computed normal distributions.
+     */
+    static <S> NormalDistribution[] computeNormalDistributionRobustness(
+            QuantitativeMonitor<S> monitor,
+            List<Trajectory<S>> trajectories,
+            double[] timeStep) {
+
+        DescriptiveStatistics[] stats = Arrays.stream(timeStep).mapToObj(i -> new DescriptiveStatistics())
+                .toArray(DescriptiveStatistics[]::new);
+
+        for (Trajectory<S> trajectory : trajectories) {
+            double[] currentRobustnessEvaluation = monitor.monitor(trajectory).valuesAt(timeStep);
+            for (int i = 0; i < timeStep.length; i++) {
+                stats[i].addValue(currentRobustnessEvaluation[i]);
+            }
+        }
+
+        return Arrays.stream(stats)
+                .map(stat -> new NormalDistribution(stat.getMean(), stat.getStandardDeviation() == 0 ? Double.MIN_VALUE : stat.getStandardDeviation()))
+                .toArray(NormalDistribution[]::new);
+    }
+
+
 
     /**
      * Return the time horizon of interest, which indicates the maximum time duration over which

@@ -44,7 +44,6 @@ class SequenceOfPositiveIntervalsTest {
 
     private final DoublePredicate SIN_GENERATOR = d -> Math.sin(d)>0;
 
-    private final DoublePredicate COS_GENERATOR = d -> Math.sin(d)>0;
 
 
     public static BooleanSignal getSequence(double dt, int size, DoublePredicate predicate) {
@@ -74,6 +73,8 @@ class SequenceOfPositiveIntervalsTest {
         assertEquals(1,shiftedSequence.size());
         assertEquals(new Interval(0, 45), shiftedSequence.get(0));
     }
+
+
 
     @Test
     void getValuesAt() {
