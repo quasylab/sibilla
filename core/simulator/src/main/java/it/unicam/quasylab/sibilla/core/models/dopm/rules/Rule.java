@@ -6,14 +6,23 @@ import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.OutputTrans
 import java.util.List;
 
 public class Rule {
+    private String name;
     private OutputTransition output;
     private List<InputTransition> inputs;
 
-    public Rule(OutputTransition output, List<InputTransition> inputs) {
+    public Rule(String name, OutputTransition output, List<InputTransition> inputs) {
+        this.name = name;
         this.output = output;
         this.inputs = inputs;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
     public OutputTransition getOutput() {
         return output;
     }

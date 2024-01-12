@@ -64,4 +64,13 @@ public class DataOrientedPopulationState implements ImmutableState {
         return new DataOrientedPopulationState(cagents);
     }
 
+    @Override
+    public String toString() {
+        String r = "{";
+        for(Agent a : agents) {
+            r += a.toString() + ",";
+        }
+        r+="}";
+        return r;
+    }
 }

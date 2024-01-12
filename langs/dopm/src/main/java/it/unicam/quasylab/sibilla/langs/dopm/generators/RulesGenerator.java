@@ -28,11 +28,11 @@ public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<Map<S
 
     @Override
     public Map<String, Rule> visitRule_declaration(DataOrientedPopulationModelParser.Rule_declarationContext ctx) {
-        rules.put(ctx.name.getText(), getRuleBuilder(ctx.body));
+        rules.put(ctx.name.getText(), getRuleBuilder(ctx.name.getText(), ctx.body));
         return rules;
     }
 
-    private Rule getRuleBuilder(DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
+    private Rule getRuleBuilder(String ruleName, DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
         OutputTransition outputTransition = new OutputTransition(
                 ctx.output.pre.accept(new AgentPredicateGenerator()),
                 state -> ctx.output.rate.accept(new PopulationExpressionEvaluator(state)).doubleOf(),
@@ -53,7 +53,7 @@ public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<Map<S
                     ictx.post.accept(new AgentReceiverExpressionGenerator())
             ));
         }
-        return new Rule(outputTransition, inputs);
+        return new Rule(ruleName, outputTransition, inputs);
     }
 
     @Override

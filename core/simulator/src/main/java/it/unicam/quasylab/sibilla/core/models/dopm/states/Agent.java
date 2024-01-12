@@ -34,4 +34,15 @@ public class Agent {
     protected Object clone() throws CloneNotSupportedException {
         return new Agent(new String(species), new HashMap<>(values));
     }
+
+    @Override
+    public String toString() {
+        String r = species + "[";
+        for(Map.Entry<String, SibillaValue> e : values.entrySet()) {
+            r+= e.getKey() + "=";
+            r+=e.getValue()+",";
+        }
+        r += "]";
+        return r;
+    }
 }

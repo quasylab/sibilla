@@ -21,30 +21,25 @@ import java.util.function.Predicate;
 
 public class DataOrientedPopulationModel implements Model<DataOrientedPopulationState>,ContinuousTimeMarkovProcess<DataOrientedPopulationState> {
 
-    private Map<String, Measure<DataOrientedPopulationState>> measures;
-    private Map<String, Predicate<DataOrientedPopulationState>> predicates;
-
-    private Map<String, Rule> rules;
+    private final Map<String, Measure<DataOrientedPopulationState>> measures;
+    private final Map<String, Predicate<DataOrientedPopulationState>> predicates;
+    private final Map<String, Rule> rules;
 
     public DataOrientedPopulationModel(Map<String, Measure<DataOrientedPopulationState>> measures, Map<String, Predicate<DataOrientedPopulationState>> predicates, Map<String, Rule> rules) {
         this.measures = measures;
-        System.out.println(Arrays.toString(this.measures.keySet().toArray()));
         this.predicates = predicates;
         this.rules = rules;
     }
-
 
     @Override
     public WeightedStructure<StepFunction<DataOrientedPopulationState>> getTransitions(RandomGenerator r, double time, DataOrientedPopulationState dataOrientedPopulationState) {
         WeightedLinkedList<StepFunction<DataOrientedPopulationState>> result = new WeightedLinkedList<>();
         for(Rule rule : this.rules.values()) {
             WeightedStructure<DataOrientedPopulationState> ruleTransitions = getTransitions(rule, dataOrientedPopulationState);
-
             for(WeightedElement<DataOrientedPopulationState> ruleTransition : ruleTransitions.getAll()) {
                 result.add(ruleTransition.getTotalWeight(), (rnd, t, dt) -> ruleTransition.getElement());
             }
         }
-
         return result;
     }
 
@@ -59,14 +54,12 @@ public class DataOrientedPopulationModel implements Model<DataOrientedPopulation
                     if(receiver != sender) {
                         WeightedStructure<DataOrientedPopulationState> newSenderResults = new WeightedLinkedList<>();
                         WeightedStructure<Agent> inputResults = getTransitions(dataOrientedPopulationState, r.getInputs(), sender, receiver);
-
                         for(WeightedElement<Agent> inputResult : inputResults.getAll()) {
                             for (WeightedElement<DataOrientedPopulationState> oldSenderResult : senderResults.getAll()) {
                                 newSenderResults.add(
                                         oldSenderResult.getTotalWeight() * inputResult.getTotalWeight(),
                                         oldSenderResult.getElement().addAgent(inputResult.getElement())
                                 );
-
                             }
                         }
                         senderResults = newSenderResults;
@@ -78,6 +71,10 @@ public class DataOrientedPopulationModel implements Model<DataOrientedPopulation
                 }
             }
         }
+        System.out.println("======" + r.getName() + "=====");
+        for(WeightedElement<DataOrientedPopulationState> c : result.getAll()) {
+            System.out.println(c.getTotalWeight() + "-" + c.getElement().toString());
+        }
         return result;
     }
 
@@ -86,16 +83,22 @@ public class DataOrientedPopulationModel implements Model<DataOrientedPopulation
         WeightedLinkedList<Agent> result = new WeightedLinkedList<>();
         for(InputTransition input : inputs) {
             if(input.getPredicate().test(receiver) && input.getSender_predicate().test(sender)) {
-                WeightedElement<Agent> received = new WeightedElement<>(
-                        input.getProbability().apply(dataOrientedPopulationState),
-                        input.getPost().apply(sender,receiver)
-                );
-                WeightedElement<Agent> notReceived = new WeightedElement<>(
-                        1-input.getProbability().apply(dataOrientedPopulationState),
-                        new Agent(new String(receiver.getSpecies()), new HashMap<>(receiver.getValues()))
-                );
-                result.add(received);
-                result.add(notReceived);
+                double receivingProbability = input.getProbability().apply(dataOrientedPopulationState);
+                if(receivingProbability > 0) {
+                    WeightedElement<Agent> received = new WeightedElement<>(
+                            input.getProbability().apply(dataOrientedPopulationState),
+                            input.getPost().apply(sender, receiver)
+                    );
+                    result.add(received);
+                }
+                double notReceivingProbability = 1-receivingProbability;
+                if(notReceivingProbability > 0) {
+                    WeightedElement<Agent> notReceived = new WeightedElement<>(
+                            notReceivingProbability,
+                            new Agent(new String(receiver.getSpecies()), new HashMap<>(receiver.getValues()))
+                    );
+                    result.add(notReceived);
+                }
                 return result;
             }
         }
