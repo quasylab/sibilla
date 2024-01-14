@@ -7,6 +7,7 @@ import it.unicam.quasylab.sibilla.core.models.dopm.rules.Rule;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.InputTransition;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.Agent;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulationState;
+import it.unicam.quasylab.sibilla.core.models.dopm.states.RuleApplication;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedElement;
@@ -35,80 +36,28 @@ public class DataOrientedPopulationModel implements Model<DataOrientedPopulation
     public WeightedStructure<StepFunction<DataOrientedPopulationState>> getTransitions(RandomGenerator r, double time, DataOrientedPopulationState dataOrientedPopulationState) {
         WeightedLinkedList<StepFunction<DataOrientedPopulationState>> result = new WeightedLinkedList<>();
         for(Rule rule : this.rules.values()) {
-            WeightedStructure<DataOrientedPopulationState> ruleTransitions = getTransitions(rule, dataOrientedPopulationState);
-            for(WeightedElement<DataOrientedPopulationState> ruleTransition : ruleTransitions.getAll()) {
-                result.add(ruleTransition.getTotalWeight(), (rnd, t, dt) -> ruleTransition.getElement());
+            WeightedStructure<RuleApplication> ruleApplications = getTransitions(rule, dataOrientedPopulationState);
+            for(WeightedElement<RuleApplication> ruleApplicationWeightedElement : ruleApplications.getAll()) {
+                result.add(ruleApplicationWeightedElement.getTotalWeight(), (rnd, t, dt) ->
+                    dataOrientedPopulationState.applyRule(ruleApplicationWeightedElement.getElement(), rnd)
+                );
             }
         }
         return result;
     }
 
-    private WeightedStructure<DataOrientedPopulationState> getTransitions(Rule r, DataOrientedPopulationState dataOrientedPopulationState) {
-        WeightedStructure<DataOrientedPopulationState> result = new WeightedLinkedList<>();
-        for(Agent sender : dataOrientedPopulationState.getAgents()) {
-            if(r.getOutput().getPredicate().test(sender)) {
-                WeightedStructure<DataOrientedPopulationState> senderResults = new WeightedLinkedList<>();
-                senderResults.add(r.getOutput().getRate().apply(dataOrientedPopulationState), new DataOrientedPopulationState(r.getOutput().getPost().apply(sender)));
-
-                for(Agent receiver : dataOrientedPopulationState.getAgents()) {
-                    if(receiver != sender) {
-                        WeightedStructure<DataOrientedPopulationState> newSenderResults = new WeightedLinkedList<>();
-                        WeightedStructure<Agent> inputResults = getTransitions(dataOrientedPopulationState, r.getInputs(), sender, receiver);
-                        for(WeightedElement<Agent> inputResult : inputResults.getAll()) {
-                            for (WeightedElement<DataOrientedPopulationState> oldSenderResult : senderResults.getAll()) {
-                                newSenderResults.add(
-                                        oldSenderResult.getTotalWeight() * inputResult.getTotalWeight(),
-                                        oldSenderResult.getElement().addAgent(inputResult.getElement())
-                                );
-                            }
-                        }
-                        senderResults = newSenderResults;
-                    }
-                }
-                //result.add(senderResults);
-                for(WeightedElement<DataOrientedPopulationState> e : senderResults.getAll()) {
-                    result.add(e.getTotalWeight(), e.getElement());
-                }
+    private WeightedStructure<RuleApplication> getTransitions(Rule r, DataOrientedPopulationState dataOrientedPopulationState) {
+        WeightedStructure<RuleApplication> result = new WeightedLinkedList<>();
+        for(Map.Entry<Agent, Long> e : dataOrientedPopulationState.getAgents().entrySet()) {
+            if(r.getOutput().getPredicate().test(e.getKey())) {
+                result.add(
+                        r.getOutput().getRate().apply(dataOrientedPopulationState) * e.getValue(),
+                        new RuleApplication(e.getKey(), r)
+                );
             }
-        }
-        System.out.println("======" + r.getName() + "=====");
-        for(WeightedElement<DataOrientedPopulationState> c : result.getAll()) {
-            System.out.println(c.getTotalWeight() + "-" + c.getElement().toString());
         }
         return result;
     }
-
-
-    private WeightedStructure<Agent> getTransitions(DataOrientedPopulationState dataOrientedPopulationState, List<InputTransition> inputs, Agent sender, Agent receiver) {
-        WeightedLinkedList<Agent> result = new WeightedLinkedList<>();
-        for(InputTransition input : inputs) {
-            if(input.getPredicate().test(receiver) && input.getSender_predicate().test(sender)) {
-                double receivingProbability = input.getProbability().apply(dataOrientedPopulationState);
-                if(receivingProbability > 0) {
-                    WeightedElement<Agent> received = new WeightedElement<>(
-                            input.getProbability().apply(dataOrientedPopulationState),
-                            input.getPost().apply(sender, receiver)
-                    );
-                    result.add(received);
-                }
-                double notReceivingProbability = 1-receivingProbability;
-                if(notReceivingProbability > 0) {
-                    WeightedElement<Agent> notReceived = new WeightedElement<>(
-                            notReceivingProbability,
-                            new Agent(new String(receiver.getSpecies()), new HashMap<>(receiver.getValues()))
-                    );
-                    result.add(notReceived);
-                }
-                return result;
-            }
-        }
-        result.add(new WeightedElement<>(
-                1,
-                new Agent(new String(receiver.getSpecies()), new HashMap<>(receiver.getValues()))
-        ));
-        return result;
-    }
-
 
     @Override
     public int stateByteArraySize() {

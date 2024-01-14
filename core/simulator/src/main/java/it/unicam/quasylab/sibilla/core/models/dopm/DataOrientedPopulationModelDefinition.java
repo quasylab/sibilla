@@ -100,7 +100,7 @@ public class DataOrientedPopulationModelDefinition implements ModelDefinition<Da
         if(this.states != null && states.containsKey(name)) {
             return states.get(name);
         } else {
-            return (r) -> new DataOrientedPopulationState(new ArrayList<>());
+            return (r) -> new DataOrientedPopulationState();
         }
     }
 
@@ -109,7 +109,7 @@ public class DataOrientedPopulationModelDefinition implements ModelDefinition<Da
         if(this.states != null) {
             return states.entrySet().iterator().next().getValue();
         } else {
-            return (r) -> new DataOrientedPopulationState(new ArrayList<>());
+            return (r) -> new DataOrientedPopulationState();
         }
     }
 

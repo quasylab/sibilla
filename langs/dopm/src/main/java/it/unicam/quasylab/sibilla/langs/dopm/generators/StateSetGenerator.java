@@ -23,12 +23,14 @@
 
 package it.unicam.quasylab.sibilla.langs.dopm.generators;
 
+import it.unicam.quasylab.sibilla.core.models.dopm.DataOrientedPopulationModel;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.Agent;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulationState;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
 import it.unicam.quasylab.sibilla.langs.dopm.evaluators.ExpressionEvaluator;
+import org.apache.commons.math3.analysis.function.Log;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.*;
@@ -42,7 +44,6 @@ public class StateSetGenerator extends DataOrientedPopulationModelBaseVisitor<Ma
         this.stateSet = new HashMap<>();
     }
 
-
     @Override
     public Map<String, Function<RandomGenerator, DataOrientedPopulationState>> visitModel(DataOrientedPopulationModelParser.ModelContext ctx) {
         ctx.element().forEach(e -> e.accept(this));
@@ -51,24 +52,25 @@ public class StateSetGenerator extends DataOrientedPopulationModelBaseVisitor<Ma
 
     @Override
     public Map<String, Function<RandomGenerator, DataOrientedPopulationState>> visitSystem_declaration(DataOrientedPopulationModelParser.System_declarationContext ctx) {
-        this.stateSet.put(ctx.name.getText(), getStateBuilder(ctx.agents.agent_expression()));
+        this.stateSet.put(ctx.name.getText(), getStateBuilder(ctx.agents.agent_instantation()));
         return stateSet;
     }
 
-    private Function<RandomGenerator, DataOrientedPopulationState> getStateBuilder(List<DataOrientedPopulationModelParser.Agent_expressionContext> agentsctx) {
-        List<Agent> agents = new ArrayList<>();
-        for(DataOrientedPopulationModelParser.Agent_expressionContext actx : agentsctx) {
-            String species = actx.name.getText();
+    private Function<RandomGenerator, DataOrientedPopulationState> getStateBuilder(List<DataOrientedPopulationModelParser.Agent_instantationContext> agentsctx) {
+        Map<Agent, Long> occupancies = new HashMap<>();
+        for(DataOrientedPopulationModelParser.Agent_instantationContext actx : agentsctx) {
+            String species = actx.agent_expression().name.getText();
             Map<String, SibillaValue> data = new HashMap<>();
-            for(DataOrientedPopulationModelParser.Var_assContext vctx : actx.vars.var_ass()) {
+            for(DataOrientedPopulationModelParser.Var_assContext vctx : actx.agent_expression().vars.var_ass()) {
                 String name = vctx.name.getText();
                 SibillaValue value = vctx.accept(new ExpressionEvaluator(c -> Optional.empty()));
                 data.put(name, value);
             }
-            agents.add(new Agent(species, data));
+            Long agentPopulationSize = actx.INTEGER() == null ? 1 : Long.parseLong(actx.INTEGER().getText());
+            Agent newAgent = new Agent(species, data);
+            occupancies.put(newAgent, agentPopulationSize+occupancies.getOrDefault(newAgent, 0L));
         }
-        DataOrientedPopulationState state = new DataOrientedPopulationState(agents);
-        return r -> state;
+        return r -> new DataOrientedPopulationState(occupancies);
     }
 
     @Override

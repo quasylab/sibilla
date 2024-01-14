@@ -1,5 +1,6 @@
 package it.unicam.quasylab.sibilla.core.models.dopm.states;
 
+import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.HashMap;
@@ -8,7 +9,6 @@ import java.util.Map;
 public class Agent {
     private String species;
     private Map<String, SibillaValue> values;
-
     public Agent(String species, Map<String, SibillaValue> values) {
         this.species = species;
         this.values = values;
@@ -31,8 +31,32 @@ public class Agent {
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
-        return new Agent(new String(species), new HashMap<>(values));
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Agent agent = (Agent) o;
+
+        if (!species.equals(agent.species)) return false;
+        for(String k : values.keySet()) {
+            if(!agent.getValues().containsKey(k) || agent.getValues().get(k).doubleOf() != values.get(k).doubleOf()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = species.hashCode();
+        for(String k : values.keySet()) {
+            result = 31 * result + k.hashCode();
+            temp = Double.doubleToLongBits(values.get(k).doubleOf());
+            result = 31 * result + (int) (temp ^ (temp >>> 32));
+        }
+        return result;
     }
 
     @Override

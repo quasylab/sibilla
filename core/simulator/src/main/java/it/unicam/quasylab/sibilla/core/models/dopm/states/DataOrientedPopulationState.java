@@ -23,54 +23,74 @@
 package it.unicam.quasylab.sibilla.core.models.dopm.states;
 
 import it.unicam.quasylab.sibilla.core.models.ImmutableState;
+import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.models.dopm.DataOrientedPopulationModel;
+import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.InputTransition;
+import it.unicam.quasylab.sibilla.core.past.ds.Tuple;
+import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 
 public class DataOrientedPopulationState implements ImmutableState {
+    private final Map<Agent, Long> agents;
+    private final Long populationSize;
 
-    private final List<Agent> agents;
-
-
-    public DataOrientedPopulationState(List<Agent> agents) {
-        this.agents = new ArrayList<>(agents);
+    public DataOrientedPopulationState(Map<Agent, Long> agents) {
+        this.agents = agents;
+        this.populationSize = agents.values().stream().reduce(0L, Long::sum);
     }
 
-    public DataOrientedPopulationState(Agent agent) {
-        this.agents = new ArrayList<>();
-        this.agents.add(agent);
+    public DataOrientedPopulationState() {
+        this.agents = new HashMap<>();
+        this.populationSize = 0L;
     }
 
+    public DataOrientedPopulationState applyRule(RuleApplication ruleApplication, RandomGenerator randomGenerator) {
+        Map<Agent, Long> newOccupancies = new HashMap<>(this.agents);
 
-    public List<Agent> getAgents() {
+        Agent senderNew = ruleApplication.getRule().getOutput().getPost().apply(ruleApplication.getSender());
+        newOccupancies.put(ruleApplication.getSender(), newOccupancies.get(ruleApplication.getSender()) - 1);
+        newOccupancies.put(senderNew, newOccupancies.getOrDefault(senderNew, 0L) + 1);
+
+        Set<Agent> usedAgents = new HashSet<>();
+
+        for(InputTransition input : ruleApplication.getRule().getInputs()) {
+            if(input.getSender_predicate().test(ruleApplication.getSender())) {
+                for(Map.Entry<Agent, Long> e : this.agents.entrySet()) {
+                    if(e.getValue() > 0 && !usedAgents.contains(e.getKey()) && input.getPredicate().test(e.getKey())) {
+                        Long totalTransitioned = Stream.generate(randomGenerator::nextDouble)
+                                .limit(e.getKey().equals(ruleApplication.getSender()) ? (e.getValue() - 1) : e.getValue())
+                                .filter(result -> result <= input.getProbability().apply(this))
+                                .count();
+                        if(totalTransitioned > 0) {
+                            Agent newReceiver = input.getPost().apply(ruleApplication.getSender(), e.getKey());
+                            newOccupancies.put(e.getKey(), newOccupancies.get(e.getKey()) - totalTransitioned);
+                            newOccupancies.put(newReceiver, newOccupancies.getOrDefault(newReceiver,0L) + totalTransitioned);
+                        }
+                        usedAgents.add(e.getKey());
+                    }
+                }
+            }
+        }
+        return new DataOrientedPopulationState(newOccupancies);
+    }
+
+    public Map<Agent,Long> getAgents() {
         return agents;
     }
 
     public double fractionOf(Predicate<Agent> predicate) {
-        return agents.stream().filter(predicate).count() / (double)agents.size();
+        return this.numberOf(predicate) / (double)populationSize;
     }
 
     public double numberOf(Predicate<Agent> predicate) {
-        return agents.stream().filter(predicate).count();
-    }
-
-    public DataOrientedPopulationState addAgent(Agent a) {
-        List<Agent> cagents = new ArrayList<>(this.agents);
-        cagents.add(a);
-        return new DataOrientedPopulationState(cagents);
-    }
-
-    @Override
-    public String toString() {
-        String r = "{";
-        for(Agent a : agents) {
-            r += a.toString() + ",";
-        }
-        r+="}";
-        return r;
+        return agents.keySet()
+                .stream()
+                .filter(predicate)
+                .count();
     }
 }

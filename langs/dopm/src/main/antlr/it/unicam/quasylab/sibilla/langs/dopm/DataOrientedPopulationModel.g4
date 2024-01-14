@@ -15,8 +15,10 @@ element : species_declaration
 system_declaration: 'system' name=ID '='  agents=system_composition ';' ;
 
 system_composition :
-    agent_expression ('|' agent_expression)*
+    agent_instantation ('|' agent_instantation)*
     ;
+
+agent_instantation : agent_expression('#'INTEGER)?;
 
 species_declaration : 'species' name=ID ';';
 
