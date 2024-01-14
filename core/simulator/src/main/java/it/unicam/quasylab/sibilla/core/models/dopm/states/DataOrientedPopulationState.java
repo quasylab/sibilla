@@ -91,7 +91,7 @@ public class DataOrientedPopulationState implements ImmutableState {
         return agents.keySet()
                 .stream()
                 .filter(predicate)
-                .map(c -> agents.get(c))
+                .map(agents::get)
                 .reduce(0L, Long::sum);
     }
 }
