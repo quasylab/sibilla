@@ -51,22 +51,22 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
 
     @Override
     public Boolean visitSystem_composition(DataOrientedPopulationModelParser.System_compositionContext ctx) {
-        for(DataOrientedPopulationModelParser.Agent_expressionContext actx : ctx.agent_expression()) {
-            if(!checkAgentDeclaration(actx)) {
+        for(DataOrientedPopulationModelParser.Agent_instantationContext actx : ctx.agent_instantation()) {
+            if(!checkAgentInstantation(actx)) {
                 return false;
             }
         }
         return true;
     }
 
-    private Boolean checkAgentDeclaration(DataOrientedPopulationModelParser.Agent_expressionContext ctx) {
-        String species = ctx.name.getText();
+    private Boolean checkAgentInstantation(DataOrientedPopulationModelParser.Agent_instantationContext ctx) {
+        String species = ctx.agent_expression().name.getText();
         if(!this.table.isASpecies(species)) {
-            this.errors.add(ModelBuildingError.unknownSymbol(species, ctx.name.getLine(), ctx.name.getCharPositionInLine()));
+            this.errors.add(ModelBuildingError.unknownSymbol(species, ctx.agent_expression().name.getLine(), ctx.agent_expression().name.getCharPositionInLine()));
             return false;
         }
-        if(ctx.vars != null) {
-            for (DataOrientedPopulationModelParser.Var_assContext c : ctx.vars.var_ass()) {
+        if(ctx.agent_expression().vars != null) {
+            for (DataOrientedPopulationModelParser.Var_assContext c : ctx.agent_expression().vars.var_ass()) {
                 String name = c.getText();
                 if(this.table.isDefined(name)) {
                     this.errors.add(ModelBuildingError.duplicatedName(name, this.table.getContext(name), ctx));
@@ -136,8 +136,8 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
     private Boolean checkAgentPredicate(DataOrientedPopulationModelParser.Agent_predicateContext ctx, List<String> variables) {
         String species = ctx.name.getText();
         if(!this.table.isASpecies(species)) {
-           this.errors.add(ModelBuildingError.unknownSymbol(species, ctx.name.getLine(), ctx.name.getCharPositionInLine()));
-           return false;
+            this.errors.add(ModelBuildingError.unknownSymbol(species, ctx.name.getLine(), ctx.name.getCharPositionInLine()));
+            return false;
         }
         if(ctx.vars != null) {
             for (TerminalNode c : ctx.vars.ID()) {

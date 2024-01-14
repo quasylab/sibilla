@@ -51,21 +51,24 @@ public class StateSetGenerator extends DataOrientedPopulationModelBaseVisitor<Ma
 
     @Override
     public Map<String, Function<RandomGenerator, DataOrientedPopulationState>> visitSystem_declaration(DataOrientedPopulationModelParser.System_declarationContext ctx) {
-        this.stateSet.put(ctx.name.getText(), getStateBuilder(ctx.agents.agent_expression()));
+        this.stateSet.put(ctx.name.getText(), getStateBuilder(ctx.agents.agent_instantation()));
         return stateSet;
     }
 
-    private Function<RandomGenerator, DataOrientedPopulationState> getStateBuilder(List<DataOrientedPopulationModelParser.Agent_expressionContext> agentsctx) {
+    private Function<RandomGenerator, DataOrientedPopulationState> getStateBuilder(List<DataOrientedPopulationModelParser.Agent_instantationContext> agentsctx) {
         List<Agent> agents = new ArrayList<>();
-        for(DataOrientedPopulationModelParser.Agent_expressionContext actx : agentsctx) {
-            String species = actx.name.getText();
-            Map<String, SibillaValue> data = new HashMap<>();
-            for(DataOrientedPopulationModelParser.Var_assContext vctx : actx.vars.var_ass()) {
-                String name = vctx.name.getText();
-                SibillaValue value = vctx.accept(new ExpressionEvaluator(c -> Optional.empty()));
-                data.put(name, value);
+        for(DataOrientedPopulationModelParser.Agent_instantationContext actx : agentsctx) {
+            Long occupancy = actx.INTEGER().getText() != null ? Long.parseLong(actx.INTEGER().getText()) :1;
+            for(int i =0; i< occupancy; ++i) {
+                String species = actx.agent_expression().name.getText();
+                Map<String, SibillaValue> data = new HashMap<>();
+                for (DataOrientedPopulationModelParser.Var_assContext vctx : actx.agent_expression().vars.var_ass()) {
+                    String name = vctx.name.getText();
+                    SibillaValue value = vctx.accept(new ExpressionEvaluator(c -> Optional.empty()));
+                    data.put(name, value);
+                    agents.add(new Agent(species, data));
+                }
             }
-            agents.add(new Agent(species, data));
         }
         DataOrientedPopulationState state = new DataOrientedPopulationState(agents);
         return r -> state;
