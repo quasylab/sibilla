@@ -58,7 +58,7 @@ public class StateSetGenerator extends DataOrientedPopulationModelBaseVisitor<Ma
     private Function<RandomGenerator, DataOrientedPopulationState> getStateBuilder(List<DataOrientedPopulationModelParser.Agent_instantationContext> agentsctx) {
         List<Agent> agents = new ArrayList<>();
         for(DataOrientedPopulationModelParser.Agent_instantationContext actx : agentsctx) {
-            Long occupancy = actx.INTEGER().getText() != null ? Long.parseLong(actx.INTEGER().getText()) :1;
+            Long occupancy = actx.INTEGER() != null ? Long.parseLong(actx.INTEGER().getText()) :1;
             for(int i =0; i< occupancy; ++i) {
                 String species = actx.agent_expression().name.getText();
                 Map<String, SibillaValue> data = new HashMap<>();
