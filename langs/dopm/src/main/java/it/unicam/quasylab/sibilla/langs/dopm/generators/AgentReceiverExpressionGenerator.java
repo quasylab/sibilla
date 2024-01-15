@@ -24,17 +24,17 @@ public class AgentReceiverExpressionGenerator extends DataOrientedPopulationMode
             String species = ctx.name.getText();
             Map<String, SibillaValue> values = new HashMap<>(receiver.getValues());
             if(ctx.vars != null) {
-            for(DataOrientedPopulationModelParser.Var_assContext vctx : ctx.vars.var_ass()) {
-                values.put(vctx.name.getText(), vctx.expr().accept(
-                        new ExpressionEvaluator(name -> {
-                            if(name.contains("sender.")) {
-                                return Optional.ofNullable(sender.getValues().get(name.split("sender.")[1]));
-                            } else {
-                                return Optional.ofNullable(receiver.getValues().get(name));
-                            }
-                        })
-                ));
-            }
+                for(DataOrientedPopulationModelParser.Var_assContext vctx : ctx.vars.var_ass()) {
+                    values.put(vctx.name.getText(), vctx.expr().accept(
+                            new ExpressionEvaluator(name -> {
+                                if(name.contains("sender.")) {
+                                    return Optional.ofNullable(sender.getValues().get(name.split("sender.")[1]));
+                                } else {
+                                    return Optional.ofNullable(receiver.getValues().get(name));
+                                }
+                            })
+                    ));
+                }
             }
             return new Agent(species, values);
         };

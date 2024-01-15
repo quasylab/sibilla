@@ -62,12 +62,14 @@ public class StateSetGenerator extends DataOrientedPopulationModelBaseVisitor<Ma
             for(int i =0; i< occupancy; ++i) {
                 String species = actx.agent_expression().name.getText();
                 Map<String, SibillaValue> data = new HashMap<>();
-                for (DataOrientedPopulationModelParser.Var_assContext vctx : actx.agent_expression().vars.var_ass()) {
-                    String name = vctx.name.getText();
-                    SibillaValue value = vctx.accept(new ExpressionEvaluator(c -> Optional.empty()));
-                    data.put(name, value);
-                    agents.add(new Agent(species, data));
+                if(actx.agent_expression().vars != null) {
+                    for (DataOrientedPopulationModelParser.Var_assContext vctx : actx.agent_expression().vars.var_ass()) {
+                        String name = vctx.name.getText();
+                        SibillaValue value = vctx.accept(new ExpressionEvaluator(c -> Optional.empty()));
+                        data.put(name, value);
+                    }
                 }
+                agents.add(new Agent(species, data));
             }
         }
         DataOrientedPopulationState state = new DataOrientedPopulationState(agents);
