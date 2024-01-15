@@ -22,8 +22,10 @@ public class AgentExpressionGenerator extends DataOrientedPopulationModelBaseVis
         return a -> {
             String species = ctx.name.getText();
             Map<String, SibillaValue> values = new HashMap<>(a.getValues());
-            for(DataOrientedPopulationModelParser.Var_assContext vctx : ctx.vars.var_ass()) {
-                values.put(vctx.name.getText(), vctx.expr().accept(new ExpressionEvaluator(name -> Optional.ofNullable(values.get(name)))));
+            if(ctx.vars != null) {
+                for (DataOrientedPopulationModelParser.Var_assContext vctx : ctx.vars.var_ass()) {
+                    values.put(vctx.name.getText(), vctx.expr().accept(new ExpressionEvaluator(name -> Optional.ofNullable(values.get(name)))));
+                }
             }
             return new Agent(species, values);
         };
