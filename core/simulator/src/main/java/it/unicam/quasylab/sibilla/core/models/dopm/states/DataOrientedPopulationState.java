@@ -29,9 +29,11 @@ import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.InputTransi
 import it.unicam.quasylab.sibilla.core.past.ds.Tuple;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import javax.swing.text.html.Option;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -49,7 +51,7 @@ public class DataOrientedPopulationState implements ImmutableState {
         this.populationSize = 0L;
     }
 
-    public DataOrientedPopulationState applyRule(RuleApplication ruleApplication, RandomGenerator randomGenerator) {
+    /*public DataOrientedPopulationState applyRule(RuleApplication ruleApplication, RandomGenerator randomGenerator) {
         Map<Agent, Long> newOccupancies = new HashMap<>(this.agents);
 
         Agent senderNew = ruleApplication.getRule().getOutput().getPost().apply(ruleApplication.getSender());
@@ -72,6 +74,41 @@ public class DataOrientedPopulationState implements ImmutableState {
                             newOccupancies.put(newReceiver, newOccupancies.getOrDefault(newReceiver,0L) + totalTransitioned);
                         }
                         usedAgents.add(e.getKey());
+                    }
+                }
+            }
+        }
+        return new DataOrientedPopulationState(newOccupancies);
+    }*/
+
+    public DataOrientedPopulationState applyRule(RuleApplication ruleApplication, RandomGenerator randomGenerator) {
+        Map<Agent, Long> newOccupancies = new HashMap<>(this.agents);
+
+        Agent senderNew = ruleApplication.getRule().getOutput().getPost().apply(ruleApplication.getSender());
+        newOccupancies.put(ruleApplication.getSender(), newOccupancies.get(ruleApplication.getSender()) - 1);
+        newOccupancies.put(senderNew, newOccupancies.getOrDefault(senderNew, 0L) + 1);
+
+        List<Boolean> senderPredicateCache = new ArrayList<>();
+
+        for(Map.Entry<Agent, Long> e : this.agents.entrySet()){
+            if(e.getValue() > 0) {
+                ListIterator<InputTransition> inputTransitionIterator = ruleApplication.getRule().getInputs().listIterator();
+                while (inputTransitionIterator.hasNext()) {
+                    int inputIndex = inputTransitionIterator.nextIndex();
+                    InputTransition input = inputTransitionIterator.next();
+                    if(senderPredicateCache.size() <= inputIndex) {
+                        senderPredicateCache.add(input.getSender_predicate().test(ruleApplication.getSender()));
+                    }
+                    if(senderPredicateCache.get(inputIndex) && input.getPredicate().test(e.getKey())) {
+                        Long totalTransitioned = Stream.generate(randomGenerator::nextDouble)
+                                .limit(e.getKey().equals(ruleApplication.getSender()) ? (e.getValue() - 1) : e.getValue())
+                                .filter(result -> result <= input.getProbability().apply(this, e.getKey()))
+                                .count();
+                        newOccupancies.put(e.getKey(), newOccupancies.get(e.getKey()) - totalTransitioned);
+                        Stream.generate(() -> input.getPost().apply(ruleApplication.getSender(), e.getKey()))
+                                .limit(totalTransitioned)
+                                .forEach(c -> newOccupancies.put(c, newOccupancies.getOrDefault(c,0L)+1));
+                        break;
                     }
                 }
             }
