@@ -13,7 +13,7 @@ import java.util.*;
 
 public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<Map<String, Rule>> {
 
-    private Map<String, Rule> rules;
+    private final Map<String, Rule> rules;
 
     public RulesGenerator() {
         this.rules = new Hashtable<>();
@@ -35,21 +35,15 @@ public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<Map<S
     private Rule getRuleBuilder(String ruleName, DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
         OutputTransition outputTransition = new OutputTransition(
                 ctx.output.pre.accept(new AgentPredicateGenerator()),
-                state -> ctx.output.rate.accept(new PopulationExpressionEvaluator(state)).doubleOf(),
+                (state,agent) -> ctx.output.rate.accept(new PopulationExpressionEvaluator(state,agent.getResolver())).doubleOf(),
                 ctx.output.post.accept(new AgentExpressionGenerator())
         );
         List<InputTransition> inputs = new ArrayList<>();
         for(DataOrientedPopulationModelParser.Input_transitionContext ictx : ctx.inputs.input_transition()) {
             inputs.add(new InputTransition(
                     ictx.pre.accept(new AgentPredicateGenerator()),
-                    (a) -> ictx.sender_predicate.accept(new ExpressionEvaluator(name -> {
-                        if(name.startsWith("sender.")) {
-                            return Optional.ofNullable(a.getValues().get(name.split("sender.")[1]));
-                        } else {
-                            return Optional.ofNullable(a.getValues().get(name));
-                        }
-                    })) == SibillaBoolean.TRUE,
-                    state -> ictx.probability.accept(new PopulationExpressionEvaluator(state)).doubleOf(),
+                    (a) -> ictx.sender_predicate.accept(new ExpressionEvaluator(name -> a.getResolver().apply(name.split("sender.")[1]))) == SibillaBoolean.TRUE,
+                    (state,agent) -> ictx.probability.accept(new PopulationExpressionEvaluator(state, agent.getResolver())).doubleOf(),
                     ictx.post.accept(new AgentReceiverExpressionGenerator())
             ));
         }

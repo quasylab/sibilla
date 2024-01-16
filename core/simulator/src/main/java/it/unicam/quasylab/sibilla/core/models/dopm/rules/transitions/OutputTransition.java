@@ -3,15 +3,16 @@ package it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.Agent;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulationState;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class OutputTransition {
     private Predicate<Agent> predicate;
-    private Function<DataOrientedPopulationState, Double> rate;
+    private BiFunction<DataOrientedPopulationState, Agent, Double> rate;
     private Function<Agent, Agent> post;
 
-    public OutputTransition(Predicate<Agent> predicate, Function<DataOrientedPopulationState, Double> rate, Function<Agent, Agent> post) {
+    public OutputTransition(Predicate<Agent> predicate, BiFunction<DataOrientedPopulationState, Agent, Double> rate, Function<Agent, Agent> post) {
         this.predicate = predicate;
         this.rate = rate;
         this.post = post;
@@ -26,11 +27,11 @@ public class OutputTransition {
         this.predicate = predicate;
     }
 
-    public Function<DataOrientedPopulationState, Double> getRate() {
+    public BiFunction<DataOrientedPopulationState, Agent, Double> getRate() {
         return rate;
     }
 
-    public void setRate(Function<DataOrientedPopulationState, Double> rate) {
+    public void setRate(BiFunction<DataOrientedPopulationState, Agent, Double> rate) {
         this.rate = rate;
     }
 

@@ -5,6 +5,8 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 
 public class Agent {
     private String species;
@@ -44,6 +46,10 @@ public class Agent {
             }
         }
         return true;
+    }
+
+    public Function<String, Optional<SibillaValue>> getResolver() {
+        return name -> Optional.ofNullable(this.values.get(name));
     }
 
     @Override

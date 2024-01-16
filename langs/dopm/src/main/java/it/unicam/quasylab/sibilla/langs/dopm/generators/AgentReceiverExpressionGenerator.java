@@ -32,7 +32,7 @@ public class AgentReceiverExpressionGenerator extends DataOrientedPopulationMode
                     values.put(vctx.name.getText(), vctx.expr().accept(
                             new ExpressionEvaluator(name -> {
                                 if(name.contains("sender.")) {
-                                    return Optional.ofNullable(sender.getValues().get(name.split("sender.")[1]));
+                                    return sender.getResolver().apply(name.split("sender.")[1]);
                                 } else {
                                     return Optional.ofNullable(values.get(name));
                                 }

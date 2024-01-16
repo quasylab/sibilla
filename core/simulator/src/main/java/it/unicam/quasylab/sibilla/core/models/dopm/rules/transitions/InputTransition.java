@@ -10,10 +10,10 @@ import java.util.function.Predicate;
 public class InputTransition {
     private Predicate<Agent> predicate;
     private Predicate<Agent> sender_predicate;
-    private Function<DataOrientedPopulationState, Double> probability;
+    private BiFunction<DataOrientedPopulationState, Agent, Double> probability;
     private BiFunction<Agent, Agent, Agent> post;
 
-    public InputTransition(Predicate<Agent> predicate, Predicate<Agent> sender_predicate, Function<DataOrientedPopulationState, Double> probability, BiFunction<Agent, Agent, Agent> post) {
+    public InputTransition(Predicate<Agent> predicate, Predicate<Agent> sender_predicate, BiFunction<DataOrientedPopulationState, Agent, Double> probability, BiFunction<Agent, Agent, Agent> post) {
         this.predicate = predicate;
         this.sender_predicate = sender_predicate;
         this.probability = probability;
@@ -36,11 +36,11 @@ public class InputTransition {
         this.sender_predicate = sender_predicate;
     }
 
-    public Function<DataOrientedPopulationState, Double> getProbability() {
+    public BiFunction<DataOrientedPopulationState, Agent, Double> getProbability() {
         return probability;
     }
 
-    public void setProbability(Function<DataOrientedPopulationState, Double> probability) {
+    public void setProbability(BiFunction<DataOrientedPopulationState, Agent, Double> probability) {
         this.probability = probability;
     }
 
