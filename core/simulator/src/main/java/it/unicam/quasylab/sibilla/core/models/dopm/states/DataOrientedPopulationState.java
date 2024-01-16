@@ -64,7 +64,7 @@ public class DataOrientedPopulationState implements ImmutableState {
                     if(e.getValue() > 0 && !usedAgents.contains(e.getKey()) && input.getPredicate().test(e.getKey())) {
                         Long totalTransitioned = Stream.generate(randomGenerator::nextDouble)
                                 .limit(e.getKey().equals(ruleApplication.getSender()) ? (e.getValue() - 1) : e.getValue())
-                                .filter(result -> result <= input.getProbability().apply(this))
+                                .filter(result -> result <= input.getProbability().apply(this, e.getKey()))
                                 .count();
                         if(totalTransitioned > 0) {
                             Agent newReceiver = input.getPost().apply(ruleApplication.getSender(), e.getKey());

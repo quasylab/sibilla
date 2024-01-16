@@ -9,7 +9,7 @@ import java.util.List;
 
 public class NumberExpressionValidator extends DataOrientedPopulationModelBaseVisitor<Boolean> {
     protected final List<ModelBuildingError> errors;
-protected final List<String> localVariables;
+    protected final List<String> localVariables;
 
     public NumberExpressionValidator(List<ModelBuildingError> errors, List<String> local_variables) {
         this.errors = errors;

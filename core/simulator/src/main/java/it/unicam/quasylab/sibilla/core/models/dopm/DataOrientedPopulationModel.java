@@ -51,7 +51,7 @@ public class DataOrientedPopulationModel implements Model<DataOrientedPopulation
         for(Map.Entry<Agent, Long> e : dataOrientedPopulationState.getAgents().entrySet()) {
             if(r.getOutput().getPredicate().test(e.getKey())) {
                 result.add(
-                        r.getOutput().getRate().apply(dataOrientedPopulationState) * e.getValue(),
+                        r.getOutput().getRate().apply(dataOrientedPopulationState, e.getKey()) * e.getValue(),
                         new RuleApplication(e.getKey(), r)
                 );
             }
