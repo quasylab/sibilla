@@ -4,21 +4,17 @@ import it.unicam.quasylab.sibilla.core.models.ContinuousTimeMarkovProcess;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.StepFunction;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.Rule;
-import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.InputTransition;
-import it.unicam.quasylab.sibilla.core.models.dopm.states.Agent;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulationState;
-import it.unicam.quasylab.sibilla.core.models.dopm.states.RuleApplication;
-import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
+import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.Trigger;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedElement;
-import it.unicam.quasylab.sibilla.core.simulator.util.WeightedLinkedList;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
-import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class DataOrientedPopulationModel implements Model<DataOrientedPopulationState>,ContinuousTimeMarkovProcess<DataOrientedPopulationState> {
 
@@ -34,29 +30,23 @@ public class DataOrientedPopulationModel implements Model<DataOrientedPopulation
 
     @Override
     public WeightedStructure<StepFunction<DataOrientedPopulationState>> getTransitions(RandomGenerator r, double time, DataOrientedPopulationState dataOrientedPopulationState) {
-        WeightedLinkedList<StepFunction<DataOrientedPopulationState>> result = new WeightedLinkedList<>();
-        for(Rule rule : this.rules.values()) {
-            WeightedStructure<RuleApplication> ruleApplications = getTransitions(rule, dataOrientedPopulationState);
-            for(WeightedElement<RuleApplication> ruleApplicationWeightedElement : ruleApplications.getAll()) {
-                result.add(ruleApplicationWeightedElement.getTotalWeight(), (rnd, t, dt) ->
-                    dataOrientedPopulationState.applyRule(ruleApplicationWeightedElement.getElement(), rnd)
-                );
-            }
-        }
-        return result;
+        return this.rules
+                .values()
+                .stream()
+                .flatMap(rule -> getRuleTransitions(dataOrientedPopulationState, rule, r))
+                .collect(WeightedStructure.collector());
     }
 
-    private WeightedStructure<RuleApplication> getTransitions(Rule r, DataOrientedPopulationState dataOrientedPopulationState) {
-        WeightedStructure<RuleApplication> result = new WeightedLinkedList<>();
-        for(Map.Entry<Agent, Long> e : dataOrientedPopulationState.getAgents().entrySet()) {
-            if(r.getOutput().getPredicate().test(e.getKey())) {
-                result.add(
-                        r.getOutput().getRate().apply(dataOrientedPopulationState, e.getKey()) * e.getValue(),
-                        new RuleApplication(e.getKey(), r)
-                );
-            }
-        }
-        return result;
+    private Stream<WeightedElement<StepFunction<DataOrientedPopulationState>>> getRuleTransitions(DataOrientedPopulationState dataOrientedPopulationState, Rule rule, RandomGenerator r) {
+        return dataOrientedPopulationState
+                .getAgents()
+                .entrySet()
+                .stream()
+                .filter(e -> e.getValue() > 0 && rule.getOutput().getPredicate().test(e.getKey()))
+                .map(e -> new WeightedElement<StepFunction<DataOrientedPopulationState>>(
+                        rule.getOutput().getRate().apply(dataOrientedPopulationState, e.getKey()) * e.getValue(),
+                        (rnd, t, dt) -> dataOrientedPopulationState.applyRule(new Trigger(e.getKey(), rule), r)
+                ));
     }
 
     @Override
