@@ -8,12 +8,14 @@ import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulation
 import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.Trigger;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedElement;
+import it.unicam.quasylab.sibilla.core.simulator.util.WeightedLinkedList;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 public class DataOrientedPopulationModel implements Model<DataOrientedPopulationState>,ContinuousTimeMarkovProcess<DataOrientedPopulationState> {
@@ -30,12 +32,14 @@ public class DataOrientedPopulationModel implements Model<DataOrientedPopulation
 
     @Override
     public WeightedStructure<StepFunction<DataOrientedPopulationState>> getTransitions(RandomGenerator r, double time, DataOrientedPopulationState dataOrientedPopulationState) {
-        return this.rules
-                .values()
+        WeightedStructure<StepFunction<DataOrientedPopulationState>> res = new WeightedLinkedList<>();
+        this.rules.values()
                 .stream()
                 .flatMap(rule -> getRuleTransitions(dataOrientedPopulationState, rule, r))
-                .collect(WeightedStructure.collector());
+                .forEach(c -> res.add(c.getTotalWeight(), c.getElement()));
+        return res;
     }
+
 
     private Stream<WeightedElement<StepFunction<DataOrientedPopulationState>>> getRuleTransitions(DataOrientedPopulationState dataOrientedPopulationState, Rule rule, RandomGenerator r) {
         return dataOrientedPopulationState

@@ -23,16 +23,19 @@
 package it.unicam.quasylab.sibilla.core.models.dopm.states;
 
 import it.unicam.quasylab.sibilla.core.models.ImmutableState;
+import it.unicam.quasylab.sibilla.core.models.StepFunction;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.InputTransition;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions.AgentDelta;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions.InputReaction;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.Trigger;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions.NoReaction;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions.Reaction;
+import it.unicam.quasylab.sibilla.core.simulator.util.WeightedElement;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,7 +55,6 @@ public class DataOrientedPopulationState implements ImmutableState {
 
     public DataOrientedPopulationState applyRule(Trigger t, RandomGenerator randomGenerator) {
         Map<Agent, Long> newOccupancies = new HashMap<>(this.agents);
-
         Agent senderNew = t.getRule().getOutput().getPost().apply(t.getSender());
         newOccupancies.put(t.getSender(), newOccupancies.get(t.getSender()) - 1);
 
