@@ -35,15 +35,15 @@ public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<Map<S
     private Rule getRuleBuilder(String ruleName, DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
         OutputTransition outputTransition = new OutputTransition(
                 ctx.output.pre.accept(new AgentPredicateGenerator()),
-                (state,agent) -> ctx.output.rate.accept(new PopulationExpressionEvaluator(state,agent.getResolver())).doubleOf(),
+                (state,agent) -> ctx.output.rate.accept(new PopulationExpressionEvaluator(state,agent.getResolver(), n-> Optional.empty())).doubleOf(),
                 ctx.output.post.accept(new AgentExpressionGenerator())
         );
         List<InputTransition> inputs = new ArrayList<>();
         for(DataOrientedPopulationModelParser.Input_transitionContext ictx : ctx.inputs.input_transition()) {
             inputs.add(new InputTransition(
                     ictx.pre.accept(new AgentPredicateGenerator()),
-                    (a) -> ictx.sender_predicate.accept(new ExpressionEvaluator(name -> a.getResolver().apply(name.split("sender.")[1]))) == SibillaBoolean.TRUE,
-                    (state,agent) -> ictx.probability.accept(new PopulationExpressionEvaluator(state, agent.getResolver())).doubleOf(),
+                    (a) -> ictx.sender_predicate.accept(new ExpressionEvaluator(n -> Optional.empty(), a.getResolver())) == SibillaBoolean.TRUE,
+                    (state,agent) -> ictx.probability.accept(new PopulationExpressionEvaluator(state, agent.getResolver(), n -> Optional.empty())).doubleOf(),
                     ictx.post.accept(new AgentReceiverExpressionGenerator())
             ));
         }

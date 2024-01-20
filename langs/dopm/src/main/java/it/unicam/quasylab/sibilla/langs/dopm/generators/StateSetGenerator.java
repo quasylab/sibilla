@@ -64,7 +64,7 @@ public class StateSetGenerator extends DataOrientedPopulationModelBaseVisitor<Ma
             if(actx.agent_expression().vars != null) {
                 for (DataOrientedPopulationModelParser.Var_assContext vctx : actx.agent_expression().vars.var_ass()) {
                     String name = vctx.name.getText();
-                    SibillaValue value = vctx.accept(new ExpressionEvaluator(c -> Optional.empty()));
+                    SibillaValue value = vctx.accept(new ExpressionEvaluator(c -> Optional.empty(), n-> Optional.empty()));
                     data.put(name, value);
                 }
             }

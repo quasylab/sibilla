@@ -39,10 +39,12 @@ import java.util.function.Function;
  */
 public class ExpressionEvaluator extends DataOrientedPopulationModelBaseVisitor<SibillaValue> {
 
-    private final Function<String, Optional<SibillaValue>> nameResolver;
+    private final Function<String, Optional<SibillaValue>> referenceResolver;
+    private final Function<String, Optional<SibillaValue>> senderReferenceResolver;
 
-    public ExpressionEvaluator(Function<String, Optional<SibillaValue>> nameResolver) {
-        this.nameResolver = nameResolver;
+    public ExpressionEvaluator(Function<String, Optional<SibillaValue>> referenceResolver, Function<String, Optional<SibillaValue>> senderReferenceResolver) {
+        this.referenceResolver = referenceResolver;
+        this.senderReferenceResolver = senderReferenceResolver;
     }
 
 
@@ -53,12 +55,12 @@ public class ExpressionEvaluator extends DataOrientedPopulationModelBaseVisitor<
 
     @Override
     public SibillaValue visitReferenceExpression(DataOrientedPopulationModelParser.ReferenceExpressionContext ctx) {
-        return nameResolver.apply(ctx.reference.getText()).orElse(SibillaValue.ERROR_VALUE);
+        return referenceResolver.apply(ctx.reference.getText()).orElse(SibillaValue.ERROR_VALUE);
     }
 
     @Override
     public SibillaValue visitSenderReferenceExpression(DataOrientedPopulationModelParser.SenderReferenceExpressionContext ctx) {
-        return nameResolver.apply(ctx.getText()).orElse(SibillaValue.ERROR_VALUE);
+        return senderReferenceResolver.apply(ctx.ID().getText()).orElse(SibillaValue.ERROR_VALUE);
     }
 
     @Override

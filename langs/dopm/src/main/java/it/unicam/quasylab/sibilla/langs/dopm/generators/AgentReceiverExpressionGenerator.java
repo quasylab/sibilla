@@ -21,24 +21,28 @@ public class AgentReceiverExpressionGenerator extends DataOrientedPopulationMode
 
     @Override
     public BiFunction<Agent,Agent,Agent> visitAgent_expression(DataOrientedPopulationModelParser.Agent_expressionContext ctx) {
-        return (sender, receiver) -> {
-            String species = ctx.name.getText();
-            Map<String, SibillaValue> values = new HashMap<>();
-            for(Map.Entry<String, SibillaValue> e : receiver.getValues().entrySet()) {
-                values.put(new String(e.getKey()), new SibillaDouble(e.getValue().doubleOf()));
+        String species = ctx.name.getText();
+        Map<String, BiFunction<Agent,Agent,SibillaValue>> expressions;
+
+        if(ctx.vars != null) {
+            expressions = new HashMap<>();
+            for(DataOrientedPopulationModelParser.Var_assContext vctx : ctx.vars.var_ass()) {
+                expressions.put(vctx.name.getText(), (sender, receiver) -> vctx.expr().accept(
+                        new ExpressionEvaluator(receiver.getResolver(), sender.getResolver())
+                ));
             }
-            if(ctx.vars != null) {
-                for(DataOrientedPopulationModelParser.Var_assContext vctx : ctx.vars.var_ass()) {
-                    values.put(vctx.name.getText(), vctx.expr().accept(
-                            new ExpressionEvaluator(name -> {
-                                if(name.contains("sender.")) {
-                                    return sender.getResolver().apply(name.split("sender.")[1]);
-                                } else {
-                                    return Optional.ofNullable(values.get(name));
-                                }
-                            })
-                    ));
-                }
+        } else {
+            expressions = null;
+        }
+
+
+        return (sender, receiver) -> {
+
+            Map<String, SibillaValue> values = new HashMap<>(receiver.getValues());
+
+            if(expressions != null) {
+                expressions
+                        .forEach((key, value) -> values.put(key, value.apply(sender, receiver)));
             }
             return new Agent(species, values);
         };

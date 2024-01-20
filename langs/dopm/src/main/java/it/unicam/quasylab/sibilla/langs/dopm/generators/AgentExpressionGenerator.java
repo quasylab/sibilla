@@ -19,13 +19,23 @@ public class AgentExpressionGenerator extends DataOrientedPopulationModelBaseVis
 
     @Override
     public Function<Agent,Agent> visitAgent_expression(DataOrientedPopulationModelParser.Agent_expressionContext ctx) {
+        String species = ctx.name.getText();
+        Map<String, Function<Agent, SibillaValue>> expressions;
+
+        if(ctx.vars != null) {
+            expressions = new HashMap<>();
+            for (DataOrientedPopulationModelParser.Var_assContext vctx : ctx.vars.var_ass()) {
+                expressions.put(vctx.name.getText(), (agent) -> vctx.
+                        expr().accept(new ExpressionEvaluator(agent.getResolver(), n -> Optional.empty())));
+            }
+        } else {
+            expressions = null;
+        }
+
         return a -> {
-            String species = ctx.name.getText();
             Map<String, SibillaValue> values = new HashMap<>(a.getValues());
-            if(ctx.vars != null) {
-                for (DataOrientedPopulationModelParser.Var_assContext vctx : ctx.vars.var_ass()) {
-                    values.put(vctx.name.getText(), vctx.expr().accept(new ExpressionEvaluator(name -> Optional.ofNullable(values.get(name)))));
-                }
+            if(expressions != null) {
+                expressions.forEach((key,value) -> values.put(key, value.apply(a)));
             }
             return new Agent(species, values);
         };

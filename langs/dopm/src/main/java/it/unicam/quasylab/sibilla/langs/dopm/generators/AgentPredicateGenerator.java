@@ -18,18 +18,29 @@ public class AgentPredicateGenerator extends DataOrientedPopulationModelBaseVisi
 
     @Override
     public Predicate<Agent> visitAgent_predicate(DataOrientedPopulationModelParser.Agent_predicateContext ctx) {
+        String predicateSpecies = ctx.name.getText();
+        List<String> vars;
+        if(ctx.vars != null) {
+            vars = new ArrayList<>();
+            for (TerminalNode node : ctx.vars.ID()) {
+                vars.add(node.getText());
+            }
+        } else{
+            vars = null;
+        }
+
         return a -> {
-            if(!a.getSpecies().equals(ctx.name.getText())) {
+            if(!a.getSpecies().equals(predicateSpecies)) {
                 return false;
             }
-            if(ctx.vars != null) {
-                for (TerminalNode node : ctx.vars.ID()) {
-                    if (!a.getValues().containsKey(node.getText())) {
+            if(vars != null) {
+                for (String var : vars) {
+                    if (!a.getValues().containsKey(var)) {
                         return false;
                     }
                 }
             }
-            return ctx.predicate.accept(new ExpressionEvaluator(name -> Optional.ofNullable(a.getValues().get(name)))) == SibillaBoolean.TRUE;
+            return ctx.predicate.accept(new ExpressionEvaluator(a.getResolver(), n -> Optional.empty())) == SibillaBoolean.TRUE;
         };
     }
 }

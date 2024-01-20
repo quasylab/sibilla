@@ -13,12 +13,12 @@ import java.util.function.Predicate;
 public class PopulationExpressionEvaluator extends ExpressionEvaluator{
     private final DataOrientedPopulationState state;
     public PopulationExpressionEvaluator(DataOrientedPopulationState state) {
-        super(n -> Optional.empty());
+        super(n -> Optional.empty(), n -> Optional.empty());
         this.state = state;
     }
 
-    public PopulationExpressionEvaluator(DataOrientedPopulationState state, Function<String, Optional<SibillaValue>> resolver) {
-        super(resolver);
+    public PopulationExpressionEvaluator(DataOrientedPopulationState state, Function<String, Optional<SibillaValue>> referenceResolver, Function<String, Optional<SibillaValue>> senderReferenceResolver) {
+        super(referenceResolver, senderReferenceResolver);
         this.state = state;
     }
 
