@@ -2,12 +2,16 @@ package it.unicam.quasylab.sibilla.langs.dopm.generators;
 
 import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulationState;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaBoolean;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
 import it.unicam.quasylab.sibilla.langs.dopm.evaluators.PopulationExpressionEvaluator;
+import it.unicam.quasylab.sibilla.langs.dopm.evaluators.TriFunction;
 
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class PredicatesGenerator extends DataOrientedPopulationModelBaseVisitor<Map<String, Predicate<DataOrientedPopulationState>>> {
@@ -31,7 +35,8 @@ public class PredicatesGenerator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     private Predicate<DataOrientedPopulationState> getPredicateBuilder(DataOrientedPopulationModelParser.ExprContext ctx) {
-        return state -> ctx.accept(new PopulationExpressionEvaluator(state)) == SibillaBoolean.TRUE;
+        TriFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, DataOrientedPopulationState, SibillaValue> predicateFunction = ctx.accept(new PopulationExpressionEvaluator());
+        return state -> predicateFunction.apply(n->Optional.empty(), n->Optional.empty(), state) == SibillaBoolean.TRUE;
     }
 
     @Override

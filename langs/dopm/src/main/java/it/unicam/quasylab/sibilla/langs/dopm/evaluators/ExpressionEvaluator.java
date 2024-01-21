@@ -31,123 +31,150 @@ import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisi
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * This visitor is used to evaluate expressions as double. Whenever an expression of the wrong
  * type is considered, a Double.NaN is returned.
  */
-public class ExpressionEvaluator extends DataOrientedPopulationModelBaseVisitor<SibillaValue> {
+public class ExpressionEvaluator extends DataOrientedPopulationModelBaseVisitor<BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue>> {
 
-    private final Function<String, Optional<SibillaValue>> referenceResolver;
-    private final Function<String, Optional<SibillaValue>> senderReferenceResolver;
 
-    public ExpressionEvaluator(Function<String, Optional<SibillaValue>> referenceResolver, Function<String, Optional<SibillaValue>> senderReferenceResolver) {
-        this.referenceResolver = referenceResolver;
-        this.senderReferenceResolver = senderReferenceResolver;
+    public ExpressionEvaluator() {
+
     }
 
 
     @Override
-    public SibillaValue visitExponentExpression(DataOrientedPopulationModelParser.ExponentExpressionContext ctx) {
-        return SibillaValue.eval(Math::pow, ctx.left.accept(this), ctx.right.accept(this));
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitExponentExpression(DataOrientedPopulationModelParser.ExponentExpressionContext ctx) {
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> left = ctx.left.accept(this);
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> right = ctx.right.accept(this);
+
+        return (agent, sender) -> SibillaValue.eval(Math::pow, left.apply(agent,sender), right.apply(agent,sender));
     }
 
     @Override
-    public SibillaValue visitReferenceExpression(DataOrientedPopulationModelParser.ReferenceExpressionContext ctx) {
-        return referenceResolver.apply(ctx.reference.getText()).orElse(SibillaValue.ERROR_VALUE);
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitReferenceExpression(DataOrientedPopulationModelParser.ReferenceExpressionContext ctx) {
+        String name = ctx.reference.getText();
+        return (agent, sender) -> agent.apply(name).orElse(SibillaValue.ERROR_VALUE);
     }
 
     @Override
-    public SibillaValue visitSenderReferenceExpression(DataOrientedPopulationModelParser.SenderReferenceExpressionContext ctx) {
-        return senderReferenceResolver.apply(ctx.ID().getText()).orElse(SibillaValue.ERROR_VALUE);
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitSenderReferenceExpression(DataOrientedPopulationModelParser.SenderReferenceExpressionContext ctx) {
+        String name = ctx.ID().getText();
+        return (agent, sender) -> agent.apply(name).orElse(SibillaValue.ERROR_VALUE);
     }
 
     @Override
-    public SibillaValue visitIntValue(DataOrientedPopulationModelParser.IntValueContext ctx) {
-        return new SibillaInteger(Integer.parseInt(ctx.getText()));
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitIntValue(DataOrientedPopulationModelParser.IntValueContext ctx) {
+        int integer = Integer.parseInt(ctx.getText());
+        return (agent, sender) -> new SibillaInteger(integer);
     }
 
     @Override
-    public SibillaValue visitBracketExpression(DataOrientedPopulationModelParser.BracketExpressionContext ctx) {
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitBracketExpression(DataOrientedPopulationModelParser.BracketExpressionContext ctx) {
         return ctx.expr().accept(this);
     }
 
     @Override
-    public SibillaValue visitRealValue(DataOrientedPopulationModelParser.RealValueContext ctx) {
-        return new SibillaDouble(Double.parseDouble(ctx.getText()));
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitRealValue(DataOrientedPopulationModelParser.RealValueContext ctx) {
+        double doublevalue = Double.parseDouble(ctx.getText());
+        return (agent, sender) -> new SibillaDouble(doublevalue);
     }
 
     @Override
-    public SibillaValue visitIfThenElseExpression(DataOrientedPopulationModelParser.IfThenElseExpressionContext ctx) {
-        if (ctx.guard.accept(this).booleanOf()) {
-            return ctx.thenBranch.accept(this);
-        } else {
-            return ctx.elseBranch.accept(this);
-        }
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitIfThenElseExpression(DataOrientedPopulationModelParser.IfThenElseExpressionContext ctx) {
+
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> guard = ctx.guard.accept(this);
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> thenBranch = ctx.thenBranch.accept(this);
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> elseBranch = ctx.elseBranch.accept(this);
+
+        return (agent, receiver) -> guard.apply(agent, receiver).booleanOf() ? thenBranch.apply(agent, receiver) : elseBranch.apply(agent, receiver);
     }
 
     @Override
-    public SibillaValue visitNegationExpression(DataOrientedPopulationModelParser.NegationExpressionContext ctx) {
-        return SibillaValue.not(ctx.arg.accept(this));
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitNegationExpression(DataOrientedPopulationModelParser.NegationExpressionContext ctx) {
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> expr = ctx.arg.accept(this);
+        return (agent, receiver) -> SibillaValue.not(expr.apply(agent, receiver));
     }
 
     @Override
-    public SibillaValue visitTrueValue(DataOrientedPopulationModelParser.TrueValueContext ctx) {
-        return SibillaBoolean.TRUE;
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitTrueValue(DataOrientedPopulationModelParser.TrueValueContext ctx) {
+        return (agent, sender) -> SibillaBoolean.TRUE;
     }
 
     @Override
-    public SibillaValue visitRelationExpression(DataOrientedPopulationModelParser.RelationExpressionContext ctx) {
-        return SibillaBoolean.of(SibillaValue.getRelationOperator(ctx.op.getText()).test(ctx.left.accept(this), ctx.right.accept(this)));
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitRelationExpression(DataOrientedPopulationModelParser.RelationExpressionContext ctx) {
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> left = ctx.left.accept(this);
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> right = ctx.right.accept(this);
+        String operator = ctx.op.getText();
+
+        return (agent, sender) -> SibillaBoolean.of(SibillaValue.getRelationOperator(operator).test(left.apply(agent,sender), right.apply(agent, sender)));
     }
 
     @Override
-    public SibillaValue visitOrExpression(DataOrientedPopulationModelParser.OrExpressionContext ctx) {
-        return SibillaValue.or(ctx.left.accept(this), ctx.right.accept(this));
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitOrExpression(DataOrientedPopulationModelParser.OrExpressionContext ctx) {
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> left = ctx.left.accept(this);
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> right = ctx.right.accept(this);
+
+        return (agent, sender) -> SibillaValue.or(left.apply(agent, sender), right.apply(agent, sender));
     }
 
     @Override
-    public SibillaValue visitFalseValue(DataOrientedPopulationModelParser.FalseValueContext ctx) {
-        return SibillaBoolean.FALSE;
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitFalseValue(DataOrientedPopulationModelParser.FalseValueContext ctx) {
+        return (agent, sender) -> SibillaBoolean.FALSE;
     }
 
     @Override
-    public SibillaValue visitAndExpression(DataOrientedPopulationModelParser.AndExpressionContext ctx) {
-        return SibillaValue.and(ctx.left.accept(this), ctx.right.accept(this));
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitAndExpression(DataOrientedPopulationModelParser.AndExpressionContext ctx) {
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> left = ctx.left.accept(this);
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> right = ctx.right.accept(this);
+
+        return (agent, sender) -> SibillaValue.and(left.apply(agent, sender), right.apply(agent, sender));
     }
 
     @Override
-    protected SibillaValue defaultResult() {
-        return SibillaValue.ERROR_VALUE;
+    protected BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> defaultResult() {
+        return (agent, sender) -> SibillaValue.ERROR_VALUE;
     }
 
 
     @Override
-    public SibillaValue visitMulDivExpression(DataOrientedPopulationModelParser.MulDivExpressionContext ctx) {
-        return SibillaValue.getOperator(ctx.op.getText()).apply(ctx.left.accept(this),ctx.right.accept(this));
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitMulDivExpression(DataOrientedPopulationModelParser.MulDivExpressionContext ctx) {
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> left = ctx.left.accept(this);
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> right = ctx.right.accept(this);
+        String operator = ctx.op.getText();
+
+        return (agent, sender) -> SibillaValue.getOperator(operator).apply(left.apply(agent,sender),right.apply(agent, sender));
     }
 
     @Override
-    public SibillaValue visitAddSubExpression(DataOrientedPopulationModelParser.AddSubExpressionContext ctx) {
-        return SibillaValue.getOperator(ctx.op.getText()).apply(ctx.left.accept(this),ctx.right.accept(this));
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue>  visitAddSubExpression(DataOrientedPopulationModelParser.AddSubExpressionContext ctx) {
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> left = ctx.left.accept(this);
+        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> right = ctx.right.accept(this);
+        String operator = ctx.op.getText();
+
+        return (agent, sender) -> SibillaValue.getOperator(operator).apply(left.apply(agent,sender),right.apply(agent, sender));
     }
 
     @Override
-    public SibillaValue visitUnaryExpression(DataOrientedPopulationModelParser.UnaryExpressionContext ctx) {
+    public BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> visitUnaryExpression(DataOrientedPopulationModelParser.UnaryExpressionContext ctx) {
         if (ctx.op.getText().equals("-")) {
-            return SibillaValue.minus(ctx.arg.accept(this));
+            BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> expr= ctx.arg.accept(this);
+            return (agent, sender) -> SibillaValue.minus(expr.apply(agent, sender));
         } else {
             return ctx.arg.accept(this);
         }
     }
 
-    public double evalDouble(DataOrientedPopulationModelParser.ExprContext expression) {
+    /*public double evalDouble(DataOrientedPopulationModelParser.ExprContext expression) {
         return expression.accept(this).doubleOf();
     }
 
     public int evalInteger(DataOrientedPopulationModelParser.ExprContext expression) {
         return expression.accept(this).intOf();
-    }
+    }*/
 
 }

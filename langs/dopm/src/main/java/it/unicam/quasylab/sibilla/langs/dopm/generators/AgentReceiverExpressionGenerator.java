@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class AgentReceiverExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<BiFunction<Agent,Agent,Agent>> {
 
@@ -22,13 +23,13 @@ public class AgentReceiverExpressionGenerator extends DataOrientedPopulationMode
     @Override
     public BiFunction<Agent,Agent,Agent> visitAgent_expression(DataOrientedPopulationModelParser.Agent_expressionContext ctx) {
         String species = ctx.name.getText();
-        Map<String, BiFunction<Agent,Agent,SibillaValue>> expressions;
+        Map<String, BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue>> expressions;
 
         if(ctx.vars != null) {
             expressions = new HashMap<>();
             for(DataOrientedPopulationModelParser.Var_assContext vctx : ctx.vars.var_ass()) {
-                expressions.put(vctx.name.getText(), (sender, receiver) -> vctx.expr().accept(
-                        new ExpressionEvaluator(receiver.getResolver(), sender.getResolver())
+                expressions.put(vctx.name.getText(), vctx.expr().accept(
+                        new ExpressionEvaluator()
                 ));
             }
         } else {
@@ -42,7 +43,7 @@ public class AgentReceiverExpressionGenerator extends DataOrientedPopulationMode
 
             if(expressions != null) {
                 expressions
-                        .forEach((key, value) -> values.put(key, value.apply(sender, receiver)));
+                        .forEach((key, value) -> values.put(key, value.apply(receiver.getResolver(), sender.getResolver())));
             }
             return new Agent(species, values);
         };
