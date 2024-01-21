@@ -59,7 +59,7 @@ public class DataOrientedPopulationState implements ImmutableState {
 
         newOccupancies = newOccupancies
                 .entrySet()
-                .parallelStream()
+                .stream()
                 .filter(entry -> entry.getValue() > 0)
                 .map(entry -> getAgentReaction(entry.getKey(), entry.getValue(), t))
                 .flatMap(reaction -> reaction.sampleDeltas(t.getSender(), this, randomGenerator))
