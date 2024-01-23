@@ -8,9 +8,7 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaBoolean;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
-import it.unicam.quasylab.sibilla.langs.dopm.evaluators.ExpressionEvaluator;
-import it.unicam.quasylab.sibilla.langs.dopm.evaluators.PopulationExpressionEvaluator;
-import it.unicam.quasylab.sibilla.langs.dopm.evaluators.TriFunction;
+import it.unicam.quasylab.sibilla.core.models.dopm.functions.ExpressionFunction;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -38,20 +36,20 @@ public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<Map<S
     }
 
     private Rule getRuleBuilder(String ruleName, DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
-        TriFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, DataOrientedPopulationState, SibillaValue> outRate = ctx.output.rate.accept(new PopulationExpressionEvaluator());
+        ExpressionFunction outRate = ctx.output.rate.accept(new ExpressionGenerator());
         OutputTransition outputTransition = new OutputTransition(
                 ctx.output.pre.accept(new AgentPredicateGenerator()),
-                (state,agent) -> outRate.apply(agent.getResolver(), n->Optional.empty(), state).doubleOf(),
+                (state,agent) -> outRate.eval(agent.getResolver(), n->Optional.empty(), state).doubleOf(),
                 ctx.output.post.accept(new AgentExpressionGenerator())
         );
         List<InputTransition> inputs = new ArrayList<>();
         for(DataOrientedPopulationModelParser.Input_transitionContext ictx : ctx.inputs.input_transition()) {
-            BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> senderPredicate = ictx.sender_predicate.accept(new ExpressionEvaluator());
-            TriFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, DataOrientedPopulationState, SibillaValue> probability = ictx.probability.accept(new PopulationExpressionEvaluator());
+            ExpressionFunction senderPredicate = ictx.sender_predicate.accept(new ExpressionGenerator());
+            ExpressionFunction probability = ictx.probability.accept(new ExpressionGenerator());
             inputs.add(new InputTransition(
                     ictx.pre.accept(new AgentPredicateGenerator()),
-                    (a) -> senderPredicate.apply(n -> Optional.empty(), a.getResolver()) == SibillaBoolean.TRUE,
-                    (state,agent) -> probability.apply(agent.getResolver(), n->Optional.empty(), state).doubleOf(),
+                    (a) -> senderPredicate.eval(n -> Optional.empty(), a.getResolver(), null) == SibillaBoolean.TRUE,
+                    (state,agent) -> probability.eval(agent.getResolver(), n->Optional.empty(), state).doubleOf(),
                     ictx.post.accept(new AgentReceiverExpressionGenerator())
             ));
         }

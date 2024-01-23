@@ -23,14 +23,11 @@
 
 package it.unicam.quasylab.sibilla.langs.dopm.generators;
 
-import it.unicam.quasylab.sibilla.core.models.dopm.DataOrientedPopulationModel;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.Agent;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulationState;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
-import it.unicam.quasylab.sibilla.langs.dopm.evaluators.ExpressionEvaluator;
-import org.apache.commons.math3.analysis.function.Log;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.*;
@@ -64,7 +61,13 @@ public class StateSetGenerator extends DataOrientedPopulationModelBaseVisitor<Ma
             if(actx.agent_expression().vars != null) {
                 for (DataOrientedPopulationModelParser.Var_assContext vctx : actx.agent_expression().vars.var_ass()) {
                     String name = vctx.name.getText();
-                    SibillaValue value = vctx.accept(new ExpressionEvaluator()).apply(n->Optional.empty(), n->Optional.empty());
+                    SibillaValue value = vctx
+                            .accept(new ExpressionGenerator())
+                            .eval(
+                                    n->Optional.empty(),
+                                    n->Optional.empty(),
+                                    null
+                            );
                     data.put(name, value);
                 }
             }

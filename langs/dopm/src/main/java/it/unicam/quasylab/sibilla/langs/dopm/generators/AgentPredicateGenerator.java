@@ -1,11 +1,11 @@
 package it.unicam.quasylab.sibilla.langs.dopm.generators;
 
+import it.unicam.quasylab.sibilla.core.models.dopm.functions.ExpressionFunction;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.Agent;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaBoolean;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
-import it.unicam.quasylab.sibilla.langs.dopm.evaluators.ExpressionEvaluator;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.*;
@@ -33,7 +33,7 @@ public class AgentPredicateGenerator extends DataOrientedPopulationModelBaseVisi
             vars = null;
         }
 
-        BiFunction<Function<String, Optional<SibillaValue>>, Function<String, Optional<SibillaValue>>, SibillaValue> predicate = ctx.predicate.accept(new ExpressionEvaluator());
+        ExpressionFunction predicate = ctx.predicate.accept(new ExpressionGenerator());
 
         return a -> {
             if(!a.getSpecies().equals(predicateSpecies)) {
@@ -46,7 +46,7 @@ public class AgentPredicateGenerator extends DataOrientedPopulationModelBaseVisi
                     }
                 }
             }
-            return predicate.apply(a.getResolver(), n -> Optional.empty()) == SibillaBoolean.TRUE;
+            return predicate.eval(a.getResolver(), n -> Optional.empty(), null) == SibillaBoolean.TRUE;
         };
     }
 }

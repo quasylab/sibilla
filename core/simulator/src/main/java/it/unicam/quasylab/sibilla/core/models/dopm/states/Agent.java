@@ -1,7 +1,9 @@
 package it.unicam.quasylab.sibilla.core.models.dopm.states;
 
+import it.unicam.quasylab.sibilla.core.models.dopm.functions.ReferenceSolverFunction;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,7 +50,7 @@ public class Agent {
         return true;
     }
 
-    public Function<String, Optional<SibillaValue>> getResolver() {
+    public ReferenceSolverFunction getResolver() {
         return name -> Optional.ofNullable(this.values.get(name));
     }
 
