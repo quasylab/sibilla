@@ -27,12 +27,10 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 public class DuplicatedSymbolException extends Exception {
     public DuplicatedSymbolException(String name, ParserRuleContext existing, ParserRuleContext duplicated) {
-        super(String.format("Symbol %s at line %d char %d is already defined at line %d char %d!",
+        super(String.format("Symbol %s at line %d is already defined at line %d!",
                 name,
                 duplicated.start.getLine(),
-                duplicated.start.getCharPositionInLine(),
-                existing.start.getLine(),
-                existing.start.getCharPositionInLine()
+                existing.start.getLine()
         ));
     }
 }

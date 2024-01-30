@@ -23,11 +23,13 @@
 
 package it.unicam.quasylab.sibilla.langs.dopm.generators;
 
+import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionContext;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.Agent;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulationState;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
+import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.*;
@@ -35,9 +37,11 @@ import java.util.function.Function;
 
 public class StateSetGenerator extends DataOrientedPopulationModelBaseVisitor<Map<String, Function<RandomGenerator, DataOrientedPopulationState>>> {
 
+    private final SymbolTable table;
     private final Map<String, Function<RandomGenerator, DataOrientedPopulationState>> stateSet;
 
-    public StateSetGenerator() {
+    public StateSetGenerator(SymbolTable table) {
+        this.table = table;
         this.stateSet = new HashMap<>();
     }
 
@@ -55,24 +59,10 @@ public class StateSetGenerator extends DataOrientedPopulationModelBaseVisitor<Ma
 
     private Function<RandomGenerator, DataOrientedPopulationState> getStateBuilder(List<DataOrientedPopulationModelParser.Agent_instantationContext> agentsctx) {
         Map<Agent, Long> occupancies = new HashMap<>();
+        AgentExpressionGenerator agentExpressionGenerator = new AgentExpressionGenerator(this.table, null, null);
         for(DataOrientedPopulationModelParser.Agent_instantationContext actx : agentsctx) {
-            String species = actx.agent_expression().name.getText();
-            Map<String, SibillaValue> data = new HashMap<>();
-            if(actx.agent_expression().vars != null) {
-                for (DataOrientedPopulationModelParser.Var_assContext vctx : actx.agent_expression().vars.var_ass()) {
-                    String name = vctx.name.getText();
-                    SibillaValue value = vctx
-                            .accept(new ExpressionGenerator())
-                            .eval(
-                                    n->Optional.empty(),
-                                    n->Optional.empty(),
-                                    null
-                            );
-                    data.put(name, value);
-                }
-            }
             Long agentPopulationSize = actx.INTEGER() == null ? 1 : Long.parseLong(actx.INTEGER().getText());
-            Agent newAgent = new Agent(species, data);
+            Agent newAgent = actx.agent_expression().accept(agentExpressionGenerator).eval(new ExpressionContext(Collections.emptyList(), Collections.emptyList(), null));
             occupancies.put(newAgent, agentPopulationSize+occupancies.getOrDefault(newAgent, 0L));
         }
         return r -> new DataOrientedPopulationState(occupancies);

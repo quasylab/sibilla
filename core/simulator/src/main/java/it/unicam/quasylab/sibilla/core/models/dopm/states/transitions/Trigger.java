@@ -1,6 +1,12 @@
 package it.unicam.quasylab.sibilla.core.models.dopm.states.transitions;
+import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionContext;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.Rule;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.Agent;
+import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulationState;
+import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions.AgentDelta;
+import org.apache.commons.math3.random.RandomGenerator;
+
+import java.util.stream.Stream;
 
 public class Trigger {
     private final Agent sender;
@@ -17,4 +23,11 @@ public class Trigger {
     public Rule getRule() {
         return rule;
     }
+
+    public Stream<AgentDelta> sampleDeltas(DataOrientedPopulationState state, RandomGenerator rg) {
+        return rule.getOutput()
+                .post()
+                .sampleDeltas(new ExpressionContext(sender.values(), state), 1, rg);
+    }
+
 }

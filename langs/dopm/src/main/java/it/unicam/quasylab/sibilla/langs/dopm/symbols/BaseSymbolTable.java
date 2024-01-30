@@ -27,19 +27,15 @@ import it.unicam.quasylab.sibilla.langs.dopm.symbols.exceptions.DuplicatedSymbol
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class BaseSymbolTable implements SymbolTable {
 
     private final HashMap<String, DataOrientedPopulationModelParser.Measure_declarationContext> measures = new HashMap<>();
 
     private final HashMap<String,DataOrientedPopulationModelParser.Predicate_declarationContext> predicates = new HashMap<>();
-
-    private final HashMap<String,DataOrientedPopulationModelParser.Species_declarationContext> species = new HashMap<>();
-
+    private final Map<String,DataOrientedPopulationModelParser.Species_declarationContext> species = new LinkedHashMap<>();
+    private final Map<String, List<Variable>> speciesVars = new LinkedHashMap<>();
     private final HashMap<String,DataOrientedPopulationModelParser.Rule_declarationContext> rules = new HashMap<>();
 
     private final HashMap<String,DataOrientedPopulationModelParser.System_declarationContext> systems = new HashMap<>();
@@ -68,6 +64,39 @@ public class BaseSymbolTable implements SymbolTable {
     public void addSpecies(String name, DataOrientedPopulationModelParser.Species_declarationContext context) throws DuplicatedSymbolException {
         checkAndThrowExceptionIfDuplicated(name,context);
         species.put(name,context);
+        this.speciesVars.put(name, new ArrayList<>());
+    }
+
+    @Override
+    public void addSpeciesVar(String species, DataOrientedPopulationModelParser.Var_declContext context) throws DuplicatedSymbolException {
+        if(this.species.containsKey(species)) {
+            if(!this.speciesVars.containsKey(species)) {
+                this.speciesVars.put(species, new ArrayList<>());
+            }
+            String varName = context.name.getText();
+            Optional<Variable> duplicate = this.speciesVars.get(species)
+                    .stream()
+                    .filter(v -> v.name().equals(varName))
+                    .findFirst();
+            if(duplicate.isPresent()) {
+                throw new DuplicatedSymbolException(context.name.getText(), duplicate.get().context(), context);
+            }
+            this.speciesVars.get(species).add(
+                    new Variable(
+                        varName,
+                        Type.fromString(context.type.getText()),
+                        context
+                    )
+            );
+        }
+    }
+    public Optional<List<Variable>> getSpeciesVariables(String name) {
+        return Optional.ofNullable(this.speciesVars.get(name));
+    }
+
+    @Override
+    public int getSpeciesId(String species) {
+        return new ArrayList<>(this.species.keySet()).indexOf(species);
     }
 
     @Override
@@ -130,6 +159,11 @@ public class BaseSymbolTable implements SymbolTable {
     @Override
     public boolean isDefined(String name) {
         return getContext(name) != null;
+    }
+
+    @Override
+    public boolean isSpeciesVarDefined(String species, String name) {
+        return false;
     }
 
     @Override

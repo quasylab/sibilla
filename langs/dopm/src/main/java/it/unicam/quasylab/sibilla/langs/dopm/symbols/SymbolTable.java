@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface SymbolTable {
@@ -16,9 +17,15 @@ public interface SymbolTable {
 
     void addSpecies(String name, DataOrientedPopulationModelParser.Species_declarationContext context) throws DuplicatedSymbolException;
 
+    void addSpeciesVar(String species, DataOrientedPopulationModelParser.Var_declContext context) throws DuplicatedSymbolException;
+
     void addRule(String name, DataOrientedPopulationModelParser.Rule_declarationContext context) throws DuplicatedSymbolException;
 
     void addSystem(String name, DataOrientedPopulationModelParser.System_declarationContext context) throws DuplicatedSymbolException;
+
+    Optional<List<Variable>> getSpeciesVariables(String species);
+
+    int getSpeciesId(String species);
 
     String[] rules();
 
@@ -37,6 +44,8 @@ public interface SymbolTable {
     ParserRuleContext getContext(String name);
 
     boolean isDefined(String name);
+
+    boolean isSpeciesVarDefined(String species, String name);
 
     DataOrientedPopulationModelParser.Species_declarationContext getSpeciesContext(String name);
 

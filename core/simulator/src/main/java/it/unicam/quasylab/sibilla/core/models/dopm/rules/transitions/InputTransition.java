@@ -1,54 +1,13 @@
 package it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions;
 
-import it.unicam.quasylab.sibilla.core.models.dopm.states.Agent;
-import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulationState;
+import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionContext;
+import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.mutations.Mutation;
 
-import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class InputTransition {
-    private Predicate<Agent> predicate;
-    private Predicate<Agent> sender_predicate;
-    private BiFunction<DataOrientedPopulationState, Agent, Double> probability;
-    private BiFunction<Agent, Agent, Agent> post;
-
-    public InputTransition(Predicate<Agent> predicate, Predicate<Agent> sender_predicate, BiFunction<DataOrientedPopulationState, Agent, Double> probability, BiFunction<Agent, Agent, Agent> post) {
-        this.predicate = predicate;
-        this.sender_predicate = sender_predicate;
-        this.probability = probability;
-        this.post = post;
-    }
-
-    public Predicate<Agent> getPredicate() {
-        return predicate;
-    }
-
-    public void setPredicate(Predicate<Agent> predicate) {
-        this.predicate = predicate;
-    }
-
-    public Predicate<Agent> getSender_predicate() {
-        return sender_predicate;
-    }
-
-    public void setSender_predicate(Predicate<Agent> sender_predicate) {
-        this.sender_predicate = sender_predicate;
-    }
-
-    public BiFunction<DataOrientedPopulationState, Agent, Double> getProbability() {
-        return probability;
-    }
-
-    public void setProbability(BiFunction<DataOrientedPopulationState, Agent, Double> probability) {
-        this.probability = probability;
-    }
-
-    public BiFunction<Agent, Agent, Agent> getPost() {
-        return post;
-    }
-
-    public void setPost(BiFunction<Agent, Agent, Agent> post) {
-        this.post = post;
-    }
+public record InputTransition(BiPredicate<Integer, ExpressionContext> predicate,
+                              Predicate<ExpressionContext> senderPredicate,
+                              Function<ExpressionContext, Double> probability, Mutation post) {
 }

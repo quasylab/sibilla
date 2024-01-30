@@ -25,7 +25,7 @@ package it.unicam.quasylab.sibilla.langs.dopm.errors;
 
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
 import it.unicam.quasylab.sibilla.langs.dopm.errors.utils.ParseUtil;
-import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolType;
+import it.unicam.quasylab.sibilla.langs.dopm.symbols.Type;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -42,11 +42,19 @@ public class ModelBuildingError {
         return new ModelBuildingError(ParseUtil.getUndefinedSymbolMessage(name,line,charPositionInLine));
     }
 
-    public static ModelBuildingError typeError(SymbolType expected, SymbolType actual, ParserRuleContext ctx) {
+    public static ModelBuildingError incorrectAgentExpression(String name, int line, int charPositionInLine) {
+        return new ModelBuildingError(ParseUtil.getIncorrectAgentExpression(name,line,charPositionInLine));
+    }
+
+    public static ModelBuildingError unexpectedType(Type e, ParserRuleContext ctx) {
+        return new ModelBuildingError(ParseUtil.getUnexpectedType(e,ctx));
+    }
+
+    public static ModelBuildingError typeError(Type expected, Type actual, ParserRuleContext ctx) {
         return new ModelBuildingError(ParseUtil.getTypeErrorMessage(expected,actual,ctx));
     }
 
-    public static ModelBuildingError expectedNumber(SymbolType t, ParserRuleContext ctx) {
+    public static ModelBuildingError expectedNumber(Type t, ParserRuleContext ctx) {
         return new ModelBuildingError(ParseUtil.getExpectedNumberMessage(t,ctx));
     }
 
@@ -54,7 +62,7 @@ public class ModelBuildingError {
         return new ModelBuildingError(ParseUtil.getIllegalUseOfAgentIdentifierMessage(reference));
     }
 
-    public static ModelBuildingError expectedBoolean(SymbolType t, ParserRuleContext ctx) {
+    public static ModelBuildingError expectedBoolean(Type t, ParserRuleContext ctx) {
         return new ModelBuildingError(ParseUtil.getExpectedBooleanMessage(t,ctx));
     }
 

@@ -1,10 +1,12 @@
 package it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions;
 
+import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionContext;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.InputTransition;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.Agent;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulationState;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 public class InputReaction implements Reaction {
@@ -32,15 +34,15 @@ public class InputReaction implements Reaction {
 
     @Override
     public Stream<AgentDelta> sampleDeltas(Agent sender, DataOrientedPopulationState state, RandomGenerator rg) {
+        double probability = input.probability().apply(new ExpressionContext(agent.values(),null, state));
         long transitioning = Stream.generate(rg::nextDouble)
                 .limit(this.total)
-                .filter(result -> result <= input.getProbability().apply(state, this.agent))
+                .filter(result -> result <= probability)
                 .count();
-        Stream<AgentDelta> transitionedStream = Stream
-                .generate(() -> new AgentDelta(input.getPost().apply(sender, this.agent), 1))
-                .limit(transitioning);
+        Stream<AgentDelta> result = input.post()
+                .sampleDeltas(new ExpressionContext(agent.values(), sender.values(), state), transitioning, rg);
         return transitioning < this.total
-                ? Stream.concat(Stream.of(new AgentDelta(agent, total - transitioning)), transitionedStream)
-                : transitionedStream;
+                ? Stream.concat(Stream.of(new AgentDelta(agent, total-transitioning)), result)
+                : result;
     }
 }

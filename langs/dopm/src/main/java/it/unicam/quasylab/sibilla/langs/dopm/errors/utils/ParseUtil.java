@@ -24,7 +24,7 @@
 package it.unicam.quasylab.sibilla.langs.dopm.errors.utils;
 
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
-import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolType;
+import it.unicam.quasylab.sibilla.langs.dopm.symbols.Type;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -35,10 +35,12 @@ public class ParseUtil {
     public static final String DUPLICATED_SYMBOL_ERROR_MESSAGE = "Symbol %s at line %d char %d is already defined at line %d char %d!";
     public static final String DUPLICATED_LOCAL_VARIABLE_MESSAGE = "Duplicated Local variable %s at line %d char %d!";
     public static final String UNDEFINED_SYMBOL_ERROR_MESSAGE = "Unknown symbol %s at line %d char %d!";
+    public static final String INCORRECT_AGENT_EXPRESSION= "Incorrect agent expression at line %d char %d!";
     public static final String EXPRESSION_TYPE_ERROR_MESSAGE = "Type error at line %d char %d: expected %s is %s!";
     public static final String EXPECTED_NUMBER_MESSAGE = "Expression at line %d char %d: expected int or real is %s!";
     public static final String ILLEGAL_USE_OF_AGENT_IDENTIFIER_MESSAGE = "Illegal use of agent identifier %s at line %d char %d!";
     public static final String EXPECTED_BOOLEAN_MESSAGE = "Expression at line %d char %d: expected a boolean is %s!";
+    public static final String UNEXPECTED_TYPE = "Expression at line %d char %d: expected %s!";
     public static final String ILLEGAL_POPULATION_EXPRESSION_MESSAGE = "Population expression is not allowed at line %d char %d!";
     public static final String ILLEGAL_USE_OF_NAME_MESSAGE = "Name %s cannot be used at line %d char %d!";
     public static final String ILLEGAL_TIME_EXPRESSION_MESSAGE = "Time dependent expression is not allowed at line %d char %d!";
@@ -66,6 +68,9 @@ public class ParseUtil {
                 existing.start.getCharPositionInLine()
         );
     }
+    public static String getIncorrectAgentExpression(String name, int line, int charPosition) {
+        return String.format(INCORRECT_AGENT_EXPRESSION,line,charPosition);
+    }
 
     public static String getUndefinedSymbolMessage(String name, int line, int charPosition) {
         return String.format(UNDEFINED_SYMBOL_ERROR_MESSAGE,name,line,charPosition);
@@ -75,19 +80,23 @@ public class ParseUtil {
         return String.format(DUPLICATED_LOCAL_VARIABLE_MESSAGE,name,line,charPosition);
     }
 
-    public static String getTypeErrorMessage(SymbolType expected, SymbolType actual, ParserRuleContext ctx) {
+    public static String getTypeErrorMessage(Type expected, Type actual, ParserRuleContext ctx) {
         return String.format(EXPRESSION_TYPE_ERROR_MESSAGE,ctx.start.getLine(),ctx.start.getCharPositionInLine(),expected.toString(),actual.toString());
     }
 
-    public static String getExpectedNumberMessage(SymbolType t, ParserRuleContext ctx) {
+    public static String getExpectedNumberMessage(Type t, ParserRuleContext ctx) {
         return String.format(EXPECTED_NUMBER_MESSAGE,ctx.start.getLine(),ctx.start.getCharPositionInLine(),t.toString());
+    }
+
+    public static String getUnexpectedType(Type e, ParserRuleContext ctx) {
+        return String.format(UNEXPECTED_TYPE,ctx.start.getLine(),ctx.start.getCharPositionInLine(),e.toString());
     }
 
     public static String getIllegalUseOfAgentIdentifierMessage(Token reference) {
         return String.format(ILLEGAL_USE_OF_AGENT_IDENTIFIER_MESSAGE,reference.getText(),reference.getLine(),reference.getCharPositionInLine());
     }
 
-    public static String getExpectedBooleanMessage(SymbolType t, ParserRuleContext ctx) {
+    public static String getExpectedBooleanMessage(Type t, ParserRuleContext ctx) {
         return String.format(EXPECTED_BOOLEAN_MESSAGE,ctx.start.getLine(),ctx.start.getCharPositionInLine(),t.toString());
     }
 

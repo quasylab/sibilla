@@ -23,19 +23,17 @@
 package it.unicam.quasylab.sibilla.core.models.dopm.states;
 
 import it.unicam.quasylab.sibilla.core.models.ImmutableState;
-import it.unicam.quasylab.sibilla.core.models.StepFunction;
-import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.InputTransition;
+import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionContext;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions.AgentDelta;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions.InputReaction;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.Trigger;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions.NoReaction;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions.Reaction;
-import it.unicam.quasylab.sibilla.core.simulator.util.WeightedElement;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Collector;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -56,19 +54,18 @@ public class DataOrientedPopulationState implements ImmutableState {
     public DataOrientedPopulationState applyRule(Trigger t, RandomGenerator randomGenerator) {
         Map<Agent, Long> newOccupancies = new HashMap<>(this.agents);
         newOccupancies.put(t.getSender(), newOccupancies.get(t.getSender()) - 1);
-
-        newOccupancies = newOccupancies
-                .entrySet()
-                .stream()
-                .filter(entry -> entry.getValue() > 0)
-                .map(entry -> getAgentReaction(entry.getKey(), entry.getValue(), t))
-                .flatMap(reaction -> reaction.sampleDeltas(t.getSender(), this, randomGenerator))
-                .collect(Collectors.groupingBy(AgentDelta::agent, Collectors.summingLong(AgentDelta::delta)));
-
-        Agent senderNew = t.getRule().getOutput().getPost().apply(t.getSender());
-        newOccupancies.put(senderNew, newOccupancies.getOrDefault(senderNew, 0L) + 1);
-
-        return new DataOrientedPopulationState(newOccupancies);
+        return new DataOrientedPopulationState(
+                Stream.concat(
+                    newOccupancies
+                        .entrySet()
+                        .stream()
+                        .filter(entry -> entry.getValue() > 0)
+                        .map(entry -> getAgentReaction(entry.getKey(), entry.getValue(), t))
+                        .flatMap(reaction -> reaction.sampleDeltas(t.getSender(), this, randomGenerator)),
+                    t.sampleDeltas(this, randomGenerator)
+                )
+                .collect(Collectors.groupingBy(AgentDelta::agent, Collectors.summingLong(AgentDelta::delta)))
+        );
     }
 
     private Reaction getAgentReaction(Agent agent, Long numberOf, Trigger trigger) {
@@ -76,7 +73,10 @@ public class DataOrientedPopulationState implements ImmutableState {
                 .getRule()
                 .getInputs()
                 .stream()
-                .filter(i -> i.getSender_predicate().test(trigger.getSender()) && i.getPredicate().test(agent))
+                .filter(i ->
+                    i.senderPredicate().test(new ExpressionContext(null, trigger.getSender().values(), this)) &&
+                    i.predicate().test(agent.species(), new ExpressionContext(agent.values(), this))
+                )
                 .findFirst()
                 .map(i -> (Reaction)new InputReaction(agent, numberOf, i))
                 .orElse(new NoReaction(agent, numberOf));
@@ -86,14 +86,14 @@ public class DataOrientedPopulationState implements ImmutableState {
         return agents;
     }
 
-    public double fractionOf(Predicate<Agent> predicate) {
+    public double fractionOf(BiPredicate<Integer, ExpressionContext> predicate) {
         return this.numberOf(predicate) / (double)populationSize;
     }
 
-    public double numberOf(Predicate<Agent> predicate) {
+    public double numberOf(BiPredicate<Integer, ExpressionContext> predicate) {
         return agents.entrySet()
                 .stream()
-                .filter(e -> predicate.test(e.getKey()))
+                .filter(e -> predicate.test(e.getKey().species(), new ExpressionContext(e.getKey().values(), this)))
                 .map(Map.Entry::getValue)
                 .reduce(0L, Long::sum);
     }

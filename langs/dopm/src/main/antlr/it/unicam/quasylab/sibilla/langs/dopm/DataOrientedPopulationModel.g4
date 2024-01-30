@@ -12,6 +12,10 @@ element : species_declaration
         | measure_declaration
         | predicate_declaration;
 
+species_declaration : 'species' name=ID (vars='{' var_decl (',' var_decl)* '}')? ';';
+
+var_decl : name=ID ':' type=('integer'|'real'|'boolean');
+
 system_declaration: 'system' name=ID '='  agents=system_composition ';' ;
 
 system_composition :
@@ -19,8 +23,6 @@ system_composition :
     ;
 
 agent_instantation : agent_expression('#'INTEGER)?;
-
-species_declaration : 'species' name=ID ';';
 
 rule_declaration    :
     'rule' name=ID '{'
@@ -31,32 +33,39 @@ rule_declaration    :
 rule_body : output=output_transition '|>' inputs=input_transition_list ;
 
 agent_predicate:
-    name=ID ('[' (vars=var_list ':')? predicate=expr ']')?
+    name=ID ('[' predicate=expr ']')?
     ;
-
-var_list: '(' name=ID (',' name=ID)* ')';
 
 output_transition :
         pre = agent_predicate
         '-[' rate=expr ']->'
-        post = agent_expression
+        post = agent_mutation
+    ;
+
+input_transition :
+        pre = agent_predicate
+        '-[' sender_predicate=expr ':' probability=expr ']->'
+        post = agent_mutation
     ;
 
 input_transition_list :
     input = input_transition (',' input=input_transition)*
     ;
 
-input_transition :
-        pre = agent_predicate
-        '-[' sender_predicate=expr ':' probability=expr ']->'
-        post = agent_expression
+agent_mutation :
+    deterministic_mutation = agent_expression
+    | '{' tuples = stochastic_mutation_tuple (',' stochastic_mutation_tuple)* '}'
+    ;
+
+stochastic_mutation_tuple :
+    '(' agent_expression ':' expr ')'
     ;
 
 agent_expression:
     name=ID vars=var_ass_list
     ;
 
-var_ass_list : '[' (var_ass)? (',' var_ass)? ']';
+var_ass_list : '[' (var_ass)? (',' var_ass)* ']';
 var_ass : name=ID '=' value=expr;
 
 measure_declaration : 'measure' name=ID '=' expr ';';
