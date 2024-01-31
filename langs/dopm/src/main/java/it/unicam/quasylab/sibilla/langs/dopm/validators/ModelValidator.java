@@ -60,7 +60,7 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
             this.errors.add(ModelBuildingError.duplicatedName(name, this.table.getContext(name), ctx));
             return false;
         }
-        return ctx.expr().accept(new ExpressionValidator(this.table, this.errors, new ArrayList<>(), Type.REAL));
+        return ctx.expr().accept(new PopulationExpressionValidator(this.table, this.errors, new ArrayList<>(), Type.REAL));
     }
 
     @Override
@@ -73,7 +73,7 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
             this.errors.add(ModelBuildingError.duplicatedName(name, this.table.getContext(name), ctx));
             return false;
         }
-        return ctx.expr().accept(new ExpressionValidator(this.table, this.errors, new ArrayList<>(), Type.BOOLEAN));
+        return ctx.expr().accept(new PopulationExpressionValidator(this.table, this.errors, new ArrayList<>(), Type.BOOLEAN));
     }
     @Override
     public Boolean visitSystem_declaration(DataOrientedPopulationModelParser.System_declarationContext ctx) {
@@ -96,9 +96,9 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
         return true;
     }
     private Boolean checkAgentInstantation(DataOrientedPopulationModelParser.Agent_instantationContext ctx) {
-        return checkAgentExpression(ctx.agent_expression(), new ArrayList<>());
+        return checkAgentExpression(ctx.agent_expression(), new ArrayList<>(), false);
     }
-    private Boolean checkAgentExpression(DataOrientedPopulationModelParser.Agent_expressionContext ctx, List<Variable> acessibleVariables) {
+    private Boolean checkAgentExpression(DataOrientedPopulationModelParser.Agent_expressionContext ctx, List<Variable> acessibleVariables, boolean modelContext) {
         String species = ctx.name.getText();
         if(!this.table.isASpecies(species)) {
             this.errors.add(ModelBuildingError.unknownSymbol(species, ctx.name.getLine(), ctx.name.getCharPositionInLine()));
@@ -123,12 +123,18 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
                 );
                 return false;
             }
-            ExpressionValidator validator = new ExpressionValidator(
-                    this.table,
-                    this.errors,
-                    acessibleVariables,
-                    currentSpeciesVariable.type()
-            );
+            ExpressionValidator validator = modelContext ? new PopulationExpressionValidator(
+                                                                this.table,
+                                                                this.errors,
+                                                                acessibleVariables,
+                                                                currentSpeciesVariable.type()
+                                                         )
+                                                         : new ExpressionValidator(
+                                                                this.table,
+                                                                this.errors,
+                                                                acessibleVariables,
+                                                                currentSpeciesVariable.type()
+                                                         );
             if(!currentAssContext.expr().accept(validator)) {
                 return false;
             }
@@ -171,30 +177,30 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
             return false;
         }
         variables.addAll(this.table.getSpeciesVariables(ctx.pre.name.getText()).orElse(new ArrayList<>()));
-        return ctx.rate.accept(new ExpressionValidator(this.table, this.errors, variables, Type.REAL)) &&
+        return ctx.rate.accept(new PopulationExpressionValidator(this.table, this.errors, variables, Type.REAL)) &&
                checkAgentMutation(ctx.post, variables);
     }
 
     private Boolean checkInputTransition(DataOrientedPopulationModelParser.Input_transitionContext ctx, List<Variable> variables) {
         if(
                 !ctx.pre.accept(this) ||
-                !ctx.sender_predicate.accept(new ExpressionValidator(this.table, this.errors, variables, Type.BOOLEAN))
+                !ctx.sender_predicate.accept(new PopulationExpressionValidator(this.table, this.errors, variables, Type.BOOLEAN))
         ) {
             return false;
         }
         variables.addAll(this.table.getSpeciesVariables(ctx.pre.name.getText()).orElse(new ArrayList<>()));
-        return ctx.probability.accept(new ExpressionValidator(this.table, this.errors, variables, Type.REAL)) &&
+        return ctx.probability.accept(new PopulationExpressionValidator(this.table, this.errors, variables, Type.REAL)) &&
                checkAgentMutation(ctx.post, variables);
     }
 
     private Boolean checkAgentMutation(DataOrientedPopulationModelParser.Agent_mutationContext ctx, List<Variable> variables) {
         if(ctx.deterministic_mutation != null) {
-            return checkAgentExpression(ctx.deterministic_mutation, variables);
+            return checkAgentExpression(ctx.deterministic_mutation, variables, true);
         }
         for(DataOrientedPopulationModelParser.Stochastic_mutation_tupleContext tctx : ctx.stochastic_mutation_tuple()) {
             if(
-                    !tctx.expr().accept(new ExpressionValidator(this.table, this.errors, variables, Type.REAL)) ||
-                    !checkAgentExpression(tctx.agent_expression(), variables)
+                    !tctx.expr().accept(new PopulationExpressionValidator(this.table, this.errors, variables, Type.REAL)) ||
+                    !checkAgentExpression(tctx.agent_expression(), variables, true)
             ) {
                 return false;
             }
@@ -204,7 +210,7 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
 
     @Override
     public Boolean visitAgent_predicate(DataOrientedPopulationModelParser.Agent_predicateContext ctx) {
-        return ctx.accept(new ExpressionValidator(this.table, this.errors, new ArrayList<>(), Type.BOOLEAN));
+        return ctx.accept(new PopulationExpressionValidator(this.table, this.errors, new ArrayList<>(), Type.BOOLEAN));
     }
     public List<ModelBuildingError> getErrors() {
                                                         return errors;

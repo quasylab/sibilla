@@ -2,6 +2,7 @@ package it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions
 
 import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionContext;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.InputTransition;
+import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.mutations.MutationResult;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.Agent;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulationState;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -39,10 +40,11 @@ public class InputReaction implements Reaction {
                 .limit(this.total)
                 .filter(result -> result <= probability)
                 .count();
-        Stream<AgentDelta> result = input.post()
+        MutationResult result = input.post()
                 .sampleDeltas(new ExpressionContext(agent.values(), sender.values(), state), transitioning, rg);
+        transitioning -= result.nonMutated();
         return transitioning < this.total
-                ? Stream.concat(Stream.of(new AgentDelta(agent, total-transitioning)), result)
-                : result;
+                ? Stream.concat(Stream.of(new AgentDelta(agent, total-transitioning)), result.agentDeltaStream())
+                : result.agentDeltaStream();
     }
 }

@@ -1,76 +1,74 @@
-grammar DataOrientedPopulationModel;
+grammar ExtendedNBA;
 
 @header {
-package it.unicam.quasylab.sibilla.langs.dopm;
+package it.unicam.quasylab.sibilla.langs.enba;
 }
 
 model   : element* EOF;
 
-element : species_declaration
-        | rule_declaration
+element : process_declaration
+        | channel_declaration
         | system_declaration
         | measure_declaration
         | predicate_declaration;
 
-species_declaration : 'species' name=ID (vars='{' var_decl (',' var_decl)* '}')? ';';
+measure_declaration : 'measure' name=ID '=' expr ';';
+
+predicate_declaration: 'predicate' name=ID '=' expr ';';
+
+channel_declaration : 'channel' name=ID ';';
+
+process_declaration : 'process' name=ID (vars='('var_decl (',' var_decl)*')')? '{'
+    body=process_body
+'}';
+
+process_body : choice_process
+             | conditional_process
+             | nil_process
+             ;
+
+choice_process : actions=action '.' process_mutation ('+' action '.' process_mutation)*;
+
+action : broadcast_output_action
+       | broadcast_input_action
+       ;
+
+broadcast_output_action : channel=ID '*' '<' rate=expr '>' '[' predicate=expr ']' '!';
+broadcast_input_action : channel=ID '*' '<' probability=expr '>' '[' predicate=expr ']' '?';
+
+conditional_process : '['predicate=expr']' then=process_body ':' else=process_body;
+
+nil_process : '_';
 
 var_decl : name=ID ':' type=('integer'|'real'|'boolean');
 
-system_declaration: 'system' name=ID '='  agents=system_composition ';' ;
+system_declaration: 'system' name=ID '='  processs=system_composition ';' ;
 
 system_composition :
-    agent_instantation ('|' agent_instantation)*
+    process_instantation ('|' process_instantation)*
     ;
 
-agent_instantation : agent_expression('#'INTEGER)?;
+process_instantation : process_expression('#'INTEGER)?;
 
-rule_declaration    :
-    'rule' name=ID '{'
-        body=rule_body
-    '}'
-    ;
-
-rule_body : output=output_transition '|>' inputs=input_transition_list ;
-
-agent_predicate:
-    name=ID ('[' predicate=expr ']')?
-    ;
-
-output_transition :
-        pre = agent_predicate
-        '-[' rate=expr ']->'
-        post = agent_mutation
-    ;
-
-input_transition :
-        pre = agent_predicate
-        '-[' sender_predicate=expr ':' probability=expr ']->'
-        post = agent_mutation
-    ;
-
-input_transition_list :
-    input = input_transition (',' input=input_transition)*
-    ;
-
-agent_mutation :
-    deterministic_mutation = agent_expression
+process_mutation :
+    deterministic_mutation = process_expression
     | '{' tuples = stochastic_mutation_tuple ('+' stochastic_mutation_tuple)* '}'
     ;
 
 stochastic_mutation_tuple :
-    '(' agent_expression ':' expr ')'
+    '(' process_expression ':' expr ')'
     ;
 
-agent_expression:
+process_expression:
     name=ID vars=var_ass_list
     ;
 
 var_ass_list : '[' (var_ass)? (',' var_ass)* ']';
 var_ass : name=ID '=' value=expr;
 
-measure_declaration : 'measure' name=ID '=' expr ';';
-
-predicate_declaration: 'predicate' name=ID '=' expr ';';
+process_predicate:
+    name=ID ('[' predicate=expr ']')?
+    ;
 
 expr    :
       left=expr op=('&'|'&&') right=expr                      # andExpression
@@ -87,12 +85,11 @@ expr    :
     | REAL                                         # realValue
     | 'false'                                      # falseValue
     | 'true'                                       # trueValue
-    | '%' agent=agent_predicate                                      # populationFractionExpression
-    | '#' agent=agent_predicate                                       # populationSizeExpression
+    | '%' process=process_predicate                                      # populationFractionExpression
+    | '#' process=process_predicate                                       # populationSizeExpression
     | reference='sender.'ID                                 # senderReferenceExpression
     | reference=ID                                 # referenceExpression
     ;
-
 
 fragment DIGIT  :   [0-9];
 fragment LETTER :   [a-zA-Z_];

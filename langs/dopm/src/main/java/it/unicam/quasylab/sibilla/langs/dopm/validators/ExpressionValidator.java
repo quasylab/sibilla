@@ -12,10 +12,10 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.*;
 
 public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<Boolean> {
-    private final SymbolTable table;
-    private final List<ModelBuildingError> errors;
-    private final List<Variable> localVariables;
-    private final Type type;
+    protected final SymbolTable table;
+    protected final List<ModelBuildingError> errors;
+    protected final List<Variable> localVariables;
+    protected final Type type;
 
     public ExpressionValidator(SymbolTable table, List<ModelBuildingError> errors, List<Variable> localVariables, Type type) {
         this.table = table;
@@ -24,7 +24,7 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
         this.type = type;
     }
 
-    private boolean checkAssignment(Type assignment, ParserRuleContext ctx) {
+    protected boolean checkAssignment(Type assignment, ParserRuleContext ctx) {
         if(!type.assignmentCompatible(assignment)) {
             this.errors.add(ModelBuildingError.unexpectedType(type,  ctx));
             return false;
@@ -32,7 +32,7 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
         return true;
     }
 
-    private boolean checkReference(String name, ParserRuleContext ctx) {
+    protected boolean checkReference(String name, ParserRuleContext ctx) {
         Optional<Variable> var = localVariables.stream().filter(v -> v.name().equals(name)).findFirst();
         if(var.isEmpty()) {
             this.errors.add(ModelBuildingError.unknownSymbol(name, ctx.start.getLine(), ctx.start.getCharPositionInLine()));
@@ -140,27 +140,12 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
     }
     @Override
     public Boolean visitPopulationFractionExpression(DataOrientedPopulationModelParser.PopulationFractionExpressionContext ctx) {
-        if(!checkAssignment(Type.REAL, ctx)) {
-            return false;
-        }
-        return ctx.agent.accept(this);
+        this.errors.add(ModelBuildingError.illegalPopulationExpression(ctx));
+        return false;
     }
     @Override
     public Boolean visitPopulationSizeExpression(DataOrientedPopulationModelParser.PopulationSizeExpressionContext ctx) {
-        if(!checkAssignment(Type.INTEGER, ctx)) {
-            return false;
-        }
-        return ctx.agent.accept(this);
-    }
-    @Override
-    public Boolean visitAgent_predicate(DataOrientedPopulationModelParser.Agent_predicateContext ctx) {
-        String species = ctx.name.getText();
-        if(!this.table.isASpecies(species)) {
-            this.errors.add(ModelBuildingError.unknownSymbol(species, ctx.name.getLine(), ctx.name.getCharPositionInLine()));
-            return false;
-        }
-        List<Variable> predicateVariables = this.table.getSpeciesVariables(species).orElse(new ArrayList<>());
-        ExpressionValidator booleanValidator = new ExpressionValidator(this.table, this.errors, predicateVariables, Type.BOOLEAN);
-        return ctx.expr().accept(booleanValidator);
+        this.errors.add(ModelBuildingError.illegalPopulationExpression(ctx));
+        return false;
     }
 }

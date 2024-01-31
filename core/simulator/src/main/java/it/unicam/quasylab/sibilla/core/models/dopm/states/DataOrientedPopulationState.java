@@ -54,6 +54,7 @@ public class DataOrientedPopulationState implements ImmutableState {
     public DataOrientedPopulationState applyRule(Trigger t, RandomGenerator randomGenerator) {
         Map<Agent, Long> newOccupancies = new HashMap<>(this.agents);
         newOccupancies.put(t.getSender(), newOccupancies.get(t.getSender()) - 1);
+        RandomGenerator sr = new SplittableRandomGenerator(randomGenerator.nextLong());
         return new DataOrientedPopulationState(
                 Stream.concat(
                     newOccupancies
@@ -61,8 +62,8 @@ public class DataOrientedPopulationState implements ImmutableState {
                         .stream()
                         .filter(entry -> entry.getValue() > 0)
                         .map(entry -> getAgentReaction(entry.getKey(), entry.getValue(), t))
-                        .flatMap(reaction -> reaction.sampleDeltas(t.getSender(), this, randomGenerator)),
-                    t.sampleDeltas(this, randomGenerator)
+                        .flatMap(reaction -> reaction.sampleDeltas(t.getSender(), this, sr)),
+                    t.sampleDeltas(this, sr)
                 )
                 .collect(Collectors.groupingBy(AgentDelta::agent, Collectors.summingLong(AgentDelta::delta)))
         );

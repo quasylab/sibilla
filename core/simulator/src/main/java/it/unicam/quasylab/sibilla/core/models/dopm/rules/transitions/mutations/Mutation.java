@@ -8,5 +8,5 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.util.stream.Stream;
 
 public interface Mutation {
-    Stream<AgentDelta> sampleDeltas(ExpressionContext context, long numberOf, RandomGenerator rg) ;
+    MutationResult sampleDeltas(ExpressionContext context, long numberOf, RandomGenerator rg) ;
 }

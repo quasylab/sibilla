@@ -17,7 +17,7 @@ public class DeterministicMutation implements Mutation {
     }
 
     @Override
-    public Stream<AgentDelta> sampleDeltas(ExpressionContext context, long numberOf, RandomGenerator rg) {
-        return Stream.of(new AgentDelta(agentExpressionFunction.eval(context), numberOf));
+    public MutationResult sampleDeltas(ExpressionContext context, long numberOf, RandomGenerator rg) {
+        return new MutationResult(Stream.of(new AgentDelta(agentExpressionFunction.eval(context), numberOf)), 0);
     }
 }
