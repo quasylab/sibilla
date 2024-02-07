@@ -7,7 +7,6 @@ import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
 import it.unicam.quasylab.sibilla.langs.dopm.symbols.Type;
 import it.unicam.quasylab.sibilla.langs.dopm.symbols.Variable;
 import it.unicam.quasylab.sibilla.langs.dopm.symbols.exceptions.DuplicatedSymbolException;
-import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.*;
 
@@ -89,14 +88,14 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
     }
     @Override
     public Boolean visitSystem_composition(DataOrientedPopulationModelParser.System_compositionContext ctx) {
-        for(DataOrientedPopulationModelParser.Agent_instantationContext actx : ctx.agent_instantation()) {
-            if(!checkAgentInstantation(actx)) {
+        for(DataOrientedPopulationModelParser.System_componentContext sctx : ctx.system_component()) {
+            if(!checkSystemComponent(sctx)) {
                 return false;
             }
         }
         return true;
     }
-    private Boolean checkAgentInstantation(DataOrientedPopulationModelParser.Agent_instantationContext ctx) {
+    private Boolean checkSystemComponent(DataOrientedPopulationModelParser.System_componentContext ctx) {
         return checkAgentExpression(ctx.agent_expression(), new ArrayList<>(), false);
     }
     private Boolean checkAgentExpression(DataOrientedPopulationModelParser.Agent_expressionContext ctx, List<Variable> acessibleVariables, boolean modelContext) {

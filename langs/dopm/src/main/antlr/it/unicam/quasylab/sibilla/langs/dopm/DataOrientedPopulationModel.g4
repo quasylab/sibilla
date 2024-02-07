@@ -19,10 +19,10 @@ var_decl : name=ID ':' type=('integer'|'real'|'boolean');
 system_declaration: 'system' name=ID '='  agents=system_composition ';' ;
 
 system_composition :
-    agent_instantation ('|' agent_instantation)*
+    system_component ('|' system_component)*
     ;
 
-agent_instantation : agent_expression('#'INTEGER)?;
+system_component : agent_expression('#'INTEGER)?;
 
 rule_declaration    :
     'rule' name=ID '{'

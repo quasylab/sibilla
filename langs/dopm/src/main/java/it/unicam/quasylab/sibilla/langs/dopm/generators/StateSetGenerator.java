@@ -53,16 +53,16 @@ public class StateSetGenerator extends DataOrientedPopulationModelBaseVisitor<Ma
 
     @Override
     public Map<String, Function<RandomGenerator, DataOrientedPopulationState>> visitSystem_declaration(DataOrientedPopulationModelParser.System_declarationContext ctx) {
-        this.stateSet.put(ctx.name.getText(), getStateBuilder(ctx.agents.agent_instantation()));
+        this.stateSet.put(ctx.name.getText(), getStateBuilder(ctx.agents.system_component()));
         return stateSet;
     }
 
-    private Function<RandomGenerator, DataOrientedPopulationState> getStateBuilder(List<DataOrientedPopulationModelParser.Agent_instantationContext> agentsctx) {
+    private Function<RandomGenerator, DataOrientedPopulationState> getStateBuilder(List<DataOrientedPopulationModelParser.System_componentContext> systemComponentsctx) {
         Map<Agent, Long> occupancies = new HashMap<>();
         AgentExpressionGenerator agentExpressionGenerator = new AgentExpressionGenerator(this.table, null, null);
-        for(DataOrientedPopulationModelParser.Agent_instantationContext actx : agentsctx) {
-            Long agentPopulationSize = actx.INTEGER() == null ? 1 : Long.parseLong(actx.INTEGER().getText());
-            Agent newAgent = actx.agent_expression().accept(agentExpressionGenerator).eval(new ExpressionContext(Collections.emptyList(), Collections.emptyList(), null));
+        for(DataOrientedPopulationModelParser.System_componentContext sctx : systemComponentsctx) {
+            Long agentPopulationSize = sctx.INTEGER() == null ? 1 : Long.parseLong(sctx.INTEGER().getText());
+            Agent newAgent = sctx.agent_expression().accept(agentExpressionGenerator).eval(new ExpressionContext(Collections.emptyList(), Collections.emptyList(), null));
             occupancies.put(newAgent, agentPopulationSize+occupancies.getOrDefault(newAgent, 0L));
         }
         return r -> new DataOrientedPopulationState(occupancies);
