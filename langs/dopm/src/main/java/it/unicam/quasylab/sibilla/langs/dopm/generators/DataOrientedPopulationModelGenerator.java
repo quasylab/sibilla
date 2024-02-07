@@ -51,8 +51,6 @@ public class DataOrientedPopulationModelGenerator {
     private final List<ModelBuildingError> errorList = new LinkedList<>();
     private ModelValidator validator;
     private boolean validated = false;
-    private EvaluationEnvironment environment;
-
 
     public DataOrientedPopulationModelGenerator(String code) {
         this(CharStreams.fromString(code));
@@ -95,10 +93,10 @@ public class DataOrientedPopulationModelGenerator {
             throw new ModelGenerationException(this.errorList);
         }
         return new DataOrientedPopulationModelDefinition(
-                this.parseTree.accept(new StateSetGenerator()),
-                this.parseTree.accept(new MeasuresGenerator()),
-                this.parseTree.accept(new PredicatesGenerator()),
-                this.parseTree.accept(new RulesGenerator())
+                this.parseTree.accept(new StateSetGenerator(this.validator.getTable())),
+                this.parseTree.accept(new MeasuresGenerator(this.validator.getTable())),
+                this.parseTree.accept(new PredicatesGenerator(this.validator.getTable())),
+                this.parseTree.accept(new RulesGenerator(this.validator.getTable()))
                 );
     }
 

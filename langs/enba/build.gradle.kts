@@ -21,16 +21,7 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.langs.dopm.symbols.exceptions;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-
-public class DuplicatedSymbolException extends Exception {
-    public DuplicatedSymbolException(String name, ParserRuleContext existing, ParserRuleContext duplicated) {
-        super(String.format("Symbol %s at line %d is already defined at line %d!",
-                name,
-                duplicated.start.getLine(),
-                existing.start.getLine()
-        ));
-    }
+plugins {
+    id("it.unicam.quasylab.sibilla.api-lang-conventions")
 }

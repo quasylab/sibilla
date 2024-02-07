@@ -1,19 +1,23 @@
 package it.unicam.quasylab.sibilla.langs.dopm.generators;
 
+import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionContext;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SimpleMeasure;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
-import it.unicam.quasylab.sibilla.langs.dopm.evaluators.PopulationExpressionEvaluator;
+import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionFunction;
+import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
 
 import java.util.*;
 
 public class MeasuresGenerator extends DataOrientedPopulationModelBaseVisitor<Map<String, Measure<DataOrientedPopulationState>>> {
 
-    private Map<String, Measure<DataOrientedPopulationState>> measures;
+    private final SymbolTable table;
+    private final Map<String, Measure<DataOrientedPopulationState>> measures;
 
-    public MeasuresGenerator() {
+    public MeasuresGenerator(SymbolTable table) {
+        this.table = table;
         this.measures = new Hashtable<>();
     }
 
@@ -31,9 +35,11 @@ public class MeasuresGenerator extends DataOrientedPopulationModelBaseVisitor<Ma
     }
 
     private Measure<DataOrientedPopulationState> getMeasureBuilder(DataOrientedPopulationModelParser.Measure_declarationContext ctx) {
+        ExpressionFunction measurefunction = ctx.expr().accept(new ExpressionGenerator(this.table, null, null));
+
         return new SimpleMeasure<DataOrientedPopulationState>(
                 ctx.name.getText(),
-                state -> ctx.expr().accept(new PopulationExpressionEvaluator(state)).doubleOf()
+                state -> measurefunction.eval(new ExpressionContext(Collections.emptyList(), Collections.emptyList(), state)).doubleOf()
         );
     }
 

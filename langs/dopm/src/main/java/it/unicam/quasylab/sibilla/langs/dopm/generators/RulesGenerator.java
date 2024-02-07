@@ -1,21 +1,25 @@
 package it.unicam.quasylab.sibilla.langs.dopm.generators;
 
+import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionContext;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.InputTransition;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.OutputTransition;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.Rule;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaBoolean;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
-import it.unicam.quasylab.sibilla.langs.dopm.evaluators.ExpressionEvaluator;
-import it.unicam.quasylab.sibilla.langs.dopm.evaluators.PopulationExpressionEvaluator;
+import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionFunction;
+import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
 
 import java.util.*;
+import java.util.function.BiPredicate;
 
 public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<Map<String, Rule>> {
 
-    private Map<String, Rule> rules;
+    private final SymbolTable table;
+    private final Map<String, Rule> rules;
 
-    public RulesGenerator() {
+    public RulesGenerator(SymbolTable table) {
+        this.table = table;
         this.rules = new Hashtable<>();
     }
 
@@ -28,33 +32,38 @@ public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<Map<S
 
     @Override
     public Map<String, Rule> visitRule_declaration(DataOrientedPopulationModelParser.Rule_declarationContext ctx) {
-        rules.put(ctx.name.getText(), getRuleBuilder(ctx.name.getText(), ctx.body));
+        rules.put(ctx.name.getText(), getRule(ctx.name.getText(), ctx.body));
         return rules;
     }
 
-    private Rule getRuleBuilder(String ruleName, DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
+    private Rule getRule(String ruleName, DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
+        String species = ctx.output.pre.name.getText();
+        ExpressionFunction outRate = ctx.output.rate.accept(new ExpressionGenerator(this.table, species, null));
         OutputTransition outputTransition = new OutputTransition(
-                ctx.output.pre.accept(new AgentPredicateGenerator()),
-                state -> ctx.output.rate.accept(new PopulationExpressionEvaluator(state)).doubleOf(),
-                ctx.output.post.accept(new AgentExpressionGenerator())
+                ctx.output.pre.accept(new AgentPredicateGenerator(this.table)),
+                (context) -> outRate.eval(context).doubleOf(),
+                ctx.output.post.accept(new AgentMutationGenerator(this.table, species, null))
         );
-        List<InputTransition> inputs = new ArrayList<>();
-        for(DataOrientedPopulationModelParser.Input_transitionContext ictx : ctx.inputs.input_transition()) {
-            inputs.add(new InputTransition(
-                    ictx.pre.accept(new AgentPredicateGenerator()),
-                    (a) -> ictx.sender_predicate.accept(new ExpressionEvaluator(name -> {
-                        if(name.startsWith("sender.")) {
-                            return Optional.ofNullable(a.getValues().get(name.split("sender.")[1]));
-                        } else {
-                            return Optional.ofNullable(a.getValues().get(name));
-                        }
-                    })) == SibillaBoolean.TRUE,
-                    state -> ictx.probability.accept(new PopulationExpressionEvaluator(state)).doubleOf(),
-                    ictx.post.accept(new AgentReceiverExpressionGenerator())
-            ));
-        }
+        List<InputTransition> inputs = getInputs(species, ctx.inputs);
         return new Rule(ruleName, outputTransition, inputs);
     }
+
+    private List<InputTransition> getInputs(String senderSpecies, DataOrientedPopulationModelParser.Input_transition_listContext transitionList) {
+        List<InputTransition> inputs = new ArrayList<>();
+        for(DataOrientedPopulationModelParser.Input_transitionContext ictx : transitionList.input_transition()) {
+            String species = ictx.pre.name.getText();
+            ExpressionFunction senderPredicate = ictx.sender_predicate.accept(new ExpressionGenerator(this.table, null, senderSpecies));
+            ExpressionFunction probability = ictx.probability.accept(new ExpressionGenerator(this.table, species, null));
+            inputs.add(new InputTransition(
+                    ictx.pre.accept(new AgentPredicateGenerator(this.table)),
+                    context -> senderPredicate.eval(context) == SibillaBoolean.TRUE,
+                    context -> probability.eval(context).doubleOf(),
+                    ictx.post.accept(new AgentMutationGenerator(this.table, species, senderSpecies))
+            ));
+        }
+        return inputs;
+    }
+
 
     @Override
     protected Map<String, Rule> defaultResult() {

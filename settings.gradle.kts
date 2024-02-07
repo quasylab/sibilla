@@ -26,3 +26,5 @@ include("langs:stl")
 include("shell")
 include("langs:dopm")
 findProject(":langs:dopm")?.name = "dopm"
+include("langs:enba")
+findProject(":langs:enba")?.name = "enba"

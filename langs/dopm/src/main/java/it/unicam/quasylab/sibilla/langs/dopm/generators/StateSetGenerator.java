@@ -23,12 +23,13 @@
 
 package it.unicam.quasylab.sibilla.langs.dopm.generators;
 
+import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionContext;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.Agent;
 import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulationState;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
-import it.unicam.quasylab.sibilla.langs.dopm.evaluators.ExpressionEvaluator;
+import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.*;
@@ -36,12 +37,13 @@ import java.util.function.Function;
 
 public class StateSetGenerator extends DataOrientedPopulationModelBaseVisitor<Map<String, Function<RandomGenerator, DataOrientedPopulationState>>> {
 
+    private final SymbolTable table;
     private final Map<String, Function<RandomGenerator, DataOrientedPopulationState>> stateSet;
 
-    public StateSetGenerator() {
+    public StateSetGenerator(SymbolTable table) {
+        this.table = table;
         this.stateSet = new HashMap<>();
     }
-
 
     @Override
     public Map<String, Function<RandomGenerator, DataOrientedPopulationState>> visitModel(DataOrientedPopulationModelParser.ModelContext ctx) {
@@ -56,30 +58,18 @@ public class StateSetGenerator extends DataOrientedPopulationModelBaseVisitor<Ma
     }
 
     private Function<RandomGenerator, DataOrientedPopulationState> getStateBuilder(List<DataOrientedPopulationModelParser.Agent_instantationContext> agentsctx) {
-        List<Agent> agents = new ArrayList<>();
+        Map<Agent, Long> occupancies = new HashMap<>();
+        AgentExpressionGenerator agentExpressionGenerator = new AgentExpressionGenerator(this.table, null, null);
         for(DataOrientedPopulationModelParser.Agent_instantationContext actx : agentsctx) {
-            Long occupancy = actx.INTEGER() != null ? Long.parseLong(actx.INTEGER().getText()) :1;
-            for(int i =0; i< occupancy; ++i) {
-                String species = actx.agent_expression().name.getText();
-                Map<String, SibillaValue> data = new HashMap<>();
-                if(actx.agent_expression().vars != null) {
-                    for (DataOrientedPopulationModelParser.Var_assContext vctx : actx.agent_expression().vars.var_ass()) {
-                        String name = vctx.name.getText();
-                        SibillaValue value = vctx.accept(new ExpressionEvaluator(c -> Optional.empty()));
-                        data.put(name, value);
-                    }
-                }
-                agents.add(new Agent(species, data));
-            }
+            Long agentPopulationSize = actx.INTEGER() == null ? 1 : Long.parseLong(actx.INTEGER().getText());
+            Agent newAgent = actx.agent_expression().accept(agentExpressionGenerator).eval(new ExpressionContext(Collections.emptyList(), Collections.emptyList(), null));
+            occupancies.put(newAgent, agentPopulationSize+occupancies.getOrDefault(newAgent, 0L));
         }
-        DataOrientedPopulationState state = new DataOrientedPopulationState(agents);
-        return r -> state;
+        return r -> new DataOrientedPopulationState(occupancies);
     }
 
     @Override
     protected Map<String, Function<RandomGenerator, DataOrientedPopulationState>> defaultResult() {
         return stateSet;
     }
-
-
 }

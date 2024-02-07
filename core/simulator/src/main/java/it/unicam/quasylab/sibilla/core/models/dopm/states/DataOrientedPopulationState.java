@@ -23,54 +23,79 @@
 package it.unicam.quasylab.sibilla.core.models.dopm.states;
 
 import it.unicam.quasylab.sibilla.core.models.ImmutableState;
-import it.unicam.quasylab.sibilla.core.models.dopm.DataOrientedPopulationModel;
+import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionContext;
+import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions.AgentDelta;
+import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions.InputReaction;
+import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.Trigger;
+import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions.NoReaction;
+import it.unicam.quasylab.sibilla.core.models.dopm.states.transitions.reactions.Reaction;
+import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DataOrientedPopulationState implements ImmutableState {
+    private final Map<Agent, Long> agents;
+    private final Long populationSize;
 
-    private final List<Agent> agents;
-
-
-    public DataOrientedPopulationState(List<Agent> agents) {
-        this.agents = new ArrayList<>(agents);
+    public DataOrientedPopulationState(Map<Agent, Long> agents) {
+        this.agents = agents;
+        this.populationSize = agents.values().stream().reduce(0L, Long::sum);
     }
 
-    public DataOrientedPopulationState(Agent agent) {
-        this.agents = new ArrayList<>();
-        this.agents.add(agent);
+    public DataOrientedPopulationState() {
+        this.agents = new HashMap<>();
+        this.populationSize = 0L;
     }
 
+    public DataOrientedPopulationState applyRule(Trigger t, RandomGenerator randomGenerator) {
+        Map<Agent, Long> newOccupancies = new HashMap<>(this.agents);
+        newOccupancies.put(t.getSender(), newOccupancies.get(t.getSender()) - 1);
+        RandomGenerator sr = new SplittableRandomGenerator(randomGenerator.nextLong());
+        return new DataOrientedPopulationState(
+                Stream.concat(
+                    newOccupancies
+                        .entrySet()
+                        .stream()
+                        .filter(entry -> entry.getValue() > 0)
+                        .map(entry -> getAgentReaction(entry.getKey(), entry.getValue(), t))
+                        .flatMap(reaction -> reaction.sampleDeltas(t.getSender(), this, sr)),
+                    t.sampleDeltas(this, sr)
+                )
+                .collect(Collectors.groupingBy(AgentDelta::agent, Collectors.summingLong(AgentDelta::delta)))
+        );
+    }
 
-    public List<Agent> getAgents() {
+    private Reaction getAgentReaction(Agent agent, Long numberOf, Trigger trigger) {
+        return trigger
+                .getRule()
+                .getInputs()
+                .stream()
+                .filter(i ->
+                    i.senderPredicate().test(new ExpressionContext(null, trigger.getSender().values(), this)) &&
+                    i.predicate().test(agent.species(), new ExpressionContext(agent.values(), this))
+                )
+                .findFirst()
+                .map(i -> (Reaction)new InputReaction(agent, numberOf, i))
+                .orElse(new NoReaction(agent, numberOf));
+    }
+
+    public Map<Agent,Long> getAgents() {
         return agents;
     }
 
-    public double fractionOf(Predicate<Agent> predicate) {
-        return agents.stream().filter(predicate).count() / (double)agents.size();
+    public double fractionOf(BiPredicate<Integer, ExpressionContext> predicate) {
+        return this.numberOf(predicate) / (double)populationSize;
     }
 
-    public double numberOf(Predicate<Agent> predicate) {
-        return agents.stream().filter(predicate).count();
-    }
-
-    public DataOrientedPopulationState addAgent(Agent a) {
-        List<Agent> cagents = new ArrayList<>(this.agents);
-        cagents.add(a);
-        return new DataOrientedPopulationState(cagents);
-    }
-
-    @Override
-    public String toString() {
-        String r = "{";
-        for(Agent a : agents) {
-            r += a.toString() + ",";
-        }
-        r+="}";
-        return r;
+    public double numberOf(BiPredicate<Integer, ExpressionContext> predicate) {
+        return agents.entrySet()
+                .stream()
+                .filter(e -> predicate.test(e.getKey().species(), new ExpressionContext(e.getKey().values(), this)))
+                .map(Map.Entry::getValue)
+                .reduce(0L, Long::sum);
     }
 }
