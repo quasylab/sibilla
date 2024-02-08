@@ -9,7 +9,6 @@ import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
 import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class AgentMutationGenerator extends DataOrientedPopulationModelBaseVisitor<Mutation> {
     private final SymbolTable table;

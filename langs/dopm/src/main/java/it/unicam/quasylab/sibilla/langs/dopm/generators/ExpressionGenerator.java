@@ -1,8 +1,6 @@
 package it.unicam.quasylab.sibilla.langs.dopm.generators;
 
 import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionContext;
-import it.unicam.quasylab.sibilla.core.models.dopm.states.Agent;
-import it.unicam.quasylab.sibilla.core.models.dopm.states.DataOrientedPopulationState;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaBoolean;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaInteger;
@@ -12,7 +10,6 @@ import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
 import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionFunction;
 import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
 import it.unicam.quasylab.sibilla.langs.dopm.symbols.Variable;
-import org.apache.commons.math3.exception.util.ExceptionContext;
 
 import java.util.Collections;
 import java.util.List;

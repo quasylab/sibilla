@@ -1,16 +1,17 @@
-package it.unicam.quasylab.sibilla.langs.dopm.validators;
+package it.unicam.quasylab.sibilla.langs.enba.validators;
 
-import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
-import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
-import it.unicam.quasylab.sibilla.langs.dopm.errors.ModelBuildingError;
-import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
-import it.unicam.quasylab.sibilla.langs.dopm.symbols.Type;
-import it.unicam.quasylab.sibilla.langs.dopm.symbols.Variable;
+import it.unicam.quasylab.sibilla.langs.enba.ExtendedNBABaseVisitor;
+import it.unicam.quasylab.sibilla.langs.enba.ExtendedNBAParser;
+import it.unicam.quasylab.sibilla.langs.enba.errors.ModelBuildingError;
+import it.unicam.quasylab.sibilla.langs.enba.symbols.SymbolTable;
+import it.unicam.quasylab.sibilla.langs.enba.symbols.Type;
+import it.unicam.quasylab.sibilla.langs.enba.symbols.Variable;
 import org.antlr.v4.runtime.ParserRuleContext;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
-public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<Boolean> {
+public class ExpressionValidator extends ExtendedNBABaseVisitor<Boolean> {
     protected final SymbolTable table;
     protected final List<ModelBuildingError> errors;
     protected final List<Variable> localVariables;
@@ -41,7 +42,7 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     @Override
-    public Boolean visitNegationExpression(DataOrientedPopulationModelParser.NegationExpressionContext ctx) {
+    public Boolean visitNegationExpression(ExtendedNBAParser.NegationExpressionContext ctx) {
         if(!checkAssignment(Type.BOOLEAN, ctx)) {
             return false;
         }
@@ -49,7 +50,7 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     @Override
-    public Boolean visitExponentExpression(DataOrientedPopulationModelParser.ExponentExpressionContext ctx) {
+    public Boolean visitExponentExpression(ExtendedNBAParser.ExponentExpressionContext ctx) {
         if(!checkAssignment(Type.INTEGER, ctx)) {
             return false;
         }
@@ -57,65 +58,65 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     @Override
-    public Boolean visitReferenceExpression(DataOrientedPopulationModelParser.ReferenceExpressionContext ctx) {
+    public Boolean visitReferenceExpression(ExtendedNBAParser.ReferenceExpressionContext ctx) {
         String name = ctx.reference.getText();
         return checkReference(name, ctx);
     }
 
     @Override
-    public Boolean visitIntValue(DataOrientedPopulationModelParser.IntValueContext ctx) {
+    public Boolean visitIntValue(ExtendedNBAParser.IntValueContext ctx) {
         return checkAssignment(Type.INTEGER, ctx);
     }
 
     @Override
-    public Boolean visitTrueValue(DataOrientedPopulationModelParser.TrueValueContext ctx) {
+    public Boolean visitTrueValue(ExtendedNBAParser.TrueValueContext ctx) {
         return checkAssignment(Type.BOOLEAN, ctx);
     }
 
     @Override
-    public Boolean visitRelationExpression(DataOrientedPopulationModelParser.RelationExpressionContext ctx) {
+    public Boolean visitRelationExpression(ExtendedNBAParser.RelationExpressionContext ctx) {
         return checkAssignment(Type.BOOLEAN, ctx);
     }
 
     @Override
-    public Boolean visitBracketExpression(DataOrientedPopulationModelParser.BracketExpressionContext ctx) {
+    public Boolean visitBracketExpression(ExtendedNBAParser.BracketExpressionContext ctx) {
         return ctx.expr().accept(this);
     }
 
     @Override
-    public Boolean visitSenderReferenceExpression(DataOrientedPopulationModelParser.SenderReferenceExpressionContext ctx) {
+    public Boolean visitSenderReferenceExpression(ExtendedNBAParser.SenderReferenceExpressionContext ctx) {
         String name = ctx.reference.getText();
         return checkReference(name, ctx);
     }
 
     @Override
-    public Boolean visitOrExpression(DataOrientedPopulationModelParser.OrExpressionContext ctx) {
+    public Boolean visitOrExpression(ExtendedNBAParser.OrExpressionContext ctx) {
         return checkAssignment(Type.BOOLEAN, ctx);
     }
 
     @Override
-    public Boolean visitIfThenElseExpression(DataOrientedPopulationModelParser.IfThenElseExpressionContext ctx) {
+    public Boolean visitIfThenElseExpression(ExtendedNBAParser.IfThenElseExpressionContext ctx) {
         ExpressionValidator booleanValidator = new ExpressionValidator(this.table,this.errors,this.localVariables,Type.BOOLEAN);
         return ctx.guard.accept(booleanValidator) && ctx.thenBranch.accept(this) && ctx.elseBranch.accept(this);
     }
 
     @Override
-    public Boolean visitFalseValue(DataOrientedPopulationModelParser.FalseValueContext ctx) {
+    public Boolean visitFalseValue(ExtendedNBAParser.FalseValueContext ctx) {
         return checkAssignment(Type.BOOLEAN, ctx);
     }
 
     @Override
-    public Boolean visitRealValue(DataOrientedPopulationModelParser.RealValueContext ctx) {
+    public Boolean visitRealValue(ExtendedNBAParser.RealValueContext ctx) {
         return checkAssignment(Type.REAL, ctx);
     }
 
     @Override
-    public Boolean visitAndExpression(DataOrientedPopulationModelParser.AndExpressionContext ctx) {
+    public Boolean visitAndExpression(ExtendedNBAParser.AndExpressionContext ctx) {
         return checkAssignment(Type.BOOLEAN, ctx);
     }
 
     @Override
-    public Boolean visitMulDivExpression(DataOrientedPopulationModelParser.MulDivExpressionContext ctx) {
+    public Boolean visitMulDivExpression(ExtendedNBAParser.MulDivExpressionContext ctx) {
         if(!checkAssignment(Type.INTEGER, ctx)) {
             return false;
         }
@@ -123,7 +124,7 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     @Override
-    public Boolean visitAddSubExpression(DataOrientedPopulationModelParser.AddSubExpressionContext ctx) {
+    public Boolean visitAddSubExpression(ExtendedNBAParser.AddSubExpressionContext ctx) {
         if(!checkAssignment(Type.INTEGER, ctx)) {
             return false;
         }
@@ -131,19 +132,19 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     @Override
-    public Boolean visitUnaryExpression(DataOrientedPopulationModelParser.UnaryExpressionContext ctx) {
+    public Boolean visitUnaryExpression(ExtendedNBAParser.UnaryExpressionContext ctx) {
         if(!checkAssignment(Type.INTEGER, ctx)) {
             return false;
         }
         return ctx.expr().accept(this);
     }
     @Override
-    public Boolean visitPopulationFractionExpression(DataOrientedPopulationModelParser.PopulationFractionExpressionContext ctx) {
+    public Boolean visitPopulationFractionExpression(ExtendedNBAParser.PopulationFractionExpressionContext ctx) {
         this.errors.add(ModelBuildingError.illegalPopulationExpression(ctx));
         return false;
     }
     @Override
-    public Boolean visitPopulationSizeExpression(DataOrientedPopulationModelParser.PopulationSizeExpressionContext ctx) {
+    public Boolean visitPopulationSizeExpression(ExtendedNBAParser.PopulationSizeExpressionContext ctx) {
         this.errors.add(ModelBuildingError.illegalPopulationExpression(ctx));
         return false;
     }

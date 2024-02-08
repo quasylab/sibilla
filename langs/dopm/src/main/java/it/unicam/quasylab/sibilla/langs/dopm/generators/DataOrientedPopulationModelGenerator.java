@@ -23,13 +23,11 @@
 
 package it.unicam.quasylab.sibilla.langs.dopm.generators;
 
-import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.dopm.DataOrientedPopulationModelDefinition;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelLexer;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
 import it.unicam.quasylab.sibilla.langs.dopm.errors.ModelBuildingError;
 import it.unicam.quasylab.sibilla.langs.dopm.generators.exceptions.ModelGenerationException;
-import it.unicam.quasylab.sibilla.langs.dopm.symbols.BaseSymbolTable;
 import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
 import it.unicam.quasylab.sibilla.langs.dopm.validators.ModelValidator;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
@@ -124,7 +122,7 @@ public class DataOrientedPopulationModelGenerator {
         if (validator != null) {
             return validator.getTable();
         }
-        return new BaseSymbolTable();
+        return new SymbolTable();
     }
 
 }

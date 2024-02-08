@@ -1,6 +1,5 @@
 package it.unicam.quasylab.sibilla.langs.dopm.generators;
 
-import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionContext;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.InputTransition;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.transitions.OutputTransition;
 import it.unicam.quasylab.sibilla.core.models.dopm.rules.Rule;
@@ -11,7 +10,6 @@ import it.unicam.quasylab.sibilla.core.models.dopm.expressions.ExpressionFunctio
 import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
 
 import java.util.*;
-import java.util.function.BiPredicate;
 
 public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<Map<String, Rule>> {
 
@@ -52,7 +50,7 @@ public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<Map<S
         List<InputTransition> inputs = new ArrayList<>();
         for(DataOrientedPopulationModelParser.Input_transitionContext ictx : transitionList.input_transition()) {
             String species = ictx.pre.name.getText();
-            ExpressionFunction senderPredicate = ictx.sender_predicate.accept(new ExpressionGenerator(this.table, null, senderSpecies));
+            ExpressionFunction senderPredicate = ictx.sender_predicate.accept(new ExpressionGenerator(this.table, senderSpecies, null));
             ExpressionFunction probability = ictx.probability.accept(new ExpressionGenerator(this.table, species, null));
             inputs.add(new InputTransition(
                     ictx.pre.accept(new AgentPredicateGenerator(this.table)),

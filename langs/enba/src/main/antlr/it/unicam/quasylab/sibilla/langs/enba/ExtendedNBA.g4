@@ -16,7 +16,7 @@ measure_declaration : 'measure' name=ID '=' expr ';';
 
 predicate_declaration: 'predicate' name=ID '=' expr ';';
 
-channel_declaration : 'channel' name=ID ';';
+channel_declaration : 'channel' name=ID (vars='('var_decl (',' var_decl)*')')? ';';
 
 process_declaration : 'process' name=ID (vars='('var_decl (',' var_decl)*')')? '{'
     body=process_body
@@ -27,46 +27,48 @@ process_body : choice_process
              | nil_process
              ;
 
-choice_process : actions=action '.' process_mutation ('+' action '.' process_mutation)*;
+choice_process : actions=action_tuple ('+' action_tuple)*;
 
-action : broadcast_output_action
-       | broadcast_input_action
-       ;
+action_tuple : broadcast_input_tuple
+             | broadcast_output_tuple;
+
+broadcast_output_tuple : broadcast_output_action '.' agent_mutation;
+broadcast_input_tuple : broadcast_input_action '.' agent_mutation;
 
 broadcast_output_action : channel=ID '*' '<' rate=expr '>' '[' predicate=expr ']' '!';
 broadcast_input_action : channel=ID '*' '<' probability=expr '>' '[' predicate=expr ']' '?';
 
 conditional_process : '['predicate=expr']' then=process_body ':' else=process_body;
 
-nil_process : '_';
+nil_process : '_NIL_';
 
 var_decl : name=ID ':' type=('integer'|'real'|'boolean');
 
-system_declaration: 'system' name=ID '='  processs=system_composition ';' ;
+system_declaration: 'system' name=ID '='  components=system_composition ';' ;
 
 system_composition :
-    process_instantation ('|' process_instantation)*
+    system_component ('|' system_component)*
     ;
 
-process_instantation : process_expression('#'INTEGER)?;
+system_component : agent_expression('#'INTEGER)?;
 
-process_mutation :
-    deterministic_mutation = process_expression
+agent_mutation :
+    deterministic_mutation = agent_expression
     | '{' tuples = stochastic_mutation_tuple ('+' stochastic_mutation_tuple)* '}'
     ;
 
 stochastic_mutation_tuple :
-    '(' process_expression ':' expr ')'
+    '(' agent_expression ':' expr ')'
     ;
 
-process_expression:
+agent_expression:
     name=ID vars=var_ass_list
     ;
 
 var_ass_list : '[' (var_ass)? (',' var_ass)* ']';
 var_ass : name=ID '=' value=expr;
 
-process_predicate:
+agent_predicate:
     name=ID ('[' predicate=expr ']')?
     ;
 
@@ -85,8 +87,8 @@ expr    :
     | REAL                                         # realValue
     | 'false'                                      # falseValue
     | 'true'                                       # trueValue
-    | '%' process=process_predicate                                      # populationFractionExpression
-    | '#' process=process_predicate                                       # populationSizeExpression
+    | '%' agent=agent_predicate                                      # populationFractionExpression
+    | '#' agent=agent_predicate                                       # populationSizeExpression
     | reference='sender.'ID                                 # senderReferenceExpression
     | reference=ID                                 # referenceExpression
     ;

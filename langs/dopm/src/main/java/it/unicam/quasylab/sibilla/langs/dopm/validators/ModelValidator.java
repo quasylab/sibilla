@@ -1,14 +1,14 @@
 package it.unicam.quasylab.sibilla.langs.dopm.validators;
 
 import it.unicam.quasylab.sibilla.langs.dopm.*;
-import it.unicam.quasylab.sibilla.langs.dopm.symbols.BaseSymbolTable;
-import it.unicam.quasylab.sibilla.langs.dopm.errors.ModelBuildingError;
 import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
+import it.unicam.quasylab.sibilla.langs.dopm.errors.ModelBuildingError;
 import it.unicam.quasylab.sibilla.langs.dopm.symbols.Type;
 import it.unicam.quasylab.sibilla.langs.dopm.symbols.Variable;
 import it.unicam.quasylab.sibilla.langs.dopm.symbols.exceptions.DuplicatedSymbolException;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boolean> {
 
@@ -17,12 +17,12 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
 
     public ModelValidator() {
         this.errors = new LinkedList<>();
-        this.table = new BaseSymbolTable();
+        this.table = new SymbolTable();
     }
 
     public ModelValidator(List<ModelBuildingError> errors) {
         this.errors = errors;
-        this.table = new BaseSymbolTable();
+        this.table = new SymbolTable();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
             }
         }
         catch(DuplicatedSymbolException e) {
-            this.errors.add(ModelBuildingError.duplicatedName(name, this.table.getContext(name), ctx));
+            this.errors.add(new ModelBuildingError(e.getMessage()));
             return false;
         }
         return true;
@@ -98,7 +98,7 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
     private Boolean checkSystemComponent(DataOrientedPopulationModelParser.System_componentContext ctx) {
         return checkAgentExpression(ctx.agent_expression(), new ArrayList<>(), false);
     }
-    private Boolean checkAgentExpression(DataOrientedPopulationModelParser.Agent_expressionContext ctx, List<Variable> acessibleVariables, boolean modelContext) {
+    private Boolean checkAgentExpression(DataOrientedPopulationModelParser.Agent_expressionContext ctx, List<Variable> variables, boolean modelContext) {
         String species = ctx.name.getText();
         if(!this.table.isASpecies(species)) {
             this.errors.add(ModelBuildingError.unknownSymbol(species, ctx.name.getLine(), ctx.name.getCharPositionInLine()));
@@ -126,13 +126,13 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
             ExpressionValidator validator = modelContext ? new PopulationExpressionValidator(
                                                                 this.table,
                                                                 this.errors,
-                                                                acessibleVariables,
+                                                                variables,
                                                                 currentSpeciesVariable.type()
                                                          )
                                                          : new ExpressionValidator(
                                                                 this.table,
                                                                 this.errors,
-                                                                acessibleVariables,
+                                                                variables,
                                                                 currentSpeciesVariable.type()
                                                          );
             if(!currentAssContext.expr().accept(validator)) {
@@ -160,10 +160,6 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
         if(!checkOutputTransition(ctx.output, sender_variables)) {
             return false;
         }
-        sender_variables = sender_variables
-                .stream()
-                .map(v -> new Variable("sender."+v.name(), v.type(), v.context()))
-                .toList();
         for(DataOrientedPopulationModelParser.Input_transitionContext ictx : ctx.inputs.input_transition()) {
             if(!checkInputTransition(ictx, new ArrayList<>(sender_variables))) {
                 return false;
@@ -188,7 +184,15 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
         ) {
             return false;
         }
-        variables.addAll(this.table.getSpeciesVariables(ctx.pre.name.getText()).orElse(new ArrayList<>()));
+        variables = Stream.concat(
+                variables
+                    .stream()
+                    .map(v -> new Variable("sender."+v.name(), v.type(), v.context())),
+                this.table
+                        .getSpeciesVariables(ctx.pre.name.getText())
+                        .orElse(new ArrayList<>())
+                        .stream()
+        ).toList();
         return ctx.probability.accept(new PopulationExpressionValidator(this.table, this.errors, variables, Type.REAL)) &&
                checkAgentMutation(ctx.post, variables);
     }
