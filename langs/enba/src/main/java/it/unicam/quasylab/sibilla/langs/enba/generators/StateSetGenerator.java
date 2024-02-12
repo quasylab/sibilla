@@ -21,20 +21,23 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.langs.dopm.generators;
+package it.unicam.quasylab.sibilla.langs.enba.generators;
 
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.expressions.ExpressionContext;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.Agent;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.AgentState;
-import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
-import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
-import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
+import it.unicam.quasylab.sibilla.langs.enba.ExtendedNBABaseVisitor;
+import it.unicam.quasylab.sibilla.langs.enba.ExtendedNBAParser;
+import it.unicam.quasylab.sibilla.langs.enba.symbols.SymbolTable;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
-public class StateSetGenerator extends DataOrientedPopulationModelBaseVisitor<Map<String, Function<RandomGenerator, AgentState>>> {
+public class StateSetGenerator extends ExtendedNBABaseVisitor<Map<String, Function<RandomGenerator, AgentState>>> {
 
     private final SymbolTable table;
     private final Map<String, Function<RandomGenerator, AgentState>> stateSet;
@@ -45,21 +48,21 @@ public class StateSetGenerator extends DataOrientedPopulationModelBaseVisitor<Ma
     }
 
     @Override
-    public Map<String, Function<RandomGenerator, AgentState>> visitModel(DataOrientedPopulationModelParser.ModelContext ctx) {
+    public Map<String, Function<RandomGenerator, AgentState>> visitModel(ExtendedNBAParser.ModelContext ctx) {
         ctx.element().forEach(e -> e.accept(this));
         return stateSet;
     }
 
     @Override
-    public Map<String, Function<RandomGenerator, AgentState>> visitSystem_declaration(DataOrientedPopulationModelParser.System_declarationContext ctx) {
-        this.stateSet.put(ctx.name.getText(), getStateBuilder(ctx.agents.system_component()));
+    public Map<String, Function<RandomGenerator, AgentState>> visitSystem_declaration(ExtendedNBAParser.System_declarationContext ctx) {
+        this.stateSet.put(ctx.name.getText(), getStateBuilder(ctx.components.system_component()));
         return stateSet;
     }
 
-    private Function<RandomGenerator, AgentState> getStateBuilder(List<DataOrientedPopulationModelParser.System_componentContext> systemComponentsctx) {
+    private Function<RandomGenerator, AgentState> getStateBuilder(List<ExtendedNBAParser.System_componentContext> systemComponentsctx) {
         Map<Agent, Long> occupancies = new HashMap<>();
         AgentExpressionGenerator agentExpressionGenerator = new AgentExpressionGenerator(this.table, null, null);
-        for(DataOrientedPopulationModelParser.System_componentContext sctx : systemComponentsctx) {
+        for(ExtendedNBAParser.System_componentContext sctx : systemComponentsctx) {
             Long agentPopulationSize = sctx.INTEGER() == null ? 1 : Long.parseLong(sctx.INTEGER().getText());
             Agent newAgent = sctx.agent_expression().accept(agentExpressionGenerator).eval(new ExpressionContext(Collections.emptyList(), Collections.emptyList(), null));
             occupancies.put(newAgent, agentPopulationSize+occupancies.getOrDefault(newAgent, 0L));

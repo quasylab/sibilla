@@ -1,16 +1,17 @@
-package it.unicam.quasylab.sibilla.langs.dopm.generators;
+package it.unicam.quasylab.sibilla.langs.enba.generators;
 
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.expressions.AgentExpressionFunction;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.expressions.ExpressionFunction;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.Agent;
-import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
-import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
-import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
+import it.unicam.quasylab.sibilla.langs.enba.ExtendedNBABaseVisitor;
+import it.unicam.quasylab.sibilla.langs.enba.ExtendedNBAParser;
+import it.unicam.quasylab.sibilla.langs.enba.symbols.SymbolTable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
-public class AgentExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<AgentExpressionFunction> {
+public class AgentExpressionGenerator extends ExtendedNBABaseVisitor<AgentExpressionFunction> {
 
     private final SymbolTable table;
     private final String agentSpecies;
@@ -23,14 +24,14 @@ public class AgentExpressionGenerator extends DataOrientedPopulationModelBaseVis
     }
 
     @Override
-    public AgentExpressionFunction visitAgent_expression(DataOrientedPopulationModelParser.Agent_expressionContext ctx) {
+    public AgentExpressionFunction visitAgent_expression(ExtendedNBAParser.Agent_expressionContext ctx) {
         String newSpecies = ctx.name.getText();
         int newSpeciesId = this.table.getSpeciesId(newSpecies);
         List<ExpressionFunction> expressions = new ArrayList<>();
 
         if(ctx.vars != null) {
             ExpressionGenerator expressionGenerator = new ExpressionGenerator(this.table, agentSpecies, senderSpecies);
-            for (DataOrientedPopulationModelParser.Var_assContext vctx : ctx.vars.var_ass()) {
+            for (ExtendedNBAParser.Var_assContext vctx : ctx.vars.var_ass()) {
                 expressions.add(vctx.expr().accept(expressionGenerator));
             }
         }

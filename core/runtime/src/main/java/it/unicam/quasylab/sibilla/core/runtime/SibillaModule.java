@@ -40,7 +40,7 @@ import java.util.Map;
  */
 public interface SibillaModule {
 
-    List<SibillaModule> MODULES = List.of(new PopulationModelModule(), new LIOModelModule(), new YodaModelModule(), new DataOrientedPopulationModelModule());
+    List<SibillaModule> MODULES = List.of(new PopulationModelModule(), new LIOModelModule(), new YodaModelModule(), new DataOrientedPopulationModelModule(), new ENBAModule());
 
     /**
      * Return the module name.

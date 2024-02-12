@@ -21,15 +21,15 @@
  *  limitations under the License.
  */
 
-package it.unicam.quasylab.sibilla.langs.dopm.generators;
+package it.unicam.quasylab.sibilla.langs.enba.generators;
 
-import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.DataOrientedPopulationModelDefinition;
-import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelLexer;
-import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
-import it.unicam.quasylab.sibilla.langs.dopm.errors.ModelBuildingError;
-import it.unicam.quasylab.sibilla.langs.dopm.generators.exceptions.ModelGenerationException;
-import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
-import it.unicam.quasylab.sibilla.langs.dopm.validators.ModelValidator;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.enba.ENBAModelDefinition;
+import it.unicam.quasylab.sibilla.langs.enba.ExtendedNBALexer;
+import it.unicam.quasylab.sibilla.langs.enba.ExtendedNBAParser;
+import it.unicam.quasylab.sibilla.langs.enba.errors.ModelBuildingError;
+import it.unicam.quasylab.sibilla.langs.enba.generators.exceptions.ModelGenerationException;
+import it.unicam.quasylab.sibilla.langs.enba.symbols.SymbolTable;
+import it.unicam.quasylab.sibilla.langs.enba.validators.ModelValidator;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
@@ -42,23 +42,22 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-public class DataOrientedPopulationModelGenerator {
-
+public class ENBAModelGenerator {
     private final CodePointCharStream source;
     private ParseTree parseTree;
     private final List<ModelBuildingError> errorList = new LinkedList<>();
     private ModelValidator validator;
     private boolean validated = false;
 
-    public DataOrientedPopulationModelGenerator(String code) {
+    public ENBAModelGenerator(String code) {
         this(CharStreams.fromString(code));
     }
 
-    public DataOrientedPopulationModelGenerator(File file) throws IOException {
+    public ENBAModelGenerator(File file) throws IOException {
         this(CharStreams.fromReader(new FileReader(file)));
     }
 
-    public DataOrientedPopulationModelGenerator(CodePointCharStream source) {
+    public ENBAModelGenerator(CodePointCharStream source) {
         this.source = source;
     }
 
@@ -70,9 +69,9 @@ public class DataOrientedPopulationModelGenerator {
     }
 
     private void generateParseTree() {
-        DataOrientedPopulationModelLexer lexer = new DataOrientedPopulationModelLexer(source);
+        ExtendedNBALexer lexer = new ExtendedNBALexer(source);
         CommonTokenStream tokens =  new CommonTokenStream(lexer);
-        DataOrientedPopulationModelParser parser = new DataOrientedPopulationModelParser(tokens);
+        ExtendedNBAParser parser = new ExtendedNBAParser(tokens);
         SibillaParseErrorListener errorListener = new SibillaParseErrorListener();
         parser.addErrorListener(errorListener);
         this.parseTree = parser.model();
@@ -81,21 +80,21 @@ public class DataOrientedPopulationModelGenerator {
         }
     }
 
-    public DataOrientedPopulationModelDefinition loadModel(String code) throws ModelGenerationException {
-        return getPopulationModelDefinition();
+    public ENBAModelDefinition loadModel(String code) throws ModelGenerationException {
+        return getModelDefinition();
     }
 
-    public DataOrientedPopulationModelDefinition getPopulationModelDefinition() throws ModelGenerationException {
+    public ENBAModelDefinition getModelDefinition() throws ModelGenerationException {
         validate();
         if (withErrors()) {
             throw new ModelGenerationException(this.errorList);
         }
-        return new DataOrientedPopulationModelDefinition(
+        return new ENBAModelDefinition(
                 this.parseTree.accept(new StateSetGenerator(this.validator.getTable())),
                 this.parseTree.accept(new MeasuresGenerator(this.validator.getTable())),
                 this.parseTree.accept(new PredicatesGenerator(this.validator.getTable())),
                 this.parseTree.accept(new RulesGenerator(this.validator.getTable()))
-                );
+        );
     }
 
     public boolean validate() {

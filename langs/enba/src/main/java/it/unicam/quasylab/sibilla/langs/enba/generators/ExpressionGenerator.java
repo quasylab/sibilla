@@ -1,21 +1,21 @@
-package it.unicam.quasylab.sibilla.langs.dopm.generators;
+package it.unicam.quasylab.sibilla.langs.enba.generators;
 
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.expressions.ExpressionContext;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.expressions.ExpressionFunction;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaBoolean;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaInteger;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
-import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
-import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
-import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.expressions.ExpressionFunction;
-import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
-import it.unicam.quasylab.sibilla.langs.dopm.symbols.Variable;
+import it.unicam.quasylab.sibilla.langs.enba.ExtendedNBABaseVisitor;
+import it.unicam.quasylab.sibilla.langs.enba.ExtendedNBAParser;
+import it.unicam.quasylab.sibilla.langs.enba.symbols.SymbolTable;
+import it.unicam.quasylab.sibilla.langs.enba.symbols.Variable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiPredicate;
 
-public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<ExpressionFunction> {
+public class ExpressionGenerator extends ExtendedNBABaseVisitor<ExpressionFunction> {
 
     private final List<Variable> agentVariables;
     private final List<Variable> senderVariables;
@@ -48,7 +48,7 @@ public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<
         return -1;
     }
     @Override
-    public ExpressionFunction visitExponentExpression(DataOrientedPopulationModelParser.ExponentExpressionContext ctx) {
+    public ExpressionFunction visitExponentExpression(ExtendedNBAParser.ExponentExpressionContext ctx) {
         ExpressionFunction left = ctx.left.accept(this);
         ExpressionFunction right = ctx.right.accept(this);
 
@@ -60,7 +60,7 @@ public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     @Override
-    public ExpressionFunction visitReferenceExpression(DataOrientedPopulationModelParser.ReferenceExpressionContext ctx) {
+    public ExpressionFunction visitReferenceExpression(ExtendedNBAParser.ReferenceExpressionContext ctx) {
         String name = ctx.reference.getText();
         int varIndex = getAgentVariableIndex(name);
         if(varIndex != -1) {
@@ -71,7 +71,7 @@ public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     @Override
-    public ExpressionFunction visitSenderReferenceExpression(DataOrientedPopulationModelParser.SenderReferenceExpressionContext ctx) {
+    public ExpressionFunction visitSenderReferenceExpression(ExtendedNBAParser.SenderReferenceExpressionContext ctx) {
         String name = ctx.ID().getText();
         int varIndex = getSenderVariableIndex(name);
         if(varIndex != -1) {
@@ -82,24 +82,24 @@ public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     @Override
-    public ExpressionFunction visitIntValue(DataOrientedPopulationModelParser.IntValueContext ctx) {
+    public ExpressionFunction visitIntValue(ExtendedNBAParser.IntValueContext ctx) {
         int integer = Integer.parseInt(ctx.getText());
         return (context) -> new SibillaInteger(integer);
     }
 
     @Override
-    public ExpressionFunction visitBracketExpression(DataOrientedPopulationModelParser.BracketExpressionContext ctx) {
+    public ExpressionFunction visitBracketExpression(ExtendedNBAParser.BracketExpressionContext ctx) {
         return ctx.expr().accept(this);
     }
 
     @Override
-    public ExpressionFunction visitRealValue(DataOrientedPopulationModelParser.RealValueContext ctx) {
+    public ExpressionFunction visitRealValue(ExtendedNBAParser.RealValueContext ctx) {
         double doubleValue = Double.parseDouble(ctx.getText());
         return (context) -> new SibillaDouble(doubleValue);
     }
 
     @Override
-    public ExpressionFunction visitIfThenElseExpression(DataOrientedPopulationModelParser.IfThenElseExpressionContext ctx) {
+    public ExpressionFunction visitIfThenElseExpression(ExtendedNBAParser.IfThenElseExpressionContext ctx) {
         ExpressionFunction guard = ctx.guard.accept(this);
         ExpressionFunction thenBranch = ctx.thenBranch.accept(this);
         ExpressionFunction elseBranch = ctx.elseBranch.accept(this);
@@ -110,18 +110,18 @@ public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     @Override
-    public ExpressionFunction visitNegationExpression(DataOrientedPopulationModelParser.NegationExpressionContext ctx) {
+    public ExpressionFunction visitNegationExpression(ExtendedNBAParser.NegationExpressionContext ctx) {
         ExpressionFunction expr = ctx.arg.accept(this);
         return (context) -> SibillaValue.not(expr.eval(context));
     }
 
     @Override
-    public ExpressionFunction visitTrueValue(DataOrientedPopulationModelParser.TrueValueContext ctx) {
+    public ExpressionFunction visitTrueValue(ExtendedNBAParser.TrueValueContext ctx) {
         return (context) -> SibillaBoolean.TRUE;
     }
 
     @Override
-    public ExpressionFunction visitRelationExpression(DataOrientedPopulationModelParser.RelationExpressionContext ctx) {
+    public ExpressionFunction visitRelationExpression(ExtendedNBAParser.RelationExpressionContext ctx) {
         ExpressionFunction left = ctx.left.accept(this);
         ExpressionFunction right = ctx.right.accept(this);
         String operator = ctx.op.getText();
@@ -136,7 +136,7 @@ public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     @Override
-    public ExpressionFunction visitOrExpression(DataOrientedPopulationModelParser.OrExpressionContext ctx) {
+    public ExpressionFunction visitOrExpression(ExtendedNBAParser.OrExpressionContext ctx) {
         ExpressionFunction left = ctx.left.accept(this);
         ExpressionFunction right = ctx.right.accept(this);
 
@@ -147,12 +147,12 @@ public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     @Override
-    public ExpressionFunction visitFalseValue(DataOrientedPopulationModelParser.FalseValueContext ctx) {
+    public ExpressionFunction visitFalseValue(ExtendedNBAParser.FalseValueContext ctx) {
         return (context) -> SibillaBoolean.FALSE;
     }
 
     @Override
-    public ExpressionFunction visitAndExpression(DataOrientedPopulationModelParser.AndExpressionContext ctx) {
+    public ExpressionFunction visitAndExpression(ExtendedNBAParser.AndExpressionContext ctx) {
         ExpressionFunction left = ctx.left.accept(this);
         ExpressionFunction right = ctx.right.accept(this);
 
@@ -169,7 +169,7 @@ public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<
 
 
     @Override
-    public ExpressionFunction visitMulDivExpression(DataOrientedPopulationModelParser.MulDivExpressionContext ctx) {
+    public ExpressionFunction visitMulDivExpression(ExtendedNBAParser.MulDivExpressionContext ctx) {
         ExpressionFunction left = ctx.left.accept(this);
         ExpressionFunction right = ctx.right.accept(this);
         String operator = ctx.op.getText();
@@ -183,7 +183,7 @@ public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     @Override
-    public ExpressionFunction  visitAddSubExpression(DataOrientedPopulationModelParser.AddSubExpressionContext ctx) {
+    public ExpressionFunction  visitAddSubExpression(ExtendedNBAParser.AddSubExpressionContext ctx) {
         ExpressionFunction left = ctx.left.accept(this);
         ExpressionFunction right = ctx.right.accept(this);
         String operator = ctx.op.getText();
@@ -197,7 +197,7 @@ public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     @Override
-    public ExpressionFunction visitUnaryExpression(DataOrientedPopulationModelParser.UnaryExpressionContext ctx) {
+    public ExpressionFunction visitUnaryExpression(ExtendedNBAParser.UnaryExpressionContext ctx) {
         if (ctx.op.getText().equals("-")) {
             ExpressionFunction expr = ctx.arg.accept(this);
             return (context) -> SibillaValue.minus(expr.eval(context));
@@ -207,13 +207,13 @@ public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<
     }
 
     @Override
-    public ExpressionFunction visitPopulationFractionExpression(DataOrientedPopulationModelParser.PopulationFractionExpressionContext ctx) {
+    public ExpressionFunction visitPopulationFractionExpression(ExtendedNBAParser.PopulationFractionExpressionContext ctx) {
         BiPredicate<Integer, ExpressionContext> predicate = new AgentPredicateGenerator(this.table).visitAgent_predicate(ctx.agent_predicate());
         return (context) -> SibillaValue.of(context.getState().fractionOf(predicate));
     }
 
     @Override
-    public ExpressionFunction visitPopulationSizeExpression(DataOrientedPopulationModelParser.PopulationSizeExpressionContext ctx) {
+    public ExpressionFunction visitPopulationSizeExpression(ExtendedNBAParser.PopulationSizeExpressionContext ctx) {
         BiPredicate<Integer, ExpressionContext> predicate = new AgentPredicateGenerator(this.table).visitAgent_predicate(ctx.agent_predicate());
         return (context) -> SibillaValue.of(context.getState().numberOf(predicate));
     }

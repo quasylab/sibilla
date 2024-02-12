@@ -43,7 +43,7 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
         try {
             this.table.addChannel(name, ctx);
             for (ExtendedNBAParser.Var_declContext vctx : ctx.var_decl()) {
-                this.table.addSpeciesVar(name, vctx);
+                this.table.addChannelVar(name, vctx);
             }
         }
         catch(DuplicatedSymbolException e) {
@@ -181,6 +181,7 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
         }
         return ctx.expr().accept(new PopulationExpressionValidator(this.table, this.errors, new ArrayList<>(), Type.REAL));
     }
+
     @Override
     public Boolean visitPredicate_declaration(ExtendedNBAParser.Predicate_declarationContext ctx) {
         String name = ctx.name.getText();

@@ -24,18 +24,18 @@
 package it.unicam.quasylab.sibilla.core.runtime;
 
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.AgentState;
-import it.unicam.quasylab.sibilla.langs.dopm.generators.DataOrientedPopulationModelGenerator;
-import it.unicam.quasylab.sibilla.langs.dopm.generators.exceptions.ModelGenerationException;
-import it.unicam.quasylab.sibilla.langs.dopm.errors.ModelBuildingError;
+import it.unicam.quasylab.sibilla.langs.enba.errors.ModelBuildingError;
+import it.unicam.quasylab.sibilla.langs.enba.generators.ENBAModelGenerator;
+import it.unicam.quasylab.sibilla.langs.enba.generators.exceptions.ModelGenerationException;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
 
-public class DataOrientedPopulationModelModule extends AbstractSibillaModule {
+public class ENBAModule extends AbstractSibillaModule {
 
-    public final static String MODULE_NAME = "dopm";
+    public final static String MODULE_NAME = "enba";
 
     private ModuleEngine<AgentState> moduleEngine;
 
@@ -47,7 +47,7 @@ public class DataOrientedPopulationModelModule extends AbstractSibillaModule {
     @Override
     public void load(File file) throws CommandExecutionException {
         try {
-            generateModuleEngine(new DataOrientedPopulationModelGenerator(file));
+            generateModuleEngine(new ENBAModelGenerator(file));
         } catch (ModelGenerationException e) {
             throw new CommandExecutionException(e.getErrors().stream().sequential().map(ModelBuildingError::toString).collect(Collectors.toList()));
         } catch (IOException e) {
@@ -58,14 +58,14 @@ public class DataOrientedPopulationModelModule extends AbstractSibillaModule {
     @Override
     public void load(String code) throws CommandExecutionException {
         try {
-            generateModuleEngine(new DataOrientedPopulationModelGenerator(code));
+            generateModuleEngine(new ENBAModelGenerator(code));
         } catch (ModelGenerationException e) {
             throw new CommandExecutionException(e.getErrors().stream().sequential().map(ModelBuildingError::toString).collect(Collectors.toList()));
         }
     }
 
-    private void generateModuleEngine(DataOrientedPopulationModelGenerator pmg) throws it.unicam.quasylab.sibilla.langs.dopm.generators.exceptions.ModelGenerationException {
-        this.moduleEngine = new ModuleEngine<>(pmg.getPopulationModelDefinition());
+    private void generateModuleEngine(ENBAModelGenerator mg) throws ModelGenerationException {
+        this.moduleEngine = new ModuleEngine<>(mg.getModelDefinition());
     }
 
     @Override
