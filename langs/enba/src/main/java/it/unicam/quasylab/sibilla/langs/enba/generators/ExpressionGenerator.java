@@ -17,35 +17,10 @@ import java.util.function.BiPredicate;
 
 public class ExpressionGenerator extends ExtendedNBABaseVisitor<ExpressionFunction> {
 
-    private final List<Variable> agentVariables;
-    private final List<Variable> senderVariables;
     private final SymbolTable table;
 
-    public ExpressionGenerator(SymbolTable table, String agentSpecies, String senderSpecies) {
+    public ExpressionGenerator(SymbolTable table) {
         this.table = table;
-        this.agentVariables = agentSpecies != null
-                ? this.table.getSpeciesVariables(agentSpecies).orElse(Collections.emptyList())
-                : Collections.emptyList();
-        this.senderVariables = senderSpecies != null
-                ? this.table.getSpeciesVariables(senderSpecies).orElse(Collections.emptyList())
-                : Collections.emptyList();
-    }
-
-    private int getAgentVariableIndex(String name) {
-        for(int i=0; i<agentVariables.size(); ++i) {
-            if(agentVariables.get(i).name().equals(name)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-    private int getSenderVariableIndex(String name) {
-        for(int i=0; i<senderVariables.size(); ++i) {
-            if(senderVariables.get(i).name().equals(name)) {
-                return i;
-            }
-        }
-        return -1;
     }
     @Override
     public ExpressionFunction visitExponentExpression(ExtendedNBAParser.ExponentExpressionContext ctx) {
@@ -62,23 +37,13 @@ public class ExpressionGenerator extends ExtendedNBABaseVisitor<ExpressionFuncti
     @Override
     public ExpressionFunction visitReferenceExpression(ExtendedNBAParser.ReferenceExpressionContext ctx) {
         String name = ctx.reference.getText();
-        int varIndex = getAgentVariableIndex(name);
-        if(varIndex != -1) {
-            return (context) -> context.getAgentValues().get(varIndex);
-        } else {
-            return (context) -> SibillaValue.ERROR_VALUE;
-        }
+        return (context) -> context.getAgentValues().get(name);
     }
 
     @Override
     public ExpressionFunction visitSenderReferenceExpression(ExtendedNBAParser.SenderReferenceExpressionContext ctx) {
         String name = ctx.ID().getText();
-        int varIndex = getSenderVariableIndex(name);
-        if(varIndex != -1) {
-            return (context) -> context.getSenderValues().get(varIndex);
-        } else {
-            return (context) -> SibillaValue.ERROR_VALUE;
-        }
+        return (context) -> context.getSenderValues().get(name);
     }
 
     @Override

@@ -93,7 +93,7 @@ public class ENBAModelGenerator {
                 this.parseTree.accept(new StateSetGenerator(this.validator.getTable())),
                 this.parseTree.accept(new MeasuresGenerator(this.validator.getTable())),
                 this.parseTree.accept(new PredicatesGenerator(this.validator.getTable())),
-                this.parseTree.accept(new RulesGenerator(this.validator.getTable()))
+                this.parseTree.accept(new ProcessesGenerator(this.validator.getTable()))
         );
     }
 

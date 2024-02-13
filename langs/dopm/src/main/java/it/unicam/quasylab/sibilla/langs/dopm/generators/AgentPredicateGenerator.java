@@ -20,11 +20,7 @@ public class AgentPredicateGenerator extends DataOrientedPopulationModelBaseVisi
     public BiPredicate<Integer, ExpressionContext> visitAgent_predicate(DataOrientedPopulationModelParser.Agent_predicateContext ctx) {
         String predicateSpecies = ctx.name.getText();
         int predicateSpeciesId = this.table.getSpeciesId(predicateSpecies);
-        ExpressionGenerator expressionGenerator = new ExpressionGenerator(
-                this.table,
-                predicateSpecies,
-                null
-        );
+        ExpressionGenerator expressionGenerator = new ExpressionGenerator(this.table);
         ExpressionFunction predicate = ctx.predicate.accept(expressionGenerator);
         return (species, context) -> {
             if(species != predicateSpeciesId) {

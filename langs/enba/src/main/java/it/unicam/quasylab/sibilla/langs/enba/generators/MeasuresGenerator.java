@@ -37,11 +37,11 @@ public class MeasuresGenerator extends ExtendedNBABaseVisitor<Map<String, Measur
     }
 
     private Measure<AgentState> getMeasureBuilder(ExtendedNBAParser.Measure_declarationContext ctx) {
-        ExpressionFunction measureFunction = ctx.expr().accept(new ExpressionGenerator(this.table, null, null));
+        ExpressionFunction measureFunction = ctx.expr().accept(new ExpressionGenerator(this.table));
 
         return new SimpleMeasure<AgentState>(
                 ctx.name.getText(),
-                state -> measureFunction.eval(new ExpressionContext(Collections.emptyList(), Collections.emptyList(), state)).doubleOf()
+                state -> measureFunction.eval(new ExpressionContext(Collections.emptyMap(), Collections.emptyMap(), state)).doubleOf()
         );
     }
 

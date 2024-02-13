@@ -36,8 +36,8 @@ public class PredicatesGenerator extends ExtendedNBABaseVisitor<Map<String, Pred
     }
 
     private Predicate<AgentState> getPredicateBuilder(ExtendedNBAParser.ExprContext ctx) {
-        ExpressionFunction predicateFunction = ctx.accept(new ExpressionGenerator(this.table, null, null));
-        return state -> predicateFunction.eval(new ExpressionContext(Collections.emptyList(), Collections.emptyList(), state)) == SibillaBoolean.TRUE;
+        ExpressionFunction predicateFunction = ctx.accept(new ExpressionGenerator(this.table));
+        return state -> predicateFunction.eval(new ExpressionContext(Collections.emptyMap(), Collections.emptyMap(), state)) == SibillaBoolean.TRUE;
     }
 
     @Override

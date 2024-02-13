@@ -35,11 +35,11 @@ public class MeasuresGenerator extends DataOrientedPopulationModelBaseVisitor<Ma
     }
 
     private Measure<AgentState> getMeasureBuilder(DataOrientedPopulationModelParser.Measure_declarationContext ctx) {
-        ExpressionFunction measurefunction = ctx.expr().accept(new ExpressionGenerator(this.table, null, null));
+        ExpressionFunction measurefunction = ctx.expr().accept(new ExpressionGenerator(this.table));
 
         return new SimpleMeasure<AgentState>(
                 ctx.name.getText(),
-                state -> measurefunction.eval(new ExpressionContext(Collections.emptyList(), Collections.emptyList(), state)).doubleOf()
+                state -> measurefunction.eval(new ExpressionContext(Collections.emptyMap(), Collections.emptyMap(), state)).doubleOf()
         );
     }
 

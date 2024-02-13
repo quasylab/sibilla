@@ -12,13 +12,9 @@ import java.util.List;
 
 public class AgentMutationGenerator extends DataOrientedPopulationModelBaseVisitor<Mutation> {
     private final SymbolTable table;
-    private final String agentSpecies;
-    private final String senderSpecies;
 
-    public AgentMutationGenerator(SymbolTable table, String agentSpecies, String senderSpecies) {
+    public AgentMutationGenerator(SymbolTable table) {
         this.table = table;
-        this.agentSpecies = agentSpecies;
-        this.senderSpecies = senderSpecies;
     }
 
     @Override
@@ -31,14 +27,14 @@ public class AgentMutationGenerator extends DataOrientedPopulationModelBaseVisit
     private DeterministicMutation getDeterministicMutation(DataOrientedPopulationModelParser.Agent_expressionContext ctx) {
         return new DeterministicMutation(
                 ctx.accept(
-                        new AgentExpressionGenerator(this.table, agentSpecies, senderSpecies)
+                        new AgentExpressionGenerator(this.table)
                 )
         );
     }
 
     private StochasticMutation getStochasticMutation(List<DataOrientedPopulationModelParser.Stochastic_mutation_tupleContext> tuples) {
-        AgentExpressionGenerator agentExpressionGenerator = new AgentExpressionGenerator(this.table, agentSpecies, senderSpecies);
-        ExpressionGenerator expressionGenerator = new ExpressionGenerator(this.table, agentSpecies, senderSpecies);
+        AgentExpressionGenerator agentExpressionGenerator = new AgentExpressionGenerator(this.table);
+        ExpressionGenerator expressionGenerator = new ExpressionGenerator(this.table);
         return new StochasticMutation(
                 tuples.stream().map(
                         tctx -> new StochasticMutationTuple

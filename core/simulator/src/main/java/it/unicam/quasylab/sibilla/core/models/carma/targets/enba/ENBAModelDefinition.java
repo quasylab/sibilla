@@ -5,6 +5,7 @@ import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.Rule;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.AgentState;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.enba.processes.Process;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -20,11 +21,11 @@ public class ENBAModelDefinition implements ModelDefinition<AgentState> {
     private Map<String, Predicate<AgentState>> predicates;
     private ENBAModel model;
 
-    public ENBAModelDefinition(Map<String, Function<RandomGenerator, AgentState>> states, Map<String, Measure<AgentState>> measures, Map<String, Predicate<AgentState>> predicates, List<Rule> rules) {
+    public ENBAModelDefinition(Map<String, Function<RandomGenerator, AgentState>> states, Map<String, Measure<AgentState>> measures, Map<String, Predicate<AgentState>> predicates, List<Process> processes) {
         this.states = states;
         this.measures = measures;
         this.predicates = predicates;
-        this.model = new ENBAModel(rules, this.measures, this.predicates);
+        this.model = new ENBAModel(processes, this.measures, this.predicates);
     }
 
     /**

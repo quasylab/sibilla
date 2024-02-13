@@ -36,11 +36,11 @@ public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<List<
 
     private Rule getRule(String ruleName, DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
         String species = ctx.output.pre.name.getText();
-        ExpressionFunction outRate = ctx.output.rate.accept(new ExpressionGenerator(this.table, species, null));
+        ExpressionFunction outRate = ctx.output.rate.accept(new ExpressionGenerator(this.table));
         OutputTransition outputTransition = new OutputTransition(
                 ctx.output.pre.accept(new AgentPredicateGenerator(this.table)),
                 (context) -> outRate.eval(context).doubleOf(),
-                ctx.output.post.accept(new AgentMutationGenerator(this.table, species, null))
+                ctx.output.post.accept(new AgentMutationGenerator(this.table))
         );
         List<InputTransition> inputs = getInputs(species, ctx.inputs);
         return new Rule(outputTransition, inputs);
@@ -50,13 +50,13 @@ public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<List<
         List<InputTransition> inputs = new ArrayList<>();
         for(DataOrientedPopulationModelParser.Input_transitionContext ictx : transitionList.input_transition()) {
             String species = ictx.pre.name.getText();
-            ExpressionFunction senderPredicate = ictx.sender_predicate.accept(new ExpressionGenerator(this.table, senderSpecies, null));
-            ExpressionFunction probability = ictx.probability.accept(new ExpressionGenerator(this.table, species, null));
+            ExpressionFunction senderPredicate = ictx.sender_predicate.accept(new ExpressionGenerator(this.table));
+            ExpressionFunction probability = ictx.probability.accept(new ExpressionGenerator(this.table));
             inputs.add(new InputTransition(
                     ictx.pre.accept(new AgentPredicateGenerator(this.table)),
                     context -> senderPredicate.eval(context) == SibillaBoolean.TRUE,
                     context -> probability.eval(context).doubleOf(),
-                    ictx.post.accept(new AgentMutationGenerator(this.table, species, senderSpecies))
+                    ictx.post.accept(new AgentMutationGenerator(this.table))
             ));
         }
         return inputs;

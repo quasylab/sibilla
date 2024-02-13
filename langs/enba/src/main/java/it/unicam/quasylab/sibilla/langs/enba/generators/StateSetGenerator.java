@@ -61,10 +61,10 @@ public class StateSetGenerator extends ExtendedNBABaseVisitor<Map<String, Functi
 
     private Function<RandomGenerator, AgentState> getStateBuilder(List<ExtendedNBAParser.System_componentContext> systemComponentsctx) {
         Map<Agent, Long> occupancies = new HashMap<>();
-        AgentExpressionGenerator agentExpressionGenerator = new AgentExpressionGenerator(this.table, null, null);
+        AgentExpressionGenerator agentExpressionGenerator = new AgentExpressionGenerator(this.table);
         for(ExtendedNBAParser.System_componentContext sctx : systemComponentsctx) {
             Long agentPopulationSize = sctx.INTEGER() == null ? 1 : Long.parseLong(sctx.INTEGER().getText());
-            Agent newAgent = sctx.agent_expression().accept(agentExpressionGenerator).eval(new ExpressionContext(Collections.emptyList(), Collections.emptyList(), null));
+            Agent newAgent = sctx.agent_expression().accept(agentExpressionGenerator).eval(new ExpressionContext(Collections.emptyMap(), Collections.emptyMap(), null));
             occupancies.put(newAgent, agentPopulationSize+occupancies.getOrDefault(newAgent, 0L));
         }
         return r -> new AgentState(occupancies);

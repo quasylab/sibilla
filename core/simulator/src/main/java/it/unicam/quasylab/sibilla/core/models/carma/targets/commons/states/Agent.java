@@ -5,8 +5,7 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.*;
 
-public record Agent(int species, List<SibillaValue> values) {
-    public final static Agent NIL = new Agent(-1,Collections.emptyList());
+public record Agent(int species, Map<String,SibillaValue> values) {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -15,12 +14,9 @@ public record Agent(int species, List<SibillaValue> values) {
         Agent agent = (Agent) o;
 
         if (species != agent.species) return false;
-        for (int i = 0; i < values.size(); ++i) {
-            if (!values.get(i).equals(agent.values.get(i))) {
-                return false;
-            }
-        }
-        return true;
+        return values.entrySet()
+                .stream()
+                .allMatch(e -> e.getValue().equals(agent.values.get(e.getKey())));
     }
 
     @Override

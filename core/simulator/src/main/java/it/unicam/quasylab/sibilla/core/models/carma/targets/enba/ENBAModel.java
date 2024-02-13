@@ -6,6 +6,10 @@ import it.unicam.quasylab.sibilla.core.models.StepFunction;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.DataOrientedPopulationModel;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.Rule;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.AgentState;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.InputTransition;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.OutputTransition;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.enba.processes.Process;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.enba.processes.actions.OutputAction;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -13,12 +17,64 @@ import org.apache.commons.math3.random.RandomGenerator;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class ENBAModel implements Model<AgentState>, ContinuousTimeMarkovProcess<AgentState> {
+    private final List<Process> processes;
     private final DataOrientedPopulationModel dopm;
 
-    public ENBAModel(List<Rule> rules, Map<String, Measure<AgentState>> measures, Map<String, Predicate<AgentState>> predicates) {
-        this.dopm = new DataOrientedPopulationModel(measures, predicates, rules);
+    private record OutputRule(OutputAction output, Rule rule) {}
+
+    public ENBAModel(List<Process> processes, Map<String, Measure<AgentState>> measures, Map<String, Predicate<AgentState>> predicates) {
+        this.processes = processes;
+        this.dopm = new DataOrientedPopulationModel(measures, predicates, getRules(processes));
+    }
+
+    private static List<Rule> getRules(List<Process> processes) {
+        Map<String, List<OutputRule>> rules = processes.stream()
+                .flatMap(p -> p.outputs().values().stream())
+                .flatMap(Collection::stream)
+                .map(o -> new AbstractMap.SimpleEntry<>(
+                        o.channel(),
+                        new OutputRule(
+                            o,
+                            new Rule(
+                                new OutputTransition(o.predicate(),o.rate(),o.post()),
+                                new ArrayList<>()
+                            )
+                        )
+                    )
+                ).collect(
+                        Collectors.groupingBy(
+                                Map.Entry::getKey,
+                                Collectors.mapping(
+                                        Map.Entry::getValue,
+                                        Collectors.toList()
+                                )
+                        )
+                );
+
+        processes.stream()
+                .flatMap(p -> p.inputs().values().stream())
+                .flatMap(Collection::stream)
+                .forEach(i -> rules.get(i.channel()).forEach(o ->
+                            o.rule.getInputs().add(
+                                    new InputTransition(
+                                            (s, c) -> i.predicate().test(s, c) && o.output.receiverPredicate().test(c),
+                                            i.senderPredicate(),
+                                            i.probability(),
+                                            i.post()
+                                    )
+                            )
+                        )
+                );
+
+        return rules
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .map(o -> o.rule)
+                .toList();
     }
 
     /**
