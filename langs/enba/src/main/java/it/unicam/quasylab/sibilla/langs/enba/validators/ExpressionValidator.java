@@ -25,7 +25,7 @@ public class ExpressionValidator extends ExtendedNBABaseVisitor<Boolean> {
     }
 
     protected boolean checkAssignment(Type assignment, ParserRuleContext ctx) {
-        if(!type.assignmentCompatible(assignment)) {
+        if(type != null && !type.assignmentCompatible(assignment)) {
             this.errors.add(ModelBuildingError.unexpectedType(type,  ctx));
             return false;
         }
@@ -60,6 +60,7 @@ public class ExpressionValidator extends ExtendedNBABaseVisitor<Boolean> {
     @Override
     public Boolean visitReferenceExpression(ExtendedNBAParser.ReferenceExpressionContext ctx) {
         String name = ctx.reference.getText();
+
         return checkReference(name, ctx);
     }
 
@@ -75,7 +76,8 @@ public class ExpressionValidator extends ExtendedNBABaseVisitor<Boolean> {
 
     @Override
     public Boolean visitRelationExpression(ExtendedNBAParser.RelationExpressionContext ctx) {
-        return checkAssignment(Type.BOOLEAN, ctx);
+        ExpressionValidator realValidator = new ExpressionValidator(table,errors,localVariables,Type.REAL);
+        return checkAssignment(Type.BOOLEAN, ctx) && ctx.left.accept(realValidator) && ctx.right.accept(realValidator);
     }
 
     @Override
@@ -85,18 +87,19 @@ public class ExpressionValidator extends ExtendedNBABaseVisitor<Boolean> {
 
     @Override
     public Boolean visitSenderReferenceExpression(ExtendedNBAParser.SenderReferenceExpressionContext ctx) {
-        String name = ctx.reference.getText();
+        String name = "sender." + ctx.ID().getText();
         return checkReference(name, ctx);
     }
 
     @Override
     public Boolean visitOrExpression(ExtendedNBAParser.OrExpressionContext ctx) {
-        return checkAssignment(Type.BOOLEAN, ctx);
+        ExpressionValidator booleanValidator = new ExpressionValidator(table,errors,localVariables,Type.BOOLEAN);
+        return checkAssignment(Type.BOOLEAN, ctx) && ctx.left.accept(booleanValidator) && ctx.right.accept(booleanValidator);
     }
 
     @Override
     public Boolean visitIfThenElseExpression(ExtendedNBAParser.IfThenElseExpressionContext ctx) {
-        ExpressionValidator booleanValidator = new ExpressionValidator(this.table,this.errors,this.localVariables,Type.BOOLEAN);
+        ExpressionValidator booleanValidator = new ExpressionValidator(this.table,this.errors,this.localVariables, Type.BOOLEAN);
         return ctx.guard.accept(booleanValidator) && ctx.thenBranch.accept(this) && ctx.elseBranch.accept(this);
     }
 
@@ -112,7 +115,8 @@ public class ExpressionValidator extends ExtendedNBABaseVisitor<Boolean> {
 
     @Override
     public Boolean visitAndExpression(ExtendedNBAParser.AndExpressionContext ctx) {
-        return checkAssignment(Type.BOOLEAN, ctx);
+        ExpressionValidator booleanValidator = new ExpressionValidator(table,errors,localVariables,Type.BOOLEAN);
+        return checkAssignment(Type.BOOLEAN, ctx) && ctx.left.accept(booleanValidator) && ctx.right.accept(booleanValidator);
     }
 
     @Override

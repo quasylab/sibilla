@@ -38,6 +38,22 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
     }
 
     @Override
+    public Boolean visitSpecies_declaration(ExtendedNBAParser.Species_declarationContext ctx) {
+        String name = ctx.name.getText();
+        try {
+            this.table.addSpecies(name, ctx);
+            for (ExtendedNBAParser.Var_declContext vctx : ctx.var_decl()) {
+                this.table.addSpeciesVar(name, vctx);
+            }
+        }
+        catch(DuplicatedSymbolException e) {
+            this.errors.add(new ModelBuildingError(e.getMessage()));
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public Boolean visitChannel_declaration(ExtendedNBAParser.Channel_declarationContext ctx) {
         String name = ctx.name.getText();
         try {
@@ -56,16 +72,11 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
     @Override
     public Boolean visitProcess_declaration(ExtendedNBAParser.Process_declarationContext ctx) {
         String name = ctx.name.getText();
-        try {
-            this.table.addSpecies(name, ctx);
-            for (ExtendedNBAParser.Var_declContext vctx : ctx.var_decl()) {
-                this.table.addSpeciesVar(name, vctx);
-            }
+
+        if(!this.table.isASpecies(name)) {
+            this.errors.add(ModelBuildingError.unknownSymbol(name, ctx.start.getLine(), ctx.start.getCharPositionInLine()));
         }
-        catch(DuplicatedSymbolException e) {
-            this.errors.add(new ModelBuildingError(e.getMessage()));
-            return false;
-        }
+
         return checkProcessBody(ctx.body, name);
     }
 
@@ -94,7 +105,7 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
         for(ExtendedNBAParser.Action_tupleContext actx : ctx.action_tuple()) {
             if(
                     (actx.broadcast_input_tuple() != null && !checkInputAction(actx.broadcast_input_tuple(), inputs, species)) ||
-                    !checkOutputAction(actx.broadcast_output_tuple(), outputs, species)
+                    (actx.broadcast_output_tuple() != null && !checkOutputAction(actx.broadcast_output_tuple(), outputs, species))
             ) {
                 return false;
             }
@@ -139,7 +150,7 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
             this.errors.add(ModelBuildingError.undefinedChannel(channel, ctx));
             return false;
         }
-        return false;
+        return true;
     }
 
     public Boolean checkActionDuplicated(String channel, Map<String, ParserRuleContext> actions, ParserRuleContext ctx) {

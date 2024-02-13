@@ -6,19 +6,22 @@ package it.unicam.quasylab.sibilla.langs.enba;
 
 model   : element* EOF;
 
-element : process_declaration
+element : species_declaration
+        | process_declaration
         | channel_declaration
         | system_declaration
         | measure_declaration
         | predicate_declaration;
 
+species_declaration : 'species' name=ID (vars='{' var_decl (',' var_decl)* '}')? ';';
+
 measure_declaration : 'measure' name=ID '=' expr ';';
 
 predicate_declaration: 'predicate' name=ID '=' expr ';';
 
-channel_declaration : 'channel' name=ID (vars='('var_decl (',' var_decl)*')')? ';';
+channel_declaration : 'channel' name=ID (vars='{'var_decl (',' var_decl)*'}')? ';';
 
-process_declaration : 'process' name=ID (vars='('var_decl (',' var_decl)*')')? '{'
+process_declaration : 'process' name=ID '{'
     body=process_body
 '}';
 

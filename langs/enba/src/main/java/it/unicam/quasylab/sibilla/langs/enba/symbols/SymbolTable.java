@@ -35,7 +35,7 @@ public class SymbolTable {
     private final Map<String, List<Variable>> channelsVariables = new LinkedHashMap<>();
     private final HashMap<String, ExtendedNBAParser.Measure_declarationContext> measures = new HashMap<>();
     private final HashMap<String,ExtendedNBAParser.Predicate_declarationContext> predicates = new HashMap<>();
-    private final Map<String,ExtendedNBAParser.Process_declarationContext> species = new LinkedHashMap<>();
+    private final Map<String,ExtendedNBAParser.Species_declarationContext> species = new LinkedHashMap<>();
     private final Map<String, List<Variable>> speciesVars = new LinkedHashMap<>();
     private final HashMap<String,ExtendedNBAParser.System_declarationContext> systems = new HashMap<>();
 
@@ -65,7 +65,7 @@ public class SymbolTable {
     }
 
 
-    public void addSpecies(String name, ExtendedNBAParser.Process_declarationContext context) throws DuplicatedSymbolException {
+    public void addSpecies(String name, ExtendedNBAParser.Species_declarationContext context) throws DuplicatedSymbolException {
         checkAndThrowExceptionIfDuplicated(name,context);
         species.put(name,context);
         this.speciesVars.put(name, new ArrayList<>());
@@ -176,7 +176,7 @@ public class SymbolTable {
     }
 
 
-    public ExtendedNBAParser.Process_declarationContext getSpeciesContext(String name) {
+    public ExtendedNBAParser.Species_declarationContext getSpeciesContext(String name) {
         return species.get(name);
     }
 
