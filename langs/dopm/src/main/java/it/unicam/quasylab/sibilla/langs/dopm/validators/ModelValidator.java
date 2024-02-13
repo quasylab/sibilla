@@ -60,7 +60,7 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
             this.errors.add(ModelBuildingError.duplicatedName(name, this.table.getContext(name), ctx));
             return false;
         }
-        return ctx.expr().accept(new PopulationExpressionValidator(this.table, this.errors, new ArrayList<>(), Type.REAL));
+        return ctx.expr().accept(new ExpressionValidator(this.table, this.errors, new ArrayList<>(), true, Type.REAL));
     }
 
     @Override
@@ -73,7 +73,7 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
             this.errors.add(ModelBuildingError.duplicatedName(name, this.table.getContext(name), ctx));
             return false;
         }
-        return ctx.expr().accept(new PopulationExpressionValidator(this.table, this.errors, new ArrayList<>(), Type.BOOLEAN));
+        return ctx.expr().accept(new ExpressionValidator(this.table, this.errors, new ArrayList<>(), true, Type.BOOLEAN));
     }
     @Override
     public Boolean visitSystem_declaration(DataOrientedPopulationModelParser.System_declarationContext ctx) {
@@ -123,18 +123,13 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
                 );
                 return false;
             }
-            ExpressionValidator validator = modelContext ? new PopulationExpressionValidator(
+            ExpressionValidator validator = new ExpressionValidator(
                                                                 this.table,
                                                                 this.errors,
                                                                 variables,
+                                                                modelContext,
                                                                 currentSpeciesVariable.type()
-                                                         )
-                                                         : new ExpressionValidator(
-                                                                this.table,
-                                                                this.errors,
-                                                                variables,
-                                                                currentSpeciesVariable.type()
-                                                         );
+            );
             if(!currentAssContext.expr().accept(validator)) {
                 return false;
             }
@@ -173,14 +168,14 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
             return false;
         }
         variables.addAll(this.table.getSpeciesVariables(ctx.pre.name.getText()).orElse(new ArrayList<>()));
-        return ctx.rate.accept(new PopulationExpressionValidator(this.table, this.errors, variables, Type.REAL)) &&
+        return ctx.rate.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.REAL)) &&
                checkAgentMutation(ctx.post, variables);
     }
 
     private Boolean checkInputTransition(DataOrientedPopulationModelParser.Input_transitionContext ctx, List<Variable> variables) {
         if(
                 !ctx.pre.accept(this) ||
-                !ctx.sender_predicate.accept(new PopulationExpressionValidator(this.table, this.errors, variables, Type.BOOLEAN))
+                !ctx.sender_predicate.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.BOOLEAN))
         ) {
             return false;
         }
@@ -193,7 +188,7 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
                         .orElse(new ArrayList<>())
                         .stream()
         ).toList();
-        return ctx.probability.accept(new PopulationExpressionValidator(this.table, this.errors, variables, Type.REAL)) &&
+        return ctx.probability.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.REAL)) &&
                checkAgentMutation(ctx.post, variables);
     }
 
@@ -203,7 +198,7 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
         }
         for(DataOrientedPopulationModelParser.Stochastic_mutation_tupleContext tctx : ctx.stochastic_mutation_tuple()) {
             if(
-                    !tctx.expr().accept(new PopulationExpressionValidator(this.table, this.errors, variables, Type.REAL)) ||
+                    !tctx.expr().accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.REAL)) ||
                     !checkAgentExpression(tctx.agent_expression(), variables, true)
             ) {
                 return false;
@@ -214,7 +209,7 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
 
     @Override
     public Boolean visitAgent_predicate(DataOrientedPopulationModelParser.Agent_predicateContext ctx) {
-        return ctx.accept(new PopulationExpressionValidator(this.table, this.errors, new ArrayList<>(), Type.BOOLEAN));
+        return ctx.accept(new ExpressionValidator(this.table, this.errors, new ArrayList<>(), true, Type.BOOLEAN));
     }
     public List<ModelBuildingError> getErrors() {
     	return errors;

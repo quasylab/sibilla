@@ -14,12 +14,15 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
     protected final SymbolTable table;
     protected final List<ModelBuildingError> errors;
     protected final List<Variable> localVariables;
+    protected final boolean modelContext;
+
     protected final Type type;
 
-    public ExpressionValidator(SymbolTable table, List<ModelBuildingError> errors, List<Variable> localVariables, Type type) {
+    public ExpressionValidator(SymbolTable table, List<ModelBuildingError> errors, List<Variable> localVariables, boolean modelContext, Type type) {
         this.table = table;
         this.errors = errors;
         this.localVariables = localVariables;
+        this.modelContext = modelContext;
         this.type = type;
     }
 
@@ -75,7 +78,7 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
 
     @Override
     public Boolean visitRelationExpression(DataOrientedPopulationModelParser.RelationExpressionContext ctx) {
-        ExpressionValidator realValidator = new ExpressionValidator(table,errors,localVariables,Type.REAL);
+        ExpressionValidator realValidator = new ExpressionValidator(table,errors,localVariables,modelContext,Type.REAL);
         return checkAssignment(Type.BOOLEAN, ctx) && ctx.left.accept(realValidator) && ctx.right.accept(realValidator);
     }
 
@@ -92,13 +95,13 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
 
     @Override
     public Boolean visitOrExpression(DataOrientedPopulationModelParser.OrExpressionContext ctx) {
-        ExpressionValidator booleanValidator = new ExpressionValidator(table,errors,localVariables,Type.BOOLEAN);
+        ExpressionValidator booleanValidator = new ExpressionValidator(table,errors,localVariables,modelContext,Type.BOOLEAN);
         return checkAssignment(Type.BOOLEAN, ctx) && ctx.left.accept(booleanValidator) && ctx.right.accept(booleanValidator);
     }
 
     @Override
     public Boolean visitIfThenElseExpression(DataOrientedPopulationModelParser.IfThenElseExpressionContext ctx) {
-        ExpressionValidator booleanValidator = new ExpressionValidator(this.table,this.errors,this.localVariables, Type.BOOLEAN);
+        ExpressionValidator booleanValidator = new ExpressionValidator(this.table,this.errors,this.localVariables, modelContext,Type.BOOLEAN);
         return ctx.guard.accept(booleanValidator) && ctx.thenBranch.accept(this) && ctx.elseBranch.accept(this);
     }
 
@@ -114,7 +117,7 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
 
     @Override
     public Boolean visitAndExpression(DataOrientedPopulationModelParser.AndExpressionContext ctx) {
-        ExpressionValidator booleanValidator = new ExpressionValidator(table,errors,localVariables,Type.BOOLEAN);
+        ExpressionValidator booleanValidator = new ExpressionValidator(table,errors,localVariables, modelContext, Type.BOOLEAN);
         return checkAssignment(Type.BOOLEAN, ctx) && ctx.left.accept(booleanValidator) && ctx.right.accept(booleanValidator);
     }
 
@@ -141,14 +144,40 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
         }
         return ctx.expr().accept(this);
     }
-    @Override
-    public Boolean visitPopulationFractionExpression(DataOrientedPopulationModelParser.PopulationFractionExpressionContext ctx) {
-        this.errors.add(ModelBuildingError.illegalPopulationExpression(ctx));
-        return false;
-    }
+
     @Override
     public Boolean visitPopulationSizeExpression(DataOrientedPopulationModelParser.PopulationSizeExpressionContext ctx) {
-        this.errors.add(ModelBuildingError.illegalPopulationExpression(ctx));
-        return false;
+        if(!modelContext) {
+            this.errors.add(ModelBuildingError.illegalPopulationExpression(ctx));
+            return false;
+        }
+        if(!checkAssignment(Type.INTEGER, ctx)) {
+            return false;
+        }
+        return ctx.agent.accept(this);
+    }
+
+    @Override
+    public Boolean visitPopulationFractionExpression(DataOrientedPopulationModelParser.PopulationFractionExpressionContext ctx) {
+        if(!modelContext) {
+            this.errors.add(ModelBuildingError.illegalPopulationExpression(ctx));
+            return false;
+        }
+        if(!checkAssignment(Type.REAL, ctx)) {
+            return false;
+        }
+        return ctx.agent.accept(this);
+    }
+
+    @Override
+    public Boolean visitAgent_predicate(DataOrientedPopulationModelParser.Agent_predicateContext ctx) {
+        String species = ctx.name.getText();
+        if(!this.table.isASpecies(species)) {
+            this.errors.add(ModelBuildingError.unknownSymbol(species, ctx.name.getLine(), ctx.name.getCharPositionInLine()));
+            return false;
+        }
+        List<Variable> predicateVariables = this.table.getSpeciesVariables(species).orElse(new ArrayList<>());
+        ExpressionValidator booleanValidator = new ExpressionValidator(this.table, this.errors, predicateVariables, modelContext, Type.BOOLEAN);
+        return ctx.expr().accept(booleanValidator);
     }
 }

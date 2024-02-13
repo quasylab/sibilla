@@ -85,10 +85,11 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
             return true;
         } else if(ctx.conditional_process() != null) {
            return ctx.conditional_process().expr().accept(
-                   new PopulationExpressionValidator(
+                   new ExpressionValidator(
                        this.table,
                        this.errors,
                        this.table.getSpeciesVariables(species).orElse(new ArrayList<>()),
+                       true,
                        Type.BOOLEAN
                    )
            )
@@ -126,8 +127,8 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
         return  checkChannelExistence(channel, ctx)
                 && checkActionDuplicated(channel, inputs, ctx)
                 && checkChannelCompatibility(species, channel)
-                && ctx.broadcast_input_action().probability.accept(new ExpressionValidator(this.table, this.errors, variables, Type.REAL))
-                && ctx.broadcast_input_action().predicate.accept(new ExpressionValidator(this.table, this.errors, channelVariables, Type.BOOLEAN))
+                && ctx.broadcast_input_action().probability.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.REAL))
+                && ctx.broadcast_input_action().predicate.accept(new ExpressionValidator(this.table, this.errors, channelVariables, true, Type.BOOLEAN))
                 && checkAgentMutation(ctx.agent_mutation(), mutationVariables);
     }
 
@@ -140,8 +141,8 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
         return  checkChannelExistence(channel, ctx)
                 && checkActionDuplicated(channel, outputs, ctx)
                 && checkChannelCompatibility(species, channel)
-                && ctx.broadcast_output_action().rate.accept(new ExpressionValidator(this.table, this.errors, variables, Type.REAL))
-                && ctx.broadcast_output_action().predicate.accept(new ExpressionValidator(this.table, this.errors, channelVariables, Type.BOOLEAN))
+                && ctx.broadcast_output_action().rate.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.REAL))
+                && ctx.broadcast_output_action().predicate.accept(new ExpressionValidator(this.table, this.errors, channelVariables, true, Type.BOOLEAN))
                 && checkAgentMutation(ctx.agent_mutation(), variables);
     }
 
@@ -190,7 +191,7 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
             this.errors.add(ModelBuildingError.duplicatedName(name, this.table.getContext(name), ctx));
             return false;
         }
-        return ctx.expr().accept(new PopulationExpressionValidator(this.table, this.errors, new ArrayList<>(), Type.REAL));
+        return ctx.expr().accept(new ExpressionValidator(this.table, this.errors, new ArrayList<>(), true, Type.REAL));
     }
 
     @Override
@@ -203,7 +204,7 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
             this.errors.add(ModelBuildingError.duplicatedName(name, this.table.getContext(name), ctx));
             return false;
         }
-        return ctx.expr().accept(new PopulationExpressionValidator(this.table, this.errors, new ArrayList<>(), Type.BOOLEAN));
+        return ctx.expr().accept(new ExpressionValidator(this.table, this.errors, new ArrayList<>(), true, Type.BOOLEAN));
     }
     @Override
     public Boolean visitSystem_declaration(ExtendedNBAParser.System_declarationContext ctx) {
@@ -253,18 +254,13 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
                 );
                 return false;
             }
-            ExpressionValidator validator = modelContext ? new PopulationExpressionValidator(
+            ExpressionValidator validator = new ExpressionValidator(
                                                                 this.table,
                                                                 this.errors,
                                                                 variables,
+                                                                modelContext,
                                                                 currentSpeciesVariable.type()
-                                                         )
-                                                         : new ExpressionValidator(
-                                                                this.table,
-                                                                this.errors,
-                                                                variables,
-                                                                currentSpeciesVariable.type()
-                                                         );
+            );
             if(!currentAssContext.expr().accept(validator)) {
                 return false;
             }
@@ -278,7 +274,7 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
         }
         for(ExtendedNBAParser.Stochastic_mutation_tupleContext tctx : ctx.stochastic_mutation_tuple()) {
             if(
-                    !tctx.expr().accept(new PopulationExpressionValidator(this.table, this.errors, variables, Type.REAL)) ||
+                    !tctx.expr().accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.REAL)) ||
                     !checkAgentExpression(tctx.agent_expression(), variables, true)
             ) {
                 return false;
@@ -289,7 +285,7 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
 
     @Override
     public Boolean visitAgent_predicate(ExtendedNBAParser.Agent_predicateContext ctx) {
-        return ctx.accept(new PopulationExpressionValidator(this.table, this.errors, new ArrayList<>(), Type.BOOLEAN));
+        return ctx.accept(new ExpressionValidator(this.table, this.errors, new ArrayList<>(), true, Type.BOOLEAN));
     }
     public List<ModelBuildingError> getErrors() {
     	return errors;
