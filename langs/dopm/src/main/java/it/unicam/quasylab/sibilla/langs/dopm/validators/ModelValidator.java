@@ -14,12 +14,6 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
 
     private final List<ModelBuildingError> errors;
     private final SymbolTable table;
-
-    public ModelValidator() {
-        this.errors = new LinkedList<>();
-        this.table = new SymbolTable();
-    }
-
     public ModelValidator(List<ModelBuildingError> errors) {
         this.errors = errors;
         this.table = new SymbolTable();
@@ -27,12 +21,11 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
 
     @Override
     public Boolean visitModel(DataOrientedPopulationModelParser.ModelContext ctx) {
+        boolean valid = true;
         for(DataOrientedPopulationModelParser.ElementContext ectx : ctx.element()) {
-            if(!ectx.accept(this)) {
-                return false;
-            }
+            valid &= ectx.accept(this);
         }
-        return true;
+        return valid;
     }
 
     @Override
@@ -151,11 +144,40 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
 
     @Override
     public Boolean visitRule_body(DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
+        if(ctx.broadcast_rule_body() != null) {
+            return checkBroadcastRuleBody(ctx.broadcast_rule_body());
+        } else {
+            return checkUnicastRuleBody(ctx.unicast_rule_body());
+        }
+    }
+
+    private boolean checkBroadcastRuleBody(DataOrientedPopulationModelParser.Broadcast_rule_bodyContext ctx) {
         List<Variable> sender_variables = new ArrayList<>();
         if(!checkOutputTransition(ctx.output, sender_variables)) {
             return false;
         }
         for(DataOrientedPopulationModelParser.Input_transitionContext ictx : ctx.inputs.input_transition()) {
+            if(!checkInputTransition(ictx, new ArrayList<>(sender_variables))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean checkUnicastRuleBody(DataOrientedPopulationModelParser.Unicast_rule_bodyContext ctx) {
+        List<Variable> sender_variables = new ArrayList<>();
+        if(!checkOutputTransition(ctx.output, sender_variables)) {
+            return false;
+        }
+        Set<String> inputSpeciesSet = new HashSet<>();
+        for(DataOrientedPopulationModelParser.Input_transitionContext ictx : ctx.inputs.input_transition()) {
+            String preSpecies = ictx.pre.name.getText();
+            if(inputSpeciesSet.contains(preSpecies)) {
+                errors.add(ModelBuildingError.duplicatedSpecies(preSpecies, ictx.pre.getStart().getLine(), ictx.pre.getStart().getCharPositionInLine()));
+                return false;
+            } else {
+                inputSpeciesSet.add(preSpecies);
+            }
             if(!checkInputTransition(ictx, new ArrayList<>(sender_variables))) {
                 return false;
             }
@@ -212,7 +234,7 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
         return ctx.accept(new ExpressionValidator(this.table, this.errors, new ArrayList<>(), true, Type.BOOLEAN));
     }
     public List<ModelBuildingError> getErrors() {
-    	return errors;
+    	return this.errors;
     }
 
     public SymbolTable getTable() {

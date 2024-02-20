@@ -1,32 +1,21 @@
 package it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules;
 
+import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.Agent;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.AgentState;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.InputTransition;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.OutputTransition;
+import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.List;
 
-public class Rule {
-    private OutputTransition output;
-    private List<InputTransition> inputs;
+public interface Rule {
+    AgentState apply(AgentState state, Agent sender, RandomGenerator randomGenerator);
 
-    public Rule(OutputTransition output, List<InputTransition> inputs) {
-        this.output = output;
-        this.inputs = inputs;
-    }
+    OutputTransition getOutput();
 
-    public OutputTransition getOutput() {
-        return output;
-    }
+    void setOutput(OutputTransition output);
 
-    public void setOutput(OutputTransition output) {
-        this.output = output;
-    }
+    List<InputTransition> getInputs();
 
-    public List<InputTransition> getInputs() {
-        return inputs;
-    }
-
-    public void setInputs(List<InputTransition> inputs) {
-        this.inputs = inputs;
-    }
+    void setInputs(List<InputTransition> inputs);
 }

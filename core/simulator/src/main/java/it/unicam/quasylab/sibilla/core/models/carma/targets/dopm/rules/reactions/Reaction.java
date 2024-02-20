@@ -1,4 +1,4 @@
-package it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.states.transitions.reactions;
+package it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.reactions;
 
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.mutations.AgentDelta;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.Agent;

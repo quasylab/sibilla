@@ -46,6 +46,8 @@ public class DataOrientedPopulationModelGenerator {
 
     private final CodePointCharStream source;
     private ParseTree parseTree;
+
+
     private final List<ModelBuildingError> errorList = new LinkedList<>();
     private ModelValidator validator;
     private boolean validated = false;
@@ -124,5 +126,10 @@ public class DataOrientedPopulationModelGenerator {
         }
         return new SymbolTable();
     }
+
+    public List<ModelBuildingError> getErrorList() {
+        return errorList;
+    }
+
 
 }

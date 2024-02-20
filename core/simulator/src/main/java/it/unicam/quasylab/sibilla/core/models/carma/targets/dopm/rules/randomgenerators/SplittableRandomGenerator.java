@@ -1,4 +1,4 @@
-package it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.states;
+package it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.randomgenerators;
 
 import org.apache.commons.math3.random.AbstractRandomGenerator;
 

@@ -70,6 +70,10 @@ public class ModelBuildingError {
         return new ModelBuildingError(ParseUtil.getIllegalPopulationExpression(ctx));
     }
 
+    public static ModelBuildingError duplicatedSpecies(String species, int line, int charPositionInLine) {
+        return new ModelBuildingError(ParseUtil.getDuplicatedSpeciesMessage(species, line, charPositionInLine));
+    }
+
     public static ModelBuildingError illegalUseOfNow(int line, int charPositionInLine) {
         return new ModelBuildingError(ParseUtil.getIllegalUseOfNow(line,charPositionInLine));
     }

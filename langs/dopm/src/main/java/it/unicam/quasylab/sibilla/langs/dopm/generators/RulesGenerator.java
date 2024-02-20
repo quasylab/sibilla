@@ -1,8 +1,10 @@
 package it.unicam.quasylab.sibilla.langs.dopm.generators;
 
+import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.Rule;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.UnicastRule;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.InputTransition;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.OutputTransition;
-import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.Rule;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.BroadcastRule;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaBoolean;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisitor;
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
@@ -30,26 +32,37 @@ public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<List<
 
     @Override
     public List<Rule> visitRule_declaration(DataOrientedPopulationModelParser.Rule_declarationContext ctx) {
-        rules.add(getRule(ctx.name.getText(), ctx.body));
+        rules.add(getRule(ctx.body));
         return rules;
     }
 
-    private Rule getRule(String ruleName, DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
-        String species = ctx.output.pre.name.getText();
-        ExpressionFunction outRate = ctx.output.rate.accept(new ExpressionGenerator(this.table));
+    private Rule getRule(DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
+        boolean broadcastRule = ctx.broadcast_rule_body() != null;
+
+        DataOrientedPopulationModelParser.Output_transitionContext output = broadcastRule
+                ? ctx.broadcast_rule_body().output
+                : ctx.unicast_rule_body().output;
+
+        DataOrientedPopulationModelParser.Input_transition_listContext inputs = broadcastRule
+                ? ctx.broadcast_rule_body().inputs
+                : ctx.unicast_rule_body().inputs;
+
+        ExpressionFunction outRate = output.rate.accept(new ExpressionGenerator(this.table));
         OutputTransition outputTransition = new OutputTransition(
-                ctx.output.pre.accept(new AgentPredicateGenerator(this.table)),
+                output.pre.accept(new AgentPredicateGenerator(this.table)),
                 (context) -> outRate.eval(context).doubleOf(),
-                ctx.output.post.accept(new AgentMutationGenerator(this.table))
+                output.post.accept(new AgentMutationGenerator(this.table))
         );
-        List<InputTransition> inputs = getInputs(species, ctx.inputs);
-        return new Rule(outputTransition, inputs);
+        List<InputTransition> inputTransitions = getInputTransitions(inputs);
+
+        return broadcastRule
+                ? new BroadcastRule(outputTransition, inputTransitions)
+                : new UnicastRule(outputTransition, inputTransitions);
     }
 
-    private List<InputTransition> getInputs(String senderSpecies, DataOrientedPopulationModelParser.Input_transition_listContext transitionList) {
+    private List<InputTransition> getInputTransitions(DataOrientedPopulationModelParser.Input_transition_listContext transitionList) {
         List<InputTransition> inputs = new ArrayList<>();
         for(DataOrientedPopulationModelParser.Input_transitionContext ictx : transitionList.input_transition()) {
-            String species = ictx.pre.name.getText();
             ExpressionFunction senderPredicate = ictx.sender_predicate.accept(new ExpressionGenerator(this.table));
             ExpressionFunction probability = ictx.probability.accept(new ExpressionGenerator(this.table));
             inputs.add(new InputTransition(

@@ -29,12 +29,11 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
 
     @Override
     public Boolean visitModel(ExtendedNBAParser.ModelContext ctx) {
+        boolean valid = true;
         for(ExtendedNBAParser.ElementContext ectx : ctx.element()) {
-            if(!ectx.accept(this)) {
-                return false;
-            }
+            valid &= ectx.accept(this);
         }
-        return true;
+        return valid;
     }
 
     @Override

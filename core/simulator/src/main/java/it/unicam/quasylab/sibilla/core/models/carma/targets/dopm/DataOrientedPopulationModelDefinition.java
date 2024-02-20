@@ -27,8 +27,9 @@ package it.unicam.quasylab.sibilla.core.models.carma.targets.dopm;
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
-import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.Rule;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.BroadcastRule;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.AgentState;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.Rule;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -44,6 +45,7 @@ public class DataOrientedPopulationModelDefinition implements ModelDefinition<Ag
     private Map<String, Measure<AgentState>> measures;
     private Map<String, Predicate<AgentState>> predicates;
     private List<Rule> rules;
+
     private DataOrientedPopulationModel model;
 
     public DataOrientedPopulationModelDefinition(Map<String, Function<RandomGenerator, AgentState>> states, Map<String, Measure<AgentState>> measures, Map<String, Predicate<AgentState>> predicates, List<Rule> rules) {
@@ -57,6 +59,10 @@ public class DataOrientedPopulationModelDefinition implements ModelDefinition<Ag
     @Override
     public void reset() {
 
+    }
+
+    public DataOrientedPopulationModel getModel() {
+        return model;
     }
 
     @Override

@@ -4,8 +4,9 @@ import it.unicam.quasylab.sibilla.core.models.ContinuousTimeMarkovProcess;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.StepFunction;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.DataOrientedPopulationModel;
-import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.Rule;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.BroadcastRule;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.AgentState;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.Rule;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.InputTransition;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.OutputTransition;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.enba.processes.Process;
@@ -23,14 +24,14 @@ public class ENBAModel implements Model<AgentState>, ContinuousTimeMarkovProcess
     private final List<Process> processes;
     private final DataOrientedPopulationModel dopm;
 
-    private record OutputRule(OutputAction output, Rule rule) {}
-
     public ENBAModel(List<Process> processes, Map<String, Measure<AgentState>> measures, Map<String, Predicate<AgentState>> predicates) {
         this.processes = processes;
         this.dopm = new DataOrientedPopulationModel(measures, predicates, getRules(processes));
     }
 
     private static List<Rule> getRules(List<Process> processes) {
+        record OutputRule(OutputAction output, Rule rule) {}
+
         Map<String, List<OutputRule>> rules = processes.stream()
                 .flatMap(p -> p.outputs().values().stream())
                 .flatMap(Collection::stream)
@@ -38,7 +39,7 @@ public class ENBAModel implements Model<AgentState>, ContinuousTimeMarkovProcess
                         o.channel(),
                         new OutputRule(
                             o,
-                            new Rule(
+                            new BroadcastRule(
                                 new OutputTransition(o.predicate(),o.rate(),o.post()),
                                 new ArrayList<>()
                             )

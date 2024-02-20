@@ -34,6 +34,7 @@ public class ParseUtil {
     public static final String SYNTAX_ERROR = "Syntax error at line %d (offset %d): %s";
     public static final String DUPLICATED_SYMBOL_ERROR_MESSAGE = "Symbol %s at line %d char %d is already defined at line %d char %d!";
     public static final String DUPLICATED_LOCAL_VARIABLE_MESSAGE = "Duplicated Local variable %s at line %d char %d!";
+    public static final String DUPLICATED_SPECIES_MESSAGE = "Cannot use species %s multiple times on the same unicast rule input transitions predicates at line %d character %d";
     public static final String UNDEFINED_SYMBOL_ERROR_MESSAGE = "Unknown symbol %s at line %d char %d!";
     public static final String INCORRECT_AGENT_EXPRESSION= "Incorrect agent expression at line %d char %d!";
     public static final String EXPRESSION_TYPE_ERROR_MESSAGE = "Type error at line %d char %d: expected %s is %s!";
@@ -79,7 +80,9 @@ public class ParseUtil {
     public static String getDuplicatedLocalVariableMessage(String name, int line, int charPosition) {
         return String.format(DUPLICATED_LOCAL_VARIABLE_MESSAGE,name,line,charPosition);
     }
-
+    public static String getDuplicatedSpeciesMessage(String name, int line, int charPosition) {
+        return String.format(DUPLICATED_SPECIES_MESSAGE,name,line,charPosition);
+    }
     public static String getTypeErrorMessage(Type expected, Type actual, ParserRuleContext ctx) {
         return String.format(EXPRESSION_TYPE_ERROR_MESSAGE,ctx.start.getLine(),ctx.start.getCharPositionInLine(),expected.toString(),actual.toString());
     }

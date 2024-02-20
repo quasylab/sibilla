@@ -3,7 +3,6 @@ package it.unicam.quasylab.sibilla.core.models.carma.targets.enba;
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.ModelDefinition;
-import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.Rule;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.AgentState;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.enba.processes.Process;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
