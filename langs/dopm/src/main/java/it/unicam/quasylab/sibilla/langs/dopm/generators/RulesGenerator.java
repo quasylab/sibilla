@@ -37,15 +37,11 @@ public class RulesGenerator extends DataOrientedPopulationModelBaseVisitor<List<
     }
 
     private Rule getRule(DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
-        boolean broadcastRule = ctx.broadcast_rule_body() != null;
+        boolean broadcastRule = ctx.broadcast != null;
 
-        DataOrientedPopulationModelParser.Output_transitionContext output = broadcastRule
-                ? ctx.broadcast_rule_body().output
-                : ctx.unicast_rule_body().output;
+        DataOrientedPopulationModelParser.Output_transitionContext output = ctx.output;
 
-        DataOrientedPopulationModelParser.Input_transition_listContext inputs = broadcastRule
-                ? ctx.broadcast_rule_body().inputs
-                : ctx.unicast_rule_body().inputs;
+        DataOrientedPopulationModelParser.Input_transition_listContext inputs = ctx.inputs;
 
         ExpressionFunction outRate = output.rate.accept(new ExpressionGenerator(this.table));
         OutputTransition outputTransition = new OutputTransition(

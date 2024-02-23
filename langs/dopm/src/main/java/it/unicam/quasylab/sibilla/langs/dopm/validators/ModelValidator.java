@@ -144,14 +144,14 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
 
     @Override
     public Boolean visitRule_body(DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
-        if(ctx.broadcast_rule_body() != null) {
-            return checkBroadcastRuleBody(ctx.broadcast_rule_body());
+        if(ctx.broadcast != null) {
+            return checkBroadcastRuleBody(ctx);
         } else {
-            return checkUnicastRuleBody(ctx.unicast_rule_body());
+            return checkUnicastRuleBody(ctx);
         }
     }
 
-    private boolean checkBroadcastRuleBody(DataOrientedPopulationModelParser.Broadcast_rule_bodyContext ctx) {
+    private boolean checkBroadcastRuleBody(DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
         List<Variable> sender_variables = new ArrayList<>();
         if(!checkOutputTransition(ctx.output, sender_variables)) {
             return false;
@@ -164,7 +164,7 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
         return true;
     }
 
-    private boolean checkUnicastRuleBody(DataOrientedPopulationModelParser.Unicast_rule_bodyContext ctx) {
+    private boolean checkUnicastRuleBody(DataOrientedPopulationModelParser.Rule_bodyContext ctx) {
         List<Variable> sender_variables = new ArrayList<>();
         if(!checkOutputTransition(ctx.output, sender_variables)) {
             return false;

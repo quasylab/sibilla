@@ -32,14 +32,14 @@ process_body : choice_process
 
 choice_process : actions=action_tuple ('+' action_tuple)*;
 
-action_tuple : broadcast_input_tuple
-             | broadcast_output_tuple;
+action_tuple : input_tuple
+             | output_tuple;
 
-broadcast_output_tuple : broadcast_output_action '.' agent_mutation;
-broadcast_input_tuple : broadcast_input_action '.' agent_mutation;
+output_tuple : output_action '.' agent_mutation;
+input_tuple : input_action '.' agent_mutation;
 
-broadcast_output_action : channel=ID '*' '<' rate=expr '>' '[' predicate=expr ']' '!';
-broadcast_input_action : channel=ID '*' '<' probability=expr '>' '[' predicate=expr ']' '?';
+output_action : channel=ID (broadcast='*')? '<' rate=expr '>' '[' predicate=expr ']' '!';
+input_action : channel=ID (broadcast='*')? '<' probability=expr '>' '[' predicate=expr ']' '?';
 
 conditional_process : '['predicate=expr']' then=process_body ':' else=process_body;
 

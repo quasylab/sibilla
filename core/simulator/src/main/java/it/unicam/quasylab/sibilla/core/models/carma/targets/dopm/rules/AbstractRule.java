@@ -9,6 +9,7 @@ import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitio
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.OutputTransition;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -19,7 +20,7 @@ public abstract class AbstractRule implements Rule {
 
     public AbstractRule(OutputTransition output, List<InputTransition> inputs) {
         this.output = output;
-        this.inputs = inputs;
+        this.inputs = new ArrayList<>(inputs);
     }
 
     @Override

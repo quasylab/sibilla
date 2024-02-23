@@ -124,4 +124,9 @@ public class ENBAModelGenerator {
         return new SymbolTable();
     }
 
+    public List<ModelBuildingError> getErrorList() {
+        return errorList;
+    }
+
+
 }

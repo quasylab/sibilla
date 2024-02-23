@@ -104,8 +104,8 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
         Map<String, ParserRuleContext> inputs = new HashMap<>();
         for(ExtendedNBAParser.Action_tupleContext actx : ctx.action_tuple()) {
             if(
-                    (actx.broadcast_input_tuple() != null && !checkInputAction(actx.broadcast_input_tuple(), inputs, species)) ||
-                    (actx.broadcast_output_tuple() != null && !checkOutputAction(actx.broadcast_output_tuple(), outputs, species))
+                    (actx.input_tuple() != null && !checkInputAction(actx.input_tuple(), inputs, species)) ||
+                    (actx.output_tuple() != null && !checkOutputAction(actx.output_tuple(), outputs, species))
             ) {
                 return false;
             }
@@ -113,8 +113,8 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
         return true;
     }
 
-    public Boolean checkInputAction(ExtendedNBAParser.Broadcast_input_tupleContext ctx, Map<String, ParserRuleContext> inputs, String species) {
-        String channel = ctx.broadcast_input_action().channel.getText();
+    public Boolean checkInputAction(ExtendedNBAParser.Input_tupleContext ctx, Map<String, ParserRuleContext> inputs, String species) {
+        String channel = ctx.input_action().channel.getText();
 
         List<Variable> variables = this.table.getSpeciesVariables(species).orElse(new ArrayList<>());
         List<Variable> channelVariables = this.table.getChannelVariables(channel).orElse(new ArrayList<>());
@@ -126,13 +126,13 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
         return  checkChannelExistence(channel, ctx)
                 && checkActionDuplicated(channel, inputs, ctx)
                 && checkChannelCompatibility(species, channel)
-                && ctx.broadcast_input_action().probability.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.REAL))
-                && ctx.broadcast_input_action().predicate.accept(new ExpressionValidator(this.table, this.errors, channelVariables, true, Type.BOOLEAN))
+                && ctx.input_action().probability.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.REAL))
+                && ctx.input_action().predicate.accept(new ExpressionValidator(this.table, this.errors, channelVariables, true, Type.BOOLEAN))
                 && checkAgentMutation(ctx.agent_mutation(), mutationVariables);
     }
 
-    public Boolean checkOutputAction(ExtendedNBAParser.Broadcast_output_tupleContext ctx, Map<String, ParserRuleContext> outputs, String species) {
-        String channel = ctx.broadcast_output_action().channel.getText();
+    public Boolean checkOutputAction(ExtendedNBAParser.Output_tupleContext ctx, Map<String, ParserRuleContext> outputs, String species) {
+        String channel = ctx.output_action().channel.getText();
 
         List<Variable> variables = this.table.getSpeciesVariables(species).orElse(new ArrayList<>());
         List<Variable> channelVariables = this.table.getChannelVariables(channel).orElse(new ArrayList<>());
@@ -140,8 +140,8 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
         return  checkChannelExistence(channel, ctx)
                 && checkActionDuplicated(channel, outputs, ctx)
                 && checkChannelCompatibility(species, channel)
-                && ctx.broadcast_output_action().rate.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.REAL))
-                && ctx.broadcast_output_action().predicate.accept(new ExpressionValidator(this.table, this.errors, channelVariables, true, Type.BOOLEAN))
+                && ctx.output_action().rate.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.REAL))
+                && ctx.output_action().predicate.accept(new ExpressionValidator(this.table, this.errors, channelVariables, true, Type.BOOLEAN))
                 && checkAgentMutation(ctx.agent_mutation(), variables);
     }
 

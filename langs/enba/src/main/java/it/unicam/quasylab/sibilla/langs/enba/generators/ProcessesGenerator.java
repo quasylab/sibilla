@@ -61,17 +61,19 @@ public class ProcessesGenerator extends ExtendedNBABaseVisitor<List<Process>> {
         return processes;
     }
     public void generateProcess(String species, ExtendedNBAParser.Process_bodyContext ctx) {
-        int predicateSpeciesId = this.table.getSpeciesId(species);
+        int speciesId = this.table.getSpeciesId(species);
+        Process process = new Process(speciesId, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
         generateProcess(
-                species,
-                (agentSpecies, context) -> agentSpecies == predicateSpeciesId,
+                (agentSpecies, context) -> agentSpecies == speciesId,
+                process,
                 ctx
         );
+        processes.add(process);
     }
 
     private void generateProcess(
-            String species,
             BiPredicate<Integer, ExpressionContext> predicate,
+            Process process,
             ExtendedNBAParser.Process_bodyContext ctx
     ) {
         if(ctx.conditional_process() != null) {
@@ -80,55 +82,56 @@ public class ProcessesGenerator extends ExtendedNBABaseVisitor<List<Process>> {
                     .predicate
                     .accept(new ExpressionGenerator(table));
             generateProcess(
-                    species,
                     (agentSpecies, context) -> predicate.test(agentSpecies, context) &&
                             (conditionalPredicate.eval(context) == SibillaBoolean.TRUE),
+                    process,
                     ctx.conditional_process().then
             );
             generateProcess(
-                    species,
                     (agentSpecies, context) -> predicate.test(agentSpecies, context) &&
                             (conditionalPredicate.eval(context) == SibillaBoolean.FALSE),
+                    process,
                     ctx.conditional_process().else_
             );
         } else if(ctx.choice_process() != null) {
-            generateActions(species, predicate, ctx.choice_process().action_tuple());
+            generateActions(predicate, process, ctx.choice_process().action_tuple());
         }
     }
 
     private void generateActions(
-            String species,
             BiPredicate<Integer, ExpressionContext> predicate,
+            Process process,
             List<ExtendedNBAParser.Action_tupleContext> actions
     ) {
-        Map<String, List<OutputAction>> outputs = new HashMap<>();
-        Map<String, List<InputAction>> inputs = new HashMap<>();
-        for(ExtendedNBAParser.Action_tupleContext action : actions) {
-            if(action.broadcast_input_tuple() != null) {
-                generateInputAction(predicate, action.broadcast_input_tuple(), inputs);
-            } else if(action.broadcast_output_tuple() != null) {
-                generateOutputAction(predicate, action.broadcast_output_tuple(), outputs);
+        for(ExtendedNBAParser.Action_tupleContext tctx : actions) {
+            if(tctx.input_tuple() != null) {
+                generateInputAction(
+                        predicate,
+                        tctx.input_tuple(),
+                        process
+                );
+            } else if(tctx.output_tuple() != null) {
+                generateOutputAction(
+                        predicate,
+                        tctx.output_tuple(),
+                        process
+                );
             }
         }
-        processes.add(new Process(this.table.getSpeciesId(species), outputs, inputs));
     }
 
     private void generateInputAction(
             BiPredicate<Integer, ExpressionContext> predicate,
-            ExtendedNBAParser.Broadcast_input_tupleContext action,
-            Map<String, List<InputAction>> inputs
+            ExtendedNBAParser.Input_tupleContext tctx,
+            Process process
     ) {
-        String channel = action.broadcast_input_action().channel.getText();
+        String channel = tctx.input_action().channel.getText();
 
-        if(!inputs.containsKey(channel)) {
-            inputs.put(channel, new ArrayList<>());
-        }
-
-        ExpressionFunction probability = action.broadcast_input_action().probability.accept(
+        ExpressionFunction probability = tctx.input_action().probability.accept(
                 new ExpressionGenerator(this.table)
         );
 
-        ExpressionFunction senderPredicate = action.broadcast_input_action().predicate.accept(
+        ExpressionFunction senderPredicate = tctx.input_action().predicate.accept(
                 new ExpressionGenerator(this.table)
         );
 
@@ -137,28 +140,34 @@ public class ProcessesGenerator extends ExtendedNBABaseVisitor<List<Process>> {
                 predicate,
                 (context) -> senderPredicate.eval(context) == SibillaBoolean.TRUE,
                 context -> probability.eval(context).doubleOf(),
-                action.agent_mutation().accept(new AgentMutationGenerator(this.table))
+                tctx.agent_mutation().accept(new AgentMutationGenerator(this.table))
         );
 
-        inputs.get(channel).add(input);
+        if(tctx.input_action().broadcast != null) {
+            if(!process.getBroadcastInputs().containsKey(channel)) {
+                process.getBroadcastInputs().put(channel, new ArrayList<>());
+            }
+            process.getBroadcastInputs().get(channel).add(input);
+        } else {
+            if(!process.getUnicastInputs().containsKey(channel)) {
+                process.getUnicastInputs().put(channel, new ArrayList<>());
+            }
+            process.getUnicastInputs().get(channel).add(input);
+        }
     }
 
     private void generateOutputAction(
             BiPredicate<Integer, ExpressionContext> predicate,
-            ExtendedNBAParser.Broadcast_output_tupleContext action,
-            Map<String, List<OutputAction>> outputs
+            ExtendedNBAParser.Output_tupleContext tctx,
+            Process process
     ) {
-        String channel = action.broadcast_output_action().channel.getText();
+        String channel = tctx.output_action().channel.getText();
 
-        if(!outputs.containsKey(channel)) {
-            outputs.put(channel, new ArrayList<>());
-        }
-
-        ExpressionFunction rate = action.broadcast_output_action().rate.accept(
+        ExpressionFunction rate = tctx.output_action().rate.accept(
                 new ExpressionGenerator(this.table)
         );
 
-        ExpressionFunction receiverPredicate = action.broadcast_output_action().predicate.accept(
+        ExpressionFunction receiverPredicate = tctx.output_action().predicate.accept(
                 new ExpressionGenerator(this.table)
         );
 
@@ -167,10 +176,20 @@ public class ProcessesGenerator extends ExtendedNBABaseVisitor<List<Process>> {
                 predicate,
                 (context) -> receiverPredicate.eval(context) == SibillaBoolean.TRUE,
                 context -> rate.eval(context).doubleOf(),
-                action.agent_mutation().accept(new AgentMutationGenerator(this.table))
+                tctx.agent_mutation().accept(new AgentMutationGenerator(this.table))
         );
 
-        outputs.get(channel).add(output);
+        if(tctx.output_action().broadcast != null) {
+            if(!process.getBroadcastOutputs().containsKey(channel)) {
+                process.getBroadcastOutputs().put(channel, new ArrayList<>());
+            }
+            process.getBroadcastOutputs().get(channel).add(output);
+        } else {
+            if(!process.getUnicastOutputs().containsKey(channel)) {
+                process.getUnicastOutputs().put(channel, new ArrayList<>());
+            }
+            process.getUnicastOutputs().get(channel).add(output);
+        }
     }
 
     @Override

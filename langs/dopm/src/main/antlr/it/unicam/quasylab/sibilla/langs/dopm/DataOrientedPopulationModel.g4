@@ -30,11 +30,7 @@ rule_declaration    :
     '}'
     ;
 
-rule_body : broadcast_rule_body
-          | unicast_rule_body;
-
-broadcast_rule_body : output=output_transition '*|>' inputs=input_transition_list;
-unicast_rule_body : output=output_transition '|>' inputs=input_transition_list;
+rule_body : output=output_transition (broadcast='*')? '|>' inputs=input_transition_list;
 
 agent_predicate:
     name=ID ('[' predicate=expr ']')?

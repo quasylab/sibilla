@@ -7,6 +7,7 @@ import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.DataOrientedPop
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.BroadcastRule;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.AgentState;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.Rule;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.UnicastRule;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.InputTransition;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.OutputTransition;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.enba.processes.Process;
@@ -19,32 +20,84 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ENBAModel implements Model<AgentState>, ContinuousTimeMarkovProcess<AgentState> {
     private final List<Process> processes;
     private final DataOrientedPopulationModel dopm;
 
-    public ENBAModel(List<Process> processes, Map<String, Measure<AgentState>> measures, Map<String, Predicate<AgentState>> predicates) {
+    public ENBAModel(
+            List<Process> processes,
+            Map<String, Measure<AgentState>> measures,
+            Map<String, Predicate<AgentState>> predicates
+    ) {
         this.processes = processes;
-        this.dopm = new DataOrientedPopulationModel(measures, predicates, getRules(processes));
+        this.dopm = new DataOrientedPopulationModel(measures, predicates, getRules(this.processes));
     }
 
     private static List<Rule> getRules(List<Process> processes) {
-        record OutputRule(OutputAction output, Rule rule) {}
+        return Stream.concat(
+                getBroadcastRules(processes),
+                getUnicastRules(processes)
+        ).toList();
+    }
 
-        Map<String, List<OutputRule>> rules = processes.stream()
-                .flatMap(p -> p.outputs().values().stream())
+    private static Stream<Rule> getUnicastRules(List<Process> processes) {
+        Map<String, List<OutputAction>> outputActions = processes.stream()
+                .flatMap(p -> p.getUnicastOutputs().values().stream())
                 .flatMap(Collection::stream)
                 .map(o -> new AbstractMap.SimpleEntry<>(
-                        o.channel(),
-                        new OutputRule(
-                            o,
-                            new BroadcastRule(
-                                new OutputTransition(o.predicate(),o.rate(),o.post()),
-                                new ArrayList<>()
-                            )
+                                o.channel(),
+                                o
                         )
-                    )
+                ).collect(
+                        Collectors.groupingBy(
+                                Map.Entry::getKey,
+                                Collectors.mapping(
+                                        Map.Entry::getValue,
+                                        Collectors.toList()
+                                )
+                        )
+                );
+
+        return processes.stream()
+                .flatMap(p -> p.getUnicastInputs().values().stream())
+                .flatMap(Collection::stream)
+                .flatMap(i -> outputActions
+                        .getOrDefault(i.channel(), Collections.emptyList())
+                        .stream()
+                        .map(o -> (Rule) new UnicastRule(
+                                        new OutputTransition(o.predicate(), o.rate(), o.post()),
+                                        List.of(
+                                                new InputTransition(
+                                                        (s, c) -> i.predicate().test(s, c) && o.receiverPredicate().test(c),
+                                                        i.senderPredicate(),
+                                                        i.probability(),
+                                                        i.post()
+                                                )
+                                        )
+                                )
+                        )
+                );
+    }
+
+    private static Stream<Rule> getBroadcastRules(List<Process> processes) {
+        record OutputRule(OutputAction output, Rule rule) {
+        }
+
+        Map<String, List<OutputRule>> rules = processes.stream()
+                .flatMap(p -> p.getBroadcastOutputs().values().stream())
+                .flatMap(Collection::stream)
+                .map(o -> new AbstractMap.SimpleEntry<>(
+                                o.channel(),
+                                new OutputRule(
+                                        o,
+                                        new BroadcastRule(
+                                                new OutputTransition(o.predicate(), o.rate(), o.post()),
+                                                new ArrayList<>()
+                                        )
+                                )
+                        )
                 ).collect(
                         Collectors.groupingBy(
                                 Map.Entry::getKey,
@@ -56,17 +109,17 @@ public class ENBAModel implements Model<AgentState>, ContinuousTimeMarkovProcess
                 );
 
         processes.stream()
-                .flatMap(p -> p.inputs().values().stream())
+                .flatMap(p -> p.getBroadcastInputs().values().stream())
                 .flatMap(Collection::stream)
                 .forEach(i -> rules.get(i.channel()).forEach(o ->
-                            o.rule.getInputs().add(
-                                    new InputTransition(
-                                            (s, c) -> i.predicate().test(s, c) && o.output.receiverPredicate().test(c),
-                                            i.senderPredicate(),
-                                            i.probability(),
-                                            i.post()
-                                    )
-                            )
+                                o.rule.getInputs().add(
+                                        new InputTransition(
+                                                (s, c) -> i.predicate().test(s, c) && o.output.receiverPredicate().test(c),
+                                                i.senderPredicate(),
+                                                i.probability(),
+                                                i.post()
+                                        )
+                                )
                         )
                 );
 
@@ -74,8 +127,7 @@ public class ENBAModel implements Model<AgentState>, ContinuousTimeMarkovProcess
                 .values()
                 .stream()
                 .flatMap(Collection::stream)
-                .map(o -> o.rule)
-                .toList();
+                .map(o -> o.rule);
     }
 
     /**
@@ -90,7 +142,7 @@ public class ENBAModel implements Model<AgentState>, ContinuousTimeMarkovProcess
      */
     @Override
     public WeightedStructure<? extends StepFunction<AgentState>> getTransitions(RandomGenerator r, double time, AgentState agentState) {
-        return dopm.getTransitions(r,time,agentState);
+        return dopm.getTransitions(r, time, agentState);
     }
 
     /**
@@ -180,4 +232,14 @@ public class ENBAModel implements Model<AgentState>, ContinuousTimeMarkovProcess
     public String[] predicates() {
         return dopm.predicates();
     }
+
+    public List<Process> getProcesses() {
+        return processes;
+    }
+
+    public DataOrientedPopulationModel getDopm() {
+        return dopm;
+    }
+
+
 }

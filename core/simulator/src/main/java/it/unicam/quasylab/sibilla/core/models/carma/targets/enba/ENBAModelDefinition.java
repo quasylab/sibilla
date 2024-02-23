@@ -168,4 +168,9 @@ public class ENBAModelDefinition implements ModelDefinition<AgentState> {
     public boolean isAnInitialConfiguration(String name) {
         return states != null && states.containsKey(name);
     }
+
+    public ENBAModel getModel() {
+        return model;
+    }
+
 }
