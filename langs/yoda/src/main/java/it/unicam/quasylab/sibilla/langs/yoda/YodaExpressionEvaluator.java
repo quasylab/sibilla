@@ -368,4 +368,9 @@ public class YodaExpressionEvaluator extends YodaModelBaseVisitor<Function<YodaE
         Function<YodaExpressionEvaluationContext, SibillaValue> guard = ctx.guard.accept(this);
         return arg -> arg.count(group, guard);
     }
+
+    @Override
+    public Function<YodaExpressionEvaluationContext, SibillaValue> visitExpressionPi(YodaModelParser.ExpressionPiContext ctx) {
+        return eec -> SibillaValue.of(Math.PI);
+    }
 }

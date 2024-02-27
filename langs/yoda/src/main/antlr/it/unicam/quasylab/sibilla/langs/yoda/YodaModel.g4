@@ -162,6 +162,7 @@ expr    : INTEGER                                                            # e
         | 'ceil' '(' argument=expr ')'                                       # expressionCeiling
         | 'floor' '(' argument=expr ')'                                      # expressionFloor
         | 'abs' '(' argument=expr ')'                                        # expressionAbsolute
+        | 'PI'                                                               # expressionPi
 ;
 
 
