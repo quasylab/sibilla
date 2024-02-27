@@ -46,8 +46,8 @@ public class ModelBuildingError {
         return new ModelBuildingError(ParseUtil.getIncorrectAgentExpression(name,line,charPositionInLine));
     }
 
-    public static ModelBuildingError unexpectedType(Type e, ParserRuleContext ctx) {
-        return new ModelBuildingError(ParseUtil.getUnexpectedType(e,ctx));
+    public static ModelBuildingError unexpectedType(ParserRuleContext ctx) {
+        return new ModelBuildingError(ParseUtil.getUnexpectedType(ctx));
     }
 
     public static ModelBuildingError duplicatedAction(ParserRuleContext action, ParserRuleContext duplicate) {

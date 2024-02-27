@@ -94,6 +94,53 @@ public class TestParser {
     }
 
     @Test
+    public void testParsingRelationEqual() throws ModelGenerationException {
+        String code = """
+                species R{k: boolean, n: integer};
+                species B{k: boolean, n: integer};
+                
+                channel red{k: boolean, n: integer};
+                
+                process R {
+                    red<1>[n == 5]?.R[k=(sender.k == k),n=0]
+                }
+                """;
+        ENBAModelGenerator generator = new ENBAModelGenerator(code);
+        assertTrue(generator.validate());
+        ENBAModel model = generator.getModelDefinition().getModel();
+        InputAction input = model.getProcesses().get(0).getUnicastInputs().get("red").get(0);
+
+
+        Agent post1 = input.post().sampleDeltas(
+                new ExpressionContext(
+                        Map.of("k", SibillaBoolean.TRUE),
+                        Map.of("k", SibillaBoolean.FALSE),
+                        null
+                ),
+                1,
+                new SplittableRandomGenerator()
+        ).agentDeltaStream().findFirst().map(AgentDelta::agent).orElse(new Agent(0, Collections.emptyMap()));
+        assertTrue(post1.species() == 0);
+        assertFalse(post1.values().get("k").booleanOf());
+
+        Agent post2 = input.post().sampleDeltas(
+                new ExpressionContext(
+                        Map.of("k", SibillaBoolean.TRUE),
+                        Map.of("k", SibillaBoolean.TRUE),
+                        null
+                ),
+                1,
+                new SplittableRandomGenerator()
+        ).agentDeltaStream().findFirst().map(AgentDelta::agent).orElse(new Agent(0, Collections.emptyMap()));
+        assertTrue(post2.species() == 0);
+        assertTrue(post2.values().get("k").booleanOf());
+
+        assertFalse(input.senderPredicate().test(new ExpressionContext(Map.of("n", new SibillaInteger(0)),null)));
+        assertTrue(input.senderPredicate().test(new ExpressionContext(Map.of("n", new SibillaInteger(5)),null)));
+        assertFalse(input.senderPredicate().test(new ExpressionContext(Map.of("n", new SibillaInteger(6)),null)));
+    }
+
+    @Test
     public void testParsingProcesses() throws ModelGenerationException {
         String code = """
                 species R{k: integer};

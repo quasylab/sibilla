@@ -28,7 +28,7 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
 
     protected boolean checkAssignment(Type assignment, ParserRuleContext ctx) {
         if(type != null && !type.assignmentCompatible(assignment)) {
-            this.errors.add(ModelBuildingError.unexpectedType(type,  ctx));
+            this.errors.add(ModelBuildingError.unexpectedType(ctx));
             return false;
         }
         return true;
@@ -79,6 +79,15 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
     @Override
     public Boolean visitRelationExpression(DataOrientedPopulationModelParser.RelationExpressionContext ctx) {
         ExpressionValidator realValidator = new ExpressionValidator(table,errors,localVariables,modelContext,Type.REAL);
+        if(ctx.op.getText().equals("==")) {
+            ExpressionValidator booleanValidator = new ExpressionValidator(table,new ArrayList<>(),localVariables,modelContext,Type.BOOLEAN);
+
+            return checkAssignment(Type.BOOLEAN, ctx) &&
+                    (
+                            (ctx.left.accept(booleanValidator) && ctx.right.accept(booleanValidator)) ||
+                                    (ctx.left.accept(realValidator) && ctx.right.accept(realValidator))
+                    );
+        }
         return checkAssignment(Type.BOOLEAN, ctx) && ctx.left.accept(realValidator) && ctx.right.accept(realValidator);
     }
 

@@ -41,7 +41,7 @@ public class ParseUtil {
     public static final String EXPECTED_NUMBER_MESSAGE = "Expression at line %d char %d: expected int or real is %s!";
     public static final String ILLEGAL_USE_OF_AGENT_IDENTIFIER_MESSAGE = "Illegal use of agent identifier %s at line %d char %d!";
     public static final String EXPECTED_BOOLEAN_MESSAGE = "Expression at line %d char %d: expected a boolean is %s!";
-    public static final String UNEXPECTED_TYPE = "Expression at line %d char %d: expected %s!";
+    public static final String UNEXPECTED_TYPE = "Expression at line %d char %d: unexpected Type!";
     public static final String ILLEGAL_POPULATION_EXPRESSION_MESSAGE = "Population expression is not allowed at line %d char %d!";
     public static final String ILLEGAL_USE_OF_NAME_MESSAGE = "Name %s cannot be used at line %d char %d!";
     public static final String ILLEGAL_TIME_EXPRESSION_MESSAGE = "Time dependent expression is not allowed at line %d char %d!";
@@ -91,8 +91,8 @@ public class ParseUtil {
         return String.format(EXPECTED_NUMBER_MESSAGE,ctx.start.getLine(),ctx.start.getCharPositionInLine(),t.toString());
     }
 
-    public static String getUnexpectedType(Type e, ParserRuleContext ctx) {
-        return String.format(UNEXPECTED_TYPE,ctx.start.getLine(),ctx.start.getCharPositionInLine(),e.toString());
+    public static String getUnexpectedType(ParserRuleContext ctx) {
+        return String.format(UNEXPECTED_TYPE,ctx.start.getLine(),ctx.start.getCharPositionInLine());
     }
 
     public static String getIllegalUseOfAgentIdentifierMessage(Token reference) {

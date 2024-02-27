@@ -229,6 +229,50 @@ public class TestParser {
     }
 
     @Test
+    public void testParsingRelationEqual() throws ModelGenerationException {
+        String code = """
+                species R{k: boolean, n: integer};
+                species B{k: boolean, n: integer};
+                
+                rule ruleA {
+                    R[true] -[1]-> B[k=true,n=0] |> B[n == 5] -[(n > 5): 1]-> B[k=(sender.k == k),n=0]
+                }
+                """;
+        DataOrientedPopulationModelGenerator generator = new DataOrientedPopulationModelGenerator(code);
+        assertTrue(generator.validate());
+        DataOrientedPopulationModel model = generator.getPopulationModelDefinition().getModel();
+        InputTransition input = model.getRules().get(0).getInputs().get(0);
+        assertFalse(input.predicate().test(0, new ExpressionContext(Map.of("n", new SibillaInteger(5)),null)));
+        assertTrue(input.predicate().test(1, new ExpressionContext(Map.of("n", new SibillaInteger(5)),null)));
+        assertFalse(input.predicate().test(1, new ExpressionContext(Map.of("n", new SibillaInteger(6)),null)));
+        assertFalse(input.senderPredicate().test(new ExpressionContext(Map.of("n", new SibillaInteger(4)),null)));
+        assertFalse(input.senderPredicate().test(new ExpressionContext(Map.of("n", new SibillaInteger(5)),null)));
+        assertTrue(input.senderPredicate().test(new ExpressionContext(Map.of("n", new SibillaInteger(6)),null)));
+        Agent post = input.post().sampleDeltas(
+                new ExpressionContext(
+                        Map.of("k", SibillaBoolean.TRUE),
+                        Map.of("k", SibillaBoolean.FALSE),
+                        null
+                ),
+                1,
+                new SplittableRandomGenerator()
+        ).agentDeltaStream().findFirst().map(AgentDelta::agent).orElse(new Agent(0, Collections.emptyMap()));
+        assertTrue(post.species() == 1);
+        assertFalse(post.values().get("k").booleanOf());
+        Agent post1 = input.post().sampleDeltas(
+                new ExpressionContext(
+                        Map.of("k", SibillaBoolean.TRUE),
+                        Map.of("k", SibillaBoolean.TRUE),
+                        null
+                ),
+                1,
+                new SplittableRandomGenerator()
+        ).agentDeltaStream().findFirst().map(AgentDelta::agent).orElse(new Agent(0, Collections.emptyMap()));
+        assertTrue(post1.species() == 1);
+        assertTrue(post1.values().get("k").booleanOf());
+    }
+
+    @Test
     public void testParsingRule() throws ModelGenerationException {
         String code = """
                 species A {v: integer};
