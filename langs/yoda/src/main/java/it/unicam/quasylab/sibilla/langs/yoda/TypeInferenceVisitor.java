@@ -371,6 +371,11 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
     }
 
     @Override
+    public YodaType visitExpressionPi(YodaModelParser.ExpressionPiContext ctx) {
+        return YodaType.REAL_TYPE;
+    }
+
+    @Override
     public YodaType visitExpressionSin(YodaModelParser.ExpressionSinContext ctx) {
         YodaType argType = ctx.argument.accept(this);
         if (!argType.isNumericType()) {
