@@ -36,20 +36,6 @@ import java.util.stream.IntStream;
 
 public class YodaConfigurationsGenerator extends YodaModelBaseVisitor<Boolean> {
 
-
-    private static final YodaExpressionEvaluationContext<RandomGenerator> RANDOM_EXPRESSION_EVALUATION_CONTEXT = new YodaExpressionEvaluationContext<>() {
-        @Override
-        public SibillaValue rnd(RandomGenerator context) {
-            return SibillaValue.of(context.nextDouble());
-        }
-
-        @Override
-        public SibillaValue rnd(RandomGenerator context, SibillaValue from, SibillaValue to) {
-            return SibillaValue.of(context.nextInt(to.intOf()-from.intOf())+from.intOf());
-        }
-    };
-
-
     private final Map<String, Function<RandomGenerator, YodaSystemState>> stateSuppliers;
 
     private Function<RandomGenerator, YodaSystemState> defaultStateSupplier;
@@ -225,10 +211,10 @@ public class YodaConfigurationsGenerator extends YodaModelBaseVisitor<Boolean> {
 
         @Override
         public List<SibillaValue> visitSetOfValuesRandom(YodaModelParser.SetOfValuesRandomContext ctx) {
-            YodaFunctionalExpressionEvaluator<RandomGenerator> evaluator = new YodaFunctionalExpressionEvaluator<>(values, RANDOM_EXPRESSION_EVALUATION_CONTEXT, variableRegistry);
-            int size = ctx.size.accept(new YodaScalarExpressionEvaluator(this.values)).intOf();
-            Function<RandomGenerator, SibillaValue> generator = ctx.generator.accept(evaluator);
-            return generateRandomSet(size, generator, ctx.distinct!=null);
+            YodaExpressionEvaluator evaluator = new YodaExpressionEvaluator(values, variableRegistry);
+            int size = ctx.size.accept(evaluator).apply(YodaExpressionEvaluationContext.EMPTY_CONTEXT).intOf();
+            Function<YodaExpressionEvaluationContext, SibillaValue> generator = ctx.generator.accept(evaluator);
+            return generateRandomSet(size, rg -> generator.apply(new YodaExpressionEvaluationRandomContext(rg)), ctx.distinct!=null);
         }
 
         private List<SibillaValue> generateRandomSet(int size, Function<RandomGenerator, SibillaValue> generator, boolean b) {

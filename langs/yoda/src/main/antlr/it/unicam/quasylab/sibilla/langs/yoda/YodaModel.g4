@@ -14,11 +14,15 @@ element : constantDeclaration
         | systemDeclaration
         | groupDeclaration
         | measureDeclaration
-        | configurationDeclaration;
+        | predicateDeclaration
+        | configurationDeclaration
+        | functionDeclaration;
+
+functionDeclaration: 'let' name=ID '(' (types += type args += ID (',' types += type args += ID)*)? ')' '=' expr;
 
 measureDeclaration: 'measure' name=ID '=' measure=expr;
 
-predicateDeclaration: 'measure' name=ID '=' predicate=expr;
+predicateDeclaration: 'predicate' name=ID '=' predicate=expr;
 
 groupDeclaration: 'group' name=ID '{' (agents += ID (',' agents += ID)* )? '}';
 
@@ -58,13 +62,23 @@ sceneElementDeclaration:
 
 nameDeclaration: type name=ID '=' value=expr;
 
-actionBody: actionName=ID '[' (updates += nameUpdate ';')* ']' /*
+actionBody: actionName=ID '[' (body += attributeUpdate)*  ']' /*
           | 'wait'    //the agent waits a turn
           | 'stop'    //the agent stops
           | 'rtf'     //the agent return to the Force */
 ;
 
-nameUpdate: fieldName=ID '<-' value=expr ;
+
+attributeUpdate:
+    'let' names += ID '=' values += expr ('and' names += ID '=' values += expr)* 'in' (body += attributeUpdate)+'endlet'
+                                                                  # attributeUpdateLetBlock
+    | fieldName=ID '<-' value=expr ';'                                # attributeUpdateAssignment
+    | 'if' guard = expr 'then' (thenBlock += attributeUpdate)* ('else' (elseBlock += attributeUpdate)+)? 'endif'
+                                                                  # attributeUpdateIfThenElse
+    ;
+
+
+
 
 behaviourDeclaration: ('when' cases+=ruleCase ('orwhen' cases+=ruleCase)* 'otherwise')? ('[' defaultcase+=weightedAction* ']')?;
 
@@ -76,12 +90,14 @@ weightedAction: actionName=ID ':' weight=expr ;
 
 systemDeclaration:
     'environment' ':'
+        ('global'  ':' (globalAttributes += attributeUpdate)* )?
         ('sensing' ':' (agentSensing += agentAttributesUpdate)* )?
         ('dynamic' ':' (agentDynamics += agentAttributesUpdate)* )?
     'end'
 ;
 
-agentAttributesUpdate: agentName=ID '[' (updates += nameUpdate ';')* ']';
+agentAttributesUpdate: agentName=ID '[' (updates += attributeUpdate)* ']';
+
 
 //CONFIG GRAMMAR
 
@@ -103,47 +119,49 @@ setOfValues:
 
 //UTIL
 
-expr    : INTEGER                                                          # expressionInteger
-        | REAL                                                             # expressionReal
-        | 'false'                                                          # expressionFalse
-        | 'true'                                                           # expressionTrue
-        | reference=ID                                                     # expressionReference
-        | '(' expr ')'                                                     # expressionBrackets
-      //  | gexpr                                                          # gexprCall
-        | oper=('+'|'-') arg=expr                                          # expressionUnary
-        | leftOp=expr oper=('+'|'-') rightOp=expr                          # expressionAddSubOperation
-        | leftOp=expr oper=('*'|'/') rightOp=expr                          # expressionMultDivOperation
-        | leftOp=expr oper=('%'|'//') rightOp=expr                         # expressionAdditionalOperation
-        | leftOp=expr '^' rightOp=expr                                     # expressionPowOperation
-        | '!' argument=expr                                                # expressionNegation
-        | 'sqrt' '(' argument=expr ')'                                     # expressionSquareRoot
-        | leftOp=expr oper=('&'|'&&') rightOp=expr                         # expressionAnd
-        | leftOp=expr oper=('|'|'||') rightOp=expr                         # expressionOr
-        | leftOp=expr '->' rightOp=expr                                    # expressionImplication
-        | leftOp=expr oper=('<'|'<='|'=='|'!='|'>='|'>') rightOp=expr      # expressionRelation
-        | guardExpr=expr '?' thenBranch=expr ':' elseBranch=expr           # expressionIfThenElse
-        | '[' fieldAssignment (',' fieldAssignment)* ']'                   # expressionRecord
-        | 'U''['min=expr',' max=expr']'                                    # expressionWeightedRandom
-        | 'rnd'                                                            # expressionRandom
-        | 'all' (groupName=ID)? ':' expr                                   # expressionForAll
-        | 'any' (groupName=ID)? ':' expr                                   # expressionExists
-        | 'min' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr      # expressionMinimum
-        | 'max' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr      # expressionMaximum
-        | 'mean' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr     # expressionMean
-        |  record=expr '.' fieldName =ID                                   # expressionRecordAccess
-        | 'it.' ref=ID                                                     # expressionItselfRef
-        | 'sin' '(' argument=expr ')'                                      # expressionSin
-        | 'sinh' '(' argument=expr ')'                                     # expressionSinh
-        | 'asin' '(' argument=expr ')'                                     # expressionAsin
-        | 'cos' '(' argument=expr ')'                                      # expressionCos
-        | 'cosh' '(' argument=expr ')'                                     # expressionCosh
-        | 'acos' '(' argument=expr ')'                                     # expressionAcos
-        | 'tan' '(' argument=expr ')'                                      # expressionTan
-        | 'tanh' '(' argument=expr ')'                                     # expressionTanh
-        | 'atan' '(' argument=expr ')'                                     # expressionAtan
-        | 'ceil' '(' argument=expr ')'                                     # expressionCeiling
-        | 'floor' '(' argument=expr ')'                                    # expressionFloor
-        | 'abs' '(' argument=expr ')'                                      # expressionAbsolute
+expr    : INTEGER                                                            # expressionInteger
+        | REAL                                                               # expressionReal
+        | 'false'                                                            # expressionFalse
+        | 'true'                                                             # expressionTrue
+        | reference=ID ('(' (params += expr (',' params+=expr )*)? ')')?     # expressionReference
+        | '(' expr ')'                                                       # expressionBrackets
+      //  | gexpr                                                            # gexprCall
+        | oper=('+'|'-') arg=expr                                            # expressionUnary
+        | leftOp=expr oper=('+'|'-') rightOp=expr                            # expressionAddSubOperation
+        | leftOp=expr oper=('*'|'/') rightOp=expr                            # expressionMultDivOperation
+        | leftOp=expr oper=('%'|'//') rightOp=expr                           # expressionAdditionalOperation
+        | leftOp=expr '^' rightOp=expr                                       # expressionPowOperation
+        | '!' argument=expr                                                  # expressionNegation
+        | 'sqrt' '(' argument=expr ')'                                       # expressionSquareRoot
+        | leftOp=expr oper=('&'|'&&') rightOp=expr                           # expressionAnd
+        | leftOp=expr oper=('|'|'||') rightOp=expr                           # expressionOr
+        | leftOp=expr '->' rightOp=expr                                      # expressionImplication
+        | leftOp=expr oper=('<'|'<='|'=='|'!='|'>='|'>') rightOp=expr        # expressionRelation
+        | guardExpr=expr '?' thenBranch=expr ':' elseBranch=expr             # expressionIfThenElse
+        | '[' fieldAssignment (',' fieldAssignment)* ']'                     # expressionRecord
+        | 'U''['min=expr',' max=expr']'                                      # expressionWeightedRandom
+        | 'rnd'                                                              # expressionRandom
+        | 'all' (groupName=ID)? ':' expr                                     # expressionForAll
+        | 'any' (groupName=ID)? ':' expr                                     # expressionExists
+        | 'min' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr        # expressionMinimum
+        | 'max' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr        # expressionMaximum
+        | 'sum' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr        # expressionSum
+        | 'mean' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr       # expressionMean
+        | '#' (groupName=ID)? ('[' guard=expr ']' )?                          # expressionCount
+        |  record=expr '.' fieldName =ID                                     # expressionRecordAccess
+        | 'it.' ref=ID                                                       # expressionItselfRef
+        | 'sin' '(' argument=expr ')'                                        # expressionSin
+        | 'sinh' '(' argument=expr ')'                                       # expressionSinh
+        | 'asin' '(' argument=expr ')'                                       # expressionAsin
+        | 'cos' '(' argument=expr ')'                                        # expressionCos
+        | 'cosh' '(' argument=expr ')'                                       # expressionCosh
+        | 'acos' '(' argument=expr ')'                                       # expressionAcos
+        | 'tan' '(' argument=expr ')'                                        # expressionTan
+        | 'tanh' '(' argument=expr ')'                                       # expressionTanh
+        | 'atan' '(' argument=expr ')'                                       # expressionAtan
+        | 'ceil' '(' argument=expr ')'                                       # expressionCeiling
+        | 'floor' '(' argument=expr ')'                                      # expressionFloor
+        | 'abs' '(' argument=expr ')'                                        # expressionAbsolute
 ;
 
 

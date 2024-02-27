@@ -49,10 +49,19 @@ import java.util.stream.Stream;
  */
 public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> {
 
+
+    private final YodaVariableMapping globalAttributes;
+
     private final List<YodaAgent> agents;
     private final List<YodaSceneElement> sceneElements;
 
+
     public YodaSystemState(List<YodaAgent> agents, List<YodaSceneElement> sceneElements) {
+        this(null, agents, sceneElements);
+    }
+
+    public YodaSystemState(YodaVariableMapping globalAttributes, List<YodaAgent> agents, List<YodaSceneElement> sceneElements) {
+        this.globalAttributes = globalAttributes;
         this.agents = agents;
         this.sceneElements = sceneElements;
     }
@@ -99,8 +108,8 @@ public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> 
      * @param p a predicate.
      * @return true if there exist an agent or an element satisfying the given predicate.
      */
-    public boolean exists(Predicate<YodaVariableMapping> p) {
-        return getStreamOfElements().anyMatch(a ->a.test(p));
+    public boolean exists(Predicate<YodaSceneElement> p) {
+        return getStreamOfElements().anyMatch(p);
     }
 
     /**
@@ -110,8 +119,8 @@ public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> 
      * @param p the predicate to evaluate.
      * @return true if there exists an element having a name in <code>agents</code> that satisfy the given predicate.
      */
-    public boolean exists(Set<YodaElementName> elementNames, Predicate<YodaVariableMapping> p) {
-        return getStreamOfElements().filter(a -> elementNames.contains(a.getName())).anyMatch(a ->a.test(p));
+    public boolean exists(Set<YodaElementName> elementNames, Predicate<YodaSceneElement> p) {
+        return getStreamOfElements().filter(a -> elementNames.contains(a.getName())).anyMatch(p);
     }
 
     /**
@@ -121,8 +130,8 @@ public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> 
      * @param p the agent predicate to evaluate
      * @return true if there exist an agent, different from <code>agent</code>, or an element satisfying the given predicate.
      */
-    public boolean exists(YodaAgent agent, Predicate<YodaVariableMapping> p) {
-        return getStreamOfElements(agent).anyMatch(a ->a.test(p));
+    public boolean exists(YodaAgent agent, Predicate<YodaSceneElement> p) {
+        return getStreamOfElements(agent).anyMatch(p);
     }
 
     /**
@@ -135,8 +144,8 @@ public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> 
      * @return true if there exist an element, different from <code>agent</code>, having its name in
      * <code>elementNames</code> that satisfies the given predicate.
      */
-    public boolean exists(YodaAgent agent, Set<YodaElementName> elementNames, Predicate<YodaVariableMapping> p) {
-        return getStreamOfElements(agent).filter(a -> elementNames.contains(a.getName())).anyMatch(a ->a.test(p));
+    public boolean exists(YodaAgent agent, Set<YodaElementName> elementNames, Predicate<YodaSceneElement> p) {
+        return getStreamOfElements(agent).filter(a -> elementNames.contains(a.getName())).anyMatch(p);
     }
 
     /**
@@ -145,8 +154,8 @@ public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> 
      * @param p a predicate.
      * @return true  if the agents and the element in the system satisfy the given predicate.
      */
-    public boolean forall(Predicate<YodaVariableMapping> p) {
-        return getStreamOfElements().allMatch(e->e.test(p));
+    public boolean forall(Predicate<YodaSceneElement> p) {
+        return getStreamOfElements().allMatch(p);
     }
 
 
@@ -157,8 +166,8 @@ public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> 
      * @param p the predicate to evaluate.
      * @return true if there exists an element having a name in <code>agents</code> that satisfy the given predicate.
      */
-    public boolean forall(Set<YodaElementName> elementNames, Predicate<YodaVariableMapping> p) {
-        return getStreamOfElements().filter(e -> elementNames.contains(e.getName())).allMatch(a ->a.test(p));
+    public boolean forall(Set<YodaElementName> elementNames, Predicate<YodaSceneElement> p) {
+        return getStreamOfElements().filter(e -> elementNames.contains(e.getName())).allMatch(p);
     }
 
     /**
@@ -168,8 +177,8 @@ public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> 
      * @param p the predicate to evaluate.
      * @return true if there exists an element having a name in <code>agents</code> that satisfy the given predicate.
      */
-    public boolean forall(YodaAgent agent, Predicate<YodaVariableMapping> p) {
-        return getStreamOfElements(agent).allMatch(e->e.test(p));
+    public boolean forall(YodaAgent agent, Predicate<YodaSceneElement> p) {
+        return getStreamOfElements(agent).allMatch(p);
     }
 
     /**
@@ -181,104 +190,121 @@ public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> 
      * @param p the predicate to evaluate.
      * @return true if there exists an element having a name in <code>agents</code> that satisfy the given predicate.
      */
-    public boolean forall(YodaAgent agent, Set<YodaElementName> elementNames, Predicate<YodaVariableMapping> p) {
-        return getStreamOfElements(agent).filter(e -> elementNames.contains(e.getName())).allMatch(a ->a.test(p));
+    public boolean forall(YodaAgent agent, Set<YodaElementName> elementNames, Predicate<YodaSceneElement> p) {
+        return getStreamOfElements(agent).filter(e -> elementNames.contains(e.getName())).allMatch(p);
     }
 
-    public SibillaValue min(ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().mapToDouble(a -> a.eval(f)).min().orElse(Double.POSITIVE_INFINITY));
+    public SibillaValue min(ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().mapToDouble(f).min().orElse(Double.POSITIVE_INFINITY));
     }
 
-    public SibillaValue min(Set<YodaElementName> elementNames, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> elementNames.contains(a.getName())).mapToDouble(a -> a.eval(f)).min().orElse(Double.POSITIVE_INFINITY));
+    public SibillaValue min(Set<YodaElementName> elementNames, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> elementNames.contains(a.getName())).mapToDouble(f).min().orElse(Double.POSITIVE_INFINITY));
     }
 
-    public SibillaValue min(Set<YodaElementName> elementNames, Predicate<YodaVariableMapping> pred, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> elementNames.contains(a.getName())).filter(a -> a.test(pred)).mapToDouble(a -> a.eval(f)).min().orElse(Double.POSITIVE_INFINITY));
+    public SibillaValue min(Set<YodaElementName> elementNames, Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> elementNames.contains(a.getName())).filter(pred).mapToDouble(f).min().orElse(Double.POSITIVE_INFINITY));
     }
 
-    public SibillaValue min(Predicate<YodaVariableMapping> pred, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.test(pred)).mapToDouble(a -> a.eval(f)).min().orElse(Double.POSITIVE_INFINITY));
+    public SibillaValue min(Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(pred).mapToDouble(f).min().orElse(Double.POSITIVE_INFINITY));
     }
 
-    public SibillaValue min(YodaAgent agent, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).mapToDouble(a -> a.eval(f)).min().orElse(Double.POSITIVE_INFINITY));
+    public SibillaValue min(YodaAgent agent, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).mapToDouble(f).min().orElse(Double.POSITIVE_INFINITY));
     }
 
-    public SibillaValue min(YodaAgent agent, Set<YodaElementName> elementNames, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> elementNames.contains(a.getName())).mapToDouble(a -> a.eval(f)).min().orElse(Double.POSITIVE_INFINITY));
+    public SibillaValue min(YodaAgent agent, Set<YodaElementName> elementNames, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> elementNames.contains(a.getName())).mapToDouble(f).min().orElse(Double.POSITIVE_INFINITY));
     }
 
-    public SibillaValue min(YodaAgent agent, Set<YodaElementName> elementNames, Predicate<YodaVariableMapping> pred, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> elementNames.contains(a.getName())).filter(a -> a.test(pred)).mapToDouble(a -> a.eval(f)).min().orElse(Double.POSITIVE_INFINITY));
+    public SibillaValue min(YodaAgent agent, Set<YodaElementName> elementNames, Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> elementNames.contains(a.getName())).filter(pred).mapToDouble(f).min().orElse(Double.POSITIVE_INFINITY));
     }
 
-    public SibillaValue min(YodaAgent agent, Predicate<YodaVariableMapping> pred, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> a.test(pred)).mapToDouble(a -> a.eval(f)).min().orElse(Double.POSITIVE_INFINITY));
+    public SibillaValue min(YodaAgent agent, Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(pred).mapToDouble(f).min().orElse(Double.POSITIVE_INFINITY));
     }
 
-    public SibillaValue max(ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().mapToDouble(a -> a.eval(f)).max().orElse(Double.NEGATIVE_INFINITY));
+    public SibillaValue max(ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().mapToDouble(f).max().orElse(Double.NEGATIVE_INFINITY));
     }
 
-    public SibillaValue max(Set<YodaElementName> elementNames, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> elementNames.contains(a.getName())).mapToDouble(a -> a.eval(f)).max().orElse(Double.NEGATIVE_INFINITY));
+    public SibillaValue max(Set<YodaElementName> elementNames, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> elementNames.contains(a.getName())).mapToDouble(f).max().orElse(Double.NEGATIVE_INFINITY));
     }
 
-    public SibillaValue max(Set<YodaElementName> elementNames, Predicate<YodaVariableMapping> pred, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> elementNames.contains(a.getName())).filter(a -> a.test(pred)).mapToDouble(a -> a.eval(f)).max().orElse(Double.NEGATIVE_INFINITY));
+    public SibillaValue max(Set<YodaElementName> elementNames, Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> elementNames.contains(a.getName())).filter(pred).mapToDouble(f).max().orElse(Double.NEGATIVE_INFINITY));
     }
 
-    public SibillaValue max(Predicate<YodaVariableMapping> pred, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.test(pred)).mapToDouble(a -> a.eval(f)).max().orElse(Double.NEGATIVE_INFINITY));
+    public SibillaValue max(Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(pred).mapToDouble(f).max().orElse(Double.NEGATIVE_INFINITY));
     }
 
-    public SibillaValue max(YodaAgent agent, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).mapToDouble(a -> a.eval(f)).max().orElse(Double.NEGATIVE_INFINITY));
+    public SibillaValue max(YodaAgent agent, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).mapToDouble(f).max().orElse(Double.NEGATIVE_INFINITY));
     }
 
-    public SibillaValue max(YodaAgent agent, Set<YodaElementName> elementNames, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> elementNames.contains(a.getName())).mapToDouble(a -> a.eval(f)).max().orElse(Double.NEGATIVE_INFINITY));
+    public SibillaValue max(YodaAgent agent, Set<YodaElementName> elementNames, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> elementNames.contains(a.getName())).mapToDouble(f).max().orElse(Double.NEGATIVE_INFINITY));
     }
 
-    public SibillaValue max(YodaAgent agent, Set<YodaElementName> elementNames, Predicate<YodaVariableMapping> pred, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> elementNames.contains(a.getName())).filter(a -> a.test(pred)).mapToDouble(a -> a.eval(f)).max().orElse(Double.NEGATIVE_INFINITY));
+    public SibillaValue max(YodaAgent agent, Set<YodaElementName> elementNames, Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> elementNames.contains(a.getName())).filter(pred).mapToDouble(f).max().orElse(Double.NEGATIVE_INFINITY));
     }
 
-    public SibillaValue max(YodaAgent agent, Predicate<YodaVariableMapping> pred, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> a.test(pred)).mapToDouble(a -> a.eval(f)).max().orElse(Double.NEGATIVE_INFINITY));
+    public SibillaValue max(YodaAgent agent, Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(pred).mapToDouble(f).max().orElse(Double.NEGATIVE_INFINITY));
     }
 
-    public SibillaValue mean(ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().mapToDouble(a -> a.eval(f)).average().orElse(0.0));
+    public SibillaValue mean(ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().mapToDouble(f).average().orElse(0.0));
     }
 
-    public SibillaValue mean(Set<YodaElementName> elementNames, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> elementNames.contains(a.getName())).mapToDouble(a -> a.eval(f)).average().orElse(0.0));
+    public SibillaValue mean(Set<YodaElementName> elementNames, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> elementNames.contains(a.getName())).mapToDouble(f).average().orElse(0.0));
     }
 
-    public SibillaValue mean(Set<YodaElementName> elementNames, Predicate<YodaVariableMapping> pred, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> elementNames.contains(a.getName())).filter(a -> a.test(pred)).mapToDouble(a -> a.eval(f)).average().orElse(0.0));
+    public SibillaValue mean(Set<YodaElementName> elementNames, Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> elementNames.contains(a.getName())).filter(pred).mapToDouble(f).average().orElse(0.0));
     }
 
-    public SibillaValue mean(Predicate<YodaVariableMapping> pred, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.test(pred)).mapToDouble(a -> a.eval(f)).average().orElse(0.0));
+    public SibillaValue mean(Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(pred).mapToDouble(f).average().orElse(0.0));
     }
 
-    public SibillaValue mean(YodaAgent agent, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).mapToDouble(a -> a.eval(f)).average().orElse(0.0));
+    public SibillaValue mean(YodaAgent agent, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).mapToDouble(f).average().orElse(0.0));
     }
 
-    public SibillaValue mean(YodaAgent agent, Set<YodaElementName> elementNames, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> elementNames.contains(a.getName())).mapToDouble(a -> a.eval(f)).average().orElse(0.0));
+    public SibillaValue mean(YodaAgent agent, Set<YodaElementName> elementNames, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> elementNames.contains(a.getName())).mapToDouble(f).average().orElse(0.0));
     }
 
-    public SibillaValue mean(YodaAgent agent, Set<YodaElementName> elementNames, Predicate<YodaVariableMapping> pred, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> elementNames.contains(a.getName())).filter(a -> a.test(pred)).mapToDouble(a -> a.eval(f)).average().orElse(0.0));
+    public SibillaValue mean(YodaAgent agent, Set<YodaElementName> elementNames, Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> elementNames.contains(a.getName())).filter(pred).mapToDouble(f).average().orElse(0.0));
     }
 
-    public SibillaValue mean(YodaAgent agent, Predicate<YodaVariableMapping> pred, ToDoubleFunction<YodaVariableMapping> f) {
-        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> a.test(pred)).mapToDouble(a -> a.eval(f)).average().orElse(0.0));
+    public SibillaValue mean(YodaAgent agent, Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(pred).mapToDouble(f).average().orElse(0.0));
     }
 
+    public SibillaValue count(YodaAgent agent, Set<YodaElementName> elementNames, Predicate<YodaSceneElement> pred) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId())
+                .filter(a -> elementNames.contains(a.getName())).filter(pred).count());
+    }
+
+    public SibillaValue count(YodaAgent agent, Predicate<YodaSceneElement> pred) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(pred).count());
+    }
+
+    public SibillaValue count(Set<YodaElementName> elementNames, Predicate<YodaSceneElement> pred) {
+        return SibillaValue.of(getStreamOfElements()
+                .filter(a -> elementNames.contains(a.getName())).filter(pred).count());
+    }
+
+    public SibillaValue count(Predicate<YodaSceneElement> pred) {
+        return SibillaValue.of(getStreamOfElements().filter(pred).count());
+    }
 }

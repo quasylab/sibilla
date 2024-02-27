@@ -51,9 +51,9 @@ public class YodaPredicateGenerator extends YodaModelBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitMeasureDeclaration(YodaModelParser.MeasureDeclarationContext ctx) {
-        YodaFunctionalExpressionEvaluator<YodaSystemState> evaluator = new YodaFunctionalExpressionEvaluator<>(constantsAndParameters, new YodaSystemStateExpressionEvaluationContext(), variableRegistry, registry::getGroup);
-        Function<YodaSystemState, SibillaValue> measureFunction = ctx.measure.accept(evaluator);
-        predicates.put(ctx.name.getText(), sys -> measureFunction.apply(sys).booleanOf());
+        YodaExpressionEvaluator evaluator = new YodaExpressionEvaluator(constantsAndParameters, variableRegistry, registry::getGroup);
+        Function<YodaExpressionEvaluationContext, SibillaValue> measureFunction = ctx.measure.accept(evaluator);
+        predicates.put(ctx.name.getText(), sys -> measureFunction.apply(new YodaExpressionEvaluationSystemContext(sys)).booleanOf());
         return true;
     }
 

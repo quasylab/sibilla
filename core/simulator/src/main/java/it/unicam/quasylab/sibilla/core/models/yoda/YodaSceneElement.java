@@ -107,4 +107,7 @@ public class YodaSceneElement {
         return f.applyAsDouble(environmentalAttributes);
     }
 
+    public SibillaValue get(YodaVariable var) {
+        return getEnvironmentalAttributeValue(var);
+    }
 }

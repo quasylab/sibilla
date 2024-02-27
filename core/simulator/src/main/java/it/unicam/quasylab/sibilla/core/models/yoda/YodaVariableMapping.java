@@ -23,11 +23,14 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
 import it.unicam.quasylab.sibilla.core.util.datastructures.SibillaMap;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 /**
  * Instances of this class are used to associate values with variables.
@@ -84,6 +87,15 @@ public class YodaVariableMapping {
         SibillaMap<YodaVariable, SibillaValue> newMap = this.map.addAll(map);
         if (this.map == newMap) return this;
         return new YodaVariableMapping(this.map.addAll(map));
+    }
+
+    public YodaVariableMapping setAll(List<YodaVariableUpdate> lst) {
+        if ((map == null)||(map.isEmpty())) return this;
+        SibillaMap<YodaVariable, SibillaValue> newMap = this.map;
+        for (YodaVariableUpdate u : lst) {
+            newMap = newMap.add(u.getVariable(), u.getValue());
+        }
+        return new YodaVariableMapping(newMap);
     }
 
 

@@ -24,6 +24,8 @@
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
 
+import it.unicam.quasylab.sibilla.core.util.values.SibillaRandomBiFunction;
+
 public class YodaAgentPrototype {
 
     private final YodaElementName agentName;
@@ -36,9 +38,8 @@ public class YodaAgentPrototype {
 
     private YodaBehaviour agentBehaviour;
 
-    private YodaAgentSensingFunction observationsUpdateFunction;
-
-    private YodaAgentEnvironmentalAttributeUpdateFunction environmentalAttributeUpdateFunction;
+    private SibillaRandomBiFunction<YodaSystemState, YodaAgent, YodaVariableMapping> observationsUpdateFunction;
+    private SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> environmentalAttributeUpdateFunction;
 
 
     public YodaAgentPrototype(YodaElementName agentName, YodaVariableMapping initialAgentAttributes, YodaVariableMapping initialEnvironmentalAttributes, YodaVariableMapping initialAgentObservations) {
@@ -80,24 +81,24 @@ public class YodaAgentPrototype {
         this.agentBehaviour = agentBehaviour;
     }
 
-    public YodaAgentSensingFunction getObservationsUpdateFunction() {
+    public SibillaRandomBiFunction<YodaSystemState, YodaAgent, YodaVariableMapping> getObservationsUpdateFunction() {
         return observationsUpdateFunction;
     }
 
-    public void setObservationsUpdateFunction(YodaAgentSensingFunction observationsUpdateFunction) {
+    public void setObservationsUpdateFunction(SibillaRandomBiFunction<YodaSystemState, YodaAgent, YodaVariableMapping> observationsUpdateFunction) {
         this.observationsUpdateFunction = observationsUpdateFunction;
     }
 
-    public YodaAgentEnvironmentalAttributeUpdateFunction getEnvironmentalAttributeUpdateFunction() {
+    public SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> getEnvironmentalAttributeUpdateFunction() {
         return environmentalAttributeUpdateFunction;
     }
 
-    public void setEnvironmentalAttributeUpdateFunction(YodaAgentEnvironmentalAttributeUpdateFunction environmentalAttributeUpdateFunction) {
+    public void setEnvironmentalAttributeUpdateFunction(SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> environmentalAttributeUpdateFunction) {
         this.environmentalAttributeUpdateFunction = environmentalAttributeUpdateFunction;
     }
 
-    public void setAgentSensing(YodaAgentSensingFunction sensingFunction) {
-        this.observationsUpdateFunction = sensingFunction;
+    public void setAgentSensing(SibillaRandomBiFunction<YodaSystemState, YodaAgent, YodaVariableMapping> observationsUpdateFunction) {
+        this.observationsUpdateFunction = observationsUpdateFunction;
     }
 
 }

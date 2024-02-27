@@ -43,7 +43,7 @@ public interface YodaAgentSensingFunction {
      * @param agent agent for which the sensing values are computed
      * @return the variable mapping containing the value sensed by the given agent in the given system.
      */
-    YodaVariableMapping compute(RandomGenerator rg, YodaSystemState system, YodaAgent agent);
+    YodaVariableMapping eval(RandomGenerator rg, YodaSystemState system, YodaAgent agent);
 
     /**
      * Returns the sensing function obtained from the computation of single attributes.

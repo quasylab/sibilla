@@ -24,14 +24,16 @@
 package it.unicam.quasylab.sibilla.langs.yoda;
 
 import it.unicam.quasylab.sibilla.core.models.yoda.*;
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaRandomBiFunction;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
-import org.apache.commons.math3.random.RandomGenerator;
+import org.antlr.v4.runtime.Token;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToDoubleBiFunction;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class YodaAgentsDefinitionsGenerator extends YodaModelBaseVisitor<Boolean> {
 
@@ -70,9 +72,9 @@ public class YodaAgentsDefinitionsGenerator extends YodaModelBaseVisitor<Boolean
     }
 
     private YodaBehaviourElement generateDefaultBehaviourCase(Map<String, YodaAction> agentActions, List<YodaModelParser.WeightedActionContext> defaultCase) {
-        YodaFunctionalExpressionEvaluator<YodaBehaviourExpressionEvaluationParameters> expressionEvaluator = new YodaFunctionalExpressionEvaluator<>(constantsAndParameters, YodaBehaviourExpressionEvaluationParameters.EVALUATION_CONTEXT, variableRegistry);
+        YodaExpressionEvaluator expressionEvaluator = new YodaExpressionEvaluator(constantsAndParameters, variableRegistry);
         Map<YodaAction, ToDoubleBiFunction<YodaVariableMapping, YodaVariableMapping>> actionWeightMapping =
-                defaultCase.stream().collect(Collectors.toMap(wa -> agentActions.get(wa.actionName.getText()), wa -> toStandardWeightBehaviourFunction(wa.weight.accept(expressionEvaluator))));
+                defaultCase.stream().collect(Collectors.toMap(wa -> agentActions.get(wa.actionName.getText()), wa -> YodaExpressionEvaluationDeterministicAgentBehaviourContext.unpack(wa.weight.accept(expressionEvaluator))));
         return new YodaBehaviourElement((agentState, agentObservations) -> true, actionWeightMapping);
     }
 
@@ -81,42 +83,36 @@ public class YodaAgentsDefinitionsGenerator extends YodaModelBaseVisitor<Boolean
     }
 
     private YodaBehaviourElement generateBehaviourElement(Map<String, YodaAction> agentActions, YodaModelParser.RuleCaseContext bc) {
-        YodaFunctionalExpressionEvaluator<YodaBehaviourExpressionEvaluationParameters> expressionEvaluator = new YodaFunctionalExpressionEvaluator<>(constantsAndParameters, YodaBehaviourExpressionEvaluationParameters.EVALUATION_CONTEXT, variableRegistry);
-        Function<YodaBehaviourExpressionEvaluationParameters, SibillaValue> guard = bc.guard.accept(expressionEvaluator);
+        YodaExpressionEvaluator expressionEvaluator = new YodaExpressionEvaluator(constantsAndParameters, variableRegistry);
+        Function<YodaExpressionEvaluationContext, SibillaValue> guard = bc.guard.accept(expressionEvaluator);
         Map<YodaAction, ToDoubleBiFunction<YodaVariableMapping, YodaVariableMapping>> actionWeightMapping =
-                bc.weightedAction().stream().collect(Collectors.toMap(wa -> agentActions.get(wa.actionName.getText()), wa -> toStandardWeightBehaviourFunction(wa.weight.accept(expressionEvaluator))));
-        return new YodaBehaviourElement((agentState, agentObservations) -> guard.apply(new YodaBehaviourExpressionEvaluationParameters(agentState, agentObservations)).booleanOf(), actionWeightMapping);
-    }
-
-    private ToDoubleBiFunction<YodaVariableMapping, YodaVariableMapping> toStandardWeightBehaviourFunction(Function<YodaBehaviourExpressionEvaluationParameters, SibillaValue> f) {
-        return (agentState, agentObservations) -> f.apply(new YodaBehaviourExpressionEvaluationParameters(agentState, agentObservations)).doubleOf();
+                bc.weightedAction().stream().collect(Collectors.toMap(wa -> agentActions.get(wa.actionName.getText()), wa -> YodaExpressionEvaluationDeterministicAgentBehaviourContext.unpack(wa.weight.accept(expressionEvaluator))));
+        return new YodaBehaviourElement((agentState, agentObservations) -> guard.apply(new YodaExpressionEvaluationDeterministicAgentBehaviourContext(agentState, agentObservations)).booleanOf(), actionWeightMapping);
     }
 
     private Map<String, YodaAction> getAgentActions(List<YodaModelParser.ActionBodyContext> actionBodyContexts) {
         Map<String, YodaAction> actions = new HashMap<>();
         for (YodaModelParser.ActionBodyContext actionBodyContext: actionBodyContexts) {
             String actionName = actionBodyContext.actionName.getText();
-            actions.put(actionName, YodaAction.actionOf(actionName, getUpdateFunctions(actionBodyContext.updates)));
+            actions.put(actionName, YodaAction.actionOf(actionName, getUpdateFunctions(actionBodyContext.body)));
         }
         return actions;
     }
 
-    private Map<YodaVariable, BiFunction<RandomGenerator, YodaVariableMapping, SibillaValue>> getUpdateFunctions(List<YodaModelParser.NameUpdateContext> updates) {
-        return updates.stream().collect(Collectors.toMap(nu -> variableRegistry.get(nu.fieldName.getText()), nu -> this.getUpdateFunction(nu.value)));
+    private SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, List<YodaVariableUpdate>> getUpdateFunctions(List<YodaModelParser.AttributeUpdateContext> updates) {
+        Function<YodaExpressionEvaluationContext, List<YodaVariableUpdate>> f = new YodaAttributeUpdateVisitor().blockUpdate(updates);
+        return (rg, state, observations) -> f.apply(new YodaExpressionEvaluationAgentBehaviourContext(rg, state, observations));
     }
 
-    private BiFunction<RandomGenerator, YodaVariableMapping, SibillaValue> getUpdateFunction(YodaModelParser.ExprContext expr) {
-        Function<YodaAgentExpressionEvaluationParameters, SibillaValue> updateFunction = expr.accept(new YodaFunctionalExpressionEvaluator<>(constantsAndParameters, YodaAgentExpressionEvaluationParameters.EVALUATION_CONTEXT, variableRegistry, s -> Set.of()));
-        return YodaAgentExpressionEvaluationParameters.unpack(updateFunction);
-    }
 
 
     private YodaVariableMapping getVariableMapping(List<YodaModelParser.NameDeclarationContext> nameDeclarationList) {
+        YodaExpressionEvaluator evaluator = new YodaExpressionEvaluator(constantsAndParameters, variableRegistry, registry::getGroup);
         return new YodaVariableMapping(
             nameDeclarationList.stream()
                     .collect(Collectors.toMap(
                             nd -> variableRegistry.get(nd.name.getText()),
-                            nd -> nd.value.accept(new YodaScalarExpressionEvaluator(constantsAndParameters)))
+                            nd -> nd.value.accept(evaluator).apply(YodaExpressionEvaluationContext.EMPTY_CONTEXT))
         ));
     }
 
@@ -135,38 +131,63 @@ public class YodaAgentsDefinitionsGenerator extends YodaModelBaseVisitor<Boolean
 
     private void generateDynamicFunctions(YodaModelParser.AgentAttributesUpdateContext agentAttributesUpdateContext) {
         YodaElementName agentName = registry.get(agentAttributesUpdateContext.agentName.getText());
-        definitions.setDynamics(agentName, generateDynamicFunction(agentAttributesUpdateContext.updates));
-    }
-
-    private YodaAgentEnvironmentalAttributeUpdateFunction generateDynamicFunction(List<YodaModelParser.NameUpdateContext> nameUpdates) {
-        YodaFunctionalExpressionEvaluator<YodaEnvironmentalAttributeEvaluationParameters> expressionEvaluator = new YodaFunctionalExpressionEvaluator<>(constantsAndParameters, YodaEnvironmentalAttributeEvaluationParameters.EVALUATION_CONTEXT, variableRegistry, registry::getGroup);
-        return YodaAgentEnvironmentalAttributeUpdateFunction.of(
-                nameUpdates.stream()
-                        .collect(Collectors.toMap(
-                                        nu -> variableRegistry.get(nu.fieldName.getText()),
-                                        nu -> YodaEnvironmentalAttributeEvaluationParameters.unpack(nu.expr().accept(expressionEvaluator))
-                                )
-                        ));
+        Function<YodaExpressionEvaluationContext, List<YodaVariableUpdate>> update = new YodaAttributeUpdateVisitor().blockUpdate(agentAttributesUpdateContext.updates);
+        definitions.setDynamics(agentName,
+                (rg, state, environment) -> environment.setAll(update.apply(new YodaExpressionEvaluationAgentDynamicContext(rg, state, environment)))
+                );
     }
 
     private void generateSensingFunctions(YodaModelParser.AgentAttributesUpdateContext agentAttributesUpdateContext) {
         YodaElementName agentName = registry.get(agentAttributesUpdateContext.agentName.getText());
-        definitions.setSensing(agentName, generateSensingFunction(agentAttributesUpdateContext.nameUpdate()));
-    }
-
-    private YodaAgentSensingFunction generateSensingFunction(List<YodaModelParser.NameUpdateContext> nameUpdates) {
-        YodaFunctionalExpressionEvaluator<YodaSensingFunctionEvaluationParameters> expressionEvaluator = new YodaFunctionalExpressionEvaluator<>(constantsAndParameters, YodaSensingFunctionEvaluationParameters.EVALUATION_CONTEXT, variableRegistry, registry::getGroup);
-        return YodaAgentSensingFunction.of(
-                nameUpdates.stream()
-                        .collect(Collectors.toMap(
-                                nu -> variableRegistry.get(nu.fieldName.getText()),
-                                nu -> YodaSensingFunctionEvaluationParameters.unpack(nu.expr().accept(expressionEvaluator))
-                        )
-        ));
+        Function<YodaExpressionEvaluationContext, List<YodaVariableUpdate>> update = new YodaAttributeUpdateVisitor().blockUpdate(agentAttributesUpdateContext.updates);
+        definitions.setSensing(agentName,
+                (rg, system, agent) -> agent.getAgentObservations().setAll(update.apply(new YodaExpressionEvaluationSensingContext(rg, system, agent)))
+        );
     }
 
 
     public YodaAgentsDefinitions getAgentsDefinitions() {
         return definitions;
+    }
+
+    public class YodaAttributeUpdateVisitor extends YodaModelBaseVisitor<Function<YodaExpressionEvaluationContext, List<YodaVariableUpdate>>> {
+
+        public Function<YodaExpressionEvaluationContext, List<YodaVariableUpdate>> blockUpdate(List<YodaModelParser.AttributeUpdateContext> list) {
+            return combine(list.stream().map(u -> u.accept(this)).toList());
+        }
+
+
+        @Override
+        public Function<YodaExpressionEvaluationContext, List<YodaVariableUpdate>> visitAttributeUpdateLetBlock(YodaModelParser.AttributeUpdateLetBlockContext ctx) {
+            YodaExpressionEvaluator evaluator = new YodaExpressionEvaluator(constantsAndParameters, variableRegistry, registry::getGroup);
+            YodaVariable[] variables = ctx.names.stream().map(Token::getText).map(variableRegistry::get).toArray(YodaVariable[]::new);
+            YodaModelParser.ExprContext[] values = ctx.values.toArray(new YodaModelParser.ExprContext[0]);
+            List<Pair<YodaVariable, Function<YodaExpressionEvaluationContext, SibillaValue>>> updates = IntStream.range(0, variables.length).mapToObj(i -> new Pair<>(variables[i], values[i].accept(evaluator))).toList();
+            Function<YodaExpressionEvaluationContext, List<YodaVariableUpdate>> body = blockUpdate(ctx.body);
+            return YodaExpressionEvaluationContext.getNestedContext(updates, body);
+        }
+
+        private Function<YodaExpressionEvaluationContext, List<YodaVariableUpdate>> combine(List<Function<YodaExpressionEvaluationContext, List<YodaVariableUpdate>>> list) {
+            return eec -> list.stream().map(f -> f.apply(eec)).flatMap(Collection::stream).toList();
+        }
+
+        @Override
+        public Function<YodaExpressionEvaluationContext, List<YodaVariableUpdate>> visitAttributeUpdateAssignment(YodaModelParser.AttributeUpdateAssignmentContext ctx) {
+            YodaExpressionEvaluator evaluator = new YodaExpressionEvaluator(constantsAndParameters, variableRegistry, registry::getGroup);
+            Function<YodaExpressionEvaluationContext, SibillaValue> expression = ctx.value.accept(evaluator);
+            YodaVariable variable = variableRegistry.get(ctx.fieldName.getText());
+            return eec -> List.of(new YodaVariableUpdate(variable, expression.apply(eec)));
+        }
+
+        @Override
+        public Function<YodaExpressionEvaluationContext, List<YodaVariableUpdate>> visitAttributeUpdateIfThenElse(YodaModelParser.AttributeUpdateIfThenElseContext ctx) {
+            YodaExpressionEvaluator evaluator = new YodaExpressionEvaluator(constantsAndParameters, variableRegistry, registry::getGroup);
+            Function<YodaExpressionEvaluationContext, SibillaValue> guard = ctx.guard.accept(evaluator);
+            Function<YodaExpressionEvaluationContext, List<YodaVariableUpdate>> thenBlock = blockUpdate(ctx.thenBlock);
+            Function<YodaExpressionEvaluationContext, List<YodaVariableUpdate>> elseBlock = blockUpdate(ctx.elseBlock);
+            return eec -> (guard.apply(eec).booleanOf()?thenBlock.apply(eec):elseBlock.apply(eec));
+        }
+
+
     }
 }

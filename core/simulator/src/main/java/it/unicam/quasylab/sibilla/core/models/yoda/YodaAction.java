@@ -23,20 +23,20 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
-import it.unicam.quasylab.sibilla.core.models.agents.VariableMapping;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaRandomBiFunction;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 
 /**
  * The interface <code>YodaAction</code> represents
  * the action done by agents in a system.
  *
  */
-public interface YodaAction extends Serializable {
+public interface YodaAction extends Serializable, SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> {
 
     /**
      * This method returns the name of this action
@@ -52,7 +52,7 @@ public interface YodaAction extends Serializable {
      * @param currentState the agent current internal state
      * @return the new internal state of an agent after performing an action
      */
-    YodaVariableMapping performAction(RandomGenerator rg, YodaVariableMapping currentState);
+    YodaVariableMapping eval(RandomGenerator rg, YodaVariableMapping agentState, YodaVariableMapping agentObservations);
 
 
     /**
@@ -62,7 +62,7 @@ public interface YodaAction extends Serializable {
      * @param f action function
      * @return returns the action with the given name that transforms the state according to the given function.
      */
-    static YodaAction actionOf(String name, BiFunction<RandomGenerator, YodaVariableMapping, YodaVariableMapping> f) {
+    static YodaAction getAction(String name, SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> f) {
         return new YodaAction() {
             @Override
             public String getName() {
@@ -70,21 +70,24 @@ public interface YodaAction extends Serializable {
             }
 
             @Override
-            public YodaVariableMapping performAction(RandomGenerator rg, YodaVariableMapping currentState) {
-                return f.apply(rg, currentState);
+            public YodaVariableMapping eval(RandomGenerator rg, YodaVariableMapping agentState, YodaVariableMapping agentObservations) {
+                return f.eval(rg, agentState, agentObservations);
             }
         };
     }
 
 
-    static YodaAction actionOf(String name, Map<YodaVariable, BiFunction<RandomGenerator, YodaVariableMapping, SibillaValue>> updates) {
-        return actionOf(name, (rg, vm) -> {
-            YodaVariableMapping result = vm;
-            for (Map.Entry<YodaVariable, BiFunction<RandomGenerator, YodaVariableMapping, SibillaValue>> e: updates.entrySet()) {
-                result = result.setValue(e.getKey(), e.getValue().apply(rg, vm));
+    static YodaAction actionOf(String name, SibillaRandomBiFunction<YodaVariableMapping,YodaVariableMapping, List<YodaVariableUpdate>> updateFunction ) {
+        return getAction(name, (rg, state, observations) -> {
+            YodaVariableMapping result = state;
+            List<YodaVariableUpdate> updates = updateFunction.eval(rg, state, observations);
+            for (YodaVariableUpdate u: updates) {
+                result = result.setValue(u.getVariable(), u.getValue());
             }
             return result;
         });
     }
+
+
 
 }

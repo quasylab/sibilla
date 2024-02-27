@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.core.models;
 import it.unicam.quasylab.sibilla.core.simulator.SimulatorCursor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.*;
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;

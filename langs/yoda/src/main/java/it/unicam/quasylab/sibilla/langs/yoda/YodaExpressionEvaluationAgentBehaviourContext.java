@@ -23,34 +23,49 @@
 
 package it.unicam.quasylab.sibilla.langs.yoda;
 
-
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariable;
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariableMapping;
-import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariableRegistry;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+import org.apache.commons.math3.random.RandomGenerator;
 
-public class YodaBehaviourExpressionEvaluationParameters {
+import java.util.function.Function;
+import java.util.function.ToDoubleBiFunction;
 
-    public static final YodaExpressionEvaluationContext<YodaBehaviourExpressionEvaluationParameters> EVALUATION_CONTEXT = new YodaExpressionEvaluationContext<>() {
-        @Override
-        public SibillaValue get(YodaBehaviourExpressionEvaluationParameters context, YodaVariable var) {
-            if (context.agentState.isDefined(var)) {
-                return context.agentState.getValue(var);
-            }
-            return context.agentObservations.getValue(var);
-        }
+public class YodaExpressionEvaluationAgentBehaviourContext implements YodaExpressionEvaluationContext {
 
-        @Override
-        public SibillaValue itGet(YodaBehaviourExpressionEvaluationParameters context, YodaVariable name) {
-            return get(context, name);
-        }
-    };
+    private final RandomGenerator rg;
     private final YodaVariableMapping agentState;
 
     private final YodaVariableMapping agentObservations;
 
-    public YodaBehaviourExpressionEvaluationParameters(YodaVariableMapping agentState, YodaVariableMapping agentObservations) {
+    public YodaExpressionEvaluationAgentBehaviourContext(RandomGenerator rg, YodaVariableMapping agentState, YodaVariableMapping agentObservations) {
+        this.rg = rg;
         this.agentState = agentState;
         this.agentObservations = agentObservations;
     }
+
+    @Override
+    public SibillaValue get(YodaVariable var) {
+        if (agentState.isDefined(var)) {
+            return agentState.getValue(var);
+        }
+        return agentObservations.getValue(var);
+    }
+
+    @Override
+    public SibillaValue it(YodaVariable name) {
+        return get(name);
+    }
+
+    @Override
+    public SibillaValue rnd() {
+        return SibillaValue.of(rg.nextDouble());
+    }
+
+    @Override
+    public SibillaValue rnd(SibillaValue from, SibillaValue to) {
+        return SibillaValue.of(from.doubleOf()+rg.nextDouble()*(to.doubleOf()-from.doubleOf()));
+    }
+
+
 }

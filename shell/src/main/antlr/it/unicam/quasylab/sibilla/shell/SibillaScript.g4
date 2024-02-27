@@ -56,7 +56,7 @@ command : module_command
         | trace_command
         ;
 
-trace_command: 'trace' (output=STRING)?;
+trace_command: 'trace' (input=STRING) 'in' (output=STRING);
 
 reachability_command: 'probreach' goal=STRING ('while' condition=STRING)? 'with' 'alpha' '='  alpha=REAL 'and' 'delta' '=' delta=REAL;
 

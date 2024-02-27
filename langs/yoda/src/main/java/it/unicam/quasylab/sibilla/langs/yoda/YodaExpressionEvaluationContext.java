@@ -25,107 +25,140 @@ package it.unicam.quasylab.sibilla.langs.yoda;
 
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaElementName;
 import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariable;
+import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariableMapping;
+import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariableUpdate;
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
 /**
  * This interface is implemented to provide an evaluation context for a yoda expression.
  *
- * @param <T> type of objects used to extract elements needed to evaluate an expression.
  */
-public interface YodaExpressionEvaluationContext<T> {
+public interface YodaExpressionEvaluationContext {
+
+    YodaExpressionEvaluationContext EMPTY_CONTEXT = new YodaExpressionEvaluationContext() {};
 
     /**
-     * Returns the value of the given variable in the given context.
+     * Returns the value associated to the given variable in this context.
      *
-     * @param context context where the expression is evaluated
      * @param var variable to extract
      * @return the value of the given variable in the given context.
      */
-    default SibillaValue get(T context, YodaVariable var) {
+    default SibillaValue get(YodaVariable var) {
         return SibillaValue.ERROR_VALUE;
     }
 
     /**
      * Returns a random value generated in the interval [0,1).
+     *
      * @return a random value generated in the interval [0,1).
      */
-    default SibillaValue rnd(T context)  {
+    default SibillaValue rnd()  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue min(T context, Set<YodaElementName> group, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> guard, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression) {
+    /**
+     * Returns the minimal value among the ones obtained by evaluating the given expression on the set of agents belonging to the given group and satisfying the given predicate.
+     *
+     * @param group a set of agent names
+     * @param guard a predicate used to select the agents
+     * @param expression the expression to evaluate
+     * @return the minimal value among the ones obtained by evaluating the given expression on the set of agents belonging to the given group and satisfying the given predicate.
+     */
+    default SibillaValue min(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> guard, Function<YodaExpressionEvaluationContext, SibillaValue> expression) {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue min(T context, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> guard, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression)  {
+    default SibillaValue min(Function<YodaExpressionEvaluationContext, SibillaValue> guard, Function<YodaExpressionEvaluationContext, SibillaValue> expression)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue min(T context, Set<YodaElementName> group, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression)  {
+    default SibillaValue min(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> expression)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue min(T context, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression)  {
+    default SibillaValue min(Function<YodaExpressionEvaluationContext, SibillaValue> expression)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue max(T context, Set<YodaElementName> group, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> guard, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression)  {
+    default SibillaValue max(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> guard, Function<YodaExpressionEvaluationContext, SibillaValue> expression)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue max(T context, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> guard, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression)  {
+    default SibillaValue max(Function<YodaExpressionEvaluationContext, SibillaValue> guard, Function<YodaExpressionEvaluationContext, SibillaValue> expression)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue max(T context, Set<YodaElementName> group, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression)  {
+    default SibillaValue max(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> expression)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue  max(T context, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression)  {
+    default SibillaValue  max(Function<YodaExpressionEvaluationContext, SibillaValue> expression)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue mean(T context, Set<YodaElementName> group, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> guard, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression)  {
+    default SibillaValue mean(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> guard, Function<YodaExpressionEvaluationContext, SibillaValue> expression)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue mean(T context, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> guard, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression)  {
+    default SibillaValue mean(Function<YodaExpressionEvaluationContext, SibillaValue> guard, Function<YodaExpressionEvaluationContext, SibillaValue> expression)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue mean(T context, Set<YodaElementName> group, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression)  {
+    default SibillaValue mean(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> expression)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue mean(T context, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> expression)  {
+    default SibillaValue mean(Function<YodaExpressionEvaluationContext, SibillaValue> expression)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue rnd(T context, SibillaValue from, SibillaValue to)  {
+    default SibillaValue rnd(SibillaValue from, SibillaValue to)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue exists(T context, Set<YodaElementName> group, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> predicate)  {
+    default SibillaValue exists(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> predicate)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue exists(T context, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> predicate)  {
+    default SibillaValue exists(Function<YodaExpressionEvaluationContext, SibillaValue> predicate)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue forAll(T context, Set<YodaElementName> group, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> predicate)  {
+    default SibillaValue forAll(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> predicate)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue forAll(T context, Function<YodaGroupExpressionEvaluationParameters, SibillaValue> predicate)  {
+    default SibillaValue forAll(Function<YodaExpressionEvaluationContext, SibillaValue> predicate)  {
         return SibillaValue.ERROR_VALUE;
     }
 
-    default SibillaValue itGet(T arg, YodaVariable name)  {
+    default SibillaValue it(YodaVariable name)  {
         return SibillaValue.ERROR_VALUE;
     }
+
+    default SibillaValue count(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> guard) {
+        return SibillaValue.ERROR_VALUE;
+    }
+
+    default SibillaValue count(Set<YodaElementName> group) {
+        return SibillaValue.ERROR_VALUE;
+    }
+
+
+    static <T> Function<YodaExpressionEvaluationContext, T> getNestedContext(
+            List<Pair<YodaVariable, Function<YodaExpressionEvaluationContext, SibillaValue>>> localVariables,
+            Function<YodaExpressionEvaluationContext, T> f
+            ) {
+        return eec -> f.apply(new YodaExpressionEvaluationLetContext(
+                new YodaVariableMapping().setAll(localVariables.stream().map(p -> new YodaVariableUpdate(p.getKey(), p.getValue().apply(eec))).toList()),
+                eec
+        ));
+    }
+
 
 }

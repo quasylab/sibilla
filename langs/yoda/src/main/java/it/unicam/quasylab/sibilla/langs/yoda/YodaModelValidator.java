@@ -31,6 +31,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -283,26 +284,17 @@ public class YodaModelValidator {
                     flag = false;
                 } else {
                     agentActions.add(action.actionName.getText());
-                    flag &= action.updates.stream().allMatch(au -> checkAttributeUpdate(agentName, s -> elementAttributeTable.isAgentAttribute(agentName, s), elementAttributeTable.getAccessibleAttributeOf(agentName), elementAttributeTable.getAccessibleAttributeOf(agentName),  au,false));
+                    flag &= action.body.stream().allMatch(au -> checkAttributeUpdate(agentName, s -> elementAttributeTable.isAgentAttribute(agentName, s), elementAttributeTable.getAccessibleAttributeOf(agentName), elementAttributeTable.getAccessibleAttributeOf(agentName),  au,false, true));
                 }
             }
             agentsActions.put(agentName, agentActions);
             return flag;
         }
 
-        private boolean checkAttributeUpdate(String agentName, Predicate<String> canBeUpdatedPredicate, Predicate<String> canBeReadPredicate, Predicate<String> canBeReadWithItPredicate, YodaModelParser.NameUpdateContext fieldUpdateContext, boolean groupExpressionsAllowed) {
-            if (canBeUpdatedPredicate.test(fieldUpdateContext.fieldName.getText())) {
-                YodaType fieldType = elementAttributeTable.getTypeOf(fieldUpdateContext.fieldName.getText());
-                if (fieldType != null) {
-                    return new TypeInferenceVisitor(errors, YodaModelValidator.this::getTypeOfConstantsAndParameters, elementAttributeTable, declaredFields, canBeReadPredicate, canBeReadWithItPredicate, true, groupExpressionsAllowed).checkType(fieldType, fieldUpdateContext.value);
-                } else {
-                    errors.record(ParseUtil.unknownAttributeName(fieldUpdateContext.fieldName));
-                    return false;
-                }
-            } else {
-                errors.record(ParseUtil.illegalUpdateOfAttribute(fieldUpdateContext.fieldName));
-                return false;
-            }
+
+
+        private boolean checkAttributeUpdate(String agentName, Predicate<String> canBeUpdatedPredicate, Predicate<String> canBeReadPredicate, Predicate<String> canBeReadWithItPredicate, YodaModelParser.AttributeUpdateContext au, boolean groupExpressionsAllowed, boolean randomExpressionAllowed) {
+            return au.accept(new AttributeUpdateValidator(canBeUpdatedPredicate, canBeReadPredicate, canBeReadWithItPredicate, groupExpressionsAllowed, true));
         }
 
 
@@ -319,12 +311,12 @@ public class YodaModelValidator {
 
         private boolean checkAgentSensing(YodaModelParser.AgentAttributesUpdateContext agentSensingContext) {
             String agentName = agentSensingContext.agentName.getText();
-            return agentSensingContext.updates.stream().allMatch(fu -> checkAttributeUpdate(agentName, s -> elementAttributeTable.isAgentObservation(agentName, s), elementAttributeTable.getSensingAttributeOf(agentName), elementAttributeTable.getSensingAttributeOf(agentName), fu, true));
+            return agentSensingContext.updates.stream().allMatch(fu -> checkAttributeUpdate(agentName, s -> elementAttributeTable.isAgentObservation(agentName, s), elementAttributeTable.getSensingAttributeOf(agentName), elementAttributeTable.getSensingAttributeOf(agentName), fu, true, true));
         }
 
         private boolean checkAgentDynamic(YodaModelParser.AgentAttributesUpdateContext agentSensingContext) {
             String agentName = agentSensingContext.agentName.getText();
-            return agentSensingContext.updates.stream().allMatch(fu -> checkAttributeUpdate(agentName, elementAttributeTable.getSensingAttributePredicateOf(agentName), elementAttributeTable.getSensingAttributeOf(agentName), elementAttributeTable.getSensingAttributeOf(agentName), fu, true));
+            return agentSensingContext.updates.stream().allMatch(fu -> checkAttributeUpdate(agentName, elementAttributeTable.getSensingAttributePredicateOf(agentName), elementAttributeTable.getSensingAttributeOf(agentName), elementAttributeTable.getSensingAttributeOf(agentName), fu, true, true));
         }
 
         @Override
@@ -349,6 +341,84 @@ public class YodaModelValidator {
         }
     }
 
+    private class AttributeUpdateValidator extends YodaModelBaseVisitor<Boolean> {
+
+        private final Predicate<String> canBeUpdatedPredicate;
+        private final Predicate<String> canBeReadPredicate;
+        private final Predicate<String> canBeReadWithItPredicate;
+        private final boolean groupExpressionsAllowed;
+        private final boolean randomExpressionAllowed;
+        private Function<String, Optional<YodaType>> currentTypeSolver;
+
+        public AttributeUpdateValidator(Predicate<String> canBeUpdatedPredicate, Predicate<String> canBeReadPredicate, Predicate<String> canBeReadWithItPredicate, boolean groupExpressionsAllowed, boolean randomExpressionAllowed) {
+            super();
+            this.canBeUpdatedPredicate = canBeUpdatedPredicate;
+            this.canBeReadPredicate = canBeReadPredicate;
+            this.canBeReadWithItPredicate = canBeReadWithItPredicate;
+            this.groupExpressionsAllowed = groupExpressionsAllowed;
+            this.currentTypeSolver = YodaModelValidator.this::getTypeOfConstantsAndParameters;
+            this.randomExpressionAllowed = randomExpressionAllowed;
+        }
+
+        @Override
+        public Boolean visitAttributeUpdateLetBlock(YodaModelParser.AttributeUpdateLetBlockContext ctx) {
+            Function<String, Optional<YodaType>> outerTypeSolver = this.currentTypeSolver;
+            boolean flag = true;
+            HashMap<String, YodaType> localVariables = new HashMap<>();
+            String[] names = ctx.names.stream().map(Token::getText).toArray(String[]::new);
+            YodaModelParser.ExprContext[] values = ctx.values.toArray(YodaModelParser.ExprContext[]::new);
+            for(int i=0; i<names.length; i++) {
+                YodaType localType = values[i].accept(new TypeInferenceVisitor(errors, getTypeSolver(localVariables, outerTypeSolver), elementAttributeTable, declaredFields, canBeReadPredicate, canBeReadWithItPredicate, randomExpressionAllowed, groupExpressionsAllowed));
+                if (localType != YodaType.NONE_TYPE) {
+                    localVariables.put(names[i], localType);
+                }
+            }
+            this.currentTypeSolver = getTypeSolver(localVariables, outerTypeSolver);
+            flag &= ctx.body.stream().allMatch(au -> au.accept(this));
+            this.currentTypeSolver = outerTypeSolver;
+            return flag;
+        }
+
+        private Function<String, Optional<YodaType>> getTypeSolver(HashMap<String, YodaType> localVariables, Function<String, Optional<YodaType>> outerTypeSolver) {
+             return str -> {
+                if (localVariables.containsKey(str)) {
+                    return Optional.of(localVariables.get(str));
+                } else {
+                    return outerTypeSolver.apply(str);
+                }
+            };
+        }
+
+        @Override
+        public Boolean visitAttributeUpdateAssignment(YodaModelParser.AttributeUpdateAssignmentContext ctx) {
+            if (canBeUpdatedPredicate.test(ctx.fieldName.getText())) {
+                YodaType fieldType = elementAttributeTable.getTypeOf(ctx.fieldName.getText());
+                if (fieldType != null) {
+                    return new TypeInferenceVisitor(errors, currentTypeSolver, elementAttributeTable, declaredFields, canBeReadPredicate, canBeReadWithItPredicate, randomExpressionAllowed, groupExpressionsAllowed).checkType(fieldType, ctx.value);
+                } else {
+                    errors.record(ParseUtil.unknownAttributeName(ctx.fieldName));
+                    return false;
+                }
+            } else {
+                errors.record(ParseUtil.illegalUpdateOfAttribute(ctx.fieldName));
+                return false;
+            }
+        }
+
+        @Override
+        public Boolean visitAttributeUpdateIfThenElse(YodaModelParser.AttributeUpdateIfThenElseContext ctx) {
+            return new TypeInferenceVisitor(errors,
+                    YodaModelValidator.this::getTypeOfConstantsAndParameters,
+                    elementAttributeTable,
+                    declaredFields,
+                    canBeReadPredicate,
+                    canBeReadWithItPredicate,
+                    true, groupExpressionsAllowed
+            ).checkType(YodaType.BOOLEAN_TYPE, ctx.guard)
+            & ctx.thenBlock.stream().allMatch(au -> au.accept(this))
+            & ctx.elseBlock.stream().allMatch(au -> au.accept(this));
+        }
+    }
 
 
     private boolean checkAgentBehaviour(String agentName, YodaModelParser.BehaviourDeclarationContext behaviourDeclarationContext) {

@@ -24,10 +24,14 @@
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaRandomBiFunction;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
@@ -52,8 +56,8 @@ public final class YodaAgent extends YodaSceneElement {
     private final YodaVariableMapping agentAttributes;
     private final YodaVariableMapping agentObservations;
     private final YodaBehaviour agentBehaviour;
-    private final YodaAgentSensingFunction observationsUpdateFunction;
-    private final YodaAgentEnvironmentalAttributeUpdateFunction environmentalAttributeUpdateFunction;
+    private final SibillaRandomBiFunction<YodaSystemState, YodaAgent, YodaVariableMapping> observationsUpdateFunction;
+    private final SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> environmentalAttributeUpdateFunction;
 
     /**
      * Creates a new instance with the given parameters.
@@ -73,8 +77,8 @@ public final class YodaAgent extends YodaSceneElement {
                      YodaVariableMapping environmentalAttributes,
                      YodaVariableMapping agentObservations,
                      YodaBehaviour agentBehaviour,
-                     YodaAgentSensingFunction observationsUpdateFunction,
-                     YodaAgentEnvironmentalAttributeUpdateFunction environmentalAttributeUpdateFunction) {
+                     SibillaRandomBiFunction<YodaSystemState, YodaAgent, YodaVariableMapping> observationsUpdateFunction,
+                     SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> environmentalAttributeUpdateFunction) {
         super(agentName, identifier, environmentalAttributes);
         this.agentAttributes = agentAttributes;
         this.agentObservations = agentObservations;
@@ -125,9 +129,9 @@ public final class YodaAgent extends YodaSceneElement {
         YodaAction selectedAction = this.agentBehaviour.selectAction(rg, actionSet);
         YodaVariableMapping newKnowledge = this.agentAttributes;
         if (selectedAction != null) {
-            newKnowledge = selectedAction.performAction(rg, this.agentAttributes);
+            newKnowledge = selectedAction.eval(rg, this.agentAttributes, newObservations);
         }
-        YodaVariableMapping newEnvironmentalAttributes = this.environmentalAttributeUpdateFunction.compute(rg, newKnowledge, this.environmentalAttributes);
+        YodaVariableMapping newEnvironmentalAttributes = this.environmentalAttributeUpdateFunction.eval(rg, newKnowledge, this.environmentalAttributes);
         return new YodaAgent(this.getId(), this.getName(), newKnowledge, newEnvironmentalAttributes, newObservations, this.agentBehaviour, this.observationsUpdateFunction, this.environmentalAttributeUpdateFunction);
     }
 
@@ -139,7 +143,7 @@ public final class YodaAgent extends YodaSceneElement {
      * @return the agent observations when it is running in a given system state.
      */
     public YodaVariableMapping observe(RandomGenerator rg, YodaSystemState state) {
-        return this.observationsUpdateFunction.compute(rg, state, this);
+        return this.observationsUpdateFunction.eval(rg, state, this);
     }
 
     public SibillaValue get(YodaVariable var) {
@@ -153,7 +157,7 @@ public final class YodaAgent extends YodaSceneElement {
     }
 
     public Map<String, ToDoubleFunction<YodaSystemState>> getTraceFunctions() {
-        HashMap<String, ToDoubleFunction<YodaSystemState>> result = new HashMap<>();
+        Map<String, ToDoubleFunction<YodaSystemState>> result = new HashMap<>();
         this.environmentalAttributes.forEach((var, val) -> result.put(var.getName(), s -> s.get(this.getId()).get(var).doubleOf()));
         this.agentAttributes.forEach((var, val) -> result.put(var.getName(), s -> s.get(this.getId()).get(var).doubleOf()));
         this.agentObservations.forEach((var, val) -> result.put(var.getName(), s -> s.get(this.getId()).get(var).doubleOf()));

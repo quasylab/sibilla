@@ -36,6 +36,7 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.Signal;
+import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.stl.StlMonitorFactory;
 import org.apache.commons.math3.random.RandomGenerator;

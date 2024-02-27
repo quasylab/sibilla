@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
+import it.unicam.quasylab.sibilla.core.util.values.SibillaRandomBiFunction;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -90,7 +92,7 @@ public class YodaAgentsDefinitions {
         }
     }
 
-    public void setSensing(YodaElementName agentName, YodaAgentSensingFunction sensingFunction) {
+    public void setSensing(YodaElementName agentName, SibillaRandomBiFunction<YodaSystemState, YodaAgent, YodaVariableMapping> sensingFunction) {
         if (agentDefinitions.containsKey(agentName)) {
             agentDefinitions.get(agentName).setAgentSensing(sensingFunction);
         } else {
@@ -98,7 +100,7 @@ public class YodaAgentsDefinitions {
         }
     }
 
-    public void setDynamics(YodaElementName agentName, YodaAgentEnvironmentalAttributeUpdateFunction updateFunction) {
+    public void setDynamics(YodaElementName agentName, SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> updateFunction) {
         if (agentDefinitions.containsKey(agentName)) {
             agentDefinitions.get(agentName).setEnvironmentalAttributeUpdateFunction(updateFunction);
         } else {
