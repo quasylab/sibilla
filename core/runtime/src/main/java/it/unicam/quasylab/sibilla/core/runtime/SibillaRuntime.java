@@ -29,6 +29,9 @@ import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+import it.unicam.quasylab.sibilla.tools.tracing.TraceSpecificationEvaluator;
+import it.unicam.quasylab.sibilla.tools.tracing.TracingData;
+import it.unicam.quasylab.sibilla.tools.tracing.TracingFunction;
 import org.apache.commons.math3.random.RandomGenerator;
 import tech.tablesaw.api.Table;
 
@@ -749,6 +752,17 @@ public final class SibillaRuntime {
         List<SimulationData> trace = this.currentModule.trace(this.rg, this.deadline);
         for (SimulationData simulationData : trace) {
             writer.write(simulationData, header);
+        }
+    }
+
+    public void trace(String tracingSpecification, String outputFolder, boolean header) throws CommandExecutionException, IOException {
+        checkLoadedModule();
+        checkDeadline();
+        TracingFunction tracingFunction = TraceSpecificationEvaluator.load(new File(tracingSpecification));
+        CSVWriter writer = new CSVWriter(outputFolder);
+        Map<String, List<TracingData>> trace = this.currentModule.trace(this.rg, tracingFunction, this.deadline);
+        for (Map.Entry<String, List<TracingData>> simulationData : trace.entrySet()) {
+            writer.write(simulationData.getKey(), simulationData.getValue(), header);
         }
     }
 

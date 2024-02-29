@@ -27,6 +27,7 @@ import org.apache.commons.math3.random.AbstractRandomGenerator;
 
 import java.io.Serializable;
 import java.util.Random;
+import java.util.SplittableRandom;
 
 /**
  * Default random generator.
@@ -34,11 +35,11 @@ import java.util.Random;
 public class DefaultRandomGenerator extends AbstractRandomGenerator implements Serializable{
 
 	private static final long serialVersionUID = -8354414629214279876L;
-	private final Random random = new Random();
+	private SplittableRandom random = new SplittableRandom();
 
 	public DefaultRandomGenerator(long seed) {
 		super();
-		random.setSeed(seed);
+		random = new SplittableRandom(seed);
 	}
 
 	public DefaultRandomGenerator() {
@@ -48,7 +49,7 @@ public class DefaultRandomGenerator extends AbstractRandomGenerator implements S
 	@Override
 	public void setSeed(long seed) {
 		clear();
-		random.setSeed(seed);
+		random = new SplittableRandom(seed);
 	}
 
 	@Override

@@ -39,8 +39,11 @@ import it.unicam.quasylab.sibilla.core.util.Signal;
 import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.stl.StlMonitorFactory;
+import it.unicam.quasylab.sibilla.tools.tracing.TracingData;
+import it.unicam.quasylab.sibilla.tools.tracing.TracingFunction;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -262,4 +265,17 @@ public class ModuleEngine<S extends State> {
         return traceFunctions.entrySet().stream().map(e -> SimulationData.getDataSet(e.getKey(), trajectory, e.getValue())).toList();
     }
 
+    public Map<String, List<TracingData>> trace(SimulationEnvironment simulationEnvironment,
+                                   RandomGenerator rg,
+                                   TracingFunction tracingFunction,
+                                   double deadline) {
+        loadModel();
+        setDefaultConfiguration();
+        S initialState = state.apply(rg);
+        Trajectory<S> trajectory = simulationEnvironment.sampleTrajectory(rg, currentModel, initialState, deadline);
+        Map<String, Function<S, Function<String, SibillaValue>>> traceFunctions = currentModel.getNameSolver(initialState);
+        Map<String, List<TracingData>> result = new HashMap<>();
+        traceFunctions.forEach((name, np) -> result.put(name, trajectory.stream().map(s -> tracingFunction.apply(np.apply(s.getValue()), s.getTime())).toList()));
+        return result;
+    }
 }

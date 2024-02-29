@@ -29,6 +29,7 @@ expr    :
     | INTEGER                                                    # expressionInteger
     | REAL                                                       # expressionReal
     | reference=ID                                               # expressionReference
+    | 'it' '.' reference=ID                                      # expressionItReferemce
     | 'abs' '(' argument=expr ')'                                # expressionAbs
     | 'acos' '(' argument=expr ')'                               # expressionACos
     | 'asin' '(' argument=expr ')'                               # expressionASin
@@ -47,6 +48,7 @@ expr    :
     | 'atan2' '(' firstArgument=expr ',' secondArgument=expr ')' # expressionATan2
     | 'max' '(' firstArgument=expr ',' secondArgument=expr ')'   # expressionMax
     | 'min' '(' firstArgument=expr ',' secondArgument=expr ')'   # expressionMin
+    | 'PI'                                                       # expressionPi
     ;
 
 

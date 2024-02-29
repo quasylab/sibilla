@@ -39,5 +39,6 @@ dependencies {
     implementation(project(":langs:slam"))
     implementation(project(":langs:yoda"))
     implementation(project(":langs:stl"))
+    implementation(project(":tools:tracing"))
 
 }

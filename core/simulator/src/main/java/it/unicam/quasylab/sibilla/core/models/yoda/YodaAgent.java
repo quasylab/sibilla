@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 
 /**
@@ -164,4 +165,19 @@ public final class YodaAgent extends YodaSceneElement {
         return result;
     }
 
+
+    public Function<YodaSystemState, Function<String, SibillaValue>> getNameResolver() {
+        Map<String, YodaVariable> variables = new HashMap<>();
+        this.environmentalAttributes.forEach((var, val) -> variables.put(var.getName(), var));
+        this.agentAttributes.forEach((var, val) -> variables.put(var.getName(), var));
+        this.agentObservations.forEach((var, val) -> variables.put(var.getName(), var));
+        return state ->
+                var -> {
+                    if (variables.containsKey(var)) {
+                        return state.get(this.getId()).get(variables.get(var));
+                    } else {
+                        return SibillaValue.ERROR_VALUE;
+                    }
+                };
+    }
 }

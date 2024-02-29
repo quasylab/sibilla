@@ -71,4 +71,9 @@ public final class ParseError {
     public int getOffset() {
         return offset;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s\nLine: %d Char: %d\n", getMessage(), getLine(), getOffset());
+    }
 }

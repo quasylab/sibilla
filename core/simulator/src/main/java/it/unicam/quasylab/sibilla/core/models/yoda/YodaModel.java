@@ -26,12 +26,12 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 import it.unicam.quasylab.sibilla.core.models.*;
 import it.unicam.quasylab.sibilla.core.simulator.DiscreteTimeSimulationStepFunction;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.Measure;
-import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
@@ -108,4 +108,9 @@ public class YodaModel implements DiscreteTimeModel<YodaSystemState> {
         return state.getAgents().stream().collect(Collectors.toMap(a -> a.getName().getName()+"_"+a.getId(), YodaAgent::getTraceFunctions));
     }
 
+    @Override
+    public Map<String, Function<YodaSystemState,Function<String, SibillaValue>>> getNameSolver(YodaSystemState state) {
+        return state.getAgents().stream().collect(
+                Collectors.toMap(a -> a.getName().getName()+"_"+a.getId(), YodaAgent::getNameResolver));
+    }
 }

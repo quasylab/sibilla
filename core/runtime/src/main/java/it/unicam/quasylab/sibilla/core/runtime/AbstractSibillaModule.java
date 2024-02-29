@@ -30,6 +30,8 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResult
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+import it.unicam.quasylab.sibilla.tools.tracing.TracingData;
+import it.unicam.quasylab.sibilla.tools.tracing.TracingFunction;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.List;
@@ -131,6 +133,11 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     @Override
     public List<SimulationData> trace( RandomGenerator rg, double dealine) {
         return checkForLoadedDefinition().trace(simulator, rg, dealine);
+    }
+
+    @Override
+    public Map<String, List<TracingData>> trace(RandomGenerator rg, TracingFunction tracingFunction, double deadline) {
+        return checkForLoadedDefinition().trace(simulator, rg, tracingFunction, deadline);
     }
 
     @Override

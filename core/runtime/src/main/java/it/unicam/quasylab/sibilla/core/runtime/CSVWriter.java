@@ -24,6 +24,8 @@
 package it.unicam.quasylab.sibilla.core.runtime;
 
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
+import it.unicam.quasylab.sibilla.tools.tracing.TracingConstants;
+import it.unicam.quasylab.sibilla.tools.tracing.TracingData;
 import tech.tablesaw.api.Row;
 import tech.tablesaw.api.Table;
 
@@ -33,7 +35,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -251,5 +252,21 @@ public class CSVWriter {
         });
     }
 
+
+    public void write(String label, List<TracingData> data, boolean header) throws FileNotFoundException {
+        File output = new File(outputFolder,prefix+label+postfix+".csv");
+        PrintWriter writer = new PrintWriter(output);
+        writeCSV(writer, data, header);
+        writer.close();
+    }
+
+    private void writeCSV(PrintWriter pw, List<TracingData> data, boolean header) {
+        if (header) {
+            pw.println(Stream.concat(Stream.of("time"), Stream.of(TracingConstants.TracingFields.values()).map(f -> f.name().toLowerCase())).collect(Collectors.joining(", ")));
+        }
+        for (TracingData datum : data) {
+            pw.println(String.join(", ", datum.values()));
+        }
+    }
 
 }

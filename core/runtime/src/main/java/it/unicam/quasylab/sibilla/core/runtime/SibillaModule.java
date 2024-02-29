@@ -26,9 +26,10 @@ package it.unicam.quasylab.sibilla.core.runtime;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.SimulationTimeSeries;
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+import it.unicam.quasylab.sibilla.tools.tracing.TracingData;
+import it.unicam.quasylab.sibilla.tools.tracing.TracingFunction;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.File;
@@ -336,4 +337,6 @@ public interface SibillaModule {
 
 
     List<SimulationData> trace(RandomGenerator rg, double deadline);
+
+    Map<String, List<TracingData>> trace(RandomGenerator rg, TracingFunction tracingFunction, double deadline);
 }
