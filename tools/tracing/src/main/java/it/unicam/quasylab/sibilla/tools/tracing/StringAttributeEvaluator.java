@@ -53,7 +53,7 @@ public class StringAttributeEvaluator extends TracingSpecificationBaseVisitor<Fu
     @Override
     public Function<Function<String, SibillaValue>, String> visitExpressionReference(TracingSpecificationParser.ExpressionReferenceContext ctx) {
         String name = ctx.reference.getText();
-        if (TracingConstants.isColour(name)||TracingConstants.isColour(name)) {
+        if (TracingConstants.isColour(name)||TracingConstants.isShape(name)) {
             return f -> name;
         }
         throw new RuntimeException(String.format("Illegal value at line %d char %d", ctx.reference.getLine(), ctx.reference.getCharPositionInLine()));
