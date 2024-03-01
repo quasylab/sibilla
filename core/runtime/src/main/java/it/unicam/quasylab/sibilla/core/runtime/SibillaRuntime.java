@@ -756,14 +756,21 @@ public final class SibillaRuntime {
     }
 
     public void trace(String tracingSpecification, String outputFolder, boolean header) throws CommandExecutionException, IOException {
+        trace(new File(tracingSpecification), outputFolder, header);
+    }
+
+    public void trace(URL tracingSpecification, String outputFolder, boolean header) throws CommandExecutionException, IOException, URISyntaxException {
+        trace(new File(tracingSpecification.toURI()), outputFolder, header);
+    }
+
+    public void trace(File tracingSpecification, String outputFolder, boolean header) throws CommandExecutionException, IOException {
         checkLoadedModule();
         checkDeadline();
-        TracingFunction tracingFunction = TraceSpecificationEvaluator.load(new File(tracingSpecification));
+        TracingFunction tracingFunction = TraceSpecificationEvaluator.load(tracingSpecification);
         CSVWriter writer = new CSVWriter(outputFolder);
         Map<String, List<TracingData>> trace = this.currentModule.trace(this.rg, tracingFunction, this.deadline);
         for (Map.Entry<String, List<TracingData>> simulationData : trace.entrySet()) {
             writer.write(simulationData.getKey(), simulationData.getValue(), header);
         }
     }
-
 }
