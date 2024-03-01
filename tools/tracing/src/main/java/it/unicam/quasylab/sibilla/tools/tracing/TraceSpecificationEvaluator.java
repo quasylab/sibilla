@@ -36,6 +36,8 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -121,6 +123,10 @@ public class TraceSpecificationEvaluator extends TracingSpecificationBaseVisitor
         return true;
     }
 
+
+    public static TracingFunction load(URL url) throws URISyntaxException, IOException {
+        return load(new File(url.toURI()));
+    }
 
     public static TracingFunction load(String source) {
         return load(CharStreams.fromString(source));

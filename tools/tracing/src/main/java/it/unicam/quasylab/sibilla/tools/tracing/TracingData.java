@@ -40,12 +40,13 @@ public record TracingData(double time, double x, double y, double z, double dire
 
     public String[] values() {
         return new String[] {
+            String.format(java.util.Locale.US,"%f", time),
             String.format(java.util.Locale.US,"%f", x),
-            String.format(java.util.Locale.US,"%f", x),
-            String.format(java.util.Locale.US,"%f", x),
-            String.format(java.util.Locale.US,"%f", x),
-            colour,
-            shape
+            String.format(java.util.Locale.US,"%f", y),
+            String.format(java.util.Locale.US,"%f", z),
+            String.format(java.util.Locale.US,"%f", direction),
+            shape,
+            colour
         };
     }
 
