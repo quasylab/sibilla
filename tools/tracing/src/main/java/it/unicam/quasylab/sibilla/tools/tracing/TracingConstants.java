@@ -33,12 +33,12 @@ public class TracingConstants {
     public static final String DEFAULT_SHAPE = Shape.CIRCLE.name().toLowerCase();
 
     public static boolean isShape(String name) {
-        String upCase = name.toLowerCase();
+        String upCase = name.toUpperCase();
         return Stream.of(Shape.values()).map(Enum::name).anyMatch(s -> s.equals(upCase));
     }
 
     public static boolean isColour(String name) {
-        String upCase = name.toLowerCase();
+        String upCase = name.toUpperCase();
         return Stream.of(Colour.values()).map(Enum::name).anyMatch(s -> s.equals(upCase));
     }
 

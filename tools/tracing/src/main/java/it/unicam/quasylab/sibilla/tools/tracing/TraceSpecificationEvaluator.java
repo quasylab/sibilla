@@ -79,7 +79,7 @@ public class TraceSpecificationEvaluator extends TracingSpecificationBaseVisitor
                 this.function.setTracingZ(ns -> f.apply(ns).doubleOf());
                 return ;
             case DIRECTION:
-                this.function.setTracingZ(ns -> f.apply(ns).doubleOf());
+                this.function.setTracingDirection(ns -> f.apply(ns).doubleOf());
         }
     }
 
