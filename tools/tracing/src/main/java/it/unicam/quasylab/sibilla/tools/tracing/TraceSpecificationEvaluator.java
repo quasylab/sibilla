@@ -31,6 +31,7 @@ import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CodePointCharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.io.File;
 import java.io.FileReader;
@@ -93,7 +94,7 @@ public class TraceSpecificationEvaluator extends TracingSpecificationBaseVisitor
         }
     }
 
-    private void setField(TracingConstants.TracingFields field, TracingSpecificationParser.ExprContext value) {
+    private void setField(TracingConstants.TracingFields field, ParserRuleContext value) {
         switch (field) {
             case X:
             case Y:
@@ -110,7 +111,14 @@ public class TraceSpecificationEvaluator extends TracingSpecificationBaseVisitor
 
     @Override
     public Boolean visitBlockFieldAssignment(TracingSpecificationParser.BlockFieldAssignmentContext ctx) {
-        return super.visitBlockFieldAssignment(ctx);
+        String name = ctx.name.getText();
+        try {
+            TracingConstants.TracingFields field = TracingConstants.TracingFields.valueOf(name.toUpperCase());
+            setField(field, ctx.whenBlock());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException(String.format("Unknown field %s at line %d char %d.", name, ctx.name.getLine(), ctx.name.getCharPositionInLine()));
+        }
+        return true;
     }
 
 
