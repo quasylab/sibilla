@@ -21,9 +21,7 @@ predicate_declaration: 'predicate' name=ID '=' expr ';';
 
 channel_declaration : 'channel' name=ID (vars='{'var_decl (',' var_decl)*'}')? ';';
 
-process_declaration : 'process' name=ID '{'
-    body=process_body
-'}';
+process_declaration : 'process' name=ID '=' body=process_body ';';
 
 process_body : choice_process
              | conditional_process
@@ -85,6 +83,7 @@ expr    :
     | '!' arg=expr                                     # negationExpression
     | guard=expr '?' thenBranch=expr ':' elseBranch=expr             # ifThenElseExpression
     | op=('-'|'+') arg=expr                            # unaryExpression
+    | 'abs(' expr ')'                                     # absExpression
     | '(' expr ')'                                     # bracketExpression
     | INTEGER                                      # intValue
     | REAL                                         # realValue

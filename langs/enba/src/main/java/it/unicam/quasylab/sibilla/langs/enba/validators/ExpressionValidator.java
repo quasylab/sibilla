@@ -94,6 +94,11 @@ public class ExpressionValidator extends ExtendedNBABaseVisitor<Boolean> {
     }
 
     @Override
+    public Boolean visitAbsExpression(ExtendedNBAParser.AbsExpressionContext ctx) {
+        return checkAssignment(Type.INTEGER, ctx) && ctx.expr().accept(this);
+    }
+
+    @Override
     public Boolean visitBracketExpression(ExtendedNBAParser.BracketExpressionContext ctx) {
         return ctx.expr().accept(this);
     }

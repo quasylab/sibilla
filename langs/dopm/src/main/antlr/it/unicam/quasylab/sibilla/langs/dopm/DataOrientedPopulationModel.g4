@@ -82,6 +82,7 @@ expr    :
     | '!' arg=expr                                     # negationExpression
     | guard=expr '?' thenBranch=expr ':' elseBranch=expr             # ifThenElseExpression
     | op=('-'|'+') arg=expr                            # unaryExpression
+    | 'abs(' expr ')'                                     # absExpression
     | '(' expr ')'                                     # bracketExpression
     | INTEGER                                      # intValue
     | REAL                                         # realValue

@@ -183,4 +183,10 @@ public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<
         return (context) -> SibillaValue.of(context.getState().numberOf(predicate));
     }
 
+    @Override
+    public ExpressionFunction visitAbsExpression(DataOrientedPopulationModelParser.AbsExpressionContext ctx) {
+        ExpressionFunction expr = ctx.expr().accept(this);
+        return context -> SibillaValue.abs(expr.eval(context));
+    }
+
 }

@@ -189,4 +189,10 @@ public class ExpressionValidator extends DataOrientedPopulationModelBaseVisitor<
         ExpressionValidator booleanValidator = new ExpressionValidator(this.table, this.errors, predicateVariables, modelContext, Type.BOOLEAN);
         return ctx.expr().accept(booleanValidator);
     }
+
+    @Override
+    public Boolean visitAbsExpression(DataOrientedPopulationModelParser.AbsExpressionContext ctx) {
+        return checkAssignment(Type.INTEGER, ctx) && ctx.expr().accept(this);
+    }
+
 }

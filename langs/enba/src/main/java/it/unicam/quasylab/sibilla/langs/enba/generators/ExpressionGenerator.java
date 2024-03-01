@@ -183,4 +183,9 @@ public class ExpressionGenerator extends ExtendedNBABaseVisitor<ExpressionFuncti
         return (context) -> SibillaValue.of(context.getState().numberOf(predicate));
     }
 
+    @Override
+    public ExpressionFunction visitAbsExpression(ExtendedNBAParser.AbsExpressionContext ctx) {
+        ExpressionFunction expr = ctx.expr().accept(this);
+        return context -> SibillaValue.abs(expr.eval(context));
+    }
 }
