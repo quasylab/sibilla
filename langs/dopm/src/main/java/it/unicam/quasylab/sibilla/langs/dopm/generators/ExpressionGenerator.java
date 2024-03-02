@@ -9,10 +9,7 @@ import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelBaseVisi
 import it.unicam.quasylab.sibilla.langs.dopm.DataOrientedPopulationModelParser;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.expressions.ExpressionFunction;
 import it.unicam.quasylab.sibilla.langs.dopm.symbols.SymbolTable;
-import it.unicam.quasylab.sibilla.langs.dopm.symbols.Variable;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.function.BiPredicate;
 
 public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<ExpressionFunction> {
@@ -43,7 +40,7 @@ public class ExpressionGenerator extends DataOrientedPopulationModelBaseVisitor<
     @Override
     public ExpressionFunction visitSenderReferenceExpression(DataOrientedPopulationModelParser.SenderReferenceExpressionContext ctx) {
         String name = ctx.ID().getText();
-        return (context) -> context.getSenderValues().get(name);
+        return (context) -> context.getOtherAgentValues().get(name);
     }
 
     @Override

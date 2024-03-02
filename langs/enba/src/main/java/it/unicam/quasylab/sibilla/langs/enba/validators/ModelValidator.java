@@ -118,7 +118,7 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
 
         List<Variable> variables = this.table.getSpeciesVariables(species).orElse(new ArrayList<>());
         List<Variable> channelVariables = this.table.getChannelVariables(channel).orElse(new ArrayList<>());
-        List<Variable> mutationVariables = Stream.concat(
+        List<Variable> senderReceiverVariables = Stream.concat(
                 variables.stream(),
                 channelVariables.stream().map(v -> new Variable("sender." + v.name(), v.type(), v.context()))
         ).toList();
@@ -127,8 +127,8 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
                 && checkActionDuplicated(channel, inputs, ctx)
                 && checkChannelCompatibility(species, channel)
                 && ctx.input_action().probability.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.REAL))
-                && ctx.input_action().predicate.accept(new ExpressionValidator(this.table, this.errors, channelVariables, true, Type.BOOLEAN))
-                && checkAgentMutation(ctx.agent_mutation(), mutationVariables);
+                && ctx.input_action().predicate.accept(new ExpressionValidator(this.table, this.errors, senderReceiverVariables, true, Type.BOOLEAN))
+                && checkAgentMutation(ctx.agent_mutation(), senderReceiverVariables);
     }
 
     public Boolean checkOutputAction(ExtendedNBAParser.Output_tupleContext ctx, Map<String, ParserRuleContext> outputs, String species) {
@@ -136,12 +136,16 @@ public class ModelValidator extends ExtendedNBABaseVisitor<Boolean> {
 
         List<Variable> variables = this.table.getSpeciesVariables(species).orElse(new ArrayList<>());
         List<Variable> channelVariables = this.table.getChannelVariables(channel).orElse(new ArrayList<>());
+        List<Variable> senderReceiverVariables = Stream.concat(
+                variables.stream(),
+                channelVariables.stream().map(v -> new Variable("receiver." + v.name(), v.type(), v.context()))
+        ).toList();
 
         return  checkChannelExistence(channel, ctx)
                 && checkActionDuplicated(channel, outputs, ctx)
                 && checkChannelCompatibility(species, channel)
                 && ctx.output_action().rate.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.REAL))
-                && ctx.output_action().predicate.accept(new ExpressionValidator(this.table, this.errors, channelVariables, true, Type.BOOLEAN))
+                && ctx.output_action().predicate.accept(new ExpressionValidator(this.table, this.errors, senderReceiverVariables, true, Type.BOOLEAN))
                 && checkAgentMutation(ctx.agent_mutation(), variables);
     }
 

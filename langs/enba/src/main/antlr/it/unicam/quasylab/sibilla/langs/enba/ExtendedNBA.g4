@@ -36,8 +36,8 @@ action_tuple : input_tuple
 output_tuple : output_action '.' agent_mutation;
 input_tuple : input_action '.' agent_mutation;
 
-output_action : channel=ID (broadcast='*')? '<' rate=expr '>' '[' predicate=expr ']' '!';
-input_action : channel=ID (broadcast='*')? '<' probability=expr '>' '[' predicate=expr ']' '?';
+output_action : channel=ID (broadcast='*')? '!' '<' rate=expr '>' '[' predicate=expr ']';
+input_action : channel=ID (broadcast='*')? '?' '<' probability=expr '>' '[' predicate=expr ']';
 
 conditional_process : '['predicate=expr']' then=process_body ':' else=process_body;
 
@@ -92,6 +92,7 @@ expr    :
     | '%' agent=agent_predicate                                      # populationFractionExpression
     | '#' agent=agent_predicate                                       # populationSizeExpression
     | reference='sender.'ID                                 # senderReferenceExpression
+    | reference='receiver.'ID                                 # receiverReferenceExpression
     | reference=ID                                 # referenceExpression
     ;
 

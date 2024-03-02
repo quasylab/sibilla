@@ -195,12 +195,6 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
     }
 
     private Boolean checkInputTransition(DataOrientedPopulationModelParser.Input_transitionContext ctx, List<Variable> variables) {
-        if(
-                !ctx.pre.accept(this) ||
-                !ctx.sender_predicate.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.BOOLEAN))
-        ) {
-            return false;
-        }
         variables = Stream.concat(
                 variables
                     .stream()
@@ -210,7 +204,9 @@ public class ModelValidator extends DataOrientedPopulationModelBaseVisitor<Boole
                         .orElse(new ArrayList<>())
                         .stream()
         ).toList();
-        return ctx.probability.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.REAL)) &&
+        return ctx.pre.accept(this) &&
+               ctx.sender_predicate.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.BOOLEAN)) &&
+               ctx.probability.accept(new ExpressionValidator(this.table, this.errors, variables, true, Type.REAL)) &&
                checkAgentMutation(ctx.post, variables);
     }
 

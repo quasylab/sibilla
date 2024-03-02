@@ -110,6 +110,12 @@ public class ExpressionValidator extends ExtendedNBABaseVisitor<Boolean> {
     }
 
     @Override
+    public Boolean visitReceiverReferenceExpression(ExtendedNBAParser.ReceiverReferenceExpressionContext ctx) {
+        String name = "receiver." + ctx.ID().getText();
+        return checkReference(name, ctx);
+    }
+
+    @Override
     public Boolean visitOrExpression(ExtendedNBAParser.OrExpressionContext ctx) {
         ExpressionValidator booleanValidator = new ExpressionValidator(table,errors,localVariables,modelContext,Type.BOOLEAN);
         return checkAssignment(Type.BOOLEAN, ctx) && ctx.left.accept(booleanValidator) && ctx.right.accept(booleanValidator);

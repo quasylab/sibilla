@@ -9,10 +9,7 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.enba.ExtendedNBABaseVisitor;
 import it.unicam.quasylab.sibilla.langs.enba.ExtendedNBAParser;
 import it.unicam.quasylab.sibilla.langs.enba.symbols.SymbolTable;
-import it.unicam.quasylab.sibilla.langs.enba.symbols.Variable;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.function.BiPredicate;
 
 public class ExpressionGenerator extends ExtendedNBABaseVisitor<ExpressionFunction> {
@@ -43,7 +40,7 @@ public class ExpressionGenerator extends ExtendedNBABaseVisitor<ExpressionFuncti
     @Override
     public ExpressionFunction visitSenderReferenceExpression(ExtendedNBAParser.SenderReferenceExpressionContext ctx) {
         String name = ctx.ID().getText();
-        return (context) -> context.getSenderValues().get(name);
+        return (context) -> context.getOtherAgentValues().get(name);
     }
 
     @Override

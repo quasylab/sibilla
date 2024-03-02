@@ -3,6 +3,7 @@ package it.unicam.quasylab.sibilla.core.models.carma.targets.enba;
 import it.unicam.quasylab.sibilla.core.models.ContinuousTimeMarkovProcess;
 import it.unicam.quasylab.sibilla.core.models.Model;
 import it.unicam.quasylab.sibilla.core.models.StepFunction;
+import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.expressions.ExpressionContext;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.DataOrientedPopulationModel;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.BroadcastRule;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.AgentState;
@@ -70,8 +71,8 @@ public class ENBAModel implements Model<AgentState>, ContinuousTimeMarkovProcess
                                         new OutputTransition(o.predicate(), o.rate(), o.post()),
                                         List.of(
                                                 new InputTransition(
-                                                        (s, c) -> i.predicate().test(s, c) && o.receiverPredicate().test(c),
-                                                        i.senderPredicate(),
+                                                        i.predicate(),
+                                                        c -> i.senderPredicate().test(c) && o.receiverPredicate().test(new ExpressionContext(c.getOtherAgentValues(), c.getAgentValues(), c.getState())),
                                                         i.probability(),
                                                         i.post()
                                                 )
@@ -114,8 +115,8 @@ public class ENBAModel implements Model<AgentState>, ContinuousTimeMarkovProcess
                 .forEach(i -> rules.get(i.channel()).forEach(o ->
                                 o.rule.getInputs().add(
                                         new InputTransition(
-                                                (s, c) -> i.predicate().test(s, c) && o.output.receiverPredicate().test(c),
-                                                i.senderPredicate(),
+                                                i.predicate(),
+                                                c -> i.senderPredicate().test(c) && o.output.receiverPredicate().test(new ExpressionContext(c.getOtherAgentValues(), c.getAgentValues(), c.getState())),
                                                 i.probability(),
                                                 i.post()
                                         )

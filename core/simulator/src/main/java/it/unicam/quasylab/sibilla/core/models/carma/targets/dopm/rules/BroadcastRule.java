@@ -48,8 +48,8 @@ public class BroadcastRule extends AbstractRule {
         return this.getInputs()
                 .stream()
                 .filter(i ->
-                        i.senderPredicate().test(new ExpressionContext(sender.values(), state)) &&
-                                i.predicate().test(agent.species(), new ExpressionContext(agent.values(), state))
+                        i.senderPredicate().test(new ExpressionContext(agent.values(), sender.values(), state)) &&
+                        i.predicate().test(agent.species(), new ExpressionContext(agent.values(), state))
                 )
                 .findFirst()
                 .map(i -> (Reaction)new InputReaction(agent, numberOf, i))

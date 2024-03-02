@@ -86,7 +86,7 @@ public class UnicastRule extends AbstractRule {
                                 e.getKey().species(),
                                 new ExpressionContext(e.getKey().values(), state)
                         ) &&
-                        input.senderPredicate().test(new ExpressionContext(sender.values(), state))
+                        input.senderPredicate().test(new ExpressionContext(e.getKey().values(), sender.values(), state))
                 ).forEach(e -> targets.add(
                                 input.probability().apply(
                                         new ExpressionContext(e.getKey().values(), state)
