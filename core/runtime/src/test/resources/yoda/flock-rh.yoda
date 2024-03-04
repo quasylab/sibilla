@@ -1,0 +1,65 @@
+param nbirds = 5;
+param maxDist = 2;
+param minDist = 1;
+param rad = 180/PI;
+
+agent Bird =
+    state :
+        real angle = 0.0;
+    features:
+        real x = 0.0;
+        real y = 0.0;
+    observations:
+        real meanX = 0.0;
+        real meanY = 0.0;
+        bool isTooFar = false;
+        bool isTooClose = false;
+    actions:
+        moveA [ angle <- U[0.0, PI/2]; ]
+        moveB [ angle <- U[PI/2, PI]; ]
+        moveC [ angle <- U[PI, (3*PI)/2]; ]
+        moveD [ angle <- U[(3*PI)/2, 2*PI]; ]
+        maintain [ angle <- angle; ]
+    behaviour:
+        when isTooFar && ((meanX < 0.0) && (meanY < 0.0)) -> [moveC:1]
+        orwhen isTooFar && ((meanX < 0.0) && (meanY >= 0.0)) -> [moveB:1]
+        orwhen isTooFar && ((meanX >= 0.0) && (meanY >= 0.0)) -> [moveA:1]
+        orwhen isTooFar && ((meanX >= 0.0) && (meanY < 0.0)) -> [moveD:1]
+        orwhen isTooClose && ((meanX < 0.0) && (meanY < 0.0)) -> [moveA:1]
+        orwhen isTooClose && ((meanX < 0.0) && (meanY >= 0.0)) -> [moveD:1]
+        orwhen isTooClose && ((meanX >= 0.0) && (meanY >= 0.0)) -> [moveC:1]
+        orwhen isTooClose && ((meanX >= 0.0) && (meanY < 0.0)) -> [moveB:1]
+        otherwise [ maintain : 1]
+end
+
+environment :
+    sensing:
+        Bird [
+            meanX <- mean Bird . x - it.x;
+            meanY <- mean Bird . y - it.y;
+            isTooFar <- sqrt ( (( mean Bird . x - it.x )^2) + (( mean Bird . y - it.y )^2) ) > maxDist;
+            isTooClose <- sqrt ( (( mean Bird . x - it.x )^2) + (( mean Bird . y - it.y )^2) ) < minDist;
+        ]
+    dynamic:
+        Bird [
+            x <- x + cos(angle);
+            y <- y + sin(angle);
+        ]
+end
+
+configuration Main :
+    for ox sampled distinct nbirds time from U[0, nbirds] do
+        for oy sampled distinct nbirds time from U[0, nbirds] do
+            Bird [ x = ox; y = oy; ]
+        endfor
+    endfor
+end
+
+configuration Main2 :
+    for o sampled distinct nbirds time from U[0, nbirds] do
+        Bird [ x = o; y = o; ]
+    endfor
+end
+
+measure birdX = mean Bird . x
+measure birdY = mean Bird . y

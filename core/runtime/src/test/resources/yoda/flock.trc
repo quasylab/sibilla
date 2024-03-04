@@ -1,0 +1,7 @@
+direction = angle;
+shape = bird;
+colour = {
+    when isTooFar : blue;
+    when isTooClose : red;
+    otherwise yellow;
+}

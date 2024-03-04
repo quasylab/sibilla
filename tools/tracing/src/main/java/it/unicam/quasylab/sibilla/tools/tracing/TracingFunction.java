@@ -99,9 +99,9 @@ public class TracingFunction {
         return new TracingData(
             t,
             extractDouble(TracingConstants.TracingFields.X.name().toLowerCase(), tracingX, nameSolver),
-            extractDouble(TracingConstants.TracingFields.Y.name().toLowerCase(), tracingX, nameSolver),
-            extractDouble(TracingConstants.TracingFields.Z.name().toLowerCase(), tracingX, nameSolver),
-            extractDouble(TracingConstants.TracingFields.DIRECTION.name().toLowerCase(), tracingX, nameSolver),
+            extractDouble(TracingConstants.TracingFields.Y.name().toLowerCase(), tracingY, nameSolver),
+            extractDouble(TracingConstants.TracingFields.Z.name().toLowerCase(), tracingZ, nameSolver),
+            extractDouble(TracingConstants.TracingFields.DIRECTION.name().toLowerCase(), tracingDirection, nameSolver),
             extractString(tracingColour, nameSolver, TracingConstants.DEFAULT_COLOUR),
             extractString(tracingShape, nameSolver, TracingConstants.DEFAULT_SHAPE)
         );
