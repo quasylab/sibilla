@@ -78,7 +78,7 @@ expr    :
     | left=expr '^' right=expr                                # exponentExpression
     | left=expr op=('*'|'/'|'//') right=expr               # mulDivExpression
     | left=expr op=('+'|'-'|'%') right=expr                   # addSubExpression
-    |  left=expr op=('<'|'<='|'=='|'>='|'>') right=expr          # relationExpression
+    |  left=expr op=('<'|'<='|'=='|'!='|'>='|'>') right=expr          # relationExpression
     | '!' arg=expr                                     # negationExpression
     | guard=expr '?' thenBranch=expr ':' elseBranch=expr             # ifThenElseExpression
     | op=('-'|'+') arg=expr                            # unaryExpression

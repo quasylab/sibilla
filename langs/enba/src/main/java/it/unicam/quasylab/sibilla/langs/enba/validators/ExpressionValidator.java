@@ -81,7 +81,7 @@ public class ExpressionValidator extends ExtendedNBABaseVisitor<Boolean> {
     @Override
     public Boolean visitRelationExpression(ExtendedNBAParser.RelationExpressionContext ctx) {
         ExpressionValidator realValidator = new ExpressionValidator(table,errors,localVariables,modelContext,Type.REAL);
-        if(ctx.op.getText().equals("==")) {
+        if(ctx.op.getText().equals("==") || ctx.op.getText().equals("!=")) {
             ExpressionValidator booleanValidator = new ExpressionValidator(table,new ArrayList<>(),localVariables,modelContext,Type.BOOLEAN);
 
             return checkAssignment(Type.BOOLEAN, ctx) &&
