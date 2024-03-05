@@ -8,27 +8,27 @@ agent Bird =
         real angle = 0.0;
     features:
         real x = 0.0;
-        real y = 0.0;
+        real z = 0.0;
     observations:
         real meanX = 0.0;
-        real meanY = 0.0;
+        real meanZ = 0.0;
         bool isTooFar = false;
         bool isTooClose = false;
     actions:
-        moveA [ angle <- U[0.0, PI/2]; ]
-        moveB [ angle <- U[PI/2, PI]; ]
-        moveC [ angle <- U[PI, (3*PI)/2]; ]
-        moveD [ angle <- U[(3*PI)/2, 2*PI]; ]
+        moveA [ angle <- U[0.0, 90.0]; ]
+        moveB [ angle <- U[90.0, 180.0]; ]
+        moveC [ angle <- U[180.0, 270.0]; ]
+        moveD [ angle <- U[270.0, 360]; ]
         maintain [ angle <- angle; ]
     behaviour:
-        when isTooFar && ((meanX < 0.0) && (meanY < 0.0)) -> [moveC:1]
-        orwhen isTooFar && ((meanX < 0.0) && (meanY >= 0.0)) -> [moveB:1]
-        orwhen isTooFar && ((meanX >= 0.0) && (meanY >= 0.0)) -> [moveA:1]
-        orwhen isTooFar && ((meanX >= 0.0) && (meanY < 0.0)) -> [moveD:1]
-        orwhen isTooClose && ((meanX < 0.0) && (meanY < 0.0)) -> [moveA:1]
-        orwhen isTooClose && ((meanX < 0.0) && (meanY >= 0.0)) -> [moveD:1]
-        orwhen isTooClose && ((meanX >= 0.0) && (meanY >= 0.0)) -> [moveC:1]
-        orwhen isTooClose && ((meanX >= 0.0) && (meanY < 0.0)) -> [moveB:1]
+        when isTooFar && ((meanX < 0.0) && (meanZ < 0.0)) -> [moveC:1]
+        orwhen isTooFar && ((meanX < 0.0) && (meanZ >= 0.0)) -> [moveB:1]
+        orwhen isTooFar && ((meanX >= 0.0) && (meanZ >= 0.0)) -> [moveA:1]
+        orwhen isTooFar && ((meanX >= 0.0) && (meanZ < 0.0)) -> [moveD:1]
+        orwhen isTooClose && ((meanX < 0.0) && (meanZ < 0.0)) -> [moveA:1]
+        orwhen isTooClose && ((meanX < 0.0) && (meanZ >= 0.0)) -> [moveD:1]
+        orwhen isTooClose && ((meanX >= 0.0) && (meanZ >= 0.0)) -> [moveC:1]
+        orwhen isTooClose && ((meanX >= 0.0) && (meanZ < 0.0)) -> [moveB:1]
         otherwise [ maintain : 1]
 end
 
@@ -36,30 +36,19 @@ environment :
     sensing:
         Bird [
             meanX <- mean Bird . x - it.x;
-            meanY <- mean Bird . y - it.y;
-            isTooFar <- sqrt ( (( mean Bird . x - it.x )^2) + (( mean Bird . y - it.y )^2) ) > maxDist;
-            isTooClose <- sqrt ( (( mean Bird . x - it.x )^2) + (( mean Bird . y - it.y )^2) ) < minDist;
+            meanZ <- mean Bird . z - it.z;
+            isTooFar <- sqrt ( (( mean Bird . x - it.x )^2) + (( mean Bird . z - it.z )^2) ) > maxDist;
+            isTooClose <- sqrt ( (( mean Bird . x - it.x )^2) + (( mean Bird . z - it.z )^2) ) < minDist;
         ]
     dynamic:
         Bird [
-            x <- x + cos(angle);
-            y <- y + sin(angle);
+            x <- x + cos((angle * PI)/180.0);
+            z <- z + sin((angle * PI)/180.0);
         ]
 end
 
 configuration Main :
-    for ox sampled distinct nbirds time from U[0, nbirds] do
-        for oy sampled distinct nbirds time from U[0, nbirds] do
-            Bird [ x = ox; y = oy; ]
-        endfor
-    endfor
-end
-
-configuration Main2 :
     for o sampled distinct nbirds time from U[0, nbirds] do
-        Bird [ x = o; y = o; ]
+        Bird [ x = o; z = o; ]
     endfor
 end
-
-measure birdX = mean Bird . x
-measure birdY = mean Bird . y

@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 /**
  * Instances of this class are used to collect the data traced at a given time step.
  */
-public record TracingData(double time, double x, double y, double z, double direction, String colour, String shape) {
+public record TracingData(double time, double x, double y, double z, double direction, String shape, String colour) {
 
     public void writeCSV(String name, List<TracingData> data) {
 

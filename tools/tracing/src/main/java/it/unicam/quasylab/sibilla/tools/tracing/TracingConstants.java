@@ -47,8 +47,8 @@ public class TracingConstants {
         Y,
         Z,
         DIRECTION,
-        COLOUR,
-        SHAPE;
+        SHAPE,
+        COLOUR;
     }
 
     public enum Colour {

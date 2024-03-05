@@ -262,10 +262,10 @@ public class CSVWriter {
 
     private void writeCSV(PrintWriter pw, List<TracingData> data, boolean header) {
         if (header) {
-            pw.println(Stream.concat(Stream.of("time"), Stream.of(TracingConstants.TracingFields.values()).map(f -> f.name().toLowerCase())).collect(Collectors.joining(", ")));
+            pw.println(Stream.concat(Stream.of("time"), Stream.of(TracingConstants.TracingFields.values()).map(f -> f.name().toLowerCase())).collect(Collectors.joining(",")));
         }
         for (TracingData datum : data) {
-            pw.println(String.join(", ", datum.values()));
+            pw.println(String.join(",", datum.values()));
         }
     }
 

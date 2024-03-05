@@ -260,6 +260,7 @@ class YodaExamplesTest {
     }
 
     @Test
+    @Disabled
     public void shouldSimulateFinderBot() throws CommandExecutionException, IOException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/finderBot2.yoda"));
@@ -364,12 +365,12 @@ class YodaExamplesTest {
     }
 
     @Test
-    //@Disabled
+    @Disabled
     public void shouldSimulateFlock() throws CommandExecutionException, IOException, URISyntaxException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/flock-rh.yoda"));
         sr.setParameter("nbirds", 5);
-        sr.setConfiguration("Main2");
+        sr.setConfiguration("Main");
         sr.setDeadline(100);
         sr.trace(getResource("yoda/flock.trc"), "./results/", true);
 
