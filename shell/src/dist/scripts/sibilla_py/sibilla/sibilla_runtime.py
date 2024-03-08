@@ -220,7 +220,7 @@ class SibillaRuntime:
     def get_predicates(self):
         return self.__runtime()
 
-    def trace(self, trace_spec: str, output_folder: str, header: bool)
+    def trace(self, trace_spec: str, output_folder: str, header: bool):
         return self.__runtime.trace(trace_spec, output_folder, header)
 
     def evaluate_first_passage_time(self, predicate_name: str,monitor: SimulationMonitor = None):
