@@ -46,6 +46,11 @@ public class UnicastRule extends AbstractRule {
 
             double sample = sr.nextDouble() * targets.getTotalWeight();
             Agent selected = targets.select(sample).getElement();
+
+            if(selected == null) {
+                return state;
+            }
+
             agentMutations.add(new AgentMutation(selected, inputTransition.post()));
         }
 
