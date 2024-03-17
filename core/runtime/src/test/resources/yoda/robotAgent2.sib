@@ -1,9 +1,0 @@
-module "yoda"
-load "yoda/robotAgent2.yoda"
-init "Main"
-add all measures
-deadline 100
-dt 1
-replica 100
-simulate
-save output "/Users/nicoladelgiudice/Documents/Risultati/Robot" prefix "robot" postfix "__"

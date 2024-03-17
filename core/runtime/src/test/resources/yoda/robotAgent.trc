@@ -1,0 +1,5 @@
+shape  = square;
+colour = {
+    when goal : green;
+    otherwise red;
+}

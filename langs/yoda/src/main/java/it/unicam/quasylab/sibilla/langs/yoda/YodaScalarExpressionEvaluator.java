@@ -213,4 +213,14 @@ public class YodaScalarExpressionEvaluator extends YodaModelBaseVisitor<SibillaV
     public SibillaValue visitExpressionAbsolute(YodaModelParser.ExpressionAbsoluteContext ctx) {
         return SibillaValue.apply(Math::abs, ctx.argument.accept(this));
     }
+
+    @Override
+    public SibillaValue visitExpressionRandom(YodaModelParser.ExpressionRandomContext ctx) {
+        return super.visitExpressionRandom(ctx);
+    }
+
+    @Override
+    public SibillaValue visitExpressionWeightedRandom(YodaModelParser.ExpressionWeightedRandomContext ctx) {
+        return SibillaValue.weightedRnd(ctx.min.accept(this), ctx.max.accept(this));
+    }
 }
