@@ -1,0 +1,5 @@
+shape = square;
+colour = {
+    when sensor : green;
+    otherwise red;
+}

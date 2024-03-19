@@ -8,13 +8,14 @@ agent Finder =
     features:
         real x = 0.0;
         real y = 0.0;
+        bool light = false;
     observations:
         bool target_sensor = false;
         real angle = 0.0;
     actions:
         stop [ dirx <- 0.0; diry <- 0.0; found <- true; ]
-        roam [ dirx <- U[-1.0 , 1.0]; diry <- U[-1.0 , 1.0]; ]
-        moveto [ dirx <- cos(angle); diry <- sin(angle); ]
+        roam [ dirx <- U[-1.0 , 1.0]; diry <- U[-1.0 , 1.0]; found <- false; ]
+        moveto [ dirx <- cos(angle); diry <- sin(angle); found <- false; ]
     behaviour:
         when target_sensor -> [ stop:1 ]
         orwhen angle != 0.0 -> [ moveto:1 ]
@@ -30,18 +31,19 @@ environment :
     sensing:
         Finder [
             target_sensor <- (any Target : (abs(it.x - posx) < 2.0)) && (any Target : ( abs(it.y - posy) < 2.0));
-            angle <- atan ((mean Finder [found] . y - it.y) / (mean Finder [found] . x - it.x));
+            angle <- atan ((mean Finder [light] . y - it.y) / (mean Finder [light] . x - it.x));
         ]
     dynamic:
         Finder [
            x <- x + dirx;
            y <- y + diry;
+           light <- found;
         ]
 end
 
 configuration Main :
-    Target [ posx = 5.0; posy = 5.0; ]
     for ox sampled distinct na time from U[0, 10] do
         Finder [ x = ox; y = 2.0; ]
     endfor
+    Target [ posx = 5.0; posy = 5.0; ]
 end
