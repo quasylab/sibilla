@@ -12,6 +12,7 @@ agent Finder =
     observations:
         bool target_sensor = false;
         real angle = 0.0;
+        bool toTarget = false;
     actions:
         stop [ dirx <- 0.0; diry <- 0.0; found <- true; ]
         roam [ dirx <- U[-1.0 , 1.0]; diry <- U[-1.0 , 1.0]; found <- false; ]
@@ -31,7 +32,13 @@ environment :
     sensing:
         Finder [
             target_sensor <- (any Target : (abs(it.x - posx) < 2.0)) && (any Target : ( abs(it.y - posy) < 2.0));
-            angle <- atan ((mean Finder [light] . y - it.y) / (mean Finder [light] . x - it.x));
+            if (any Finder: light) then
+                angle <- atan ((mean Finder [light] . y - it.y) / (mean Finder [light] . x - it.x));
+                toTarget <- true;
+            else
+                angle <- 0.0;
+                toTarget <- false;
+            endif
         ]
     dynamic:
         Finder [
