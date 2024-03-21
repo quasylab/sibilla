@@ -90,7 +90,7 @@ public class YodaVariableMapping {
     }
 
     public YodaVariableMapping setAll(List<YodaVariableUpdate> lst) {
-        if ((map == null)||(map.isEmpty())) return this;
+        //if ((map == null)||(map.isEmpty())) return this;
         SibillaMap<YodaVariable, SibillaValue> newMap = this.map;
         for (YodaVariableUpdate u : lst) {
             newMap = newMap.add(u.getVariable(), u.getValue());

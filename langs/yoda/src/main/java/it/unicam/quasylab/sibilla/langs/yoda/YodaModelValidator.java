@@ -408,7 +408,7 @@ public class YodaModelValidator {
         @Override
         public Boolean visitAttributeUpdateIfThenElse(YodaModelParser.AttributeUpdateIfThenElseContext ctx) {
             return new TypeInferenceVisitor(errors,
-                    YodaModelValidator.this::getTypeOfConstantsAndParameters,
+                    currentTypeSolver,
                     elementAttributeTable,
                     declaredFields,
                     canBeReadPredicate,

@@ -14,15 +14,22 @@ agent Finder =
         bool light = false;
     observations:
         bool target_sensor = false;
-        real angle = 0.0;
         bool toTarget = false;
+        real diffX = 0.0;
+        real diffY = 0.0;
     actions:
         stop [ dirx <- 0.0; diry <- 0.0; found <- true; ]
         roam [ dirx <- U[-1.0 , 1.0]; diry <- U[-1.0 , 1.0]; found <- false; ]
-        moveto [ dirx <- cos(angle); diry <- sin(angle); found <- false; ]
+        moveNorth [ dirx <- 0; diry <- U[0.0 , 1.0]; found <- false;]
+        moveSouth [ dirx <- 0; diry <- U[-1.0 , 0.0]; found <- false;]
+        moveEast [ dirx <- U[0.0 , 1.0]; diry <- 0; found <- false;]
+        moveWest [ dirx <- U[-1.0 , 0.0]; diry <- 0; found <- false;]
     behaviour:
         when target_sensor -> [ stop:1 ]
-        orwhen toTarget -> [ moveto:1 ]
+        orwhen toTarget && (diffX < (-tolerance)) -> [ moveWest:1 ]
+        orwhen toTarget && (diffX > tolerance) -> [ moveEast:1 ]
+        orwhen toTarget && (diffY < (-tolerance)) -> [ moveSouth:1 ]
+        orwhen toTarget && (diffY > tolerance) -> [ moveNorth:1 ]
         otherwise [ roam:1 ]
 end
 
@@ -36,22 +43,16 @@ environment :
         Finder [
             target_sensor <- (any Target : (abs(it.x - posx) < tolerance)) && (any Target : ( abs(it.y - posy) < tolerance));
             if (any Finder: light) then
-                let meanX = mean Finder [light] .x
-                and meanY = mean Finder [light] .y
-                in
-                    if (it.x < meanX) then
-                        angle <- atan ((meanY - it.y) // (meanX - it.x));
-                    else
-                        angle <- atan ((meanY - it.y) // (meanX - it.x)) + PI;
-                    endif
-                    toTarget <- true;
-                endlet
+                diffX <- (mean Finder [light] . x - it.x);
+                diffY <- (mean Finder [light] . y - it.y);
+                toTarget <- true;
             else
-                angle <- 0.0;
+                diffX <- 0.0;
+                diffY <- 0.0;
                 toTarget <- false;
             endif
         ]
-     dynamic:
+    dynamic:
         Finder [
            x <- x + dirx;
            y <- y + diry;
