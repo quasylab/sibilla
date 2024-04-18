@@ -6,7 +6,6 @@ import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.mutations.Mu
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.mutations.MutationResult;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.Agent;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.AgentState;
-import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.randomgenerators.SplittableRandomGenerator;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.InputTransition;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.OutputTransition;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedElement;
@@ -29,7 +28,6 @@ public class UnicastRule extends AbstractRule {
         record AgentMutation (Agent agent, Mutation mutation) {}
         Map<Agent, Long> newOccupancies = new HashMap<>(state.getAgents());
         newOccupancies.put(sender, newOccupancies.get(sender) - 1);
-        RandomGenerator sr = new SplittableRandomGenerator(randomGenerator.nextLong());
         List<AgentMutation> agentMutations = new ArrayList<>();
 
         for(InputTransition inputTransition : getInputs()) {
@@ -44,7 +42,7 @@ public class UnicastRule extends AbstractRule {
                 return state;
             }
 
-            double sample = sr.nextDouble() * targets.getTotalWeight();
+            double sample = randomGenerator.nextDouble() * targets.getTotalWeight();
             Agent selected = targets.select(sample).getElement();
 
             if(selected == null) {
@@ -63,7 +61,7 @@ public class UnicastRule extends AbstractRule {
                             state
                     ),
                     am.mutation,
-                    sr
+                    randomGenerator
             ).orElse(am.agent);
             newOccupancies.put(mutated, newOccupancies.getOrDefault(mutated,0L) + 1);
         });
@@ -74,7 +72,7 @@ public class UnicastRule extends AbstractRule {
                         state
                 ),
                 getOutput().post(),
-                sr
+                randomGenerator
         ).orElse(sender);
 
         newOccupancies.put(newSender, newOccupancies.getOrDefault(newSender,0L) + 1);

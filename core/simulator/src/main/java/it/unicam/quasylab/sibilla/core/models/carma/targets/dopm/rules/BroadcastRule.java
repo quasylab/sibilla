@@ -5,7 +5,6 @@ import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.mutations.Ag
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.mutations.MutationResult;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.Agent;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.commons.states.AgentState;
-import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.randomgenerators.SplittableRandomGenerator;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.InputTransition;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.transitions.OutputTransition;
 import it.unicam.quasylab.sibilla.core.models.carma.targets.dopm.rules.reactions.InputReaction;
@@ -29,7 +28,6 @@ public class BroadcastRule extends AbstractRule {
     public AgentState apply(AgentState state, Agent sender, RandomGenerator randomGenerator) {
         Map<Agent, Long> newOccupancies = new HashMap<>(state.getAgents());
         newOccupancies.put(sender, newOccupancies.get(sender) - 1);
-        RandomGenerator sr = new SplittableRandomGenerator(randomGenerator.nextLong());
         return new AgentState(
                 Stream.concat(
                                 newOccupancies
@@ -37,8 +35,8 @@ public class BroadcastRule extends AbstractRule {
                                         .stream()
                                         .filter(entry -> entry.getValue() > 0)
                                         .map(entry -> getAgentReaction(state, entry.getKey(), sender, entry.getValue()))
-                                        .flatMap(reaction -> reaction.sampleDeltas(sender, state, sr)),
-                                sampleSenderDeltas(state, sender, sr)
+                                        .flatMap(reaction -> reaction.sampleDeltas(sender, state, randomGenerator)),
+                                sampleSenderDeltas(state, sender, randomGenerator)
                         )
                         .collect(Collectors.groupingBy(AgentDelta::agent, Collectors.summingLong(AgentDelta::delta)))
         );

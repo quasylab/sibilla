@@ -7,8 +7,8 @@ package it.unicam.quasylab.sibilla.langs.enba;
 model   : element* EOF;
 
 element : species_declaration
-        | process_declaration
         | channel_declaration
+        | process_declaration
         | system_declaration
         | measure_declaration
         | predicate_declaration;
@@ -28,6 +28,10 @@ process_body : choice_process
              | nil_process
              ;
 
+conditional_process : '['predicate=expr']' then=process_body ':' else=process_body;
+
+nil_process : '_NIL_';
+
 choice_process : actions=action_tuple ('+' action_tuple)*;
 
 action_tuple : input_tuple
@@ -39,9 +43,7 @@ input_tuple : input_action '.' agent_mutation;
 output_action : channel=ID (broadcast='*')? '!' '<' rate=expr '>' '[' predicate=expr ']';
 input_action : channel=ID (broadcast='*')? '?' '<' probability=expr '>' '[' predicate=expr ']';
 
-conditional_process : '['predicate=expr']' then=process_body ':' else=process_body;
 
-nil_process : '_NIL_';
 
 var_decl : name=ID ':' type=('integer'|'real'|'boolean');
 
