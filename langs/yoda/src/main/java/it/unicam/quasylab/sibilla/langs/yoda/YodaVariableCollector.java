@@ -34,6 +34,29 @@ public class YodaVariableCollector extends YodaModelBaseVisitor<Boolean> {
         ctx.agentStateAttributes.forEach(nd -> registry.add(nd.name.getText()));
         ctx.agentFeaturesAttributes.forEach(nd -> registry.add(nd.name.getText()));
         ctx.agentObservationsAttributes.forEach(nd -> registry.add(nd.name.getText()));
+        ctx.actionBody().forEach(ab -> ab.accept(this));
+        return true;
+    }
+
+    @Override
+    public Boolean visitSystemDeclaration(YodaModelParser.SystemDeclarationContext ctx) {
+        ctx.globalAttributes.forEach(au -> au.accept(this));
+        ctx.agentSensing.forEach(as -> as.accept(this));
+        ctx.agentDynamics.forEach(ad -> ad.accept(this));
+        return true;
+    }
+
+    @Override
+    public Boolean visitAttributeUpdateIfThenElse(YodaModelParser.AttributeUpdateIfThenElseContext ctx) {
+        ctx.thenBlock.forEach(au -> au.accept(this));
+        ctx.elseBlock.forEach(au -> au.accept(this));
+        return true;
+    }
+
+    @Override
+    public Boolean visitAttributeUpdateLetBlock(YodaModelParser.AttributeUpdateLetBlockContext ctx) {
+        ctx.names.forEach(n -> registry.add(n.getText()));
+        ctx.body.forEach(au -> au.accept(this));
         return true;
     }
 

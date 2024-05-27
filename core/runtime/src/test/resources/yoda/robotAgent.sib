@@ -1,0 +1,5 @@
+module "yoda"
+load "yoda/robotAgent.yoda"
+init "Main"
+deadline 100
+trace "yoda/robotAgent.trc" in "./results/" h = true

@@ -102,8 +102,9 @@ public class TracingFunction {
             extractDouble(TracingConstants.TracingFields.Y.name().toLowerCase(), tracingY, nameSolver),
             extractDouble(TracingConstants.TracingFields.Z.name().toLowerCase(), tracingZ, nameSolver),
             extractDouble(TracingConstants.TracingFields.DIRECTION.name().toLowerCase(), tracingDirection, nameSolver),
-            extractString(tracingColour, nameSolver, TracingConstants.DEFAULT_COLOUR),
-            extractString(tracingShape, nameSolver, TracingConstants.DEFAULT_SHAPE)
+            extractString(tracingShape, nameSolver, TracingConstants.DEFAULT_SHAPE),
+            extractString(tracingColour, nameSolver, TracingConstants.DEFAULT_COLOUR)
+
         );
     }
 

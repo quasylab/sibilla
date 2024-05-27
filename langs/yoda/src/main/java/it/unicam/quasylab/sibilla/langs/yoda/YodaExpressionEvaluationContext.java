@@ -154,8 +154,8 @@ public interface YodaExpressionEvaluationContext {
             List<Pair<YodaVariable, Function<YodaExpressionEvaluationContext, SibillaValue>>> localVariables,
             Function<YodaExpressionEvaluationContext, T> f
             ) {
-        return eec -> f.apply(new YodaExpressionEvaluationLetContext(
-                new YodaVariableMapping().setAll(localVariables.stream().map(p -> new YodaVariableUpdate(p.getKey(), p.getValue().apply(eec))).toList()),
+        return eec -> f.apply(
+                new YodaExpressionEvaluationLetContext(new YodaVariableMapping().setAll(localVariables.stream().map(p -> new YodaVariableUpdate(p.getKey(), p.getValue().apply(eec))).toList()),
                 eec
         ));
     }

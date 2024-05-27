@@ -234,6 +234,15 @@ public interface SibillaValue {
         }
     }
 
+
+    static SibillaValue weightedRnd(SibillaValue min, SibillaValue max) {
+        if (min.doubleOf() < max.doubleOf()){
+            return new SibillaDouble((Math.random() * (max.doubleOf()) - min.doubleOf()) + min.doubleOf());
+        }else {
+            return SibillaValue.ERROR_VALUE;
+        }
+    }
+
     static <T,R> BiFunction<T, R, SibillaValue> apply(DoubleUnaryOperator op, BiFunction<T, R, SibillaValue> function) {
         return (t, r) -> SibillaValue.apply(op, function.apply(t, r));
     }

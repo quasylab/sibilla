@@ -1,0 +1,7 @@
+direction=angle;
+shape = square;
+colour = {
+    when light : green;
+    when toTarget : yellow;
+    otherwise red;
+}

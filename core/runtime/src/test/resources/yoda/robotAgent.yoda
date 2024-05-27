@@ -44,7 +44,6 @@ environment:
             west <- any Obstacle : (posx==it.x-1)&&(posy==it.y);
             goal <- it.y==height+1;
         ]
-
     dynamic :
         Robot [
            x <- x + dirx;
@@ -53,14 +52,10 @@ environment:
  end
 
  configuration Main :
-    for ox sampled distinct 5 time from U[0, width] do
-       Obstacle[ posx = ox; posy = 7; ]
+    for i sampled distinct na time from floor(U[0, width]) do
+        Robot[ x = i ; y = floor(U[0, height]) ; ]
     endfor
-    Robot[ x = 9 ; y = 0 ; ]
+    for o sampled distinct no time from floor(U[0, width]) do
+       Obstacle[ posx = o; posy = floor(U[2, height]); ]
+    endfor
  end
-
-
-
-measure meanX =  mean Robot . x
-
-measure meanY =  mean Robot . y

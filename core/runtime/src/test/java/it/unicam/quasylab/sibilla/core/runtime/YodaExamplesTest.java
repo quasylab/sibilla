@@ -53,14 +53,14 @@ class YodaExamplesTest {
     @Test
     @Disabled
     public void shouldLoadResourceRobotScenario() {
-        assertNotNull(getResource("yoda/robotAgent2.yoda"));
+        assertNotNull(getResource("yoda/robotAgent.yoda"));
     }
 
     @Test
     @Disabled
     public void shouldInstantiateAInitialConfigurationFromStringRobotScenario() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
-        sr.load(getResource("yoda/robotAgent2.yoda"));
+        sr.load(getResource("yoda/robotAgent.yoda"));
         assertEquals(1, sr.getInitialConfigurations().length);
         assertEquals("Main", sr.getInitialConfigurations()[0]);
         sr.setConfiguration("Main");
@@ -70,7 +70,7 @@ class YodaExamplesTest {
     @Disabled
     public void shouldSimulateRobotScenario() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
-        sr.load(getResource("yoda/robotAgent2.yoda"));
+        sr.load(getResource("yoda/robotAgent.yoda"));
         sr.setConfiguration("Main");
         sr.addAllMeasures();
         sr.setDeadline(100);
@@ -80,11 +80,31 @@ class YodaExamplesTest {
         sr.printData("TestRobotScenario");
     }
 
+
+    @Test
+    @Disabled
+    public void shouldSimulateRoboticScenarioWithTrace() throws CommandExecutionException, IOException, URISyntaxException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/robotAgent.yoda"));
+        sr.setConfiguration("Main");
+        sr.setDeadline(100);
+        sr.trace(getResource("yoda/robotAgent.trc"), "./results/", true);
+    }
+    /*
+    @Test
+    public void shouldSimulateRobotScenarioWithTrace() throws CommandExecutionException, IOException, URISyntaxException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/robotAgent.yoda"));
+        sr.setParameter("no", 5);
+        sr.setConfiguration("Main");
+        sr.setDeadline(100);
+        sr.trace(getResource("yoda/flock.trc"), "./results/", true);
+*/
     @Test
     @Disabled
     public void shouldSimulateRobotAndChangeParam() throws CommandExecutionException, IOException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
-        sr.load(getResource("yoda/robotAgent2.yoda"));
+        sr.load(getResource("yoda/robotAgent.yoda"));
         sr.setParameter("no", 5);
         sr.setConfiguration("Main");
         sr.addAllMeasures();
@@ -99,7 +119,7 @@ class YodaExamplesTest {
     @Test
     @Disabled
     public void testRobotMeasures() throws YodaModelGenerationException, URISyntaxException, IOException {
-        YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent2.yoda");
+        YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent.yoda");
         generator.getParseTree();
         EvaluationEnvironment env = generator.getEvaluationEnvironment();
         YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
@@ -118,7 +138,7 @@ class YodaExamplesTest {
     @Test
     @Disabled
     public void testRobotNext() throws YodaModelGenerationException, URISyntaxException, IOException {
-        YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent2.yoda");
+        YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent.yoda");
         generator.getParseTree();
         EvaluationEnvironment env = generator.getEvaluationEnvironment();
         YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
@@ -155,7 +175,7 @@ class YodaExamplesTest {
     @Test
     @Disabled
     public void testRobotActions() throws YodaModelGenerationException, URISyntaxException, IOException {
-        YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent2.yoda");
+        YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent.yoda");
         generator.getParseTree();
         EvaluationEnvironment env = generator.getEvaluationEnvironment();
         YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
@@ -187,7 +207,7 @@ class YodaExamplesTest {
     @Test
     @Disabled
     public void testRobotCollision() throws YodaModelGenerationException, URISyntaxException, IOException {
-        YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent2.yoda");
+        YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent.yoda");
         generator.getParseTree();
         EvaluationEnvironment env = generator.getEvaluationEnvironment();
         YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
@@ -261,23 +281,20 @@ class YodaExamplesTest {
 
     @Disabled
     @Test
-    public void shouldSimulateFinderBot() throws CommandExecutionException, IOException {
+    @Disabled
+    public void shouldSimulateFinderBot() throws CommandExecutionException, IOException, URISyntaxException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
-        sr.load(getResource("yoda/finderBot2.yoda"));
+        sr.load(getResource("yoda/finderBot.yoda"));
         sr.setConfiguration("Main");
-        sr.setParameter("na", 4);
         sr.setDeadline(100);
-        sr.setDt(1);
-        //sr.setDt(1);
-        //sr.setReplica(1);
-        sr.trace("./results/", true);
+        sr.trace(getResource("yoda/finderBot.trc"),"./results/", true);
         //sr.simulate("FinderBot");
     }
 
     @Test
     @Disabled
     public void testFinderActionRoam() throws YodaModelGenerationException, URISyntaxException, IOException {
-        YodaModelGenerator generator = loadModelGenerator("yoda/finderBot.yoda");
+        YodaModelGenerator generator = loadModelGenerator("yoda/finderBot3.yoda");
         generator.getParseTree();
         EvaluationEnvironment env = generator.getEvaluationEnvironment();
         YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
@@ -312,7 +329,7 @@ class YodaExamplesTest {
     @Test
     @Disabled
     public void testFinderActionStop() throws  YodaModelGenerationException, URISyntaxException, IOException {
-        YodaModelGenerator generator = loadModelGenerator("yoda/finderBot.yoda");
+        YodaModelGenerator generator = loadModelGenerator("yoda/finderBot3.yoda");
         generator.getParseTree();
         EvaluationEnvironment env = generator.getEvaluationEnvironment();
         YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
@@ -365,15 +382,14 @@ class YodaExamplesTest {
     }
 
     @Test
-    //@Disabled
+    @Disabled
     public void shouldSimulateFlock() throws CommandExecutionException, IOException, URISyntaxException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/flock-rh.yoda"));
         sr.setParameter("nbirds", 5);
-        sr.setConfiguration("Main2");
+        sr.setConfiguration("Main");
         sr.setDeadline(100);
         sr.trace(getResource("yoda/flock.trc"), "./results/", true);
-
     }
 
     @Test
