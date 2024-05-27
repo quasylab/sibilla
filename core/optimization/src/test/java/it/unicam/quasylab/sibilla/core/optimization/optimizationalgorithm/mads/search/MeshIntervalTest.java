@@ -10,12 +10,15 @@ class MeshIntervalTest {
     void testListOfElements(){
         MeshIntervalBD meshInterval = new MeshIntervalBD("a",-1.0,13.0,3,4);
         meshInterval.getIntervalElements().forEach(System.out::println);
+
+        MeshIntervalBD meshIntervalCenter5 = new MeshIntervalBD("a",-1.0,13.0,3,5);
+        meshIntervalCenter5.getIntervalElements().forEach(System.out::println);
     }
 
     @Test
     void testRandomElements(){
         MeshIntervalBD meshInterval = new MeshIntervalBD("a",-1.0,13.0,3,4);
-        meshInterval.getIntervalElements().forEach(System.out::println);
+        meshInterval.setSeed(123L);
         for (int i = 0; i < 50; i++) {
             System.out.println(meshInterval.getRandomValue());
         }

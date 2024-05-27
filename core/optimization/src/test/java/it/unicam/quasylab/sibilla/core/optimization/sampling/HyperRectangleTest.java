@@ -6,6 +6,7 @@ import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.Interval;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.EXCEPT_INTERVALS_WITH_SAME_ID;
@@ -79,6 +80,46 @@ class HyperRectangleTest {
         hr.changeCenter(newCenter);
 
         assertFalse(hr.couldContain(aPoint));
+    }
+
+    @Test
+    void testRandomSampleWithSeed() {
+        HyperRectangle hr = new HyperRectangle(
+                new ContinuousInterval("A", -10, 10),
+                new ContinuousInterval("B", -20, 20),
+                new ContinuousInterval("C", -2, 2)
+        );
+        hr.setSeeds(123456789L);
+
+        Map<String, Double> firstSample = hr.getRandomValue();
+        assertEquals(2.853092964515211, firstSample.get("A"));
+        assertEquals(-19.26242372770849, firstSample.get("B"));
+        assertEquals(0.21556020540300702, firstSample.get("C"));
+
+        Map<String, Double> secondSample = hr.getRandomValue();
+        assertEquals(0.6211862671946555, secondSample.get("A"));
+        assertEquals(16.009715588845374, secondSample.get("B"));
+        assertEquals(0.29399274394423713, secondSample.get("C"));
+
+        Map<String, Double> thirdSample = hr.getRandomValue();
+        assertEquals(0.8616039812589662, thirdSample.get("A"));
+        assertEquals(0.992132570205861, thirdSample.get("B"));
+        assertEquals(-0.5715646080207919, thirdSample.get("C"));
+    }
+
+    @Test
+    void testList(){
+        HyperRectangle hr = new HyperRectangle(
+                new ContinuousInterval("A", -10, 10),
+                new ContinuousInterval("B", -20, 20),
+                new ContinuousInterval("C", -2, 2)
+        );
+        List<String> ids = hr.getIdsList();
+
+        assertEquals(3, ids.size());
+        assertEquals("A", ids.get(0));
+        assertEquals("B", ids.get(1));
+        assertEquals("C", ids.get(2));
     }
 
 

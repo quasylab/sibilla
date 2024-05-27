@@ -2,7 +2,6 @@ package it.unicam.quasylab.sibilla.core.optimization.sampling.interval;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Stream;
 
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.EXCEPT_ILLEGAL_STEP;
@@ -143,8 +142,7 @@ public class DiscreteStepInterval extends AbstractDiscreteInterval{
 
     @SuppressWarnings("all")
     private int randomIntBetween(int min,int max){
-        Random rand = new Random();
-        return rand.nextInt((max - min) + 1) + min;
+        return super.rand.nextInt((max - min) + 1) + min;
     }
 
     @Override

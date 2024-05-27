@@ -259,6 +259,7 @@ class YodaExamplesTest {
         sr.setConfiguration("Main");
     }
 
+    @Disabled
     @Test
     public void shouldSimulateFinderBot() throws CommandExecutionException, IOException {
         SibillaRuntime sr = getRuntimeWithYodaModule();

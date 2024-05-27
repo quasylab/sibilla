@@ -1,6 +1,5 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads;
 
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationTask;
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.poll.LTPollMaximalPositiveBasis;
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.poll.LTPollMinimalPositiveBasis;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
@@ -16,9 +15,9 @@ public class LTMADSTask extends AbstractMADSTask{
 
 
     @Override
-    public Map<String, Double> minimize(ToDoubleFunction<Map<String, Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints, Properties properties) {
+    public Map<String, Double> minimize(ToDoubleFunction<Map<String, Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints, Properties properties, Long seed) {
         this.setUsePositiveBasis(properties);
-        return super.minimize(objectiveFunction, searchSpace, constraints, properties);
+        return super.minimize(objectiveFunction, searchSpace, constraints, properties,seed);
     }
 
     private void setUsePositiveBasis(Properties properties){

@@ -1,5 +1,6 @@
 package it.unicam.quasylab.sibilla.core.optimization.surrogate;
 
+import it.unicam.quasylab.sibilla.core.optimization.sampling.FullFactorialSamplingTask;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.RandomSamplingTask;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.SamplingStrategyRegistry;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
@@ -143,6 +144,34 @@ class DataSetTest {
     }
 
     @Test
+    void testArray(){
+        HyperRectangle searchSpace = new HyperRectangle(
+                new DiscreteStepInterval("x",0.0,5.0,1.0),
+                new DiscreteStepInterval("y",15.0,25.0,1.0)
+        );
+
+        ToDoubleFunction<Map<String,Double>> function = m -> m.get("x") + m.get("y");
+
+        DataSet ts = new DataSet(searchSpace,new FullFactorialSamplingTask(),5,function);
+
+        double[][] dataInput = ts.getDataMatrix();
+        double[] dataOutput = ts.getResultValues();
+        String[] names = ts.getColumnNames();
+
+        assertEquals(0.0, dataInput[0][0]);
+        assertEquals(17.0, dataInput[0][1]);
+        assertEquals(2.0, dataInput[13][0]);
+        assertEquals(23.0, dataInput[13][1]);
+
+        assertEquals(19.0,dataOutput[1]);
+        assertEquals(18.0,dataOutput[5]);
+
+        assertEquals("x",names[0]);
+        assertEquals("y",names[1]);
+
+    }
+
+    @Test
     void testMap(){
         HyperRectangle searchSpace = new HyperRectangle(
                 new DiscreteStepInterval("x",0.0,5.0,1.0),
@@ -171,6 +200,60 @@ class DataSetTest {
         //System.out.println(ts2);
         //System.out.println(ts3);
 
+    }
+
+    @Test
+    public void testSplit() {
+
+        HyperRectangle searchSpace = new HyperRectangle(
+                new DiscreteStepInterval("x",0.0,5.0,1.0),
+                new DiscreteStepInterval("y",5.0,10.0,1.0)
+        );
+
+        ToDoubleFunction<Map<String,Double>>  function = (
+                map -> map.get("x") + map.get("y")
+        );
+
+        DataSet ts = new DataSet(searchSpace,new RandomSamplingTask(),10,function,123L);
+        DataSet[] split = ts.trainTestSplit(0.9);
+
+        assertEquals(9,split[0].rowCount());
+        assertEquals(1,split[1].rowCount());
+
+        System.out.println();
+        System.out.println(ts);
+        System.out.println();
+        System.out.println(split[0]);
+        System.out.println();
+        System.out.println(split[1]);
+        System.out.println();
+    }
+
+    @Test
+    public void testSplitSeed() {
+
+        HyperRectangle searchSpace = new HyperRectangle(
+                new DiscreteStepInterval("x",0.0,5.0,1.0),
+                new DiscreteStepInterval("y",5.0,10.0,1.0)
+        );
+
+        ToDoubleFunction<Map<String,Double>>  function = (
+                map -> map.get("x") + map.get("y")
+        );
+
+        DataSet ts = new DataSet(searchSpace,new RandomSamplingTask(),10,function,123L);
+        DataSet[] split = ts.trainTestSplit(0.6,123L);
+
+        //assertEquals(9,split[0].rowCount());
+        //assertEquals(1,split[1].rowCount());
+
+        System.out.println();
+        System.out.println(ts);
+        System.out.println();
+        System.out.println(split[0]);
+        System.out.println();
+        System.out.println(split[1]);
+        System.out.println();
     }
 
 //    @Test

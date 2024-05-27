@@ -2,9 +2,7 @@ package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.
 
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.AbstractDiscreteInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.Interval;
-import org.opencv.core.Mat;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

@@ -21,5 +21,7 @@ public interface SamplingTask {
      * @see    <a href=https://jtablesaw.github.io/tablesaw/gettingstarted.html">tablesaw</a>
      */
      Table getSampleTable(int numberOfSamples, HyperRectangle hyperRectangle );
+
+     Table getSampleTable(int numberOfSamplesPerDimension, HyperRectangle hyperRectangle, long seed);
 }
 

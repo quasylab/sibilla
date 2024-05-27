@@ -10,6 +10,7 @@ import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRecta
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
@@ -35,6 +36,7 @@ public abstract class AbstractMADSTask implements OptimizationTask {
 
     protected Mesh mesh;
     protected boolean opportunistic;
+    protected Random random;
 
     public int iteration;
     public boolean terminated;
@@ -42,8 +44,10 @@ public abstract class AbstractMADSTask implements OptimizationTask {
 
 
     @Override
-    public Map<String, Double> minimize(ToDoubleFunction<Map<String, Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints, Properties properties) {
+    public Map<String, Double> minimize(ToDoubleFunction<Map<String, Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints, Properties properties, Long seed) {
+        this.random = new Random(seed);
         this.searchSpace = searchSpace;
+        this.searchSpace.setSeeds(seed);
         constraints.addAll(getSearchSpaceAsConstraintList(searchSpace));
         this.setProperties(properties);
         this.barrierFunction = new BarrierFunction(objectiveFunction,constraints);
@@ -97,7 +101,7 @@ public abstract class AbstractMADSTask implements OptimizationTask {
     }
 
     protected void search(){
-        List<Map<String,Double>> S = searchMethod.generateTrialPoints(this.numberOfSearchPoint,mesh);
+        List<Map<String,Double>> S = searchMethod.generateTrialPoints(this.numberOfSearchPoint,mesh,this.random);
         boolean searchSuccess = false;
         for (Map<String,Double> point: S ) {
             double currentEvaluation = barrierFunction.evaluate(point);
@@ -116,7 +120,7 @@ public abstract class AbstractMADSTask implements OptimizationTask {
     }
 
     protected void poll(){
-        List<Map<String,Double>> polledPoints = this.pollMethod.getPolledPoints( this.minimizingParametersFound, this.deltaPoll );
+        List<Map<String,Double>> polledPoints = this.pollMethod.getPolledPoints( this.minimizingParametersFound, this.deltaPoll, this.random);
         boolean pollSucceed = false;
         for (Map<String,Double> polledPoint: polledPoints) {
             double currentEvaluation = barrierFunction.evaluate(polledPoint);

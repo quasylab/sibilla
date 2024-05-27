@@ -26,22 +26,35 @@ import java.util.stream.IntStream;
 public class LatinHyperCubeSamplingTask implements SamplingTask {
 
     Random random = new Random();
+
     @Override
     public Table getSampleTable(int numberOfSamples, HyperRectangle hr) {
-        int[][] shuffledMatrix = getShuffledMatrix(hr.getDimensionality(),numberOfSamples);
+        return getSampleTable(numberOfSamples, hr, System.nanoTime());
+    }
+
+    @Override
+    public Table getSampleTable(int numberOfSamples, HyperRectangle hr, long seed) {
+        random.setSeed(seed);
+        int[][] shuffledMatrix = getShuffledMatrix(hr.getDimensionality(), numberOfSamples);
         DoubleColumn[] columns = new DoubleColumn[hr.getDimensionality()];
         for (int i = 0; i < hr.getDimensionality(); i++) {
             double[] columnArray = new double[numberOfSamples];
-            for (int j = 0; j <numberOfSamples ; j++) {
-                double value = hr.getInterval(i).getLowerBound() + ((shuffledMatrix[i][j] - random.nextDouble())/(numberOfSamples)) * (hr.getInterval(i).getUpperBound() - hr.getInterval(i).getLowerBound() );
+            for (int j = 0; j < numberOfSamples; j++) {
+                double value = hr.getInterval(i).getLowerBound() + ((shuffledMatrix[i][j] - random.nextDouble()) / (numberOfSamples)) * (hr.getInterval(i).getUpperBound() - hr.getInterval(i).getLowerBound());
                 columnArray[j] = hr.getInterval(i).isContinuous() ? value : hr.getInterval(i).getClosestValueTo(value);
             }
-            columns[i] = DoubleColumn.create(hr.getInterval(i).getId(),columnArray);
+            columns[i] = DoubleColumn.create(hr.getInterval(i).getId(), columnArray);
         }
         return Table.create().addColumns(columns);
     }
 
+
     public List<double[]> getSamplesAsArray(int numberOfSamples, HyperRectangle hr) {
+        return getSamplesAsArray(numberOfSamples,hr,System.nanoTime());
+    }
+
+    public List<double[]> getSamplesAsArray(int numberOfSamples, HyperRectangle hr, long seed) {
+        random.setSeed(seed);
         int[][] shuffledMatrix = getShuffledMatrix(hr.getDimensionality(),numberOfSamples);
         List<double[]> samples = new ArrayList<>();
         for (int j = 0; j <numberOfSamples ; j++) {
@@ -56,6 +69,11 @@ public class LatinHyperCubeSamplingTask implements SamplingTask {
 
 
     public List<Map<String, Double>> getSamplesAsMap(int numberOfSamples, HyperRectangle hr) {
+        return this.getSamplesAsMap(numberOfSamples,hr,System.nanoTime());
+    }
+
+    public List<Map<String, Double>> getSamplesAsMap(int numberOfSamples, HyperRectangle hr, long seed) {
+        random.setSeed(seed);
         int[][] shuffledMatrix = getShuffledMatrix(hr.getDimensionality(),numberOfSamples);
         List<Map<String, Double>> samples = new ArrayList<>();
         for (int j = 0; j <numberOfSamples ; j++) {
