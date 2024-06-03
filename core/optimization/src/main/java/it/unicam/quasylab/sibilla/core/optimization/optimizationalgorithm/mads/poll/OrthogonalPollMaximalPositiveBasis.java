@@ -2,11 +2,9 @@ package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.
 
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.AbstractMADSTask;
 
-import java.util.Random;
-
-public class LTPollMinimalPositiveBasis extends AbstractPollMethod{
+public class OrthogonalPollMaximalPositiveBasis extends AbstractPollMethod{
     @Override
     protected int[][] getPositiveBasis(AbstractMADSTask madsTaskInstance) {
-        return new LTDirection(madsTaskInstance.getRandomInstance()).getMinimalPositiveBasis(madsTaskInstance.getDimensionality(),madsTaskInstance.getDeltaPoll());
+        return new OrthogonalDirection().generateOrthogonalBasis(madsTaskInstance.getDimensionality(),madsTaskInstance.getT(),madsTaskInstance.getL());
     }
 }

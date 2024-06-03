@@ -37,8 +37,8 @@ public class LTDirection {
     }
 
 
-    public BlVectorAndiHat getBlVectorAndCapI(int n, double deltaMash){
-        double l = (-1)*log(deltaMash,4);
+    public BlVectorAndiHat getBlVectorAndCapI(int n, double deltaPoll){
+        double l = (-1)*log(deltaPoll,4);
         if(lc > l)
             return memorizedBLVectorAndiHat;
         lc += 1;
@@ -78,12 +78,12 @@ public class LTDirection {
     }
 
 
-    public int[][] getBasis(int n, double deltaMesh){
-        BlVectorAndiHat blAndiHat = getBlVectorAndCapI(n,deltaMesh);
+    public int[][] getBasis(int n, double deltaPoll){
+        BlVectorAndiHat blAndiHat = getBlVectorAndCapI(n,deltaPoll);
         int[] blVector = blAndiHat.blVector;
         int iHat = blAndiHat.iHat;
 
-        int l = (int) ((-1)*log(deltaMesh,4));
+        int l = (int) ((-1)*log(deltaPoll,4));
 
         int[][] lMatrix = getL(n,l);
         int[] p = getRowPermutation(n,iHat);
@@ -111,8 +111,8 @@ public class LTDirection {
         return bQuoted;
     }
 
-    public int[][] getMinimalPositiveBasis(int n, double deltaMesh){
-        int[][] basis = getBasis(n,deltaMesh);
+    public int[][] getMinimalPositiveBasis(int n, double deltaPoll){
+        int[][] basis = getBasis(n,deltaPoll);
         int[][] positiveSpanningSet = new int[n][n+1];
         for (int i = 0; i < positiveSpanningSet.length; i++) {
             int rowSum = 0;
@@ -127,8 +127,8 @@ public class LTDirection {
 
 
 
-    public int[][] getMaximalPositiveBasis(int n, double deltaMesh){
-        int[][] basis = getBasis(n,deltaMesh);
+    public int[][] getMaximalPositiveBasis(int n, double deltaPoll){
+        int[][] basis = getBasis(n,deltaPoll);
         int[][] positiveSpanningSet = new int[n][n*2];
         for (int i = 0; i < positiveSpanningSet.length; i++) {
             for (int j = 0; j < basis[0].length; j++) {

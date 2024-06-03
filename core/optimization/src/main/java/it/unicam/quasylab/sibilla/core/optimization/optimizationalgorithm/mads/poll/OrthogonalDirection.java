@@ -1,16 +1,21 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.poll;
 
 import java.util.Arrays;
-@SuppressWarnings("unused")
 public class OrthogonalDirection {
 
 
 
-    public double[][] generateOrthogonalBasis(int n, int t, int l) {
+    public int[][] generateOrthogonalBasis(int n, int t, int l) {
         double[] h = haltonSequence(n, t);
         double[] q = adjustedHalton(h, n, l);
         double[][] H = householderTransformation(q);
-        return formBasisMatrix(H, n);
+        int[][] orthogonalBasis = new int[H.length][H[0].length];
+        for (int i = 0; i < orthogonalBasis.length; i++) {
+            for (int j = 0; j < orthogonalBasis[i].length; j++) {
+                orthogonalBasis[i][j] = (int)  Math.round(Math.round(Math.pow(norm(q), 2)) * H[i][j]);
+            }
+        }
+        return getMaximalPositiveBasis(orthogonalBasis,n);
     }
 
     private double[][] householderTransformation(double[] q) {
@@ -29,12 +34,13 @@ public class OrthogonalDirection {
         return H;
     }
 
-    private double[][] formBasisMatrix(double[][] H, int n) {
-        double[][] basis = new double[2 * n][n];
+
+    private int[][] getMaximalPositiveBasis(int[][] H, int n) {
+        int[][] basis = new int[n][2 * n];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                basis[i][j] = H[i][j];
-                basis[i + n][j] = -H[i][j];
+                basis[i][j] = H[i][j]; // Place the original values
+                basis[i][j + n] = -H[i][j]; // Place the negated values
             }
         }
         return basis;
@@ -83,7 +89,8 @@ public class OrthogonalDirection {
         }
 
         double alphaInitial = Math.pow(2, Math.abs(l) / 2.0) / Math.sqrt(n) - 0.5;
-        double alpha = findOptimalAlpha(d, alphaInitial, Math.pow(2, Math.abs(l) / 2.0));
+        //double alpha = findOptimalAlpha(d, alphaInitial, Math.min(100,Math.pow(2, Math.abs(l) / 2.0)));
+        double alpha = findOptimalAlpha(d, alphaInitial,Math.pow(2, Math.abs(l) / 2.0));
         return multiplyAndRound(d, alpha);
     }
 
@@ -93,26 +100,54 @@ public class OrthogonalDirection {
     }
 
     private double findOptimalAlpha(double[] d, double initial, double limit) {
-        double alpha = initial;
-        double step = 0.1;
+        double low = initial;
+        double high = initial;
 
-        while (norm(multiplyAndRound(d, alpha)) < limit) {
-            alpha += step;
+        // First, find an upper bound where the condition fails
+        while (norm(multiplyAndRound(d, high)) < limit) {
+            high *= 2;  // Exponentially increase the upper bound
         }
 
-        return alpha - step; // Return the previous value as the optimal one
+        // Now perform binary search between low and high
+        while (high - low > 1e-6) {  // Tolerance for convergence
+            double mid = (low + high) / 2;
+            if (norm(multiplyAndRound(d, mid)) < limit) {
+                low = mid;
+            } else {
+                high = mid;
+            }
+        }
+
+        return low;  // Return the largest valid alpha
     }
 
     private double norm(double[] vec) {
         return Math.sqrt(Arrays.stream(vec).map(v -> v * v).sum());
     }
 
-    private double[] multiplyAndRound(double[] vec, double alpha) {
-        double norm = norm(vec);
-        return Arrays.stream(vec)
-                .map(v -> Math.round(alpha * (v / norm)))
-                .toArray();
+    private double[] multiplyAndRound(double[] d, double alpha) {
+        return Arrays.stream(d).map(v -> Math.round(v * alpha)).toArray();
     }
+
+//    private double findOptimalAlpha(double[] d, double initial, double limit) {
+//        double alpha = initial;
+//        double step = 0.1;
+//        while (norm(multiplyAndRound(d, alpha)) < limit) {
+//            alpha += step;
+//        }
+//        return alpha - step; // Return the previous value as the optimal one
+//    }
+//
+//    private double norm(double[] vec) {
+//        return Math.sqrt(Arrays.stream(vec).map(v -> v * v).sum());
+//    }
+//
+//    private double[] multiplyAndRound(double[] vec, double alpha) {
+//        double norm = norm(vec);
+//        return Arrays.stream(vec)
+//                .map(v -> Math.round(alpha * (v / norm)))
+//                .toArray();
+//    }
 
     private int[] getFirstNPrimes(int n) {
         int[] primes = new int[n];

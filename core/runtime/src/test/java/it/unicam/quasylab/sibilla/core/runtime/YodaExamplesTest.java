@@ -279,7 +279,7 @@ class YodaExamplesTest {
         sr.setConfiguration("Main");
     }
 
-    @Disabled
+
     @Test
     @Disabled
     public void shouldSimulateFinderBot() throws CommandExecutionException, IOException, URISyntaxException {
