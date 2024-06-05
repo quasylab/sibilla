@@ -32,7 +32,7 @@ import java.util.SplittableRandom;
 /**
  * Default random generator.
  */
-public class DefaultRandomGenerator extends AbstractRandomGenerator implements Serializable{
+public class DefaultRandomGenerator extends AbstractRandomGenerator implements Serializable {
 
 	private static final long serialVersionUID = -8354414629214279876L;
 	private SplittableRandom random = new SplittableRandom();

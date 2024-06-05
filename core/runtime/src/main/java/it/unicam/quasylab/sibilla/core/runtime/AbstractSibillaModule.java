@@ -44,8 +44,20 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     private Set<String> enabledMeasures = new TreeSet<>();
     private boolean summary = true;
     private final SimulationEnvironment simulator = new SimulationEnvironment();
+    protected final CommandAdapter commandAdapter = new CommandAdapter();
 
     private Configuration currentConfiguration;
+
+    public AbstractSibillaModule() {
+        initCommandHandler();
+    }
+
+    @Override
+    public boolean handle(Command command) throws CommandExecutionException {
+        return commandAdapter.handle(command);
+    }
+
+    protected void initCommandHandler() {}
 
     protected abstract ModuleEngine<?> getModuleEngine();
 

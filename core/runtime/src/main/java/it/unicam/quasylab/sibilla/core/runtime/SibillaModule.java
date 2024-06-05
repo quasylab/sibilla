@@ -39,7 +39,7 @@ import java.util.Map;
 /**
  * A Module identifies a component used to handle a specific language in Sibilla.
  */
-public interface SibillaModule {
+public interface SibillaModule extends CommandHandler {
 
     List<SibillaModule> MODULES = List.of(new PopulationModelModule(), new LIOModelModule(), new YodaModelModule());
 
@@ -339,4 +339,9 @@ public interface SibillaModule {
     List<SimulationData> trace(RandomGenerator rg, double deadline);
 
     Map<String, List<TracingData>> trace(RandomGenerator rg, TracingFunction tracingFunction, double deadline);
+
+    @Override
+    default boolean handle(Command command) throws CommandExecutionException {
+        return false;
+    }
 }

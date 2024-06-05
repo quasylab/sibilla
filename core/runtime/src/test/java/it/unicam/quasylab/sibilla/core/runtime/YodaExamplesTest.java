@@ -3,10 +3,21 @@ package it.unicam.quasylab.sibilla.core.runtime;
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.yoda.*;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import it.unicam.quasylab.sibilla.core.simulator.DiscreteTimeSimulationStepFunction;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
+import it.unicam.quasylab.sibilla.core.tools.glotl.GLoTLStatisticalModelChecker;
+import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalAlwaysFormula;
+import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalEventuallyFormula;
+import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalFormula;
+import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalFractionOfFormula;
+import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalAlwaysFormula;
+import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalAtomicFormula;
+import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalEventuallyFormula;
+import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalFormula;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaModelGenerationException;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaModelGenerator;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +26,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -434,7 +448,103 @@ class YodaExamplesTest {
         assertEquals("moveC", acts3.getAll().get(0).getElement().getName());
     }
 
+    private static Predicate<YodaAgent> getClosePredicate(double delta,
+                                                          YodaVariable x,
+                                                          YodaVariable y,
+                                                          YodaVariable meanX,
+                                                          YodaVariable meanY) {
+        return a -> {
+            double dx = Math.pow(a.get(x).doubleOf()-a.get(meanX).doubleOf(),2);
+            double dy = Math.pow(a.get(y).doubleOf()-a.get(meanY).doubleOf(),2);
+            return (Math.sqrt(dx+dy) < 2*delta)&&((Math.sqrt(dx+dy) > delta));
+        };
+    }
+
+    private static LocalFormula<YodaAgent> getLocalEventuallyClose(
+                                                        int ks,
+                                                        int k,
+                                                        double delta,
+                                                        YodaVariable x,
+                                                        YodaVariable y,
+                                                        YodaVariable meanX,
+                                                        YodaVariable meanY) {
+        return new LocalEventuallyFormula<>(0, k, new LocalAlwaysFormula<>(0, ks, new LocalAtomicFormula<>(getClosePredicate(delta, x, y, meanX, meanY))));
+    }
+
+    private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getEventuallyCloseFormula(double delta,
+                                                                                                    int ks,
+                                                                                                    YodaVariableRegistry registry) {
+        YodaVariable x = registry.get("x");
+        YodaVariable y = registry.get("z");
+        YodaVariable meanX = registry.get("meanX");
+        YodaVariable meanY = registry.get("meanZ");
+        Predicate<YodaAgent> pred = getClosePredicate(delta, x, y, meanX, meanY);
+        GlobalFractionOfFormula<YodaAgent, YodaSystemState> close = new GlobalFractionOfFormula<>(
+                new LocalAtomicFormula<>(pred),
+                p -> p>0.90
+        );
+        GlobalAlwaysFormula<YodaAgent, YodaSystemState> stable = new GlobalAlwaysFormula<>(0, ks, close);
+        return i -> new GlobalEventuallyFormula<>(0, i, stable);
+    }
+
+    private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getEventuallyLocalCloseFormula(double delta,
+                                                                                                    int ks,
+                                                                                                    int k,
+                                                                                                    YodaVariableRegistry registry) {
+        YodaVariable x = registry.get("x");
+        YodaVariable y = registry.get("z");
+        YodaVariable meanX = registry.get("meanX");
+        YodaVariable meanY = registry.get("meanZ");
+        GlobalFractionOfFormula<YodaAgent, YodaSystemState> close = new GlobalFractionOfFormula<>(
+                getLocalEventuallyClose(ks, k, delta, x, y, meanX, meanY),
+                p -> p>0.90
+        );
+        return i -> new GlobalEventuallyFormula<>(0, i, close);
+    }
+
+
     @Test
+    public void testFlockMonitor()throws YodaModelGenerationException, URISyntaxException, IOException {
+        YodaModelGenerator generator = loadModelGenerator("yoda/flock-rh.yoda");
+        YodaModelDefinition yodaModelDefinition = generator.getYodaModelDefinition();
+        YodaVariableRegistry yodaVariableRegistry = generator.getYodaVariableRegistry();
+        GLoTLStatisticalModelChecker smc = new GLoTLStatisticalModelChecker();
+
+        DefaultRandomGenerator drg = new DefaultRandomGenerator();
+        Function<RandomGenerator, YodaSystemState> initialState;
+
+        yodaModelDefinition.setParameter("nbirds", SibillaValue.of(5));
+        initialState = yodaModelDefinition.getDefaultConfiguration();
+        System.out.println("phig_5 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phil_5 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
+
+        yodaModelDefinition.setParameter("nbirds", SibillaValue.of(10));
+        initialState = yodaModelDefinition.getDefaultConfiguration();
+        System.out.println("phig_10 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phil_10 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
+
+        yodaModelDefinition.setParameter("nbirds", SibillaValue.of(20));
+        initialState = yodaModelDefinition.getDefaultConfiguration();
+        System.out.println("phig_20 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phil_20 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
+
+        yodaModelDefinition.setParameter("nbirds", SibillaValue.of(30));
+        initialState = yodaModelDefinition.getDefaultConfiguration();
+        System.out.println("phig_30 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phil_30 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
+
+        yodaModelDefinition.setParameter("nbirds", SibillaValue.of(40));
+        initialState = yodaModelDefinition.getDefaultConfiguration();
+        System.out.println("phig_40 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phil_40 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
+
+        yodaModelDefinition.setParameter("nbirds", SibillaValue.of(50));
+        initialState = yodaModelDefinition.getDefaultConfiguration();
+        System.out.println("phig_50 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phil_50 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
+    }
+
+        @Test
     @Disabled
     public void testFlockAlign()throws YodaModelGenerationException, URISyntaxException, IOException {
         YodaModelGenerator generator = loadModelGenerator("yoda/flock-rh.yoda");

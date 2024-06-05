@@ -65,8 +65,8 @@ public class GLoTLStatisticalModelChecker {
         DefaultRandomGenerator rg = new DefaultRandomGenerator();
         SimulationEnvironment se = new SimulationEnvironment();
         int[] counterArray = new int[size];
-        List<GlobalFormula<A, S>> formulas = IntStream.range(0, size).mapToObj(formulaBuilder).collect(Collectors.toList());
-        List<GLoTLPathChecker<A,S>> pathCheckers = formulas.stream().map(GLoTLPathChecker::new).collect(Collectors.toList());
+        List<GlobalFormula<A, S>> formulas = IntStream.range(0, size).mapToObj(formulaBuilder).toList();
+        List<GLoTLPathChecker<A,S>> pathCheckers = formulas.stream().map(GLoTLPathChecker::new).toList();
         double deadline = formulas.stream().mapToDouble(GlobalFormula::getTimeHorizon).max().orElse(0.0);
         for(int i=0; i<replica; i++) {
             Trajectory<S> trajectory = se.sampleTrajectory(rg, stepFunction, stateBuilder.apply(rg), deadline);

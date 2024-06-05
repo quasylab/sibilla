@@ -1,7 +1,8 @@
-param nbirds = 5;
-param maxDist = 2;
-param minDist = 1;
+param nbirds = 20;
+param maxDist = 15;
+param minDist = 3;
 param rad = 180/PI;
+param speed = 0.4;
 
 agent Bird =
     state :
@@ -42,8 +43,8 @@ environment :
         ]
     dynamic:
         Bird [
-            x <- x + cos((angle * PI)/180.0);
-            z <- z + sin((angle * PI)/180.0);
+            x <- x + cos((angle * PI)/180.0)*speed;
+            z <- z + sin((angle * PI)/180.0)*speed;
         ]
 end
 

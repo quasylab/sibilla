@@ -46,7 +46,7 @@ import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
-public final class SibillaRuntime {
+public final class SibillaRuntime implements CommandHandler {
 
     private static final String UNKNOWN_MODULE_MESSAGE = "Module %s is unknown!";
     private static final String NO_MODULE_HAS_BEEN_LOADED =  "No module has been loaded!";
@@ -58,9 +58,19 @@ public final class SibillaRuntime {
     private long replica = 1;
     private double deadline = Double.NaN;
     private double dt = Double.NaN;
+    private CommandAdapter commandHandler;
 
     public SibillaRuntime() {
+        this.commandHandler = new CommandAdapter();
         initModules();
+        initHandlers();
+    }
+
+    private void initHandlers() {
+        this.commandHandler.recordHandler("load", cmd -> {
+            this.loadModule(cmd.getArgument(0));
+            return true;
+        });
     }
 
     private void initModules() {
@@ -772,5 +782,17 @@ public final class SibillaRuntime {
         for (Map.Entry<String, List<TracingData>> simulationData : trace.entrySet()) {
             writer.write(simulationData.getKey(), simulationData.getValue(), header);
         }
+    }
+
+    @Override
+    public boolean handle(Command command) throws CommandExecutionException {
+        if (this.commandHandler.handle(command)) {
+            return true;
+        }
+        if (this.currentModule != null) {
+            return this.currentModule.handle(command);
+        }
+        //TODO: Add message from the static class!
+        throw new CommandExecutionException("ERROR MESSAGE COMMAND IS NOT ENABLED");
     }
 }
