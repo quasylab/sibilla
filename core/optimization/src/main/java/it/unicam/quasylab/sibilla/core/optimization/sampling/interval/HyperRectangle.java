@@ -1,7 +1,7 @@
 package it.unicam.quasylab.sibilla.core.optimization.sampling.interval;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.*;
 
@@ -19,6 +19,7 @@ public class HyperRectangle{
             throw new IllegalArgumentException(EXCEPT_INTERVALS_WITH_SAME_ID);
         else
             this.intervals = intervals;
+        AbstractInterval.resetCounter();
     }
 
     public HyperRectangle(List<? extends Interval> intervals){
@@ -92,6 +93,29 @@ public class HyperRectangle{
             randomValue.put(i.getId(),i.getRandomValue());
         }
         return randomValue;
+    }
+
+    /**
+     * Sets the seeds for each Interval in the intervals array.
+     *
+     * @param seeds a LongStream of seeds to be set
+     * @throws IllegalArgumentException if there are not enough seeds provided
+     */
+    public void setSeeds(LongStream seeds){
+        Iterator<Long> seedIterator = seeds.iterator();
+        for (Interval i : this.intervals) {
+            if (seedIterator.hasNext()) {
+                i.setSeed(seedIterator.next());
+            } else {
+                throw new IllegalArgumentException("Not enough seeds provided.");
+            }
+        }
+    }
+
+    public void setSeeds(long seed){
+        long[] seeds = new Random(seed).longs(intervals.length).toArray();
+        setSeeds(Arrays.stream(seeds));
+
     }
 
     public void changeCenter(double[] newCenterArray){

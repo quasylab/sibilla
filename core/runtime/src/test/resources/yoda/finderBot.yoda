@@ -1,4 +1,7 @@
 param na = 3;
+param tolerance = 2.0;
+param tposX = 5.0;
+param tposY = 5.0;
 
 agent Finder =
     state:
@@ -19,7 +22,7 @@ agent Finder =
         moveto [ dirx <- cos(angle); diry <- sin(angle); found <- false; ]
     behaviour:
         when target_sensor -> [ stop:1 ]
-        orwhen angle != 0.0 -> [ moveto:1 ]
+        orwhen toTarget -> [ moveto:1 ]
         otherwise [ roam:1 ]
 end
 
@@ -31,16 +34,24 @@ end
 environment :
     sensing:
         Finder [
-            target_sensor <- (any Target : (abs(it.x - posx) < 2.0)) && (any Target : ( abs(it.y - posy) < 2.0));
+            target_sensor <- (any Target : (abs(it.x - posx) < tolerance)) && (any Target : ( abs(it.y - posy) < tolerance));
             if (any Finder: light) then
-                angle <- atan ((mean Finder [light] . y - it.y) / (mean Finder [light] . x - it.x));
-                toTarget <- true;
+                let meanX = mean Finder [light] .x
+                and meanY = mean Finder [light] .y
+                in
+                    if (it.x < meanX) then
+                        angle <- atan ((meanY - it.y) // (meanX - it.x));
+                    else
+                        angle <- atan ((meanY - it.y) // (meanX - it.x)) + PI;
+                    endif
+                    toTarget <- true;
+                endlet
             else
                 angle <- 0.0;
                 toTarget <- false;
             endif
         ]
-    dynamic:
+     dynamic:
         Finder [
            x <- x + dirx;
            y <- y + diry;
@@ -52,5 +63,5 @@ configuration Main :
     for ox sampled distinct na time from U[0, 10] do
         Finder [ x = ox; y = 2.0; ]
     endfor
-    Target [ posx = 5.0; posy = 5.0; ]
+    Target [ posx = tposX; posy = tposY; ]
 end

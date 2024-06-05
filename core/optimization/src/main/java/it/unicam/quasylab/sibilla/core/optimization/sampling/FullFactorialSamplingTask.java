@@ -41,6 +41,11 @@ public class FullFactorialSamplingTask implements SamplingTask {
         return getTableFromSetOfList(Sets.cartesianProduct(getSetsOfPointsPerDimension(numberOfSamplesPerDimension,hyperRectangle)),hyperRectangle);
     }
 
+    @Override
+    public Table getSampleTable(int numberOfSamplesPerDimension, HyperRectangle hyperRectangle, long seed) {
+        return getSampleTable(numberOfSamplesPerDimension, hyperRectangle);
+    }
+
     private List<Set<Double>> getSetsOfPointsPerDimension(int n , HyperRectangle hr){
         List<Set<Double>> setsOfPointsPerDimension = new ArrayList<>();
         for (int i = 0; i < hr.getDimensionality(); i++) {

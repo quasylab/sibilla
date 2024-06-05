@@ -10,7 +10,7 @@ public abstract class AbstractInterval implements Interval{
     protected final String id;
     protected double lowerBound;
     protected double upperBound;
-    protected Random rand = new Random();
+    protected Random rand;
     private static final AtomicLong idCounter = new AtomicLong();
 
     public AbstractInterval(String id, double lowerBound, double upperBound) {
@@ -19,6 +19,7 @@ public abstract class AbstractInterval implements Interval{
         this.id = id;
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
+        this.rand = new Random();
     }
 
     public AbstractInterval(double lowerBound, double upperBound) {
@@ -53,6 +54,14 @@ public abstract class AbstractInterval implements Interval{
         return this.upperBound - (this.length()/2);
     }
 
+    @Override
+    public void setSeed(long seed) {
+        this.rand.setSeed(seed);
+    }
+
+    public static void resetCounter() {
+        idCounter.set(0L);
+    }
 
     @Override
     public String toString() {

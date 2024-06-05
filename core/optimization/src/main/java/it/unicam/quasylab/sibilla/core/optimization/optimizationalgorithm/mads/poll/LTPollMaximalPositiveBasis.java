@@ -1,16 +1,18 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.poll;
 
+import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.AbstractMADSTask;
+
+import java.util.Random;
+
 public class LTPollMaximalPositiveBasis extends AbstractPollMethod{
-
-    private final LTDirection ltDirection;
-
-    public LTPollMaximalPositiveBasis() {
-        this.ltDirection = new LTDirection();
-    }
-
-
     @Override
-    protected int[][] getPositiveBasis(int dimension, double deltaMesh) {
-        return this.ltDirection.getMaximalPositiveBasis(dimension,deltaMesh);
+    protected int[][] getPositiveBasis(AbstractMADSTask madsTaskInstance) {
+        return new LTDirection(madsTaskInstance.getRandomInstance()).getMaximalPositiveBasis(madsTaskInstance.getDimensionality(),madsTaskInstance.getDeltaPoll());
     }
+
+
+//    @Override
+//    protected int[][] getPositiveBasis(int dimension, double deltaMesh, Random random) {
+//        return new LTDirection(random).getMaximalPositiveBasis(dimension,deltaMesh);
+//    }
 }

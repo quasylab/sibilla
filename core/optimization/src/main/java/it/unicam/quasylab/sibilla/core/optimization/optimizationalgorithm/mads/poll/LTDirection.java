@@ -1,9 +1,12 @@
 package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.poll;
 
-import static it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads.Common.*;
 
-@SuppressWarnings("ManualArrayCopy")
+import java.util.Random;
+
+
 public class LTDirection {
+
+    Random random;
 
     public record BlVectorAndiHat(
             int[] blVector,
@@ -14,7 +17,11 @@ public class LTDirection {
     int lc;
 
     public LTDirection() {
+        this(new Random());
+    }
 
+    public LTDirection(Random random){
+        this.random = random;
     }
 
     public int[] getRowPermutation(int n, int iHat){
@@ -30,8 +37,8 @@ public class LTDirection {
     }
 
 
-    public BlVectorAndiHat getBlVectorAndCapI(int n, double deltaMash){
-        double l = (-1)*log(deltaMash,4);
+    public BlVectorAndiHat getBlVectorAndCapI(int n, double deltaPoll){
+        double l = (-1)*log(deltaPoll,4);
         if(lc > l)
             return memorizedBLVectorAndiHat;
         lc += 1;
@@ -48,7 +55,6 @@ public class LTDirection {
 
     /**
      * Basis Construction in R^(n-1)
-     *
      * Let L a lower triangular (n-1)x(n-1) matrix where each term on the diagonal is
      * either plus or minus 2^(l) and the lower components are randomly chosen in :<br>
      * [ -(2^(l)) + 1 , -(2^(l)) + 2 , ... , 2^(l)-1 ]
@@ -72,12 +78,12 @@ public class LTDirection {
     }
 
 
-    public int[][] getBasis(int n, double deltaMesh){
-        BlVectorAndiHat blAndiHat = getBlVectorAndCapI(n,deltaMesh);
+    public int[][] getBasis(int n, double deltaPoll){
+        BlVectorAndiHat blAndiHat = getBlVectorAndCapI(n,deltaPoll);
         int[] blVector = blAndiHat.blVector;
         int iHat = blAndiHat.iHat;
 
-        int l = (int) ((-1)*log(deltaMesh,4));
+        int l = (int) ((-1)*log(deltaPoll,4));
 
         int[][] lMatrix = getL(n,l);
         int[] p = getRowPermutation(n,iHat);
@@ -105,8 +111,8 @@ public class LTDirection {
         return bQuoted;
     }
 
-    public int[][] getMinimalPositiveBasis(int n, double deltaMesh){
-        int[][] basis = getBasis(n,deltaMesh);
+    public int[][] getMinimalPositiveBasis(int n, double deltaPoll){
+        int[][] basis = getBasis(n,deltaPoll);
         int[][] positiveSpanningSet = new int[n][n+1];
         for (int i = 0; i < positiveSpanningSet.length; i++) {
             int rowSum = 0;
@@ -121,8 +127,8 @@ public class LTDirection {
 
 
 
-    public int[][] getMaximalPositiveBasis(int n, double deltaMesh){
-        int[][] basis = getBasis(n,deltaMesh);
+    public int[][] getMaximalPositiveBasis(int n, double deltaPoll){
+        int[][] basis = getBasis(n,deltaPoll);
         int[][] positiveSpanningSet = new int[n][n*2];
         for (int i = 0; i < positiveSpanningSet.length; i++) {
             for (int j = 0; j < basis[0].length; j++) {
@@ -136,4 +142,55 @@ public class LTDirection {
         }
         return positiveSpanningSet;
     }
+
+    public int[] getIntArrayWithoutValue(int[] array, int elementToRemove){
+        int[] newArray = new int[array.length-1];
+        for(int i=0, k=0;i<array.length;i++){
+            if(array[i]!=elementToRemove){
+                newArray[k]=array[i];
+                k++;
+            }
+        }
+        return newArray;
+    }
+
+
+    public void shuffle(int[] array){
+        int index;
+        for (int i = array.length - 1; i > 0; i--) {
+            index = this.random.nextInt(i + 1);
+            if (index != i) {
+                array[index] ^= array[i];
+                array[i] ^= array[index];
+                array[index] ^= array[i];
+            }
+        }
+    }
+
+    public int getRandomIntBetween(int min, int max){
+        //return min + (int)(Math.random() * ((max - min) + 1));
+        return min + (int)(this.random.nextDouble() * ((max - min) + 1));
+    }
+
+    public int getRandomElementInTheArray(int[] array) {
+        int rnd = this.random.nextInt(array.length);
+        return array[rnd];
+    }
+
+
+    public double log(double value, double base) {
+        return Math.log(value)/Math.log(base);
+    }
+
+
+    public int[] getSequentialIntArray(int begin, int end){
+        int[] sequentialArray = new int[end-begin+1];
+        for (int i=begin; i<=end; i++) {
+            sequentialArray[i] = i;
+        }
+        return sequentialArray;
+    }
+
+
+
 }

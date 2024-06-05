@@ -6,7 +6,6 @@ import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.Interval;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Stream;
 
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.EXCEPT_ILLEGAL_STEP;
@@ -17,11 +16,29 @@ public class MeshIntervalBD extends AbstractDiscreteInterval {
     private BigDecimal lowerBoundBD;
     private BigDecimal upperBoundBD;
 
-
+    /**
+     * Creates a mesh interval with the specified ID, lower and upper bounds.
+     * The step size and central point are not yet initialized.
+     *
+     * @param id         The identifier of the interval.
+     * @param lowerBound The lower bound of the interval.
+     * @param upperBound The upper bound of the interval.
+     */
     public MeshIntervalBD(String id, double lowerBound, double upperBound) {
         super(id, lowerBound, upperBound);
     }
 
+
+    /**
+     * Creates a mesh interval with the specified ID, lower and upper bounds, step size, and central point.
+     *
+     * @param id         The identifier of the interval.
+     * @param lowerBound The lower bound of the interval.
+     * @param upperBound The upper bound of the interval.
+     * @param step       The step size between points in the interval.
+     * @param point      The central point of the interval.
+     * @throws IllegalArgumentException If the step is not positive or the point is not within the bounds.
+     */
     public MeshIntervalBD(String id, double lowerBound, double upperBound, double step, double point) {
         this(id,lowerBound, upperBound);
         this.setStep(step);
@@ -115,9 +132,9 @@ public class MeshIntervalBD extends AbstractDiscreteInterval {
     public double getRandomValue() {
         return this.getLeftmostElement().add(stepBD.multiply(new BigDecimal(randomIntBetween(0, this.size()-1)))).doubleValue();
     }
+    @SuppressWarnings("SameParameterValue")
     private int randomIntBetween(int min,int max){
-        Random rand = new Random();
-        return rand.nextInt((max - min) + 1) + min;
+        return super.rand.nextInt((max - min) + 1) + min;
     }
 
     @Override
@@ -133,7 +150,15 @@ public class MeshIntervalBD extends AbstractDiscreteInterval {
 
     @Override
     public boolean contains(double value) {
-        return false;
+        BigDecimal valueBD = BigDecimal.valueOf(value); // Convert to BigDecimal
+
+        if (valueBD.compareTo(lowerBoundBD) < 0 || valueBD.compareTo(upperBoundBD) > 0) {
+            return false;
+        }
+
+        BigDecimal distanceFromLeftmost = valueBD.subtract(getLeftmostElement()).abs();
+
+        return distanceFromLeftmost.remainder(stepBD).compareTo(BigDecimal.ZERO) == 0;
     }
 
     @Override

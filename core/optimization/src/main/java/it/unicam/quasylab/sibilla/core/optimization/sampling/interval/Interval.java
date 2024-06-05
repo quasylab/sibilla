@@ -39,6 +39,8 @@ public interface Interval {
      */
     double getRandomValue();
 
+    void setSeed(long seed);
+
     /**
      * Move the interval moving the center
      * @param newCenter the new center
@@ -86,7 +88,6 @@ public interface Interval {
     default ContinuousInterval convertToContinuous(){
         return new ContinuousInterval(this.getId(), this.getLowerBound(),this.getUpperBound());
     }
-
 
   }
 

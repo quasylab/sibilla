@@ -6,15 +6,13 @@ import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRecta
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.ToDoubleFunction;
-
+@Disabled
 class RBFNetworkModelTest {
 
     @Test
-    @Disabled
     void testNet(){
 
         //sin(5x)*cos(5y)/5
@@ -31,15 +29,10 @@ class RBFNetworkModelTest {
 
         rbfNetworkSurrogate.fit();
 
-        Map<String,Double> anInput = new HashMap<>();
-        anInput.put("x",1.0);
-        anInput.put("y",1.0);
 
         double res = rbfNetworkSurrogate.predict(new Double[]{1.0,1.0});
 
-        //System.out.println(res);
-        //System.out.println(funToOpt.apply(anInput));
-        //System.out.println(rbfNetworkSurrogate.getInSampleMetrics());
+        System.out.println(res);
     }
 
 }

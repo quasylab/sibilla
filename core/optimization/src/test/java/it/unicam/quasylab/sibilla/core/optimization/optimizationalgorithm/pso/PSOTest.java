@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class PSOTest {
 
-    private boolean beingInRange(double value, double beginRange ,double endRange){
+    private boolean isInRange(double value, double beginRange , double endRange){
         return value >= beginRange && value <= endRange;
     }
 
@@ -35,6 +35,7 @@ class PSOTest {
      *
      * @see    <a href=https://www.wolframalpha.com/input?i=minimize+7+*+%28+x+*+y+%29%2F%28e%5E%28x%5E2%2By%5E2%29%29">WolframAlhpa</a>
      */
+    //@Disabled
     @Test
     void minimizeFunction() {
 
@@ -53,15 +54,16 @@ class PSOTest {
 
         Map<String,Double> minimizingValues = new PSOTask().minimize(functionToOptimize,searchSpace);
 
-        boolean isLocalMinima1 = beingInRange(minimizingValues.get("x"),-0.95, -0.55) &&
-                beingInRange(minimizingValues.get("y"),0.55, 0.95);
+        boolean isLocalMinima1 = isInRange(minimizingValues.get("x"),-0.95, -0.55) &&
+                isInRange(minimizingValues.get("y"),0.55, 0.95);
 
-        boolean isLocalMinima2 = beingInRange(minimizingValues.get("x"),0.55, 0.95) &&
-                beingInRange(minimizingValues.get("y"),-0.95, -0.55);
+        boolean isLocalMinima2 = isInRange(minimizingValues.get("x"),0.55, 0.95) &&
+                isInRange(minimizingValues.get("y"),-0.95, -0.55);
 
         assertTrue(isLocalMinima1 || isLocalMinima2);
     }
 
+    //@Disabled
     @Test
     void maximizeFunction() {
 
@@ -78,14 +80,14 @@ class PSOTest {
                 new ContinuousInterval("y",-2.0,2.0)
         );
 
-        Map<String,Double> maximizingValues = new PSOTask().maximize(functionToOptimize,searchSpace);
+        Map<String,Double> maximizingValues = new PSOTask().maximize(functionToOptimize,searchSpace,new ArrayList<>(),new Properties(),12345L);
 
 
-        boolean isLocalMaxima1 = beingInRange(maximizingValues.get("x"),-0.95, -0.55) &&
-                beingInRange(maximizingValues.get("y"),-0.95, -0.55);
+        boolean isLocalMaxima1 = isInRange(maximizingValues.get("x"),-0.95, -0.55) &&
+                isInRange(maximizingValues.get("y"),-0.95, -0.55);
 
-        boolean isLocalMaxima2 = beingInRange(maximizingValues.get("x"),0.55, 0.95) &&
-                beingInRange(maximizingValues.get("y"),0.55, 0.95);
+        boolean isLocalMaxima2 = isInRange(maximizingValues.get("x"),0.55, 0.95) &&
+                isInRange(maximizingValues.get("y"),0.55, 0.95);
 
         assertTrue(isLocalMaxima1 || isLocalMaxima2);
     }
@@ -93,6 +95,7 @@ class PSOTest {
     /**
      * @see    <a href=https://www.researchgate.net/publication/336121050_Structural_Design_Optimization_Based_on_the_Moving_Baseline_Strategy">Structural Design Optimization Based on the Moving Baseline Strategy</a>
      */
+    //@Disabled
     @Test
     //@Disabled("Disabled : very time consuming")
     void minimizeFunctionWithConstraint() {
@@ -155,8 +158,7 @@ class PSOTest {
 
         assertTrue(rightZone.couldContain(minimizingValues));
     }
-
-    //@Disabled("Disabled : very time consuming")
+    //@Disabled
     @Test
     void minimizeMultidimensionalFunctionWithConstraint() {
 
@@ -259,7 +261,7 @@ class PSOTest {
 
     }
 
-
+    //@Disabled
     @Test
     public void testRosenbrockFunction(){
 
@@ -272,12 +274,6 @@ class PSOTest {
         Properties psoProperties = new Properties();
         psoProperties.setProperty("pso.iteration", "1000");
         psoProperties.setProperty("pso.particles_number", "1000");
-        //ParticleSwarmOptimization pso =  new ParticleSwarmOptimization(ROSENBROCK_FUNCTION,null,searchSpace,psoProperties);
-
-        //pso.setSearchSpaceAsConstraints();
-
-        //Map<String,Double> minimizingValues = pso.minimize();
-        //System.out.println(minimizingValues.toString());
 
         OptimizationTask optimizationTask = new PSOAlgorithm().getOptimizationTask();
         optimizationTask.setProperties(psoProperties);
@@ -295,7 +291,7 @@ class PSOTest {
 
 
 
-
+    //@Disabled
     @Test
     void minimizeSimpleFunctionWithConstraints(){
 
@@ -345,7 +341,7 @@ class PSOTest {
         double result = myFunction.applyAsDouble(solution);
         assertEquals(111.0, result);
     }
-
+    //@Disabled
     @Test
     void minimizeSimpleFunctionSearchSpaceAsConstraints(){
 
@@ -384,15 +380,13 @@ class PSOTest {
         OptimizationTask optimizationTask = new PSOAlgorithm().getOptimizationTask();
         optimizationTask.setProperties(properties);
         Map<String,Double> solution = optimizationTask.minimize(myFunction,searchSpace);
-//        ParticleSwarmOptimization pso = new ParticleSwarmOptimization(myFunction,null,searchSpace,properties);
-//        pso.setSearchSpaceAsConstraints();
-//        Map<String,Double> solution = pso.minimize();
         double result = myFunction.applyAsDouble(solution);
 
         assertEquals(111.0, result);
     }
 
 
+    //@Disabled
     @Test
     void testMaximizationSimpleFunction(){
         HyperRectangle searchSpace = new HyperRectangle(
@@ -407,6 +401,67 @@ class PSOTest {
         assertTrue(validatePredictedResult(0.707,x,0.05));
         assertTrue(validatePredictedResult(0.000,y,0.05));
     }
+
+    //@Disabled
+    @Test
+    void testTenParameterWithSumConstraint(){
+
+        HyperRectangle searchSpace = new HyperRectangle(
+                new ContinuousInterval("x0",-10.0,10.0),
+                new ContinuousInterval("x1",-10.0,10.0),
+                new ContinuousInterval("x2",-10.0,10.0),
+                new ContinuousInterval("x3",-10.0,10.0),
+                new ContinuousInterval("x4",-10.0,10.0),
+                new ContinuousInterval("x5",-10.0,10.0),
+                new ContinuousInterval("x6",-10.0,10.0),
+                new ContinuousInterval("x7",-10.0,10.0),
+                new ContinuousInterval("x8",-10.0,10.0),
+                new ContinuousInterval("x9",-10.0,10.0)
+        );
+
+        Predicate<Map<String,Double>> moreConstraint = par ->
+                par.get("x0") + par.get("x1") + par.get("x2") + par.get("x3") + par.get("x4")
+                + par.get("x5") + par.get("x6")  + par.get("x7") + par.get("x8") + par.get("x9") >= 10.0;
+
+
+        Predicate<Map<String,Double>> lessConstraint = par ->
+                par.get("x0") + par.get("x1") + par.get("x2") + par.get("x3") + par.get("x4")
+                        + par.get("x5") + par.get("x6")  + par.get("x7") + par.get("x8") + par.get("x9") <= 11.0;
+
+        List<Predicate<Map<String,Double>>> constraint = new ArrayList<>();
+        constraint.add(moreConstraint);
+        constraint.add(lessConstraint);
+
+        ToDoubleFunction<Map<String, Double>> function = par -> {
+            double x = par.get("x0") + par.get("x1") + par.get("x2") + par.get("x3") + par.get("x4")
+                    + par.get("x5") + par.get("x6") + par.get("x7") + par.get("x8") + par.get("x9");
+            double a = 1; // Adjust as needed for steepness
+            return a * Math.pow(x - 10.5, 2);
+        };
+
+        OptimizationTask optimizationTask = new PSOAlgorithm().getOptimizationTask();
+        Map<String,Double> solution = optimizationTask.minimize(function,searchSpace,constraint,new Properties(),123456L);
+        Map<String, Double> expectedValues = Map.of(
+                "x8", -1.8759463841388893,
+                "x9", 6.270442764309462,
+                "x0", 2.7759723129203606,
+                "x1", -5.588251898309184,
+                "x2", -2.593354392032383,
+                "x3", -6.990630377087715,
+                "x4", 4.244604569116974,
+                "x5", 9.127158059370686,
+                "x6", 8.406797408526058,
+                "x7", -3.2767920626753666
+        );
+
+
+        for (Map.Entry<String, Double> entry : solution.entrySet()) {
+            String key = entry.getKey();
+            double value = entry.getValue();
+            assertEquals(expectedValues.get(key), value, 0.0001);
+        }
+    }
+
 
 
 

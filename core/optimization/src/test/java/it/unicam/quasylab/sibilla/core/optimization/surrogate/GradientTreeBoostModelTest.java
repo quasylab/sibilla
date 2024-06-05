@@ -32,8 +32,6 @@ class GradientTreeBoostModelTest {
                 ;
         GradientTreeBoostModel rfr = new GradientTreeBoostModel(dataSet,0.85,new Properties());
         rfr.fit();
-        System.out.println(rfr.getTrainingSetMetrics().toString());
-
     }
 
 

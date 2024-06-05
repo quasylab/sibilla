@@ -8,6 +8,8 @@ import tech.tablesaw.columns.Column;
 
 import java.util.*;
 import java.util.function.ToDoubleFunction;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static it.unicam.quasylab.sibilla.core.optimization.Constants.*;
 
@@ -17,18 +19,21 @@ public class DataSet extends Table {
     private final String resultColumnName;
 
     public DataSet(HyperRectangle searchSpace, SamplingTask samplingTask, int dataSetSize, ToDoubleFunction<Map<String,Double>>function){
-        this(searchSpace,samplingTask,dataSetSize,function,DEFAULT_COLUMN_RESULT_NAME);
+        this(searchSpace,samplingTask,dataSetSize,function,DEFAULT_COLUMN_RESULT_NAME,System.nanoTime());
     }
-    public DataSet(HyperRectangle searchSpace, SamplingTask samplingTask, int dataSetSize, ToDoubleFunction<Map<String,Double>> function, String resultColumnName){
+    public DataSet(HyperRectangle searchSpace, SamplingTask samplingTask, int dataSetSize, ToDoubleFunction<Map<String,Double>>function, Long seed){
+        this(searchSpace,samplingTask,dataSetSize,function,DEFAULT_COLUMN_RESULT_NAME,seed);
+    }
+    public DataSet(HyperRectangle searchSpace, SamplingTask samplingTask, int dataSetSize, ToDoubleFunction<Map<String,Double>> function, String resultColumnName,Long seed){
         super(DEFAULT_DATASET_NAME);
         this.function = function;
         this.searchSpace = searchSpace;
         this.resultColumnName = resultColumnName;
-        Table samples = samplingTask.getSampleTable(dataSetSize,searchSpace);
+        Table samples = samplingTask.getSampleTable(dataSetSize,searchSpace,seed);
         this.addColumns(samples.columns().toArray(Column[]::new));
         this.addColumns(computeResultColumn(samples,function,resultColumnName));
     }
-    private DataSet(Table trainingSet, HyperRectangle searchSpace, ToDoubleFunction<Map<String,Double>> function, String resultColumnName){
+    public DataSet(Table trainingSet, HyperRectangle searchSpace, ToDoubleFunction<Map<String,Double>> function, String resultColumnName){
         super(DEFAULT_DATASET_NAME,trainingSet.columns());
         this.searchSpace = searchSpace;
         this.function = function;
@@ -39,9 +44,9 @@ public class DataSet extends Table {
         List<Map<String,Double>> listOfRowAsMap = toMapList(input);
         Double[] results = new Double[listOfRowAsMap.size()];
         for (int i = 0; i < listOfRowAsMap.size(); i++) {
-            System.out.print("<");
+            //System.out.print("<");
             results[i] = function.applyAsDouble(listOfRowAsMap.get(i));
-            System.out.print(">");
+            //System.out.print(">");
         }
         return DoubleColumn.create(columnID,results);
     }
@@ -164,6 +169,35 @@ public class DataSet extends Table {
         };
     }
 
+    private Table where(List<Integer> indices) {
+        Table result = this.emptyCopy();
+        for (int index : indices) {
+            Row row = this.row(index);
+            result.append(row);
+        }
+        return result;
+    }
+
+    public DataSet[] trainTestSplit(double trainingPortion, Long seed) {
+        Random random = (seed == null) ? new Random() : new Random(seed);
+        int totalRows = this.rowCount();
+        int trainingRowCount = (int) Math.round(totalRows * trainingPortion);
+
+        List<Integer> allIndices = IntStream.range(0, totalRows).boxed().collect(Collectors.toList());
+        Collections.shuffle(allIndices, random);
+
+        List<Integer> trainingIndices = allIndices.subList(0, trainingRowCount);
+        List<Integer> testIndices = allIndices.subList(trainingRowCount, totalRows);
+
+        Table trainingTable = this.where(trainingIndices);
+        Table testTable = this.where(testIndices);
+
+        return new DataSet[]{
+                new DataSet(trainingTable, this.searchSpace, this.function, this.resultColumnName),
+                new DataSet(testTable, this.searchSpace, this.function, this.resultColumnName)
+        };
+    }
+
     public ToDoubleFunction<Map<String,Double>> getFunction() {
         return function;
     }
@@ -175,4 +209,31 @@ public class DataSet extends Table {
     public String getResultColumnName() {
         return resultColumnName;
     }
+
+    public double[][] getDataMatrix() {
+        int numRows = this.rowCount();
+        int numCols = this.columnCount() - 1; // Excluding the last column
+        double[][] dataMatrix = new double[numRows][numCols];
+
+        for (int i = 0; i < numRows; i++) {
+            Row row = this.row(i);
+            for (int j = 0; j < numCols; j++) {
+                dataMatrix[i][j] = row.getDouble(j);
+            }
+        }
+        return dataMatrix;
+    }
+
+    public double[] getResultValues() {
+        DoubleColumn resultColumn = getResultColumn();
+        return resultColumn.asDoubleArray();
+    }
+
+    public String[] getColumnNames() {
+        String[] columnNames = new String[this.columnCount() - 1];
+        IntStream.range(0, this.columnCount() - 1)
+                .forEach(i -> columnNames[i] = this.column(i).name());
+        return columnNames;
+    }
+
 }

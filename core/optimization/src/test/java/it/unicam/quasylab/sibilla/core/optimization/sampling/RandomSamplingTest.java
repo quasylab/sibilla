@@ -28,4 +28,27 @@ class RandomSamplingTest {
     }
 
 
+    @Test
+    void testNumberOfRowAndColumnWithSeed() {
+        HyperRectangle hr = new HyperRectangle(
+                new ContinuousInterval(1.0,10.0),
+                new DiscreteStepInterval(1.0,10.0,1.0),
+                new DiscreteSetInterval(3,5,9)
+        );
+        int numberOfSamples = 5;
+        Table sampleSet = new RandomSamplingTask().getSampleTable(numberOfSamples,hr,123456789);
+        assertTrue( sampleSet.rowCount() == numberOfSamples &&
+                sampleSet.columnCount() == hr.getDimensionality());
+
+        System.out.println(sampleSet);
+        double expectedValueV0 = 6.783891834031845;
+        double expectedValueV1 = 4;
+        double expectedValueV2 = 9;
+        assertEquals(expectedValueV0, sampleSet.row(0).getDouble(hr.getInterval(0).getId()));
+        assertEquals(expectedValueV1, sampleSet.row(0).getDouble(hr.getInterval(1).getId()));
+        assertEquals(expectedValueV2, sampleSet.row(0).getDouble(hr.getInterval(2).getId()));
+
+    }
+
+
 }

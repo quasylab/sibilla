@@ -51,7 +51,7 @@ public class RBFNetworkModel extends AbstractSurrogateModel{
 
     @Override
     public void setProperties(Properties properties) {
-        int RBF_NEURONS_NUMBER = trainingSet.columnCount()*2;
+        int RBF_NEURONS_NUMBER = trainingSet.columnCount()*10;
         boolean NORMALIZED = false;
 
         this.rbfNeuronsToLearn = Integer.parseInt(properties.getProperty("rbfn.neurons", RBF_NEURONS_NUMBER+""));

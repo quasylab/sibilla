@@ -32,7 +32,7 @@ public class GradientTreeBoostModel extends AbstractSurrogateModel{
 
     @Override
     public double predict(Double[] inputVector) {
-        Tuple predictorTuple = Tuple.of(inputVector,this.gradientTreeBoost.schema());
+        Tuple predictorTuple = Tuple.of(inputVector,this.getModelScheme());
         return this.gradientTreeBoost.predict(predictorTuple);
     }
 

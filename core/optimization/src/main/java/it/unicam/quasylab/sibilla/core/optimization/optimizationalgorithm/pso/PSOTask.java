@@ -20,6 +20,7 @@ public class PSOTask implements OptimizationTask {
     private BiPredicate<Double,Double> evaluationCriteria;
     private FitnessFunction fitnessFunction;
     private Swarm swarm;
+    private Random random;
 
     public PSOTask(){
         setProperties(new Properties());
@@ -75,19 +76,16 @@ public class PSOTask implements OptimizationTask {
             p.setFitness(this.fitnessFunction.evaluate(position));
             particles.add(p);
         }
-
-        Random rand = new Random();
-        particles.forEach(particle -> particle.setParticleBest(particles.get(rand.nextInt(particles.size()))));
+        particles.forEach(particle -> particle.setParticleBest(particles.get(random.nextInt(particles.size()))));
 
         return particles;
     }
 
     private void updateVelocityOf(Particle particle){
-        Random r = new Random();
         for (String valueName: particle.getVelocity().keySet()) {
             double newValue = inertia * particle.getVelocity().get(valueName) +
-                    r.nextDouble() * selfConfidence * ( particle.getParticleBest().getPosition().get(valueName) - particle.getPosition().get(valueName)) +
-                    r.nextDouble() * swarmConfidence * (swarm.getGlobalBest().getPosition().get(valueName) - particle.getPosition().get(valueName));
+                    random.nextDouble() * selfConfidence * ( particle.getParticleBest().getPosition().get(valueName) - particle.getPosition().get(valueName)) +
+                    random.nextDouble() * swarmConfidence * (swarm.getGlobalBest().getPosition().get(valueName) - particle.getPosition().get(valueName));
             particle.getVelocity().put(valueName, newValue);
         }
     }
@@ -101,9 +99,11 @@ public class PSOTask implements OptimizationTask {
     }
 
     @Override
-    public Map<String, Double> minimize(ToDoubleFunction<Map<String, Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints,Properties properties) {
+    public Map<String, Double> minimize(ToDoubleFunction<Map<String, Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints,Properties properties, Long seed) {
         constraints.addAll(getSearchSpaceAsConstraintList(searchSpace));
         setProperties(properties);
+        this.random = new Random(seed);
+        searchSpace.setSeeds(seed);
         this.penaltyValue = Double.POSITIVE_INFINITY;
         this.evaluationCriteria = (x, y) -> x < y;
         this.fitnessFunction = new FitnessFunction(objectiveFunction, constraints, penaltyValue);
@@ -112,17 +112,6 @@ public class PSOTask implements OptimizationTask {
         return this.swarm.getGlobalBest().getPosition();
     }
 
-    @Override
-    public Map<String, Double> maximize(ToDoubleFunction<Map<String, Double>> objectiveFunction, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints,Properties properties) {
-        constraints.addAll(getSearchSpaceAsConstraintList(searchSpace));
-        setProperties(properties);
-        this.penaltyValue = Double.NEGATIVE_INFINITY;
-        this.evaluationCriteria = (x, y) -> x > y;
-        this.fitnessFunction = new FitnessFunction(objectiveFunction, constraints, penaltyValue);
-        this.swarm = getPopulatedSwarm(searchSpace);
-        performIteration();
-        return this.swarm.getGlobalBest().getPosition();
-    }
 
     @Override
     public void setProperties(Properties properties) {

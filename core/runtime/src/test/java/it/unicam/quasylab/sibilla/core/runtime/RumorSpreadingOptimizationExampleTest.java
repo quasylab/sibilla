@@ -23,12 +23,12 @@ import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
+;
 @Disabled
 public class RumorSpreadingOptimizationExampleTest {
 
@@ -52,19 +52,19 @@ public class RumorSpreadingOptimizationExampleTest {
                 """
                         param k_s = 0.05;
                         param k_r = 0.05;
-                                        
+                        
                         const initial_spreaders = 90;
                         const initial_ignorants = 10;
                         const initial_blockers = 0;
-                                                    
+                        
                         species spreader;
                         species ignorant;
                         species blocker;
-                                                    
+                        
                         rule spreading {
                             spreader|ignorant -[ #spreader * %ignorant * k_s ]-> spreader|spreader
                         }
-                                                    
+                        
                         rule stop_spreading_1 {
                             spreader|spreader -[ #spreader * k_r ]-> spreader|blocker
                         }
@@ -72,7 +72,7 @@ public class RumorSpreadingOptimizationExampleTest {
                         rule stop_spreading_2 {
                             blocker|spreader -[ #blocker * %spreader * k_r ]-> blocker|blocker
                         }
-                                                   
+                        
                         system init = spreader<initial_spreaders>|ignorant<initial_ignorants>|blocker<initial_blockers>;
                         """;
 
@@ -166,11 +166,13 @@ public class RumorSpreadingOptimizationExampleTest {
     }
 
     /**
-     * //TODO: Check
+     *
      * Refer to <a href="https://openportal.isti.cnr.it/data/2015/424157/2015_424157.postprint.pdf">the case</a>
      * k_s  [0.0001, 2.0]
      * k_r  [0.0001, 0.5]
      */
+    @SuppressWarnings("all")
+    @Disabled
     @Test
     public void testDatasetForSurrogateSr() throws StlModelGenerationException, ModelGenerationException, IOException {
         RumorSpreadingExample rsExample = new RumorSpreadingExample();

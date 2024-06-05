@@ -13,13 +13,19 @@ import tech.tablesaw.api.Table;
 public class RandomSamplingTask implements SamplingTask {
     @Override
     public Table getSampleTable(int numberOfSamples, HyperRectangle hr) {
+        return getSampleTable(numberOfSamples, hr, System.nanoTime());
+    }
+
+    @Override
+    public Table getSampleTable(int numberOfSamples, HyperRectangle hr, long seed) {
         DoubleColumn[] columns = new DoubleColumn[hr.getDimensionality()];
+        hr.setSeeds(seed);
         for (int i = 0; i < hr.getDimensionality(); i++) {
             double[] columnArray = new double[numberOfSamples];
-            for (int j = 0; j <numberOfSamples ; j++) {
+            for (int j = 0; j < numberOfSamples; j++) {
                 columnArray[j] = hr.getInterval(i).getRandomValue();
             }
-            columns[i] = DoubleColumn.create(hr.getInterval(i).getId(),columnArray);
+            columns[i] = DoubleColumn.create(hr.getInterval(i).getId(), columnArray);
         }
         return Table.create().addColumns(columns);
     }

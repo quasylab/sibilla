@@ -53,4 +53,30 @@ class FullFactorialSamplingTest {
         assertTrue(sampleSetCont.rowCount() > sampleSetMix.rowCount());
     }
 
+
+    @Test
+    void testGetSampleTable() {
+        // Create a HyperRectangle with intervals for each dimension
+        HyperRectangle hyperRectangle = new HyperRectangle(
+                new ContinuousInterval("A", -10, 10),
+                new ContinuousInterval("B", -20, 20),
+                new ContinuousInterval("C", -2, 2)
+        );
+
+        // Create an instance of FullFactorialSamplingTask
+        FullFactorialSamplingTask samplingTask = new FullFactorialSamplingTask();
+
+        // Call the getSampleTable method with the desired number of samples per dimension
+        int numberOfSamplesPerDimension = 3;
+        Table sampleTable = samplingTask.getSampleTable(numberOfSamplesPerDimension, hyperRectangle);
+
+        // Verify the expected number of rows in the sample table
+        int expectedNumberOfRows = 3 * 3 * 3; // 3 samples per dimension
+        assertEquals(expectedNumberOfRows, sampleTable.rowCount());
+
+        // Verify the expected number of columns in the sample table
+        int expectedNumberOfColumns = 3; // 3 dimensions
+        assertEquals(expectedNumberOfColumns, sampleTable.columnCount());
+    }
+
 }
