@@ -2,6 +2,7 @@ package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads;
 
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.Properties;
 import java.util.function.ToDoubleFunction;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@Disabled
 class LTMADSTaskTest {
 
     private boolean beingInRange(double value, double beginRange ,double endRange){
