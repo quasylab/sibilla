@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.runtime;
 
+import it.unicam.quasylab.sibilla.core.runtime.command.*;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
@@ -46,10 +47,10 @@ import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 
+import static it.unicam.quasylab.sibilla.core.runtime.Message.*;
+
 public final class SibillaRuntime implements CommandHandler {
 
-    private static final String UNKNOWN_MODULE_MESSAGE = "Module %s is unknown!";
-    private static final String NO_MODULE_HAS_BEEN_LOADED =  "No module has been loaded!";
     private final Map<String,SibillaModule> moduleIndex = new TreeMap<>();
     private SibillaModule currentModule;
     private final Map<String, Map<String,double[][]>> simulations = new TreeMap<>();
@@ -58,24 +59,28 @@ public final class SibillaRuntime implements CommandHandler {
     private long replica = 1;
     private double deadline = Double.NaN;
     private double dt = Double.NaN;
-    private CommandAdapter commandHandler;
+    private final CommandAdapter commandAdapter;
 
     public SibillaRuntime() {
-        this.commandHandler = new CommandAdapter();
+        this.commandAdapter = new CommandAdapter();
         initModules();
         initHandlers();
     }
 
     private void initHandlers() {
-        this.commandHandler.recordHandler("load", cmd -> {
+        this.commandAdapter.recordHandler(CommandName.LOAD_MODULE, cmd -> {
             this.loadModule(cmd.getArgument(0));
-            return true;
+            return new VoidResult();
         });
+
+
+
     }
 
     private void initModules() {
         for (SibillaModule m: SibillaModule.MODULES) {
             moduleIndex.put(m.getModuleName(),m);
+            //m.addHandler("simulate", cmd -> this.simulate())
             if (currentModule == null) {
                 currentModule =  m;
             }
@@ -118,7 +123,7 @@ public final class SibillaRuntime implements CommandHandler {
      * Loads a specification from the give file.
      *
      * @param fileName file name.
-     * @throws CommandExecutionException
+     * @throws CommandExecutionException if the file cannot be found
      */
     public void loadFromFile(String fileName) throws CommandExecutionException {
         currentModule.load(new File(fileName));
@@ -356,7 +361,7 @@ public final class SibillaRuntime implements CommandHandler {
 
     /**
      * Run a simulation and save results with the given label.
-     * @return
+     * @return the simulation results
      */
     public Map<String, double[][]> simulate(String label) throws CommandExecutionException {
         return simulate(null,label);
@@ -784,15 +789,26 @@ public final class SibillaRuntime implements CommandHandler {
         }
     }
 
+
+
     @Override
-    public boolean handle(Command command) throws CommandExecutionException {
-        if (this.commandHandler.handle(command)) {
-            return true;
-        }
-        if (this.currentModule != null) {
+    public CommandResult handle(Command command) throws CommandExecutionException {
+
+        if(this.commandAdapter.isCommandHandable(command.name()))
+            return this.commandAdapter.handle(command);
+        if (this.currentModule != null)
             return this.currentModule.handle(command);
-        }
-        //TODO: Add message from the static class!
-        throw new CommandExecutionException("ERROR MESSAGE COMMAND IS NOT ENABLED");
+        throw new CommandExecutionException(String.format(UNKNOWN_COMMAND_MESSAGE,command.name()));
     }
+
+//    @Override
+//    public CommandResult handle(Command command) throws CommandExecutionException {
+//        if (this.commandAdapter.handle(command)) {
+//            return true;
+//        }
+//        if (this.currentModule != null) {
+//            return this.currentModule.handle(command);
+//        }
+//        throw new CommandExecutionException(String.format(UNKNOWN_COMMAND_MESSAGE,command.name()));
+//    }
 }

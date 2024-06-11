@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.runtime;
 
+import it.unicam.quasylab.sibilla.core.runtime.command.*;
+import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
@@ -53,11 +55,22 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     }
 
     @Override
-    public boolean handle(Command command) throws CommandExecutionException {
+    public CommandResult handle(Command command) throws CommandExecutionException {
         return commandAdapter.handle(command);
     }
 
-    protected void initCommandHandler() {}
+    protected void initCommandHandler() {
+
+        this.commandAdapter.recordHandler(CommandName.SIMULATE, cmd ->{
+            SimulationMonitor monitor = null;
+            RandomGenerator rg = new DefaultRandomGenerator();
+            long replica = Long.parseLong(cmd.getArgument(2));
+            double deadline = Double.parseDouble(cmd.getArgument(3));
+            double dt = Double.parseDouble(cmd.getArgument(4));
+            return new MapResult(this.simulate(null,rg,replica,deadline,dt));
+        });
+
+    }
 
     protected abstract ModuleEngine<?> getModuleEngine();
 

@@ -11,7 +11,7 @@ import java.util.Properties;
 import java.util.function.ToDoubleFunction;
 
 import static org.junit.jupiter.api.Assertions.*;
-@Disabled
+
 class LTMADSTaskTest {
 
     private boolean beingInRange(double value, double beginRange ,double endRange){

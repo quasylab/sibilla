@@ -22,9 +22,9 @@
  *
  */
 
-package it.unicam.quasylab.sibilla.core.runtime;
+package it.unicam.quasylab.sibilla.core.runtime.command;
 
-public record Command(String command, String[] args) {
+public record Command(CommandName name, String[] args) {
     public String getArgument(int i) {
         return args[i];
     }

@@ -22,7 +22,9 @@
  *
  */
 
-package it.unicam.quasylab.sibilla.core.runtime;
+package it.unicam.quasylab.sibilla.core.runtime.command;
+
+import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
 
 /**
  * This interface is implemented by the classes that are able to handle
@@ -30,6 +32,6 @@ package it.unicam.quasylab.sibilla.core.runtime;
  */
 public interface CommandHandler {
 
-    boolean handle(Command command) throws CommandExecutionException;
+    CommandResult handle(Command command) throws CommandExecutionException;
 
 }

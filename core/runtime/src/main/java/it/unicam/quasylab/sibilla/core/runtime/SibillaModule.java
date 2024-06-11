@@ -23,6 +23,10 @@
 
 package it.unicam.quasylab.sibilla.core.runtime;
 
+import it.unicam.quasylab.sibilla.core.runtime.command.Command;
+import it.unicam.quasylab.sibilla.core.runtime.command.CommandHandler;
+import it.unicam.quasylab.sibilla.core.runtime.command.CommandResult;
+import it.unicam.quasylab.sibilla.core.runtime.command.VoidResult;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
@@ -341,7 +345,7 @@ public interface SibillaModule extends CommandHandler {
     Map<String, List<TracingData>> trace(RandomGenerator rg, TracingFunction tracingFunction, double deadline);
 
     @Override
-    default boolean handle(Command command) throws CommandExecutionException {
-        return false;
+    default CommandResult handle(Command command) throws CommandExecutionException {
+        return new VoidResult();
     }
 }
