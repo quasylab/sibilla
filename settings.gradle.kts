@@ -25,3 +25,7 @@ include("langs:slam")
 include("langs:stl")
 include("tools:tracing")
 include("shell")
+include("langs:dopm")
+findProject(":langs:dopm")?.name = "dopm"
+include("langs:enba")
+findProject(":langs:enba")?.name = "enba"
