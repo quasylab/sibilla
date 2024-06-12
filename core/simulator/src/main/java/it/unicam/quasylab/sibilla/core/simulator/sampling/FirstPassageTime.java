@@ -23,60 +23,52 @@
 
 package it.unicam.quasylab.sibilla.core.simulator.sampling;
 
-import it.unicam.quasylab.sibilla.core.models.State;
-import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+public class FirstPassageTime {
 
-public class FirstPassageTime<S extends State> implements Supplier<SamplingHandler<S>> {
 
-    private final String name;
-    private final Predicate<? super S> condition;
-    private final DescriptiveStatistics values;
-    private int tests = 0;
+    private final int tests;
+    private final DescriptiveStatistics statistics;
 
-    public FirstPassageTime(String name, Predicate<? super S> condition) {
-        this.name = name;
-        this.condition = condition;
-        this.values = new DescriptiveStatistics();
+    public FirstPassageTime(int tests, DescriptiveStatistics statistics) {
+        this.tests = tests;
+        this.statistics = statistics;
     }
 
-    public synchronized FirstPassageTimeResults getResults() {
-        return new FirstPassageTimeResults(tests, values);
+    public int getTests() {
+        return tests;
     }
 
-    private synchronized void testStart() {
-        this.tests++;
+    public double getMin() {
+        return statistics.getMin();
     }
 
-    private synchronized void addValue(double time) {
-        this.values.addValue(time);
+    public double getMax() {
+        return statistics.getMax();
     }
 
-    @Override
-    public SamplingHandler<S> get() {
-        return new SamplingHandler<>() {
+    public double getQ1() {
+        return statistics.getPercentile(25);
+    }
 
-            private boolean flag = false;
+    public double getQ2() {
+        return statistics.getPercentile(50);
+    }
 
-            @Override
-            public void start() {
-                testStart();
-            }
+    public double getQ3() {
+        return statistics.getPercentile(75);
+    }
 
-            @Override
-            public void sample(double time, S state) {
-                if (condition.test(state)&&!flag) {
-                    addValue(time);
-                    flag = true;
-                }
-            }
+    public double getMean() {
+        return statistics.getMean();
+    }
 
-            @Override
-            public void end(double time) {}
-        };
+    public double getStandardDeviation() {
+        return statistics.getStandardDeviation();
+    }
+
+    public long getHits() {
+        return statistics.getN();
     }
 }

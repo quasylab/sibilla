@@ -24,12 +24,8 @@
 
 package it.unicam.quasylab.sibilla.core.runtime.command;
 
-public record Command(CommandName name, String[] args) {
-    public String getArgument(int i) {
-        return args[i];
-    }
+public sealed interface Command permits CommandSimulate, CommandLoadModule, CommandFirstPassageTime, CommandMonitor {
 
-    public int numberOfArguments() {
-        return args.length;
-    }
+    CommandName getCommandName();
+
 }

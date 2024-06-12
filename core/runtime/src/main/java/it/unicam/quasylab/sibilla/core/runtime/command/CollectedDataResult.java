@@ -24,16 +24,8 @@
 
 package it.unicam.quasylab.sibilla.core.runtime.command;
 
-import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
+import java.util.Map;
 
-import java.util.Optional;
-
-/**
- * This interface is implemented by the classes that are able to handle
- * commands generated in a sibilla runtime environment.
- */
-public interface CommandHandler {
-
-    Optional<CommandResult> handle(Command command) throws CommandExecutionException;
+public record CollectedDataResult(String label, Map<String, double[][]> data) implements CommandResult {
 
 }

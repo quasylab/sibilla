@@ -28,7 +28,7 @@ import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
@@ -36,10 +36,7 @@ import it.unicam.quasylab.sibilla.tools.tracing.TracingData;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingFunction;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public abstract class AbstractSibillaModule implements SibillaModule {
 
@@ -55,20 +52,12 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     }
 
     @Override
-    public CommandResult handle(Command command) throws CommandExecutionException {
+    public Optional<CommandResult> handle(Command command) throws CommandExecutionException {
         return commandAdapter.handle(command);
     }
 
     protected void initCommandHandler() {
 
-        this.commandAdapter.recordHandler(CommandName.SIMULATE, cmd ->{
-            SimulationMonitor monitor = null;
-            RandomGenerator rg = new DefaultRandomGenerator();
-            long replica = Long.parseLong(cmd.getArgument(2));
-            double deadline = Double.parseDouble(cmd.getArgument(3));
-            double dt = Double.parseDouble(cmd.getArgument(4));
-            return new MapResult(this.simulate(null,rg,replica,deadline,dt));
-        });
 
     }
 
@@ -136,7 +125,7 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     }
 
     @Override
-    public FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt, String predicateName) {
+    public FirstPassageTime firstPassageTime(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt, String predicateName) {
         return checkForLoadedDefinition().firstPassageTime(simulator, monitor, rg, replica, deadline, dt, predicateName);
     }
 

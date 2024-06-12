@@ -23,7 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.runtime;
 
-import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -859,7 +859,7 @@ class SibillaRuntimeTest {
         sr.setConfiguration("start");
         sr.setDeadline(100.0);
         sr.setReplica(500);
-        FirstPassageTimeResults res = sr.firstPassageTime(null, "done");
+        FirstPassageTime res = sr.firstPassageTime(null, "done");
         assertEquals(0.5, res.getMean(),0.2);
         sr.setParameter("lambda", 1.0);
         sr.setConfiguration("start");

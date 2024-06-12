@@ -26,10 +26,9 @@ package it.unicam.quasylab.sibilla.core.runtime;
 import it.unicam.quasylab.sibilla.core.runtime.command.Command;
 import it.unicam.quasylab.sibilla.core.runtime.command.CommandHandler;
 import it.unicam.quasylab.sibilla.core.runtime.command.CommandResult;
-import it.unicam.quasylab.sibilla.core.runtime.command.VoidResult;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingData;
@@ -225,7 +224,7 @@ public interface SibillaModule extends CommandHandler {
      * @param predicateName
      * @return
      */
-    FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt, String predicateName);
+    FirstPassageTime firstPassageTime(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt, String predicateName);
 
 
     /**
@@ -344,8 +343,4 @@ public interface SibillaModule extends CommandHandler {
 
     Map<String, List<TracingData>> trace(RandomGenerator rg, TracingFunction tracingFunction, double deadline);
 
-    @Override
-    default CommandResult handle(Command command) throws CommandExecutionException {
-        return new VoidResult();
-    }
 }

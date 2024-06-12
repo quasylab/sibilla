@@ -27,7 +27,7 @@ import it.unicam.quasylab.sibilla.core.runtime.command.*;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.tools.tracing.TraceSpecificationEvaluator;
@@ -43,6 +43,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
@@ -53,8 +54,8 @@ public final class SibillaRuntime implements CommandHandler {
 
     private final Map<String,SibillaModule> moduleIndex = new TreeMap<>();
     private SibillaModule currentModule;
-    private final Map<String, Map<String,double[][]>> simulations = new TreeMap<>();
-    private Map<String,double[][]> lastSimulation;
+    private final Map<String, Map<String,double[][]>> collectedData = new TreeMap<>();
+    private Map<String,double[][]> lastCollectedData;
     private final RandomGenerator rg = new DefaultRandomGenerator();
     private long replica = 1;
     private double deadline = Double.NaN;
@@ -68,13 +69,19 @@ public final class SibillaRuntime implements CommandHandler {
     }
 
     private void initHandlers() {
-        this.commandAdapter.recordHandler(CommandName.LOAD_MODULE, cmd -> {
-            this.loadModule(cmd.getArgument(0));
-            return new VoidResult();
-        });
+        this.commandAdapter.recordHandler(CommandName.SIMULATE, this::executeSimulateCommand);
+        this.commandAdapter.recordHandler(CommandName.LOAD_MODULE, this::executeCommandLoadModule);
 
 
 
+    }
+
+    private Optional<CommandResult> executeCommandLoadModule(Command command) throws CommandExecutionException {
+        if (command instanceof CommandLoadModule loadModuleCommand) {
+            loadModule(loadModuleCommand.name());
+            return Optional.of(new Answer());
+        }
+        return Optional.empty();
     }
 
     private void initModules() {
@@ -307,11 +314,15 @@ public final class SibillaRuntime implements CommandHandler {
     public Map<String, double[][]> simulate(SimulationMonitor monitor, String label) throws CommandExecutionException {
         checkDeadline();
         checkDt();
-        lastSimulation = currentModule.simulate(monitor,rg,replica,deadline,dt);
-        if (label != null) {
-            simulations.put(label, lastSimulation);
+        return currentModule.simulate(monitor,rg,replica,deadline,dt);
+    }
+
+    public Optional<CommandResult> executeSimulateCommand(Command cmd) throws CommandExecutionException {
+        if (cmd instanceof CommandSimulate commandSimulate) {
+            Map<String, double[][]> data = simulate(commandSimulate.monitor(), commandSimulate.label());
+            return Optional.of(new CollectedDataResult(commandSimulate.label(), data));
         }
-        return lastSimulation;
+        return Optional.empty();
     }
 
     /**
@@ -364,6 +375,8 @@ public final class SibillaRuntime implements CommandHandler {
      * @return the simulation results
      */
     public Map<String, double[][]> simulate(String label) throws CommandExecutionException {
+        //TODO: Check the following update!
+        // was: simulate(null,label)
         return simulate(null,label);
     }
 
@@ -480,8 +493,8 @@ public final class SibillaRuntime implements CommandHandler {
      */
     public void save(String outputFolder, String prefix, String postfix) throws IOException, CommandExecutionException {
         CSVWriter writer = new CSVWriter(outputFolder, prefix, postfix);
-        if (lastSimulation != null) {
-            writer.write(lastSimulation);
+        if (lastCollectedData != null) {
+            writer.write(lastCollectedData);
         } else {
             throw new CommandExecutionException("No simulation is available!");
         }
@@ -531,7 +544,7 @@ public final class SibillaRuntime implements CommandHandler {
         if (label == null) {
             save(outputFolder,prefix,postfix);
         } else {
-            Map<String, double[][]> series = this.simulations.get(label);
+            Map<String, double[][]> series = this.collectedData.get(label);
             if (series != null) {
                 CSVWriter writer = new CSVWriter(outputFolder, prefix, postfix);
                 writer.write(series);
@@ -559,7 +572,7 @@ public final class SibillaRuntime implements CommandHandler {
     }
 
     public String printData(String label) {
-        Map<String, double[][]> series = this.simulations.get(label);
+        Map<String, double[][]> series = this.collectedData.get(label);
         if (series != null) {
             StringWriter sw = new StringWriter();
             for (Map.Entry<String, double[][]> ts: series.entrySet()) {
@@ -576,7 +589,7 @@ public final class SibillaRuntime implements CommandHandler {
         return currentModule.getPredicates();
     }
 
-    public FirstPassageTimeResults firstPassageTime(SimulationMonitor monitor, String predicateName) throws CommandExecutionException {
+    public FirstPassageTime firstPassageTime(SimulationMonitor monitor, String predicateName) throws CommandExecutionException {
         checkDeadline();
         checkReplica();
         return currentModule.firstPassageTime(monitor,rg,replica,deadline,dt,predicateName);
@@ -792,13 +805,26 @@ public final class SibillaRuntime implements CommandHandler {
 
 
     @Override
-    public CommandResult handle(Command command) throws CommandExecutionException {
+    public Optional<CommandResult> handle(Command command) throws CommandExecutionException {
+        Optional<CommandResult> commandResult = this.commandAdapter.handle(command);
+        if (commandResult.isEmpty()&&(this.currentModule != null)) {
+            commandResult = this.currentModule.handle(command);
+        }
+        commandResult.ifPresent(this::handleResult);
+        return commandResult;
+    }
 
-        if(this.commandAdapter.isCommandHandable(command.name()))
-            return this.commandAdapter.handle(command);
-        if (this.currentModule != null)
-            return this.currentModule.handle(command);
-        throw new CommandExecutionException(String.format(UNKNOWN_COMMAND_MESSAGE,command.name()));
+    private void handleResult(CommandResult commandResult) {
+        if (commandResult instanceof CollectedDataResult collectedDataResult) {
+            storeCollectedData(collectedDataResult.label(), collectedDataResult.data());
+        }
+    }
+
+    private void storeCollectedData(String label, Map<String,double[][]> data) {
+        if (label != null) {
+            this.collectedData.put(label, data);
+        }
+        this.lastCollectedData = data;
     }
 
 //    @Override

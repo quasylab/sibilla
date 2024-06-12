@@ -26,7 +26,8 @@ package it.unicam.quasylab.sibilla.shell;
 
 import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
 import it.unicam.quasylab.sibilla.core.runtime.SibillaRuntime;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
+import it.unicam.quasylab.sibilla.core.runtime.command.CommandLoadModule;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
 import it.unicam.quasylab.sibilla.shell.expression.ArithmeticExpressionVisitor;
@@ -136,7 +137,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
     @Override
     public Boolean visitModule_command(SibillaScriptParser.Module_commandContext ctx) {
         try {
-            runtime.loadModule(getStringContent(ctx.name.getText()));
+            runtime.handle(new CommandLoadModule(ctx.getText()));
             showMessage(String.format(MODULE_MESSAGE, ctx.name.getText()));
             return true;
         } catch (CommandExecutionException e) {
@@ -222,7 +223,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
         if (!currentDirectory.isDirectory()) {
             return false;
         }
-        for (String s: currentDirectory.list()) {
+        for (String s: Objects.requireNonNull(currentDirectory.list())) {
             showMessage(s);
         }
         return true;
@@ -318,10 +319,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
     @Override
     public Boolean visitFirst_passage_time(SibillaScriptParser.First_passage_timeContext ctx) {
         String predicateName = getStringContent(ctx.name.getText());
-        ShellSimulationMonitor monitor = null;
-        if (isInteractive) {
-            monitor = new ShellSimulationMonitor(output);
-        }
+        ShellSimulationMonitor monitor = (isInteractive?new ShellSimulationMonitor(output):null);
         try {
             showFirstPassageTimeResults(predicateName, runtime.firstPassageTime(monitor, predicateName) );
             return true;
@@ -331,7 +329,7 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
         }
     }
 
-    private void showFirstPassageTimeResults(String name, FirstPassageTimeResults firstPassageTime) {
+    private void showFirstPassageTimeResults(String name, FirstPassageTime firstPassageTime) {
         if (firstPassageTime.getTests()==0) {
             printInfo("First passage time "+name+":", new String[] { "Tests = "+0});
             return ;

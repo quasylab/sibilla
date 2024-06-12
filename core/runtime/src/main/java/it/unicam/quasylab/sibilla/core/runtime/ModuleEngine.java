@@ -30,13 +30,12 @@ import it.unicam.quasylab.sibilla.core.models.State;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeHandlerSupplier;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
-import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeResults;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
 import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.Signal;
-import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.stl.StlMonitorFactory;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingData;
@@ -165,20 +164,20 @@ public class ModuleEngine<S extends State> {
         }
     }
 
-    public FirstPassageTimeResults firstPassageTime(SimulationEnvironment simulationEnvironment,
-                                                    SimulationMonitor monitor,
-                                                    RandomGenerator rg,
-                                                    long replica,
-                                                    double deadline,
-                                                    double dt,
-                                                    String predicateName) {
+    public FirstPassageTime firstPassageTime(SimulationEnvironment simulationEnvironment,
+                                             SimulationMonitor monitor,
+                                             RandomGenerator rg,
+                                             long replica,
+                                             double deadline,
+                                             double dt,
+                                             String predicateName) {
         loadModel();
         setDefaultConfiguration();
         Predicate<? super S> predicate = currentModel.getPredicate(predicateName);
         if (predicate == null) {
             throw new IllegalStateException("Predicate "+predicateName+" is unknown!");
         }
-        FirstPassageTime<S> fpt = new FirstPassageTime<>(predicateName, predicate);
+        FirstPassageTimeHandlerSupplier<S> fpt = new FirstPassageTimeHandlerSupplier<>(predicateName, predicate);
         try {
             simulationEnvironment.simulate(monitor, rg, currentModel, state, fpt, replica, deadline);
             return fpt.getResults();

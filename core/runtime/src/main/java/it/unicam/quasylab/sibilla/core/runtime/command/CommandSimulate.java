@@ -24,16 +24,13 @@
 
 package it.unicam.quasylab.sibilla.core.runtime.command;
 
-import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
+import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 
-import java.util.Optional;
+public record CommandSimulate(SimulationMonitor monitor, String label) implements Command {
 
-/**
- * This interface is implemented by the classes that are able to handle
- * commands generated in a sibilla runtime environment.
- */
-public interface CommandHandler {
 
-    Optional<CommandResult> handle(Command command) throws CommandExecutionException;
-
+    @Override
+    public CommandName getCommandName() {
+        return CommandName.SIMULATE;
+    }
 }

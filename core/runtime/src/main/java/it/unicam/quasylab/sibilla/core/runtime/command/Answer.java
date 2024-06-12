@@ -24,16 +24,26 @@
 
 package it.unicam.quasylab.sibilla.core.runtime.command;
 
-import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 
-import java.util.Optional;
+public final class Answer implements CommandResult {
 
-/**
- * This interface is implemented by the classes that are able to handle
- * commands generated in a sibilla runtime environment.
- */
-public interface CommandHandler {
+    private final List<String> messages = new LinkedList<>();
 
-    Optional<CommandResult> handle(Command command) throws CommandExecutionException;
+    public Answer() {}
+
+    public void add(String message) {
+        this.messages.add(message);
+    }
+
+    public void add(String key, double value) {
+        add(key," = ",value);
+    }
+
+    public void add(String key, String sep, double value) {
+        add(String.format(Locale.US, "%s%s%f", key, sep, value));
+    }
 
 }
