@@ -71,7 +71,7 @@ public class PopulationMeasuresGenerator extends PopulationModelBaseVisitor<Map<
     private Measure<PopulationState> getMeasure(String name, Function<String, Optional<SibillaValue>> evaluator, Map<String, SibillaValue> m, PopulationModelParser.ExprContext expr) {
         Function<PopulationState, SibillaValue> measureFunction = expr.accept(
                 new PopulationExpressionEvaluator(PopulationModelGenerator.combine(evaluator, m), registry));
-        return new SimpleMeasure<>(name+m.toString(), s -> measureFunction.apply(s).doubleOf());
+        return new SimpleMeasure<>(name+(m.isEmpty()?"":m.toString()), s -> measureFunction.apply(s).doubleOf());
     }
 
 
