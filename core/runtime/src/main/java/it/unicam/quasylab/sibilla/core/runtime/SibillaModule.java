@@ -26,16 +26,19 @@ package it.unicam.quasylab.sibilla.core.runtime;
 import it.unicam.quasylab.sibilla.core.runtime.command.Command;
 import it.unicam.quasylab.sibilla.core.runtime.command.CommandHandler;
 import it.unicam.quasylab.sibilla.core.runtime.command.CommandResult;
+import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationManagerFactory;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+import it.unicam.quasylab.sibilla.langs.stl.StlModelGenerationException;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingData;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingFunction;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -315,9 +318,7 @@ public interface SibillaModule extends CommandHandler {
      *
      * @param file the file containing the formulas to load.
      */
-    default void loadFormulas(File file) throws CommandExecutionException {
-        throw new CommandExecutionException("Command not supported");
-    }
+    void loadFormulas(File file) throws CommandExecutionException, IOException, StlModelGenerationException;
 
 
     /**
@@ -325,9 +326,7 @@ public interface SibillaModule extends CommandHandler {
      *
      * @param code the string containing the set of formulas.
      */
-    default void loadFormulas(String code) throws CommandExecutionException {
-        throw new CommandExecutionException("Command not supported");
-    }
+    void loadFormulas(String code) throws CommandExecutionException, StlModelGenerationException;
 
 
     /**
@@ -338,6 +337,37 @@ public interface SibillaModule extends CommandHandler {
      */
     void setSimulationManagerFactory(SimulationManagerFactory factory);
 
+    /**
+     * Performs qualitative monitoring using a specified formula.
+     *
+     * @param rg The random generator used to sample trajectories.
+     * @param formulaName The name of the formula used for monitoring.
+     * @param formulaArgs The arguments for the formula.
+     * @param deadline The deadline.
+     * @param dt The time step increment.
+     * @param replica The number of replicas to run.
+     * @return A map where the key is the formula name and the value is a double[][] array, where:
+     *         - results[i][0] is the time step
+     *         - results[i][1] is the probability of the formula being satisfied at the time step
+     * @throws StlModelGenerationException If there is an error generating the formula monitor.
+     */
+    Map<String, double[][]> qualitativeMonitoring(RandomGenerator rg, String[] formulaName, double[][] formulaArgs,double deadline, double dt, int replica) throws StlModelGenerationException;
+    /**
+     * Performs quantitative monitoring using a single formula.
+     *
+     * @param rg The random generator used to sample trajectories.
+     * @param formulaName The name of the formula used for monitoring.
+     * @param formulaArgs The arguments for the formula.
+     * @param deadline The deadline.
+     * @param dt The time step increment.
+     * @param replica The number of replicas to run.
+     * @return A map where the key is the formula name and the value is a double[][] array, where:
+     *         - results[i][0] is the time step
+     *         - results[i][1] is the mean robustness at the time step
+     *         - results[i][2] is the standard deviation of robustness at the time step
+     * @throws StlModelGenerationException If there is an error generating the formula monitor.
+     */
+    Map<String, double[][]> quantitativeMonitoring(RandomGenerator rg, String[] formulaName, double[][] formulaArgs,double deadline, double dt, int replica) throws StlModelGenerationException;
 
     List<SimulationData> trace(RandomGenerator rg, double deadline);
 

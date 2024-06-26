@@ -231,11 +231,48 @@ class QualitativeMonitorTest {
         assertEquals(0.66, probabilities[0], 0.2);
     }
 
+    @Test
+    public void testProbabilityWithDoubleArray() {
+        Supplier<Trajectory<PopulationState>> trajectorySupplier = () -> {
+            List<Trajectory<PopulationState>> trajectoryList = new ArrayList<>();
+            trajectoryList.add(getPopulationTrajectory(new int[]{3, 3, 3, 3, 3}));
+            trajectoryList.add(getPopulationTrajectory(new int[]{3, 3, 3, 3, 3}));
+            trajectoryList.add(getPopulationTrajectory(new int[]{1, 1, 1, 1, 1}));
+            Random random = new Random();
+            return trajectoryList.get(random.nextInt(trajectoryList.size()));
+        };
 
+        QualitativeMonitor<PopulationState> atomicMonitor =
+                QualitativeMonitor.atomicFormula((PopulationState s) -> s.getOccupancy(0) == 3);
 
+        double[] timeSteps = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0};
+        double[][] results = QualitativeMonitor.computeTimeSeriesProbabilities(atomicMonitor, trajectorySupplier, 100, timeSteps);
 
+        assertEquals(1.0, results[0][0], 0.001); // Time step
+        assertEquals(0.66, results[0][1], 0.2);  // Probability
+    }
 
+    @Test
+    public void testProbabilityWithDTAndDeadline() {
+        Supplier<Trajectory<PopulationState>> trajectorySupplier = () -> {
+            List<Trajectory<PopulationState>> trajectoryList = new ArrayList<>();
+            trajectoryList.add(getPopulationTrajectory(new int[]{3, 3, 3, 3, 3}));
+            trajectoryList.add(getPopulationTrajectory(new int[]{3, 3, 3, 3, 3}));
+            trajectoryList.add(getPopulationTrajectory(new int[]{1, 1, 1, 1, 1}));
+            Random random = new Random();
+            return trajectoryList.get(random.nextInt(trajectoryList.size()));
+        };
 
+        QualitativeMonitor<PopulationState> atomicMonitor =
+                QualitativeMonitor.atomicFormula((PopulationState s) -> s.getOccupancy(0) == 3);
+
+        double dt = 1.0;
+        double deadline = 5.0;
+        double[][] results = QualitativeMonitor.computeTimeSeriesProbabilities(atomicMonitor, trajectorySupplier, 100, dt, deadline);
+
+        assertEquals(1.0, results[1][0], 0.001); // Time step
+        assertEquals(0.66, results[0][1], 0.2);  // Probability
+    }
 
 
 }

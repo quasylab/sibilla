@@ -193,6 +193,21 @@ public interface Model<S extends State> extends Serializable {
         return toReturn;
     }
 
+    /**
+     * Creates a mapping of measure labels to measure functions that calculate the measure values based on the state.
+     *
+     * @return A map associating a label (measure name) to a function that takes a state and returns the value of the measure associated with the label.
+     */
+    default Map<String, ToDoubleFunction<S>> measuresFunctionMapping() {
+        Map<String, ToDoubleFunction<S>> mapping = new HashMap<>();
+
+        for (String measure : measures()) {
+            mapping.put(measure, state -> measure(measure, state));
+        }
+
+        return mapping;
+    }
+
     default Map<String, Map<String, ToDoubleFunction<S>>> trace(S state) {
         throw new IllegalStateException("Trace is not implemented in this model!");
     }

@@ -23,6 +23,8 @@
 
 package it.unicam.quasylab.sibilla.core.runtime;
 
+import it.unicam.quasylab.sibilla.core.models.State;
+import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.runtime.command.*;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
@@ -32,11 +34,18 @@ import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaDouble;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+import it.unicam.quasylab.sibilla.langs.stl.StlLoader;
+import it.unicam.quasylab.sibilla.langs.stl.StlModelGenerationException;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingData;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingFunction;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.function.ToDoubleFunction;
+
+import static it.unicam.quasylab.sibilla.core.runtime.Message.NO_MODULE_HAS_BEEN_LOADED;
 
 public abstract class AbstractSibillaModule implements SibillaModule {
 
@@ -44,7 +53,6 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     private boolean summary = true;
     private final SimulationEnvironment simulator = new SimulationEnvironment();
     protected final CommandAdapter commandAdapter = new CommandAdapter();
-
     private Configuration currentConfiguration;
 
     public AbstractSibillaModule() {
@@ -66,7 +74,7 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     private ModuleEngine<?> checkForLoadedDefinition() {
         ModuleEngine<?> engine = getModuleEngine();
         if (engine == null) {
-            throw new IllegalStateException("No model has been loaded!");
+            throw new IllegalStateException(NO_MODULE_HAS_BEEN_LOADED);
         }
         return engine;
     }
@@ -118,6 +126,7 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     public void removeAllMeasures() {
         this.enabledMeasures = new TreeSet<>();
     }
+
 
     @Override
     public Map<String, double[][]> simulate(SimulationMonitor monitor, RandomGenerator rg, long replica, double deadline, double dt) {
@@ -207,6 +216,8 @@ public abstract class AbstractSibillaModule implements SibillaModule {
         return checkForLoadedDefinition().setConfiguration(name, args);
     }
 
+
+
     @Override
     public String[] getMeasures() {
         return checkForLoadedDefinition().getMeasures();
@@ -233,4 +244,24 @@ public abstract class AbstractSibillaModule implements SibillaModule {
         return summary;
     }
 
+
+    @Override
+    public void loadFormulas(File file) throws IOException{
+        checkForLoadedDefinition().generateMonitor(file);
+    }
+
+    @Override
+    public void loadFormulas(String code){
+        checkForLoadedDefinition().generateMonitor(code);
+    }
+
+    @Override
+    public Map<String, double[][]> qualitativeMonitoring(RandomGenerator rg, String[] formulaName, double[][] formulaArgs,double deadline, double dt, int replica) throws StlModelGenerationException {
+        return checkForLoadedDefinition().qualitativeMonitoring(this.simulator, rg, formulaName, formulaArgs,deadline, dt, replica);
+    }
+
+    @Override
+    public Map<String, double[][]> quantitativeMonitoring(RandomGenerator rg, String[] formulaName, double[][] formulaArgs, double deadline, double dt, int replica) throws StlModelGenerationException {
+        return checkForLoadedDefinition().quantitativeMonitoring(this.simulator, rg, formulaName, formulaArgs, deadline,dt, replica);
+    }
 }

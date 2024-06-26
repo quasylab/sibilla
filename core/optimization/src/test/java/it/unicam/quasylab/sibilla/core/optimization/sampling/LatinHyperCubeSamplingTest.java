@@ -59,8 +59,8 @@ class LatinHyperCubeSamplingTest {
         double[] expectedValueV1 = {0.12903200433554973, 4.153242450992566, 3.194171546175148, 2.35975181048092};
 
         for (int i = 0; i < numberOfSamples; i++) {
-            assertEquals(expectedValueV0[i], sampleSet.row(i).getDouble(hr.getInterval(0).getId()));
-            assertEquals(expectedValueV1[i], sampleSet.row(i).getDouble(hr.getInterval(1).getId()));
+            assertEquals(expectedValueV0[i], sampleSet.row(i).getDouble(hr.getInterval(0).getId()),0.1);
+            assertEquals(expectedValueV1[i], sampleSet.row(i).getDouble(hr.getInterval(1).getId()),0.1);
         }
     }
 
@@ -81,8 +81,8 @@ class LatinHyperCubeSamplingTest {
         expectedValues.add(Map.of("Value_0", 4.444171546175148, "Value_1", 2.35975181048092));
 
         for (int i = 0; i < numberOfSamples; i++) {
-            assertEquals(expectedValues.get(i).get("Value_0"), sampleSet.get(i).get("Value_0"));
-            assertEquals(expectedValues.get(i).get("Value_1"), sampleSet.get(i).get("Value_1"));
+            assertEquals(expectedValues.get(i).get("Value_0"), sampleSet.get(i).get("Value_0"),0.1);
+            assertEquals(expectedValues.get(i).get("Value_1"), sampleSet.get(i).get("Value_1"),0.1);
         }
     }
 

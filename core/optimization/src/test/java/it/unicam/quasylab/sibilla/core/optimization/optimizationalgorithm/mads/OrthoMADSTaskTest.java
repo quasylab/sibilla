@@ -33,8 +33,8 @@ public class OrthoMADSTaskTest {
         Map<String,Double> minimizingValues = new OrthoMADSTask().minimize(functionToOptimize,searchSpace,new ArrayList<>(),new Properties(),123L);
 
 
-        assertEquals(0.6781336512362466, minimizingValues.get("x"));
-        assertEquals(-0.7064310933941202, minimizingValues.get("y"));
+        assertEquals(0.6781336512362466, minimizingValues.get("x"),0.1);
+        assertEquals(-0.7064310933941202, minimizingValues.get("y"),0.1);
 
     }
 

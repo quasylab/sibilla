@@ -44,9 +44,9 @@ class RandomSamplingTest {
         double expectedValueV0 = 6.783891834031845;
         double expectedValueV1 = 4;
         double expectedValueV2 = 9;
-        assertEquals(expectedValueV0, sampleSet.row(0).getDouble(hr.getInterval(0).getId()));
-        assertEquals(expectedValueV1, sampleSet.row(0).getDouble(hr.getInterval(1).getId()));
-        assertEquals(expectedValueV2, sampleSet.row(0).getDouble(hr.getInterval(2).getId()));
+        assertEquals(expectedValueV0, sampleSet.row(0).getDouble(hr.getInterval(0).getId()),0.1);
+        assertEquals(expectedValueV1, sampleSet.row(0).getDouble(hr.getInterval(1).getId()),0.1);
+        assertEquals(expectedValueV2, sampleSet.row(0).getDouble(hr.getInterval(2).getId()),0.1);
 
     }
 

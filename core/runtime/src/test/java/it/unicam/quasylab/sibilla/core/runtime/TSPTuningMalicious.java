@@ -105,7 +105,7 @@ public class TSPTuningMalicious {
                   rule UNC_to_BLUE {
                     UNC-[ (%MAL>=0.5? 0:1) * #UNC * persuasion_rate * %BLUE ]-> BLUE
                   }
-                                
+                
                   rule UNC_to_RED {
                     UNC -[ (%MAL>=0.5? 0:1) * #UNC * persuasion_rate * %RED ]-> RED
                   }

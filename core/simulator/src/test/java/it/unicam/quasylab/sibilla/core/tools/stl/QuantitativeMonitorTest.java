@@ -461,6 +461,63 @@ class QuantitativeMonitorTest {
 
 
 
+    @Test
+    public void testMeanAndStandardDeviationRobustness() {
+        QuantitativeMonitor<PopulationState> am = QuantitativeMonitor.atomicFormula(pm -> pm.getOccupancy(0));
+        double[] timeSteps = {0.5, 1.5, 2.5};
+
+        double[][] meanAndSdFromSupplier = QuantitativeMonitor.meanAndStandardDeviationRobustness(
+                am,
+                supplierOfTrajectoryForTest(2),
+                100,
+                timeSteps
+        );
+
+        double[][] meanAndSdFromList = QuantitativeMonitor.meanAndStandardDeviationRobustness(
+                am,
+                listOfTrajectoryForTest(),
+                timeSteps
+        );
+
+        assertEquals(1, meanAndSdFromList[0][1], 0.1);
+        assertEquals(1, meanAndSdFromSupplier[0][1], 0.1);
+        assertEquals(0, meanAndSdFromList[0][2], 0.1);
+        assertEquals(0, meanAndSdFromSupplier[0][2], 0.1);
+
+        assertEquals(353.333, meanAndSdFromList[1][1], 0.1);
+        assertEquals(374.1, meanAndSdFromSupplier[1][1], 0.1);
+        assertEquals(807.605, meanAndSdFromList[1][2], 0.1);
+        assertEquals(766.192, meanAndSdFromSupplier[1][2], 0.1);
+
+        assertEquals(2.5, meanAndSdFromList[2][1], 0.1);
+        assertEquals(2.56, meanAndSdFromSupplier[2][1], 0.1);
+        assertEquals(0.547, meanAndSdFromList[2][2], 0.1);
+        assertEquals(0.498, meanAndSdFromSupplier[2][2], 0.1);
+    }
+
+
+//    @Test
+//    public void testMeanAndStandardDeviationRobustnessListDT() {
+//        QuantitativeMonitor<PopulationState> am =QuantitativeMonitor.globally(new Interval(0.0,0.5), QuantitativeMonitor.atomicFormula(pm -> pm.getOccupancy(0)));
+//        double[][] meanAndSdFromList = QuantitativeMonitor.meanAndStandardDeviationRobustness(
+//                am,
+//                listOfTrajectoryForTest(),
+//                0.5
+//        );
+//
+//        assertEquals(1, meanAndSdFromList[1][1], 1e-3);
+//        assertEquals(0, meanAndSdFromList[1][2], 1e-3);
+//
+//        assertEquals(353.333, meanAndSdFromList[3][1], 1e-2);
+//        assertEquals(807.605, meanAndSdFromList[3][2], 1e-3);
+//
+//        assertEquals(2.5, meanAndSdFromList[5][1], 1e-3);
+//        assertEquals(0.547, meanAndSdFromList[5][2], 1e-3);
+//    }
+
+
+
+
     private List<Trajectory<PopulationState>> listOfTrajectoryForTest(){
         List<Trajectory<PopulationState>> trajectoryList = new ArrayList<>();
         trajectoryList.add(getPopulationTrajectory(new int[]{ 1,  100, 2}));

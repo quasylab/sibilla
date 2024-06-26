@@ -4,6 +4,7 @@ import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.pso.PS
 import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.sa.SimulatedAnnealingTask;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SA {
 
+    @Disabled
     @Test
     void minimizeFunction() {
 

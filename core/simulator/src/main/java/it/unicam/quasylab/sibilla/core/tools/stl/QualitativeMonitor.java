@@ -124,6 +124,174 @@ public interface QualitativeMonitor<S> {
 
 
     /**
+     * Calculate the probability of a given qualitative monitor being satisfied over time using
+     * sampled trajectories and return results in a double[][] array.
+     *
+     * @param monitor The qualitative monitor to be evaluated.
+     * @param trajectoryProvider A supplier for generating trajectories.
+     * @param runs The number of simulation runs.
+     * @param timeStep An array of time steps at which the probabilities are calculated.
+     * @return A double[][] array where:
+     *         - results[i][0] is the time step
+     *         - results[i][1] is the probability of the monitor satisfaction at the time step
+     */
+    static <S> double[][] computeTimeSeriesProbabilities(
+            QualitativeMonitor<S> monitor,
+            Supplier<Trajectory<S>> trajectoryProvider,
+            int runs,
+            double[] timeStep) {
+
+        int[] counter = new int[timeStep.length];
+        for (int i = 0; i < runs; i++) {
+            boolean[] evaluations = monitor.monitor(trajectoryProvider.get()).getValuesAt(timeStep);
+            IntStream.range(0, counter.length).filter(j -> evaluations[j]).forEach(j -> counter[j]++);
+        }
+        double[] probabilities = Arrays.stream(counter).mapToDouble(j -> j / ((double) runs)).toArray();
+
+        double[][] results = new double[timeStep.length][2];
+        for (int i = 0; i < timeStep.length; i++) {
+            results[i][0] = timeStep[i];
+            results[i][1] = probabilities[i];
+        }
+        return results;
+    }
+
+    /**
+     * Calculate the probability of a given qualitative monitor being satisfied over time using
+     * sampled trajectories and return results in a double[][] array.
+     *
+     * @param monitor The qualitative monitor to be evaluated.
+     * @param trajectoryProvider A supplier for generating trajectories.
+     * @param runs The number of simulation runs.
+     * @param samplings The number of time steps to consider.
+     * @param dt The time step duration.
+     * @return A double[][] array where:
+     *         - results[i][0] is the time step
+     *         - results[i][1] is the probability of the monitor satisfaction at the time step
+     */
+    static <S> double[][] computeTimeSeriesProbabilities(
+            QualitativeMonitor<S> monitor,
+            Supplier<Trajectory<S>> trajectoryProvider,
+            int runs,
+            int samplings,
+            double dt) {
+
+        double[] timeStep = IntStream.range(0, samplings).mapToDouble(i -> i * dt).toArray();
+        return computeTimeSeriesProbabilities(monitor, trajectoryProvider, runs, timeStep);
+    }
+
+    /**
+     * Calculate the probability of a given qualitative monitor being satisfied over time using
+     * sampled trajectories with a specified error probability and confidence interval, and return results in a double[][] array.
+     *
+     * @param monitor The qualitative monitor to be evaluated.
+     * @param trajectoryProvider A supplier for generating trajectories.
+     * @param errorProbability The desired error probability for the estimation.
+     * @param delta The confidence interval for the estimation.
+     * @param timeStep An array of time steps at which the probabilities are calculated.
+     * @return A double[][] array where:
+     *         - results[i][0] is the time step
+     *         - results[i][1] is the probability of the monitor satisfaction at the time step
+     */
+    static <S> double[][] computeTimeSeriesProbabilities(
+            QualitativeMonitor<S> monitor,
+            Supplier<Trajectory<S>> trajectoryProvider,
+            double errorProbability,
+            double delta,
+            double[] timeStep) {
+
+        int runs = (int) ((1 / Math.pow(errorProbability, 2)) * Math.log(2 / delta)) + 1;
+        return computeTimeSeriesProbabilities(monitor, trajectoryProvider, runs, timeStep);
+    }
+
+    /**
+     * Calculate the probability of a given qualitative monitor being satisfied over time using
+     * sampled simulation with a specified error probability and confidence interval, and return results in a double[][] array.
+     *
+     * @param monitor The qualitative monitor to be evaluated.
+     * @param trajectoryProvider A supplier for generating trajectories.
+     * @param errorProbability The desired error probability.
+     * @param delta The confidence interval.
+     * @param samplings The number of time steps to consider.
+     * @param dt The time step duration.
+     * @return A double[][] array where:
+     *         - results[i][0] is the time step
+     *         - results[i][1] is the probability of the monitor satisfaction at the time step
+     */
+    static <S> double[][] computeTimeSeriesProbabilities(
+            QualitativeMonitor<S> monitor,
+            Supplier<Trajectory<S>> trajectoryProvider,
+            double errorProbability,
+            double delta,
+            int samplings,
+            double dt) {
+
+        int runs = (int) ((1 / Math.pow(errorProbability, 2)) * Math.log(2 / delta)) + 1;
+        return computeTimeSeriesProbabilities(monitor, trajectoryProvider, runs, samplings, dt);
+    }
+
+    /**
+     * Calculate the probability of a given qualitative monitor being satisfied over time using
+     * sampled trajectories, and return results in a double[][] array.
+     *
+     * @param monitor The qualitative monitor to be evaluated.
+     * @param trajectoryProvider A supplier for generating trajectories.
+     * @param runs The number of simulation runs.
+     * @param dt The time step duration.
+     * @param deadline The total time horizon.
+     * @return A double[][] array where:
+     *         - results[i][0] is the time step
+     *         - results[i][1] is the probability of the monitor satisfaction at the time step
+     */
+    static <S> double[][] computeTimeSeriesProbabilities(
+            QualitativeMonitor<S> monitor,
+            Supplier<Trajectory<S>> trajectoryProvider,
+            int runs,
+            double dt,
+            double deadline) {
+
+        double[] timeStep = generateTimeSteps(dt, deadline-monitor.getTimeHorizon());
+        return computeTimeSeriesProbabilities(monitor, trajectoryProvider, runs, timeStep);
+    }
+
+    /**
+     * Calculate the probability of a given qualitative monitor being satisfied over time using
+     * sampled trajectories, and return results in a double[][] array.
+     *
+     * @param monitor The qualitative monitor to be evaluated.
+     * @param trajectoryProvider A supplier for generating trajectories.
+     * @param runs The number of simulation runs.
+     * @param dt The time step duration.
+     * @return A double[][] array where:
+     *         - results[i][0] is the time step
+     *         - results[i][1] is the probability of the monitor satisfaction at the time step
+     */
+    static <S> double[][] computeTimeSeriesProbabilities(
+            QualitativeMonitor<S> monitor,
+            Supplier<Trajectory<S>> trajectoryProvider,
+            int runs,
+            double dt) {
+
+        return computeTimeSeriesProbabilities(monitor, trajectoryProvider, runs, dt, monitor.getTimeHorizon());
+    }
+
+
+
+    private static double[] generateTimeSteps(double dt, double deadline) {
+        int stepsCount = (int) Math.ceil(deadline / dt);
+        double[] timeSteps = new double[stepsCount];
+        for (int i = 0; i < stepsCount; i++) {
+            timeSteps[i] = i * dt;
+        }
+        return timeSteps;
+    }
+
+
+
+
+
+
+    /**
      * A monitor used to evaluate an atomic proposition of the form p(m(s)).
      *
      * @param <S>  type of states in the trajectory

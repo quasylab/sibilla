@@ -31,6 +31,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.IntStream;
@@ -54,10 +55,10 @@ public interface QuantitativeMonitor<S> {
 
 
     /**
-     * Calculate the probability of a given qualitative monitor being satisfied over time using
+     * Calculate the probability of a given quantitative monitor being satisfied over time using
      * sampled trajectories
      *
-     * @param monitor The qualitative monitor to be evaluated.
+     * @param monitor The quantitative monitor to be evaluated.
      * @param trajectoryProvider A supplier for generating trajectories.
      * @param runs The number of simulation runs.
      * @param timeStep An array of time steps at which the probabilities are calculated.
@@ -76,10 +77,10 @@ public interface QuantitativeMonitor<S> {
 
 
     /**
-     * Calculate the probability of a given qualitative monitor being satisfied over time using
+     * Calculate the probability of a given quantitative monitor being satisfied over time using
      * pre-generated trajectories.
      *
-     * @param monitor The qualitative monitor to be evaluated.
+     * @param monitor The quantitative monitor to be evaluated.
      * @param trajectories A list of pre-generated trajectories for evaluation.
      * @param timeStep An array of time steps at which the probabilities are calculated.
      * @return An array of probabilities for the monitor satisfaction at different time steps.
@@ -208,6 +209,170 @@ public interface QuantitativeMonitor<S> {
                 .toArray(NormalDistribution[]::new);
     }
 
+    /**
+     * Computes the mean and standard deviation of robustness values at specified time steps.
+     *
+     * @param monitor the quantitative monitor to evaluate
+     * @param trajectoryProvider the supplier of trajectories
+     * @param runs the number of runs to perform
+     * @param timeStep the time steps at which to evaluate the monitor
+     * @param <S> the type of the monitor state
+     * @return a double[][] array where:
+     *         - results[i][0] is the time step
+     *         - results[i][1] is the mean robustness at the time step
+     *         - results[i][2] is the standard deviation of robustness at the time step
+     */
+    static <S> double[][] meanAndStandardDeviationRobustness(
+            QuantitativeMonitor<S> monitor,
+            Supplier<Trajectory<S>> trajectoryProvider,
+            int runs,
+            double[] timeStep) {
+
+        double[][] robustnessEvaluations = new double[timeStep.length][runs];
+
+        for (int run = 0; run < runs; run++) {
+            Trajectory<S> trajectory = trajectoryProvider.get();
+            Signal s = monitor.monitor(trajectory);
+            double[] currentRobustnessEvaluation = monitor.monitor(trajectoryProvider.get()).valuesAt(timeStep);
+            for (int i = 0; i < timeStep.length; i++) {
+                robustnessEvaluations[i][run] = currentRobustnessEvaluation[i];
+            }
+        }
+
+        return calculateMeanAndSd(robustnessEvaluations, timeStep);
+    }
+
+
+    /**
+     * Computes the mean and standard deviation of robustness values at specified time steps.
+     *
+     * @param monitor the quantitative monitor to evaluate
+     * @param trajectories the list of trajectories to evaluate
+     * @param timeStep the time steps at which to evaluate the monitor
+     * @param <S> the type of the monitor state
+     * @return a double[][] array where:
+     *         - results[i][0] is the time step
+     *         - results[i][1] is the mean robustness at the time step
+     *         - results[i][2] is the standard deviation of robustness at the time step
+     */
+    static <S> double[][] meanAndStandardDeviationRobustness(
+            QuantitativeMonitor<S> monitor,
+            List<Trajectory<S>> trajectories,
+            double[] timeStep) {
+
+        double[][] robustnessEvaluations = new double[timeStep.length][trajectories.size()];
+
+        for (int run = 0; run < trajectories.size(); run++) {
+            double[] currentRobustnessEvaluation = monitor.monitor(trajectories.get(run)).valuesAt(timeStep);
+            for (int i = 0; i < timeStep.length; i++) {
+                robustnessEvaluations[i][run] = currentRobustnessEvaluation[i];
+            }
+        }
+        return calculateMeanAndSd(robustnessEvaluations, timeStep);
+
+    }
+
+
+    private static double[] generateTimeSteps(double deadline, double dt) {
+        int stepsCount = (int) Math.ceil(deadline / dt)+1;
+        double[] timeSteps = new double[stepsCount];
+        for (int i = 0; i < stepsCount; i++) {
+            timeSteps[i] = i * dt;
+        }
+        return timeSteps;
+    }
+    /**
+     * Computes the mean and standard deviation of robustness values at time steps generated from 0 to the deadline with increments of dt.
+     *
+     * @param monitor the quantitative monitor to evaluate
+     * @param trajectoryProvider the supplier of trajectories
+     * @param runs the number of runs to perform
+     * @param dt the time step increment
+     * @param deadline the total time horizon
+     * @param <S> the type of the monitor state
+     * @return a double[][] array where:
+     *         - results[i][0] is the time step
+     *         - results[i][1] is the mean robustness at the time step
+     *         - results[i][2] is the standard deviation of robustness at the time step
+     */
+    static <S> double[][] meanAndStandardDeviationRobustness(
+            QuantitativeMonitor<S> monitor,
+            Supplier<Trajectory<S>> trajectoryProvider,
+            int runs,
+            double dt,
+            double deadline) {
+        return meanAndStandardDeviationRobustness(monitor, trajectoryProvider, runs, generateTimeSteps(deadline-monitor.getTimeHorizon(), dt));
+    }
+    /**
+     * Computes the mean and standard deviation of robustness values at time steps generated from 0 to the monitor's time horizon with increments of dt.
+     *
+     * @param monitor the quantitative monitor to evaluate
+     * @param trajectoryProvider the supplier of trajectories
+     * @param runs the number of runs to perform
+     * @param dt the time step increment
+     * @param <S> the type of the monitor state
+     * @return a double[][] array where:
+     *         - results[i][0] is the time step
+     *         - results[i][1] is the mean robustness at the time step
+     *         - results[i][2] is the standard deviation of robustness at the time step
+     */
+    static <S> double[][] meanAndStandardDeviationRobustness(
+            QuantitativeMonitor<S> monitor,
+            Supplier<Trajectory<S>> trajectoryProvider,
+            int runs,
+            double dt) {
+        return meanAndStandardDeviationRobustness(monitor, trajectoryProvider, runs, dt, monitor.getTimeHorizon());
+    }
+
+//    static <S> double[][] meanAndStandardDeviationRobustness(
+//            QuantitativeMonitor<S> monitor,
+//            List<Trajectory<S>> trajectories,
+//            double dt,
+//            double deadline){
+//        return meanAndStandardDeviationRobustness(monitor, trajectories, generateTimeSteps(deadline, dt));
+//    }
+
+
+
+//    static <S> double[][] meanAndStandardDeviationRobustness(
+//            QuantitativeMonitor<S> monitor,
+//            List<Trajectory<S>> trajectories,
+//            double dt){
+//        return meanAndStandardDeviationRobustness(monitor, trajectories,dt, monitor.getTimeHorizon());
+//    }
+
+    private static double[][] calculateMeanAndSd(double[][] robustnessEvaluations, double[] timeStep) {
+        Function<double[], double[]> calculateMeanAndStandardDeviation = getMeanAndSdFunction();
+        double[][] results = new double[timeStep.length][3];
+
+        for (int i = 0; i < timeStep.length; i++) {
+            double[] meanAndSd = calculateMeanAndStandardDeviation.apply(robustnessEvaluations[i]);
+            results[i][0] = timeStep[i];   // Time step
+            results[i][1] = meanAndSd[0];  // Mean
+            results[i][2] = meanAndSd[1];  // Standard deviation
+        }
+
+        return results;
+    }
+
+    private static Function<double[], double[]> getMeanAndSdFunction(){
+        return values -> {
+            double sum = 0.0;
+            double sumOfSquares = 0.0;
+            int length = values.length;
+
+            for (double value : values) {
+                sum += value;
+                sumOfSquares += value * value;
+            }
+
+            double mean = sum / length;
+            double variance = (sumOfSquares - (sum * sum) / length) / (length - 1);
+            double standardDeviation = Math.sqrt(variance);
+
+            return new double[]{mean, standardDeviation};
+        };
+    }
 
 
     /**

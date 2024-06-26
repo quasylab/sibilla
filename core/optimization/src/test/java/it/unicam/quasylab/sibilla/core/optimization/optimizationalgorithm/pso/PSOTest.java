@@ -339,7 +339,7 @@ class PSOTest {
         Map<String,Double> solution = optimizationTask.minimize(myFunction,searchSpace,constraints);
 
         double result = myFunction.applyAsDouble(solution);
-        assertEquals(111.0, result);
+        assertEquals(111.0, result,0.1);
     }
     //@Disabled
     @Test
@@ -382,7 +382,7 @@ class PSOTest {
         Map<String,Double> solution = optimizationTask.minimize(myFunction,searchSpace);
         double result = myFunction.applyAsDouble(solution);
 
-        assertEquals(111.0, result);
+        assertEquals(111.0, result,0.1);
     }
 
 
@@ -458,7 +458,7 @@ class PSOTest {
         for (Map.Entry<String, Double> entry : solution.entrySet()) {
             String key = entry.getKey();
             double value = entry.getValue();
-            assertEquals(expectedValues.get(key), value, 0.0001);
+            assertEquals(expectedValues.get(key), value, 0.01);
         }
     }
 

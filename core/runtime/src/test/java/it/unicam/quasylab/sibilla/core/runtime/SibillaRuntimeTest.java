@@ -24,11 +24,13 @@
 package it.unicam.quasylab.sibilla.core.runtime;
 
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
+import it.unicam.quasylab.sibilla.langs.stl.StlModelGenerationException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -705,6 +707,95 @@ class SibillaRuntimeTest {
         sr.addSpaceInterval("recoverRate",0.005,1.5);
         sr.setProbReachAsObjectiveFunction(null,"allRecovered",0.05,0.05);
         sr.generateTrainingSet();
+    }
+
+
+    @Disabled
+    @Test
+    public void testFormula() throws CommandExecutionException, StlModelGenerationException {
+        String modelSpec = """
+                param k_i = 0.05;
+                param k_r = 0.05;
+                    
+                species S;
+                species I;
+                species R;
+                                            
+                rule infection {
+                    S|I -[ #S * %I * k_i ]-> I|I
+                }
+                                            
+                rule recovered {
+                    I -[ #I * k_r ]-> R
+                }
+                
+                system init = S<90>|I<10>|R<0>;
+                
+                """;
+
+        String formulaSpec = """
+                measure #I
+                formula formula_id [] : ( \\E[100,120][ #I == 0] )&& (\\G[0,100][ #I > 0 ]) endformula
+                """;
+
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.setSeed(123L);
+        sr.load(modelSpec);
+        sr.setConfiguration("init");
+        sr.addAllMeasures();
+        sr.setReplica(5);
+        sr.setDeadline(120);
+        sr.setDt(5);
+        sr.loadFormula(formulaSpec);
+        Map<String, double[][]>  result = sr.quantitativeMonitorSignal(new String[]{"formula_id"},new double[][]{{}});
+        System.out.println(result.get("formula_id")[0][0]);
+        System.out.println(result.get("formula_id")[0][1]);
+        System.out.println(result.get("formula_id")[0][2]);
+    }
+
+    @Disabled
+    @Test
+    public void testFormulaMeasures() throws CommandExecutionException, StlModelGenerationException {
+        String modelSpec = """
+                param k_i = 0.05;
+                param k_r = 0.05;
+                
+                species S;
+                species I;
+                species R;
+                
+                rule infection {
+                    S|I -[ #S * %I * k_i ]-> I|I
+                }
+                
+                rule recovered {
+                    I -[ #I * k_r ]-> R
+                }
+                
+                measure Inf =  #I * 1;
+                
+                system init = S<90>|I<10>|R<0>;
+                
+                """;
+
+        String formulaSpec = """
+                measure Inf
+                formula formula_id [] : ( \\E[100,120][ Inf == 0] )&& (\\G[0,100][ Inf > 0 ]) endformula
+                """;
+
+        SibillaRuntime sr = getRuntimeWithModule();
+        sr.setSeed(123L);
+        sr.load(modelSpec);
+        sr.setConfiguration("init");
+        sr.addAllMeasures();
+        sr.setReplica(5);
+        sr.setDeadline(120);
+        sr.setDt(5);
+        sr.loadFormula(formulaSpec);
+        Map<String, double[][]>  result = sr.quantitativeMonitorSignal(new String[]{"formula_id"},new double[][]{{}});
+        System.out.println(result.get("formula_id")[0][0]);
+        System.out.println(result.get("formula_id")[0][1]);
+        System.out.println(result.get("formula_id")[0][2]);
     }
 
 //    @Test

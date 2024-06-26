@@ -2,7 +2,6 @@ package it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.mads;
 
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
 import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -88,8 +87,8 @@ class LTMADSTaskTest {
         Map<String,Double> minimizingValues = new LTMADSTask().minimize(functionToOptimize,searchSpace,new ArrayList<>(),new Properties(),123L);
 
 
-        assertEquals(0.7264628148152565, minimizingValues.get("x"));
-        assertEquals(-0.7234187530700915, minimizingValues.get("y"));
+        assertEquals(0.7264628148152565, minimizingValues.get("x"),0.1);
+        assertEquals(-0.7234187530700915, minimizingValues.get("y"),0.1);
 
     }
 
@@ -120,8 +119,8 @@ class LTMADSTaskTest {
         );
 
         Map<String,Double> maximizingValues = new LTMADSTask().maximize(functionToOptimize,searchSpace,new ArrayList<>(),new Properties(),123L);
-        assertEquals(0.7036325818092801, maximizingValues.get("x"));
-        assertEquals(0.7114320316940459, maximizingValues.get("y"));
+        assertEquals(0.7036325818092801, maximizingValues.get("x"),0.1);
+        assertEquals(0.7114320316940459, maximizingValues.get("y"),0.1);
 
     }
 

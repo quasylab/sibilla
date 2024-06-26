@@ -30,6 +30,7 @@ import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+import it.unicam.quasylab.sibilla.langs.stl.StlModelGenerationException;
 import it.unicam.quasylab.sibilla.tools.tracing.TraceSpecificationEvaluator;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingData;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingFunction;
@@ -139,7 +140,7 @@ public final class SibillaRuntime implements CommandHandler {
     /**
      * Load a specification from a string.
      *
-     * @param code specificaiton code.
+     * @param code specification code.
      */
     public void load(String code) throws CommandExecutionException {
         currentModule.load(code);
@@ -240,7 +241,7 @@ public final class SibillaRuntime implements CommandHandler {
      *
      * @param name configuration name.
      * @param args configuration parameters.
-     * @return true or false depending if the configuration has been successfully created.
+     * @return true or false depending on if the configuration has been successfully created.
      */
     public boolean setConfiguration(String name, double ... args) throws CommandExecutionException {
         checkLoadedModule();
@@ -315,6 +316,34 @@ public final class SibillaRuntime implements CommandHandler {
         checkDeadline();
         checkDt();
         return currentModule.simulate(monitor,rg,replica,deadline,dt);
+    }
+
+    public void loadFormula(String sourceCode) throws CommandExecutionException, StlModelGenerationException {
+        currentModule.loadFormulas(sourceCode);
+    }
+
+    public void loadFormula(File sourceCodeFile) throws CommandExecutionException, StlModelGenerationException, IOException {
+        currentModule.loadFormulas(sourceCodeFile);
+    }
+
+    public Map<String, double[][]> qualitativeMonitorSignal(String[] formulaNames, double[][] formulaParameters) throws CommandExecutionException, StlModelGenerationException {
+        checkDt();
+        checkDeadline();
+        return currentModule.qualitativeMonitoring(rg,formulaNames,formulaParameters,deadline,dt,(int) replica);
+    }
+
+    public Map<String, double[][]> quantitativeMonitorSignal(String[] formulaNames, double[][] formulaParameters) throws CommandExecutionException, StlModelGenerationException {
+        checkDt();
+        checkDeadline();
+        return currentModule.quantitativeMonitoring(rg,formulaNames,formulaParameters,deadline,dt,(int) replica);
+    }
+
+    public double expectedProbabilityAt0(String formulaName, double[] formulaParameters) throws CommandExecutionException, StlModelGenerationException {
+        return this.qualitativeMonitorSignal(new String[]{formulaName}, new double[][]{formulaParameters}).get(formulaName)[0][1];
+    }
+
+    public double robustnessAt0(String formulaName, double[] formulaParameters) throws CommandExecutionException, StlModelGenerationException {
+        return this.quantitativeMonitorSignal(new String[]{formulaName}, new double[][]{formulaParameters}).get(formulaName)[0][1];
     }
 
     public Optional<CommandResult> executeSimulateCommand(Command cmd) throws CommandExecutionException {
@@ -402,7 +431,7 @@ public final class SibillaRuntime implements CommandHandler {
      * Set simulation deadline.
      *
      * @param deadline simulation deadline.
-     * @throws CommandExecutionException when the deadline is a non positive value.
+     * @throws CommandExecutionException when the deadline is a non-positive value.
      */
     public void setDeadline(double deadline) throws CommandExecutionException {
         if (deadline<=0) {
@@ -424,7 +453,7 @@ public final class SibillaRuntime implements CommandHandler {
      * Set sampling time.
      *
      * @param dt sampling time.
-     * @throws CommandExecutionException when the given sampling time is a non positive value.
+     * @throws CommandExecutionException when the given sampling time is a non-positive value.
      */
     public void setDt(double dt) throws CommandExecutionException {
         if (dt<=0) {
@@ -461,7 +490,7 @@ public final class SibillaRuntime implements CommandHandler {
     }
 
     /**
-     * Set a seed for the rundom generator.
+     * Set a seed for the random generator.
      *
      * @param seed the seed to use with the random generator.
      */
@@ -827,14 +856,4 @@ public final class SibillaRuntime implements CommandHandler {
         this.lastCollectedData = data;
     }
 
-//    @Override
-//    public CommandResult handle(Command command) throws CommandExecutionException {
-//        if (this.commandAdapter.handle(command)) {
-//            return true;
-//        }
-//        if (this.currentModule != null) {
-//            return this.currentModule.handle(command);
-//        }
-//        throw new CommandExecutionException(String.format(UNKNOWN_COMMAND_MESSAGE,command.name()));
-//    }
 }

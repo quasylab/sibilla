@@ -236,6 +236,17 @@ public class CSVWriter {
         return postfix;
     }
 
+    /**
+     * Saves the given SimulationData to a CSV file. The file will be placed in {@link #getOutputFolder()}.
+     * The name of the file will be <code>getPrefix()+data.getName()+getPostfix()+".csv"</code>.
+     *
+     * @param data SimulationData to be saved
+     * @param header boolean indicating whether to include a header row in the CSV file
+     * @throws FileNotFoundException if the file cannot be created or opened for writing
+     *
+     * The header row in the CSV file will contain the word "time" followed by the labels of each entry in the SimulationData.
+     * This makes the CSV file easier to understand and interpret by providing context for the data columns.
+     */
     public void write(SimulationData data, boolean header) throws FileNotFoundException {
         File output = new File(outputFolder,prefix+data.getName()+postfix+".csv");
         PrintWriter writer = new PrintWriter(output);
@@ -243,6 +254,16 @@ public class CSVWriter {
         writer.close();
     }
 
+    /**
+     * Writes the given SimulationData to a PrintWriter in CSV format. Optionally includes a header row.
+     *
+     * @param pw PrintWriter to which the CSV data is written
+     * @param data SimulationData to be written to CSV
+     * @param header boolean indicating whether to include a header row in the CSV output
+     *
+     * If header is true, the header row will contain the word "time" followed by the labels of each entry in the SimulationData.
+     * This helps to make the CSV output clearer and more understandable by indicating the meaning of each column.
+     */
     private void writeCSV(PrintWriter pw, SimulationData data, boolean header) {
         if (header) {
             pw.println(Stream.concat(Stream.of("time"), IntStream.range(0, data.getNumberOfEntries()).mapToObj(data::getLabel)).collect(Collectors.joining(", ")));
@@ -252,7 +273,18 @@ public class CSVWriter {
         });
     }
 
-
+    /**
+     * Saves a list of TracingData to a CSV file with the given label. The file will be placed in {@link #getOutputFolder()}.
+     * The name of the file will be <code>getPrefix()+label+getPostfix()+".csv"</code>.
+     *
+     * @param label String representing the label of the data
+     * @param data List of TracingData to be saved
+     * @param header boolean indicating whether to include a header row in the CSV file
+     * @throws FileNotFoundException if the file cannot be created or opened for writing
+     *
+     * The header row in the CSV file will contain the word "time" followed by the names of all fields in the TracingConstants.TracingFields enumeration.
+     * This makes the CSV file easier to understand and interpret by providing context for the data columns.
+     */
     public void write(String label, List<TracingData> data, boolean header) throws FileNotFoundException {
         File output = new File(outputFolder,prefix+label+postfix+".csv");
         PrintWriter writer = new PrintWriter(output);
@@ -260,6 +292,16 @@ public class CSVWriter {
         writer.close();
     }
 
+    /**
+     * Writes the given list of TracingData to a PrintWriter in CSV format. Optionally includes a header row.
+     *
+     * @param pw PrintWriter to which the CSV data is written
+     * @param data List of TracingData to be written to CSV
+     * @param header boolean indicating whether to include a header row in the CSV output
+     *
+     * If header is true, the header row will contain the word "time" followed by the names of all fields in the TracingConstants.TracingFields enumeration.
+     * This helps to make the CSV output clearer and more understandable by indicating the meaning of each column.
+     */
     private void writeCSV(PrintWriter pw, List<TracingData> data, boolean header) {
         if (header) {
             pw.println(Stream.concat(Stream.of("time"), Stream.of(TracingConstants.TracingFields.values()).map(f -> f.name().toLowerCase())).collect(Collectors.joining(",")));

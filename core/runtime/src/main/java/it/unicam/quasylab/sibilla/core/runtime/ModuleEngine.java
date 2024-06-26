@@ -33,20 +33,24 @@ import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeHandlerSupplier;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
-import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
+import it.unicam.quasylab.sibilla.core.tools.stl.QualitativeMonitor;
+import it.unicam.quasylab.sibilla.core.tools.stl.QuantitativeMonitor;
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
-import it.unicam.quasylab.sibilla.core.util.Signal;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
-import it.unicam.quasylab.sibilla.langs.stl.StlMonitorFactory;
+import it.unicam.quasylab.sibilla.langs.stl.StlModelGenerationException;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingData;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingFunction;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 
 public class ModuleEngine<S extends State> {
@@ -59,7 +63,7 @@ public class ModuleEngine<S extends State> {
     protected String selectedConfigurationName;
     private double[] selectedConfigurationArgs;
 
-    private StlMonitorFactory<S> monitorFactory;
+    protected SibillaSTLMonitorGenerator<S> stlMonitorGenerator;
 
     public ModuleEngine(ModelDefinition<S> modelDefinition) {
         this.modelDefinition = modelDefinition;
@@ -237,21 +241,74 @@ public class ModuleEngine<S extends State> {
         clear();
     }
 
+    public Map<String, ToDoubleFunction<S>> getMeasuresFunctionMapping() {
+        return currentModel.measuresFunctionMapping();
+    }
+
     public boolean isAMeasure(String name) {
         loadModel();
         return this.currentModel.getMeasure(name) != null;
     }
 
-    public BooleanSignal monitorQualitative(String name, double[] args, int replica) {
-        loadModel();
-        return null;
+    public Map<String, double[][]>  qualitativeMonitoring(SimulationEnvironment se,
+                                                          RandomGenerator rg,
+                                                          String[] formulaName,
+                                                          double[][] formulaArgs,
+                                                          double deadline,
+                                                          double dt,
+                                                          int replica) throws StlModelGenerationException {
+        Map<String, double[][]> result = new TreeMap<>();
+        for (int i = 0; i < formulaName.length; i++) {
+            QualitativeMonitor<S> formulaMonitor = stlMonitorGenerator.getQualitativeMonitor(formulaName[i], formulaArgs[i]);
+            Supplier<Trajectory<S>> trajectoryProvider = () -> se.sampleTrajectory(rg, currentModel, state.apply(rg), deadline);
+            result.put(formulaName[i], QualitativeMonitor.computeTimeSeriesProbabilities(formulaMonitor,trajectoryProvider,replica,dt,deadline));
+        }
+        return  result;
+
     }
 
 
-    public Signal quantitativeMonitor(String name, double[] args, int replica) {
+    /**
+     * Performs quantitative monitoring using a single formula.
+     *
+     * @param simulationEnvironment The simulation environment used to generate trajectories.
+     * @param rg The random generator used to sample trajectories.
+     * @param formulaName The name of the formula used for monitoring.
+     * @param formulaArgs The arguments for the formula.
+     * @param deadline The deadline.
+     * @param dt The time step increment.
+     * @param replica The number of replicas to run.
+     * @return A map where the key is the formula name and the value is a double[][] array, where:
+     *         - results[i][0] is the time step
+     *         - results[i][1] is the mean robustness at the time step
+     *         - results[i][2] is the standard deviation of robustness at the time step
+     * @throws StlModelGenerationException If there is an error generating the formula monitor.
+     */
+    public Map<String, double[][]> quantitativeMonitoring(SimulationEnvironment simulationEnvironment,
+                                                          RandomGenerator rg,
+                                                          String[] formulaName,
+                                                          double[][] formulaArgs,
+                                                          double deadline,
+                                                          double dt,
+                                                          int replica) throws StlModelGenerationException {
         loadModel();
-        return null;
+        setDefaultConfiguration();
+        Map<String, double[][]> result = new TreeMap<>();
+        for (int i = 0; i < formulaName.length; i++) {
+            QuantitativeMonitor<S> formulaMonitor = stlMonitorGenerator.getQuantitativeMonitor(formulaName[i], formulaArgs[i]);
+            Supplier<Trajectory<S>> trajectoryProvider = () -> {
+                Trajectory<S> trajectory = simulationEnvironment.sampleTrajectory(rg, currentModel, state.apply(rg), deadline);
+                trajectory.setEnd(deadline);
+                return trajectory;
+            };
+            //simulationEnvironment.sampleTrajectory(rg, currentModel, state.apply(rg), deadline);
+            result.put(formulaName[i], QuantitativeMonitor.meanAndStandardDeviationRobustness(formulaMonitor,trajectoryProvider,replica,dt,deadline));
+        }
+        return  result;
+
     }
+
+
 
     public List<SimulationData> trace(SimulationEnvironment simulationEnvironment,
                                       RandomGenerator rg,
@@ -276,5 +333,13 @@ public class ModuleEngine<S extends State> {
         Map<String, List<TracingData>> result = new HashMap<>();
         traceFunctions.forEach((name, np) -> result.put(name, trajectory.stream().map(s -> tracingFunction.apply(np.apply(s.getValue()), s.getTime())).toList()));
         return result;
+    }
+
+    public void generateMonitor(String code) {
+        this.stlMonitorGenerator = new SibillaSTLMonitorGenerator<>(code, getMeasuresFunctionMapping());
+    }
+
+    public void generateMonitor(File file) throws  IOException {
+        this.stlMonitorGenerator = new SibillaSTLMonitorGenerator<>(file, getMeasuresFunctionMapping());
     }
 }
