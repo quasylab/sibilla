@@ -284,7 +284,33 @@ public class YodaExpressionEvaluator extends YodaModelBaseVisitor<Function<YodaE
         }
     }
 
+    @Override
+    public Function<YodaExpressionEvaluationContext, SibillaValue> visitExpressionDistance(YodaModelParser.ExpressionDistanceContext ctx) {
+        Function<YodaExpressionEvaluationContext, SibillaValue> v1 = ctx.a1.accept(this);
+        Function<YodaExpressionEvaluationContext, SibillaValue> v2 = ctx.a2.accept(this);
+        Function<YodaExpressionEvaluationContext, SibillaValue> v3 = ctx.a3.accept(this);
+        Function<YodaExpressionEvaluationContext, SibillaValue> v4 = ctx.a4.accept(this);
+        return arg -> SibillaValue.distance(
+                SibillaValue.of(v1.apply(arg).doubleOf()),
+                SibillaValue.of(v2.apply(arg).doubleOf()),
+                SibillaValue.of(v3.apply(arg).doubleOf()),
+                SibillaValue.of(v4.apply(arg).doubleOf())
+                );
+    }
 
+    @Override
+    public Function<YodaExpressionEvaluationContext, SibillaValue> visitExpressionAngleOf(YodaModelParser.ExpressionAngleOfContext ctx) {
+        Function<YodaExpressionEvaluationContext, SibillaValue> v1 = ctx.a1.accept(this);
+        Function<YodaExpressionEvaluationContext, SibillaValue> v2 = ctx.a2.accept(this);
+        Function<YodaExpressionEvaluationContext, SibillaValue> v3 = ctx.a3.accept(this);
+        Function<YodaExpressionEvaluationContext, SibillaValue> v4 = ctx.a4.accept(this);
+        return arg -> SibillaValue.angleOf(
+                SibillaValue.of(v1.apply(arg).doubleOf()),
+                SibillaValue.of(v2.apply(arg).doubleOf()),
+                SibillaValue.of(v3.apply(arg).doubleOf()),
+                SibillaValue.of(v4.apply(arg).doubleOf())
+        );
+    }
 
     @Override
     public Function<YodaExpressionEvaluationContext, SibillaValue> visitExpressionAdditionalOperation(YodaModelParser.ExpressionAdditionalOperationContext ctx) {

@@ -82,9 +82,9 @@ attributeUpdate:
 
 behaviourDeclaration: ('when' cases+=ruleCase ('orwhen' cases+=ruleCase)* 'otherwise')? ('[' defaultcase+=weightedAction* ']')?;
 
-ruleCase: guard=expr '->' '[' actions+=weightedAction* ']';
+ruleCase: guard=expr '->' '[' (actions+=weightedAction)* ']';
 
-weightedAction: actionName=ID ':' weight=expr ;
+weightedAction: actionName=ID ':' weight=expr ';' ;
 
 //SYSTEM GRAMMAR
 
@@ -163,6 +163,8 @@ expr    : INTEGER                                                            # e
         | 'floor' '(' argument=expr ')'                                      # expressionFloor
         | 'abs' '(' argument=expr ')'                                        # expressionAbsolute
         | 'PI'                                                               # expressionPi
+        | 'distance' '(' a1=expr ',' a2=expr ',' a3=expr ',' a4=expr ')'     # expressionDistance
+        | 'angleOf' '(' a1=expr ',' a2=expr ',' a3=expr ',' a4=expr ')'      # expressionAngleOf
 ;
 
 

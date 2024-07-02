@@ -1,0 +1,52 @@
+param nSus = 10;
+param nInf = 3;
+param er = 0.75;
+param ir = 0.3;
+param rr = 0.75;
+param tolerance = 1.5;
+param speed = 1;
+
+agent Agent =
+    state:
+        bool exposed = false;
+        bool infected = false;
+        real dir = 0.0;
+    features:
+        bool contagious = false;
+        real x = 0.0;
+        real z = 0.0;
+    observations:
+        bool contact = false;
+    actions:
+        move [dir <- U[ 0.0 , (2 * PI)];]
+        getExposed [dir <- U[ 0.0 , (2 * PI)]; exposed <- true;]
+        getInfected [dir <- U[ 0.0 , (2 * PI)]; exposed <- false; infected <- true;]
+        recover [dir <- U[ 0.0 , (2 * PI)]; infected <- false;]
+    behaviour:
+        when contact && (!exposed) && (!infected) -> [ getExposed : er; move : (1-er); ]
+        orwhen exposed -> [ getInfected : ir; move : (1-ir);]
+        orwhen infected -> [ recover : rr; move : (1-rr);]
+        otherwise [ move:1; ]
+end
+
+environment :
+    sensing:
+        Agent [
+            contact <- (any Agent : contagious) && (any Agent : distance(it.x, it.z, x, z) < tolerance);
+        ]
+    dynamic:
+        Agent [
+            contagious <- infected;
+            x <- (x + cos(dir)) * speed;
+            z <- (z + sin(dir)) * speed;
+        ]
+end
+
+configuration Main :
+    for i sampled distinct nSus time from U[0,10] do
+        Agent [ x = i; z = i; contagious = false;]
+    endfor
+    for j sampled distinct nInf time from U[0,10] do
+        Agent [ x = j; z = j; contagious = true;]
+    endfor
+end

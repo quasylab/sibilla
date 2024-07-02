@@ -21,9 +21,9 @@ agent Finder =
         roam [ dirx <- U[-1.0 , 1.0]; diry <- U[-1.0 , 1.0]; found <- false; ]
         moveto [ dirx <- cos(angle); diry <- sin(angle); found <- false; ]
     behaviour:
-        when target_sensor -> [ stop:1 ]
-        orwhen toTarget -> [ moveto:1 ]
-        otherwise [ roam:1 ]
+        when target_sensor -> [ stop:1; ]
+        orwhen toTarget -> [ moveto:1; ]
+        otherwise [ roam:1; ]
 end
 
 element Target =

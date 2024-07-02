@@ -223,4 +223,14 @@ public class YodaScalarExpressionEvaluator extends YodaModelBaseVisitor<SibillaV
     public SibillaValue visitExpressionWeightedRandom(YodaModelParser.ExpressionWeightedRandomContext ctx) {
         return SibillaValue.weightedRnd(ctx.min.accept(this), ctx.max.accept(this));
     }
+
+    @Override
+    public SibillaValue visitExpressionDistance(YodaModelParser.ExpressionDistanceContext ctx) {
+        return SibillaValue.distance(ctx.a1.accept(this), ctx.a2.accept(this), ctx.a3.accept(this), ctx.a4.accept(this));
+    }
+
+    @Override
+    public SibillaValue visitExpressionAngleOf(YodaModelParser.ExpressionAngleOfContext ctx) {
+        return SibillaValue.angleOf(ctx.a1.accept(this), ctx.a2.accept(this), ctx.a3.accept(this), ctx.a4.accept(this));
+    }
 }

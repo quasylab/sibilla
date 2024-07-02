@@ -514,6 +514,38 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         return recordType;
     }
 
+    @Override
+    public YodaType visitExpressionDistance(YodaModelParser.ExpressionDistanceContext ctx) {
+        YodaType a1Type = ctx.a1.accept(this);
+        YodaType a2Type = ctx.a2.accept(this);
+        YodaType a3Type = ctx.a3.accept(this);
+        YodaType a4Type = ctx.a4.accept(this);
+        YodaType[] args = new YodaType[]{a1Type, a2Type, a3Type, a4Type};
+        for (YodaType arg : args) {
+            if (!arg.isNumericType()) {
+                errors.record(ParseUtil.illegalTypeError(arg, ctx));
+                return YodaType.NONE_TYPE;
+            }
+        }
+        return YodaType.REAL_TYPE;
+    }
+
+    @Override
+    public YodaType visitExpressionAngleOf(YodaModelParser.ExpressionAngleOfContext ctx) {
+        YodaType a1Type = ctx.a1.accept(this);
+        YodaType a2Type = ctx.a2.accept(this);
+        YodaType a3Type = ctx.a3.accept(this);
+        YodaType a4Type = ctx.a4.accept(this);
+        YodaType[] args = new YodaType[]{a1Type, a2Type, a3Type, a4Type};
+        for (YodaType arg : args) {
+            if (!arg.isNumericType()) {
+                errors.record(ParseUtil.illegalTypeError(arg, ctx));
+                return YodaType.NONE_TYPE;
+            }
+        }
+        return YodaType.REAL_TYPE;
+    }
+
     private void checkAllFieldsAreAssigned(YodaType.RecordType recordType, YodaModelParser.ExpressionRecordContext ctx) {
         Set<String> fields = recordType.getFields();
         if (fields.size() != ctx.fieldAssignment().size()) {

@@ -400,10 +400,10 @@ class YodaExamplesTest {
     public void shouldSimulateFlock() throws CommandExecutionException, IOException, URISyntaxException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/flock-rh.yoda"));
-        sr.setParameter("nbirds", 5);
+        sr.setParameter("nbirds", 500);
         sr.setConfiguration("Main");
         sr.setDeadline(100);
-        sr.trace(getResource("yoda/flock.trc"), "./results/", true);
+        sr.trace(getResource("yoda/flock.trc"), "./results/", false);
     }
 
     @Test
@@ -505,6 +505,7 @@ class YodaExamplesTest {
 
 
     @Test
+    @Disabled
     public void testFlockMonitor()throws YodaModelGenerationException, URISyntaxException, IOException {
         YodaModelGenerator generator = loadModelGenerator("yoda/flock-rh.yoda");
         YodaModelDefinition yodaModelDefinition = generator.getYodaModelDefinition();
@@ -545,7 +546,7 @@ class YodaExamplesTest {
         System.out.println("phil_50 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
     }
 
-        @Test
+    @Test
     @Disabled
     public void testFlockAlign()throws YodaModelGenerationException, URISyntaxException, IOException {
         YodaModelGenerator generator = loadModelGenerator("yoda/flock-rh.yoda");
@@ -589,5 +590,21 @@ class YodaExamplesTest {
     }
 
     /* END TESTS ON FLOCK */
+
+
+    /* BEGIN TESTS ON SEIR */
+
+    @Test
+//    @Disabled
+    public void shouldSimulateSEIR() throws CommandExecutionException, IOException, URISyntaxException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/seir.yoda"));
+        sr.setConfiguration("Main");
+        sr.setDeadline(100);
+        sr.trace(getResource("yoda/seir.trc"),"./results/", false);
+        //sr.simulate("FinderBot");
+    }
+
+
 
 }

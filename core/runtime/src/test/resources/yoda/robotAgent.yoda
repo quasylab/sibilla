@@ -23,11 +23,11 @@ agent Robot =
         moveWest [ dirx <- -1; diry <- 0;]
         stop [ dirx <- 0; diry <- 0; ]
     behaviour :
-        when goal -> [ stop: 1 ]
-        orwhen !north -> [ moveNorth: 1 ]
-        orwhen !east -> [ moveEast: 1 ]
-        orwhen !west -> [ moveWest: 1 ]
-        otherwise [ stop: 1 ]
+        when goal -> [ stop: 1 ;]
+        orwhen !north -> [ moveNorth: 1 ;]
+        orwhen !east -> [ moveEast: 1 ;]
+        orwhen !west -> [ moveWest: 1 ;]
+        otherwise [ stop: 1 ;]
 end
 
 element Obstacle =
@@ -53,7 +53,7 @@ environment:
 
  configuration Main :
     for i sampled distinct na time from floor(U[0, width]) do
-        Robot[ x = i ; y = floor(U[0, height]) ; ]
+        Robot[ x = i ; y = 0 ; ]
     endfor
     for o sampled distinct no time from floor(U[0, width]) do
        Obstacle[ posx = o; posy = floor(U[2, height]); ]

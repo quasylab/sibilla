@@ -251,6 +251,18 @@ public interface SibillaValue {
         return (r, t) -> op.apply(function.apply(r, t));
     }
 
+    static SibillaValue distance(SibillaValue v1, SibillaValue v2, SibillaValue v3, SibillaValue v4) {
+        SibillaValue x = sub(v1, v3);
+        SibillaValue y = sub(v2, v4);
+        return new SibillaDouble(Math.sqrt(Math.pow(x.doubleOf(), 2) + Math.pow(y.doubleOf(), 2)));
+    }
+
+    static SibillaValue angleOf(SibillaValue v1, SibillaValue v2, SibillaValue v3, SibillaValue v4) {
+        SibillaValue x = sub(v1, v3);
+        SibillaValue y = sub(v2, v4);
+        return new SibillaDouble(Math.atan2(y.doubleOf(), x.doubleOf()));
+    }
+
 
     /**
      * Returns the double representation of this value. {@link Double#NaN} is returned if this
