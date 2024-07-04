@@ -1,11 +1,11 @@
 package it.unicam.quasylab.sibilla.core.runtime;
 
 import it.unicam.quasylab.sibilla.core.models.State;
-import it.unicam.quasylab.sibilla.core.tools.stl.QualitativeMonitor;
-import it.unicam.quasylab.sibilla.core.tools.stl.QuantitativeMonitor;
-import it.unicam.quasylab.sibilla.langs.stl.StlLoader;
-import it.unicam.quasylab.sibilla.langs.stl.StlModelGenerationException;
-import it.unicam.quasylab.sibilla.langs.stl.StlMonitorFactory;
+import it.unicam.quasylab.sibilla.tools.stl.QualitativeMonitor;
+import it.unicam.quasylab.sibilla.tools.stl.QuantitativeMonitor;
+import it.unicam.quasylab.sibilla.tools.stl.StlLoader;
+import it.unicam.quasylab.sibilla.tools.stl.StlModelGenerationException;
+import it.unicam.quasylab.sibilla.tools.stl.StlMonitorFactory;
 import org.antlr.v4.runtime.CharStreams;
 
 import java.io.File;

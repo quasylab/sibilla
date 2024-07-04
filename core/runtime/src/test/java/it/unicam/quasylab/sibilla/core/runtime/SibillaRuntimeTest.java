@@ -24,7 +24,7 @@
 package it.unicam.quasylab.sibilla.core.runtime;
 
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
-import it.unicam.quasylab.sibilla.langs.stl.StlModelGenerationException;
+import it.unicam.quasylab.sibilla.tools.stl.StlModelGenerationException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

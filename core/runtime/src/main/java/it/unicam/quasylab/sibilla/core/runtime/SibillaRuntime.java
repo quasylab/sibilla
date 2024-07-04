@@ -30,7 +30,7 @@ import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
-import it.unicam.quasylab.sibilla.langs.stl.StlModelGenerationException;
+import it.unicam.quasylab.sibilla.tools.stl.StlModelGenerationException;
 import it.unicam.quasylab.sibilla.tools.tracing.TraceSpecificationEvaluator;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingData;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingFunction;
