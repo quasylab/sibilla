@@ -1,0 +1,54 @@
+param nRed = 5;
+param nBlue = 5;
+param tolerance = 1;
+param speed = 1;
+
+agent Supporter =
+    state :
+        real direction = 0.0;
+        bool switchParty = false;
+    features :
+        bool redParty = false;
+        bool blueParty = false;
+        real x = 0.0;
+        real z = 0.0;
+    observations :
+        bool challenged = false;
+    actions :
+        changeParty [direction <- U[0.0, 2*PI]; switchParty <- true;]
+        move [direction <- U[0.0, 2*PI]; switchParty <- false;]
+    behaviour :
+        when challenged -> [changeParty:1;]
+        otherwise [move:1;]
+end
+
+environment :
+    sensing :
+        Supporter[
+            let actualBlue = # Supporter[blueParty && (distance(x,z,it.x,it.z)<tolerance)]
+            and actualRed = # Supporter[redParty && (distance(x,z,it.x,it.z)<tolerance)]
+            in
+                if ((it.redParty && (actualBlue>actualRed))||(it.blueParty && (actualBlue<actualRed))) then
+                    challenged <- true;
+                else
+                    challenged <- false;
+                endif
+            endlet
+        ]
+    dynamic :
+        Supporter[
+            x <- (x + cos(direction)) * speed;
+            z <- (z + sin(direction)) * speed;
+            redParty <-(redParty && !switchParty)||(!redParty && switchParty);
+            blueParty <-(blueParty && !switchParty)||(!blueParty && switchParty);
+        ]
+end
+
+configuration Main :
+    for i sampled distinct nRed time from U[0,10] do
+        Supporter[redParty = true; blueParty = false; x = i; z = U[0,10];]
+    endfor
+    for j sampled distinct nBlue time from U[0,10] do
+        Supporter[redParty = false; blueParty = true; x = j; z = U[0,10];]
+    endfor
+end

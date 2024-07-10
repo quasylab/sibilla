@@ -3,7 +3,6 @@ package it.unicam.quasylab.sibilla.core.runtime;
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.yoda.*;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
-import it.unicam.quasylab.sibilla.core.simulator.DiscreteTimeSimulationStepFunction;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
 import it.unicam.quasylab.sibilla.core.tools.glotl.GLoTLStatisticalModelChecker;
 import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalAlwaysFormula;
@@ -595,7 +594,7 @@ class YodaExamplesTest {
     /* BEGIN TESTS ON SEIR */
 
     @Test
-//    @Disabled
+    @Disabled
     public void shouldSimulateSEIR() throws CommandExecutionException, IOException, URISyntaxException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/seir.yoda"));
@@ -605,6 +604,59 @@ class YodaExamplesTest {
         //sr.simulate("FinderBot");
     }
 
+    @Test
+    @Disabled
+    public void testSEIRMonitor() throws IOException, URISyntaxException, YodaModelGenerationException {
+        YodaModelGenerator generator = loadModelGenerator("yoda/seir.yoda");
+        YodaModelDefinition definition = generator.getYodaModelDefinition();
+        YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
+        GLoTLStatisticalModelChecker smc = new GLoTLStatisticalModelChecker();
+
+        DefaultRandomGenerator drg = new DefaultRandomGenerator();
+        Function<RandomGenerator, YodaSystemState> initialState;
+
+        definition.setParameter("nSus", SibillaValue.of(99));
+        definition.setParameter("nInf", SibillaValue.of(1));
+        initialState=definition.getDefaultConfiguration();
+        System.out.println("phig_1Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r), initialState, getEventuallySEIRFormula(1, 10, variableRegistry),30, 100)));
+        System.out.println("phil_1Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r), initialState, getEventuallyLocalSEIRFormula(1, 10, 10, variableRegistry),30, 100 )));
+
+        definition.setParameter("nSus", SibillaValue.of(95));
+        definition.setParameter("nInf", SibillaValue.of(5));
+        initialState=definition.getDefaultConfiguration();
+        System.out.println("phig_5Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r), initialState, getEventuallySEIRFormula(1, 10, variableRegistry),30, 100)));
+        System.out.println("phil_5Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r), initialState, getEventuallyLocalSEIRFormula(1, 10, 10, variableRegistry),30, 100 )));
+
+        definition.setParameter("nSus", SibillaValue.of(90));
+        definition.setParameter("nInf", SibillaValue.of(10));
+        initialState=definition.getDefaultConfiguration();
+        System.out.println("phig_10Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r), initialState, getEventuallySEIRFormula(1, 10, variableRegistry),30, 100)));
+        System.out.println("phil_10Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r), initialState, getEventuallyLocalSEIRFormula(1, 10, 10, variableRegistry),30, 100 )));
+
+    }
 
 
+    private IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getEventuallyLocalSEIRFormula(int delta, int ks, int k, YodaVariableRegistry variableRegistry) {
+        return null;
+    }
+
+    private IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getEventuallySEIRFormula(int delta, int ks, YodaVariableRegistry variableRegistry) {
+        return null;
+    }
+
+    /* END TESTS ON SEIR */
+
+    /* BEGIN TESTS ON RB */
+    @Test
+
+    public void shouldSimulateRedBlue() throws CommandExecutionException, IOException, URISyntaxException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/redblue.yoda"));
+        sr.setConfiguration("Main");
+        sr.setParameter("nRed", 70);
+        sr.setParameter("nBlue", 30);
+        sr.setDeadline(100);
+        sr.trace(getResource("yoda/redblue.trc"),"./results/", false);
+        //sr.simulate("FinderBot");
+    }
 }

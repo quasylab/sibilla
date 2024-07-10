@@ -145,6 +145,7 @@ public class YodaExpressionEvaluationSensingContext implements YodaExpressionEva
         return agent.get(name);
     }
 
+
     @Override
     public SibillaValue count(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> guard) {
         return system.count(group, other -> guard.apply(new YodaExpressionEvaluationAgentPredicateContext(agent, other)).booleanOf());

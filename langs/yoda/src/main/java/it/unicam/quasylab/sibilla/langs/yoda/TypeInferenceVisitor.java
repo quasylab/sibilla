@@ -280,7 +280,25 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
             }
         }
         return YodaType.NONE_TYPE;
+    }
 
+    private YodaType checkGroupExpression(YodaModelParser.ExprContext ctx, Token groupName, YodaModelParser.ExprContext guard){
+        if (groupExpressionsAllowed) {
+            Predicate<String> validAttributePredicate = getValidGroupPredicate(groupName);
+            TypeInferenceVisitor visitor = new TypeInferenceVisitor(this.errors,typeFunction, elementAttributeTable, fieldsRecordType, validAttributePredicate, validItAttributePredicates, false, false);
+            if (guard==null|| visitor.checkType(YodaType.BOOLEAN_TYPE,guard)) {
+                return YodaType.REAL_TYPE;
+            }
+        }
+        return YodaType.NONE_TYPE;
+    }
+
+    @Override
+    public YodaType visitExpressionCount(YodaModelParser.ExpressionCountContext ctx) {
+        if (groupExpressionsAllowed){
+            return checkGroupExpression(ctx, ctx.groupName, ctx.guard);
+        }
+        return YodaType.NONE_TYPE;
     }
 
     private Predicate<String> getValidGroupPredicate(Token groupName) {
@@ -329,6 +347,8 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         }
         return YodaType.NONE_TYPE;
     }
+
+
 
     private YodaType checkGroupPredicateExpression(YodaModelParser.ExprContext ctx, Token groupName, YodaModelParser.ExprContext expr) {
         Predicate<String> validAttributePredicate = getValidGroupPredicate(groupName);

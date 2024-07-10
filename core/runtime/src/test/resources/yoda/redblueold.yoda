@@ -1,0 +1,77 @@
+param nRed = 3;
+param nBlue = 3;
+param nUnc = 10;
+
+param rate = 0.5;
+param tolerance = 0.1;
+param speed = 1;
+
+agent Supporter =
+    state :
+        bool red = false;
+        bool blue = false;
+        bool unc = false;
+        real direction = 0.0;
+    features :
+        bool redSide = false;
+        bool blueSide = false;
+        bool noSide = false;
+        real x = 0.0;
+        real z = 0.0;
+    observations :
+        bool meetRed = false;
+        bool meetBlue = false;
+    actions :
+        move [direction <- U[ 0.0 , (2 * PI)];]
+        turnRed [direction <- U[ 0.0 , (2 * PI)]; red <- true; blue <- false; unc <- false;]
+        turnBlue [direction <- U[ 0.0 , (2 * PI)]; red <- false; blue <- true; unc <- false;]
+        turnUnc [direction <- U[ 0.0 , (2 * PI)]; red <- false; blue <- false; unc <- true;]
+    behaviour:
+        when ((meetRed && blue) || (meetBlue && red)) -> [turnUnc : 1;]
+        orwhen (meetRed && unc) -> [turnRed : 1;]
+        orwhen (meetBlue && unc) -> [turnBlue : 1;]
+        otherwise [move : 1;]
+end
+
+environment :
+    sensing :
+        Supporter [
+            let actualBlue = # Supporter[blueSide && (distance(x,z,it.x,it.z)<tolerance)]
+            and actualRed = # Supporter[redSide && (distance(x,z,it.x,it.z)<tolerance)]
+            in
+            if ((actualBlue!=0.0) && (actualRed!=0.0))then
+                if (actualBlue == actualRed) then
+                    meetRed <- false;
+                    meetBlue <- false;
+                endif
+                if (actualBlue < actualRed) then
+                    meetRed <- true;
+                    meetBlue <- false;
+                else
+                    meetRed <- false;
+                    meetBlue <- true;
+                endif
+            endif
+            endlet
+        ]
+    dynamic :
+        Supporter [
+            x <- (x + cos(direction)) * speed;
+            z <- (z + sin(direction)) * speed;
+            redSide <- red;
+            blueSide <- blue;
+            noSide <- unc;
+        ]
+end
+
+configuration Main :
+    for i sampled distinct nUnc time from U[0, nUnc] do
+        Supporter [x = i; z = i; noSide = true;]
+    endfor
+    for j sampled distinct nRed time from U[0, nRed] do
+        Supporter [x = j; z = j; redSide = true;]
+    endfor
+    for k sampled distinct nBlue time from U[0,nBlue] do
+        Supporter [x = k; z = k; blueSide = true; ]
+    endfor
+end

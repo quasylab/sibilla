@@ -1,0 +1,6 @@
+shape =  triangle;
+colour = {
+    when redParty : red;
+    when blueParty : blue;
+    otherwise gray;
+}
