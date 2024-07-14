@@ -111,29 +111,36 @@ public class YodaModelGenerator {
         }
         return new YodaModelDefinition(
                 getEvaluationEnvironment(),
-                this::getMeasures,
-                this::getPredicates,
-                this::getSystemStates
+                new YodaModelGeneratorElementProvider()
         );
     }
 
-    private ParametricDataSet<Function<RandomGenerator, YodaSystemState>> getSystemStates(EvaluationEnvironment environment) {
-        YodaConfigurationsGenerator generator = new YodaConfigurationsGenerator(environment.getEvaluator(), getYodaAgentsDefinitions(environment.getEvaluator()), getYodaVariableRegistry(), getYodaElementNameRegistry() );
+    protected ParametricDataSet<Function<RandomGenerator, YodaSystemState>> generateSystemStates(Function<String, Optional<YodaFunction>> functions, EvaluationEnvironment environment) {
+        YodaConfigurationsGenerator generator = new YodaConfigurationsGenerator(functions,
+                environment.getEvaluator(),
+                getYodaAgentsDefinitions(functions, environment.getEvaluator()), getYodaVariableRegistry(), getYodaElementNameRegistry() );
         this.parseTree.accept(generator);
         return generator.getGeneratedConfigurations();
     }
 
-    private Map<String, Predicate<YodaSystemState>> getPredicates(EvaluationEnvironment environment) {
-        YodaPredicateGenerator generator = new YodaPredicateGenerator(environment.getEvaluator(), getYodaVariableRegistry(), getYodaElementNameRegistry());
+    protected Map<String, Predicate<YodaSystemState>> generatePredicates(Function<String, Optional<YodaFunction>> functions, EvaluationEnvironment environment) {
+        YodaPredicateGenerator generator = new YodaPredicateGenerator(functions, environment.getEvaluator(), getYodaVariableRegistry(), getYodaElementNameRegistry());
         this.parseTree.accept(generator);
         return generator.getPredicates();
     }
 
-    private Map<String, Measure<YodaSystemState>> getMeasures(EvaluationEnvironment environment) {
-        YodaMeasuresGenerator generator = new YodaMeasuresGenerator(environment.getEvaluator(), getYodaVariableRegistry(), getYodaElementNameRegistry());
+    protected Map<String, Measure<YodaSystemState>> generateMeasures(Function<String, Optional<YodaFunction>> functions, EvaluationEnvironment environment) {
+        YodaMeasuresGenerator generator = new YodaMeasuresGenerator(functions, environment.getEvaluator(), getYodaVariableRegistry(), getYodaElementNameRegistry());
         this.parseTree.accept(generator);
         return generator.getMeasures();
     }
+
+    public Function<String, Optional<YodaFunction>> generateDeclaredFunctions(EvaluationEnvironment evaluationEnvironment) {
+        YodaFunctionGenerator yodaFunctionGenerator = new YodaFunctionGenerator(evaluationEnvironment.getEvaluator(), getYodaVariableRegistry());
+        this.parseTree.accept(yodaFunctionGenerator);
+        return yodaFunctionGenerator::getFunction;
+    }
+
 
     public EvaluationEnvironment getEvaluationEnvironment() throws YodaModelGenerationException {
         ConstantsAndParametersEvaluator evaluator = new ConstantsAndParametersEvaluator();
@@ -160,8 +167,8 @@ public class YodaModelGenerator {
         return this.elementNameRegistry;
     }
 
-    public YodaAgentsDefinitions getYodaAgentsDefinitions(Function<String, Optional<SibillaValue>> nameResolver) {
-        YodaAgentsDefinitionsGenerator generator = new YodaAgentsDefinitionsGenerator(this.elementNameRegistry, getYodaVariableRegistry(), nameResolver);
+    public YodaAgentsDefinitions getYodaAgentsDefinitions(Function<String, Optional<YodaFunction>> functions, Function<String, Optional<SibillaValue>> nameResolver) {
+        YodaAgentsDefinitionsGenerator generator = new YodaAgentsDefinitionsGenerator(functions, this.elementNameRegistry, getYodaVariableRegistry(), nameResolver);
         this.parseTree.accept(generator);
         return generator.getAgentsDefinitions();
     }
@@ -177,5 +184,31 @@ public class YodaModelGenerator {
         };
     }
 
+    class YodaModelGeneratorElementProvider implements YodaModelElementProvider {
+
+        private EvaluationEnvironment evaluationEnvironment;
+        private Function<String, Optional<YodaFunction>> functions;
+
+        @Override
+        public void setEvaluationEnvironment(EvaluationEnvironment evaluationEnvironment) {
+            this.evaluationEnvironment = evaluationEnvironment;
+            this.functions = generateDeclaredFunctions(evaluationEnvironment);
+        }
+
+        @Override
+        public Map<String, Measure<YodaSystemState>> getMeasures() {
+            return generateMeasures(functions, evaluationEnvironment);
+        }
+
+        @Override
+        public Map<String, Predicate<YodaSystemState>> getPredicates() {
+            return generatePredicates(functions, evaluationEnvironment);
+        }
+
+        @Override
+        public ParametricDataSet<Function<RandomGenerator, YodaSystemState>> getSystemStates() {
+            return generateSystemStates(functions, evaluationEnvironment);
+        }
+    }
 
 }

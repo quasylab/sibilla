@@ -18,7 +18,13 @@ element : constantDeclaration
         | configurationDeclaration
         | functionDeclaration;
 
-functionDeclaration: 'let' name=ID '(' (types += type args += ID (',' types += type args += ID)*)? ')' '=' expr;
+functionDeclaration: 'let' name=ID '(' (types += type args += ID (',' types += type args += ID)*)? ')' '=' functionStatement 'end';
+
+functionStatement:
+    'let' names += ID '=' values += expr ('and' names += ID '=' values += expr)* 'in' functionStatement 'endlet'                                  # functionStatementLet
+    | 'if' guard=expr 'then' thenStatement=functionStatement 'else' elseStatement=functionStatement 'endif' # functionStatementIfThenElse
+    | 'return' expr                                                             # functionStatementReturn
+;
 
 measureDeclaration: 'measure' name=ID '=' measure=expr;
 
@@ -138,6 +144,7 @@ expr    : INTEGER                                                            # e
         | leftOp=expr '->' rightOp=expr                                      # expressionImplication
         | leftOp=expr oper=('<'|'<='|'=='|'!='|'>='|'>') rightOp=expr        # expressionRelation
         | guardExpr=expr '?' thenBranch=expr ':' elseBranch=expr             # expressionIfThenElse
+        | 'if' '(' guardExpr=expr ')' thenBranch=expr 'else' elseBranch=expr # expressionIfThenElse
         | '[' fieldAssignment (',' fieldAssignment)* ']'                     # expressionRecord
         | 'U''['min=expr',' max=expr']'                                      # expressionWeightedRandom
         | 'rnd'                                                              # expressionRandom

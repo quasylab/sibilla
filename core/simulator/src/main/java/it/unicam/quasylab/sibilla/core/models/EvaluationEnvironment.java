@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models;
 
+import it.unicam.quasylab.sibilla.core.util.values.SibillaType;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.beans.PropertyChangeListener;
@@ -47,7 +48,6 @@ public class EvaluationEnvironment {
     private Map<String, SibillaValue> values;
     private final PropertyChangeSupport changer;
     private boolean isChanged = false;
-
 
 
     public EvaluationEnvironment() {

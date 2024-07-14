@@ -23,19 +23,19 @@
 
 package it.unicam.quasylab.sibilla.langs.yoda;
 
-import it.unicam.quasylab.sibilla.core.models.yoda.YodaElementName;
-import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariable;
-import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariableRegistry;
+import it.unicam.quasylab.sibilla.core.models.yoda.*;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaBoolean;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaRecord;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -45,17 +45,25 @@ public class YodaExpressionEvaluator extends YodaModelBaseVisitor<Function<YodaE
 
     private final Function<String, Optional<SibillaValue>> constantsAndParameters;
 
+    private final Function<String, Optional<YodaFunction>> functions;
+
     private final YodaVariableRegistry registry;
     private final Function<String, Set<YodaElementName>> groupSolver;
 
-    public YodaExpressionEvaluator(Function<String, Optional<SibillaValue>> constantsAndParameters, YodaVariableRegistry registry, Function<String, Set<YodaElementName>> groupSolver) {
+    public YodaExpressionEvaluator(Function<String, Optional<YodaFunction>> functions,
+                                   Function<String, Optional<SibillaValue>> constantsAndParameters,
+                                   YodaVariableRegistry registry, Function<String,
+                                   Set<YodaElementName>> groupSolver) {
         this.constantsAndParameters = constantsAndParameters;
         this.registry = registry;
         this.groupSolver = groupSolver;
+        this.functions = functions;
     }
 
-    public YodaExpressionEvaluator(Function<String, Optional<SibillaValue>> constantsAndParameters, YodaVariableRegistry variableRegistry) {
-        this(constantsAndParameters, variableRegistry, s -> Set.of());
+    public YodaExpressionEvaluator(Function<String, Optional<YodaFunction>> functions,
+                                   Function<String, Optional<SibillaValue>> constantsAndParameters,
+                                   YodaVariableRegistry variableRegistry) {
+        this(functions, constantsAndParameters, variableRegistry, s -> Set.of());
     }
 
     @Override
@@ -71,7 +79,20 @@ public class YodaExpressionEvaluator extends YodaModelBaseVisitor<Function<YodaE
         if (oValue.isPresent()) {
             SibillaValue v = oValue.get();
             return arg -> v;
-        } else {
+        }
+        Optional<YodaFunction> fValue = functions.apply(name);
+        if (fValue.isPresent()) {
+            YodaFunction f = fValue.get();
+            List<Function<YodaExpressionEvaluationContext, SibillaValue>> params = ctx.params.stream().map(p -> p.accept(this)).toList();
+            if (params.size() == f.parameters().length) {
+                return arg -> f.body().apply(params.stream().map(e -> e.apply(arg)).toArray(SibillaValue[]::new));
+            } else {
+                //TODO: Manage type error!
+                return arg -> SibillaValue.ERROR_VALUE;
+            }
+        }
+
+        else {
             YodaVariable var = registry.get(name);
             return arg -> arg.get(var);
         }
