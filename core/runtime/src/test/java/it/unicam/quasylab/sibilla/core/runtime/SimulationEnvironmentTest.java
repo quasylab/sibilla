@@ -28,15 +28,15 @@ public class SimulationEnvironmentTest {
             const startS = 95;           /* Initial number of S agents */
             const startI = 5;           /* Initial number of I agents */
             const startR = 0;            /* Initial number of R agents */
-                                        
+            
             species S;
             species I;
             species R;
-                                        
+            
             rule infection {
                 S|I -[ #S * #I * k_i ]-> I|I
             }
-                                        
+            
             rule recovered {
                 I -[ #I * k_r ]-> R
             }

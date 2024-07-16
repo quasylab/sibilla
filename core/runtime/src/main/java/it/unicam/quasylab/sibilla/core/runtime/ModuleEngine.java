@@ -55,7 +55,7 @@ import java.util.function.ToDoubleFunction;
 
 public class ModuleEngine<S extends State> {
 
-    private final ModelDefinition<S>          modelDefinition;
+    private final ModelDefinition<S> modelDefinition;
     private ParametricDataSet<Function<RandomGenerator,S>> states;
     private Model<S>                    currentModel;
     protected Function<RandomGenerator,S> state;
@@ -248,6 +248,49 @@ public class ModuleEngine<S extends State> {
     public boolean isAMeasure(String name) {
         loadModel();
         return this.currentModel.getMeasure(name) != null;
+    }
+
+    public Map<String,String[]> getMonitors() throws StlModelGenerationException {
+        return this.stlMonitorGenerator.getStlMonitorFactory().getMonitors();
+    }
+
+
+    private Supplier<Trajectory<S>> getTrajectoryProvider(SimulationEnvironment se,
+                                                          RandomGenerator rg,
+                                                          double deadline) {
+        return  () -> {
+            Trajectory<S> trajectory = se.sampleTrajectory(rg, currentModel, state.apply(rg), deadline);
+            trajectory.setEnd(deadline);
+            return trajectory;
+        };
+    }
+
+
+    public double meanRobustnessAtTime0(SimulationEnvironment se,
+                                    RandomGenerator rg,
+                                    String formulaName,
+                                    double[] formulaParameters,
+                                    int replica) throws StlModelGenerationException {
+        QuantitativeMonitor<S> formulaMonitor = stlMonitorGenerator.getQuantitativeMonitor(formulaName, formulaParameters);
+        return QuantitativeMonitor.computeMeanRobustness(formulaMonitor,getTrajectoryProvider(se,rg,formulaMonitor.getTimeHorizon()),replica,new double[]{0.0})[0];
+    }
+
+    public double[] meanAndSdRobustnessAtTime0(SimulationEnvironment se,
+                                        RandomGenerator rg,
+                                        String formulaName,
+                                        double[] formulaParameters,
+                                        int replica) throws StlModelGenerationException {
+        QuantitativeMonitor<S> formulaMonitor = stlMonitorGenerator.getQuantitativeMonitor(formulaName, formulaParameters);
+        return QuantitativeMonitor.meanAndStandardDeviationRobustness(formulaMonitor,getTrajectoryProvider(se,rg,formulaMonitor.getTimeHorizon()),replica,new double[]{0.0})[0];
+    }
+
+    public double expectedProbabilityAtTime0(SimulationEnvironment se,
+                                             RandomGenerator rg,
+                                             String formulaName,
+                                             double[] formulaParameters,
+                                             int replica) throws StlModelGenerationException {
+        QualitativeMonitor<S> formulaMonitor = stlMonitorGenerator.getQualitativeMonitor(formulaName, formulaParameters);
+        return QualitativeMonitor.computeProbability(formulaMonitor,getTrajectoryProvider(se,rg,formulaMonitor.getTimeHorizon()),replica,new double[]{0.0})[0];
     }
 
     public Map<String, double[][]>  qualitativeMonitoring(SimulationEnvironment se,

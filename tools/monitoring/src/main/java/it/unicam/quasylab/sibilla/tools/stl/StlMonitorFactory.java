@@ -66,4 +66,6 @@ public class StlMonitorFactory<S> {
         return IntStream.range(0, args.length).boxed().collect(Collectors.toMap(i -> monitorParameters[i], i-> args[i]));
     }
 
+    public  Map<String, String[]> getMonitors() { return monitors; }
+
 }

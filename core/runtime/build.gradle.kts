@@ -30,9 +30,10 @@ plugins {
 dependencies {
     // https://mvnrepository.com/artifact/tech.tablesaw/tablesaw-core
     implementation("tech.tablesaw:tablesaw-core:0.43.1")
+    // https://mvnrepository.com/artifact/org.yaml/snakeyaml
+    implementation("org.yaml:snakeyaml:2.2")
 
     implementation(project(":core:simulator"))
-    implementation(project(":core:optimization"))
     implementation(project(":langs:pm"))
     implementation(project(":langs:lio"))
     implementation(project(":langs:markov"))
@@ -40,5 +41,6 @@ dependencies {
     implementation(project(":langs:yoda"))
     implementation(project(":tools:tracing"))
     implementation(project(":tools:monitoring"))
+    implementation(project(":tools:synthesis"))
 
 }

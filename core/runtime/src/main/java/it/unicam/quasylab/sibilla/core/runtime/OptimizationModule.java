@@ -1,15 +1,15 @@
 package it.unicam.quasylab.sibilla.core.runtime;
 
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationAlgorithmRegistry;
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.OptimizationTask;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.SamplingStrategyRegistry;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.Interval;
-import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateMetrics;
-import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateModel;
-import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateModelRegistry;
-import it.unicam.quasylab.sibilla.core.optimization.surrogate.DataSet;
+import it.unicam.quasylab.sibilla.tools.synthesis.optimizationalgorithm.OptimizationTask;
+import it.unicam.quasylab.sibilla.tools.synthesis.sampling.SamplingStrategyRegistry;
+import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.ContinuousInterval;
+import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.HyperRectangle;
+import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.Interval;
+import it.unicam.quasylab.sibilla.tools.synthesis.surrogate.SurrogateMetrics;
+import it.unicam.quasylab.sibilla.tools.synthesis.surrogate.SurrogateModel;
+import it.unicam.quasylab.sibilla.tools.synthesis.surrogate.SurrogateModelRegistry;
+import it.unicam.quasylab.sibilla.tools.synthesis.surrogate.DataSet;
+import it.unicam.quasylab.sibilla.tools.synthesis.optimizationalgorithm.OptimizationAlgorithmRegistry;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -174,7 +174,7 @@ public class OptimizationModule {
     public void generateSurrogateFunction(){
         generateSurrogateModel();
         this.surrogateFunction = this.surrogateModel.getSurrogateFunction(true);
-        this.surrogateMetrics = this.surrogateModel.getTrainingSetMetrics();
+        this.surrogateMetrics = this.surrogateModel.getInSampleMetrics();
     }
 
 
@@ -383,12 +383,11 @@ public class OptimizationModule {
 
     public String infoTrainingSet(){
         String emptySpace = "    ";
-        String info = "Size: " + this.dataSet.rowCount() + "\n" +
+        return "Size: " + this.dataSet.rowCount() + "\n" +
                 "Result info: " + this.dataSet.rowCount() + "\n" +
                 emptySpace + "Mean               : " + this.dataSet.getResultMean() + "\n" +
                 emptySpace + "Standard Deviation : " + this.dataSet.getResultSD() + "\n" +
                 emptySpace + "Mode               : " + this.dataSet.getResultMode() + "\n";
-        return info;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////

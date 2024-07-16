@@ -792,6 +792,10 @@ class SibillaRuntimeTest {
         sr.setDeadline(120);
         sr.setDt(5);
         sr.loadFormula(formulaSpec);
+        Map<String, String[]> monitors = sr.getMonitors();
+        for(String monitor : monitors.keySet()) {
+            System.out.println(monitor);
+        }
         Map<String, double[][]>  result = sr.quantitativeMonitorSignal(new String[]{"formula_id"},new double[][]{{}});
         System.out.println(result.get("formula_id")[0][0]);
         System.out.println(result.get("formula_id")[0][1]);

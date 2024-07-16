@@ -27,14 +27,9 @@ package it.unicam.quasylab.sibilla.tools.stl;
 import it.unicam.quasylab.sibilla.core.models.pm.Population;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
-import it.unicam.quasylab.sibilla.tools.stl.QualitativeMonitor;
-import it.unicam.quasylab.sibilla.tools.stl.QuantitativeMonitor;
 import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
 import it.unicam.quasylab.sibilla.core.util.Interval;
 import it.unicam.quasylab.sibilla.core.util.Signal;
-import it.unicam.quasylab.sibilla.tools.stl.StlLoader;
-import it.unicam.quasylab.sibilla.tools.stl.StlModelGenerationException;
-import it.unicam.quasylab.sibilla.tools.stl.StlMonitorFactory;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -119,6 +114,46 @@ public class TestStlParser {
         assertEquals(signal.valueAt(7.0),signalParsed.valueAt(7.0));
 
     }
+
+//    @Test
+//    public void testParsedAtomicFormulaWithParameters() throws StlModelGenerationException {
+//
+//        String TEST_FORMULA = " measure mes_1  formula atomicF [a=0] : [mes_1 > a] endformula";
+//
+//        StlLoader stlLoader = new StlLoader(TEST_FORMULA);
+//
+//        Map<String, ToDoubleFunction<PopulationState>> measure = new HashMap<>();
+//        measure.put("mes_1", s -> s.getOccupancy(0));
+//
+//        StlMonitorFactory<PopulationState> stlModelFactory = stlLoader.getModelFactory(measure);
+//
+//        QuantitativeMonitor<PopulationState> parsedQuantitativeMonitor =
+//                stlModelFactory.getQuantitativeMonitor("atomicF", new double[]{});
+//
+//        Trajectory<PopulationState> t = getPopulationTrajectory(
+//                new int[]{0, 8, 3, 2, 1, 1, 1}
+//        );
+//
+//        Signal signal = QuantitativeMonitor
+//                .atomicFormula((PopulationState sign)-> sign.getOccupancy(0) - 3.0).monitor(t);
+//
+//        Signal signalParsed = parsedQuantitativeMonitor.monitor(t);
+//
+//        assertEquals(signal.getStart(),signalParsed.getStart());
+//        assertEquals(signal.getEnd(),signalParsed.getEnd());
+//
+//        assertEquals(signal.valueAt(0.0),signalParsed.valueAt(0.0));
+//        assertEquals(signal.valueAt(1.0),signalParsed.valueAt(1.0));
+//        assertEquals(signal.valueAt(2.0),signalParsed.valueAt(2.0));
+//        assertEquals(signal.valueAt(3.0),signalParsed.valueAt(3.0));
+//        assertEquals(signal.valueAt(4.0),signalParsed.valueAt(4.0));
+//        assertEquals(signal.valueAt(5.0),signalParsed.valueAt(5.0));
+//        assertEquals(signal.valueAt(6.0),signalParsed.valueAt(6.0));
+//        assertEquals(signal.valueAt(7.0),signalParsed.valueAt(7.0));
+//
+//    }
+
+
 
     @Test
     public void testParsedNegation() throws StlModelGenerationException {
@@ -210,6 +245,35 @@ public class TestStlParser {
         }
     }
 
+
+    @Test public void monitors() throws StlModelGenerationException {
+
+        String TEST_FORMULA = "measure mes_1 measure mes_2 " +
+                "formula conjunction_formula [a=0,b=3] : [mes_1 >= 0] && [mes_2 >= 0] endformula " +
+                "formula disjunction_formula [b=5,a=1] : [mes_1 >= 0] || [mes_2 >= 0] endformula";
+
+
+        StlLoader stlLoader = new StlLoader(TEST_FORMULA);
+
+        Map<String, ToDoubleFunction<PopulationState>> measure = new HashMap<>();
+        measure.put("mes_1", s -> s.getOccupancy(0));
+        measure.put("mes_2", s -> s.getOccupancy(1));
+
+
+        StlMonitorFactory<PopulationState> stlModelFactory = stlLoader.getModelFactory(measure);
+        Map<String, String[]> monitors = stlModelFactory.getMonitors();
+        assertTrue(monitors.containsKey("conjunction_formula"));
+        assertEquals(2, monitors.keySet().size());
+        assertEquals(2, monitors.get("conjunction_formula").length);
+
+        for (String key : monitors.keySet()) {
+            String[] values = monitors.get(key);
+            System.out.println(key);
+            System.out.println(Arrays.toString(values));
+        }
+    }
+
+
     @Test
     public void testEventuallyWithParametrization() throws StlModelGenerationException {
         String TEST_FORMULA = """
@@ -252,6 +316,7 @@ public class TestStlParser {
             timeToCheck += 0.5;
         }
     }
+
 
     @Test
     public void testGloballyWithParametrization() throws StlModelGenerationException {
@@ -586,30 +651,6 @@ public class TestStlParser {
 
     }
 
-
-//    @Test
-//    public void testParsedTemporalFormulaWithLogicInside() throws StlModelGenerationException {
-//
-//        String TEST_FORMULA = " measure mes_1 formula atomicF [] : \\G[0,7]([mes_1 > 2] && [mes_1 < 6])endformula";
-//
-//        StlLoader stlLoader = new StlLoader(TEST_FORMULA);
-//
-//        Map<String, ToDoubleFunction<PopulationState>> measure = new HashMap<>();
-//        measure.put("mes_1", s -> s.getOccupancy(0));
-//
-//        StlMonitorFactory<PopulationState> stlModelFactory = stlLoader.getModelFactory(measure);
-//
-//        QuantitativeMonitor<PopulationState> parsedQuantitativeMonitor =
-//                stlModelFactory.getQuantitativeMonitor("atomicF", new double[]{});
-//
-//        Trajectory<PopulationState> t = getPopulationTrajectory(
-//                new int[]{5, 4, 5, 5, 6, 3, 3}
-//        );
-//
-//        Signal signalParsed = parsedQuantitativeMonitor.monitor(t);
-//
-//
-//    }
 
 
 

@@ -28,7 +28,6 @@ import it.unicam.quasylab.sibilla.core.simulator.SimulationMonitor;
 
 public record CommandSimulate(SimulationMonitor monitor, String label) implements Command {
 
-
     @Override
     public CommandName getCommandName() {
         return CommandName.SIMULATE;

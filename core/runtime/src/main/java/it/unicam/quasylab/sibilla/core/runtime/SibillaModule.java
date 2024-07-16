@@ -369,6 +369,44 @@ public interface SibillaModule extends CommandHandler {
      */
     Map<String, double[][]> quantitativeMonitoring(RandomGenerator rg, String[] formulaName, double[][] formulaArgs,double deadline, double dt, int replica) throws StlModelGenerationException;
 
+    /**
+     * Calculates the mean robustness at time 0 based on the provided parameters.
+     *
+     * @param rg The random generator
+     * @param formulaName The name of the formula
+     * @param formulaParameters The parameters for the formula
+     * @param replica The replica number
+     * @return The mean robustness at time 0
+     * @throws StlModelGenerationException If an error occurs during STL model generation
+     */
+    double meanRobustnessAtTime0( RandomGenerator rg, String formulaName, double[] formulaParameters, int replica) throws StlModelGenerationException;
+
+    /**
+     * Calculate the mean and standard deviation robustness at time 0.
+     *
+     * @param rg The random generator.
+     * @param formulaName The name of the formula.
+     * @param formulaParameters The parameters for the formula.
+     * @param replica The number of replicas.
+     * @return An array containing the mean and standard deviation robustness at time 0.
+     * @throws StlModelGenerationException If there is an issue with STL model generation.
+     */
+    double[] meanAndSdRobustnessAtTime0( RandomGenerator rg, String formulaName, double[] formulaParameters, int replica) throws StlModelGenerationException;
+
+    /**
+     * Calculates the expected probability at time 0 based on a qualitative monitor.
+     *
+     * @param rg          the random generator
+     * @param formulaName the name of the formula
+     * @param formulaParameters the array of formula parameters
+     * @param replica     the number of replicas
+     * @return the expected probability at time 0
+     * @throws StlModelGenerationException if there is an error generating the STL model
+     */
+    double expectedProbabilityAtTime0( RandomGenerator rg, String formulaName, double[] formulaParameters, int replica) throws StlModelGenerationException;
+
+    Map<String,String[]> getMonitors() throws StlModelGenerationException;
+
     List<SimulationData> trace(RandomGenerator rg, double deadline);
 
     Map<String, List<TracingData>> trace(RandomGenerator rg, TracingFunction tracingFunction, double deadline);

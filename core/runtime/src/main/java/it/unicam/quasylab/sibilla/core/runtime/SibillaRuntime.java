@@ -35,7 +35,6 @@ import it.unicam.quasylab.sibilla.tools.tracing.TraceSpecificationEvaluator;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingData;
 import it.unicam.quasylab.sibilla.tools.tracing.TracingFunction;
 import org.apache.commons.math3.random.RandomGenerator;
-import tech.tablesaw.api.Table;
 
 import java.io.File;
 import java.io.IOException;
@@ -326,24 +325,41 @@ public final class SibillaRuntime implements CommandHandler {
         currentModule.loadFormulas(sourceCodeFile);
     }
 
+
     public Map<String, double[][]> qualitativeMonitorSignal(String[] formulaNames, double[][] formulaParameters) throws CommandExecutionException, StlModelGenerationException {
         checkDt();
         checkDeadline();
+        checkReplica();
         return currentModule.qualitativeMonitoring(rg,formulaNames,formulaParameters,deadline,dt,(int) replica);
     }
 
     public Map<String, double[][]> quantitativeMonitorSignal(String[] formulaNames, double[][] formulaParameters) throws CommandExecutionException, StlModelGenerationException {
         checkDt();
         checkDeadline();
+        checkReplica();
         return currentModule.quantitativeMonitoring(rg,formulaNames,formulaParameters,deadline,dt,(int) replica);
     }
 
-    public double expectedProbabilityAt0(String formulaName, double[] formulaParameters) throws CommandExecutionException, StlModelGenerationException {
-        return this.qualitativeMonitorSignal(new String[]{formulaName}, new double[][]{formulaParameters}).get(formulaName)[0][1];
+    public double expectedProbabilityAtTime0(String formulaName, double[] formulaParameters) throws CommandExecutionException, StlModelGenerationException {
+        //return this.qualitativeMonitorSignal(new String[]{formulaName}, new double[][]{formulaParameters}).get(formulaName)[0][1];
+        checkReplica();
+        return currentModule.expectedProbabilityAtTime0(rg,formulaName,formulaParameters,(int) replica);
+
     }
 
-    public double robustnessAt0(String formulaName, double[] formulaParameters) throws CommandExecutionException, StlModelGenerationException {
-        return this.quantitativeMonitorSignal(new String[]{formulaName}, new double[][]{formulaParameters}).get(formulaName)[0][1];
+    public double meanRobustnessAtTime0(String formulaName, double[] formulaParameters) throws CommandExecutionException, StlModelGenerationException {
+        //return this.quantitativeMonitorSignal(new String[]{formulaName}, new double[][]{formulaParameters}).get(formulaName)[0][1];
+        checkReplica();
+        return currentModule.meanRobustnessAtTime0(rg,formulaName,formulaParameters,(int) replica);
+    }
+
+    public double[] meanAndSdRobustnessAtTime0(String formulaName, double[] formulaParameters) throws CommandExecutionException, StlModelGenerationException {
+        checkReplica();
+        return currentModule.meanAndSdRobustnessAtTime0(rg,formulaName,formulaParameters,(int) replica);
+    }
+
+    public Map<String,String[]> getMonitors() throws StlModelGenerationException {
+        return currentModule.getMonitors();
     }
 
     public Optional<CommandResult> executeSimulateCommand(Command cmd) throws CommandExecutionException {
@@ -775,9 +791,9 @@ public final class SibillaRuntime implements CommandHandler {
     public void generateTrainingSet(){
         this.optimizationModule.generateTrainingSet();
     }
-    public Table getTrainingSet() {
-        return this.optimizationModule.getTrainingSet();
-    }
+//    public Table getTrainingSet() {
+//        return this.optimizationModule.getTrainingSet();
+//    }
     public void resetOptimizationSettings(){ this.optimizationModule.initialise();}
 
     public Map<String,Double> getOptimalSolution(){

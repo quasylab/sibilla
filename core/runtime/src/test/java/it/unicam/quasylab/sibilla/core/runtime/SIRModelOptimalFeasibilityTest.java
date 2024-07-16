@@ -3,15 +3,15 @@ package it.unicam.quasylab.sibilla.core.runtime;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModel;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationModelDefinition;
 import it.unicam.quasylab.sibilla.core.models.pm.PopulationState;
-import it.unicam.quasylab.sibilla.core.optimization.optimizationalgorithm.pso.PSOTask;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.FullFactorialSamplingTask;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.LatinHyperCubeSamplingTask;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.ContinuousInterval;
-import it.unicam.quasylab.sibilla.core.optimization.sampling.interval.HyperRectangle;
-import it.unicam.quasylab.sibilla.core.optimization.surrogate.DataSet;
-import it.unicam.quasylab.sibilla.core.optimization.surrogate.RandomForest;
-import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateFactory;
-import it.unicam.quasylab.sibilla.core.optimization.surrogate.SurrogateModel;
+import it.unicam.quasylab.sibilla.tools.synthesis.optimizationalgorithm.pso.PSOTask;
+import it.unicam.quasylab.sibilla.tools.synthesis.sampling.FullFactorialSamplingTask;
+import it.unicam.quasylab.sibilla.tools.synthesis.sampling.LatinHyperCubeSamplingTask;
+import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.ContinuousInterval;
+import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.HyperRectangle;
+import it.unicam.quasylab.sibilla.tools.synthesis.surrogate.DataSet;
+import it.unicam.quasylab.sibilla.tools.synthesis.surrogate.RandomForest;
+import it.unicam.quasylab.sibilla.tools.synthesis.surrogate.SurrogateFactory;
+import it.unicam.quasylab.sibilla.tools.synthesis.surrogate.SurrogateModel;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.SimulationEnvironment;
 import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
@@ -190,7 +190,7 @@ public class SIRModelOptimalFeasibilityTest {
     }
 
 
-    @Disabled
+    //@Disabled
     @Test
     public void testSirCaseMaximization() throws StlModelGenerationException, ModelGenerationException{
 
@@ -221,6 +221,8 @@ public class SIRModelOptimalFeasibilityTest {
 
         Map<String,Double> maximizingValues = new PSOTask().maximize(surrogateFunction,searchSirSpace);
         System.out.println(maximizingValues);
+        System.out.println("surrogate value : " + surrogateFunction.applyAsDouble(maximizingValues));
+        System.out.println("actual value    : " + probFunction.applyAsDouble(maximizingValues));
 
         assertEquals(maximizingValues.get("k_i"),0.25,0.1);
         assertEquals(maximizingValues.get("k_r"),0.05,0.1);
