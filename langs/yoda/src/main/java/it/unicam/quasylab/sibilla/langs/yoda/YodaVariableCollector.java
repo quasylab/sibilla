@@ -67,6 +67,13 @@ public class YodaVariableCollector extends YodaModelBaseVisitor<Boolean> {
     }
 
     @Override
+    public Boolean visitFunctionStatementLet(YodaModelParser.FunctionStatementLetContext ctx) {
+        ctx.names.forEach(n -> registry.add(n.getText()));
+        ctx.functionStatement().accept(this);
+        return true;
+    }
+
+    @Override
     protected Boolean defaultResult() {
         return true;
     }

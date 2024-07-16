@@ -42,18 +42,21 @@ public class YodaConfigurationsGenerator extends YodaModelBaseVisitor<Boolean> {
 
     private final Function<String, Optional<SibillaValue>> constantsAndParameters;
 
+    private final Function<String, Optional<YodaFunction>> functions;
+
     private final YodaAgentsDefinitions definitions;
 
     private final YodaVariableRegistry variableRegistry;
 
     private final YodaElementNameRegistry elementNameRegistry;
 
-    public YodaConfigurationsGenerator(Function<String, Optional<SibillaValue>> constantsAndParameters, YodaAgentsDefinitions definitions, YodaVariableRegistry variableRegistry, YodaElementNameRegistry elementNameRegistry) {
+    public YodaConfigurationsGenerator(Function<String, Optional<YodaFunction>> functions, Function<String, Optional<SibillaValue>> constantsAndParameters, YodaAgentsDefinitions definitions, YodaVariableRegistry variableRegistry, YodaElementNameRegistry elementNameRegistry) {
         this.stateSuppliers = new HashMap<>();
         this.constantsAndParameters = constantsAndParameters;
         this.definitions = definitions;
         this.variableRegistry = variableRegistry;
         this.elementNameRegistry = elementNameRegistry;
+        this.functions = functions;
     }
 
 
@@ -211,7 +214,7 @@ public class YodaConfigurationsGenerator extends YodaModelBaseVisitor<Boolean> {
 
         @Override
         public List<SibillaValue> visitSetOfValuesRandom(YodaModelParser.SetOfValuesRandomContext ctx) {
-            YodaExpressionEvaluator evaluator = new YodaExpressionEvaluator(values, variableRegistry);
+            YodaExpressionEvaluator evaluator = new YodaExpressionEvaluator(functions, values, variableRegistry);
             int size = ctx.size.accept(evaluator).apply(YodaExpressionEvaluationContext.EMPTY_CONTEXT).intOf();
             Function<YodaExpressionEvaluationContext, SibillaValue> generator = ctx.generator.accept(evaluator);
             return generateRandomSet(size, rg -> generator.apply(new YodaExpressionEvaluationRandomContext(rg)), ctx.distinct!=null);

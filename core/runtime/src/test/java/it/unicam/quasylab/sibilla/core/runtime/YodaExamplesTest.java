@@ -14,6 +14,7 @@ import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalAtomicFormula;
 import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalEventuallyFormula;
 import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalFormula;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
+import it.unicam.quasylab.sibilla.langs.yoda.YodaFunction;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaModelGenerationException;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaModelGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -25,6 +26,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
@@ -135,7 +137,8 @@ class YodaExamplesTest {
         YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent.yoda");
         generator.getParseTree();
         EvaluationEnvironment env = generator.getEvaluationEnvironment();
-        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        Function<String, Optional<YodaFunction>> functions = generator.generateDeclaredFunctions(env);
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(functions, env.getEvaluator());
         YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
         YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
         YodaAgent agent = agentsDefinitions.getAgent(0,elementNameRegistry.get("Robot"), new YodaVariableMapping());
@@ -154,7 +157,8 @@ class YodaExamplesTest {
         YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent.yoda");
         generator.getParseTree();
         EvaluationEnvironment env = generator.getEvaluationEnvironment();
-        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        Function<String, Optional<YodaFunction>> functions = generator.generateDeclaredFunctions(env);
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(functions, env.getEvaluator());
         YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
         YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
 
@@ -191,7 +195,8 @@ class YodaExamplesTest {
         YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent.yoda");
         generator.getParseTree();
         EvaluationEnvironment env = generator.getEvaluationEnvironment();
-        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        Function<String, Optional<YodaFunction>> functions = generator.generateDeclaredFunctions(env);
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(functions, env.getEvaluator());
         YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
         YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
 
@@ -223,7 +228,8 @@ class YodaExamplesTest {
         YodaModelGenerator generator = loadModelGenerator("yoda/robotAgent.yoda");
         generator.getParseTree();
         EvaluationEnvironment env = generator.getEvaluationEnvironment();
-        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        Function<String, Optional<YodaFunction>> functions = generator.generateDeclaredFunctions(env);
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(functions, env.getEvaluator());
         YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
         YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
 
@@ -310,7 +316,8 @@ class YodaExamplesTest {
         YodaModelGenerator generator = loadModelGenerator("yoda/finderBot3.yoda");
         generator.getParseTree();
         EvaluationEnvironment env = generator.getEvaluationEnvironment();
-        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        Function<String, Optional<YodaFunction>> functions = generator.generateDeclaredFunctions(env);
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(functions, env.getEvaluator());
         YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
         YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
 
@@ -345,7 +352,8 @@ class YodaExamplesTest {
         YodaModelGenerator generator = loadModelGenerator("yoda/finderBot3.yoda");
         generator.getParseTree();
         EvaluationEnvironment env = generator.getEvaluationEnvironment();
-        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        Function<String, Optional<YodaFunction>> functions = generator.generateDeclaredFunctions(env);
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(functions, env.getEvaluator());
         YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
         YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
 
@@ -411,7 +419,8 @@ class YodaExamplesTest {
         YodaModelGenerator generator = loadModelGenerator("yoda/flock-rh.yoda");
         generator.getParseTree();
         EvaluationEnvironment env = generator.getEvaluationEnvironment();
-        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        Function<String, Optional<YodaFunction>> functions = generator.generateDeclaredFunctions(env);
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(functions, env.getEvaluator());
         YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
         YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
 
@@ -551,7 +560,8 @@ class YodaExamplesTest {
         YodaModelGenerator generator = loadModelGenerator("yoda/flock-rh.yoda");
         generator.getParseTree();
         EvaluationEnvironment env = generator.getEvaluationEnvironment();
-        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(env.getEvaluator());
+        Function<String, Optional<YodaFunction>> functions = generator.generateDeclaredFunctions(env);
+        YodaAgentsDefinitions agentsDefinitions = generator.getYodaAgentsDefinitions(functions, env.getEvaluator());
         YodaElementNameRegistry elementNameRegistry = generator.getYodaElementNameRegistry();
         YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
 
