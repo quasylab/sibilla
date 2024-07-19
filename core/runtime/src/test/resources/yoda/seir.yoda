@@ -43,10 +43,10 @@ environment :
 end
 
 configuration Main :
-    for i sampled distinct nSus time from U[0,10] do
-        Agent [ x = i; z = i; contagious = false;]
+    for i sampled distinct nSus time from U[0,50] do
+        Agent [ x = i; z = U[0,50]; contagious = false;]
     endfor
-    for j sampled distinct nInf time from U[0,10] do
-        Agent [ x = j; z = j; contagious = true;]
+    for j sampled distinct nInf time from U[0,50] do
+        Agent [ x = j; z = U[0,50]; contagious = true;]
     endfor
 end

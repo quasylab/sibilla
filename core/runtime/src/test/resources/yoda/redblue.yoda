@@ -1,7 +1,8 @@
-param nRed = 5;
-param nBlue = 5;
-param tolerance = 1;
+param nRed = 70;
+param nBlue = 30;
+param tolerance = 10;
 param speed = 1;
+param cr = 0.5;
 
 agent Supporter =
     state :
@@ -14,11 +15,12 @@ agent Supporter =
         real z = 0.0;
     observations :
         bool challenged = false;
+        real delta = 0.0;
     actions :
         changeParty [direction <- U[0.0, 2*PI]; switchParty <- true;]
         move [direction <- U[0.0, 2*PI]; switchParty <- false;]
     behaviour :
-        when challenged -> [changeParty:1;]
+        when challenged -> [changeParty : delta*cr ; move : (1-delta*cr);]
         otherwise [move:1;]
 end
 
@@ -28,10 +30,12 @@ environment :
             let actualBlue = # Supporter[blueParty && (distance(x,z,it.x,it.z)<tolerance)]
             and actualRed = # Supporter[redParty && (distance(x,z,it.x,it.z)<tolerance)]
             in
-                if ((it.redParty && (actualBlue>actualRed))||(it.blueParty && (actualBlue<actualRed))) then
+                if (((actualRed+actualBlue)>0)&&((it.redParty && (actualBlue<actualRed))||(it.blueParty && (actualBlue>actualRed)))) then
                     challenged <- true;
+                    delta <- abs(actualBlue-actualRed)/(actualRed+actualBlue);
                 else
                     challenged <- false;
+                    delta <- 0.0;
                 endif
             endlet
         ]
@@ -45,10 +49,10 @@ environment :
 end
 
 configuration Main :
-    for i sampled distinct nRed time from U[0,10] do
-        Supporter[redParty = true; blueParty = false; x = i; z = U[0,10];]
+    for i sampled distinct nRed time from U[0,100] do
+        Supporter[redParty = true; blueParty = false; x = i; z = U[0,100];]
     endfor
-    for j sampled distinct nBlue time from U[0,10] do
-        Supporter[redParty = false; blueParty = true; x = j; z = U[0,10];]
+    for j sampled distinct nBlue time from U[0,100] do
+        Supporter[redParty = false; blueParty = true; x = j; z = U[0,100];]
     endfor
 end

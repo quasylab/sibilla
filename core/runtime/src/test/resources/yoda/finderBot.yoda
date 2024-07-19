@@ -1,25 +1,25 @@
 param na = 3;
 param tolerance = 2.0;
 param tposX = 5.0;
-param tposY = 5.0;
+param tposZ = 5.0;
 
 agent Finder =
     state:
         real dirx = 0.0;
-        real diry = 0.0;
+        real dirz = 0.0;
         bool found = false;
     features:
         real x = 0.0;
-        real y = 0.0;
+        real z = 0.0;
         bool light = false;
     observations:
         bool target_sensor = false;
         real angle = 0.0;
         bool toTarget = false;
     actions:
-        stop [ dirx <- 0.0; diry <- 0.0; found <- true; ]
-        roam [ dirx <- U[-1.0 , 1.0]; diry <- U[-1.0 , 1.0]; found <- false; ]
-        moveto [ dirx <- cos(angle); diry <- sin(angle); found <- false; ]
+        stop [ dirx <- 0.0; dirz <- 0.0; found <- true; ]
+        roam [ dirx <- U[-1.0 , 1.0]; dirz <- U[-1.0 , 1.0]; found <- false; ]
+        moveto [ dirx <- cos(angle); dirz <- sin(angle); found <- false; ]
     behaviour:
         when target_sensor -> [ stop:1; ]
         orwhen toTarget -> [ moveto:1; ]
@@ -28,22 +28,18 @@ end
 
 element Target =
     real posx = 0.0;
-    real posy = 0.0;
+    real posz = 0.0;
 end
 
 environment :
     sensing:
         Finder [
-            target_sensor <- (any Target : (abs(it.x - posx) < tolerance)) && (any Target : ( abs(it.y - posy) < tolerance));
+            target_sensor <- (any Target : distance(posx, posz, it.x, it.z) < tolerance);
             if (any Finder: light) then
                 let meanX = mean Finder [light] .x
-                and meanY = mean Finder [light] .y
+                and meanZ = mean Finder [light] .z
                 in
-                    if (it.x < meanX) then
-                        angle <- atan ((meanY - it.y) // (meanX - it.x));
-                    else
-                        angle <- atan ((meanY - it.y) // (meanX - it.x)) + PI;
-                    endif
+                    angle <- angleOf(meanX, meanZ, it.x, it.z);
                     toTarget <- true;
                 endlet
             else
@@ -54,14 +50,14 @@ environment :
      dynamic:
         Finder [
            x <- x + dirx;
-           y <- y + diry;
+           z <- z + dirz;
            light <- found;
         ]
 end
 
 configuration Main :
     for ox sampled distinct na time from U[0, 10] do
-        Finder [ x = ox; y = 2.0; ]
+        Finder [ x = ox; z = 0.0; ]
     endfor
-    Target [ posx = tposX; posy = tposY; ]
+    Target [ posx = tposX; posz = tposZ; ]
 end
