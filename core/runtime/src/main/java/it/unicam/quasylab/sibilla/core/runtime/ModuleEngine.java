@@ -33,6 +33,7 @@ import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTimeHandlerSupplier;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.SamplingFunction;
+import it.unicam.quasylab.sibilla.core.util.Signal;
 import it.unicam.quasylab.sibilla.tools.stl.QualitativeMonitor;
 import it.unicam.quasylab.sibilla.tools.stl.QuantitativeMonitor;
 import it.unicam.quasylab.sibilla.core.util.SimulationData;
@@ -250,7 +251,7 @@ public class ModuleEngine<S extends State> {
         return this.currentModel.getMeasure(name) != null;
     }
 
-    public Map<String,String[]> getMonitors() throws StlModelGenerationException {
+    public Map<String, Map<String, ToDoubleFunction<Map<String, Double>>>>  getFormulaMonitors() throws StlModelGenerationException {
         return this.stlMonitorGenerator.getStlMonitorFactory().getMonitors();
     }
 
@@ -268,17 +269,26 @@ public class ModuleEngine<S extends State> {
 
     public double meanRobustnessAtTime0(SimulationEnvironment se,
                                     RandomGenerator rg,
-                                    String formulaName,
-                                    double[] formulaParameters,
+                                    String formulaName, Map<String, Double> formulaParameters,
                                     int replica) throws StlModelGenerationException {
         QuantitativeMonitor<S> formulaMonitor = stlMonitorGenerator.getQuantitativeMonitor(formulaName, formulaParameters);
-        return QuantitativeMonitor.computeMeanRobustness(formulaMonitor,getTrajectoryProvider(se,rg,formulaMonitor.getTimeHorizon()),replica,new double[]{0.0})[0];
+//        return QuantitativeMonitor.computeMeanRobustness(formulaMonitor,getTrajectoryProvider(se,rg,formulaMonitor.getTimeHorizon()),replica,new double[]{0.0})[0];
+        double robustness = 0.0;
+        for(int i = 0; i < replica;i++){
+            Trajectory<S> trajectory = se.sampleTrajectory(rg, currentModel, state.apply(rg), formulaMonitor.getTimeHorizon());
+            trajectory.setEnd(formulaMonitor.getTimeHorizon());
+            //System.out.println(trajectory);
+            Signal robustnessSignal = formulaMonitor.monitor(trajectory);
+            double currentRobustness = robustnessSignal.valueAt(0);
+            robustness += currentRobustness;
+        }
+
+        return robustness / replica;
     }
 
     public double[] meanAndSdRobustnessAtTime0(SimulationEnvironment se,
                                         RandomGenerator rg,
-                                        String formulaName,
-                                        double[] formulaParameters,
+                                        String formulaName, Map<String, Double> formulaParameters,
                                         int replica) throws StlModelGenerationException {
         QuantitativeMonitor<S> formulaMonitor = stlMonitorGenerator.getQuantitativeMonitor(formulaName, formulaParameters);
         return QuantitativeMonitor.meanAndStandardDeviationRobustness(formulaMonitor,getTrajectoryProvider(se,rg,formulaMonitor.getTimeHorizon()),replica,new double[]{0.0})[0];
@@ -286,8 +296,7 @@ public class ModuleEngine<S extends State> {
 
     public double expectedProbabilityAtTime0(SimulationEnvironment se,
                                              RandomGenerator rg,
-                                             String formulaName,
-                                             double[] formulaParameters,
+                                             String formulaName, Map<String, Double> formulaParameters,
                                              int replica) throws StlModelGenerationException {
         QualitativeMonitor<S> formulaMonitor = stlMonitorGenerator.getQualitativeMonitor(formulaName, formulaParameters);
         return QualitativeMonitor.computeProbability(formulaMonitor,getTrajectoryProvider(se,rg,formulaMonitor.getTimeHorizon()),replica,new double[]{0.0})[0];
@@ -296,7 +305,7 @@ public class ModuleEngine<S extends State> {
     public Map<String, double[][]>  qualitativeMonitoring(SimulationEnvironment se,
                                                           RandomGenerator rg,
                                                           String[] formulaName,
-                                                          double[][] formulaArgs,
+                                                          Map<String, Double>[] formulaArgs,
                                                           double deadline,
                                                           double dt,
                                                           int replica) throws StlModelGenerationException {
@@ -330,7 +339,7 @@ public class ModuleEngine<S extends State> {
     public Map<String, double[][]> quantitativeMonitoring(SimulationEnvironment simulationEnvironment,
                                                           RandomGenerator rg,
                                                           String[] formulaName,
-                                                          double[][] formulaArgs,
+                                                          Map<String, Double>[] formulaArgs,
                                                           double deadline,
                                                           double dt,
                                                           int replica) throws StlModelGenerationException {

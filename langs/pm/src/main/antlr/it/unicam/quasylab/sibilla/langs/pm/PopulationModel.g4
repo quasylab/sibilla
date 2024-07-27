@@ -69,24 +69,29 @@ predicate_declaration: 'predicate' name=ID '=' expr ';';
 param_declaration   : 'param' name=ID '=' expr ';';
 
 expr    :
-      left=expr op=('&'|'&&') right=expr                      # andExpression
-    | left=expr op=('|'|'||') right=expr                      # orExpression
-    | left=expr '^' right=expr                                # exponentExpression
-    | left=expr op=('*'|'/'|'//') right=expr               # mulDivExpression
-    | left=expr op=('+'|'-'|'%') right=expr                   # addSubExpression
+      left=expr op=('&'|'&&') right=expr                         # andExpression
+    | left=expr op=('|'|'||') right=expr                         # orExpression
+    | left=expr '^' right=expr                                   # exponentExpression
+    | left=expr op=('*'|'/'|'//') right=expr                     # mulDivExpression
+    | left=expr op=('+'|'-'|'%') right=expr                      # addSubExpression
     |  left=expr op=('<'|'<='|'=='|'>='|'>') right=expr          # relationExpression
-    | '!' arg=expr                                     # negationExpression
-    | guard=expr '?' thenBranch=expr ':' elseBranch=expr             # ifThenElseExpression
-    | op=('-'|'+') arg=expr                            # unaryExpression
-    | '(' expr ')'                                     # bracketExpression
-    | INTEGER                                      # intValue
-    | REAL                                         # realValue
-    | 'false'                                      # falseValue
-    | 'true'                                       # trueValue
-    | '%' agent=species_expression                                       # populationFractionExpression
-    | '#' agent=species_expression                                       # populationSizeExpression
-//    | 'now'                                        # nowExpression
-    | reference=ID                                 # referenceExpression
+    | '!' arg=expr                                               # negationExpression
+    | guard=expr '?' thenBranch=expr ':' elseBranch=expr         # ifThenElseExpression
+    | op=('-'|'+') arg=expr                                      # unaryExpression
+    | '(' expr ')'                                               # bracketExpression
+    | 'round' '(' argument=expr ')'                              # expressionRound
+    | 'ceil' '(' argument=expr ')'                               # expressionCeil
+    | 'floor' '(' argument=expr ')'                              # expressionFloor
+    | 'max' '(' firstArgument=expr ',' secondArgument=expr ')'   # expressionMax
+    | 'min' '(' firstArgument=expr ',' secondArgument=expr ')'   # expressionMin
+    | INTEGER                                                    # intValue
+    | REAL                                                       # realValue
+    | 'false'                                                    # falseValue
+    | 'true'                                                     # trueValue
+    | '%' agent=species_expression                               # populationFractionExpression
+    | '#' agent=species_expression                               # populationSizeExpression
+//    | 'now'                                                    # nowExpression
+    | reference=ID                                               # referenceExpression
 //    | 'abs' '(' expr ')'
     ;
 

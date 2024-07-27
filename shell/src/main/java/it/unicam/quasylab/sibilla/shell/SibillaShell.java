@@ -23,7 +23,6 @@
 
 package it.unicam.quasylab.sibilla.shell;
 
-import it.unicam.quasylab.sibilla.core.runtime.SibillaModule;
 import it.unicam.quasylab.sibilla.core.runtime.SibillaRuntime;
 
 import java.io.*;

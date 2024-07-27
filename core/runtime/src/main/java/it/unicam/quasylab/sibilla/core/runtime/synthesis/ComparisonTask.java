@@ -4,7 +4,10 @@ import it.unicam.quasylab.sibilla.core.runtime.CommandExecutionException;
 import it.unicam.quasylab.sibilla.core.runtime.SibillaRuntime;
 import it.unicam.quasylab.sibilla.tools.stl.StlModelGenerationException;
 import it.unicam.quasylab.sibilla.tools.synthesis.SynthesisRecord;
+import it.unicam.quasylab.sibilla.tools.synthesis.Synthesizer;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.ToDoubleBiFunction;
 import java.util.function.ToDoubleFunction;
@@ -20,7 +23,7 @@ public class ComparisonTask extends SynthesisTask {
     ModelSpecs modelVariantSpecs;
     String formulae;
     boolean isMinimization;
-
+    ToDoubleBiFunction<double[], double[]> distanceFunction;
 
     public ComparisonTask(Map<String, Object> taskMap,SynthesisStrategy synthesisStrategy) {
         super(taskMap,synthesisStrategy);
@@ -30,7 +33,7 @@ public class ComparisonTask extends SynthesisTask {
         this.setModelOriginalSpecs(taskSpecs);
         this.setModelVariantSpecs(taskSpecs);
         this.setFormulae(taskSpecs);
-
+        this.distanceFunction = getDistanceFunction();
     }
 
     private void setFormulae(Map<String, Object> taskSpecs) {
@@ -44,17 +47,7 @@ public class ComparisonTask extends SynthesisTask {
             throw new IllegalArgumentException("modelVariant not found in taskSpecs!");
         }
         Map<String, Object> modelVariantSpec = getAsMap(taskSpecs.get("modelVariant"));
-        String module = (String) modelVariantSpec.get("module");
-        String initialConfiguration = (String) modelVariantSpec.get("initialConfiguration");
-        String modelSpecification = (String) modelVariantSpec.get("modelSpecification");
-
-        if (module == null || initialConfiguration == null || modelSpecification == null) {
-            throw new IllegalArgumentException("modelVariant must contain module, initialConfiguration and modelSpecification!");
-        }
-        if(!super.isModuleAvailable(module))
-            throw new IllegalArgumentException(String.format(super.UNKNOWN_MODULE_MESSAGE,module));
-
-        this.modelVariantSpecs = new ModelSpecs(module, initialConfiguration, modelSpecification);
+        this.modelVariantSpecs = new ModelSpecHandler(modelVariantSpec).getModelSpecs();
     }
 
     private void setModelOriginalSpecs(Map<String, Object> taskSpecs) {
@@ -62,15 +55,7 @@ public class ComparisonTask extends SynthesisTask {
             throw new IllegalArgumentException("modelOriginal not found in taskSpecs!");
         }
         Map<String, Object> modelOriginalSpec = getAsMap(taskSpecs.get("modelOriginal"));
-        String module = (String) modelOriginalSpec.get("module");
-        String initialConfiguration = (String) modelOriginalSpec.get("initialConfiguration");
-        String modelSpecification = (String) modelOriginalSpec.get("modelSpecification");
-
-        if (module == null || initialConfiguration == null || modelSpecification == null) {
-            throw new IllegalArgumentException("modelOriginal must contain module, initialConfiguration, and modelSpecification!");
-        }
-
-        this.modelOriginalSpecs = new ModelSpecs(module, initialConfiguration, modelSpecification);
+        this.modelOriginalSpecs = new ModelSpecHandler(modelOriginalSpec).getModelSpecs();
     }
 
 
@@ -89,34 +74,34 @@ public class ComparisonTask extends SynthesisTask {
     }
 
 
-    private String[] getFormulaNames(SibillaRuntime sr) throws StlModelGenerationException {
-        return sr.getMonitors().keySet().toArray(new String[0]);
+    private String[] getFormulaNames(SibillaRuntime sr) throws StlModelGenerationException, CommandExecutionException {
+        return sr.getFormulaeMonitors().keySet().toArray(new String[0]);
     }
 
+
     private double[] evaluateOriginalRobustnessVector(SibillaRuntime sr) throws CommandExecutionException, StlModelGenerationException {
-        sr.loadModule(modelOriginalSpecs.modelSpecification);
-        sr.load(modelOriginalSpecs.modelSpecification);
-        sr.setDt(super.dt);
+        sr.loadModule(modelOriginalSpecs.module());
+        sr.load(modelOriginalSpecs.modelSpecification());
         sr.setReplica(super.replica);
-        sr.setConfiguration(modelOriginalSpecs.initialConfiguration);
+        sr.setConfiguration(modelOriginalSpecs.initialConfiguration());
         sr.loadFormula(formulae);
 
         String[] formulaNames = getFormulaNames(sr);
+
         double[] originalRobustnessVector = new double[formulaNames.length];
 
         for (int i = 0; i < formulaNames.length; i++) {
-            originalRobustnessVector[i] = sr.meanRobustnessAtTime0(formulaNames[i], new double[]{}); //TODO
+            originalRobustnessVector[i] = sr.meanRobustnessAtTime0(formulaNames[i], new HashMap<>());
         }
-
         return originalRobustnessVector;
     }
 
     private double[] evaluateVariantRobustnessVector(SibillaRuntime sr) throws CommandExecutionException, StlModelGenerationException {
-        sr.setConfiguration(modelVariantSpecs.initialConfiguration);
         String[] formulaNames = getFormulaNames(sr);
+
         double[] variantRobustnessVector = new double[formulaNames.length];
         for (int i = 0; i < formulaNames.length; i++) {
-            variantRobustnessVector[i] = sr.meanRobustnessAtTime0(formulaNames[i], new double[]{}); //TODO
+            variantRobustnessVector[i] = sr.meanRobustnessAtTime0(formulaNames[i], new HashMap<>());
         }
         return variantRobustnessVector;
     }
@@ -125,32 +110,64 @@ public class ComparisonTask extends SynthesisTask {
     @Override
     public SynthesisRecord execute(SibillaRuntime runtime) throws CommandExecutionException, StlModelGenerationException {
         runtime.reset();
-        double[]  originalRobustnessVector = evaluateOriginalRobustnessVector(runtime);
+        double[] originalRobustnessVector = evaluateOriginalRobustnessVector(runtime);
         runtime.reset();
-        runtime.loadModule(modelVariantSpecs.modelSpecification);
-        runtime.load(modelVariantSpecs.modelSpecification);
-        runtime.load(formulae);
+        runtime.loadModule(modelVariantSpecs.module());
+        runtime.load(modelVariantSpecs.modelSpecification());
+        runtime.setReplica(super.replica);
+        runtime.setConfiguration(modelVariantSpecs.initialConfiguration());
+        runtime.loadFormula(formulae);
+        this.setModelParameterNames(runtime);
         ToDoubleFunction<Map<String,Double>> objFunction = getObjectiveFunction(runtime, originalRobustnessVector);
-        return generateSynthesizer(objFunction, this.isMinimization).getLastSynthesisRecord();
+        Synthesizer synthesizer = generateSynthesizer(objFunction, this.isMinimization);
+        synthesizer.searchOptimalSolution();
+        SynthesisRecord synRec =synthesizer.getLastSynthesisRecord();
+
+        System.out.println("real DISTANCE");
+        System.out.println(synRec.optimalValueObjectiveFunction());
+        System.out.println("surrogate DISTANCE");
+        System.out.println(synRec.optimalValueSurrogateFunction());
+        System.out.println(" . . . . . . . . . . . . . . . . . . . . . . . . .");
+        System.out.println("Original Robustness vector : ");
+        System.out.println(Arrays.toString(originalRobustnessVector));
+        System.out.println("Variant Robustness vector : ");
+        System.out.println(Arrays.toString(REMOVE_THAT_METHOD(runtime, synRec.optimalCoordinates())));
+        System.out.println();
+
+        return synthesizer.getLastSynthesisRecord();
     }
 
 
+    private double[] REMOVE_THAT_METHOD(SibillaRuntime runtime, Map<String,Double> optimalCoordinates) throws CommandExecutionException, StlModelGenerationException {
+        runtime.reset();
+        runtime.reset();
+        runtime.loadModule(modelVariantSpecs.module());
+        for(String paramName : optimalCoordinates.keySet()){
+            runtime.setParameter(paramName, optimalCoordinates.get(paramName));
+        }
+        runtime.setReplica(super.replica);
+        runtime.setConfiguration(modelVariantSpecs.initialConfiguration());
+        runtime.loadFormula(formulae);
+        this.setModelParameterNames(runtime);
+        return evaluateVariantRobustnessVector(runtime);
+    }
+
     private ToDoubleFunction<Map<String,Double>> getObjectiveFunction(SibillaRuntime runtime, double[] originalRobustnessVector) {
         return m -> {
-            setRuntimeParameters(runtime,m);
+            setModelParameters(runtime,m);
             double[] variantRobustnessVector;
             try {
+                runtime.setConfiguration(modelVariantSpecs.initialConfiguration());
                 variantRobustnessVector = evaluateVariantRobustnessVector(runtime);
-
             } catch (CommandExecutionException | StlModelGenerationException e) {
                 throw new RuntimeException(e);
             }
-            return getDistanceFunction().applyAsDouble(originalRobustnessVector, variantRobustnessVector);
+
+            return this.distanceFunction.applyAsDouble(originalRobustnessVector, variantRobustnessVector);
         };
     }
 
 
-    private record ModelSpecs(String module, String initialConfiguration, String modelSpecification){}
 
     private ToDoubleBiFunction<double[],double[]> getDistanceFunction(){
         switch (comparisonType) {
@@ -160,11 +177,11 @@ public class ComparisonTask extends SynthesisTask {
             }
             case IMPROVE -> {
                 this.isMinimization = false;
-                return (vec1, vec2) -> distanceType.distanceFunction.apply(vec1, vec2, p, true);
+                return (vec1, vec2) -> distanceType.distanceFunction.apply(vec2, vec1, p, true);
             }
             case DIVERGE -> {
                 this.isMinimization = false;
-                return (vec1, vec2) -> distanceType.distanceFunction.apply(vec2, vec1, p, true);  }
+                return (vec1, vec2) -> distanceType.distanceFunction.apply(vec1, vec2, p, true);  }
             default -> throw new IllegalStateException("Unexpected value: " + comparisonType);
         }
     }

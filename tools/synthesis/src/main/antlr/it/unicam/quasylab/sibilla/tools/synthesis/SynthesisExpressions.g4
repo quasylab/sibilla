@@ -29,6 +29,7 @@ expr    :
     | 'acos' '(' argument=expr ')'                               # expressionACos
     | 'asin' '(' argument=expr ')'                               # expressionASin
     | 'atan' '(' argument=expr ')'                               # expressionATan
+    | 'round' '(' argument=expr ')'                              # expressionRound
     | 'ceil' '(' argument=expr ')'                               # expressionCeil
     | 'cos' '(' argument=expr ')'                                # expressionCos
     | 'cosh' '(' argument=expr ')'                               # expressionCosh

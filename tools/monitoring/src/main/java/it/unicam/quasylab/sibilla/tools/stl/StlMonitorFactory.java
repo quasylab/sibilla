@@ -27,6 +27,7 @@ package it.unicam.quasylab.sibilla.tools.stl;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -36,36 +37,53 @@ public class StlMonitorFactory<S> {
 
     private final Map<String, Function<Map<String, Double>, QuantitativeMonitor<S>>> quantitativeMonitors = new HashMap<>();
 
-    private final Map<String, String[]> monitors = new HashMap<>();
+    private final Map<String, Map<String, ToDoubleFunction<Map<String, Double>>>> monitors = new HashMap<>();
 
 
-    public void addMonitor(String name,  String[] args, Function<Map<String, Double>, QualitativeMonitor<S>> qualitativeMonitorFactory, Function<Map<String, Double>, QuantitativeMonitor<S>> quantitativeMonitorFactory) {
+
+    public void addMonitor(String name, Map<String, ToDoubleFunction<Map<String, Double>>> args, Function<Map<String, Double>, QualitativeMonitor<S>> qualitativeMonitorFactory, Function<Map<String, Double>, QuantitativeMonitor<S>> quantitativeMonitorFactory) {
         this.monitors.put(name, args);
         this.qualitativeMonitors.put(name, qualitativeMonitorFactory);
         this.quantitativeMonitors.put(name, quantitativeMonitorFactory);
     }
 
-    public QualitativeMonitor<S> getQualitativeMonitor(String name, double[] args) {
+    public QualitativeMonitor<S> getQualitativeMonitor(String name) {
+        return getQualitativeMonitor(name, new HashMap<>());
+    }
+
+    public QualitativeMonitor<S> getQualitativeMonitor(String name, Map<String, Double> args) {
         Map<String, Double> argumentMapping = getArgumentMapping(name, args);
         return qualitativeMonitors.get(name).apply(argumentMapping);
     }
 
-    public QuantitativeMonitor<S> getQuantitativeMonitor(String name, double[] args) {
+    public QuantitativeMonitor<S> getQuantitativeMonitor(String name) {
+        return getQuantitativeMonitor(name, new HashMap<>());
+    }
+
+    public QuantitativeMonitor<S> getQuantitativeMonitor(String name, Map<String, Double> args) {
         Map<String, Double> argumentMapping = getArgumentMapping(name, args);
         return quantitativeMonitors.get(name).apply(argumentMapping);
     }
 
-    private Map<String, Double> getArgumentMapping(String name, double[] args) {
+    private Map<String, Double> getArgumentMapping(String name, Map<String, Double> args) {
         if (!monitors.containsKey(name)) {
-            throw new IllegalArgumentException("Monitor "+name+" does not exist.");
+            throw new IllegalArgumentException("Monitor " + name + " does not exist.");
         }
-        String[] monitorParameters = monitors.get(name);
-        if (monitorParameters.length != args.length) {
-            throw new IllegalArgumentException("Illegal number of parameters! Expected "+monitorParameters.length+" are "+args.length);
+        Map<String, ToDoubleFunction<Map<String, Double>>> monitorParameters = monitors.get(name);
+        Map<String, Double> result = new HashMap<>();
+
+        for (Map.Entry<String, ToDoubleFunction<Map<String, Double>>> entry : monitorParameters.entrySet()) {
+            String paramName = entry.getKey();
+            if (args.containsKey(paramName)) {
+                result.put(paramName, args.get(paramName));
+            } else {
+                result.put(paramName, entry.getValue().applyAsDouble(args));
+            }
         }
-        return IntStream.range(0, args.length).boxed().collect(Collectors.toMap(i -> monitorParameters[i], i-> args[i]));
+
+        return result;
     }
 
-    public  Map<String, String[]> getMonitors() { return monitors; }
+    public  Map<String, Map<String, ToDoubleFunction<Map<String, Double>>>> getMonitors() { return monitors; }
 
 }

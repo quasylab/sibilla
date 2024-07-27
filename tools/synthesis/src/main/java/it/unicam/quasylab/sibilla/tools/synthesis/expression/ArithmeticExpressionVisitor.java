@@ -81,7 +81,10 @@ public class ArithmeticExpressionVisitor extends SynthesisExpressionsBaseVisitor
         return map -> Math.cosh(visit(ctx.argument).applyAsDouble(map));
     }
 
-
+    @Override
+    public ToDoubleFunction<Map<String, Double>> visitExpressionRound(SynthesisExpressionsParser.ExpressionRoundContext ctx) {
+        return map -> Math.round(visit(ctx.argument).applyAsDouble(map));
+    }
 
     @Override
     public ToDoubleFunction<Map<String, Double>> visitExpressionUnaryOperator(SynthesisExpressionsParser.ExpressionUnaryOperatorContext ctx) {

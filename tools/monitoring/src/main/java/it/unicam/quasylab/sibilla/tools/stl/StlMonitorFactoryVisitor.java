@@ -32,6 +32,7 @@ import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 
@@ -77,8 +78,16 @@ public class StlMonitorFactoryVisitor<S> extends StlModelBaseVisitor<Boolean> {
 
     @Override
     public Boolean visitDeclarationFormula(StlModelParser.DeclarationFormulaContext ctx) {
-        monitorFactory.addMonitor(ctx.name.getText(),
-                ctx.params.stream().map(p -> p.name.getText()).toArray(String[]::new),
+        String name = ctx.name.getText();
+        Map<String, ToDoubleFunction<Map<String, Double>>> parameters = new TreeMap<>();
+        ctx.params.forEach(pCtx -> {
+            String paramName = pCtx.name.getText();
+            StlModelParser.ExprContext paramExpr = pCtx.expr();
+            StlExpressionEvaluator expressionEvaluator = new StlExpressionEvaluator();
+            ToDoubleFunction<Map<String, Double>> paramFunction = paramExpr.accept(expressionEvaluator);
+            parameters.put(paramName, paramFunction);
+        });
+        monitorFactory.addMonitor(name, parameters,
                 getQualitativeMonitor(ctx.formula), getQuantitativeMonitor(ctx.formula));
         return true;
     }

@@ -17,7 +17,7 @@ declarationFormula: 'formula' name=ID ('[' (params+=formulaParameter (',' params
 'endformula'
 ;
 
-formulaParameter: name=ID '=' expr;
+formulaParameter: name=ID '=' value = expr;
 
 stlFormula:
         'true'                                                # stlFormulaTrue

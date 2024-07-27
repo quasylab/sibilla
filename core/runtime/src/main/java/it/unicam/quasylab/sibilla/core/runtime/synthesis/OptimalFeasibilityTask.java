@@ -5,8 +5,6 @@ import it.unicam.quasylab.sibilla.core.runtime.SibillaRuntime;
 import it.unicam.quasylab.sibilla.tools.stl.StlModelGenerationException;
 import it.unicam.quasylab.sibilla.tools.synthesis.SynthesisRecord;
 import it.unicam.quasylab.sibilla.tools.synthesis.Synthesizer;
-
-
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
@@ -50,17 +48,7 @@ public class OptimalFeasibilityTask extends SynthesisTask {
                 throw new IllegalArgumentException("Model not found in taskSpecs!");
             }
             Map<String, Object> modelSpec = getAsMap(taskSpecs.get("model"));
-            String module = (String) modelSpec.get("module");
-            String initialConfiguration = (String) modelSpec.get("initialConfiguration");
-            String modelSpecification = (String) modelSpec.get("modelSpecification");
-
-            if (module == null || initialConfiguration == null || modelSpecification == null) {
-                throw new IllegalArgumentException("Model must contain module, initialConfiguration, and modelSpecification!");
-            }
-            if(!super.isModuleAvailable(module))
-                throw new IllegalArgumentException(String.format(super.UNKNOWN_MODULE_MESSAGE,module));
-
-            this.modelSpecs = new ModelSpecs(module, initialConfiguration, modelSpecification);
+            this.modelSpecs = new ModelSpecHandler(modelSpec).getModelSpecs();
         }
 
         private void setFormulae(Map<String, Object> taskSpecs) {
@@ -70,15 +58,18 @@ public class OptimalFeasibilityTask extends SynthesisTask {
 
         }
 
+
+
         @Override
         public SynthesisRecord execute(SibillaRuntime runtime) throws CommandExecutionException, StlModelGenerationException {
             runtime.reset();
             runtime.loadModule(modelSpecs.module());
             runtime.load(modelSpecs.modelSpecification());
             runtime.setReplica(super.replica);
-            runtime.setConfiguration(modelSpecs.initialConfiguration);
+            runtime.setConfiguration(modelSpecs.initialConfiguration());
+            setModelParameterNames(runtime);
             runtime.loadFormula(getFormulae());
-            this.formulaName = runtime.getMonitors().keySet().toArray(new String[0])[0];
+            this.formulaName = runtime.getFormulaeMonitors().keySet().toArray(new String[0])[0];
             ToDoubleFunction<Map<String,Double>> objectiveFunction = getObjectiveFunction(runtime);
             Synthesizer synthesizer = generateSynthesizer(objectiveFunction, objectiveType.isMinimize());
             synthesizer.searchOptimalSolution();
@@ -87,11 +78,11 @@ public class OptimalFeasibilityTask extends SynthesisTask {
 
         private ToDoubleFunction<Map<String,Double>> getObjectiveFunction(SibillaRuntime runtime) {
             return m->{
-                setRuntimeParameters(runtime,m);
+                setModelParameters(runtime,m);
                 double eval;
                 try {
                     runtime.setConfiguration(modelSpecs.initialConfiguration());
-                    eval = evaluationFunction.applyAsDouble(runtime,formulaName,new double[]{});
+                    eval = evaluationFunction.applyAsDouble(runtime,formulaName,m);
                 } catch (CommandExecutionException | StlModelGenerationException e) {
                     throw new RuntimeException(e);
                 }
@@ -101,7 +92,7 @@ public class OptimalFeasibilityTask extends SynthesisTask {
 
 
 
-    private record ModelSpecs(String module, String initialConfiguration, String modelSpecification) {}
+    //private record ModelSpecs(String module, String initialConfiguration, String modelSpecification) {}
 
         private enum ObjectiveType {
             MAXIMIZE, MINIMIZE;
@@ -122,7 +113,7 @@ public class OptimalFeasibilityTask extends SynthesisTask {
 
             @FunctionalInterface
             public interface STLEvaluation {
-                double applyAsDouble(SibillaRuntime sr, String formulaName, double[] formulaParameters) throws CommandExecutionException, StlModelGenerationException;
+                double applyAsDouble(SibillaRuntime sr, String formulaName, Map<String, Double> formulaParameters) throws CommandExecutionException, StlModelGenerationException;
             }
         }
 

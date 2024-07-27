@@ -38,10 +38,10 @@ public class SynthesisStrategy {
 
 
     private String[] constraints;
-    private Properties properties;
+    private final Properties properties;
 
 
-    private boolean performInfill;
+    private final boolean performInfill;
     private double convergenceThreshold;
     private int maxInfillIterations;
 

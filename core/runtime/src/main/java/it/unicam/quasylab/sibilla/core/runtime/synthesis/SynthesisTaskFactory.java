@@ -4,15 +4,11 @@ import java.util.Map;
 
 public class SynthesisTaskFactory {
 
-    public static SynthesisTask createTask(TaskName taskName, Map<String,Object> taskMap, SynthesisStrategy strategy) {
-        switch (taskName) {
-            case OPTIMAL_FEASIBILITY:
-                return new OptimalFeasibilityTask(taskMap,strategy);
-            case COMPARATIVE:
-                return new ComparisonTask(taskMap,strategy);
-            default:
-                throw new IllegalArgumentException("Unknown task name");
-        }
+    public static SynthesisTask createTask(TaskName taskName, Map<String,Object> taskMap, SynthesisStrategy strategy){
+        return switch (taskName) {
+            case OPTIMAL_FEASIBILITY -> new OptimalFeasibilityTask(taskMap, strategy);
+            case COMPARATIVE -> new ComparisonTask(taskMap, strategy);
+        };
     }
 
 

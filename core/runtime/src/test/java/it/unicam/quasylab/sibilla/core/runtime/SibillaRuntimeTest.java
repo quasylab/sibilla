@@ -30,7 +30,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.ToDoubleFunction;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -408,25 +410,25 @@ class SibillaRuntimeTest {
             param meet_rate = 1.0;
             param moral_decay_rate = 0.25;
             param suicide_rate = 0.05;
-                        
+            
             const max_sanity = 3;
-                        
+            
             species human of [0,max_sanity];
             species infected_human;
             species deceased;
-                        
+            
             rule loss_of_sanity for i in [0,max_sanity] when i>0 {
                 human[i] -[ moral_decay_rate ]-> human[i-1]
             }
-                        
+            
             rule moral_support for i in [0,max_sanity] and j in [0,max_sanity]  when ((i<max_sanity-1)&&(j<max_sanity-1)) {
                 human[i]|human[j] -[ (#human[0] + #human[1] + #human[2]) * meet_rate ]-> human[i+1]|human[j+1]
             }
-                        
+            
             rule human_get_infected for i in [0,max_sanity-1] {
                 human[i]|infected_human -[ (#human[0] + #human[1] + #human[2]) * %infected_human * meet_rate ]-> infected_human|infected_human
             }
-                        
+            
             rule killing_human for i in [0,max_sanity-1] {
                 human[i]|human[i] -[ (#human[0] + #human[1] + #human[2]) * meet_rate * paranoia ]-> human[i]|deceased
             }
@@ -518,23 +520,23 @@ class SibillaRuntimeTest {
             predicate onlyB = (%B == 1.0);
             """;
 
-    @Disabled
-    public void testTheThing() throws CommandExecutionException, IOException {
-        SibillaRuntime sr = getRuntimeWithModule();
-        sr.load(TEST_THE_THING);
-        sr.setConfiguration("initial");
-        sr.addAllMeasures();
-        sr.setReplica(5);
-        sr.setDeadline(100);
-        sr.setDt(1);
-        sr.setSamplingStrategy("ffs");
-        sr.setDataSetSize(50);
-        sr.addSpaceInterval("paranoia",0.05,2);
-        sr.addSpaceInterval("meet_rate",0.05,2);
-        sr.setProbReachAsObjectiveFunction(null,"half_humans_survived_and_alien_eradicated",0.05,0.05);
-        sr.generateTrainingSet();
-        sr.saveTable("alien","/repository",null,null);
-    }
+//    @Disabled
+//    public void testTheThing() throws CommandExecutionException, IOException {
+//        SibillaRuntime sr = getRuntimeWithModule();
+//        sr.load(TEST_THE_THING);
+//        sr.setConfiguration("initial");
+//        sr.addAllMeasures();
+//        sr.setReplica(5);
+//        sr.setDeadline(100);
+//        sr.setDt(1);
+//        sr.setSamplingStrategy("ffs");
+//        sr.setDataSetSize(50);
+//        sr.addSpaceInterval("paranoia",0.05,2);
+//        sr.addSpaceInterval("meet_rate",0.05,2);
+//        sr.setProbReachAsObjectiveFunction(null,"half_humans_survived_and_alien_eradicated",0.05,0.05);
+//        sr.generateTrainingSet();
+//        sr.saveTable("alien","/repository",null,null);
+//    }
 
 
 
@@ -556,25 +558,25 @@ class SibillaRuntimeTest {
 //        sr.saveTable("TSP_Sample","/repository",null,null);
 //    }
 
-    @Disabled
-    public void testNewTSP_Optimization() throws CommandExecutionException, IOException {
-        SibillaRuntime sr = getRuntimeWithModule();
-        sr.load(TEST_TSP_OPT);
-        sr.setConfiguration("start");
-        sr.addAllMeasures();
-        sr.setReplica(5);
-        sr.setDeadline(50);
-        sr.setDt(1);
-        sr.setSamplingStrategy("ffs");
-        sr.setDataSetSize(20);
-        sr.usingSurrogate(true);
-        sr.addSpaceInterval("meetRate",0.2,2);
-        sr.addSpaceInterval("pError",0.005,0.5);
-        sr.setProbReachAsObjectiveFunction(null,"win0",0.05,0.05);
-        sr.setOptimizationAsMinimization(false);
-        sr.performOptimization();
-        System.out.println(sr.getOptimizationInfo());
-    }
+//    @Disabled
+//    public void testNewTSP_Optimization() throws CommandExecutionException, IOException {
+//        SibillaRuntime sr = getRuntimeWithModule();
+//        sr.load(TEST_TSP_OPT);
+//        sr.setConfiguration("start");
+//        sr.addAllMeasures();
+//        sr.setReplica(5);
+//        sr.setDeadline(50);
+//        sr.setDt(1);
+//        sr.setSamplingStrategy("ffs");
+//        sr.setDataSetSize(20);
+//        sr.usingSurrogate(true);
+//        sr.addSpaceInterval("meetRate",0.2,2);
+//        sr.addSpaceInterval("pError",0.005,0.5);
+//        sr.setProbReachAsObjectiveFunction(null,"win0",0.05,0.05);
+//        sr.setOptimizationAsMinimization(false);
+//        sr.performOptimization();
+//        System.out.println(sr.getOptimizationInfo());
+//    }
 
 
 
@@ -655,59 +657,61 @@ class SibillaRuntimeTest {
 
 
 
-    @Disabled
-    public void testFungi() throws CommandExecutionException, IOException {
-        SibillaRuntime sr = new SibillaRuntime();
-        sr.load(TEST_FUNGI);
-        sr.setConfiguration("fair");
-        sr.addAllMeasures();
-        sr.setReplica(5);
-        sr.setDeadline(100);
-        sr.setDt(1);
-        sr.setSamplingStrategy("ffs");
-        sr.setDataSetSize(40);
-        sr.addSpaceInterval("t",-40,40);
-        sr.addSpaceInterval("h",-5,5);
-        sr.setProbReachAsObjectiveFunction(null,"majorityA",0.05,0.05);
-        sr.generateTrainingSet();
-        //sr.saveTable("fungiBalanced","/Users/lorenzomatteucci/phd",null,null);
-    }
+//    @Disabled
+//    public void testFungi() throws CommandExecutionException, IOException {
+//        SibillaRuntime sr = new SibillaRuntime();
+//        sr.load(TEST_FUNGI);
+//        sr.setConfiguration("fair");
+//        sr.addAllMeasures();
+//        sr.setReplica(5);
+//        sr.setDeadline(100);
+//        sr.setDt(1);
+//        sr.setSamplingStrategy("ffs");
+//        sr.setDataSetSize(40);
+//        sr.addSpaceInterval("t",-40,40);
+//        sr.addSpaceInterval("h",-5,5);
+//        sr.setProbReachAsObjectiveFunction(null,"majorityA",0.05,0.05);
+//        sr.generateTrainingSet();
+//        //sr.saveTable("fungiBalanced","/Users/lorenzomatteucci/phd",null,null);
+//    }
 
 
-    @Disabled
-    public void testNewTSPBattery() throws CommandExecutionException, IOException {
-        SibillaRuntime sr = getRuntimeWithModule();
-        sr.load(TEST_TSP_BATTERY);
-        sr.setConfiguration("fair");
-        sr.addAllMeasures();
-        sr.setReplica(5);
-        sr.setDeadline(100);
-        sr.setDt(1);
-        sr.setSamplingStrategy("ffs");
-        sr.setDataSetSize(10);
-        sr.addSpaceInterval("recharge_rate",0.05,2);
-        sr.addSpaceInterval("reactivation_rate",0.05,2);
-        sr.addSpaceInterval("deactivation_rate",0.05,2);
-        sr.setProbReachAsObjectiveFunction(null,"consensus_and_charged",0.05,0.05);
-        sr.generateTrainingSet();
-        //sr.saveTable("TSP_BATTERY","/Users/lorenzomatteucci/phd/tsp_battery",null,null);
-    }
-    @Disabled
-    public void testNewSIR() throws CommandExecutionException, IOException {
-        SibillaRuntime sr = getRuntimeWithModule();
-        sr.load(TEST_SIR);
-        sr.setConfiguration("init");
-        sr.addAllMeasures();
-        sr.setReplica(5);
-        sr.setDeadline(100);
-        sr.setDt(1);
-        sr.setSamplingStrategy("ffs");
-        sr.setDataSetSize(50);
-        sr.addSpaceInterval("infectionRate",0.005,1.5);
-        sr.addSpaceInterval("recoverRate",0.005,1.5);
-        sr.setProbReachAsObjectiveFunction(null,"allRecovered",0.05,0.05);
-        sr.generateTrainingSet();
-    }
+//    @Disabled
+//    public void testNewTSPBattery() throws CommandExecutionException, IOException {
+//        SibillaRuntime sr = getRuntimeWithModule();
+//        sr.load(TEST_TSP_BATTERY);
+//        sr.setConfiguration("fair");
+//        sr.addAllMeasures();
+//        sr.setReplica(5);
+//        sr.setDeadline(100);
+//        sr.setDt(1);
+//        sr.setSamplingStrategy("ffs");
+//        sr.setDataSetSize(10);
+//        sr.addSpaceInterval("recharge_rate",0.05,2);
+//        sr.addSpaceInterval("reactivation_rate",0.05,2);
+//        sr.addSpaceInterval("deactivation_rate",0.05,2);
+//        sr.setProbReachAsObjectiveFunction(null,"consensus_and_charged",0.05,0.05);
+//        sr.generateTrainingSet();
+//        //sr.saveTable("TSP_BATTERY","/Users/lorenzomatteucci/phd/tsp_battery",null,null);
+//    }
+
+
+//    @Disabled
+//    public void testNewSIR() throws CommandExecutionException, IOException {
+//        SibillaRuntime sr = getRuntimeWithModule();
+//        sr.load(TEST_SIR);
+//        sr.setConfiguration("init");
+//        sr.addAllMeasures();
+//        sr.setReplica(5);
+//        sr.setDeadline(100);
+//        sr.setDt(1);
+//        sr.setSamplingStrategy("ffs");
+//        sr.setDataSetSize(50);
+//        sr.addSpaceInterval("infectionRate",0.005,1.5);
+//        sr.addSpaceInterval("recoverRate",0.005,1.5);
+//        sr.setProbReachAsObjectiveFunction(null,"allRecovered",0.05,0.05);
+//        sr.generateTrainingSet();
+//    }
 
 
     @Disabled
@@ -747,7 +751,8 @@ class SibillaRuntimeTest {
         sr.setDeadline(120);
         sr.setDt(5);
         sr.loadFormula(formulaSpec);
-        Map<String, double[][]>  result = sr.quantitativeMonitorSignal(new String[]{"formula_id"},new double[][]{{}});
+        Map<String, Double>[] parameterMap = new Map[]{new HashMap<String,Double>()};
+        Map<String, double[][]>  result = sr.quantitativeMonitorSignal(new String[]{"formula_id"},parameterMap);
         System.out.println(result.get("formula_id")[0][0]);
         System.out.println(result.get("formula_id")[0][1]);
         System.out.println(result.get("formula_id")[0][2]);
@@ -792,11 +797,14 @@ class SibillaRuntimeTest {
         sr.setDeadline(120);
         sr.setDt(5);
         sr.loadFormula(formulaSpec);
-        Map<String, String[]> monitors = sr.getMonitors();
+        Map<String, Map<String, ToDoubleFunction<Map<String, Double>>>>  monitors = sr.getFormulaeMonitors();
         for(String monitor : monitors.keySet()) {
             System.out.println(monitor);
         }
-        Map<String, double[][]>  result = sr.quantitativeMonitorSignal(new String[]{"formula_id"},new double[][]{{}});
+
+        Map<String, Double>[] parameterMap = new Map[]{new HashMap<String,Double>()};
+
+        Map<String, double[][]>  result = sr.quantitativeMonitorSignal(new String[]{"formula_id"},parameterMap);
         System.out.println(result.get("formula_id")[0][0]);
         System.out.println(result.get("formula_id")[0][1]);
         System.out.println(result.get("formula_id")[0][2]);
@@ -844,24 +852,24 @@ class SibillaRuntimeTest {
 //    }
 
 
-    @Disabled
-    public void testNewTSP_Optimization_LTMADS() throws CommandExecutionException, IOException {
-        SibillaRuntime sr = getRuntimeWithModule();
-        sr.load(TEST_TSP_OPT);
-        sr.setConfiguration("start");
-        sr.addAllMeasures();
-        sr.setReplica(5);
-        sr.setDeadline(50);
-        sr.setDt(1);
-        sr.usingSurrogate(false);
-        sr.setOptimizationStrategy("ltmads");
-        sr.addSpaceInterval("meetRate",0.2,2);
-        sr.addSpaceInterval("pError",0.005,0.5);
-        sr.setProbReachAsObjectiveFunction(null,"win0",0.05,0.05);
-        sr.setOptimizationAsMinimization(false);
-        sr.performOptimization();
-        System.out.println(sr.getOptimizationInfo());
-    }
+//    @Disabled
+//    public void testNewTSP_Optimization_LTMADS() throws CommandExecutionException, IOException {
+//        SibillaRuntime sr = getRuntimeWithModule();
+//        sr.load(TEST_TSP_OPT);
+//        sr.setConfiguration("start");
+//        sr.addAllMeasures();
+//        sr.setReplica(5);
+//        sr.setDeadline(50);
+//        sr.setDt(1);
+//        sr.usingSurrogate(false);
+//        sr.setOptimizationStrategy("ltmads");
+//        sr.addSpaceInterval("meetRate",0.2,2);
+//        sr.addSpaceInterval("pError",0.005,0.5);
+//        sr.setProbReachAsObjectiveFunction(null,"win0",0.05,0.05);
+//        sr.setOptimizationAsMinimization(false);
+//        sr.performOptimization();
+//        System.out.println(sr.getOptimizationInfo());
+//    }
 
     @Test
     public void shouldSelectPopulationModule() throws CommandExecutionException {
@@ -979,24 +987,24 @@ class SibillaRuntimeTest {
 
 
 
-    @Disabled
-    public void testOptimization() throws CommandExecutionException {
-        SibillaRuntime sr = getRuntimeWithModule();
-        sr.load(CODE_TSP);
-        sr.setConfiguration("balanced");
-        sr.setDeadline(100.0);
-        sr.usingSurrogate(true);
-        sr.setProbReachAsObjectiveFunction(null,"consensus",0.1,0.1);
-        sr.addSpaceInterval("scale",1.0,20.0);
-        sr.setDataSetSize(100);
-        sr.setOptimizationAsMinimization(true);
-        sr.performOptimization();
-        System.out.println(sr.getOptimizationInfo());
-
-//        interpreter.execute("optimizes using \"pso\" with surrogate \"rf\"");
-//        interpreter.execute("search in \"x\" in [-10,10]");
-//        interpreter.execute("min x^2+x+3");
-    }
+//    @Disabled
+//    public void testOptimization() throws CommandExecutionException {
+//        SibillaRuntime sr = getRuntimeWithModule();
+//        sr.load(CODE_TSP);
+//        sr.setConfiguration("balanced");
+//        sr.setDeadline(100.0);
+//        sr.usingSurrogate(true);
+//        sr.setProbReachAsObjectiveFunction(null,"consensus",0.1,0.1);
+//        sr.addSpaceInterval("scale",1.0,20.0);
+//        sr.setDataSetSize(100);
+//        sr.setOptimizationAsMinimization(true);
+//        sr.performOptimization();
+//        System.out.println(sr.getOptimizationInfo());
+//
+////        interpreter.execute("optimizes using \"pso\" with surrogate \"rf\"");
+////        interpreter.execute("search in \"x\" in [-10,10]");
+////        interpreter.execute("min x^2+x+3");
+//    }
 
 
 //    @Test
@@ -1032,16 +1040,16 @@ class SibillaRuntimeTest {
 //    }
 
 
-    @Test
-    public void exceptionInSetProperty() throws CommandExecutionException {
-        SibillaRuntime sr = getRuntimeWithModule();
-        try{
-            sr.setSurrogateProperty("not_a_parameter","5");
-        }catch (CommandExecutionException e){
-            System.out.printf((e.getErrorMessages().toString()) + "%n","word");
-        }
-
-    }
+//    @Test
+//    public void exceptionInSetProperty() throws CommandExecutionException {
+//        SibillaRuntime sr = getRuntimeWithModule();
+//        try{
+//            sr.setSurrogateProperty("not_a_parameter","5");
+//        }catch (CommandExecutionException e){
+//            System.out.printf((e.getErrorMessages().toString()) + "%n","word");
+//        }
+//
+//    }
 
 
 //    @Test

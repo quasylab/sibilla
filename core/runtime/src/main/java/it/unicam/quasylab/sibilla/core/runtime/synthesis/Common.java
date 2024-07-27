@@ -10,7 +10,7 @@ public class Common {
     public static final String DEFAULT_SURROGATE = "rf";
     public static final String DEFAULT_OPTIMIZATION = "pso";
     public static final int DEFAULT_DATASET_SIZE = 1000;
-    public static final double DEFAULT_TRAINING_PORTION = 0.9;
+    public static final double DEFAULT_TRAINING_PORTION = 0.95;
 
 
     public static final double DEFAULT_DEADLINE = 100;

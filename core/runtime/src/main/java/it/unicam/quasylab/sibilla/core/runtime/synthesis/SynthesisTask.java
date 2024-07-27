@@ -8,9 +8,9 @@ import it.unicam.quasylab.sibilla.tools.synthesis.SynthesisRecord;
 import it.unicam.quasylab.sibilla.tools.synthesis.Synthesizer;
 
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.ToDoubleFunction;
 
 
@@ -27,9 +27,7 @@ public abstract class SynthesisTask {
 
     SynthesisStrategy synthesisStrategy;
 
-    protected final String UNKNOWN_MODULE_MESSAGE = "%s is unknown! Available modules are: " +
-            Arrays.stream(availableModules()).reduce("\n",(a, b)->a +"\n"+b);
-
+    Set<String> modelParameterNames;
 
 
     public SynthesisTask(Map<String,Object> taskMap,SynthesisStrategy synthesisStrategy) {
@@ -95,14 +93,17 @@ public abstract class SynthesisTask {
                 .toList().toArray(new String[0]);
     }
 
-    protected boolean isModuleAvailable(String moduleName){
-        return Arrays.stream(availableModules()).anyMatch(moduleName::equals);
-    }
 
 
-    protected void setRuntimeParameters(SibillaRuntime sr, Map<String, Double> parameters) {
+    protected void setModelParameters(SibillaRuntime sr, Map<String, Double> parameters) {
         for (String paramName : parameters.keySet()) {
-            sr.setParameter(paramName, parameters.get(paramName));
+            if(this.modelParameterNames.contains(paramName))
+                sr.setParameter(paramName, parameters.get(paramName));
         }
     }
+
+    protected void setModelParameterNames(SibillaRuntime sr){
+        this.modelParameterNames = Set.of(sr.getParameters());
+    }
+
 }
