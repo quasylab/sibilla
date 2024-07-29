@@ -43,16 +43,17 @@ command : module_command
         | predicates_command
         | first_passage_time
         | reachability_command
-        | set_optimization_strategy
-        | set_optimization_properties
-        | set_surrogate_properties
-        | search_space_interval
-        | constraints_definition
-        | optimization_command
-        | dataset_setting
-        | reset_optimization_command
-        | sample_command
-        | save_samples_command
+        | run_synthesis_command
+        //| set_optimization_strategy
+        //| set_optimization_properties
+        //| set_surrogate_properties
+        //| search_space_interval
+        //| constraints_definition
+        //| optimization_command
+        //| dataset_setting
+        //| reset_optimization_command
+        //| sample_command
+        //| save_samples_command
         | trace_command
         ;
 
@@ -153,53 +154,9 @@ ls_command : 'ls' ;
 
 cd_command : 'cd' name=STRING;
 
+run_synthesis_command : 'run' 'synthesis' path=STRING (verboseValue = 'verbose')? ;
 
-set_optimization_strategy :
-    'optimizes using' algorithm_name=STRING ('with surrogate' surrogate_name=STRING)?
-;
 
-set_optimization_properties :
-    ('set' 'optimization' 'property'|'set' 'opt' 'prop') key=STRING value=STRING
-;
-
-set_surrogate_properties :
-    ('set' 'surrogate' 'property'|'set' 'sur' 'prop') key=STRING  value=STRING
-;
-
-search_space_interval :
-    'search' 'in' variable=STRING 'in' '[' lower_bound=expr',' upper_bound=expr ']'
-;
-
-constraints_definition :
-    'add' 'constraint' constraint=expr
-;
-
-dataset_setting :
-    'dataset' 'size' dataset_size=INTEGER ('test' test_percentage=REAL)? ('sampling' sampling_strategy_name=STRING)?
-;
-
-optimization_command :
-    kind_of_optimization=( 'minimize' | 'min' | 'maximize' | 'max' ) objective_function
-;
-
-sample_command :
-    'sample' ('using' sampling_strategy=STRING)? objective_function ('of size' number_of_samples=INTEGER)?
- ;
-
-save_samples_command : 'save' 'samples' (name=ID)? ('output'  dir=STRING)? ('prefix' prefix=STRING)? ('postfix' postfix=STRING)?
-            ;
-
-objective_function : (
-     objective_reachability
-     | objective_first_passage_time
-     | objective_expr
-     );
-
-reset_optimization_command : 'reset' 'optimization' 'setting';
-
-objective_reachability : 'probreach' goal=STRING (('while' condition=STRING)? 'with' 'alpha' '='  alpha=REAL 'and' 'delta' '=' delta=REAL)?;
-objective_first_passage_time : 'fpt' name=STRING;
-objective_expr : expression=expr ;
 
 expr :
       left=expr op=('&'|'&&') right=expr                      # andExpression

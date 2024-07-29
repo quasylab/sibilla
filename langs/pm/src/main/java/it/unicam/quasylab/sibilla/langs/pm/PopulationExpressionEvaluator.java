@@ -61,6 +61,38 @@ public class PopulationExpressionEvaluator extends PopulationModelBaseVisitor<Fu
     }
 
     @Override
+    public Function<PopulationState, SibillaValue> visitExpressionRound(PopulationModelParser.ExpressionRoundContext ctx) {
+        Function<PopulationState, SibillaValue> arg = ctx.expr().accept(this);
+        return s -> SibillaValue.of(Math.round(arg.apply(s).doubleOf()));
+    }
+
+    @Override
+    public Function<PopulationState, SibillaValue> visitExpressionFloor(PopulationModelParser.ExpressionFloorContext ctx) {
+        Function<PopulationState, SibillaValue> arg = ctx.expr().accept(this);
+        return s -> SibillaValue.of(Math.floor(arg.apply(s).doubleOf()));
+    }
+
+    @Override
+    public Function<PopulationState, SibillaValue> visitExpressionCeil(PopulationModelParser.ExpressionCeilContext ctx) {
+        Function<PopulationState, SibillaValue> arg = ctx.expr().accept(this);
+        return s -> SibillaValue.of(Math.ceil(arg.apply(s).doubleOf()));
+    }
+
+    @Override
+    public Function<PopulationState, SibillaValue> visitExpressionMin(PopulationModelParser.ExpressionMinContext ctx) {
+        Function<PopulationState, SibillaValue> left = ctx.firstArgument.accept(this);
+        Function<PopulationState, SibillaValue> right = ctx.secondArgument.accept(this);
+        return s -> SibillaValue.min(left.apply(s), right.apply(s));
+    }
+
+    @Override
+    public Function<PopulationState, SibillaValue> visitExpressionMax(PopulationModelParser.ExpressionMaxContext ctx) {
+        Function<PopulationState, SibillaValue> left = ctx.firstArgument.accept(this);
+        Function<PopulationState, SibillaValue> right = ctx.secondArgument.accept(this);
+        return s -> SibillaValue.max(left.apply(s), right.apply(s));
+    }
+
+    @Override
     public Function<PopulationState, SibillaValue> visitIntValue(PopulationModelParser.IntValueContext ctx) {
         SibillaValue v = new SibillaInteger(Integer.parseInt(ctx.getText()));
         return s-> v;

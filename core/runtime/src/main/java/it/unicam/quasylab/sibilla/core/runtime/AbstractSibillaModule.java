@@ -256,12 +256,33 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     }
 
     @Override
-    public Map<String, double[][]> qualitativeMonitoring(RandomGenerator rg, String[] formulaName, double[][] formulaArgs,double deadline, double dt, int replica) throws StlModelGenerationException {
+    public Map<String, double[][]> qualitativeMonitoring(RandomGenerator rg, String[] formulaName, Map<String, Double>[] formulaArgs,double deadline, double dt, int replica) throws StlModelGenerationException {
         return checkForLoadedDefinition().qualitativeMonitoring(this.simulator, rg, formulaName, formulaArgs,deadline, dt, replica);
     }
 
     @Override
-    public Map<String, double[][]> quantitativeMonitoring(RandomGenerator rg, String[] formulaName, double[][] formulaArgs, double deadline, double dt, int replica) throws StlModelGenerationException {
+    public Map<String, double[][]> quantitativeMonitoring(RandomGenerator rg, String[] formulaName, Map<String, Double>[] formulaArgs, double deadline, double dt, int replica) throws StlModelGenerationException {
         return checkForLoadedDefinition().quantitativeMonitoring(this.simulator, rg, formulaName, formulaArgs, deadline,dt, replica);
     }
+
+    @Override
+    public double meanRobustnessAtTime0( RandomGenerator rg, String formulaName, Map<String, Double> formulaParameters, int replica) throws StlModelGenerationException {
+        return checkForLoadedDefinition().meanRobustnessAtTime0(this.simulator, rg, formulaName, formulaParameters, replica);
+    }
+
+    @Override
+    public double[] meanAndSdRobustnessAtTime0(RandomGenerator rg, String formulaName,Map<String, Double> formulaParameters, int replica) throws StlModelGenerationException {
+        return checkForLoadedDefinition().meanAndSdRobustnessAtTime0(this.simulator, rg, formulaName, formulaParameters, replica);
+    }
+
+    @Override
+    public double expectedProbabilityAtTime0( RandomGenerator rg, String formulaName, Map<String, Double> formulaParameters, int replica) throws StlModelGenerationException {
+        return checkForLoadedDefinition().expectedProbabilityAtTime0(this.simulator, rg, formulaName, formulaParameters, replica);
+    }
+
+    @Override
+    public Map<String, Map<String, ToDoubleFunction<Map<String, Double>>>> getFormulaMonitors() throws StlModelGenerationException {
+        return checkForLoadedDefinition().getFormulaMonitors();
+    }
+
 }

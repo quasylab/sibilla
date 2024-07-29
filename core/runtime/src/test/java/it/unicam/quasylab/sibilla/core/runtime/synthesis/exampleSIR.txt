@@ -1,0 +1,15 @@
+param k_i = 0.2;
+param k_r = 0.05;
+
+species S;
+species I;
+species R;
+
+rule infection {
+   S|I -[ #S * %I * k_i ]-> I|I
+}
+
+rule recovered {
+    I -[ #I * k_r ]-> R
+}
+system initial = S<90>|I<10>|R<0>;

@@ -30,9 +30,9 @@ import it.unicam.quasylab.sibilla.core.runtime.command.CommandLoadModule;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.langs.util.ParseError;
 import it.unicam.quasylab.sibilla.langs.util.SibillaParseErrorListener;
-import it.unicam.quasylab.sibilla.shell.expression.ArithmeticExpressionVisitor;
-import it.unicam.quasylab.sibilla.shell.expression.BooleanExpressionVisitor;
 
+import it.unicam.quasylab.sibilla.tools.synthesis.SynthesisRecord;
+import it.unicam.quasylab.sibilla.tools.synthesis.surrogate.SurrogateMetrics;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -47,10 +47,11 @@ import java.util.*;
 
 public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
     public static final String MODULE_MESSAGE = "Module %s has been successfully loaded\n";
-    private static final String WELCOME_MESSAGE = "Sibilla interactive shell...\n";
+    private static final String WELCOME_MESSAGE = "Welcome in the Sibilla interactive shell ! \n";
     private static final String OK_MESSAGE = "Ok\n";
     private static final String CODE_LOADED = "Code %s has been successfully loaded\n";
     private static final String GOODBYE_MESSAGE = "Goodbye...";
+    private static final String PERFORMING_SYNTHESIS = "Performing synthesis...\n";
 
     private final SibillaRuntime runtime;
     private final PrintStream output;
@@ -137,7 +138,8 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
     @Override
     public Boolean visitModule_command(SibillaScriptParser.Module_commandContext ctx) {
         try {
-            runtime.handle(new CommandLoadModule(ctx.getText()));
+            String moduleName = getStringContent(ctx.name.getText());
+            runtime.handle(new CommandLoadModule(moduleName));
             showMessage(String.format(MODULE_MESSAGE, ctx.name.getText()));
             return true;
         } catch (CommandExecutionException e) {
@@ -353,6 +355,48 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
 
     }
 
+    private void showSynthesisResults(SynthesisRecord record, boolean verbose) {
+        List<String> infoLines = new ArrayList<>();
+
+        infoLines.add("Optimal Coordinates: " + (record.optimalCoordinates() != null ? record.optimalCoordinates() : "not present"));
+        infoLines.add("Optimal Value (Objective Function): " + record.optimalValueObjectiveFunction());
+        infoLines.add("Optimal Value (Surrogate Function): " + record.optimalValueSurrogateFunction());
+
+        if (verbose) {
+            infoLines.add("Optimization Algorithm: " + (record.chosenOptimizationAlgorithm() != null ? record.chosenOptimizationAlgorithm() : "not present"));
+            infoLines.add("Surrogate Model: " + (record.chosenSurrogateModel() != null ? record.chosenSurrogateModel() : "not present"));
+            infoLines.add("Sampling Strategy: " + (record.chosenSamplingStrategy() != null ? record.chosenSamplingStrategy() : "not present"));
+            infoLines.add("Use Surrogate: " + record.useSurrogate());
+            infoLines.add("Is Minimization Problem: " + record.isMinimizationProblem());
+            infoLines.add("Number of Samples: " + record.numberOfSamples());
+            infoLines.add("Training Portion: " + record.trainingPortion());
+            infoLines.add("Search Space: " + (record.searchSpace() != null ? record.searchSpace() : "not present"));
+
+            if (record.inSampleMetrics() != null) {
+                infoLines.add("In-Sample Metrics:");
+                addMetricsInfo(infoLines, record.inSampleMetrics());
+            }
+
+            if (record.outOfSampleMetrics() != null) {
+                infoLines.add("Out-of-Sample Metrics:");
+                addMetricsInfo(infoLines, record.outOfSampleMetrics());
+            }
+        }
+
+        printInfo("Synthesis Results:", infoLines.toArray(new String[0]));
+    }
+
+    private void addMetricsInfo(List<String> infoLines, SurrogateMetrics metrics) {
+        infoLines.add("  MSE: " + metrics.getMse());
+        infoLines.add("  RMSE: " + metrics.getRmse());
+        infoLines.add("  RSS: " + metrics.getRss());
+        infoLines.add("  MAD: " + metrics.getMad());
+        infoLines.add("  R^2: " + metrics.getrSquared());
+        infoLines.add("  Fit Time: " + metrics.getFitTimeInSeconds());
+        infoLines.add("  Training Set Size: " + metrics.getTrainingSize());
+        infoLines.add("  Test Set Size: " + metrics.getTestSize());
+    }
+
     @Override
     public Boolean visitAdd_measure_command(SibillaScriptParser.Add_measure_commandContext ctx) {
         runtime.addMeasure(getStringContent(ctx.name.getText()));
@@ -532,90 +576,122 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
     }
 
     @Override
-    public Boolean visitSet_optimization_strategy(SibillaScriptParser.Set_optimization_strategyContext ctx){
-        try {
-            runtime.setOptimizationStrategy(getStringContent(ctx.algorithm_name));
-            if(ctx.surrogate_name == null)
-                runtime.usingSurrogate(false);
-            else{
-                runtime.usingSurrogate(true);
-                runtime.setSurrogateStrategy(getStringContent(ctx.surrogate_name));
-            }
-            showMessage(OK_MESSAGE);
+    public Boolean visitRun_synthesis_command(SibillaScriptParser.Run_synthesis_commandContext ctx) {
+        try{
+            String synthesisSpecPath = getStringContent(ctx.path.getText());
+            File file = getFile(synthesisSpecPath);
+            showMessage(PERFORMING_SYNTHESIS);
+            boolean verbose = ctx.verboseValue != null;
+            SynthesisRecord synthesisResult = this.runtime.performSynthesis(file);
+            showSynthesisResults(synthesisResult, verbose);
             return true;
+        } catch (IOException e) {
+            printErrorMessages(List.of(e.getMessage()));
         } catch (CommandExecutionException e) {
             printErrorMessages(e.getErrorMessages());
         }
-        return false;
-
-    }
-
-
-    @Override
-    public Boolean visitSet_optimization_properties(SibillaScriptParser.Set_optimization_propertiesContext ctx){
-        try {
-            runtime.setOptimizationProperty(getStringContent(ctx.key),getStringContent(ctx.value));
-            showMessage(OK_MESSAGE);
-            return true;
-        } catch (CommandExecutionException e) {
-            printErrorMessages(e.getErrorMessages());
-        } catch (IllegalArgumentException e){
-            printErrorMessages(Collections.singletonList(String.format(e.getMessage(), getStringContent(ctx.key))));
-        }
-        return false;
-
-    }
-
-    @Override
-    public Boolean visitSet_surrogate_properties(SibillaScriptParser.Set_surrogate_propertiesContext ctx){
-        try {
-            runtime.setSurrogateProperty(getStringContent(ctx.key),getStringContent(ctx.value));
-            showMessage(OK_MESSAGE);
-            return true;
-        } catch (CommandExecutionException e) {
-            printErrorMessages(e.getErrorMessages());
-        }
-        return false;
-    }
-
-    @Override
-    public Boolean visitSearch_space_interval(SibillaScriptParser.Search_space_intervalContext ctx) {
-        try {
-            runtime.addSpaceInterval(
-                    getStringContent(ctx.variable),
-                    new ArithmeticExpressionVisitor().visit(ctx.lower_bound).applyAsDouble(null),
-                    new ArithmeticExpressionVisitor().visit(ctx.upper_bound).applyAsDouble(null)
-            );
-            showMessage(OK_MESSAGE);
-            return true;
-        }catch (Exception e){
-            showErrorMessage(e.getMessage());
-        }
-        return false;
-    }
-
-    @Override
-    public Boolean visitReset_optimization_command(SibillaScriptParser.Reset_optimization_commandContext ctx) {
-        return super.visitReset_optimization_command(ctx);
-    }
-
-    @Override
-    public Boolean visitConstraints_definition(SibillaScriptParser.Constraints_definitionContext ctx) {
-        try {
-            runtime.addConstraint(new BooleanExpressionVisitor(new ArithmeticExpressionVisitor()).visit(ctx.constraint));
-            showMessage(OK_MESSAGE);
-            return true;
-        } catch (Exception e){
-            showErrorMessage(e.getMessage());
-        }
-        return false;
-    }
-
-//    @Override
-//    public Boolean visitTraining_set_setting(SibillaScriptParser.Training_set_settingContext ctx) {
 //        try {
-//            runtime.setDataSetSize(Integer.parseInt(ctx.training_set_size.getText()));
+//            String synthesisSpecPath = getStringContent(ctx.path.getText());
+//            File file = getFile(synthesisSpecPath);
+//            //SynthesisRecord a = this.runtime.performSynthesis(file);
+//            showMessage(PERFORMING_SYNTHESIS);
+//            return true;
+//        } catch (CommandExecutionException e) {
+//            printErrorMessages(e.getErrorMessages());
+//        }
+
+        return super.visitRun_synthesis_command(ctx);
+    }
+
+    //    @Override
+//    public Boolean visitSet_optimization_strategy(SibillaScriptParser.Set_optimization_strategyContext ctx){
+//        try {
+//            runtime.setOptimizationStrategy(getStringContent(ctx.algorithm_name));
+//            if(ctx.surrogate_name == null)
+//                runtime.usingSurrogate(false);
+//            else{
+//                runtime.usingSurrogate(true);
+//                runtime.setSurrogateStrategy(getStringContent(ctx.surrogate_name));
+//            }
+//            showMessage(OK_MESSAGE);
+//            return true;
+//        } catch (CommandExecutionException e) {
+//            printErrorMessages(e.getErrorMessages());
+//        }
+//        return false;
+//
+//    }
+//
+//
+//    @Override
+//    public Boolean visitSet_optimization_properties(SibillaScriptParser.Set_optimization_propertiesContext ctx){
+//        try {
+//            runtime.setOptimizationProperty(getStringContent(ctx.key),getStringContent(ctx.value));
+//            showMessage(OK_MESSAGE);
+//            return true;
+//        } catch (CommandExecutionException e) {
+//            printErrorMessages(e.getErrorMessages());
+//        } catch (IllegalArgumentException e){
+//            printErrorMessages(Collections.singletonList(String.format(e.getMessage(), getStringContent(ctx.key))));
+//        }
+//        return false;
+//
+//    }
+//
+//    @Override
+//    public Boolean visitSet_surrogate_properties(SibillaScriptParser.Set_surrogate_propertiesContext ctx){
+//        try {
+//            runtime.setSurrogateProperty(getStringContent(ctx.key),getStringContent(ctx.value));
+//            showMessage(OK_MESSAGE);
+//            return true;
+//        } catch (CommandExecutionException e) {
+//            printErrorMessages(e.getErrorMessages());
+//        }
+//        return false;
+//    }
+//
+//    @Override
+//    public Boolean visitSearch_space_interval(SibillaScriptParser.Search_space_intervalContext ctx) {
+//        try {
+//            runtime.addSpaceInterval(
+//                    getStringContent(ctx.variable),
+//                    new ArithmeticExpressionVisitor().visit(ctx.lower_bound).applyAsDouble(null),
+//                    new ArithmeticExpressionVisitor().visit(ctx.upper_bound).applyAsDouble(null)
+//            );
+//            showMessage(OK_MESSAGE);
+//            return true;
+//        }catch (Exception e){
+//            showErrorMessage(e.getMessage());
+//        }
+//        return false;
+//    }
+//
+//    @Override
+//    public Boolean visitReset_optimization_command(SibillaScriptParser.Reset_optimization_commandContext ctx) {
+//        return super.visitReset_optimization_command(ctx);
+//    }
+//
+//    @Override
+//    public Boolean visitConstraints_definition(SibillaScriptParser.Constraints_definitionContext ctx) {
+//        try {
+//            runtime.addConstraint(new BooleanExpressionVisitor(new ArithmeticExpressionVisitor()).visit(ctx.constraint));
+//            showMessage(OK_MESSAGE);
+//            return true;
+//        } catch (Exception e){
+//            showErrorMessage(e.getMessage());
+//        }
+//        return false;
+//    }
+//
+//
+//    @Override
+//    public Boolean visitDataset_setting(SibillaScriptParser.Dataset_settingContext ctx) {
+//        try {
+//            runtime.setDataSetSize(Integer.parseInt(ctx.dataset_size.getText()));
 //            Optional<String> samplingNameOptional = Optional.ofNullable(getStringContent(ctx.sampling_strategy_name));
+//            //if (ctx.test_percentage != null) runtime.setTrainingSetProportion(ctx.sampling_strategy_name);
+//            Optional<Double> testPercentageOptional = Optional.of(Double.parseDouble(ctx.test_percentage.getText()));
+//            testPercentageOptional.ifPresent(aDouble -> runtime.setTrainingSetProportion(1 - aDouble));
 //            samplingNameOptional.ifPresent(runtime::setSamplingStrategy);
 //            showMessage(OK_MESSAGE);
 //            return true;
@@ -624,115 +700,96 @@ public class SibillaShellInterpreter extends SibillaScriptBaseVisitor<Boolean> {
 //        }
 //        return false;
 //    }
-
-
-    @Override
-    public Boolean visitDataset_setting(SibillaScriptParser.Dataset_settingContext ctx) {
-        try {
-            runtime.setDataSetSize(Integer.parseInt(ctx.dataset_size.getText()));
-            Optional<String> samplingNameOptional = Optional.ofNullable(getStringContent(ctx.sampling_strategy_name));
-            //TODO
-            //if (ctx.test_percentage != null) runtime.setTrainingSetProportion(ctx.sampling_strategy_name);
-            Optional<Double> testPercentageOptional = Optional.of(Double.parseDouble(ctx.test_percentage.getText()));
-            testPercentageOptional.ifPresent(aDouble -> runtime.setTrainingSetProportion(1 - aDouble));
-            samplingNameOptional.ifPresent(runtime::setSamplingStrategy);
-            showMessage(OK_MESSAGE);
-            return true;
-        } catch (Exception e){
-            showErrorMessage(e.getMessage());
-        }
-        return false;
-    }
-
-    @Override
-    public Boolean visitObjective_expr(SibillaScriptParser.Objective_exprContext ctx) {
-        try {
-            runtime.setObjectiveFunction(new ArithmeticExpressionVisitor().visit(ctx.expression));
-            return true;
-        }catch (Exception e){
-            showErrorMessage(e.getMessage());
-        }
-        return false;
-    }
-
-
-    @Override
-    public Boolean visitObjective_first_passage_time(SibillaScriptParser.Objective_first_passage_timeContext ctx) {
-        try {
-            String name = getStringContent(ctx.name);
-            runtime.setFirstPassageTimeAsObjectiveFunction(null,name);
-            return true;
-        }catch (Exception e){
-            showErrorMessage(e.getMessage());
-        }
-        return false;
-     }
-
-    @Override
-    public Boolean visitObjective_reachability(SibillaScriptParser.Objective_reachabilityContext ctx) {
-
-        try {
-            String targetPredicate = getStringContent(ctx.goal.getText());
-            double alpha = ctx.alpha != null ? Double.parseDouble(ctx.alpha.getText()) : 0.01;
-            double delta = ctx.delta != null ? Double.parseDouble(ctx.delta.getText()) : 0.01;
-
-            if (ctx.condition != null) {
-                runtime.setProbReachAsObjectiveFunction(null,targetPredicate,alpha,delta);
-            } else {
-                runtime.setProbReachAsObjectiveFunctionWithCondition(null,getStringContent(ctx.condition.getText()),targetPredicate,alpha,delta);
-            }
-            return true;
-        }catch (Exception e){
-            showErrorMessage(e.getMessage());
-        }
-        return false;
-    }
-
-    @Override
-    public Boolean visitOptimization_command(SibillaScriptParser.Optimization_commandContext ctx) {
-        try {
-            runtime.setOptimizationAsMinimization(ctx.kind_of_optimization.getText().equals("min") || ctx.kind_of_optimization.getText().equals("minimize"));
-            this.visitObjective_function(ctx.objective_function());
-            showMessage("Processing...\n");
-            runtime.performOptimization();
-            showMessage(runtime.getOptimizationInfo());
-
-            return true;
-        }catch (Exception e){
-            showErrorMessage(e.getMessage());
-        }
-        return false;
-    }
-
-    @Override
-    public Boolean visitSample_command(SibillaScriptParser.Sample_commandContext ctx) {
-        try {
-            if(ctx.sampling_strategy.getText() != null)
-                runtime.setSamplingStrategy(ctx.sampling_strategy.getText());
-            if(ctx.number_of_samples.getText() != null)
-                runtime.setDataSetSize(Integer.parseInt(ctx.number_of_samples.getText()));
-            runtime.generateTrainingSet();
-            String messageStringBuilder = "Training set generated : \n"+runtime.getTrainingSetInfo();
-            showMessage(messageStringBuilder);
-            return true;
-        }catch (Exception e){
-            showErrorMessage(e.getMessage());
-        }
-        return false;
-    }
-
-    @Override
-    public Boolean visitSave_samples_command(SibillaScriptParser.Save_samples_commandContext ctx) {
-        try {
-            runtime.saveTable((ctx.name == null ? null : ctx.name.getText()), getStringContent(ctx.dir), getStringContent(ctx.prefix), getStringContent(ctx.postfix));
-            return true;
-        } catch (IOException e) {
-            printErrorMessages(List.of(e.getMessage()));
-        } catch (CommandExecutionException e) {
-            printErrorMessages(e.getErrorMessages());
-        }
-        return false;
-    }
+//
+//    @Override
+//    public Boolean visitObjective_expr(SibillaScriptParser.Objective_exprContext ctx) {
+//        try {
+//            runtime.setObjectiveFunction(new ArithmeticExpressionVisitor().visit(ctx.expression));
+//            return true;
+//        }catch (Exception e){
+//            showErrorMessage(e.getMessage());
+//        }
+//        return false;
+//    }
+//
+//
+//    @Override
+//    public Boolean visitObjective_first_passage_time(SibillaScriptParser.Objective_first_passage_timeContext ctx) {
+//        try {
+//            String name = getStringContent(ctx.name);
+//            runtime.setFirstPassageTimeAsObjectiveFunction(null,name);
+//            return true;
+//        }catch (Exception e){
+//            showErrorMessage(e.getMessage());
+//        }
+//        return false;
+//     }
+//
+//    @Override
+//    public Boolean visitObjective_reachability(SibillaScriptParser.Objective_reachabilityContext ctx) {
+//
+//        try {
+//            String targetPredicate = getStringContent(ctx.goal.getText());
+//            double alpha = ctx.alpha != null ? Double.parseDouble(ctx.alpha.getText()) : 0.01;
+//            double delta = ctx.delta != null ? Double.parseDouble(ctx.delta.getText()) : 0.01;
+//
+//            if (ctx.condition != null) {
+//                runtime.setProbReachAsObjectiveFunction(null,targetPredicate,alpha,delta);
+//            } else {
+//                runtime.setProbReachAsObjectiveFunctionWithCondition(null,getStringContent(ctx.condition.getText()),targetPredicate,alpha,delta);
+//            }
+//            return true;
+//        }catch (Exception e){
+//            showErrorMessage(e.getMessage());
+//        }
+//        return false;
+//    }
+//
+//    @Override
+//    public Boolean visitOptimization_command(SibillaScriptParser.Optimization_commandContext ctx) {
+//        try {
+//            runtime.setOptimizationAsMinimization(ctx.kind_of_optimization.getText().equals("min") || ctx.kind_of_optimization.getText().equals("minimize"));
+//            this.visitObjective_function(ctx.objective_function());
+//            showMessage("Processing...\n");
+//            runtime.performOptimization();
+//            showMessage(runtime.getOptimizationInfo());
+//
+//            return true;
+//        }catch (Exception e){
+//            showErrorMessage(e.getMessage());
+//        }
+//        return false;
+//    }
+//
+//    @Override
+//    public Boolean visitSample_command(SibillaScriptParser.Sample_commandContext ctx) {
+//        try {
+//            if(ctx.sampling_strategy.getText() != null)
+//                runtime.setSamplingStrategy(ctx.sampling_strategy.getText());
+//            if(ctx.number_of_samples.getText() != null)
+//                runtime.setDataSetSize(Integer.parseInt(ctx.number_of_samples.getText()));
+//            runtime.generateTrainingSet();
+//            String messageStringBuilder = "Training set generated : \n"+runtime.getTrainingSetInfo();
+//            showMessage(messageStringBuilder);
+//            return true;
+//        }catch (Exception e){
+//            showErrorMessage(e.getMessage());
+//        }
+//        return false;
+//    }
+//
+//    @Override
+//    public Boolean visitSave_samples_command(SibillaScriptParser.Save_samples_commandContext ctx) {
+//        try {
+//            runtime.saveTable((ctx.name == null ? null : ctx.name.getText()), getStringContent(ctx.dir), getStringContent(ctx.prefix), getStringContent(ctx.postfix));
+//            return true;
+//        } catch (IOException e) {
+//            printErrorMessages(List.of(e.getMessage()));
+//        } catch (CommandExecutionException e) {
+//            printErrorMessages(e.getErrorMessages());
+//        }
+//        return false;
+//    }
 
     @Override
     public Boolean visitTrace_command(SibillaScriptParser.Trace_commandContext ctx) {

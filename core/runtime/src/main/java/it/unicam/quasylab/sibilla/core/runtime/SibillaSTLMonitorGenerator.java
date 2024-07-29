@@ -33,12 +33,20 @@ public class SibillaSTLMonitorGenerator<S extends State> {
     }
 
 
-    public QualitativeMonitor<S> getQualitativeMonitor(String name, double[] args) throws StlModelGenerationException {
+    public QualitativeMonitor<S> getQualitativeMonitor(String name, Map<String, Double> args) throws StlModelGenerationException {
         return this.getStlMonitorFactory().getQualitativeMonitor(name, args);
     }
 
-    public QuantitativeMonitor<S> getQuantitativeMonitor(String name, double[] args) throws StlModelGenerationException {
+    public QuantitativeMonitor<S> getQuantitativeMonitor(String name, Map<String, Double> args) throws StlModelGenerationException {
         return this.getStlMonitorFactory().getQuantitativeMonitor(name,args);
+    }
+
+    public QualitativeMonitor<S> getQualitativeMonitor(String name) throws StlModelGenerationException {
+        return this.getStlMonitorFactory().getQualitativeMonitor(name);
+    }
+
+    public QuantitativeMonitor<S> getQuantitativeMonitor(String name) throws StlModelGenerationException {
+        return this.getStlMonitorFactory().getQuantitativeMonitor(name);
     }
 }
 

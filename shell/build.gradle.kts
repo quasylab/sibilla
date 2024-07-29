@@ -18,6 +18,8 @@ dependencies {
     implementation(project(":core:simulator"))
     implementation(project(":core:runtime"))
     implementation(project(":langs:util"))
+    implementation(project(":tools:synthesis"))
+
 }
 
 application {
