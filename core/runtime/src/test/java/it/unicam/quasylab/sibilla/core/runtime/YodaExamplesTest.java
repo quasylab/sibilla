@@ -1,6 +1,7 @@
 package it.unicam.quasylab.sibilla.core.runtime;
 
 import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
+import it.unicam.quasylab.sibilla.core.models.TimeStep;
 import it.unicam.quasylab.sibilla.core.models.yoda.*;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
@@ -176,14 +177,17 @@ class YodaExamplesTest {
         assertEquals(SibillaValue.of(0), state.get(0).get(variableRegistry.get("dirx")));
         assertEquals(SibillaValue.of(0), state.get(0).get(variableRegistry.get("diry")));
 
-        state = state.next(rg);
+        state = state.next(rg, 0.0).getValue();
         assertEquals(SibillaValue.of(0), state.get(0).get(variableRegistry.get("dirx")));
         assertEquals(SibillaValue.of(1), state.get(0).get(variableRegistry.get("diry")));
         assertEquals(SibillaValue.of(5), state.get(0).get(variableRegistry.get("x")));
         assertEquals(SibillaValue.of(1), state.get(0).get(variableRegistry.get("y")));
 
+        double time = 0.0;
         for (int i = 0; i<10; i++){
-            state = state.next(rg);
+            TimeStep<YodaSystemState> next = state.next(rg, time);
+            state = next.getValue();
+            time += next.getTime();
         }
         assertEquals(SibillaValue.of(5), state.get(0).get(variableRegistry.get("x")));
         assertEquals(SibillaValue.of(11), state.get(0).get(variableRegistry.get("y")));
@@ -253,14 +257,23 @@ class YodaExamplesTest {
         DefaultRandomGenerator rg = new DefaultRandomGenerator();
         YodaSystemState state = new YodaSystemState(List.of(agent), List.of(obs1,obs2));
 
-        state = state.next(rg);
+        double time = 0.0;
+
+        TimeStep<YodaSystemState> next = state.next(rg, time);
+        state = next.getValue();
+        time += next.getTime();
+
+
         YodaVariableMapping observations = state.get(0).observe(rg, state);
         WeightedStructure<YodaAction> acts = state.get(0).getAgentBehaviour().evaluate(agent.getAgentAttributes(), observations);
         assertEquals(1, acts.getTotalWeight());
         assertEquals(1, acts.getAll().get(0).getTotalWeight());
         assertEquals("moveWest", acts.getAll().get(0).getElement().getName());
 
-        state = state.next(rg);
+        next = state.next(rg, time);
+        state = next.getValue();
+        time += next.getTime();
+
         observations = state.get(0).observe(rg, state);
         acts = state.get(0).getAgentBehaviour().evaluate(agent.getAgentAttributes(), observations);
         assertEquals(1, acts.getTotalWeight());
@@ -268,8 +281,11 @@ class YodaExamplesTest {
         assertEquals("moveNorth", acts.getAll().get(0).getElement().getName());
 
         for (int i = 0; i<10;i++){
-            state = state.next(rg);
+            next = state.next(rg, time);
+            state = next.getValue();
+            time += next.getTime();
         }
+
         observations = state.get(0).observe(rg, state);
         acts = state.get(0).getAgentBehaviour().evaluate(agent.getAgentAttributes(), observations);
         assertEquals(1, acts.getTotalWeight());
@@ -525,33 +541,33 @@ class YodaExamplesTest {
 
         yodaModelDefinition.setParameter("nbirds", SibillaValue.of(5));
         initialState = yodaModelDefinition.getDefaultConfiguration();
-        System.out.println("phig_5 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
-        System.out.println("phil_5 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phig_5 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg, 0.0).getValue(), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phil_5 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg, 0.0).getValue(), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
 
         yodaModelDefinition.setParameter("nbirds", SibillaValue.of(10));
         initialState = yodaModelDefinition.getDefaultConfiguration();
-        System.out.println("phig_10 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
-        System.out.println("phil_10 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phig_10 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg, 0.0).getValue(), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phil_10 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg, 0.0).getValue(), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
 
         yodaModelDefinition.setParameter("nbirds", SibillaValue.of(20));
         initialState = yodaModelDefinition.getDefaultConfiguration();
-        System.out.println("phig_20 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
-        System.out.println("phil_20 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phig_20 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg, 0.0).getValue(), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phil_20 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg, 0.0).getValue(), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
 
         yodaModelDefinition.setParameter("nbirds", SibillaValue.of(30));
         initialState = yodaModelDefinition.getDefaultConfiguration();
-        System.out.println("phig_30 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
-        System.out.println("phil_30 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phig_30 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg, 0.0).getValue(), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phil_30 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg, 0.0).getValue(), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
 
         yodaModelDefinition.setParameter("nbirds", SibillaValue.of(40));
         initialState = yodaModelDefinition.getDefaultConfiguration();
-        System.out.println("phig_40 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
-        System.out.println("phil_40 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phig_40 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg, 0.0).getValue(), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phil_40 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg, 0.0).getValue(), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
 
         yodaModelDefinition.setParameter("nbirds", SibillaValue.of(50));
         initialState = yodaModelDefinition.getDefaultConfiguration();
-        System.out.println("phig_50 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
-        System.out.println("phil_50 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phig_50 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg, 0.0).getValue(), initialState, getEventuallyCloseFormula(1, 10, yodaVariableRegistry), 30, 100)));
+        System.out.println("phil_50 = "+Arrays.toString(smc.computeProbability((rg, s) -> s.next(rg, 0.0).getValue(), initialState, getEventuallyLocalCloseFormula(1, 10, 10, yodaVariableRegistry), 30, 100)));
     }
 
     @Test
@@ -628,20 +644,20 @@ class YodaExamplesTest {
         definition.setParameter("nSus", SibillaValue.of(99));
         definition.setParameter("nInf", SibillaValue.of(1));
         initialState=definition.getDefaultConfiguration();
-        System.out.println("phig_1Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r), initialState, getEventuallySEIRFormula(1, 10, variableRegistry),30, 100)));
-        System.out.println("phil_1Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r), initialState, getEventuallyLocalSEIRFormula(1, 10, 10, variableRegistry),30, 100 )));
+        System.out.println("phig_1Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r, 0.0).getValue(), initialState, getEventuallySEIRFormula(1, 10, variableRegistry),30, 100)));
+        System.out.println("phil_1Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r, 0.0).getValue(), initialState, getEventuallyLocalSEIRFormula(1, 10, 10, variableRegistry),30, 100 )));
 
         definition.setParameter("nSus", SibillaValue.of(95));
         definition.setParameter("nInf", SibillaValue.of(5));
         initialState=definition.getDefaultConfiguration();
-        System.out.println("phig_5Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r), initialState, getEventuallySEIRFormula(1, 10, variableRegistry),30, 100)));
-        System.out.println("phil_5Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r), initialState, getEventuallyLocalSEIRFormula(1, 10, 10, variableRegistry),30, 100 )));
+        System.out.println("phig_5Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r, 0.0).getValue(), initialState, getEventuallySEIRFormula(1, 10, variableRegistry),30, 100)));
+        System.out.println("phil_5Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r, 0.0).getValue(), initialState, getEventuallyLocalSEIRFormula(1, 10, 10, variableRegistry),30, 100 )));
 
         definition.setParameter("nSus", SibillaValue.of(90));
         definition.setParameter("nInf", SibillaValue.of(10));
         initialState=definition.getDefaultConfiguration();
-        System.out.println("phig_10Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r), initialState, getEventuallySEIRFormula(1, 10, variableRegistry),30, 100)));
-        System.out.println("phil_10Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r), initialState, getEventuallyLocalSEIRFormula(1, 10, 10, variableRegistry),30, 100 )));
+        System.out.println("phig_10Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r, 0.0).getValue(), initialState, getEventuallySEIRFormula(1, 10, variableRegistry),30, 100)));
+        System.out.println("phil_10Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r, 0.0).getValue(), initialState, getEventuallyLocalSEIRFormula(1, 10, 10, variableRegistry),30, 100 )));
 
     }
 

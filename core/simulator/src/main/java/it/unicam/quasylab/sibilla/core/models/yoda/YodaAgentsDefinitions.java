@@ -24,6 +24,7 @@
 package it.unicam.quasylab.sibilla.core.models.yoda;
 
 import it.unicam.quasylab.sibilla.core.util.values.SibillaRandomBiFunction;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaRandomTimedBiFunction;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -100,7 +101,7 @@ public class YodaAgentsDefinitions {
         }
     }
 
-    public void setDynamics(YodaElementName agentName, SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> updateFunction) {
+    public void setDynamics(YodaElementName agentName, SibillaRandomTimedBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> updateFunction) {
         if (agentDefinitions.containsKey(agentName)) {
             agentDefinitions.get(agentName).setEnvironmentalAttributeUpdateFunction(updateFunction);
         } else {

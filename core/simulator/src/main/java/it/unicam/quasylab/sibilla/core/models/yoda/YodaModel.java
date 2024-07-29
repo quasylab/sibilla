@@ -31,12 +31,13 @@ import org.apache.commons.math3.random.RandomGenerator;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 
-public class YodaModel implements DiscreteTimeModel<YodaSystemState> {
+public class YodaModel implements MarkovModel<YodaSystemState> {
 
     private final Map<String, Measure<YodaSystemState>> measureMap;
 
@@ -49,9 +50,10 @@ public class YodaModel implements DiscreteTimeModel<YodaSystemState> {
 
 
     @Override
-    public YodaSystemState sampleNextState(RandomGenerator r, double time, YodaSystemState state) {
-        return state.next(r);
+    public Optional<TimeStep<YodaSystemState>> next(RandomGenerator r, double time, YodaSystemState state) {
+        return Optional.of(state.next(r, time));
     }
+
 
 
     @Override
@@ -99,10 +101,6 @@ public class YodaModel implements DiscreteTimeModel<YodaSystemState> {
         return predicateMap.keySet().toArray(new String[0]);
     }
 
-    public DiscreteTimeSimulationStepFunction<YodaSystemState> getDiscreteTimeStepFunction() {
-        return (rg,state) -> state.next(rg);
-    }
-
     @Override
     public Map<String, Map<String, ToDoubleFunction<YodaSystemState>>> trace(YodaSystemState state) {
         return state.getAgents().stream().collect(Collectors.toMap(a -> a.getName().getName()+"_"+a.getId(), YodaAgent::getTraceFunctions));
@@ -113,4 +111,5 @@ public class YodaModel implements DiscreteTimeModel<YodaSystemState> {
         return state.getAgents().stream().collect(
                 Collectors.toMap(a -> a.getName().getName()+"_"+a.getId(), YodaAgent::getNameResolver));
     }
+
 }

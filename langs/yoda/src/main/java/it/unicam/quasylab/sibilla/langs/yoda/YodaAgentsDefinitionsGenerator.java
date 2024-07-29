@@ -137,7 +137,7 @@ public class YodaAgentsDefinitionsGenerator extends YodaModelBaseVisitor<Boolean
         YodaElementName agentName = registry.get(agentAttributesUpdateContext.agentName.getText());
         Function<YodaExpressionEvaluationContext, List<YodaVariableUpdate>> update = new YodaAttributeUpdateVisitor().blockUpdate(agentAttributesUpdateContext.updates);
         definitions.setDynamics(agentName,
-                (rg, state, environment) -> environment.setAll(update.apply(new YodaExpressionEvaluationAgentDynamicContext(rg, state, environment)))
+                (rg, dt, state, environment) -> environment.setAll(update.apply(new YodaExpressionEvaluationAgentDynamicContext(rg, dt, state, environment)))
                 );
     }
 

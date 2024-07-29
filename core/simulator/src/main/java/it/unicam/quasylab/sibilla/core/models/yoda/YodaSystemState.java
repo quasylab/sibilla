@@ -25,13 +25,12 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 
 import it.unicam.quasylab.sibilla.core.models.ImmutableState;
 import it.unicam.quasylab.sibilla.core.models.IndexedState;
-import it.unicam.quasylab.sibilla.core.models.agents.VariableMapping;
+import it.unicam.quasylab.sibilla.core.models.TimeStep;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
@@ -53,19 +52,42 @@ public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> 
     private final YodaVariableMapping globalAttributes;
 
     private final List<YodaAgent> agents;
+
     private final List<YodaSceneElement> sceneElements;
 
+    private final double actionExecutionInterval;
+
+    private final double attributesUpdateInterval;
+
+    private double nextScheduledActionExecutionTime = 0.0  ;
+
+    private double nextScheduledAttributeUpdateTime = 0.0  ;
 
     public YodaSystemState(List<YodaAgent> agents, List<YodaSceneElement> sceneElements) {
         this(null, agents, sceneElements);
     }
 
     public YodaSystemState(YodaVariableMapping globalAttributes, List<YodaAgent> agents, List<YodaSceneElement> sceneElements) {
+        this(1.0, globalAttributes, agents, sceneElements);
+    }
+
+    public YodaSystemState(double actionExecutionInterval, YodaVariableMapping globalAttributes, List<YodaAgent> agents, List<YodaSceneElement> sceneElements) {
+        this(actionExecutionInterval, actionExecutionInterval, globalAttributes, agents, sceneElements);
+    }
+
+    public YodaSystemState(double actionExecutionInterval, double attributesUpdateInterval, YodaVariableMapping globalAttributes, List<YodaAgent> agents, List<YodaSceneElement> sceneElements) {
+        this(actionExecutionInterval, actionExecutionInterval, attributesUpdateInterval, attributesUpdateInterval, globalAttributes, agents, sceneElements);
+    }
+
+    public YodaSystemState(double actionExecutionInterval, double nextScheduledActionExecutionTime, double attributesUpdateInterval, double nextScheduledAttributeUpdateTime, YodaVariableMapping globalAttributes, List<YodaAgent> agents, List<YodaSceneElement> sceneElements) {
+        this.actionExecutionInterval = actionExecutionInterval;
+        this.attributesUpdateInterval = attributesUpdateInterval;
         this.globalAttributes = globalAttributes;
         this.agents = agents;
         this.sceneElements = sceneElements;
+        this.nextScheduledActionExecutionTime = nextScheduledActionExecutionTime;
+        this.nextScheduledAttributeUpdateTime = nextScheduledAttributeUpdateTime;
     }
-
 
     /**
      * This method returns the entire list of available agents
@@ -77,9 +99,31 @@ public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> 
     }
 
 
-    public YodaSystemState next(RandomGenerator rg) {
-        List<YodaAgent> newAgents = this.agents.stream().parallel().map(a -> a.next(rg, this)).collect(Collectors.toList());
-        return new YodaSystemState(newAgents, this.sceneElements);
+    public TimeStep<YodaSystemState> next(RandomGenerator rg, double time) {
+        double dt = Math.min(nextScheduledActionExecutionTime, nextScheduledAttributeUpdateTime) - time;
+        if (dt<=0)  {
+            throw new IllegalArgumentException("Illegal time interval!");
+        }
+        YodaSystemState state = updateEnvironmentalAttributes(rg, dt);
+        if (nextScheduledAttributeUpdateTime<nextScheduledActionExecutionTime) {
+            return new TimeStep<>(dt, state.scheduleAttributeUpdate(nextScheduledAttributeUpdateTime+attributesUpdateInterval));
+        }
+        List<YodaAgent> newAgents = state.agents.stream().parallel().map(a -> a.next(rg, state)).collect(Collectors.toList());
+        double nextScheduledActionExecutionTime = this.nextScheduledActionExecutionTime+this.actionExecutionInterval;
+        double nextScheduledAttributeUpdateTime = this.nextScheduledAttributeUpdateTime;
+        if (this.nextScheduledActionExecutionTime <= this.nextScheduledAttributeUpdateTime) {
+            nextScheduledAttributeUpdateTime += this.attributesUpdateInterval;
+        }
+        return new TimeStep<>(dt, new YodaSystemState(actionExecutionInterval, nextScheduledActionExecutionTime, attributesUpdateInterval, nextScheduledAttributeUpdateTime, globalAttributes, newAgents, state.sceneElements));
+    }
+
+    private YodaSystemState scheduleAttributeUpdate(double v) {
+        return new YodaSystemState(actionExecutionInterval, nextScheduledActionExecutionTime, attributesUpdateInterval, nextScheduledAttributeUpdateTime, globalAttributes, agents, sceneElements);
+    }
+
+    private YodaSystemState updateEnvironmentalAttributes(RandomGenerator rg, double dt) {
+        List<YodaAgent> newAgents = agents.stream().map(a -> a.updateEnvironmentalAttributes(rg, dt)).collect(Collectors.toList());
+        return new YodaSystemState(actionExecutionInterval, nextScheduledActionExecutionTime, attributesUpdateInterval, nextScheduledAttributeUpdateTime, globalAttributes, newAgents, sceneElements);
     }
 
 
@@ -289,6 +333,41 @@ public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> 
     public SibillaValue mean(YodaAgent agent, Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
         return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(pred).mapToDouble(f).average().orElse(0.0));
     }
+
+    ///
+
+    public SibillaValue sum(ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().mapToDouble(f).sum());
+    }
+
+    public SibillaValue sum(Set<YodaElementName> elementNames, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> elementNames.contains(a.getName())).mapToDouble(f).sum());
+    }
+
+    public SibillaValue sum(Set<YodaElementName> elementNames, Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> elementNames.contains(a.getName())).filter(pred).mapToDouble(f).sum());
+    }
+
+    public SibillaValue sum(Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(pred).mapToDouble(f).sum());
+    }
+
+    public SibillaValue sum(YodaAgent agent, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).mapToDouble(f).sum());
+    }
+
+    public SibillaValue sum(YodaAgent agent, Set<YodaElementName> elementNames, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> elementNames.contains(a.getName())).mapToDouble(f).sum());
+    }
+
+    public SibillaValue sum(YodaAgent agent, Set<YodaElementName> elementNames, Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(a -> elementNames.contains(a.getName())).filter(pred).mapToDouble(f).sum());
+    }
+
+    public SibillaValue sum(YodaAgent agent, Predicate<YodaSceneElement> pred, ToDoubleFunction<YodaSceneElement> f) {
+        return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(pred).mapToDouble(f).sum());
+    }
+
 
     public SibillaValue count(YodaAgent agent, Set<YodaElementName> elementNames, Predicate<YodaSceneElement> pred) {
         return SibillaValue.of(getStreamOfElements().filter(a -> a.getId() != agent.getId())

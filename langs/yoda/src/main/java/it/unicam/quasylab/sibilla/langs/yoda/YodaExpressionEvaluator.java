@@ -420,4 +420,35 @@ public class YodaExpressionEvaluator extends YodaModelBaseVisitor<Function<YodaE
     public Function<YodaExpressionEvaluationContext, SibillaValue> visitExpressionPi(YodaModelParser.ExpressionPiContext ctx) {
         return eec -> SibillaValue.of(Math.PI);
     }
+
+    @Override
+    public Function<YodaExpressionEvaluationContext, SibillaValue> visitExpressionDt(YodaModelParser.ExpressionDtContext ctx) {
+        return YodaExpressionEvaluationContext::dt;
+    }
+
+    @Override
+    public Function<YodaExpressionEvaluationContext, SibillaValue> visitExpressionSum(YodaModelParser.ExpressionSumContext ctx) {
+        Function<YodaExpressionEvaluationContext, SibillaValue>  expression = ctx.value.accept(this);
+        if ((ctx.groupName ==null)&&(ctx.guard == null)) {
+            return arg -> arg.sum(expression);
+        }
+        if (ctx.groupName == null) {
+            Function<YodaExpressionEvaluationContext, SibillaValue> guard = ctx.guard.accept(this);
+            return arg -> arg.sum(guard, expression);
+        }
+        if (ctx.guard == null) {
+            Set<YodaElementName> group = groupSolver.apply(ctx.groupName.getText());
+            return arg -> arg.sum(group, expression);
+        }
+        Function<YodaExpressionEvaluationContext, SibillaValue> guard = ctx.guard.accept(this);
+        Set<YodaElementName> group = groupSolver.apply(ctx.groupName.getText());
+        return arg -> arg.sum(group, guard, expression);
+    }
+
+    @Override
+    public Function<YodaExpressionEvaluationContext, SibillaValue> visitExpressionAtan2(YodaModelParser.ExpressionAtan2Context ctx) {
+        Function<YodaExpressionEvaluationContext, SibillaValue> firstArgumentEvaluation = ctx.left.accept(this);
+        Function<YodaExpressionEvaluationContext, SibillaValue> secondArgumentEvaluation = ctx.right.accept(this);
+        return arg -> SibillaValue.atan2(firstArgumentEvaluation.apply(arg), secondArgumentEvaluation.apply(arg));
+    }
 }

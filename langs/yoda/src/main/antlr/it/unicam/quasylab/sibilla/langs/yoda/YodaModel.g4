@@ -50,7 +50,7 @@ recordFieldDeclaration: type name=ID;
 
 agentDeclaration:
     'agent' agentName=ID  '='
-        'state' ':'
+        ('state'|'conditions') ':'
             (agentStateAttributes += nameDeclaration ';')*
         'features' ':'
             (agentFeaturesAttributes += nameDeclaration ';')*
@@ -166,12 +166,14 @@ expr    : INTEGER                                                            # e
         | 'tan' '(' argument=expr ')'                                        # expressionTan
         | 'tanh' '(' argument=expr ')'                                       # expressionTanh
         | 'atan' '(' argument=expr ')'                                       # expressionAtan
+        | 'atan2' '(' left=expr ',' right=expr ')'                           # expressionAtan2
         | 'ceil' '(' argument=expr ')'                                       # expressionCeiling
         | 'floor' '(' argument=expr ')'                                      # expressionFloor
         | 'abs' '(' argument=expr ')'                                        # expressionAbsolute
         | 'PI'                                                               # expressionPi
         | 'distance' '(' a1=expr ',' a2=expr ',' a3=expr ',' a4=expr ')'     # expressionDistance
         | 'angleOf' '(' a1=expr ',' a2=expr ',' a3=expr ',' a4=expr ')'      # expressionAngleOf
+        | 'dt'                                                               # expressionDt
 ;
 
 

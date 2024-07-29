@@ -117,6 +117,23 @@ public interface YodaExpressionEvaluationContext {
         return SibillaValue.ERROR_VALUE;
     }
 
+    default SibillaValue sum(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> guard, Function<YodaExpressionEvaluationContext, SibillaValue> expression)  {
+        return SibillaValue.ERROR_VALUE;
+    }
+
+    default SibillaValue sum(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> expression)  {
+        return SibillaValue.ERROR_VALUE;
+    }
+
+    default SibillaValue sum(Function<YodaExpressionEvaluationContext, SibillaValue> guard, Function<YodaExpressionEvaluationContext, SibillaValue> expression)  {
+        return SibillaValue.ERROR_VALUE;
+    }
+
+    default SibillaValue sum(Function<YodaExpressionEvaluationContext, SibillaValue> expression) {
+        return SibillaValue.ERROR_VALUE;
+    }
+
+
     default SibillaValue rnd(SibillaValue from, SibillaValue to)  {
         return SibillaValue.ERROR_VALUE;
     }
@@ -149,6 +166,9 @@ public interface YodaExpressionEvaluationContext {
         return SibillaValue.ERROR_VALUE;
     }
 
+    default SibillaValue dt() {
+        return SibillaValue.ERROR_VALUE;
+    }
 
     static <T> Function<YodaExpressionEvaluationContext, T> getNestedContext(
             List<Pair<YodaVariable, Function<YodaExpressionEvaluationContext, SibillaValue>>> localVariables,
@@ -159,7 +179,6 @@ public interface YodaExpressionEvaluationContext {
                 eec
         ));
     }
-
 
 
 }

@@ -25,6 +25,8 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 
 
 import it.unicam.quasylab.sibilla.core.util.values.SibillaRandomBiFunction;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaRandomTimedBiFunction;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaRandomTimedFunction;
 
 public class YodaAgentPrototype {
 
@@ -39,7 +41,7 @@ public class YodaAgentPrototype {
     private YodaBehaviour agentBehaviour;
 
     private SibillaRandomBiFunction<YodaSystemState, YodaAgent, YodaVariableMapping> observationsUpdateFunction;
-    private SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> environmentalAttributeUpdateFunction;
+    private SibillaRandomTimedBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> environmentalAttributeUpdateFunction;
 
 
     public YodaAgentPrototype(YodaElementName agentName, YodaVariableMapping initialAgentAttributes, YodaVariableMapping initialEnvironmentalAttributes, YodaVariableMapping initialAgentObservations) {
@@ -89,11 +91,11 @@ public class YodaAgentPrototype {
         this.observationsUpdateFunction = observationsUpdateFunction;
     }
 
-    public SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> getEnvironmentalAttributeUpdateFunction() {
+    public SibillaRandomTimedBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> getEnvironmentalAttributeUpdateFunction() {
         return environmentalAttributeUpdateFunction;
     }
 
-    public void setEnvironmentalAttributeUpdateFunction(SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> environmentalAttributeUpdateFunction) {
+    public void setEnvironmentalAttributeUpdateFunction(SibillaRandomTimedBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> environmentalAttributeUpdateFunction) {
         this.environmentalAttributeUpdateFunction = environmentalAttributeUpdateFunction;
     }
 

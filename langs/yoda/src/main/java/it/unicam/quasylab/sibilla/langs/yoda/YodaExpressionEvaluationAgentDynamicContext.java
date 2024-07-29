@@ -28,9 +28,6 @@ import it.unicam.quasylab.sibilla.core.models.yoda.YodaVariableMapping;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.function.Function;
-import java.util.function.ToDoubleBiFunction;
-
 public class YodaExpressionEvaluationAgentDynamicContext implements YodaExpressionEvaluationContext {
 
 
@@ -38,11 +35,13 @@ public class YodaExpressionEvaluationAgentDynamicContext implements YodaExpressi
 
     private final YodaVariableMapping agentObservations;
     private final RandomGenerator rg;
+    private final double dt;
 
-    public YodaExpressionEvaluationAgentDynamicContext(RandomGenerator rg, YodaVariableMapping agentState, YodaVariableMapping agentObservations) {
+    public YodaExpressionEvaluationAgentDynamicContext(RandomGenerator rg, double dt, YodaVariableMapping agentState, YodaVariableMapping agentObservations) {
         this.rg = rg;
         this.agentState = agentState;
         this.agentObservations = agentObservations;
+        this.dt = dt;
     }
 
     @Override
@@ -56,6 +55,11 @@ public class YodaExpressionEvaluationAgentDynamicContext implements YodaExpressi
     @Override
     public SibillaValue it(YodaVariable name) {
         return get(name);
+    }
+
+    @Override
+    public SibillaValue dt() {
+        return SibillaValue.of(dt);
     }
 
     @Override

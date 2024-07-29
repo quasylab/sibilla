@@ -119,6 +119,26 @@ public class YodaExpressionEvaluationLetContext implements YodaExpressionEvaluat
     }
 
     @Override
+    public SibillaValue sum(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> guard, Function<YodaExpressionEvaluationContext, SibillaValue> expression) {
+        return nestedContext.mean(group, guard, expression);
+    }
+
+    @Override
+    public SibillaValue sum(Function<YodaExpressionEvaluationContext, SibillaValue> guard, Function<YodaExpressionEvaluationContext, SibillaValue> expression) {
+        return nestedContext.mean(guard, expression);
+    }
+
+    @Override
+    public SibillaValue sum(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> expression) {
+        return nestedContext.mean(group, expression);
+    }
+
+    @Override
+    public SibillaValue sum(Function<YodaExpressionEvaluationContext, SibillaValue> expression) {
+        return nestedContext.mean(expression);
+    }
+
+    @Override
     public SibillaValue rnd(SibillaValue from, SibillaValue to) {
         return nestedContext.rnd(from, to);
     }

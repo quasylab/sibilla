@@ -26,6 +26,7 @@ package it.unicam.quasylab.sibilla.core.models.yoda;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
 import it.unicam.quasylab.sibilla.core.util.datastructures.Pair;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaRandomBiFunction;
+import it.unicam.quasylab.sibilla.core.util.values.SibillaRandomTimedBiFunction;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -58,7 +59,7 @@ public final class YodaAgent extends YodaSceneElement {
     private final YodaVariableMapping agentObservations;
     private final YodaBehaviour agentBehaviour;
     private final SibillaRandomBiFunction<YodaSystemState, YodaAgent, YodaVariableMapping> observationsUpdateFunction;
-    private final SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> environmentalAttributeUpdateFunction;
+    private final SibillaRandomTimedBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> environmentalAttributeUpdateFunction;
 
     /**
      * Creates a new instance with the given parameters.
@@ -79,7 +80,7 @@ public final class YodaAgent extends YodaSceneElement {
                      YodaVariableMapping agentObservations,
                      YodaBehaviour agentBehaviour,
                      SibillaRandomBiFunction<YodaSystemState, YodaAgent, YodaVariableMapping> observationsUpdateFunction,
-                     SibillaRandomBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> environmentalAttributeUpdateFunction) {
+                     SibillaRandomTimedBiFunction<YodaVariableMapping, YodaVariableMapping, YodaVariableMapping> environmentalAttributeUpdateFunction) {
         super(agentName, identifier, environmentalAttributes);
         this.agentAttributes = agentAttributes;
         this.agentObservations = agentObservations;
@@ -132,8 +133,11 @@ public final class YodaAgent extends YodaSceneElement {
         if (selectedAction != null) {
             newKnowledge = selectedAction.eval(rg, this.agentAttributes, newObservations);
         }
-        YodaVariableMapping newEnvironmentalAttributes = this.environmentalAttributeUpdateFunction.eval(rg, newKnowledge, this.environmentalAttributes);
-        return new YodaAgent(this.getId(), this.getName(), newKnowledge, newEnvironmentalAttributes, newObservations, this.agentBehaviour, this.observationsUpdateFunction, this.environmentalAttributeUpdateFunction);
+        return new YodaAgent(this.getId(), this.getName(), newKnowledge, this.environmentalAttributes, newObservations, this.agentBehaviour, this.observationsUpdateFunction, this.environmentalAttributeUpdateFunction);
+    }
+
+    public YodaAgent updateEnvironmentalAttributes(RandomGenerator rg, double dt) {
+        return new YodaAgent(this.getId(), this.getName(), this.agentAttributes, this.environmentalAttributeUpdateFunction.eval(rg, dt, this.agentAttributes, this.environmentalAttributes), this.agentObservations, this.agentBehaviour, this.observationsUpdateFunction, this.environmentalAttributeUpdateFunction);
     }
 
     /**

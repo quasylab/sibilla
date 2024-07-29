@@ -263,6 +263,10 @@ public interface SibillaValue {
         return new SibillaDouble(Math.atan2(y.doubleOf(), x.doubleOf()));
     }
 
+    static SibillaValue atan2(SibillaValue y, SibillaValue x) {
+        return SibillaValue.of(Math.atan2(y.doubleOf(), x.doubleOf()));
+    }
+
 
     /**
      * Returns the double representation of this value. {@link Double#NaN} is returned if this

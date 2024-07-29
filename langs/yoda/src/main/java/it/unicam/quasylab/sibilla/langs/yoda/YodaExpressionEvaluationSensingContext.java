@@ -116,6 +116,26 @@ public class YodaExpressionEvaluationSensingContext implements YodaExpressionEva
     }
 
     @Override
+    public SibillaValue sum(Function<YodaExpressionEvaluationContext, SibillaValue> expression) {
+        return system.sum(agent, other -> expression.apply(new YodaExpressionEvaluationAgentPredicateContext(agent, other)).doubleOf());
+    }
+
+    @Override
+    public SibillaValue sum(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> expression) {
+        return system.sum(agent, group, other -> expression.apply(new YodaExpressionEvaluationAgentPredicateContext(agent, other)).doubleOf());
+    }
+
+    @Override
+    public SibillaValue sum(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> guard, Function<YodaExpressionEvaluationContext, SibillaValue> expression) {
+        return system.sum(agent, group, other -> expression.apply(new YodaExpressionEvaluationAgentPredicateContext(agent, other)).doubleOf());
+    }
+
+    @Override
+    public SibillaValue sum(Function<YodaExpressionEvaluationContext, SibillaValue> guard, Function<YodaExpressionEvaluationContext, SibillaValue> expression) {
+        return system.sum(agent, other -> guard.apply(new YodaExpressionEvaluationAgentPredicateContext(agent, other)).booleanOf(), other -> expression.apply(new YodaExpressionEvaluationAgentPredicateContext(agent, other)).doubleOf());
+    }
+
+    @Override
     public SibillaValue rnd(SibillaValue from, SibillaValue to) {
         return SibillaValue.of(from.doubleOf()+rg.nextDouble()*(to.doubleOf()-from.doubleOf()));
     }

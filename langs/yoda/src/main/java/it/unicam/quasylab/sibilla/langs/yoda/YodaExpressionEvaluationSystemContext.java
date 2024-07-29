@@ -103,6 +103,27 @@ public class YodaExpressionEvaluationSystemContext implements YodaExpressionEval
     }
 
     @Override
+    public SibillaValue sum(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> guard, Function<YodaExpressionEvaluationContext, SibillaValue> expression) {
+        return sys.sum(group, element -> guard.apply(new YodaExpressionEvaluationAgentPredicateContext(element, element)).booleanOf(), element -> expression.apply(new YodaExpressionEvaluationAgentPredicateContext(element, element)).doubleOf());
+    }
+
+    @Override
+    public SibillaValue sum(Function<YodaExpressionEvaluationContext, SibillaValue> guard, Function<YodaExpressionEvaluationContext, SibillaValue> expression) {
+        return sys.sum(element -> guard.apply(new YodaExpressionEvaluationAgentPredicateContext(element, element)).booleanOf(), element -> expression.apply(new YodaExpressionEvaluationAgentPredicateContext(element, element)).doubleOf());
+    }
+
+    @Override
+    public SibillaValue sum(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> expression) {
+        return sys.sum(group, element -> expression.apply(new YodaExpressionEvaluationAgentPredicateContext(element, element)).doubleOf());
+    }
+
+    @Override
+    public SibillaValue sum(Function<YodaExpressionEvaluationContext, SibillaValue> expression) {
+        return sys.sum(element -> expression.apply(new YodaExpressionEvaluationAgentPredicateContext(element, element)).doubleOf());
+    }
+
+
+    @Override
     public SibillaValue exists(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> predicate) {
         return SibillaValue.of(sys.exists(group, element -> predicate.apply(new YodaExpressionEvaluationAgentPredicateContext(element, element)).booleanOf()));
     }
