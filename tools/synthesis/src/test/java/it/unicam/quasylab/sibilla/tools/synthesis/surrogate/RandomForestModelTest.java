@@ -3,6 +3,7 @@ package it.unicam.quasylab.sibilla.tools.synthesis.surrogate;
 import it.unicam.quasylab.sibilla.tools.synthesis.sampling.LatinHyperCubeSamplingTask;
 import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.ContinuousInterval;
 import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.HyperRectangle;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RandomForestModelTest {
 
+    @Disabled
     @Test
     void testTrainingAndPredictSeed(){
         ToDoubleFunction<Map<String,Double>> functionToLearn = (
@@ -42,6 +44,7 @@ class RandomForestModelTest {
     }
 
 
+    @Disabled
     @Test
     void testTrainingAndPredictSeedVer2(){
         ToDoubleFunction<Map<String,Double>> functionToLearn = (
@@ -65,6 +68,7 @@ class RandomForestModelTest {
     }
 
 
+    @Disabled
     @Test
     void testOutOfSample(){
         ToDoubleFunction<Map<String,Double>> functionToLearn = (

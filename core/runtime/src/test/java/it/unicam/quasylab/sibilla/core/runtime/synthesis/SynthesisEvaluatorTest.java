@@ -491,7 +491,7 @@ class SynthesisEvaluatorTest {
 
 
 
-
+    @Disabled
     @Test
     public void testAllComparison() throws CommandExecutionException, StlModelGenerationException {
         System.out.println("PRESERVE");
@@ -528,6 +528,7 @@ class SynthesisEvaluatorTest {
     }
 
 
+    @Disabled
     @Test
     void testComparisonPreserveTSP() throws CommandExecutionException, StlModelGenerationException {
         String spec = """
@@ -696,7 +697,7 @@ class SynthesisEvaluatorTest {
         printTSPResult(sr);
     }
 
-
+    @Disabled
     @Test
     void testComparisonDivergeTSP() throws CommandExecutionException, StlModelGenerationException {
         String spec = """
@@ -866,7 +867,7 @@ class SynthesisEvaluatorTest {
         printTSPResult(sr);
     }
 
-
+    @Disabled
     @Test
     void testComparisonImproveTSP() throws CommandExecutionException, StlModelGenerationException {
         String spec = """

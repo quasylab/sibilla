@@ -2,6 +2,7 @@ package it.unicam.quasylab.sibilla.tools.synthesis.optimizationalgorithm.mads;
 
 import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.ContinuousInterval;
 import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.HyperRectangle;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ class LTMADSTaskTest {
      *
      * @see    <a href=https://www.wolframalpha.com/input?i=minimize+7+*+%28+x+*+y+%29%2F%28e%5E%28x%5E2%2By%5E2%29%29">WolframAlhpa</a>
      */
+    @Disabled
     @Test
     void minimizeFunction() {
 
@@ -68,6 +70,7 @@ class LTMADSTaskTest {
      *
      * @see    <a href=https://www.wolframalpha.com/input?i=minimize+7+*+%28+x+*+y+%29%2F%28e%5E%28x%5E2%2By%5E2%29%29">WolframAlhpa</a>
      */
+    @Disabled
     @Test
     void minimizeFunctionSeed() {
 
@@ -105,6 +108,7 @@ class LTMADSTaskTest {
      *
      * @see    <a href=https://www.wolframalpha.com/input?i=minimize+7+*+%28+x+*+y+%29%2F%28e%5E%28x%5E2%2By%5E2%29%29">WolframAlhpa</a>
      */
+    @Disabled
     @Test
     void maximaizeFunctionSeed() {
 

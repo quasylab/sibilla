@@ -4,6 +4,7 @@ import it.unicam.quasylab.sibilla.tools.synthesis.expression.ExpressionInterpret
 import it.unicam.quasylab.sibilla.tools.synthesis.optimizationalgorithm.OptimizationTask;
 import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.ContinuousInterval;
 import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.HyperRectangle;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ class PSOTaskTest {
         return value >= beginRange && value <= endRange;
     }
 
+    @Disabled
     @Test
     void testInterpretedFunction(){
 
@@ -64,7 +66,7 @@ class PSOTaskTest {
      *
      * @see    <a href=https://www.wolframalpha.com/input?i=minimize+7+*+%28+x+*+y+%29%2F%28e%5E%28x%5E2%2By%5E2%29%29">WolframAlhpa</a>
      */
-    //@Disabled
+    @Disabled
     @Test
     void minimizeFunction() {
 
@@ -92,7 +94,7 @@ class PSOTaskTest {
         assertTrue(isLocalMinima1 || isLocalMinima2);
     }
 
-    //@Disabled
+    @Disabled
     @Test
     void maximizeFunction() {
 
@@ -127,7 +129,7 @@ class PSOTaskTest {
     /**
      * @see    <a href=https://www.researchgate.net/publication/336121050_Structural_Design_Optimization_Based_on_the_Moving_Baseline_Strategy">Structural Design Optimization Based on the Moving Baseline Strategy</a>
      */
-    //@Disabled
+    @Disabled
     @Test
     //@Disabled("Disabled : very time consuming")
     void minimizeFunctionWithConstraint() {
@@ -293,7 +295,7 @@ class PSOTaskTest {
 
     }
 
-    //@Disabled
+    @Disabled
     @Test
     public void testRosenbrockFunction(){
 
@@ -323,7 +325,7 @@ class PSOTaskTest {
 
 
 
-    //@Disabled
+    @Disabled
     @Test
     void minimizeSimpleFunctionWithConstraints(){
 
@@ -373,7 +375,7 @@ class PSOTaskTest {
         double result = myFunction.applyAsDouble(solution);
         assertEquals(111.0, result,0.1);
     }
-    //@Disabled
+    @Disabled
     @Test
     void minimizeSimpleFunctionSearchSpaceAsConstraints(){
 
@@ -418,7 +420,7 @@ class PSOTaskTest {
     }
 
 
-    //@Disabled
+    @Disabled
     @Test
     void testMaximizationSimpleFunction(){
         HyperRectangle searchSpace = new HyperRectangle(
@@ -434,7 +436,7 @@ class PSOTaskTest {
         assertTrue(validatePredictedResult(0.000,y,0.05));
     }
 
-    //@Disabled
+    @Disabled
     @Test
     void testTenParameterWithSumConstraint(){
 

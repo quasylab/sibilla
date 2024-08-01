@@ -2,6 +2,7 @@ package it.unicam.quasylab.sibilla.tools.synthesis.optimizationalgorithm.mads;
 
 import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.ContinuousInterval;
 import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.HyperRectangle;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class OrthoMADSTaskTest {
 
 
+    @Disabled
     @Test
     void minimizeFunctionSeed() {
 

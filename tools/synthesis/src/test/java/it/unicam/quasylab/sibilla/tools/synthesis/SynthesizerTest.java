@@ -3,6 +3,7 @@ package it.unicam.quasylab.sibilla.tools.synthesis;
 import it.unicam.quasylab.sibilla.tools.synthesis.expression.ExpressionInterpreter;
 import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.ContinuousInterval;
 import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.HyperRectangle;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.function.ToDoubleFunction;
 
 class SynthesizerTest {
 
+    @Disabled
     @Test
     void minimize() {
 

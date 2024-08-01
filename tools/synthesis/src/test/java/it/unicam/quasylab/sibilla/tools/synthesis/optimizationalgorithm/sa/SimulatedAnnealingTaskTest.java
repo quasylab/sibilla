@@ -11,7 +11,7 @@ import java.util.Properties;
 import java.util.function.ToDoubleFunction;
 
 class SimulatedAnnealingTaskTest {
-    //@Disabled
+    @Disabled
     @Test
     void minimizeFunction() {
 

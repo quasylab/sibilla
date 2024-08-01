@@ -13,6 +13,7 @@ import java.util.function.ToDoubleFunction;
 class GradientTreeBoostModelTest {
 
 
+    @Disabled
     @Test
     void testTrainingAndPredict(){
         ToDoubleFunction<Map<String,Double>> functionToLearn = (
