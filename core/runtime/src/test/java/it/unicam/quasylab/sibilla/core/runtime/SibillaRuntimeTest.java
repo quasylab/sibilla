@@ -748,14 +748,18 @@ class SibillaRuntimeTest {
         sr.setConfiguration("init");
         sr.addAllMeasures();
         sr.setReplica(5);
-        sr.setDeadline(120);
+        sr.setDeadline(200);
         sr.setDt(5);
         sr.loadFormula(formulaSpec);
         Map<String, Double>[] parameterMap = new Map[]{new HashMap<String,Double>()};
-        Map<String, double[][]>  result = sr.quantitativeMonitorSignal(new String[]{"formula_id"},parameterMap);
-        System.out.println(result.get("formula_id")[0][0]);
-        System.out.println(result.get("formula_id")[0][1]);
-        System.out.println(result.get("formula_id")[0][2]);
+        Map<String, double[][]>  quantitativeResult = sr.quantitativeMonitorSignal(new String[]{"formula_id"},parameterMap);
+        System.out.println(quantitativeResult.get("formula_id")[0][0]);
+        System.out.println(quantitativeResult.get("formula_id")[0][1]);
+        System.out.println(quantitativeResult.get("formula_id")[0][2]);
+        System.out.println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ");
+        Map<String, double[][]>  qualitativeResult = sr.qualitativeMonitorSignal(new String[]{"formula_id"},parameterMap);
+        System.out.println(qualitativeResult.get("formula_id")[0][0]);
+        System.out.println(qualitativeResult.get("formula_id")[0][1]);
     }
 
     @Disabled
@@ -894,7 +898,7 @@ class SibillaRuntimeTest {
     }
 
     @Test
-    public void shouldSimulate() throws CommandExecutionException, LoadException {
+    public void shouldSimulate() throws CommandExecutionException, LoadException, IOException {
         SibillaRuntime sr = getRuntimeWithModule();
         sr.load(CODE);
         sr.setConfiguration("init");
@@ -903,6 +907,7 @@ class SibillaRuntimeTest {
         sr.setDeadline(100);
         sr.setDt(1);
         sr.simulate("test");
+        sr.save("/Users/lorenzomatteucci/Documents/val","no","ko");
     }
 
 

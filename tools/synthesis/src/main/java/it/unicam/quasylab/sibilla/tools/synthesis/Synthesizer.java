@@ -345,6 +345,7 @@ public class Synthesizer {
      */
     private void generateOptimizationTask(){
         this.optimizationTask = optimizationRegistry.get(this.chosenOptimizationAlgorithm).getOptimizationTask();
+        this.optimizationTask.setProperties(this.properties);
     }
     /**
      * Performs the minimization process.

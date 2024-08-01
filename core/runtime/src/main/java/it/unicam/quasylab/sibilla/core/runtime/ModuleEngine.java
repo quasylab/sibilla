@@ -302,20 +302,31 @@ public class ModuleEngine<S extends State> {
         return QualitativeMonitor.computeProbability(formulaMonitor,getTrajectoryProvider(se,rg,formulaMonitor.getTimeHorizon()),replica,new double[]{0.0})[0];
     }
 
-    public Map<String, double[][]>  qualitativeMonitoring(SimulationEnvironment se,
+    public Map<String, double[][]>  qualitativeMonitoring(SimulationEnvironment simulationEnvironment,
                                                           RandomGenerator rg,
                                                           String[] formulaName,
                                                           Map<String, Double>[] formulaArgs,
                                                           double deadline,
                                                           double dt,
                                                           int replica) throws StlModelGenerationException {
+
+        loadModel();
+        setDefaultConfiguration();
         Map<String, double[][]> result = new TreeMap<>();
+
+
         for (int i = 0; i < formulaName.length; i++) {
             QualitativeMonitor<S> formulaMonitor = stlMonitorGenerator.getQualitativeMonitor(formulaName[i], formulaArgs[i]);
-            Supplier<Trajectory<S>> trajectoryProvider = () -> se.sampleTrajectory(rg, currentModel, state.apply(rg), deadline);
+            Supplier<Trajectory<S>> trajectoryProvider = () -> {
+                Trajectory<S> trajectory = simulationEnvironment.sampleTrajectory(rg, currentModel, state.apply(rg), deadline);
+                trajectory.setEnd(deadline);
+                return trajectory;
+            };
             result.put(formulaName[i], QualitativeMonitor.computeTimeSeriesProbabilities(formulaMonitor,trajectoryProvider,replica,dt,deadline));
         }
-        return  result;
+
+        return result;
+
 
     }
 

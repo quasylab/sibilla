@@ -6,7 +6,7 @@ import it.unicam.quasylab.sibilla.tools.stl.StlModelGenerationException;
 import it.unicam.quasylab.sibilla.tools.synthesis.SynthesisRecord;
 import it.unicam.quasylab.sibilla.tools.synthesis.Synthesizer;
 
-import java.util.Arrays;
+//import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.ToDoubleBiFunction;
@@ -121,36 +121,36 @@ public class ComparisonTask extends SynthesisTask {
         ToDoubleFunction<Map<String,Double>> objFunction = getObjectiveFunction(runtime, originalRobustnessVector);
         Synthesizer synthesizer = generateSynthesizer(objFunction, this.isMinimization);
         synthesizer.searchOptimalSolution();
-        SynthesisRecord synRec =synthesizer.getLastSynthesisRecord();
-
-        System.out.println("real DISTANCE");
-        System.out.println(synRec.optimalValueObjectiveFunction());
-        System.out.println("surrogate DISTANCE");
-        System.out.println(synRec.optimalValueSurrogateFunction());
-        System.out.println(" . . . . . . . . . . . . . . . . . . . . . . . . .");
-        System.out.println("Original Robustness vector : ");
-        System.out.println(Arrays.toString(originalRobustnessVector));
-        System.out.println("Variant Robustness vector : ");
-        System.out.println(Arrays.toString(REMOVE_THAT_METHOD(runtime, synRec.optimalCoordinates())));
-        System.out.println();
+//        SynthesisRecord synRec =synthesizer.getLastSynthesisRecord();
+//
+//        System.out.println("real DISTANCE");
+//        System.out.println(synRec.optimalValueObjectiveFunction());
+//        System.out.println("surrogate DISTANCE");
+//        System.out.println(synRec.optimalValueSurrogateFunction());
+//        System.out.println(" . . . . . . . . . . . . . . . . . . . . . . . . .");
+//        System.out.println("Original Robustness vector : ");
+//        System.out.println(Arrays.toString(originalRobustnessVector));
+//        System.out.println("Variant Robustness vector : ");
+//        System.out.println(Arrays.toString(REMOVE_THAT_METHOD(runtime, synRec.optimalCoordinates())));
+//        System.out.println();
 
         return synthesizer.getLastSynthesisRecord();
     }
 
 
-    private double[] REMOVE_THAT_METHOD(SibillaRuntime runtime, Map<String,Double> optimalCoordinates) throws CommandExecutionException, StlModelGenerationException {
-        runtime.reset();
-        runtime.reset();
-        runtime.loadModule(modelVariantSpecs.module());
-        for(String paramName : optimalCoordinates.keySet()){
-            runtime.setParameter(paramName, optimalCoordinates.get(paramName));
-        }
-        runtime.setReplica(super.replica);
-        runtime.setConfiguration(modelVariantSpecs.initialConfiguration());
-        runtime.loadFormula(formulae);
-        this.setModelParameterNames(runtime);
-        return evaluateVariantRobustnessVector(runtime);
-    }
+//    private double[] REMOVE_THAT_METHOD(SibillaRuntime runtime, Map<String,Double> optimalCoordinates) throws CommandExecutionException, StlModelGenerationException {
+//        runtime.reset();
+//        runtime.reset();
+//        runtime.loadModule(modelVariantSpecs.module());
+//        for(String paramName : optimalCoordinates.keySet()){
+//            runtime.setParameter(paramName, optimalCoordinates.get(paramName));
+//        }
+//        runtime.setReplica(super.replica);
+//        runtime.setConfiguration(modelVariantSpecs.initialConfiguration());
+//        runtime.loadFormula(formulae);
+//        this.setModelParameterNames(runtime);
+//        return evaluateVariantRobustnessVector(runtime);
+//    }
 
     private ToDoubleFunction<Map<String,Double>> getObjectiveFunction(SibillaRuntime runtime, double[] originalRobustnessVector) {
         return m -> {

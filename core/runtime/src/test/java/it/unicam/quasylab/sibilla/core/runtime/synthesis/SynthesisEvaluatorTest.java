@@ -296,7 +296,7 @@ class SynthesisEvaluatorTest {
      * k_r (rate of recovery) - between 0.005 and 0.2
      * The test aims to find the maximum or optimal values for these parameters. In this case,
      * the optimal values found are:
-     * max -> 0.35
+     * max ->approx 0.35
      * k_i -> 0.25
      * k_r -> 0.05
      * The test employs the Sibilla probabilistic model checker, which generates a surrogate model using random forest.
@@ -491,9 +491,9 @@ class SynthesisEvaluatorTest {
 
 
 
-    @Disabled
+
     @Test
-    public void testMultiple() throws CommandExecutionException, StlModelGenerationException {
+    public void testAllComparison() throws CommandExecutionException, StlModelGenerationException {
         System.out.println("PRESERVE");
         for (int i = 0; i < 5; i++) {
             System.out.println("_ - _ - _ - _ - _ - _ - _ - _ - _ - _ - _ - _ - _");
@@ -527,7 +527,7 @@ class SynthesisEvaluatorTest {
 
     }
 
-    @Disabled
+
     @Test
     void testComparisonPreserveTSP() throws CommandExecutionException, StlModelGenerationException {
         String spec = """
@@ -559,6 +559,9 @@ class SynthesisEvaluatorTest {
                         properties:
                           - name: "iteration"
                             value: "1000"
+                     sampling:
+                        name: "lhs"
+                        datasetSize: 500
           
                    synthesisTask:
                      type: "comparative"
@@ -689,11 +692,11 @@ class SynthesisEvaluatorTest {
         SynthesisTask task = evaluator.getTask();
 
         SynthesisRecord sr = task.execute(new SibillaRuntime());
-        System.out.println(sr.info(false));
+        System.out.println(sr.info(true));
         printTSPResult(sr);
     }
 
-    @Disabled
+
     @Test
     void testComparisonDivergeTSP() throws CommandExecutionException, StlModelGenerationException {
         String spec = """
@@ -725,6 +728,9 @@ class SynthesisEvaluatorTest {
                         properties:
                           - name: "iteration"
                             value: "1000"
+                     sampling:
+                        name: "lhs"
+                        datasetSize: 500
           
                    synthesisTask:
                      type: "comparative"
@@ -856,11 +862,11 @@ class SynthesisEvaluatorTest {
         SynthesisTask task = evaluator.getTask();
 
         SynthesisRecord sr = task.execute(new SibillaRuntime());
-        System.out.println(sr.info(false));
+        System.out.println(sr.info(true));
         printTSPResult(sr);
     }
 
-    @Disabled
+
     @Test
     void testComparisonImproveTSP() throws CommandExecutionException, StlModelGenerationException {
         String spec = """
@@ -892,6 +898,9 @@ class SynthesisEvaluatorTest {
                         properties:
                           - name: "iteration"
                             value: "1000"
+                     sampling:
+                        name: "lhs"
+                        datasetSize: 500
           
                    synthesisTask:
                      type: "comparative"
@@ -1023,7 +1032,7 @@ class SynthesisEvaluatorTest {
         SynthesisTask task = evaluator.getTask();
 
         SynthesisRecord sr = task.execute(new SibillaRuntime());
-        System.out.println(sr.info(false));
+        System.out.println(sr.info(true));
         printTSPResult(sr);
     }
 

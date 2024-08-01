@@ -279,7 +279,7 @@ public interface QualitativeMonitor<S> {
 
 
     private static double[] generateTimeSteps(double dt, double deadline) {
-        int stepsCount = (int) Math.ceil(deadline / dt);
+        int stepsCount = (int) Math.ceil(deadline / dt)+1;
         double[] timeSteps = new double[stepsCount];
         for (int i = 0; i < stepsCount; i++) {
             timeSteps[i] = i * dt;

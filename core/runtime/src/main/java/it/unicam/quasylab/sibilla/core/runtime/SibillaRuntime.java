@@ -315,7 +315,11 @@ public final class SibillaRuntime implements CommandHandler {
     public Map<String, double[][]> simulate(SimulationMonitor monitor, String label) throws CommandExecutionException {
         checkDeadline();
         checkDt();
-        return currentModule.simulate(monitor,rg,replica,deadline,dt);
+        lastCollectedData = currentModule.simulate(monitor,rg,replica,deadline,dt);
+        if (label != null) {
+            collectedData.put(label, lastCollectedData);
+        }
+        return lastCollectedData;
     }
 
     public void loadFormula(String sourceCode) throws CommandExecutionException, StlModelGenerationException {

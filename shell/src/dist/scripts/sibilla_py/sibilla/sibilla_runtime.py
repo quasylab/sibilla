@@ -6,7 +6,10 @@ SSHELL_PATH = os.environ.get('SSHELL_PATH', '')
 
 jnius_config.add_classpath(os.path.join(SSHELL_PATH, 'lib', '*'))
 
+
+from typing import Dict, List, Callable
 import jnius
+import pandas as pd
 import io
 
 from .plotting_module import SibillaDataPlotter
@@ -17,12 +20,71 @@ ShellSimulationMonitor = jnius.autoclass("it.unicam.quasylab.sibilla.shell.Shell
 FirstPassageTimeResults = jnius.autoclass("it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime")
 System = jnius.autoclass("java.lang.System")
 
+SynthesisRecord = jnius.autoclass("it.unicam.quasylab.sibilla.tools.synthesis.SynthesisRecord")
+SurrogateMetrics = jnius.autoclass("it.unicam.quasylab.sibilla.tools.synthesis.surrogate.SurrogateMetrics")
+
+
+
 class Map(jnius.JavaClass, metaclass=jnius.MetaJavaClass):
     __javaclass__ = 'java/util/Map'
     entrySet = jnius.JavaMethod('()Ljava/util/Set;')
 
     def to_dict(self):
         return {e.getKey():e.getValue() for e in self.entrySet().toArray()}
+
+
+class MonitorResults:
+    def __init__(self, java_result, is_qualitative: bool):
+        self.java_result = java_result
+        self.is_qualitative = is_qualitative
+
+    def get_formula_results(self, formula_name: str) -> List[List[float]]:
+        entry_set = self.java_result.entrySet()
+        iterator = entry_set.iterator()
+        while iterator.hasNext():
+            entry = iterator.next()
+            if str(entry.getKey()) == formula_name:
+                return [list(row) for row in entry.getValue()]
+        return []
+
+    def get_all_results(self) -> Dict[str, List[List[float]]]:
+        result = {}
+        entry_set = self.java_result.entrySet()
+        iterator = entry_set.iterator()
+        while iterator.hasNext():
+            entry = iterator.next()
+            key = str(entry.getKey())
+            value = entry.getValue()
+            result[key] = [list(row) for row in value]
+        return result
+
+    def get_pandas_dataframe(self, formula_name: str) -> pd.DataFrame:
+        data = self.get_formula_results(formula_name)
+        if not data:
+            return pd.DataFrame()
+
+        if self.is_qualitative:
+            columns = ['Time Step', 'Probability']
+        else:
+            columns = ['Time Step', 'Mean Robustness', 'SD Robustness']
+
+        return pd.DataFrame(data, columns=columns)
+
+    def get_all_pandas_dataframes(self) -> Dict[str, pd.DataFrame]:
+        return {formula: self.get_pandas_dataframe(formula)
+                for formula in self.get_all_results().keys()}
+
+    def __str__(self):
+        return str(self.get_all_results())
+
+    def __repr__(self):
+        return f"MonitorResults({self.get_all_results()}, is_qualitative={self.is_qualitative})"
+
+class CommandExecutionException(Exception):
+    pass
+
+class StlModelGenerationException(Exception):
+    pass
 
 class SibillaRuntime:
 
@@ -220,6 +282,72 @@ class SibillaRuntime:
     def get_predicates(self):
         return self.__runtime()
 
+    def load_formula(self, source_code: str):
+        self.__runtime.loadFormula(source_code)
+
+    def load_formula_from_file(self, file_path: str):
+        java_file = jnius.autoclass('java.io.File')(file_path)
+        self.__runtime.loadFormula(java_file)
+
+
+    def qualitative_monitor_signal(self, formula_names: List[str], formula_parameters: List[Dict[str, float]]) -> MonitorResults:
+        # Convert formula_names to Java String array
+        String = jnius.autoclass('java.lang.String')
+        StringArray = jnius.autoclass('java.lang.reflect.Array')
+        java_formula_names = StringArray.newInstance(String, len(formula_names))
+        for i, name in enumerate(formula_names):
+            java_formula_names[i] = String(name)
+
+        # Convert formula_parameters to Java Map array
+        JavaHashMap = jnius.autoclass('java.util.HashMap')
+        MapArray = jnius.autoclass('java.lang.reflect.Array')
+        java_formula_parameters = MapArray.newInstance(JavaHashMap, len(formula_parameters))
+        for i, params in enumerate(formula_parameters):
+            java_map = JavaHashMap()
+            for k, v in params.items():
+                java_map.put(k, float(v))
+            java_formula_parameters[i] = java_map
+
+        result = self.__runtime.qualitativeMonitorSignal(
+            java_formula_names,
+            java_formula_parameters
+        )
+        return MonitorResults(result, is_qualitative=True)
+
+    def quantitative_monitor_signal(self, formula_names: List[str], formula_parameters: List[Dict[str, float]]) -> MonitorResults:
+        # Convert formula_names to Java String array
+        String = jnius.autoclass('java.lang.String')
+        StringArray = jnius.autoclass('java.lang.reflect.Array')
+        java_formula_names = StringArray.newInstance(String, len(formula_names))
+        for i, name in enumerate(formula_names):
+            java_formula_names[i] = String(name)
+
+        # Convert formula_parameters to Java Map array
+        JavaHashMap = jnius.autoclass('java.util.HashMap')
+        MapArray = jnius.autoclass('java.lang.reflect.Array')
+        java_formula_parameters = MapArray.newInstance(JavaHashMap, len(formula_parameters))
+        for i, params in enumerate(formula_parameters):
+            java_map = JavaHashMap()
+            for k, v in params.items():
+                java_map.put(k, float(v))
+            java_formula_parameters[i] = java_map
+
+        result = self.__runtime.quantitativeMonitorSignal(
+            java_formula_names,
+            java_formula_parameters
+        )
+        return MonitorResults(result, is_qualitative=False)
+
+    def expected_probability_at_time0(self, formula_name, formula_parameters):
+        return self.__runtime.expectedProbabilityAtTime0(formula_name, formula_parameters)
+
+    def mean_robustness_at_time0(self, formula_name, formula_parameters):
+        return self.__runtime.meanRobustnessAtTime0(formula_name, formula_parameters)
+
+    def mean_and_sd_robustness_at_time0(self, formula_name, formula_parameters):
+        result = self.__runtime.meanAndSdRobustnessAtTime0(formula_name, formula_parameters)
+        return tuple(result)
+
     def trace(self, trace_spec: str, output_folder: str, header: bool):
         return self.__runtime.trace(trace_spec, output_folder, header)
 
@@ -234,6 +362,12 @@ class SibillaRuntime:
         fpt_r = profiler.execute(ftp_runtime, predicate_name, monitor)
         fpt_r.set_profiler(profiler)
         return fpt_r
+
+    def perform_synthesis(self, source_spec: str):
+        synthesis_record = SynthesisRecord(self.__runtime.performSynthesis(source_spec))
+        return synthesis_record
+
+
 
     def evaluate_reachability(self,goal: str, delta:float = 0.01 , epsilon:float = 0.01, condition: str = None, monitor: SimulationMonitor=None):
 
@@ -285,6 +419,10 @@ class SibillaRuntime:
         return self
     def __exit__(self, type, value, traceback):
         self.clear()
+
+
+
+
 
 class SibillaSimulationResult:
 
@@ -448,3 +586,135 @@ class SibillaReachabilityResult:
         str_to_ret += f'error gap  (delta)   :  {self.delta}\n'
 
         return str_to_ret
+
+
+
+class JavaToPythonDoubleFunction:
+    def __init__(self, java_function):
+        self.java_function = java_function
+
+    def __call__(self, arg):
+        if isinstance(arg, dict):
+            java_map = jnius.autoclass('java.util.HashMap')()
+            for k, v in arg.items():
+                java_double = jnius.autoclass('java.lang.Double')(float(v))
+                java_map.put(k, java_double)
+            return self.java_function.applyAsDouble(java_map)
+        return self.java_function.applyAsDouble(arg)
+
+class SynthesisRecord:
+    def __init__(self, java_synthesis_record):
+        self.java_record = java_synthesis_record
+        self.time_elapsed = None
+        self.memory_used = None
+
+    def set_profiler(self, profiler: Profiler):
+        self.time_elapsed = profiler.time_required
+        self.memory_used = profiler.max_memory - profiler.min_memory
+
+    def chosen_optimization_algorithm(self) -> str:
+        return self.java_record.chosenOptimizationAlgorithm()
+
+    def chosen_surrogate_model(self) -> str:
+        return self.java_record.chosenSurrogateModel()
+
+    def chosen_sampling_strategy(self) -> str:
+        return self.java_record.chosenSamplingStrategy()
+
+    def objective_function(self) -> Callable[[Dict[str, float]], float]:
+        return JavaToPythonDoubleFunction(self.java_record.objectiveFunction())
+
+    def surrogate_function(self) -> Callable[[Dict[str, float]], float]:
+        return JavaToPythonDoubleFunction(self.java_record.surrogateFunction())
+
+    def real_fun_dataset(self) -> List[Dict[str, float]]:
+        return self.java_record.realFunDataset().toMapList()
+
+    def use_surrogate(self) -> bool:
+        return self.java_record.useSurrogate()
+
+    def is_minimization_problem(self) -> bool:
+        return self.java_record.isMinimizationProblem()
+
+    def search_space(self) -> Dict[str, tuple]:
+        java_search_space = self.java_record.searchSpace()
+        return {dim: (java_search_space.getLower(dim), java_search_space.getUpper(dim))
+                for dim in java_search_space.getDimensions()}
+
+    def properties(self) -> Dict[str, str]:
+        return dict(self.java_record.properties())
+
+    def number_of_samples(self) -> int:
+        return self.java_record.numberOfSamples()
+
+    def training_portion(self) -> float:
+        return self.java_record.trainingPortion()
+
+    def constraints(self) -> List[Callable[[Dict[str, float]], bool]]:
+        return [JavaToPythonDoubleFunction(c) for c in self.java_record.constraints()]
+
+    def optimal_coordinates(self) -> Dict[str, float]:
+        java_coords = self.java_record.optimalCoordinates()
+        if java_coords is None:
+            return None
+
+        result = {}
+        entry_set = java_coords.entrySet()
+        iterator = entry_set.iterator()
+        while iterator.hasNext():
+            entry = iterator.next()
+            key = entry.getKey()
+            value = entry.getValue()
+            result[str(key)] = float(value)
+
+        return result
+
+    def optimal_value_objective_function(self) -> float:
+        return self.java_record.optimalValueObjectiveFunction()
+
+    def optimal_value_surrogate_function(self) -> float:
+        return self.java_record.optimalValueSurrogateFunction()
+
+    def in_sample_metrics(self) -> Dict[str, float]:
+        metrics = self.java_record.inSampleMetrics()
+        return {'mse': metrics.getMSE(), 'r_squared': metrics.getRSquared()} if metrics else None
+
+    def out_of_sample_metrics(self) -> Dict[str, float]:
+        metrics = self.java_record.outOfSampleMetrics()
+        return {'mse': metrics.getMSE(), 'r_squared': metrics.getRSquared()} if metrics else None
+
+    def info(self, verbose: bool = False) -> str:
+        return self.java_record.info(verbose)
+
+    def set_profiler(self, profiler: Profiler):
+        self.time_elapsed = profiler.time_required
+        self.memory_used = profiler.max_memory - profiler.min_memory
+
+    def __str__(self) -> str:
+        return self._get_string_representation()
+
+    def __repr__(self) -> str:
+        return f"SynthesisRecord(java_obj={self.java_record})"
+
+    def _get_string_representation(self, verbose: bool = False) -> str:
+        sb = []
+        sb.append(f"Optimal Coordinates: {self.optimal_coordinates()}")
+        sb.append(f"Optimal Value (Objective Function): {self.optimal_value_objective_function()}")
+        sb.append(f"Optimal Value (Surrogate Function): {self.optimal_value_surrogate_function()}")
+
+        if verbose:
+            sb.append(f"Optimization Algorithm: {self.chosen_optimization_algorithm()}")
+            sb.append(f"Surrogate Model: {self.chosen_surrogate_model()}")
+            sb.append(f"Sampling Strategy: {self.chosen_sampling_strategy()}")
+            sb.append(f"Use Surrogate: {self.use_surrogate()}")
+            sb.append(f"Is Minimization Problem: {self.is_minimization_problem()}")
+            sb.append(f"Number of Samples: {self.number_of_samples()}")
+            sb.append(f"Training Portion: {self.training_portion()}")
+            sb.append(f"Search Space: {self.search_space()}")
+            sb.append(f"Properties: {self.properties()}")
+            sb.append(f"In-Sample Metrics: {self.in_sample_metrics()}")
+            sb.append(f"Out-of-Sample Metrics: {self.out_of_sample_metrics()}")
+            sb.append(f"Time Elapsed: {self.time_elapsed}")
+            sb.append(f"Memory Used: {self.memory_used}")
+
+        return "\n".join(sb)

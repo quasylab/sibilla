@@ -1,6 +1,7 @@
 package it.unicam.quasylab.sibilla.tools.synthesis.optimizationalgorithm.sa;
 
 import it.unicam.quasylab.sibilla.tools.synthesis.optimizationalgorithm.OptimizationTask;
+import it.unicam.quasylab.sibilla.tools.synthesis.optimizationalgorithm.sa.cooling.*;
 import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.HyperRectangle;
 import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.Interval;
 
@@ -17,6 +18,8 @@ public class SimulatedAnnealingTask implements OptimizationTask {
     private FitnessFunction fitnessFunction;
     private Random random;
 
+    private CoolingSchedule coolingSchedule;
+
     public SimulatedAnnealingTask() {
         setProperties(new Properties());
     }
@@ -24,40 +27,58 @@ public class SimulatedAnnealingTask implements OptimizationTask {
     public SimulatedAnnealingTask(Properties properties) {
         setProperties(properties);
     }
-
     private void performIteration(HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints) {
-        Map<String, Double> currentSolution = searchSpace.getRandomValue();
-        Map<String, Double> finalCurrentSolution = currentSolution;
-        while (!constraints.stream().allMatch(c -> c.test(finalCurrentSolution))) {
-            currentSolution = searchSpace.getRandomValue();
-        }
-
+        Map<String, Double> currentSolution = generateInitialSolution(searchSpace, constraints);
         Map<String, Double> bestSolution = new HashMap<>(currentSolution);
         double currentTemperature = initialTemperature;
 
         for (int iteration = 0; iteration < maxIterations; iteration++) {
-            Map<String, Double> newSolution = generateNeighborSolution(currentSolution, searchSpace);
-            Map<String, Double> finalNewSolution = newSolution;
-            while (!constraints.stream().allMatch(c -> c.test(finalNewSolution))) {
-                newSolution = generateNeighborSolution(currentSolution, searchSpace);
-            }
+            Map<String, Double> newSolution = generateValidNeighborSolution(currentSolution, searchSpace, constraints);
 
-            double currentEnergy = fitnessFunction.evaluate(currentSolution);
-            double newEnergy = fitnessFunction.evaluate(newSolution);
-
-            if (acceptanceProbability(currentEnergy, newEnergy, currentTemperature) > random.nextDouble()) {
+            if (shouldAcceptNewSolution(currentSolution, newSolution, currentTemperature)) {
                 currentSolution = newSolution;
             }
 
-            if (fitnessFunction.evaluate(currentSolution) < fitnessFunction.evaluate(bestSolution)) {
-                bestSolution = new HashMap<>(currentSolution);
-            }
-
-            currentTemperature *= (1 - coolingRate);
+            updateBestSolution(currentSolution, bestSolution);
+            currentTemperature =  coolingSchedule.cool(currentTemperature, iteration, maxIterations);
         }
 
         this.bestSolution = bestSolution;
     }
+
+    private Map<String, Double> generateInitialSolution(HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints) {
+        Map<String, Double> solution;
+        do {
+            solution = searchSpace.getRandomValue();
+        } while (!isValidSolution(solution, constraints));
+        return solution;
+    }
+
+    private Map<String, Double> generateValidNeighborSolution(Map<String, Double> currentSolution, HyperRectangle searchSpace, List<Predicate<Map<String, Double>>> constraints) {
+        Map<String, Double> newSolution;
+        do {
+            newSolution = generateNeighborSolution(currentSolution, searchSpace);
+        } while (!isValidSolution(newSolution, constraints));
+        return newSolution;
+    }
+
+    private boolean isValidSolution(Map<String, Double> solution, List<Predicate<Map<String, Double>>> constraints) {
+        return constraints.stream().allMatch(c -> c.test(solution));
+    }
+
+    private boolean shouldAcceptNewSolution(Map<String, Double> currentSolution, Map<String, Double> newSolution, double currentTemperature) {
+        double currentEnergy = fitnessFunction.evaluate(currentSolution);
+        double newEnergy = fitnessFunction.evaluate(newSolution);
+        return acceptanceProbability(currentEnergy, newEnergy, currentTemperature) > random.nextDouble();
+    }
+
+    private void updateBestSolution(Map<String, Double> currentSolution, Map<String, Double> bestSolution) {
+        if (fitnessFunction.evaluate(currentSolution) < fitnessFunction.evaluate(bestSolution)) {
+            bestSolution.clear();
+            bestSolution.putAll(currentSolution);
+        }
+    }
+
 
     private Map<String, Double> generateNeighborSolution(Map<String, Double> currentSolution, HyperRectangle searchSpace) {
         Map<String, Double> newSolution = new HashMap<>(currentSolution);
@@ -102,10 +123,24 @@ public class SimulatedAnnealingTask implements OptimizationTask {
         int MAX_ITERATIONS = 1000;
         double INITIAL_TEMPERATURE = 1000.0;
         double COOLING_RATE = 0.003;
+        String DEFAULT_COOLING_SCHEDULE = "linear";
 
         this.maxIterations = Integer.parseInt(properties.getProperty("sa.max_iterations", MAX_ITERATIONS + ""));
         this.initialTemperature = Double.parseDouble(properties.getProperty("sa.initial_temperature", INITIAL_TEMPERATURE + ""));
         this.coolingRate = Double.parseDouble(properties.getProperty("sa.cooling_rate", COOLING_RATE + ""));
+        String coolingScheduleType = properties.getProperty("sa.cooling_schedule", DEFAULT_COOLING_SCHEDULE);
+        switch (coolingScheduleType.toLowerCase()) {
+            case "exponential":
+                this.coolingSchedule = new ExponentialCoolingSchedule(coolingRate);
+                break;
+            case "logarithmic":
+                this.coolingSchedule = new LogarithmicCoolingSchedule();
+                break;
+            case "linear":
+            default:
+                this.coolingSchedule = new LinearCoolingSchedule(coolingRate);
+                break;
+        }
     }
 
     private Map<String, Double> bestSolution;
