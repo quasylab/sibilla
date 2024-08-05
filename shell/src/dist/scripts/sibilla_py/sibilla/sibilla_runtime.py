@@ -630,6 +630,22 @@ class SynthesisRecord:
     def real_fun_dataset(self) -> List[Dict[str, float]]:
         return self.java_record.realFunDataset().toMapList()
 
+    def get_dataset(self) -> pd.DataFrame:
+        java_list = self.java_record.getDatasetAsMapList()
+        python_list = []
+        for java_map in java_list:
+            python_dict = {}
+            entry_set = java_map.entrySet()
+            iterator = entry_set.iterator()
+            while iterator.hasNext():
+                entry = iterator.next()
+                key = str(entry.getKey())
+                value = float(entry.getValue())
+                python_dict[key] = value
+            python_list.append(python_dict)
+        return pd.DataFrame(python_list)
+
+
     def use_surrogate(self) -> bool:
         return self.java_record.useSurrogate()
 

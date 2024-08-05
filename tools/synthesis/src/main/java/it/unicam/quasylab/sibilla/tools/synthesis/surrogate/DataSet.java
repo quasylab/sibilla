@@ -41,7 +41,7 @@ public class DataSet extends Table {
     }
 
     private DoubleColumn computeResultColumn(Table input, ToDoubleFunction<Map<String,Double>> function, String columnID){
-        List<Map<String,Double>> listOfRowAsMap = toMapList(input);
+        List<Map<String,Double>> listOfRowAsMap = toListOfMaps(input);
         Double[] results = new Double[listOfRowAsMap.size()];
         for (int i = 0; i < listOfRowAsMap.size(); i++) {
             //System.out.print("<");
@@ -53,7 +53,7 @@ public class DataSet extends Table {
 
 
 
-    private List<Map<String,Double>> toMapList(Table table){
+    private List<Map<String,Double>> toListOfMaps(Table table){
         List<Map<String,Double>> mapList = new ArrayList<>();
         for (int i = 0; i < table.rowCount(); i++) {
             Row row = table.row(i);
@@ -66,7 +66,7 @@ public class DataSet extends Table {
         return mapList;
     }
 
-    public List<Map<String,Double>> toMapList(){
+    public List<Map<String,Double>> toListOfMaps(){
         List<Map<String,Double>> mapList = new ArrayList<>();
         for (int i = 0; i < this.rowCount(); i++) {
             Row row = this.row(i);

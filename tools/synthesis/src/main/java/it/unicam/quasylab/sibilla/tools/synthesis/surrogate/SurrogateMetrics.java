@@ -56,7 +56,7 @@ public class SurrogateMetrics {
     private double[] getPredictedValues(SurrogateModel surrogate, DataSet dataSet) {
         double[] predicted = new double[truth.length];
         ToDoubleFunction<Map<String,Double>> surrogateFunction = surrogate.getSurrogateFunction(false);
-        List<Map<String,Double>> listOfRowsAsMaps = dataSet.toMapList();
+        List<Map<String,Double>> listOfRowsAsMaps = dataSet.toListOfMaps();
         for (int i = 0; i < truth.length; i++) {
             Map<String,Double> row = listOfRowsAsMaps.get(i);
             predicted[i] = surrogateFunction.applyAsDouble(row);

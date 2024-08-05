@@ -181,7 +181,7 @@ class DataSetTest {
 
 
 
-        List<Map<String,Double>> tsAsMap = ts.toMapList();
+        List<Map<String,Double>> tsAsMap = ts.toListOfMaps();
 
         ts.stream().forEach(System.out::println);
 

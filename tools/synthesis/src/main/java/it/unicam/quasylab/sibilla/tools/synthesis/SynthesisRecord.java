@@ -32,7 +32,7 @@ public record SynthesisRecord(
 ) {
 
     public List<Map<String,Double>> getDatasetAsMapList(){
-        return realFunDataset.toMapList();
+        return realFunDataset.toListOfMaps();
     }
     public String info(boolean verbose){
         StringBuilder sb = new StringBuilder();
