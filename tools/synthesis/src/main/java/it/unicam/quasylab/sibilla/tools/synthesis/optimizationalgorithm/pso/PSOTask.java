@@ -120,7 +120,7 @@ public class PSOTask implements OptimizationTask {
         double SELF_CONFIDENCE = 1.49617;
         double SWARM_CONFIDENCE = 1.49617;
         int NUMBER_OF_PARTICLES = 100;
-        int ITERATION = 1000;
+        int ITERATION = 100;
 
         this.inertia = Double.parseDouble(properties.getProperty("pso.inertia", INERTIA +""));
         this.selfConfidence = Double.parseDouble(properties.getProperty("pso.self_confidence", SELF_CONFIDENCE +""));

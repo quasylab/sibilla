@@ -30,6 +30,7 @@ import it.unicam.quasylab.sibilla.core.simulator.Trajectory;
 import it.unicam.quasylab.sibilla.core.util.BooleanSignal;
 import it.unicam.quasylab.sibilla.core.util.Interval;
 import it.unicam.quasylab.sibilla.core.util.Signal;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -41,6 +42,30 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TestStlParser {
 
+
+    public static Trajectory<PopulationState> getPopulationTrajectoryAtTimes(double[] times, int[]... signals) {
+        if (signals.length == 0)
+            throw new IllegalArgumentException("At least one trajectory is needed");
+        if (times.length != signals[0].length)
+            throw new IllegalArgumentException("The number of time points must match the number of signal points");
+
+        Trajectory<PopulationState> trajectory = new Trajectory<>();
+        int numPopulations = signals.length;
+
+        for (int i = 0; i < times.length; i++) {
+            Population[] populations = new Population[numPopulations];
+
+            for (int j = 0; j < numPopulations; j++) {
+                populations[j] = new Population(j, signals[j][i]);
+            }
+
+            trajectory.add(times[i], new PopulationState(numPopulations, populations));
+        }
+
+        trajectory.setEnd(times[times.length - 1]);
+
+        return trajectory;
+    }
 
     public static Trajectory<PopulationState> getPopulationTrajectory(double[] timeIntervals, int[]... signals) {
         if(signals.length==0)
@@ -662,6 +687,8 @@ public class TestStlParser {
 
     }
 
+    @SuppressWarnings("unused")
+    @Disabled
     @Test
     void testParseError() throws StlModelGenerationException {
         String TEST_FORMULA = """
@@ -684,6 +711,109 @@ public class TestStlParser {
 
     }
 
+
+    /**
+     * 0.0:[90, 10, 0] --> 0.39431566657167305:[90, 9, 1] --> 0.5053485249608954:[89, 10, 1] --> 1.044933361765899:[89, 9, 2] --> 2.174221015809152:[89, 8, 3] --> 2.8797601145787106:[88, 9, 3] --> 3.225023155754782:[88, 8, 4] --> 3.289675513149529:[87, 9, 4] --> 3.702892944707358:[86, 10, 4] --> 4.31994889800267:[85, 11, 4] --> 4.506332014243528:[85, 10, 5] --> 4.5724601649349506:[85, 9, 6] --> 6.205083965049217:[84, 10, 6] --> 7.279092670894575:[84, 9, 7] --> 7.658599509593253:[84, 8, 8] --> 10.166814252998206:[84, 7, 9] --> 10.797159693176154:[83, 8, 9] --> 11.33442988833734:[82, 9, 9] --> 11.697942230599075:[81, 10, 9] --> 13.369230472552958:[80, 11, 9] --> 13.500347038084332:[79, 12, 9] --> 13.829706786620442:[78, 13, 9] --> 14.0872852085095:[77, 14, 9] --> 14.118368361007837:[76, 15, 9] --> 14.769705307886413:[75, 16, 9] --> 15.29096211671821:[75, 15, 10] --> 15.319138397640407:[74, 16, 10] --> 15.533500101512615:[74, 15, 11] --> 16.19033430764179:[73, 16, 11] --> 16.392316646850553:[72, 17, 11] --> 16.555801407784923:[71, 18, 11] --> 16.56646387568298:[71, 17, 12] --> 16.775922550850506:[70, 18, 12] --> 18.54458706689295:[69, 19, 12] --> 18.58522180649093:[68, 20, 12] --> 18.848287919694673:[67, 21, 12] --> 18.91262637637121:[66, 22, 12] --> 18.95003924598895:[65, 23, 12] --> 19.048779750648247:[64, 24, 12] --> 19.791694494283746:[63, 25, 12] --> 20.430428274368015:[63, 24, 13] --> 20.437975687295864:[62, 25, 13] --> 20.79454984498183:[61, 26, 13] --> 21.109627572485426:[60, 27, 13] --> 21.221834683284722:[59, 28, 13] --> 21.581976338620873:[58, 29, 13] --> 21.607563484977877:[57, 30, 13] --> 21.618873485446645:[56, 31, 13] --> 21.81231410802491:[55, 32, 13] --> 21.998792461545086:[54, 33, 13] --> 22.041562553173492:[53, 34, 13] --> 22.086760057898843:[53, 33, 14] --> 22.125847953170993:[52, 34, 14] --> 22.195704899309575:[51, 35, 14] --> 22.36574620344519:[51, 34, 15] --> 23.091194940433102:[51, 33, 16] --> 23.232515777471985:[50, 34, 16] --> 23.53038647564842:[49, 35, 16]
+     * @throws StlModelGenerationException
+     */
+    @Disabled
+    @Test
+    public void testProblematicCase() throws StlModelGenerationException {
+        String TEST_FORMULA = """
+                measure %I
+                formula formula_with_id [a=0,b=100] : ( \\G[a,(a+b)][ %I > 0.3] && \\G[(a+b),(a+b+b)][ %I < 0.3] ) endformula
+                formula formula_with_id_reduced [a=0,b=100] : ( \\G[(a+b),(a+b+b)][ %I < 0.3] ) endformula
+                formula formula_id [a=0,b=100] : ( \\G[4.125792580104338,4.125792580104338+5.092318988523647][ %I > 0.3] && \\G[4.125792580104338+5.092318988523647,4.125792580104338+5.092318988523647+5.092318988523647][ %I < 0.3] ) endformula
+                formula formula_id_summed [a=0,b=100] : ( \\G[4.125792580104338,9.218111568627985][ %I > 0.3] && \\G[9.218111568627985,14.310430557151632][ %I < 0.3] ) endformula
+                formula formula_id_approx [a=0,b=100] : ( \\G[4.13,4.13+5.09][ %I > 0.3] && \\G[4.13+5.09,4.123+5.09+5.09][ %I < 0.3] ) endformula
+                """;
+
+        StlLoader stlLoader = new StlLoader(TEST_FORMULA);
+        Map<String, ToDoubleFunction<PopulationState>> measure = new HashMap<>();
+        measure.put("%S", s -> s.getOccupancy(0));
+        measure.put("%I", s -> s.getOccupancy(1));
+        measure.put("%R", s -> s.getOccupancy(2));
+        StlMonitorFactory<PopulationState> stlModelFactory = stlLoader.getModelFactory(measure);
+
+
+        Trajectory<PopulationState> t = getPopulationTrajectoryAtTimes(
+                new double[]{
+                        0.0,                  // First point
+                        21.581976338620873,   // Middle point 2
+                        23.53038647564842     // Last point
+                },
+                new int[]{90,58, 49},  // S values
+                new int[]{10,  29, 35},  // I values
+                new int[]{ 0, 13, 16}   // R values
+        );
+
+        //QuantitativeMonitor<PopulationState> quantitativeMonitor = stlModelFactory.getQuantitativeMonitor("formula_id", Map.of("a", 0, "b", 100));
+
+        QuantitativeMonitor<PopulationState> quantitativeMonitor = stlModelFactory.getQuantitativeMonitor("formula_with_id_reduced", Map.of("a", 4.125792580104338, "b", 5.092318988523647));
+
+        //QuantitativeMonitor<PopulationState> quantitativeMonitor = stlModelFactory.getQuantitativeMonitor("formula_with_id_reduced", Map.of("a", 4.126, "b", 5.092));
+
+        double robustnessAt0 = quantitativeMonitor.monitor(t).valueAt(0);
+        System.out.println(robustnessAt0);
+
+    }
+
+
+    /**
+     * 0.0:[90, 10, 0] --> 0.39431566657167305:[90, 9, 1] --> 0.5053485249608954:[89, 10, 1] --> 1.044933361765899:[89, 9, 2] --> 2.174221015809152:[89, 8, 3] --> 2.8797601145787106:[88, 9, 3] --> 3.225023155754782:[88, 8, 4] --> 3.289675513149529:[87, 9, 4] --> 3.702892944707358:[86, 10, 4] --> 4.31994889800267:[85, 11, 4] --> 4.506332014243528:[85, 10, 5] --> 4.5724601649349506:[85, 9, 6] --> 6.205083965049217:[84, 10, 6] --> 7.279092670894575:[84, 9, 7] --> 7.658599509593253:[84, 8, 8] --> 10.166814252998206:[84, 7, 9] --> 10.797159693176154:[83, 8, 9] --> 11.33442988833734:[82, 9, 9] --> 11.697942230599075:[81, 10, 9] --> 13.369230472552958:[80, 11, 9] --> 13.500347038084332:[79, 12, 9] --> 13.829706786620442:[78, 13, 9] --> 14.0872852085095:[77, 14, 9] --> 14.118368361007837:[76, 15, 9] --> 14.769705307886413:[75, 16, 9] --> 15.29096211671821:[75, 15, 10] --> 15.319138397640407:[74, 16, 10] --> 15.533500101512615:[74, 15, 11] --> 16.19033430764179:[73, 16, 11] --> 16.392316646850553:[72, 17, 11] --> 16.555801407784923:[71, 18, 11] --> 16.56646387568298:[71, 17, 12] --> 16.775922550850506:[70, 18, 12] --> 18.54458706689295:[69, 19, 12] --> 18.58522180649093:[68, 20, 12] --> 18.848287919694673:[67, 21, 12] --> 18.91262637637121:[66, 22, 12] --> 18.95003924598895:[65, 23, 12] --> 19.048779750648247:[64, 24, 12] --> 19.791694494283746:[63, 25, 12] --> 20.430428274368015:[63, 24, 13] --> 20.437975687295864:[62, 25, 13] --> 20.79454984498183:[61, 26, 13] --> 21.109627572485426:[60, 27, 13] --> 21.221834683284722:[59, 28, 13] --> 21.581976338620873:[58, 29, 13] --> 21.607563484977877:[57, 30, 13] --> 21.618873485446645:[56, 31, 13] --> 21.81231410802491:[55, 32, 13] --> 21.998792461545086:[54, 33, 13] --> 22.041562553173492:[53, 34, 13] --> 22.086760057898843:[53, 33, 14] --> 22.125847953170993:[52, 34, 14] --> 22.195704899309575:[51, 35, 14] --> 22.36574620344519:[51, 34, 15] --> 23.091194940433102:[51, 33, 16] --> 23.232515777471985:[50, 34, 16] --> 23.53038647564842:[49, 35, 16]
+     * @throws StlModelGenerationException
+     */
+    @Disabled
+    @Test
+    public void testProblematicCaseA() throws StlModelGenerationException {
+        String TEST_FORMULA = """
+                measure %I
+                formula formula_with_id [a=0,b=100] : ( \\G[a,(a+b)][ %I > 0.3] && \\G[(a+b),(a+b+b)][ %I < 0.3] ) endformula
+                formula formula_with_id_reduced [a=0,b=100] : ( \\G[(a+b),(a+b+b)][ %I < 0.3] ) endformula
+                formula formula_id [a=0,b=100] : ( \\G[4.125792580104338,4.125792580104338+5.092318988523647][ %I > 0.3] && \\G[4.125792580104338+5.092318988523647,4.125792580104338+5.092318988523647+5.092318988523647][ %I < 0.3] ) endformula
+                formula formula_id_summed [a=0,b=100] : ( \\G[4.125792580104338,9.218111568627985][ %I > 0.3] && \\G[9.218111568627985,14.310430557151632][ %I < 0.3] ) endformula
+                formula formula_id_approx [a=0,b=100] : ( \\G[4.13,4.13+5.09][ %I > 0.3] && \\G[4.13+5.09,4.123+5.09+5.09][ %I < 0.3] ) endformula
+                """;
+
+        StlLoader stlLoader = new StlLoader(TEST_FORMULA);
+        Map<String, ToDoubleFunction<PopulationState>> measure = new HashMap<>();
+        measure.put("%S", s -> s.getOccupancy(0));
+        measure.put("%I", s -> s.getOccupancy(1));
+        measure.put("%R", s -> s.getOccupancy(2));
+        StlMonitorFactory<PopulationState> stlModelFactory = stlLoader.getModelFactory(measure);
+
+        Trajectory<PopulationState> t = getPopulationTrajectoryAtTimes(
+                new double[]{
+                        0.0, 0.39431566657167305, 0.5053485249608954, 1.044933361765899, 2.174221015809152,
+                        2.8797601145787106, 3.225023155754782, 3.289675513149529, 3.702892944707358,
+                        4.31994889800267, 4.506332014243528, 4.5724601649349506, 6.205083965049217,
+                        7.279092670894575, 7.658599509593253, 10.166814252998206, 10.797159693176154,
+                        11.33442988833734, 11.697942230599075, 13.369230472552958, 13.500347038084332,
+                        13.829706786620442, 14.0872852085095, 14.118368361007837, 14.769705307886413,
+                        15.29096211671821, 15.319138397640407, 15.533500101512615, 16.19033430764179,
+                        16.392316646850553, 16.555801407784923, 16.56646387568298, 16.775922550850506,
+                        18.54458706689295, 18.58522180649093, 18.848287919694673, 18.91262637637121,
+                        18.95003924598895, 19.048779750648247, 19.791694494283746, 20.430428274368015,
+                        20.437975687295864, 20.79454984498183, 21.109627572485426, 21.221834683284722,
+                        21.581976338620873, 21.607563484977877, 21.618873485446645, 21.81231410802491,
+                        21.998792461545086, 22.041562553173492, 22.086760057898843, 22.125847953170993,
+                        22.195704899309575, 22.36574620344519, 23.091194940433102, 23.232515777471985,
+                        23.53038647564842
+                },
+                new int[]{90,90,89,89,89,88,88,87,86,85,85,85,84,84,84,84,83,82,81,80,79,78,77,76,75,75,74,74,73,72,71,71,70,69,68,67,66,65,64,63,63,62,61,60,59,58,57,56,55,54,53,53,52,51,51,51,50,49},
+                new int[]{10, 9,10, 9, 8, 9, 8, 9,10,11,10, 9,10, 9, 8, 7, 8, 9,10,11,12,13,14,15,16,15,16,15,16,17,18,17,18,19,20,21,22,23,24,25,24,25,26,27,28,29,30,31,32,33,34,33,34,35,34,33,34,35},
+                new int[]{ 0, 1, 1, 2, 3, 3, 4, 4, 4, 4, 5, 6, 6, 7, 8, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9,10,10,11,11,11,11,12,12,12,12,12,12,12,12,12,13,13,13,13,13,13,13,13,13,13,13,14,14,14,15,16,16,16}
+        );
+
+        //QuantitativeMonitor<PopulationState> quantitativeMonitor = stlModelFactory.getQuantitativeMonitor("formula_id", Map.of("a", 0, "b", 100));
+
+        QuantitativeMonitor<PopulationState> quantitativeMonitor = stlModelFactory.getQuantitativeMonitor("formula_with_id_reduced", Map.of("a", 4.125792580104338, "b", 5.092318988523647));
+
+
+        double robustnessAt0 = quantitativeMonitor.monitor(t).valueAt(0);
+        System.out.println(robustnessAt0);
+
+    }
 
 
 }

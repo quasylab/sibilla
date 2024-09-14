@@ -28,10 +28,11 @@ public class Common {
     }
 
     @SuppressWarnings("unchecked")
-    public static List<Object> getAList(Object obj) {
+    public static List<Object> getAsList(Object obj) {
         if(!(obj instanceof List)) {
             throw new ClassCastException("not a List");
         }
         return (List<Object>) obj;
     }
+
 }

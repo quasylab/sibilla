@@ -569,7 +569,7 @@ public interface QuantitativeMonitor<S> {
     }
 
     /**
-     * A monitor used to evaluate an atomic the "until" monitor.
+     * A monitor used to evaluate the "until" monitor.
      *
      * @param m1     Left argument of the "until".
      * @param interval An interval during which the "until" holds.
@@ -603,7 +603,7 @@ public interface QuantitativeMonitor<S> {
 
 
     /**
-     * Create a "quantitative eventually" monitor with a specified interval.
+     * a monitor used to evaluate the "eventually" monitor.
      *
      * @param interval The time interval over which the "eventually" monitor is applicable.
      * @param m       The quantitative monitor to apply.

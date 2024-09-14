@@ -2,14 +2,10 @@ package it.unicam.quasylab.sibilla.core.runtime.synthesis;
 
 import it.unicam.quasylab.sibilla.tools.synthesis.optimizationalgorithm.OptimizationAlgorithmRegistry;
 import it.unicam.quasylab.sibilla.tools.synthesis.sampling.SamplingStrategyRegistry;
-import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.ContinuousInterval;
-import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.HyperRectangle;
+import it.unicam.quasylab.sibilla.tools.synthesis.sampling.interval.*;
 import it.unicam.quasylab.sibilla.tools.synthesis.surrogate.SurrogateModelRegistry;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import static it.unicam.quasylab.sibilla.core.runtime.synthesis.Common.*;
 
@@ -77,21 +73,117 @@ public class SynthesisStrategy {
 
     }
 
+    /**
+     * Sets the search space for the optimization process based on the provided configuration map.
+     * The search space is defined as a list of intervals, each specifying a parameter and its range or set of values.
+     *
+     * @param configurationMap A map containing the search space configuration.
+     *                         The map should have a "searchSpace" key with a list of interval specifications.
+     *
+     * @throws IllegalArgumentException if an unknown interval type is encountered or if required fields are missing.
+     *
+     * @example
+     * Here's an example of how to use this method with different types of intervals:
+     * <pre>
+     * Map<String, Object> configMap = new HashMap<>();
+     * List<Map<String, Object>> searchSpace = new ArrayList<>();
+     *
+     * // Continuous interval (default type)
+     * searchSpace.add(Map.of(
+     *     "parameterName", "d",
+     *     "lowerBound", 0.5,
+     *     "upperBound", 50.0
+     * ));
+     *
+     * // Explicit continuous interval
+     * searchSpace.add(Map.of(
+     *     "parameterName", "a",
+     *     "type", "continuous",
+     *     "lowerBound", 0.5,
+     *     "upperBound", 50.0
+     * ));
+     *
+     * // Discrete interval
+     * searchSpace.add(Map.of(
+     *     "parameterName", "b",
+     *     "type", "discrete",
+     *     "lowerBound", 0.5,
+     *     "upperBound", 5.0,
+     *     "stepSize", 0.5
+     * ));
+     *
+     * // Set interval
+     * searchSpace.add(Map.of(
+     *     "parameterName", "c",
+     *     "type", "set",
+     *     "set", List.of(0.5, 6.0, 3.2, 1.0)
+     * ));
+     *
+     * configMap.put("searchSpace", searchSpace);
+     * setSearchSpace(configMap);
+     * </pre>
+     */
+    public void setSearchSpace(Map<String, Object> configurationMap) {
+        List<Object> intervalList = getAsList(configurationMap.get("searchSpace"));
+        List<Interval> intervals = new ArrayList<>(intervalList.size());
 
+        for (Object intervalObj : intervalList) {
+            Map<String, Object> intervalSpec = getAsMap(intervalObj);
+            String type = (String) intervalSpec.getOrDefault("type", "continuous");
+            String parameterName = (String) intervalSpec.get("parameterName");
 
-    public void setSearchSpace(Map<String,Object> configurationMap){
-        List<Object> intervalList = getAList(configurationMap.get("searchSpace"));
-        ContinuousInterval[] intervals = new ContinuousInterval[intervalList.size()];
-        for (int i = 0; i < intervalList.size(); i++) {
-            Map<String,Object> intervalSpec = getAsMap(intervalList.get(i));
-            intervals[i] = new ContinuousInterval(
-                    (String) intervalSpec.get("parameterName"),
-                    (double) intervalSpec.get("lowerBound"),
-                    (double) intervalSpec.get("upperBound"));
+            switch (type) {
+                case "continuous":
+                    intervals.add(createContinuousInterval(parameterName, intervalSpec));
+                    break;
+                case "discrete":
+                    intervals.add(createDiscreteStepInterval(parameterName, intervalSpec));
+                    break;
+                case "set":
+                    intervals.add(createDiscreteSetInterval(parameterName, intervalSpec));
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown interval type: " + type);
+            }
         }
-        this.searchSpace = new HyperRectangle(intervals);
+
+        this.searchSpace = new HyperRectangle(intervals.toArray(new Interval[0]));
     }
 
+    private ContinuousInterval createContinuousInterval(String parameterName, Map<String, Object> spec) {
+        return new ContinuousInterval(
+                parameterName,
+                getDoubleValue(spec, "lowerBound"),
+                getDoubleValue(spec, "upperBound")
+        );
+    }
+
+    private DiscreteStepInterval createDiscreteStepInterval(String parameterName, Map<String, Object> spec) {
+        double lowerBound = getDoubleValue(spec, "lowerBound");
+        double upperBound = getDoubleValue(spec, "upperBound");
+        double step = spec.containsKey("step")
+                ? getDoubleValue(spec, "step")
+                : Math.abs(upperBound - lowerBound) / 10;
+
+        return new DiscreteStepInterval(parameterName, lowerBound, upperBound, step);
+    }
+
+    private DiscreteSetInterval createDiscreteSetInterval(String parameterName, Map<String, Object> spec) {
+        List<Object> set = getAsList(spec.get("set"));
+        double[] samples = set.stream()
+                .mapToDouble(obj -> ((Number) obj).doubleValue())
+                .toArray();
+
+        return new DiscreteSetInterval(parameterName, samples);
+    }
+
+    private double getDoubleValue(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (value instanceof Number) {
+            return ((Number) value).doubleValue();
+        }
+        throw new IllegalArgumentException("Expected a number for key: " + key);
+    }
     public void setSamplingStrategy(Map<String,Object> configurationMap) {
         Map<String,Object> samplingSpec = getAsMap(configurationMap.get("sampling"));
         setSamplingStrategy((String) samplingSpec.get("name"));
@@ -105,7 +197,7 @@ public class SynthesisStrategy {
         Map<String,Object> optimizationSpec = getAsMap(configurationMap.get("optimization"));
         setOptimizationStrategy((String) optimizationSpec.get("name"));
         if(optimizationSpec.containsKey("constraints")) {
-            List<Object> constraintListSpec = getAList(optimizationSpec.get("constraints"));
+            List<Object> constraintListSpec = getAsList(optimizationSpec.get("constraints"));
             this.constraints = new String[constraintListSpec.size()];
             for (int i = 0; i < constraintListSpec.size(); i++) {
                 Map<String,Object> constraintSpec = getAsMap(constraintListSpec.get(i));
@@ -113,7 +205,7 @@ public class SynthesisStrategy {
             }
         }
         if(optimizationSpec.containsKey("properties"))
-            setProperties(getAList(optimizationSpec.get("properties")));
+            setProperties(getAsList(optimizationSpec.get("properties")));
     }
 
     public void setSurrogateStrategy(Map<String,Object> configurationMap) {
@@ -124,7 +216,7 @@ public class SynthesisStrategy {
         else
             this.trainingDatasetPortion = DEFAULT_TRAINING_PORTION;
         if(surrogateSpec.containsKey("properties"))
-            setProperties(getAList(surrogateSpec.get("properties")));
+            setProperties(getAsList(surrogateSpec.get("properties")));
     }
 
     private void setInfillParameters(Map<String, Object> strategyMap) {

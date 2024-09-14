@@ -277,7 +277,6 @@ public class ModuleEngine<S extends State> {
         for(int i = 0; i < replica;i++){
             Trajectory<S> trajectory = se.sampleTrajectory(rg, currentModel, state.apply(rg), formulaMonitor.getTimeHorizon());
             trajectory.setEnd(formulaMonitor.getTimeHorizon());
-            //System.out.println(trajectory);
             Signal robustnessSignal = formulaMonitor.monitor(trajectory);
             double currentRobustness = robustnessSignal.valueAt(0);
             robustness += currentRobustness;

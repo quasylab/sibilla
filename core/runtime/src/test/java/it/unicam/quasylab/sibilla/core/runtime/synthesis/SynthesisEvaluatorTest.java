@@ -8,8 +8,10 @@ import it.unicam.quasylab.sibilla.tools.synthesis.SynthesisRecord;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.ToIntFunction;
 
 class SynthesisEvaluatorTest {
@@ -172,20 +174,35 @@ class SynthesisEvaluatorTest {
 
     }
 
+
+    /*
+
+                    new ContinuousInterval("tau_mRNA",1.0,15.0),
+                new ContinuousInterval("tau_prot",1.0,15.0));
+     */
+
     @Disabled
     @Test
-    void testOptimalRepressilatorParameters() throws CommandExecutionException, StlModelGenerationException {
+    void testOptimalRepressilatorParametersInfill() throws CommandExecutionException, StlModelGenerationException {
         String spec = """
               synthesisStrategy:
                 searchSpace:
-                - parameterName: "k_i"
-                  lowerBound: 0.005
-                  upperBound: 0.3
-                - parameterName: "k_r"
-                  lowerBound: 0.005
-                  upperBound: 0.2
+                - parameterName: "tau_mRNA"
+                  lowerBound: 1.0
+                  upperBound: 10.0
+                - parameterName: "tau_prot"
+                  lowerBound: 1.0
+                  upperBound: 10.0
+                sampling:
+                  name: "lhs"
+                  datasetSize: 100
+                infill:
+                    threshold: 0.1
+                    maxIteration: 3
               synthesisTask:
                 type: "optimalFeasibility"
+                simulationSetting:
+                    replica: 5
                 taskSpecs:
                     objective: "maximize"
                     evaluation: "qualitative"
@@ -275,16 +292,147 @@ class SynthesisEvaluatorTest {
               
                             system initial = Y < startY >|VOID < startVOID >;
                     formulae: |
-                        measure #I
-                        formula formula_id  : ( \\E[100,120][ #I == 0] )&& (\\G[0,100][ #I > 0 ]) endformula
+                        measure #PZ
+                        formula f_id [kT = 800, kB = 500 , t = 100, tW = 10, tE = 20] :  \\E [0,t] ( \\G[tE,tW+tE]([#PZ > kB] && [#PZ < kT]) && \\E [0,tE][#PZ < kB]  && \\E [tW+tE,tE+tW+tE][#PZ < kB] )  endformula
               """;
 
         SynthesisEvaluator evaluator = new SynthesisEvaluator(spec);
         SynthesisTask task = evaluator.getTask();
 
         SynthesisRecord sr = task.execute(new SibillaRuntime());
-        System.out.println(sr.info(false));
+        System.out.println(sr.info(true));
     }
+
+    @Disabled
+    @Test
+    void testRepeatedRepressilatorParameters() throws CommandExecutionException, StlModelGenerationException {
+        for (int i = 0; i < 10; i++) {
+            testOptimalRepressilatorParameters();
+        }
+    }
+
+    @Disabled
+    @Test
+    void testOptimalRepressilatorParameters() throws CommandExecutionException, StlModelGenerationException {
+        String spec = """
+              synthesisStrategy:
+                searchSpace:
+                - parameterName: "tau_mRNA"
+                  lowerBound: 1.0
+                  upperBound: 10.0
+                - parameterName: "tau_prot"
+                  lowerBound: 1.0
+                  upperBound: 10.0
+                sampling:
+                  name: "lhs"
+                  datasetSize: 300
+              synthesisTask:
+                type: "optimalFeasibility"
+                simulationSetting:
+                    replica: 5
+                taskSpecs:
+                    objective: "maximize"
+                    evaluation: "qualitative"
+                    model:
+                        module: "population"
+                        initialConfiguration: "initial"
+                        modelSpecification: |
+                            param n = 2;         /* Hill coefficient n */
+                            param KM = 40;       /* K_M*/
+                            param tau_mRNA = 2;  /* mRNA half life */
+                            param tau_prot = 10; /* protein half life */
+                            param ps_a = 0.5;    /* promotor strength (repressed) ( tps_repr ) */
+                            param ps_0 = 0.0005; /* promotor strength (full) ( tps_active ) */
+              
+                            const ln2 = 0.69314718056;
+                            const beta = 0.2;
+                            const alpha0 = 0.2164;
+                            const alpha = 216.404;
+                            const eff = 20;
+                            const t_ave =  tau_mRNA / ln2;   /* average mRNA lifetime */
+                            const kd_mRNA = ln2 / tau_prot;  /* mRNA decay rate */
+                            const kd_prot = ln2 / tau_mRNA;  /* protein decay rate  */
+                            const k_tl = eff / t_ave;        /* translation rate  */
+                            const a_tr = (ps_a -ps_0)*60;    /* transcription rate  */
+                            const a0_tr = ps_0 * 60;         /* transcription rate (repressed)   */
+              
+                            const startY = 20; /* Initial number of Y agents */
+                            const startVOID = 1; /* Initial number of VOID agents */
+              
+                            species VOID;  /* To represent nothingness, fictitious species are created */
+              
+                            species PX; /*  protein produced by X */
+                            species PY; /*  protein produced by Y */
+                            species PZ; /*  protein produced by Z */
+                            species X; /*  mRNA X (LacI) */
+                            species Y; /*  mRNA Y (TetR) */
+                            species Z; /*  mRNA Z (CI)*/
+              
+              
+                            rule degradation_of_X_transcripts {
+                                X|VOID -[ kd_mRNA * #X ]-> VOID
+                            }
+              
+                            rule degradation_of_Y_transcripts {
+                                Y|VOID -[ kd_mRNA * #Y ]-> VOID
+                            }
+              
+                            rule degradation_of_Z_transcripts {
+                                Z|VOID -[ kd_mRNA * #Z ]-> VOID
+                            }
+              
+                            rule translation_of_X {
+                                VOID -[ k_tl * #X ]-> VOID|PX
+                            }
+              
+                            rule translation_of_Y {
+                                VOID -[ k_tl * #Y ]-> VOID|PY
+                            }
+              
+                            rule translation_of_Z {
+                                VOID -[ k_tl * #Z ]-> VOID|PZ
+                            }
+              
+                            rule degradation_of_X {
+                                PX|VOID -[ kd_prot * #PX ]-> VOID
+                            }
+              
+                            rule degradation_of_Y {
+                                PY|VOID -[ kd_prot * #PY ]-> VOID
+                            }
+              
+                            rule degradation_of_Z {
+                                PZ|VOID -[ kd_prot * #PZ ]-> VOID
+                            }
+              
+                            rule transcription_of_X {
+                                VOID -[ a0_tr + ( ( a_tr * KM^(n) )/( KM^n + #PZ^n ) ) ]-> VOID|X
+                            }
+              
+                            rule transcription_of_Y {
+                                VOID -[ a0_tr + ( ( a_tr * KM^(n) )/( KM^n + #PX^n ) ) ]-> VOID|Y
+                            }
+              
+                            rule transcription_of_Z {
+                                VOID -[ a0_tr + ( ( a_tr * KM^(n) )/( KM^n + #PY^n ) ) ]-> VOID|Z
+                            }
+              
+                            system initial = Y < startY >|VOID < startVOID >;
+                    formulae: |
+                        measure #PZ
+                        formula f_id [kT = 800, kB = 500 , t = 100, tW = 10, tE = 20] :  \\E [0,t] ( \\G[tE,tW+tE]([#PZ > kB] && [#PZ < kT]) && \\E [0,tE][#PZ < kB]  && \\E [tW+tE,tE+tW+tE][#PZ < kB] )  endformula
+              """;
+
+        SynthesisEvaluator evaluator = new SynthesisEvaluator(spec);
+        SynthesisTask task = evaluator.getTask();
+
+        SynthesisRecord sr = task.execute(new SibillaRuntime());
+        System.out.println(sr.info(true));
+        System.out.println("====================================================================\n");
+        System.out.println(sr.info(false));
+        System.out.println("====================================================================\n");
+    }
+
 
 
     /**
@@ -318,6 +466,61 @@ class SynthesisEvaluatorTest {
                 - parameterName: "k_r"
                   lowerBound: 0.005
                   upperBound: 0.2
+              synthesisTask:
+                type: "optimalFeasibility"
+                taskSpecs:
+                    objective: "maximize"
+                    evaluation: "qualitative"
+                    model:
+                        module: "population"
+                        initialConfiguration: "initial"
+                        modelSpecification: |
+                            param k_i = 0.05;
+                            param k_r = 0.05;
+              
+                            species S;
+                            species I;
+                            species R;
+              
+                            rule infection {
+                               S|I -[ #S * %I * k_i ]-> I|I
+                            }
+              
+                            rule recovered {
+                                I -[ #I * k_r ]-> R
+                            }
+                            system initial = S<90>|I<10>|R<0>;
+                    formulae: |
+                        measure #I
+                        formula formula_id  : ( \\E[100,120][ #I == 0] )&& (\\G[0,100][ #I > 0 ]) endformula
+              """;
+
+        SynthesisEvaluator evaluator = new SynthesisEvaluator(spec);
+        SynthesisTask task = evaluator.getTask();
+
+        SynthesisRecord sr = task.execute(new SibillaRuntime());
+        System.out.println(sr.info(false));
+    }
+
+
+    @Disabled
+    @Test
+    void testSirDifferentSurrogateAndAlgorithm() throws CommandExecutionException, StlModelGenerationException {
+
+        String spec = """
+              synthesisStrategy:
+                searchSpace:
+                - parameterName: "k_i"
+                  lowerBound: 0.005
+                  upperBound: 0.3
+                - parameterName: "k_r"
+                  lowerBound: 0.005
+                  upperBound: 0.2
+                surrogate:
+                  name: "gtb"
+                  trainPortion: 0.9
+                optimization:
+                  name: "sa"
               synthesisTask:
                 type: "optimalFeasibility"
                 taskSpecs:
@@ -437,22 +640,25 @@ class SynthesisEvaluatorTest {
         SynthesisTask task = evaluator.getTask();
 
         SynthesisRecord sr = task.execute(new SibillaRuntime());
-        System.out.println(sr.info(false));
+        System.out.println(sr.info(true));
     }
 
 
     @Disabled
     @Test
     void testOptimalSIRInterval_2() throws CommandExecutionException, StlModelGenerationException {
+
+
+
         String spec = """
               synthesisStrategy:
                 searchSpace:
                 - parameterName: "a"
-                  lowerBound: 0.0
+                  lowerBound: 0.5
                   upperBound: 50.0
                 - parameterName: "b"
-                  lowerBound: 0.0
-                  upperBound: 10.0
+                  lowerBound: 0.5
+                  upperBound: 50.0
               synthesisTask:
                 type: "optimalFeasibility"
                 taskSpecs:
@@ -462,7 +668,7 @@ class SynthesisEvaluatorTest {
                         module: "population"
                         initialConfiguration: "initial"
                         modelSpecification: |
-                            param k_i = 0.2;
+                            param k_i = 0.21;
                             param k_r = 0.05;
               
                             species S;
@@ -479,14 +685,15 @@ class SynthesisEvaluatorTest {
                             system initial = S<90>|I<10>|R<0>;
                     formulae: |
                         measure %I
-                        formula formula_id [a=0,b=100] : ( \\G[a,(a+b)][ %I > 0.1] ) endformula
+                        formula formula_id [a=0,b=100] : ( \\G[a,(a+b)][ %I > 0.3]) endformula
+                        formula formula_id_error [a=0,b=100] : ( \\G[a,(a+b)][ %I > 0.3] && \\G[(a+b),(a+b+b)][ %I < 0.3] ) endformula
               """;
 
         SynthesisEvaluator evaluator = new SynthesisEvaluator(spec);
         SynthesisTask task = evaluator.getTask();
 
         SynthesisRecord sr = task.execute(new SibillaRuntime());
-        System.out.println(sr.info(false));
+        System.out.println(sr.info(true));
     }
 
 
@@ -1351,5 +1558,342 @@ class SynthesisEvaluatorTest {
 
     }
 
+    @Disabled
+    @Test
+    public void testRepeatDifferentApproaches() throws CommandExecutionException, StlModelGenerationException {
+        for (int i = 0; i < 25; i++) {
+            testMultipleApproaches();
+        }
+    }
+    @Disabled
+    @Test
+    public void testRepeatDifferentApproachesInterval() throws CommandExecutionException, StlModelGenerationException {
+        for (int i = 0; i < 10; i++) {
+            testMultipleApproachesIntervals();
+        }
+    }
+    @Disabled
+    @Test
+    public void testRepressilatorApproaches() throws CommandExecutionException, StlModelGenerationException {
+        for (int i = 0; i < 5; i++) {
+            testMultipleApproachesRepr();
+        }
+    }
+    @Disabled
+    @Test
+    public void testMultipleApproaches() throws CommandExecutionException, StlModelGenerationException {
+        String[] algo = new String[]{"pso","sa","ltmads","orthomads"};
+        String[] surrogate = new String[]{"rf","gtb","rbf"};
+        String spec = """
+              synthesisStrategy:
+                searchSpace:
+                - parameterName: "k_i"
+                  lowerBound: 0.005
+                  upperBound: 0.3
+                - parameterName: "k_r"
+                  lowerBound: 0.005
+                  upperBound: 0.2
+                sampling:
+                  name: "lhs"
+                  datasetSize: 1000
+                surrogate:
+                  name: "ID_SURROGATE"
+                optimization:
+                  name: "ID_OPTIMIZATION"
+              synthesisTask:
+                type: "optimalFeasibility"
+                taskSpecs:
+                    objective: "maximize"
+                    evaluation: "qualitative"
+                    model:
+                        module: "population"
+                        initialConfiguration: "initial"
+                        modelSpecification: |
+                            param k_i = 0.05;
+                            param k_r = 0.05;
+              
+                            species S;
+                            species I;
+                            species R;
+              
+                            rule infection {
+                               S|I -[ #S * %I * k_i ]-> I|I
+                            }
+              
+                            rule recovered {
+                                I -[ #I * k_r ]-> R
+                            }
+                            system initial = S<90>|I<10>|R<0>;
+                    formulae: |
+                        measure #I
+                        formula formula_id  : ( \\E[100,120][ #I == 0] )&& (\\G[0,100][ #I > 0 ]) endformula
+              """;
+
+        Map<String, String> specifications = generateSpecifications(spec, algo, surrogate);
+
+        for (Map.Entry<String, String> entry : specifications.entrySet()) {
+            String key = entry.getKey();
+            String currentSpec = entry.getValue();
+
+            SynthesisEvaluator evaluator = new SynthesisEvaluator(currentSpec);
+            SynthesisTask task = evaluator.getTask();
+
+            long startTime = System.nanoTime();
+            SynthesisRecord sr = task.execute(new SibillaRuntime());
+            long endTime = System.nanoTime();
+
+            long executionTime = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
+
+            double k_i = sr.optimalCoordinates().get("k_i");
+            double k_r = sr.optimalCoordinates().get("k_r");
+            double surr_eval = sr.optimalValueSurrogateFunction();
+            double real_eval = sr.optimalValueObjectiveFunction();
+            String infos = "{" + "\"id\": \"" + key + "\"," + "\"time\":" + executionTime + "," + "\"k_i\":" + k_i + "," + "\"k_r\":" + k_r + "," + "\"surrogate_eval\":" + surr_eval + "," + "\"real_eval\":" + real_eval + "},";
+
+            System.out.println(infos);
+
+        }
+    }
+
+
+    @Disabled
+    @Test
+    public void testMultipleApproachesIntervals() throws CommandExecutionException, StlModelGenerationException {
+        String[] algo = new String[]{"pso","sa","ltmads","orthomads"};
+        String[] surrogate = new String[]{"rf","gtb","rbf"};
+        String spec = """
+              synthesisStrategy:
+                searchSpace:
+                - parameterName: "a"
+                  lowerBound: 0.0
+                  upperBound: 50.0
+                - parameterName: "b"
+                  lowerBound: 0.001
+                  upperBound: 50.0
+                surrogate:
+                  name: "ID_SURROGATE"
+                optimization:
+                  name: "ID_OPTIMIZATION"
+              synthesisTask:
+                type: "optimalFeasibility"
+                taskSpecs:
+                    objective: "maximize"
+                    evaluation: "quantitative"
+                    model:
+                        module: "population"
+                        initialConfiguration: "initial"
+                        modelSpecification: |
+                            param k_i = 0.265;
+                            param k_r = 0.05;
+              
+                            species S;
+                            species I;
+                            species R;
+              
+                            rule infection {
+                               S|I -[ #S * %I * k_i ]-> I|I
+                            }
+              
+                            rule recovered {
+                                I -[ #I * k_r ]-> R
+                            }
+                            system initial = S<90>|I<10>|R<0>;
+                    formulae: |
+                        measure %I
+                        formula formula_id [a=0,b=100] : ( \\G[a,(a+b)][ %I > 0.3]) endformula
+              """;
+
+        // not working for :
+        // formula formula_id [a=0,b=100] : ( \G[a,(a+b)][ %I > 0.3] && \G[(a+b),(a+b+b)][ %I < 0.3] ) endformula
+
+
+        Map<String, String> specifications = generateSpecifications(spec, algo, surrogate);
+
+        for (Map.Entry<String, String> entry : specifications.entrySet()) {
+            String key = entry.getKey();
+            String currentSpec = entry.getValue();
+
+            SynthesisEvaluator evaluator = new SynthesisEvaluator(currentSpec);
+            SynthesisTask task = evaluator.getTask();
+
+            long startTime = System.nanoTime();
+            SynthesisRecord sr = task.execute(new SibillaRuntime());
+            long endTime = System.nanoTime();
+
+            long executionTime = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
+
+            double a = sr.optimalCoordinates().get("a");
+            double b = sr.optimalCoordinates().get("b");
+            double surr_eval = sr.optimalValueSurrogateFunction();
+            double real_eval = sr.optimalValueObjectiveFunction();
+            String infos = "{" + "\"id\": \"" + key + "\"," + "\"time\":" + executionTime + "," + "\"a\":" + a + "," + "\"b\":" + b + "," + "\"surrogate_eval\":" + surr_eval + "," + "\"real_eval\":" + real_eval + "},";
+
+            System.out.println(infos);
+
+        }
+    }
+
+
+
+    @Disabled
+    @Test
+    public void testMultipleApproachesRepr() throws CommandExecutionException, StlModelGenerationException {
+        String[] algo = new String[]{"pso","sa","ltmads","orthomads"};
+        String[] surrogate = new String[]{"rf","gtb","rbf"};
+        String spec = """
+              synthesisStrategy:
+                searchSpace:
+                - parameterName: "tau_mRNA"
+                  lowerBound: 1.0
+                  upperBound: 10.0
+                - parameterName: "tau_prot"
+                  lowerBound: 1.0
+                  upperBound: 10.0
+                sampling:
+                  name: "lhs"
+                  datasetSize: 100
+                infill:
+                    threshold: 0.1
+                    maxIteration: 3
+              synthesisTask:
+                type: "optimalFeasibility"
+                simulationSetting:
+                    replica: 5
+                taskSpecs:
+                    objective: "maximize"
+                    evaluation: "qualitative"
+                    model:
+                        module: "population"
+                        initialConfiguration: "initial"
+                        modelSpecification: |
+                            param n = 2;         /* Hill coefficient n */
+                            param KM = 40;       /* K_M*/
+                            param tau_mRNA = 2;  /* mRNA half life */
+                            param tau_prot = 10; /* protein half life */
+                            param ps_a = 0.5;    /* promotor strength (repressed) ( tps_repr ) */
+                            param ps_0 = 0.0005; /* promotor strength (full) ( tps_active ) */
+              
+                            const ln2 = 0.69314718056;
+                            const beta = 0.2;
+                            const alpha0 = 0.2164;
+                            const alpha = 216.404;
+                            const eff = 20;
+                            const t_ave =  tau_mRNA / ln2;   /* average mRNA lifetime */
+                            const kd_mRNA = ln2 / tau_prot;  /* mRNA decay rate */
+                            const kd_prot = ln2 / tau_mRNA;  /* protein decay rate  */
+                            const k_tl = eff / t_ave;        /* translation rate  */
+                            const a_tr = (ps_a -ps_0)*60;    /* transcription rate  */
+                            const a0_tr = ps_0 * 60;         /* transcription rate (repressed)   */
+              
+                            const startY = 20; /* Initial number of Y agents */
+                            const startVOID = 1; /* Initial number of VOID agents */
+              
+                            species VOID;  /* To represent nothingness, fictitious species are created */
+              
+                            species PX; /*  protein produced by X */
+                            species PY; /*  protein produced by Y */
+                            species PZ; /*  protein produced by Z */
+                            species X; /*  mRNA X (LacI) */
+                            species Y; /*  mRNA Y (TetR) */
+                            species Z; /*  mRNA Z (CI)*/
+              
+              
+                            rule degradation_of_X_transcripts {
+                                X|VOID -[ kd_mRNA * #X ]-> VOID
+                            }
+              
+                            rule degradation_of_Y_transcripts {
+                                Y|VOID -[ kd_mRNA * #Y ]-> VOID
+                            }
+              
+                            rule degradation_of_Z_transcripts {
+                                Z|VOID -[ kd_mRNA * #Z ]-> VOID
+                            }
+              
+                            rule translation_of_X {
+                                VOID -[ k_tl * #X ]-> VOID|PX
+                            }
+              
+                            rule translation_of_Y {
+                                VOID -[ k_tl * #Y ]-> VOID|PY
+                            }
+              
+                            rule translation_of_Z {
+                                VOID -[ k_tl * #Z ]-> VOID|PZ
+                            }
+              
+                            rule degradation_of_X {
+                                PX|VOID -[ kd_prot * #PX ]-> VOID
+                            }
+              
+                            rule degradation_of_Y {
+                                PY|VOID -[ kd_prot * #PY ]-> VOID
+                            }
+              
+                            rule degradation_of_Z {
+                                PZ|VOID -[ kd_prot * #PZ ]-> VOID
+                            }
+              
+                            rule transcription_of_X {
+                                VOID -[ a0_tr + ( ( a_tr * KM^(n) )/( KM^n + #PZ^n ) ) ]-> VOID|X
+                            }
+              
+                            rule transcription_of_Y {
+                                VOID -[ a0_tr + ( ( a_tr * KM^(n) )/( KM^n + #PX^n ) ) ]-> VOID|Y
+                            }
+              
+                            rule transcription_of_Z {
+                                VOID -[ a0_tr + ( ( a_tr * KM^(n) )/( KM^n + #PY^n ) ) ]-> VOID|Z
+                            }
+              
+                            system initial = Y < startY >|VOID < startVOID >;
+                    formulae: |
+                        measure #PZ
+                        formula f_id [kT = 800, kB = 500 , t = 100, tW = 10, tE = 20] :  \\E [0,t] ( \\G[tE,tW+tE]([#PZ > kB] && [#PZ < kT]) && \\E [0,tE][#PZ < kB]  && \\E [tW+tE,tE+tW+tE][#PZ < kB] )  endformula
+              """;
+
+        Map<String, String> specifications = generateSpecifications(spec, algo, surrogate);
+
+        for (Map.Entry<String, String> entry : specifications.entrySet()) {
+            String key = entry.getKey();
+            String currentSpec = entry.getValue();
+
+            SynthesisEvaluator evaluator = new SynthesisEvaluator(currentSpec);
+            SynthesisTask task = evaluator.getTask();
+
+            long startTime = System.nanoTime();
+            SynthesisRecord sr = task.execute(new SibillaRuntime());
+            long endTime = System.nanoTime();
+            long executionTime = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
+
+            double tau_mRNA = sr.optimalCoordinates().get("tau_mRNA");
+            double tau_prot = sr.optimalCoordinates().get("tau_prot");
+            double surr_eval = sr.optimalValueSurrogateFunction();
+            double real_eval = sr.optimalValueObjectiveFunction();
+            String infos = "{" + "\"id\": \"" + key + "\"," + "\"time\":" + executionTime + "," + "\"tau_mRNA\":" + tau_mRNA + "," + "\"tau_prot\":" + tau_prot + "," + "\"surrogate_eval\":" + surr_eval + "," + "\"real_eval\":" + real_eval + "},";
+
+            System.out.println(infos);
+
+        }
+    }
+
+
+
+
+    public Map<String, String> generateSpecifications(String spec, String[] algorithms, String[] surrogates) {
+        Map<String, String> specifications = new HashMap<>();
+
+        for (String algo : algorithms) {
+            for (String surr : surrogates) {
+                String id = algo + " | " + surr;
+                String modifiedSpec = spec
+                        .replace("ID_SURROGATE", surr)
+                        .replace("ID_OPTIMIZATION", algo);
+                specifications.put(id, modifiedSpec);
+            }
+        }
+
+        return specifications;
+    }
 
 }

@@ -39,8 +39,6 @@ public abstract class AbstractMADSTask implements OptimizationTask {
     protected Random random;
 
     public int iteration;
-    public boolean terminated;
-
 
     // needed for Orthogonal
     int t_0;
@@ -57,7 +55,6 @@ public abstract class AbstractMADSTask implements OptimizationTask {
         constraints.addAll(getSearchSpaceAsConstraintList(searchSpace));
         this.setProperties(properties);
         this.barrierFunction = new BarrierFunction(objectiveFunction,constraints);
-
         Map<String,Double> randomPointInSearchSpace = this.searchSpace.getRandomValue();
         setAsIncumbentMinimum(randomPointInSearchSpace,this.barrierFunction.evaluate(randomPointInSearchSpace));
         this.mesh = new Mesh(this.searchSpace,this.minimizingParametersFound,this.deltaMesh);
@@ -76,16 +73,15 @@ public abstract class AbstractMADSTask implements OptimizationTask {
 
         double DELTA_MESH = 1.0;
         double DELTA_POLL = 1.0;
-        double TAU = 4.0;
-        //double EPSILON = Double.POSITIVE_INFINITY;
-        double EPSILON = Double.POSITIVE_INFINITY;
+        double TAU = 1.0 / 4.0;
+        double EPSILON = 1.0E-50;
         int ITERATION = 500;
         int SEARCH_POINTS = 20;
         boolean OPPORTUNISTIC = false;
 
         this.searchMethod = getSearchMethod();
         this.deltaMesh = Double.parseDouble(properties.getProperty("mads.delta_mesh", Double.toString(DELTA_MESH)));
-        this.deltaMesh = Double.parseDouble(properties.getProperty("mads.delta_poll", Double.toString(DELTA_POLL)));
+        this.deltaPoll = Double.parseDouble(properties.getProperty("mads.delta_poll", Double.toString(DELTA_POLL)));
         this.tau = Double.parseDouble(properties.getProperty("mads.tau", Double.toString(TAU)));
         this.epsilon = Double.parseDouble(properties.getProperty("mads.epsilon", Double.toString(EPSILON)));
         this.maxIteration = Integer.parseInt(properties.getProperty("mads.iteration", Integer.toString(ITERATION)));
@@ -100,7 +96,7 @@ public abstract class AbstractMADSTask implements OptimizationTask {
 
     protected void performAlgorithm(){
         this.iteration = 0;
-        while (iteration < maxIteration){
+        while (!(this.deltaPoll < this.epsilon) && !(this.iteration >= this.maxIteration) ){
             parameterUpdate();
             search();
             this.iteration++;
@@ -108,12 +104,10 @@ public abstract class AbstractMADSTask implements OptimizationTask {
     }
 
 
-
     protected void parameterUpdate(){
-        this.deltaPoll = Math.min( deltaMesh , Math.pow(deltaMesh,2));
-        if(this.deltaPoll < minDeltaPoll)
-            minDeltaPoll = this.deltaPoll;
+        setDeltaMesh(Math.min( deltaPoll , Math.pow(deltaPoll,2)));
     }
+
 
     protected void search(){
         List<Map<String,Double>> S = searchMethod.generateTrialPoints(this.numberOfSearchPoint,mesh,this.random);
@@ -122,7 +116,7 @@ public abstract class AbstractMADSTask implements OptimizationTask {
             double currentEvaluation = barrierFunction.evaluate(point);
             if(currentEvaluation < minimumFound){
                 this.setAsIncumbentMinimum(point,currentEvaluation);
-                this.setDeltaMesh(Math.pow( this.tau , -1.0) * this.deltaMesh);
+                this.setDeltaPoll(Math.pow( this.tau , -1.0) * this.deltaPoll);
                 searchSuccess = true;
                 if(opportunistic)
                     break;
@@ -130,8 +124,6 @@ public abstract class AbstractMADSTask implements OptimizationTask {
         }
         if (!searchSuccess)
             poll();
-        else
-            termination();
     }
 
     protected void poll(){
@@ -139,7 +131,6 @@ public abstract class AbstractMADSTask implements OptimizationTask {
             this.t = this.getL() + t_0;
         else
             this.t = 1 + this.t_max;
-        //List<Map<String,Double>> polledPoints = this.pollMethod.getPolledPoints( this.minimizingParametersFound, this.deltaPoll, this.random);
         List<Map<String,Double>> polledPoints = this.pollMethod.getPolledPoints( this);
         boolean pollSucceed = false;
         for (Map<String,Double> polledPoint: polledPoints) {
@@ -151,25 +142,12 @@ public abstract class AbstractMADSTask implements OptimizationTask {
                     break;
             }
         }
-//        if(pollSucceed){
-//            this.setDeltaMesh( Math.pow(tau, -1.0) * this.deltaMesh);
-//            this.t = getL() + t_0;
-//        }
-//        else{
-//            this.setDeltaMesh( tau * this.deltaMesh);
-//            this.t = 1 + this.t_max;
-//        }
 
         if(pollSucceed)
-            this.setDeltaMesh( Math.pow(tau, -1.0) * this.deltaMesh);
+            this.setDeltaPoll( Math.pow(tau, -1.0) * this.deltaPoll);
         else
-            this.setDeltaMesh( tau * this.deltaMesh);
-
+            this.setDeltaPoll( tau * this.deltaPoll);
         this.t_max = Math.max(this.t, this.t_max);
-    }
-
-    protected void termination(){
-        this.terminated = ((this.deltaMesh <= epsilon) || (this.iteration >= this.maxIteration));
     }
 
 
@@ -179,8 +157,17 @@ public abstract class AbstractMADSTask implements OptimizationTask {
     }
 
     protected void setDeltaMesh(double deltaMesh){
+        if(deltaMesh == 0.0)
+            deltaMesh = Double.MIN_VALUE;
         this.deltaMesh = deltaMesh;
         this.mesh.setDeltaMesh(deltaMesh);
+    }
+
+    protected void setDeltaPoll(double deltaPoll){
+        this.deltaPoll = deltaPoll;
+        if(this.deltaPoll < minDeltaPoll)
+            minDeltaPoll = this.deltaPoll;
+
     }
 
     private int getNthPrimeNumber(int n){
@@ -213,6 +200,7 @@ public abstract class AbstractMADSTask implements OptimizationTask {
         return this.minimizingParametersFound;
     }
 
+    @SuppressWarnings("SameParameterValue")
     private double log(double value, double base) {
         return Math.log(value)/Math.log(base);
     }

@@ -44,7 +44,7 @@ public class Interval {
      */
     public Interval(double start, double end) {
         if (start>=end) {
-            throw new IllegalArgumentException("Illegal parameters for positive interval.");
+            throw new IllegalArgumentException("Illegal parameters for positive interval, passed:\n start: " + start + "\n, end: " + end);
         }
         this.start = start;
         this.end = end;

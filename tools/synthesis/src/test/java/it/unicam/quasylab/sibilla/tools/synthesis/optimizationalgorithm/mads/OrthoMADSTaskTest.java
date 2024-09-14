@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class OrthoMADSTaskTest {
 
 
-    @Disabled
+    //@Disabled
     @Test
     void minimizeFunctionSeed() {
 
@@ -34,9 +34,12 @@ public class OrthoMADSTaskTest {
 
         Map<String,Double> minimizingValues = new OrthoMADSTask().minimize(functionToOptimize,searchSpace,new ArrayList<>(),new Properties(),123L);
 
+        System.out.println(minimizingValues);
 
-        assertEquals(0.6781336512362466, minimizingValues.get("x"),0.1);
-        assertEquals(-0.7064310933941202, minimizingValues.get("y"),0.1);
+        double value = 1 / Math.sqrt(2);
+
+        assertEquals(-value, minimizingValues.get("x"),0.1);
+        assertEquals(value, minimizingValues.get("y"),0.1);
 
     }
 
