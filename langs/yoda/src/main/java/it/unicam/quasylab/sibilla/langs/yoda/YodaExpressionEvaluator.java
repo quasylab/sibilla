@@ -417,6 +417,16 @@ public class YodaExpressionEvaluator extends YodaModelBaseVisitor<Function<YodaE
     }
 
     @Override
+    public Function<YodaExpressionEvaluationContext, SibillaValue> visitExpressionFraction(YodaModelParser.ExpressionFractionContext ctx) {
+        Set<YodaElementName> group = groupSolver.apply(ctx.groupName.getText());
+        if (ctx.guard == null) {
+            return arg -> arg.fractionOf(group);
+        }
+        Function<YodaExpressionEvaluationContext, SibillaValue> guard = ctx.guard.accept(this);
+        return arg -> arg.fractionOf(group, guard);
+    }
+
+    @Override
     public Function<YodaExpressionEvaluationContext, SibillaValue> visitExpressionPi(YodaModelParser.ExpressionPiContext ctx) {
         return eec -> SibillaValue.of(Math.PI);
     }
@@ -451,4 +461,6 @@ public class YodaExpressionEvaluator extends YodaModelBaseVisitor<Function<YodaE
         Function<YodaExpressionEvaluationContext, SibillaValue> secondArgumentEvaluation = ctx.right.accept(this);
         return arg -> SibillaValue.atan2(firstArgumentEvaluation.apply(arg), secondArgumentEvaluation.apply(arg));
     }
+
+
 }

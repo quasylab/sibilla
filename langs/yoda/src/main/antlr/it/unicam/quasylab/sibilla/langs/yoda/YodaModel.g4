@@ -26,9 +26,9 @@ functionStatement:
     | 'return' expr                                                             # functionStatementReturn
 ;
 
-measureDeclaration: 'measure' name=ID '=' measure=expr;
+measureDeclaration: 'measure' name=ID '=' measure=expr ';';
 
-predicateDeclaration: 'predicate' name=ID '=' predicate=expr;
+predicateDeclaration: 'predicate' name=ID '=' predicate=expr ';';
 
 groupDeclaration: 'group' name=ID '{' (agents += ID (',' agents += ID)* )? '}';
 
@@ -131,7 +131,6 @@ expr    : INTEGER                                                            # e
         | 'true'                                                             # expressionTrue
         | reference=ID ('(' (params += expr (',' params+=expr )*)? ')')?     # expressionReference
         | '(' expr ')'                                                       # expressionBrackets
-      //  | gexpr                                                            # gexprCall
         | oper=('+'|'-') arg=expr                                            # expressionUnary
         | leftOp=expr oper=('+'|'-') rightOp=expr                            # expressionAddSubOperation
         | leftOp=expr oper=('*'|'/') rightOp=expr                            # expressionMultDivOperation
@@ -154,7 +153,8 @@ expr    : INTEGER                                                            # e
         | 'max' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr        # expressionMaximum
         | 'sum' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr        # expressionSum
         | 'mean' (groupName=ID)? ('[' guard=expr ']' )? '.' value=expr       # expressionMean
-        | '#' (groupName=ID)? ('[' guard=expr ']' )?                          # expressionCount
+        | '#' (groupName=ID)? ('[' guard=expr ']' )?                         # expressionCount
+        | '%' (groupName=ID)? ('[' guard=expr ']' )?                         # expressionFraction
         |  record=expr '.' fieldName =ID                                     # expressionRecordAccess
         | 'it.' ref=ID                                                       # expressionItselfRef
         | 'sin' '(' argument=expr ')'                                        # expressionSin

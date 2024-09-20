@@ -175,4 +175,14 @@ public class YodaExpressionEvaluationSensingContext implements YodaExpressionEva
     public SibillaValue count(Set<YodaElementName> group) {
         return YodaExpressionEvaluationContext.super.count(group);
     }
+
+    @Override
+    public SibillaValue fractionOf(Set<YodaElementName> group) {
+        return YodaExpressionEvaluationContext.super.fractionOf(group);
+    }
+
+    @Override
+    public SibillaValue fractionOf(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> guard) {
+        return system.fractionOf(group, other -> guard.apply(new YodaExpressionEvaluationAgentPredicateContext(agent, other)).booleanOf());
+    }
 }

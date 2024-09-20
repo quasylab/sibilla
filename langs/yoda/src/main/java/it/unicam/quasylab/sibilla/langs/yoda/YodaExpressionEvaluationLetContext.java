@@ -178,6 +178,16 @@ public class YodaExpressionEvaluationLetContext implements YodaExpressionEvaluat
         return nestedContext.count(group);
     }
 
+    @Override
+    public SibillaValue fractionOf(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> guard) {
+        return nestedContext.fractionOf(group, guard);
+    }
+
+    @Override
+    public SibillaValue fractionOf(Set<YodaElementName> group) {
+        return nestedContext.fractionOf(group);
+    }
+
     public static <T> Function<YodaExpressionEvaluationContext, T> let(List<Pair<YodaVariable, Function<YodaExpressionEvaluationContext, SibillaValue>>> localVariables, Function<YodaExpressionEvaluationContext, T> f) {
         return YodaExpressionEvaluationContext.getNestedContext(localVariables, f);
     }

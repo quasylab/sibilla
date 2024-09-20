@@ -301,6 +301,14 @@ public class TypeInferenceVisitor extends YodaModelBaseVisitor<YodaType>{
         return YodaType.NONE_TYPE;
     }
 
+    @Override
+    public YodaType visitExpressionFraction(YodaModelParser.ExpressionFractionContext ctx) {
+        if (groupExpressionsAllowed){
+            return checkGroupExpression(ctx, ctx.groupName, ctx.guard);
+        }
+        return YodaType.NONE_TYPE;
+    }
+
     private Predicate<String> getValidGroupPredicate(Token groupName) {
         Predicate<String> validAttributePredicate = elementAttributeTable.getGroupExpressionValidAttributePredicate();
         if (groupName != null) {

@@ -137,6 +137,10 @@ public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> 
         return agents.size();
     }
 
+    public int numberOfElements(){
+        return sceneElements.size();
+    }
+
 
     private Stream<YodaSceneElement> getStreamOfElements() {
         return Stream.concat(this.agents.stream(), this.sceneElements.stream());
@@ -385,5 +389,25 @@ public class YodaSystemState implements ImmutableState, IndexedState<YodaAgent> 
 
     public SibillaValue count(Predicate<YodaSceneElement> pred) {
         return SibillaValue.of(getStreamOfElements().filter(pred).count());
+    }
+
+    public SibillaValue fractionOf(YodaAgent agent, Set<YodaElementName> elementNames, Predicate<YodaSceneElement> pred) {
+        double numberOfFilteredElements = getStreamOfElements().filter(a -> a.getId() != agent.getId())
+                .filter(a -> elementNames.contains(a.getName())).filter(pred).count();
+        return SibillaValue.of(numberOfFilteredElements/numberOfAgents());
+    }
+
+    public SibillaValue fractionOf(YodaAgent agent, Predicate<YodaSceneElement> pred) {
+        double numberOfFilteredAgents = getStreamOfElements().filter(a -> a.getId() != agent.getId()).filter(pred).count();
+        return SibillaValue.of(numberOfFilteredAgents/numberOfAgents());
+    }
+
+    public SibillaValue fractionOf(Set<YodaElementName> elementNames, Predicate<YodaSceneElement> pred) {
+        double numberOfFilteredElements = getStreamOfElements().filter(a -> elementNames.contains(a.getName())).filter(pred).count();
+        return SibillaValue.of(numberOfFilteredElements/numberOfAgents());
+    }
+
+    public SibillaValue fractionOf(Predicate<YodaSceneElement> pred) {
+        return SibillaValue.of(getStreamOfElements().filter(pred).count()/numberOfAgents());
     }
 }

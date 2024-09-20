@@ -181,4 +181,11 @@ public interface YodaExpressionEvaluationContext {
     }
 
 
+    default SibillaValue fractionOf(Set<YodaElementName> group){
+        return SibillaValue.ERROR_VALUE;
+    }
+
+    default SibillaValue fractionOf(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> guard){
+        return SibillaValue.ERROR_VALUE;
+    }
 }

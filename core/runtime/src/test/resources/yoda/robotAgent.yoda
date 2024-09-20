@@ -1,7 +1,7 @@
 param height = 10;
 param width = 10;
 param no = 10;
-param na = 3;
+param na = 5;
 
 agent Robot =
     state:
@@ -23,11 +23,12 @@ agent Robot =
         moveWest [ dirx <- -1; diry <- 0;]
         stop [ dirx <- 0; diry <- 0; ]
     behaviour :
-        when goal -> [ stop: 1 ;]
-        orwhen !north -> [ moveNorth: 1 ;]
-        orwhen !east -> [ moveEast: 1 ;]
-        orwhen !west -> [ moveWest: 1 ;]
-        otherwise [ stop: 1 ;]
+        when goal -> [ stop: 1; ]
+        orwhen !north -> [ moveNorth: 1; ]
+        orwhen north -> [ moveEast: 0.5; moveWest: 0.5; ]
+        orwhen north && east -> [ moveWest: 1; ]
+        orwhen north && west -> [ moveEast: 1; ]
+        otherwise [ stop: 1; ]
 end
 
 element Obstacle =
@@ -59,3 +60,7 @@ environment:
        Obstacle[ posx = o; posy = floor(U[2, height]); ]
     endfor
  end
+
+
+measure inGoalArea = #Robot[it.goal];
+predicate success = %Robot[it.goal] ==  ;

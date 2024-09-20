@@ -4,6 +4,7 @@ import it.unicam.quasylab.sibilla.core.models.EvaluationEnvironment;
 import it.unicam.quasylab.sibilla.core.models.TimeStep;
 import it.unicam.quasylab.sibilla.core.models.yoda.*;
 import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
+import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
 import it.unicam.quasylab.sibilla.core.tools.glotl.GLoTLStatisticalModelChecker;
 import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalAlwaysFormula;
@@ -292,6 +293,35 @@ class YodaExamplesTest {
         assertEquals(1, acts.getAll().get(0).getTotalWeight());
         assertEquals("stop", acts.getAll().get(0).getElement().getName());
     }
+
+    @Test
+    @Disabled
+    public void testFPT() throws URISyntaxException, IOException, CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/robotAgent.yoda"));
+        sr.setConfiguration("Main");
+        sr.setDeadline(100);
+        sr.setDt(1);
+        sr.setReplica(100);
+        FirstPassageTime fptRes = sr.firstPassageTime(null, "success");
+        assertEquals(1, fptRes.getMean(), 0.2 );
+    }
+
+    @Test
+    @Disabled
+    public void testReach() throws URISyntaxException, IOException, CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/robotAgent.yoda"));
+        sr.setConfiguration("Main");
+        sr.setDeadline(100);
+        sr.setDt(1);
+        sr.setReplica(100);
+        assertEquals(1.0, sr.computeProbReach(null, "success", 0.1,0.1));
+    }
+
+
+
+
 
     /* END TESTS ON ROBOT SCENARIO */
 

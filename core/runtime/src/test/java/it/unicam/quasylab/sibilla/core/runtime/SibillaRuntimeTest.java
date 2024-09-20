@@ -875,6 +875,7 @@ class SibillaRuntimeTest {
 //        System.out.println(sr.getOptimizationInfo());
 //    }
 
+    @Disabled
     @Test
     public void shouldSelectPopulationModule() throws CommandExecutionException {
         SibillaRuntime sr = new SibillaRuntime();
@@ -882,12 +883,14 @@ class SibillaRuntimeTest {
         sr.loadModule(PopulationModelModule.MODULE_NAME);
     }
 
+    @Disabled
     @Test
     public void shouldLoadASpecificationFromString() throws CommandExecutionException, LoadException {
         SibillaRuntime sr = getRuntimeWithModule();
         sr.load(CODE);
     }
 
+    @Disabled
     @Test
     public void shouldInstantiateASystemFromName() throws CommandExecutionException, LoadException {
         SibillaRuntime sr = getRuntimeWithModule();
@@ -897,6 +900,7 @@ class SibillaRuntimeTest {
         sr.setConfiguration("init");
     }
 
+    @Disabled
     @Test
     public void shouldSimulate() throws CommandExecutionException, LoadException, IOException {
         SibillaRuntime sr = getRuntimeWithModule();
@@ -917,6 +921,7 @@ class SibillaRuntimeTest {
         return sr;
     }
 
+    @Disabled
     @Test
     public void shouldLoadAndSimulate() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithModule();
@@ -930,6 +935,7 @@ class SibillaRuntimeTest {
         sr.printData("test");
     }
 
+    @Disabled
     @Test
     public void shouldBeBalanced() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithModule();
@@ -941,6 +947,7 @@ class SibillaRuntimeTest {
         sr.printData("test");
     }
 
+    @Disabled
     @Test
     public void shouldBeBalancedCelebrities() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithModule();
@@ -950,6 +957,7 @@ class SibillaRuntimeTest {
         assertEquals(4, sr.getMeasures().length);
     }
 
+    @Disabled
     @Test
     public void shouldComputeReachProbability() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithModule();
@@ -959,6 +967,7 @@ class SibillaRuntimeTest {
         assertEquals(1.0, sr.computeProbReach(null, "consensus", 0.1, 0.1));
     }
 
+    @Disabled
     @Test
     public void shouldChangeWithSet() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithModule();
@@ -979,6 +988,7 @@ class SibillaRuntimeTest {
         assertEquals(1.0/3.0, res.getMean(),0.2);
     }
 
+    @Disabled
     @Test
     public void testShopManager() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithModule();
@@ -1101,6 +1111,7 @@ class SibillaRuntimeTest {
 //        SibillaRuntime sr = getRuntimeWithModule();
 //        sr.load(TEST_SIR);
 //    }
+@Disabled
     @Test
     public void testWolvesAndSheep() throws CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithModule();

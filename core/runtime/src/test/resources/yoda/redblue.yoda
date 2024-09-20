@@ -2,7 +2,7 @@ param nRed = 70;
 param nBlue = 30;
 param tolerance = 10;
 param speed = 1;
-param cr = 0.5;
+param cr = 1;
 
 agent Supporter =
     state :
