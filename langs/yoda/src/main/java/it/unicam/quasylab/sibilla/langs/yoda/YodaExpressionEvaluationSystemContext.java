@@ -142,4 +142,14 @@ public class YodaExpressionEvaluationSystemContext implements YodaExpressionEval
     public SibillaValue forAll(Function<YodaExpressionEvaluationContext, SibillaValue> predicate) {
         return SibillaValue.of(sys.forall( element -> predicate.apply(new YodaExpressionEvaluationAgentPredicateContext(element, element)).booleanOf()));
     }
+
+    @Override
+    public SibillaValue fractionOf(Set<YodaElementName> group) {
+        return sys.fractionOf(group, e -> true);
+    }
+
+    @Override
+    public SibillaValue fractionOf(Set<YodaElementName> group, Function<YodaExpressionEvaluationContext, SibillaValue> guard) {
+        return sys.fractionOf(group, element -> guard.apply(new YodaExpressionEvaluationAgentPredicateContext(element, element)).booleanOf());
+    }
 }

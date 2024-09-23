@@ -63,4 +63,4 @@ environment:
 
 
 measure inGoalArea = #Robot[it.goal];
-predicate success = %Robot[it.goal] ==  ;
+predicate success = %Robot[it.goal] ==  1;
