@@ -1,55 +1,47 @@
-param nbirds = 20;
-param maxDist = 15;
-param minDist = 3;
-param rad = 180/PI;
-param speed = 0.4;
+param nbirds = 5;
+param maxDist = 2; param minDist = 1;
+param speed = 1; param threshold = 2;
 
 agent Bird =
-    state :
-        real angle = 0.0;
-    features:
-        real x = 0.0;
-        real z = 0.0;
-    observations:
-        real meanX = 0.0;
-        real meanZ = 0.0;
-        bool isTooFar = false;
-        bool isTooClose = false;
-    actions:
-        moveA [ angle <- U[0.0, 90.0]; ]
-        moveB [ angle <- U[90.0, 180.0]; ]
-        moveC [ angle <- U[180.0, 270.0]; ]
-        moveD [ angle <- U[270.0, 360]; ]
-        maintain [ angle <- angle; ]
-    behaviour:
-        when isTooFar && ((meanX < 0.0) && (meanZ < 0.0)) -> [moveC:1]
-        orwhen isTooFar && ((meanX < 0.0) && (meanZ >= 0.0)) -> [moveB:1]
-        orwhen isTooFar && ((meanX >= 0.0) && (meanZ >= 0.0)) -> [moveA:1]
-        orwhen isTooFar && ((meanX >= 0.0) && (meanZ < 0.0)) -> [moveD:1]
-        orwhen isTooClose && ((meanX < 0.0) && (meanZ < 0.0)) -> [moveA:1]
-        orwhen isTooClose && ((meanX < 0.0) && (meanZ >= 0.0)) -> [moveD:1]
-        orwhen isTooClose && ((meanX >= 0.0) && (meanZ >= 0.0)) -> [moveC:1]
-        orwhen isTooClose && ((meanX >= 0.0) && (meanZ < 0.0)) -> [moveB:1]
-        otherwise [ maintain : 1]
+  state :
+    real angle = 0.0;
+  features:
+    real x = 0.0;
+    real y = 0.0;
+  observations:
+    real centerOfMass = 0.0;
+    bool isTooFar = false;
+    bool isTooClose = false;
+  actions:
+    goBack [angle <- centerOfMass+U[-1/4*PI, 1/4*PI];]
+    escape [angle <- centerOfMass+U[3/4*PI, 5/4*PI];]
+    skip [angle<-angle;]
+  behaviour:
+    when isTooFar -> [goBack:1;]
+    orwhen isTooClose  -> [escape:1;]
+    otherwise [ skip : 1;]
 end
 
 environment :
-    sensing:
-        Bird [
-            meanX <- mean Bird . x - it.x;
-            meanZ <- mean Bird . z - it.z;
-            isTooFar <- sqrt ( (( mean Bird . x - it.x )^2) + (( mean Bird . z - it.z )^2) ) > maxDist;
-            isTooClose <- sqrt ( (( mean Bird . x - it.x )^2) + (( mean Bird . z - it.z )^2) ) < minDist;
-        ]
-    dynamic:
-        Bird [
-            x <- x + cos((angle * PI)/180.0)*speed;
-            z <- z + sin((angle * PI)/180.0)*speed;
-        ]
+  sensing:
+    Bird [
+      let meanX = mean Bird[distance(it.x, it.y, x, y)<threshold]. x
+      and meanY = mean Bird[distance(it.x, it.y, x, y)<threshold]. y
+      in
+        isTooFar <- distance(it.x, it.y, meanX, meanY) > maxDist;
+        isTooClose <- distance(it.x, it.y, meanX, meanY) < minDist;
+        centerOfMass <- angleOf(meanX, meanY, it.x, it.y );
+      endlet
+    ]
+  dynamic:
+    Bird [
+      x <- x + cos(angle)*speed;
+      y <- y + sin(angle)*speed;
+    ]
 end
 
 configuration Main :
     for o sampled distinct nbirds time from U[0, nbirds] do
-        Bird [ x = o; z = o; ]
+        Bird [ x = o; y = o; ]
     endfor
 end
