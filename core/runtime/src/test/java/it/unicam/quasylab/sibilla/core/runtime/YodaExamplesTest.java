@@ -11,10 +11,7 @@ import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalAlwaysFormula;
 import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalEventuallyFormula;
 import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalFormula;
 import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalFractionOfFormula;
-import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalAlwaysFormula;
-import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalAtomicFormula;
-import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalEventuallyFormula;
-import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalFormula;
+import it.unicam.quasylab.sibilla.core.tools.glotl.local.*;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaFunction;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaModelGenerationException;
@@ -667,14 +664,20 @@ class YodaExamplesTest {
     public void shouldSimulateSEIR() throws CommandExecutionException, IOException, URISyntaxException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/seir.yoda"));
+        sr.setParameter("nSus", 90);
+        sr.setParameter("nInf", 10);
         sr.setConfiguration("Main");
+        sr.addAllMeasures();
         sr.setDeadline(100);
-        sr.trace(getResource("yoda/seir.trc"),"./results/", false);
-        //sr.simulate("FinderBot");
+        sr.setDt(1);
+        sr.setReplica(100);
+        //sr.trace(getResource("yoda/seir.trc"),"./results/", false);
+        sr.simulate("FinderBot");
+        sr.save("./results/", "#", "SEIR");
     }
 
     @Test
-    @Disabled
+    //@Disabled
     public void testSEIRMonitor() throws IOException, URISyntaxException, YodaModelGenerationException {
         YodaModelGenerator generator = loadModelGenerator("yoda/seir.yoda");
         YodaModelDefinition definition = generator.getYodaModelDefinition();
@@ -684,6 +687,38 @@ class YodaExamplesTest {
         DefaultRandomGenerator drg = new DefaultRandomGenerator();
         Function<RandomGenerator, YodaSystemState> initialState;
 
+        definition.setParameter("nSus", SibillaValue.of(90));
+        definition.setParameter("nInf", SibillaValue.of(10));
+        //definition.setParameter("er", SibillaValue.of(0.05));
+        //definition.setParameter("ir", SibillaValue.of(0.03));
+        //definition.setParameter("rr", SibillaValue.of(0.001));
+        //definition.setParameter("tolerance", SibillaValue.of(0.1));
+
+        initialState=definition.getDefaultConfiguration();
+
+        System.out.println("Phig_AH_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysAtomicHealthy(variableRegistry), 60, 100)));
+        System.out.println("Phig_GH_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysHealthy(4, variableRegistry), 60, 100)));
+        //System.out.println("Phig_DI_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyDoubleInfection(2, 4, 6, variableRegistry), 30, 100)));
+
+        definition.setParameter("nSus", SibillaValue.of(450));
+        definition.setParameter("nInf", SibillaValue.of(50));
+        initialState=definition.getDefaultConfiguration();
+
+        System.out.println("Phig_AH_500 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysAtomicHealthy(variableRegistry), 60, 100)));
+        System.out.println("Phig_GH_500 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysHealthy(4, variableRegistry), 60, 100)));
+        //System.out.println("Phig_DI_500 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyDoubleInfection(2, 4, 6, variableRegistry), 30, 100)));
+
+
+        definition.setParameter("nSus", SibillaValue.of(900));
+        definition.setParameter("nInf", SibillaValue.of(100));
+        initialState=definition.getDefaultConfiguration();
+
+        System.out.println("Phig_AH_1000 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysAtomicHealthy(variableRegistry), 60, 100)));
+        System.out.println("Phig_GH_1000 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysHealthy(4, variableRegistry), 60, 100)));
+        //System.out.println("Phig_DI_1000 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyDoubleInfection(2, 4, 6, variableRegistry), 30, 100)));
+
+
+        /*
         definition.setParameter("nSus", SibillaValue.of(99));
         definition.setParameter("nInf", SibillaValue.of(1));
         initialState=definition.getDefaultConfiguration();
@@ -702,16 +737,76 @@ class YodaExamplesTest {
         System.out.println("phig_10Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r, 0.0).getValue(), initialState, getEventuallySEIRFormula(1, 10, variableRegistry),30, 100)));
         System.out.println("phil_10Inf = "+Arrays.toString(smc.computeProbability((r, state) -> state.next(r, 0.0).getValue(), initialState, getEventuallyLocalSEIRFormula(1, 10, 10, variableRegistry),30, 100 )));
 
+
+ */
     }
 
-
-    private IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getEventuallyLocalSEIRFormula(int delta, int ks, int k, YodaVariableRegistry variableRegistry) {
-        return null;
+    private static Predicate<YodaAgent> getSPredicate(YodaVariable exposed, YodaVariable infected){
+        return a -> {
+            boolean isExposed = a.get(exposed).booleanOf();
+            boolean isInfected = a.get(infected).booleanOf();
+            return !isExposed && !isInfected;
+        };
     }
 
-    private IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getEventuallySEIRFormula(int delta, int ks, YodaVariableRegistry variableRegistry) {
-        return null;
+    private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getGlobalAlwaysAtomicHealthy(YodaVariableRegistry registry){
+        YodaVariable exposed = registry.get("exposed");
+        YodaVariable infected = registry.get("infected");
+
+        GlobalFractionOfFormula<YodaAgent, YodaSystemState> healthy = new GlobalFractionOfFormula(
+                new LocalAtomicFormula(getSPredicate(exposed,infected)),
+                p -> p>0.5
+        );
+
+        return i -> new GlobalAlwaysFormula<>(0,i,healthy);
+
     }
+
+    private static LocalAlwaysFormula<YodaAgent> getLocalAlwaysHealthy(int k, YodaVariable exposed, YodaVariable infected){
+        return new LocalAlwaysFormula<>(0, k, new LocalAtomicFormula<>(getSPredicate(exposed, infected)));
+    }
+
+    private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getGlobalAlwaysHealthy(int k1, YodaVariableRegistry registry){
+        YodaVariable exposed = registry.get("exposed");
+        YodaVariable infected = registry.get("infected");
+
+        GlobalFractionOfFormula<YodaAgent, YodaSystemState> healthyStable = new GlobalFractionOfFormula<>(
+                getLocalAlwaysHealthy(k1, exposed, infected),
+                p->p>0.5
+        );
+
+        return i -> new GlobalAlwaysFormula<>(0,i,healthyStable);
+    }
+
+    private static Predicate<YodaAgent> getInfectedPredicate(YodaVariable infected){
+        return a -> {
+            boolean isInfected = a.get(infected).booleanOf();
+            return isInfected;
+        };
+    }
+
+    private static LocalEventuallyFormula<YodaAgent> getLocalDoubleInfection(int k1, int k2, int k3, YodaVariable exposed, YodaVariable infected){
+        return new LocalEventuallyFormula<>(
+                0, k1, new LocalConjunctionFormula<>(
+                        new LocalAtomicFormula<>(getInfectedPredicate(infected)), new LocalAlwaysFormula<>(
+                                k1, k2, new LocalConjunctionFormula<>(
+                                        new LocalAtomicFormula<>(getSPredicate(exposed,infected)), new LocalAlwaysFormula<>(
+                                                k2, k3, new LocalAtomicFormula<>(getInfectedPredicate(infected))
+        )))));
+    }
+
+    private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getGlobalEventuallyDoubleInfection( int k1, int k2, int k3, YodaVariableRegistry registry){
+        YodaVariable exposed = registry.get("exposed");
+        YodaVariable infected = registry.get("infected");
+
+        GlobalFractionOfFormula<YodaAgent, YodaSystemState> doubleInfection = new GlobalFractionOfFormula<>(
+                getLocalDoubleInfection(k1,k2,k3,exposed,infected),
+                p -> p<0.05
+        );
+
+        return i -> new GlobalEventuallyFormula<>(0,i,doubleInfection);
+    }
+
 
     /* END TESTS ON SEIR */
 
@@ -728,4 +823,77 @@ class YodaExamplesTest {
         sr.trace(getResource("yoda/redblue.trc"),"./results/", false);
         //sr.simulate("FinderBot");
     }
+
+    private static Predicate<YodaAgent> getRedPredicate(YodaVariable red){
+        return a -> {
+            boolean isRed = a.get(red).booleanOf();
+            return isRed;
+        };
+    }
+
+    private static Predicate<YodaAgent> getBluePredicate(YodaVariable blue){
+        return a -> {
+            boolean isBlue = a.get(blue).booleanOf();
+            return isBlue;
+        };
+    }
+
+    private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getGlobalEventuallyRed(int k2, YodaVariableRegistry registry){
+        YodaVariable red = registry.get("redParty");
+        Predicate<YodaAgent> pred = getRedPredicate(red);
+        GlobalFractionOfFormula<YodaAgent,YodaSystemState> isRed = new GlobalFractionOfFormula<>(
+                new LocalAtomicFormula<>(pred),
+                p-> (p>0.4)&&(p<0.6)
+        );
+        GlobalAlwaysFormula<YodaAgent,YodaSystemState> stableRed = new GlobalAlwaysFormula<>(0,k2,isRed);
+        return i -> new GlobalEventuallyFormula<>(0,i,stableRed);
+    }
+
+    private static LocalEventuallyFormula<YodaAgent> getLocalEventuallyStable(int k1, int k2, YodaVariable blue, YodaVariable red){
+        LocalAlwaysFormula<YodaAgent> isBlue = new LocalAlwaysFormula<>(0,k2,new LocalAtomicFormula<>(getBluePredicate(blue)));
+        LocalAlwaysFormula<YodaAgent> isRed = new LocalAlwaysFormula<>(0,k2,new LocalAtomicFormula<>(getRedPredicate(red)));
+        return new LocalEventuallyFormula<>(0,k1, new LocalDisjunctionFormula<>(isBlue, isRed));
+    }
+
+    private static IntFunction<GlobalFormula<YodaAgent,YodaSystemState>> getGlobalEventuallyBalanced(int k1, int k2, int k3, YodaVariableRegistry registry){
+        YodaVariable red = registry.get("redParty");
+        YodaVariable blue = registry.get("blueParty");
+        GlobalFractionOfFormula<YodaAgent,YodaSystemState> isStable = new GlobalFractionOfFormula<>(
+                getLocalEventuallyStable(k1,k2,blue,red),
+                p-> p>0.75
+        );
+        return i -> new GlobalEventuallyFormula<>(0,i,isStable);
+
+    }
+
+    @Test
+    @Disabled
+    public void testRBMonitor() throws YodaModelGenerationException, URISyntaxException, IOException {
+        YodaModelGenerator generator = loadModelGenerator("yoda/redblue.yoda");
+        YodaModelDefinition definition = generator.getYodaModelDefinition();
+        YodaVariableRegistry registry = generator.getYodaVariableRegistry();
+        GLoTLStatisticalModelChecker smc = new GLoTLStatisticalModelChecker();
+
+        DefaultRandomGenerator rng = new DefaultRandomGenerator();
+        Function<RandomGenerator, YodaSystemState> initialState;
+
+        //70 red e 30 blue
+        initialState = definition.getDefaultConfiguration();
+        System.out.println("Phig_Red_100 = " +Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyRed(1, registry), 30, 100)));
+        System.out.println("Phig_Bal_100 = "+ Arrays.toString(smc.computeProbability((r,state)-> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyBalanced(4, 2, 2, registry), 30, 100)));
+
+        definition.setParameter("nRed", SibillaValue.of(350));
+        definition.setParameter("nBlue", SibillaValue.of(150));
+        initialState = definition.getDefaultConfiguration();
+        System.out.println("Phig_Red_500 = " +Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyRed(1, registry), 30, 100)));
+        System.out.println("Phig_Bal_500 = "+ Arrays.toString(smc.computeProbability((r,state)-> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyBalanced(4, 2, 2, registry), 30, 100)));
+
+        definition.setParameter("nRed", SibillaValue.of(700));
+        definition.setParameter("nBlue", SibillaValue.of(300));
+        initialState = definition.getDefaultConfiguration();
+        System.out.println("Phig_Red_1000 = " +Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyRed(1, registry), 30, 100)));
+        System.out.println("Phig_Bal_1000 = "+ Arrays.toString(smc.computeProbability((r,state)-> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyBalanced(4, 2, 2, registry), 30, 100)));
+
+    }
+    /* END TESTS ON RB */
 }

@@ -1,9 +1,9 @@
 param nSus = 10;
 param nInf = 3;
-param er = 0.75;
-param ir = 0.3;
-param rr = 0.75;
-param tolerance = 1.5;
+param er = 0.15;
+param ir = 0.25;
+param rr = 0.25;
+param tolerance = 10.0;
 param speed = 1;
 
 agent Agent =
@@ -32,7 +32,7 @@ end
 environment :
     sensing:
         Agent [
-            contact <- (any Agent : contagious) && (any Agent : distance(it.x, it.z, x, z) < tolerance);
+            contact <- (any Agent : (contagious && (distance(it.x, it.z, x, z) < tolerance)));
         ]
     dynamic:
         Agent [
@@ -43,10 +43,14 @@ environment :
 end
 
 configuration Main :
-    for i sampled distinct nSus time from U[0,50] do
-        Agent [ x = i; z = U[0,50]; contagious = false;]
+    for i sampled distinct nSus time from U[0, (nInf+nSus)/2] do
+        Agent [ x = i; z = U[0,50]; ]
     endfor
-    for j sampled distinct nInf time from U[0,50] do
-        Agent [ x = j; z = U[0,50]; contagious = true;]
+    for j sampled distinct nInf time from U[0, (nInf+nSus)/2] do
+        Agent [ x = j; z = U[0,50]; infected = true; contagious = true;]
     endfor
 end
+
+measure infected = #Agent[ infected ];
+measure exposed = #Agent[ exposed ];
+measure healthy = #Agent[ !(exposed || infected) ];

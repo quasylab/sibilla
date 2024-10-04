@@ -49,10 +49,10 @@ environment :
 end
 
 configuration Main :
-    for i sampled distinct nRed time from U[0,100] do
+    for i sampled distinct nRed time from U[0, (nRed+nBlue)] do
         Supporter[redParty = true; blueParty = false; x = i; z = U[0,100];]
     endfor
-    for j sampled distinct nBlue time from U[0,100] do
+    for j sampled distinct nBlue time from U[0,(nRed+nBlue)] do
         Supporter[redParty = false; blueParty = true; x = j; z = U[0,100];]
     endfor
 end
