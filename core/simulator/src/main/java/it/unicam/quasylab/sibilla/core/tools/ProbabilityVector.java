@@ -23,11 +23,10 @@
 
 package it.unicam.quasylab.sibilla.core.tools;
 
+import it.unicam.quasylab.sibilla.core.models.IndexedState;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
@@ -37,13 +36,30 @@ import java.util.stream.Collectors;
  *
  * @param <S> data types of indexed elements.
  */
-public class ProbabilityVector<S> {
+public class ProbabilityVector<S> implements Iterable<ProbabilityEntries<S>> {
 
 
     public static <S> ProbabilityVector<S> getProbabilityVector(List<ProbabilityEntries<S>> entries) {
         ProbabilityVector<S> probabilityVector = new ProbabilityVector<>();
         entries.forEach(probabilityVector::add);
         return probabilityVector;
+    }
+
+    /**
+     * Returns a sub-probability distribution associating v to element s.
+     *
+     * @param s elements with probability
+     * @param v probability value
+     * @return a sub-probability distribution associating v to element s
+     *
+     * @param <S> type of measured set
+     *
+     * @throws IllegalArgumentException if v is either less than 0 or grater than 1
+     */
+    public static <S> ProbabilityVector<S> of(S s, double v) {
+        ProbabilityVector<S> vector = new ProbabilityVector<>();
+        vector.add(s,v);
+        return vector;
     }
 
     private void add(ProbabilityEntries<S> e) {
@@ -89,6 +105,15 @@ public class ProbabilityVector<S> {
     }
 
     /**
+     * Returns the total probability mass of the element in this vector.
+     *
+     * @return the total probability mass of the element in this vector.
+     */
+    public double getTotalProbability() {
+        return sum;
+    }
+
+    /**
      * Increments the probability associated to the given element.
      *
      * @param element an element.
@@ -131,6 +156,16 @@ public class ProbabilityVector<S> {
         return result;
     }
 
+    /**
+     * Returns the probability vector obtained by multiplying this object by
+     * a scalar between 0 and 1.
+     *
+     * @param p a double value between 0 and 1.
+     * @return the probability vector obtained by multiplying this object by
+     * a scalar between 0 and 1.
+     *
+     * @throws IllegalArgumentException if p is greater than 1.0 or less than 0.0
+     */
     public ProbabilityVector<S> scale(double p) {
         if ((p>1.0)||(p<0.0)) {
             throw new IllegalArgumentException("Probability must be a value between 0.0 and 1.0");
@@ -141,12 +176,14 @@ public class ProbabilityVector<S> {
     }
 
     /**
-     * Computes the vector measuring the probability to reach in one step other
-     * states from <code>s</code>.
+     * Returns a probability vector that associates to each <code>s1</code>
+     * different from the given <code>s</code> the probability <code>this.get(s1)</code>
+     * and <code>(1-this.getTotalProbability))+this.get(s)</code> to <code>s</code>.
      *
      * @param s a state.
-     * @return the vector measuring the probability to reach in one step other
-     * states from <code>s</code>.
+     * @return a new probability vector that associates to each <code>s1</code>
+     * different from the given <code>s</code> the probability <code>this.get(s1)</code>
+     *  and <code>(1-this.getTotalProbability))+this.get(s)</code> to <code>s</code>.
      */
     public ProbabilityVector<S> complete(S s) {
         if (sum >= 1.0) { return this; }
@@ -169,10 +206,24 @@ public class ProbabilityVector<S> {
         other.iterate(this::add);
     }
 
+    /**
+     * Returns the number of elements with positive probability in the vector.
+     *
+     * @return the number of elements with positive probability in the vector.
+     */
     public int size() {
         return this.elements.size();
     }
 
+    /**
+     * Returns an element randomly selected in this vector with probability <code>this.getTotalProbability()</code>
+     * or the given value <code>s</code> with probability <code>1-this.getTotalProbability()</code>.
+     *
+     * @param randomGenerator random generator used to sample the value
+     * @param s a default value
+     * @return an element randomly selected in this vector with probability <code>this.getTotalProbability()</code>
+     * or the given value <code>s</code> with probability <code>1-this.getTotalProbability()</code>.
+     */
     public synchronized S sample(RandomGenerator randomGenerator, S s) {
         double d = randomGenerator.nextDouble();
         if (d<sum) {
@@ -186,29 +237,69 @@ public class ProbabilityVector<S> {
         return s;
     }
 
+    /**
+     * Returns the summation of <code>function.applyAsDouble(s)*this.get(s)</code> for each element <code>s</code>
+     * in this vector.
+     *
+     * @param function a function mapping elements of type <code>S</code> to double.
+     * @return the summation of <code>function.applyAsDouble(s)*this.get(s)</code> for each element <code>s</code>
+     * in this vector.
+     */
     public double compute(ToDoubleFunction<S> function) {
         return this.elements.entrySet().stream().mapToDouble(e -> function.applyAsDouble(e.getKey())*e.getValue()).sum();
     }
 
+    /**
+     * Returns the application of given function to this vector. The given function <code>f</code> associates
+     * each element of type <code>S</code> to probability vectors over elements of type <code>T</code>.
+     * The result of the application is the sum of <code>f.apply(s).scale(this.get(s))</code>
+     * for each <code>s</code> in this vector.
+     *
+     * @param f the function
+     * @return the application of given function by this vector.
+     * @param <T> the application of given function by this vector.
+     */
     public <T> ProbabilityVector<T> apply(Function<S, ProbabilityVector<T>> f) {
         ProbabilityVector<T> result = new ProbabilityVector<>();
         for (Map.Entry<S, Double> e: this.elements.entrySet()) {
             result.add( f.apply(e.getKey()).scale(e.getValue()));
         }
-        //this.elements.forEach( (s,p) -> result.add( f.apply(s).scale(p) ) );
         return result;
     }
 
+    /**
+     * Returns the application of given function to this vector. The resulting vector associates to each
+     * valut <code>t</code> of type <code>T</code> the probability according to this vector of the set
+     * of <code>s</code> such that <code>f.apply(s).equals(t)</code>.
+     *
+     * @param f a function from <code>S</code> to <code>T</code>>
+     * @return the application of given function to this vector.
+     * @param <T> the domain of the resulting probability vector.
+     */
     public <T> ProbabilityVector<T> map(Function<S, T> f) {
         ProbabilityVector<T> result = new ProbabilityVector<>();
         this.elements.forEach((s,p) -> result.add(f.apply(s), p));
         return result;
     }
 
+    /**
+     * Returns the probability associated to the set of values satisfying the given predicate.
+     *
+     * @param pred a predicate
+     * @return the probability associated to the set of values satisfying the given predicate.
+     */
     public double get(Predicate<S> pred) {
         return this.elements.entrySet().stream().filter(e -> pred.test(e.getKey())).mapToDouble(Map.Entry::getValue).sum();
     }
 
+    /**
+     * Returns the (sub-)probability obtained from this vector by considering only the elements
+     * satisfying the given predicate.
+     *
+     * @param pred a predicate
+     * @return the (sub-)probability obtained from this vector by considering only the elements
+     * satisfying the given predicate.
+     */
     public ProbabilityVector<S> filter(Predicate<S> pred) {
         ProbabilityVector<S> result = new ProbabilityVector<>();
         this.elements.forEach((s,p) -> {
@@ -222,5 +313,73 @@ public class ProbabilityVector<S> {
     @Override
     public String toString() {
         return elements + " <"+sum+">";
+    }
+
+    @Override
+    public int hashCode() {
+        return elements.hashCode();
+    }
+
+    @Override
+    public Iterator<ProbabilityEntries<S>> iterator() {
+        Iterator<Map.Entry<S, Double>> iterator = elements.entrySet().iterator();
+        return new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public ProbabilityEntries<S> next() {
+                Map.Entry<S, Double> entry = iterator.next();
+                return new ProbabilityEntries<>(entry.getKey(), entry.getValue());
+            }
+        };
+    }
+
+    @Override
+    public void forEach(Consumer<? super ProbabilityEntries<S>> action) {
+        elements.forEach((key, value) -> action.accept(new ProbabilityEntries<>(key, value)));
+    }
+
+    @Override
+    public Spliterator<ProbabilityEntries<S>> spliterator() {
+        Spliterator<Map.Entry<S, Double>> spliterator = elements.entrySet().stream().spliterator();
+        return new ProbabilityEntrySplitIterator<>(spliterator);
+    }
+
+    private static class ProbabilityEntrySplitIterator<S> implements Spliterator<ProbabilityEntries<S>> {
+
+
+        private final Spliterator<Map.Entry<S, Double>> splititerator;
+
+        public ProbabilityEntrySplitIterator(Spliterator<Map.Entry<S, Double>> spliterator) {
+            this.splititerator = spliterator;
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super ProbabilityEntries<S>> action) {
+            return splititerator.tryAdvance(entry -> action.accept(new ProbabilityEntries<>(entry.getKey(), entry.getValue())));
+        }
+
+        @Override
+        public Spliterator<ProbabilityEntries<S>> trySplit() {
+            Spliterator<Map.Entry<S, Double>> entrySpliterator = this.splititerator.trySplit();
+            if (entrySpliterator == null) {
+                return null;
+            } else {
+                return new ProbabilityEntrySplitIterator<>(entrySpliterator);
+            }
+        }
+
+        @Override
+        public long estimateSize() {
+            return splititerator.estimateSize();
+        }
+
+        @Override
+        public int characteristics() {
+            return splititerator.characteristics();
+        }
     }
 }

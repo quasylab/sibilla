@@ -27,10 +27,20 @@ import it.unicam.quasylab.sibilla.core.models.IndexedState;
 
 public class GlobalNextFormula<T, S extends IndexedState<T>> implements GlobalFormula<T,S> {
 
+    private final int steps;
+
     private final GlobalFormula<T, S> argument;
 
-    public GlobalNextFormula(GlobalFormula<T, S> argument) {
+    public GlobalNextFormula(int steps, GlobalFormula<T, S> argument) {
+        if (steps < 1) {
+            throw new IllegalArgumentException("Steps must be greater than 0");
+        }
+        this.steps = steps;
         this.argument = argument;
+    }
+
+    public GlobalNextFormula(GlobalFormula<T, S> argument) {
+        this(1, argument);
     }
 
     @Override
@@ -45,11 +55,15 @@ public class GlobalNextFormula<T, S extends IndexedState<T>> implements GlobalFo
 
     @Override
     public GlobalFormula<T, S> next(S state) {
-        return argument;
+        if (steps>1) {
+            return new GlobalNextFormula<>(steps-1, argument);
+        } else {
+            return argument;
+        }
     }
 
     @Override
     public double getTimeHorizon() {
-        return argument.getTimeHorizon()+1;
+        return argument.getTimeHorizon()+steps;
     }
 }

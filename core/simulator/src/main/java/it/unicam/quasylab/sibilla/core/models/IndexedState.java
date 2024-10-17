@@ -45,5 +45,4 @@ public interface IndexedState<S> extends State {
      */
     int numberOfAgents();
 
-
 }

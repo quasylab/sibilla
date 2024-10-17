@@ -23,6 +23,7 @@
 
 package it.unicam.quasylab.sibilla.core.models.lio;
 
+import it.unicam.quasylab.sibilla.core.models.IndexedState;
 import it.unicam.quasylab.sibilla.core.tools.ProbabilityMatrix;
 import it.unicam.quasylab.sibilla.core.tools.ProbabilityVector;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -165,4 +166,5 @@ public class LIOCountingState implements LIOState {
 
     public void add(LIOAgent key, Integer value) {
     }
+
 }

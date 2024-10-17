@@ -25,10 +25,20 @@ package it.unicam.quasylab.sibilla.core.tools.glotl.local;
 
 public class LocalNextFormula<T> implements LocalFormula<T> {
 
+    private final int steps;
+
     private final LocalFormula<T> argument;
 
-    public LocalNextFormula(LocalFormula<T> argument) {
+    public LocalNextFormula(int steps, LocalFormula<T> argument) {
+        if (steps < 1) {
+            throw new IllegalArgumentException("Steps must be greater than 1");
+        }
+        this.steps = steps;
         this.argument = argument;
+    }
+
+    public LocalNextFormula(LocalFormula<T> argument) {
+        this(1, argument);
     }
 
     @Override
@@ -43,11 +53,15 @@ public class LocalNextFormula<T> implements LocalFormula<T> {
 
     @Override
     public LocalFormula<T> next(T state) {
-        return argument;
+        if (steps>1) {
+            return new LocalNextFormula<>(steps-1, argument.next(state));
+        } else {
+            return argument.next(state);
+        }
     }
 
     @Override
     public double getTimeHorizon() {
-        return 1+argument.getTimeHorizon();
+        return steps+argument.getTimeHorizon();
     }
 }
