@@ -1,4 +1,3 @@
-
 const S = 0;
 const E = 1;
 const I = 2;
@@ -15,7 +14,7 @@ param speed = 1;
 
 agent Agent =
     state:
-        int state = S;
+        int status = 0;
         real dir = 0.0;
     features:
         bool contagious = false;
@@ -25,15 +24,15 @@ agent Agent =
         bool contact = false;
     actions:
         move [dir <- U[ 0.0 , (2 * PI)];]
-        getExposed [dir <- U[ 0.0 , (2 * PI)]; state <- E;]
-        getInfected [dir <- U[ 0.0 , (2 * PI)]; state <- I;]
-        recover [dir <- U[ 0.0 , (2 * PI)]; state <- R;]
-        lost [dir <- U[ 0.0 , (2 * PI)]; state <- S;]
+        getExposed [dir <- U[ 0.0 , (2 * PI)]; status <- E;]
+        getInfected [dir <- U[ 0.0 , (2 * PI)]; status <- I;]
+        recover [dir <- U[ 0.0 , (2 * PI)]; status <- R;]
+        lost [dir <- U[ 0.0 , (2 * PI)]; status <- S;]
     behaviour:
-        when contact && (state == S) -> [ getExposed : er; move : (1-er); ]
-        orwhen (state == E) -> [ getInfected : ir; move : (1-ir);]
-        orwhen (state == I) -> [ recover : rr; move : (1-rr);]
-        orwhen (state == R) -> [ lost: lr; move: (1-lr); ]
+        when contact && (status == S) -> [ getExposed : er; move : (1-er); ]
+        orwhen (status == E) -> [ getInfected : ir; move : (1-ir);]
+        orwhen (status == I) -> [ recover : rr; move : (1-rr);]
+        orwhen (status == R) -> [ lost: lr; move: (1-lr); ]
         otherwise [ move:1; ]
 end
 
@@ -44,7 +43,7 @@ environment :
         ]
     dynamic:
         Agent [
-            contagious <- (state == I);
+            contagious <- (status == I);
             x <- (x + cos(dir)) * speed;
             z <- (z + sin(dir)) * speed;
         ]
@@ -55,10 +54,12 @@ configuration Main :
         Agent [ x = i; z = U[0,50]; ]
     endfor
     for j sampled distinct nInf time from U[0, (nInf+nSus)/2] do
-        Agent [ x = j; z = U[0,50]; state=I; contagious = true;]
+        Agent [ x = j; z = U[0,50]; status=I; contagious = true;]
     endfor
 end
 
-measure infected = #Agent[ (state==I) ];
-measure exposed = #Agent[ (state==E) ];
-measure healthy = #Agent[ (state==S)||(state==R) ];
+measure infected = #Agent[ (status==I) ];
+measure exposed = #Agent[ (status==E) ];
+measure healthy = #Agent[ (status==S)||(status==R) ];
+measure susceptible = #Agent[ (status==S) ];
+measure recovered = #Agent[ (status==R) ];

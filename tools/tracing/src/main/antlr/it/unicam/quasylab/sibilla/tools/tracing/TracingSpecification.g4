@@ -25,6 +25,7 @@ expr    :
     | left=expr op=('*'|'/'|'//') right=expr                     # expressionMulDiv
     | left=expr op=('+'|'-'|'%') right=expr                      # expressionAddSub
     | op=('-'|'+') arg=expr                                      # expressionUnaryOperator
+    | left=expr op=RELOP right=expr                              # expressionRelop
     | '(' expr ')'                                               # expressionBracket
     | INTEGER                                                    # expressionInteger
     | REAL                                                       # expressionReal

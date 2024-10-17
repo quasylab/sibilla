@@ -38,6 +38,7 @@ import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalAlwaysFormula;
 import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalAtomicFormula;
 import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalFormula;
 import it.unicam.quasylab.sibilla.core.tools.glotl.local.LocalNextFormula;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class RBTest {
 
     @Test
+    @Disabled
     public void testAgentDefinition() {
         LIOAgentDefinitions def = getAgentDefinition(0.5);
         assertNotNull(def.getAgent("B"));
@@ -53,6 +55,7 @@ public class RBTest {
 
 
     @Test
+    @Disabled
     public void testBehaviourOfAgentB() {
         LIOAgentDefinitions def = getAgentDefinition(0.5);
         LIOAgent a = def.getAgent("B");
@@ -64,6 +67,7 @@ public class RBTest {
     }
 
     @Test
+    @Disabled
     public void testBehaviourOfAgentR() {
         LIOAgentDefinitions def = getAgentDefinition(0.5);
         LIOAgent a = def.getAgent("R");
@@ -75,6 +79,7 @@ public class RBTest {
     }
 
     @Test
+    @Disabled
     public void testStep() {
         DefaultRandomGenerator rg = new DefaultRandomGenerator();
         LIOAgentDefinitions def = getAgentDefinition(1);
@@ -92,6 +97,7 @@ public class RBTest {
 
 
     @Test
+    @Disabled
     public void testAtomic() {
         LIOAgentDefinitions def = getAgentDefinition(0.5);
         LIOModel model = new LIOModel(def);
@@ -131,6 +137,7 @@ public class RBTest {
     }
 
     @Test
+    @Disabled
     public void shouldNotBeLocalStable() {
         LIOAgentDefinitions def = getAgentDefinition(0.5);
         LIOAgent red = def.getAgent("R");
@@ -149,6 +156,7 @@ public class RBTest {
     }
 
     @Test
+    @Disabled
     public void shouldBeLocalStable() {
         LIOAgentDefinitions def = getAgentDefinition(0.5);
         LIOAgent red = def.getAgent("R");

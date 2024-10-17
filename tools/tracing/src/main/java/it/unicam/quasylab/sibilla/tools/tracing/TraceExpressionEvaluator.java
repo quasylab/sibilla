@@ -28,6 +28,7 @@ import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -63,6 +64,16 @@ public class TraceExpressionEvaluator extends TracingSpecificationBaseVisitor<Fu
         Function<Function<String, SibillaValue>, SibillaValue> arg = ctx.argument.accept(this);
         return f -> SibillaValue.apply(Math::log, arg.apply(f));
     }
+
+    @Override
+    public Function<Function<String, SibillaValue>, SibillaValue> visitExpressionRelop(TracingSpecificationParser.ExpressionRelopContext ctx) {
+        Function<Function<String, SibillaValue>, SibillaValue> left = ctx.left.accept(this);
+        Function<Function<String, SibillaValue>, SibillaValue> right = ctx.right.accept(this);
+        BiPredicate<SibillaValue, SibillaValue> op = SibillaValue.getRelationOperator(ctx.op.getText());
+        return f -> SibillaValue.of(op.test(left.apply(f), right.apply(f)));
+    }
+
+
 
     @Override
     public Function<Function<String, SibillaValue>, SibillaValue> visitExpressionCos(TracingSpecificationParser.ExpressionCosContext ctx) {

@@ -1,7 +1,7 @@
 direction = dir;
 shape = triangle;
 colour = {
-    when infected : red;
-    when exposed : yellow;
-    otherwise green
+    when (status == 2) : red;
+    when (status == 1) : yellow;
+    otherwise green;
 }
