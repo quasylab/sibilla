@@ -693,9 +693,8 @@ class YodaExamplesTest {
     }
 
     @Test
-    @Disabled
     public void testSEIRMonitor() throws IOException, URISyntaxException, YodaModelGenerationException {
-        YodaModelGenerator generator = loadModelGenerator("yoda/seir.yoda");
+        YodaModelGenerator generator = loadModelGenerator("yoda/seir2.yoda");
         YodaModelDefinition definition = generator.getYodaModelDefinition();
         YodaVariableRegistry variableRegistry = generator.getYodaVariableRegistry();
         GLoTLStatisticalModelChecker smc = new GLoTLStatisticalModelChecker();
@@ -714,7 +713,7 @@ class YodaExamplesTest {
 
         //System.out.println("Phig_AH_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysAtomicHealthy(variableRegistry), 60, 100)));
         //System.out.println("Phig_GH_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysHealthy(4, variableRegistry), 60, 100)));
-        System.out.println("Phig_DI_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyDoubleInfection( 5, 10, 15, 0.25, variableRegistry), 30, 100)));
+        //System.out.println("Phig_DI_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyDoubleInfection( 5, 10, 15, 0.25, variableRegistry), 30, 100)));
 /*
         definition.setParameter("nSus", SibillaValue.of(450));
         definition.setParameter("nInf", SibillaValue.of(50));
@@ -733,7 +732,11 @@ class YodaExamplesTest {
         System.out.println("Phig_GH_1000 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysHealthy(4, variableRegistry), 60, 100)));
         //System.out.println("Phig_DI_1000 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyDoubleInfection(2, 4, 6, variableRegistry), 30, 100)));
 
+
  */
+        System.out.println("Phi_gh_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_gh(variableRegistry), 60, 100)));
+        System.out.println("Phi_glh_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_glh(variableRegistry, 5), 60, 100)));
+        System.out.println("Phig_gdi_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_gdi( variableRegistry, 2,  4, 60), 60, 100)));
     }
 
     private static Predicate<YodaAgent> getSPredicate(YodaVariable exposed, YodaVariable infected){
@@ -760,41 +763,58 @@ class YodaExamplesTest {
 
 
     private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getFormulaPhi_gh(YodaVariableRegistry registry){
-        YodaVariable state = registry.get("state");
-        return i -> new GlobalNextFormula<>(i,
-                new GlobalFractionOfFormula<>(
+        YodaVariable state = registry.get("status");
+        return i -> {
+            if (i==0) {
+                return new GlobalFractionOfFormula<>(
                         new LocalAtomicFormula<>(getIsHealtyPredicate(state)),
                         p -> p>0.5
-                ));
+                );
+            } else {
+                return new GlobalNextFormula<>(i,
+                        new GlobalFractionOfFormula<>(
+                                new LocalAtomicFormula<>(getIsHealtyPredicate(state)),
+                                p -> p>0.5
+                        ));
+            }
+        };
     }
 
     private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getFormulaPhi_glh(YodaVariableRegistry registry, int k){
-        YodaVariable state = registry.get("state");
+        YodaVariable state = registry.get("status");
         LocalAlwaysFormula<YodaAgent> phi_lh = new LocalAlwaysFormula<>(0, k, new LocalAtomicFormula<>(getIsHealtyPredicate(state)));
-        return i -> new GlobalNextFormula<>(i,
-                new GlobalFractionOfFormula<>(
+        return i -> {
+            if (i==0) {
+                return new GlobalFractionOfFormula<>(
                         phi_lh,
-                        p -> p>0.5
-                ));
+                        p -> p>0.3
+                );
+            } else {
+                return new GlobalNextFormula<>(i,
+                        new GlobalFractionOfFormula<>(
+                                phi_lh,
+                                p -> p>0.3
+                        ));
+            }
+        };
     }
 
-    private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getFormulaPhi_gdi(YodaVariableRegistry registry, int k, int k_1, int k_2, int k_3){
-        YodaVariable state = registry.get("state");
-        LocalFormula<YodaAgent> phi_ldi = new LocalEventuallyFormula<>(0, k_1,
-                new LocalConjunctionFormula<>(
-                        new LocalAtomicFormula<>(getIsInfectedPredicate(state)),
-                        new LocalEventuallyFormula<>(0, k_2,
-                            new LocalConjunctionFormula<>(
-                                    new LocalAtomicFormula<>(getIsHealtyPredicate(state)),
-                                    new LocalEventuallyFormula<>(0, k_3, new LocalAtomicFormula<>(getIsInfectedPredicate(state)))
-                            )
-                        )
-                )
+    private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getFormulaPhi_gdi(YodaVariableRegistry registry, int k_1, int k_2, int k_3){
+        YodaVariable state = registry.get("status");
+        LocalFormula<YodaAgent> phi_ldi = new LocalAlwaysFormula<>(0, k_1,
+                        new LocalAtomicFormula<>(getIsInfectedPredicate(state))
         );
-        return i -> new GlobalNextFormula<>(i,
+//        LocalFormula<YodaAgent> phi_ldi = new LocalConjunctionFormula<>(
+//                new LocalAtomicFormula<>(getIsInfectedPredicate(state)),
+//                new LocalEventuallyFormula<>(0, k_2,
+//                        new LocalAtomicFormula<>(getIsHealtyPredicate(state))
+//                )
+//        );
+//        );
+        return i -> new GlobalNextFormula<>(i+1,
                 new GlobalFractionOfFormula<>(
                         phi_ldi,
-                        p -> p>0.5
+                        p -> p<0.25
                 ));
     }
 

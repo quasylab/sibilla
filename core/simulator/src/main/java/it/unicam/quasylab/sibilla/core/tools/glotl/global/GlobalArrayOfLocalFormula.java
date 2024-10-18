@@ -39,22 +39,24 @@ public class GlobalArrayOfLocalFormula<T,S extends IndexedState<T>> implements G
 
     private final double fractionOfSatisfiedFormulas;
     private final double fractionOfUnSatisfiedFormulas;
+    private final boolean isTerminal;
 
     public GlobalArrayOfLocalFormula(ArrayList<LocalFormula<T>> elements, DoublePredicate predicate) {
         this.elements = elements;
         this.predicate = predicate;
         this.fractionOfSatisfiedFormulas = ((double) elements.stream().filter(LocalFormula::isAccepting).count())/elements.size();
         this.fractionOfUnSatisfiedFormulas = ((double) elements.stream().filter(LocalFormula::isRejecting).count())/elements.size();
+        this.isTerminal = elements.stream().allMatch(f -> f.isAccepting()||f.isRejecting());
     }
 
     @Override
     public boolean isAccepting() {
-        return predicate.test(fractionOfSatisfiedFormulas);
+        return isTerminal&&predicate.test(fractionOfSatisfiedFormulas);
     }
 
     @Override
     public boolean isRejecting() {
-        return predicate.negate().test(1-fractionOfUnSatisfiedFormulas);
+        return isTerminal&&predicate.negate().test(1-fractionOfUnSatisfiedFormulas);
     }
 
     @Override

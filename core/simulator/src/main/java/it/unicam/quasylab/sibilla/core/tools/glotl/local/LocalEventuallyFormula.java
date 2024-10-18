@@ -62,7 +62,7 @@ public class LocalEventuallyFormula<T> implements LocalFormula<T> {
         if (from>0) {
             return nextFormula;
         }
-        return LocalFormula.disjunction(argument.next(state), argument);
+        return LocalFormula.disjunction(argument.next(state), nextFormula);
     }
 
     @Override

@@ -5,9 +5,9 @@ const R = 3;
 
 param nSus = 10;
 param nInf = 3;
-param er = 0.15;
-param ir = 0.25;
-param rr = 0.25;
+param er = 0.5;
+param ir = 0.5;
+param rr = 0.2;
 param lr = 0.1;
 param tolerance = 10.0;
 param speed = 1;
