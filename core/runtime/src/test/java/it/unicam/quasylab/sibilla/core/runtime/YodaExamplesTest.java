@@ -7,10 +7,7 @@ import it.unicam.quasylab.sibilla.core.simulator.DefaultRandomGenerator;
 import it.unicam.quasylab.sibilla.core.simulator.sampling.FirstPassageTime;
 import it.unicam.quasylab.sibilla.core.simulator.util.WeightedStructure;
 import it.unicam.quasylab.sibilla.core.tools.glotl.GLoTLStatisticalModelChecker;
-import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalAlwaysFormula;
-import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalEventuallyFormula;
-import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalFormula;
-import it.unicam.quasylab.sibilla.core.tools.glotl.global.GlobalFractionOfFormula;
+import it.unicam.quasylab.sibilla.core.tools.glotl.global.*;
 import it.unicam.quasylab.sibilla.core.tools.glotl.local.*;
 import it.unicam.quasylab.sibilla.core.util.values.SibillaValue;
 import it.unicam.quasylab.sibilla.langs.yoda.YodaFunction;
@@ -747,7 +744,62 @@ class YodaExamplesTest {
         };
     }
 
-    private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getGlobalAlwaysAtomicHealthy(YodaVariableRegistry registry){
+    private static Predicate<YodaAgent> getIsHealtyPredicate(YodaVariable state){
+        return a -> {
+            int s = a.get(state).intOf();
+            return (s == 0)||(s == 3);
+        };
+    }
+
+    private static Predicate<YodaAgent> getIsInfectedPredicate(YodaVariable state){
+        return a -> {
+            int s = a.get(state).intOf();
+            return (s == 2);
+        };
+    }
+
+
+    private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getFormulaPhi_gh(YodaVariableRegistry registry){
+        YodaVariable state = registry.get("state");
+        return i -> new GlobalNextFormula<>(i,
+                new GlobalFractionOfFormula<>(
+                        new LocalAtomicFormula<>(getIsHealtyPredicate(state)),
+                        p -> p>0.5
+                ));
+    }
+
+    private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getFormulaPhi_glh(YodaVariableRegistry registry, int k){
+        YodaVariable state = registry.get("state");
+        LocalAlwaysFormula<YodaAgent> phi_lh = new LocalAlwaysFormula<>(0, k, new LocalAtomicFormula<>(getIsHealtyPredicate(state)));
+        return i -> new GlobalNextFormula<>(i,
+                new GlobalFractionOfFormula<>(
+                        phi_lh,
+                        p -> p>0.5
+                ));
+    }
+
+    private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getFormulaPhi_gdi(YodaVariableRegistry registry, int k, int k_1, int k_2, int k_3){
+        YodaVariable state = registry.get("state");
+        LocalFormula<YodaAgent> phi_ldi = new LocalEventuallyFormula<>(0, k_1,
+                new LocalConjunctionFormula<>(
+                        new LocalAtomicFormula<>(getIsInfectedPredicate(state)),
+                        new LocalEventuallyFormula<>(0, k_2,
+                            new LocalConjunctionFormula<>(
+                                    new LocalAtomicFormula<>(getIsHealtyPredicate(state)),
+                                    new LocalEventuallyFormula<>(0, k_3, new LocalAtomicFormula<>(getIsInfectedPredicate(state)))
+                            )
+                        )
+                )
+        );
+        return i -> new GlobalNextFormula<>(i,
+                new GlobalFractionOfFormula<>(
+                        phi_ldi,
+                        p -> p>0.5
+                ));
+    }
+
+
+        private static IntFunction<GlobalFormula<YodaAgent, YodaSystemState>> getGlobalAlwaysAtomicHealthy(YodaVariableRegistry registry){
         YodaVariable exposed = registry.get("exposed");
         YodaVariable infected = registry.get("infected");
 
