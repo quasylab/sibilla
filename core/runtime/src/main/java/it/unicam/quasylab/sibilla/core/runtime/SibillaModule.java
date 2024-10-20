@@ -48,7 +48,7 @@ import java.util.function.ToDoubleFunction;
  */
 public interface SibillaModule extends CommandHandler {
 
-    List<SibillaModule> MODULES = List.of(new PopulationModelModule(), new LIOModelModule(), new YodaModelModule());
+    List<SibillaModule> MODULES = List.of(new PopulationModelModule(), new LIOModelModule(), new YodaModelModule(), new DataOrientedPopulationModelModule(), new ENBAModule());
 
     /**
      * Return the module name.

@@ -21,28 +21,25 @@
  *  limitations under the License.
  */
 
+package it.unicam.quasylab.sibilla.langs.dopm.generators.exceptions;
 
+import it.unicam.quasylab.sibilla.langs.dopm.errors.ModelBuildingError;
 
-plugins {
-    id("it.unicam.quasylab.sibilla.java-library-conventions")
-}
+import java.util.List;
+import java.util.stream.Collectors;
 
-dependencies {
-    // https://mvnrepository.com/artifact/tech.tablesaw/tablesaw-core
-    implementation("tech.tablesaw:tablesaw-core:0.43.1")
-    // https://mvnrepository.com/artifact/org.yaml/snakeyaml
-    implementation("org.yaml:snakeyaml:2.2")
+public class ModelGenerationException extends Throwable {
 
-    implementation(project(":core:simulator"))
-    implementation(project(":langs:pm"))
-    implementation(project(":langs:lio"))
-    implementation(project(":langs:dopm"))
-    implementation(project(":langs:enba"))
-    implementation(project(":langs:markov"))
-    implementation(project(":langs:slam"))
-    implementation(project(":langs:yoda"))
-    implementation(project(":tools:tracing"))
-    implementation(project(":tools:monitoring"))
-    implementation(project(":tools:synthesis"))
+    private final List<ModelBuildingError> errors;
+
+    public ModelGenerationException(List<ModelBuildingError> errors) {
+        super(errors.stream().map(ModelBuildingError::getMessage).collect(Collectors.joining("\n")));
+        this.errors = errors;
+    }
+
+    public List<ModelBuildingError> getErrors() {
+        return errors;
+    }
+
 
 }
