@@ -202,7 +202,7 @@ public class YodaConfigurationsGenerator extends YodaModelBaseVisitor<Boolean> {
         @Override
         public List<SibillaValue> visitSetOfValuesInterval(YodaModelParser.SetOfValuesIntervalContext ctx) {
             SibillaValue from = ctx.from.accept(new YodaScalarExpressionEvaluator(this.values));
-            SibillaValue to = ctx.from.accept(new YodaScalarExpressionEvaluator(this.values));
+            SibillaValue to = ctx.to.accept(new YodaScalarExpressionEvaluator(this.values));
             return IntStream.range(from.intOf(), to.intOf()).mapToObj(SibillaValue::of).collect(Collectors.toList());
         }
 
