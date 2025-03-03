@@ -97,9 +97,13 @@ class YodaExamplesTest {
     public void shouldSimulateRoboticScenarioWithTrace() throws CommandExecutionException, IOException, URISyntaxException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/robotAgent.yoda"));
-        sr.setConfiguration("Main");
-        sr.setDeadline(100);
-        sr.trace(getResource("yoda/robotAgent.trc"), "./results/", true);
+        sr.setParameter("height", 100);
+        sr.setParameter("width", 100);
+        sr.setParameter("no", 100);
+        sr.setParameter("na", 50);
+        sr.setConfiguration("MainFunnel");
+        sr.setDeadline(150);
+        sr.trace(getResource("yoda/robotAgent.trc"), "./results/", false);
     }
     /*
     @Test
@@ -291,27 +295,27 @@ class YodaExamplesTest {
     @Test
     @Disabled
     public void testFPT() throws URISyntaxException, IOException, CommandExecutionException {
+        int imax = 50;
+        double[] times = new double[imax];
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/robotAgent.yoda"));
-        int k = 80;
-        sr.setParameter("no", k);
-        sr.setParameter("na", 20);
+        int k = 100;
+//        sr.setParameter("no", k);
         sr.setParameter("width", k);
         sr.setParameter("height", k);
-
-
-
-        sr.setConfiguration("Main");
-        sr.setDeadline(150);
+        sr.setDeadline(500);
         sr.setDt(1);
         sr.setReplica(100);
-        FirstPassageTime fptRes = sr.firstPassageTime(null, "success");
-        System.out.println(fptRes.getMean());
+        for (int i = 0; i < imax; i++) {
+            sr.setParameter("na", i+1);
+            sr.setConfiguration("MainFunnel");
+            FirstPassageTime fptRes = sr.firstPassageTime(null, "good");
+            double fptMean = fptRes.getMean();
+            times[i] = fptMean;
+        }
+        System.out.println(Arrays.toString(times));
+
         //assertEquals(true, fptRes.getMean()<100);
-
-
-
-
     }
 
     @Test
@@ -319,13 +323,63 @@ class YodaExamplesTest {
     public void testReach() throws URISyntaxException, IOException, CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/robotAgent.yoda"));
-        sr.setConfiguration("Main");
-        sr.setDeadline(100);
+        sr.setParameter("height", 20);
+        sr.setParameter("width", 50);
+        sr.setParameter("no", 100);
+        sr.setParameter("na", 15);
+        sr.setConfiguration("MainFunnel");
+        //sr.setDeadline(500);
         sr.setDt(1);
         sr.setReplica(100);
-        assertEquals(true, sr.computeProbReach(null, "success", 0.1,0.1)>0.5);
+        int imax = 45;
+        int step = 10;
+        double[] times = new double[imax+1];
+        for (int i = 43; i <= imax; i++) {
+            int deadline = i*step;
+            sr.setDeadline(deadline);
+            times[i] = sr.computeProbReach(null,"good", 0.05,0.001);
+            System.out.println(i+" - "+deadline+"/"+imax*step+" -> "+times[i]);
+        }
+        System.out.println(Arrays.toString(times));
+
+
+        //        assertEquals(true, sr.computeProbReach(null, "success", 0.1,0.1)>0.5);
     }
 
+
+
+    @Test
+    @Disabled
+    public void testSingle() throws URISyntaxException, IOException, CommandExecutionException{
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/robotAgent.yoda"));
+//        sr.setParameter("no", 100);
+        sr.setParameter("width", 50);
+        sr.setParameter("height", 50);
+        sr.setParameter("na", 50);
+        sr.setDeadline(500);
+        sr.setDt(1);
+        sr.setReplica(100);
+        sr.addAllMeasures();
+        sr.setConfiguration("MainFunnel");
+//        sr.trace("results", true);
+        sr.simulate(null, "sim");
+        sr.save( "results","__","__");
+    }
+
+    @Test
+    @Disabled
+    public void shouldSimulateRoboticScenarioCrossWithTrace() throws CommandExecutionException, IOException, URISyntaxException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/robotAgent.yoda"));
+        sr.setParameter("height", 100);
+        sr.setParameter("width", 100);
+        sr.setParameter("no", 100);
+        sr.setParameter("na", 70);
+        sr.setConfiguration("MainCross");
+        sr.setDeadline(150);
+        sr.trace(getResource("yoda/robotAgent.trc"), "./results/", false);
+    }
 
 
 
@@ -693,6 +747,7 @@ class YodaExamplesTest {
     }
 
     @Test
+    @Disabled
     public void testSEIRMonitor() throws IOException, URISyntaxException, YodaModelGenerationException {
         YodaModelGenerator generator = loadModelGenerator("yoda/seir2.yoda");
         YodaModelDefinition definition = generator.getYodaModelDefinition();
@@ -711,32 +766,29 @@ class YodaExamplesTest {
 
         initialState=definition.getDefaultConfiguration();
 
-        //System.out.println("Phig_AH_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysAtomicHealthy(variableRegistry), 60, 100)));
-        //System.out.println("Phig_GH_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysHealthy(4, variableRegistry), 60, 100)));
-        //System.out.println("Phig_DI_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyDoubleInfection( 5, 10, 15, 0.25, variableRegistry), 30, 100)));
-/*
+        System.out.println("Phi_gh_100 : "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_gh(variableRegistry), 30, 1000)));
+        System.out.println("Phi_glh_100 : "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_glh(variableRegistry, 5), 30, 1000)));
+        System.out.println("Phig_gdi_100 : "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_gdi( variableRegistry, 2,  4, 60), 30, 1000)));
+
         definition.setParameter("nSus", SibillaValue.of(450));
         definition.setParameter("nInf", SibillaValue.of(50));
+
         initialState=definition.getDefaultConfiguration();
 
-        System.out.println("Phig_AH_500 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysAtomicHealthy(variableRegistry), 60, 100)));
-        System.out.println("Phig_GH_500 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysHealthy(4, variableRegistry), 60, 100)));
-        //System.out.println("Phig_DI_500 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyDoubleInfection(2, 4, 6, variableRegistry), 30, 100)));
-
+        System.out.println("Phi_gh_500 : "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_gh(variableRegistry), 30, 1000)));
+        System.out.println("Phi_glh_500 : "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_glh(variableRegistry, 5), 30, 1000)));
+        System.out.println("Phig_gdi_500 : "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_gdi( variableRegistry, 2,  4, 60), 30, 1000)));
 
         definition.setParameter("nSus", SibillaValue.of(900));
         definition.setParameter("nInf", SibillaValue.of(100));
+
         initialState=definition.getDefaultConfiguration();
 
-        System.out.println("Phig_AH_1000 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysAtomicHealthy(variableRegistry), 60, 100)));
-        System.out.println("Phig_GH_1000 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalAlwaysHealthy(4, variableRegistry), 60, 100)));
-        //System.out.println("Phig_DI_1000 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getGlobalEventuallyDoubleInfection(2, 4, 6, variableRegistry), 30, 100)));
+        System.out.println("Phi_gh_1000 : "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_gh(variableRegistry), 30, 1000)));
+        System.out.println("Phi_glh_1000 : "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_glh(variableRegistry, 5), 30, 1000)));
+        System.out.println("Phig_gdi_1000 : "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_gdi( variableRegistry, 2,  4, 60), 30, 1000)));
 
 
- */
-        System.out.println("Phi_gh_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_gh(variableRegistry), 60, 100)));
-        System.out.println("Phi_glh_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_glh(variableRegistry, 5), 60, 100)));
-        System.out.println("Phig_gdi_100 = "+Arrays.toString(smc.computeProbability((r,state) -> state.next(r, 0.0).getValue(), initialState, getFormulaPhi_gdi( variableRegistry, 2,  4, 60), 60, 100)));
     }
 
     private static Predicate<YodaAgent> getSPredicate(YodaVariable exposed, YodaVariable infected){

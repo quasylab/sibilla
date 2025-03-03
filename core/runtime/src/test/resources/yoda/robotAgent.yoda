@@ -7,6 +7,8 @@ agent Robot =
     state:
         int dirx = 0;
         int diry = 0;
+        real waitTime = 0.0;
+        bool collisionHandler = false;
     features:
         int x = 0;
         int y = 0;
@@ -15,17 +17,22 @@ agent Robot =
         bool south = false;
         bool east = false;
         bool west = false;
+        bool collision = false;
         bool goal = false;
     actions :
-        moveNorth [ dirx <- 0; diry <- 1;]
-        moveSouth [ dirx <- 0; diry <- -1;]
-        moveEast [ dirx <- 1; diry <- 0;]
-        moveWest [ dirx <- -1; diry <- 0;]
+        moveNorth [ dirx <- 0; diry <- 1; collisionHandler <- false;]
+        moveSouth [ dirx <- 0; diry <- -1; collisionHandler <- false;]
+        moveEast [ dirx <- 1; diry <- 0; collisionHandler <- false;]
+        moveWest [ dirx <- -1; diry <- 0; collisionHandler <- false;]
+        collide [ dirx <- 0; diry <- 0; waitTime <- ceil(U[0, 5]); collisionHandler <- true;]
+        wait [waitTime <- waitTime - 1 ;]
         stop [ dirx <- 0; diry <- 0; ]
     behaviour :
         when goal -> [ stop: 1; ]
+        orwhen collision && !collisionHandler -> [ collide:1; ]
+        orwhen waitTime > 0 -> [ wait:1;]
         orwhen !north -> [ moveNorth: 1; ]
-        orwhen north -> [ moveEast: 0.5; moveWest: 0.5; ]
+        orwhen north && !east && !west -> [ moveEast: 0.5; moveWest: 0.5; ]
         orwhen north && east -> [ moveWest: 1; ]
         orwhen north && west -> [ moveEast: 1; ]
         otherwise [ stop: 1; ]
@@ -39,10 +46,18 @@ end
 environment:
     sensing :
         Robot [
-            north <- any Obstacle : (posy==it.y+1)&&(posx==it.x);
-            south <- any Obstacle : (posy==it.y-1)&&(posx==it.x);
-            east <- any Obstacle : (posx==it.x+1)&&(posy==it.y);
-            west <- any Obstacle : (posx==it.x-1)&&(posy==it.y);
+            north <- (any Obstacle : (posy==it.y+1)&&(posx==it.x))||
+                     (any Robot :(x==it.x)&&(y==it.y+1));
+            south <- (any Obstacle : (posy==it.y-1)&&(posx==it.x))||
+                     (any Robot : (x==it.x)&&(y==it.y-1));
+            east <- (any Obstacle : (posx==it.x+1)&&(posy==it.y))||
+                    (any Robot :(x==it.x+1)&&(y==it.y))||
+                    (it.x == width);
+            west <- (any Obstacle : (posx==it.x-1)&&(posy==it.y))||
+                    (any Robot : (x==it.x-1)&&(y==it.y))||
+                    (it.x == 0);
+            collision <- (any Obstacle : (posx==it.x)&&(posy==it.y))||
+                         (# Robot [(x==it.x)&&(y==it.y)] > 1);
             goal <- it.y==height+1;
         ]
     dynamic :
@@ -52,7 +67,7 @@ environment:
         ]
  end
 
- configuration Main :
+configuration Main :
     for i sampled distinct na time from floor(U[0, width]) do
         Robot[ x = i ; y = 0 ; ]
     endfor
@@ -61,6 +76,64 @@ environment:
     endfor
  end
 
+configuration MainCross :
+     for o sampled distinct na time from floor(U[0, width]) do
+         Robot[ x = o ; y = 0 ; ]
+     endfor
+
+     for j from 0 to width/5 do
+        Obstacle[ posx = j*5; posy = (height/2)-3; ]
+        Obstacle[ posx = j*5; posy = (height/2)+3; ]
+     endfor
+
+     for j from 3 to (width-3)/5 do
+        Obstacle[ posx = j*5; posy = (height/2); ]
+     endfor
+end
+
+configuration MainFunnel :
+         for o sampled distinct na time from floor(U[0, width]) do
+             Robot[ x = o ; y = 0 ; ]
+         endfor
+         for j from -1 to width/3 do
+            Obstacle[ posx = j; posy = height/2; ]
+         endfor
+         for j from (2*width)/3 to width+1 do
+            Obstacle[ posx = j; posy = height/2; ]
+         endfor
+         for j from (width/3)+3 to ((2*width)/3)-3 do
+            for i from (height/2)+4 to height do
+                Obstacle[ posx = j; posy = i; ]
+            endfor
+         endfor
+end
+
+configuration MainFunnel2:
+         for i from 0 to na do
+             Robot[ x = i*width/(na+1) ; y = 0 ; ]
+         endfor
+
+         for j from -1 to width/3 do
+            Obstacle[ posx = j; posy = height/2; ]
+         endfor
+         for j from (2*width)/3 to width+1 do
+            Obstacle[ posx = j; posy = height/2; ]
+         endfor
+         for j from (width/3)+3 to ((2*width)/3)-3 do
+            for i from (height/2)+4 to height do
+                Obstacle[ posx = j; posy = i; ]
+            endfor
+         endfor
+end
+
+configuration MainCringe :
+    Obstacle[posx=5;posy=6;]
+    Robot [x=5; y = 5;]
+    Robot [x=5; y = 5;]
+end
 
 measure inGoalArea = #Robot[it.goal];
+measure crashed = #Robot[it.collision];
+
 predicate success = %Robot[it.goal] >=  1;
+predicate good = %Robot[it.goal] >=  0.75;

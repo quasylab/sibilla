@@ -1,5 +1,6 @@
 shape  = square;
 colour = {
+    when collision : red;
     when goal : green;
-    otherwise red;
+    otherwise yellow;
 }
