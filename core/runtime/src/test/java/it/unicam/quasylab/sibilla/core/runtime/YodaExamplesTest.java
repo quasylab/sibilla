@@ -319,28 +319,22 @@ class YodaExamplesTest {
     }
 
     @Test
-    @Disabled
     public void testReach() throws URISyntaxException, IOException, CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/robotAgent.yoda"));
-        sr.setParameter("height", 20);
+        sr.setParameter("height", 100);
         sr.setParameter("width", 50);
         sr.setParameter("no", 100);
-        sr.setParameter("na", 15);
+        sr.setParameter("na", 30);
         sr.setConfiguration("MainFunnel");
+        sr.setDeadline(500);
         //sr.setDeadline(500);
         sr.setDt(1);
         sr.setReplica(100);
         int imax = 45;
         int step = 10;
-        double[] times = new double[imax+1];
-        for (int i = 43; i <= imax; i++) {
-            int deadline = i*step;
-            sr.setDeadline(deadline);
-            times[i] = sr.computeProbReach(null,"good", 0.05,0.001);
-            System.out.println(i+" - "+deadline+"/"+imax*step+" -> "+times[i]);
-        }
-        System.out.println(Arrays.toString(times));
+        double[] probs = sr.computeProbReach(null,"good", 0.1,0.001, 1.0);
+        System.out.println(Arrays.toString(probs));
 
 
         //        assertEquals(true, sr.computeProbReach(null, "success", 0.1,0.1)>0.5);

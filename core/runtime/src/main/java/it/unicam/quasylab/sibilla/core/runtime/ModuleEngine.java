@@ -208,6 +208,24 @@ public class ModuleEngine<S extends State> {
         }
     }
 
+    public double[] estimateReachability(SimulationEnvironment simulationEnvironment,
+                                       SimulationMonitor monitor,
+                                       RandomGenerator rg,
+                                       String targetName,
+                                       double dt,
+                                       double time,
+                                       double pError,
+                                       double delta) {
+        loadModel();
+        setDefaultConfiguration();
+        Predicate<? super S> targetPredicate = currentModel.getPredicate(targetName);
+        try {
+            return simulationEnvironment.reachability(monitor, rg, pError,delta,dt, time, currentModel, state, s -> true, targetPredicate::test);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException(e.getMessage());
+        }
+    }
+
     public double estimateReachability(SimulationEnvironment simulationEnvironment,
                                        SimulationMonitor monitor,
                                        RandomGenerator rg,

@@ -297,6 +297,8 @@ public interface SibillaModule extends CommandHandler {
      */
     double estimateReachability(SimulationMonitor monitor, RandomGenerator rg,  String targetCondition, double time, double pError, double delta);
 
+    double[] estimateReachability(SimulationMonitor monitor, RandomGenerator rg,  String targetCondition, double dt, double time, double pError, double delta);
+
 
     /**
      * Estimate the probability to reach a state satisfying the target condition within time units while only state

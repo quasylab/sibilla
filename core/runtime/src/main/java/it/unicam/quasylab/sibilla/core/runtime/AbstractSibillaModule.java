@@ -144,6 +144,11 @@ public abstract class AbstractSibillaModule implements SibillaModule {
     }
 
     @Override
+    public double[] estimateReachability(SimulationMonitor monitor, RandomGenerator rg,  String targetCondition, double dt, double time, double pError, double delta) {
+        return checkForLoadedDefinition().estimateReachability(simulator, monitor, rg, targetCondition, dt, time, pError, delta);
+    }
+
+    @Override
     public double estimateReachability(SimulationMonitor monitor, RandomGenerator rg, String transientCondition, String targetCondition, double time, double pError, double delta) {
         return checkForLoadedDefinition().estimateReachability(simulator, monitor, rg, transientCondition, targetCondition, time, pError, delta);
     }

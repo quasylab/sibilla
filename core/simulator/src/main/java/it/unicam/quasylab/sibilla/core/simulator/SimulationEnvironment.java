@@ -36,6 +36,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 /**
  * An object responsible for managing simulations. When a new request is
@@ -286,6 +287,14 @@ public class SimulationEnvironment implements Serializable {
 			return reachability(monitor, random, errorProbability, delta, deadline, model::createSimulationCursor, state, condition, goal);
 	}
 
+
+	public <S extends State> double[] reachability(SimulationMonitor monitor, RandomGenerator random,
+												 double errorProbability, double delta, double dt, double deadline, Model<S> model, Function<RandomGenerator,S> state,
+												 StatePredicate<? super S> condition, StatePredicate<? super S> goal) throws InterruptedException {
+		return reachability(monitor, random, errorProbability, delta, dt, deadline, model::createSimulationCursor, state, condition, goal);
+	}
+
+
 	/**
 	 * Estimates the probability to reach a state satisfying the given goal
 	 * predicate within the given deadline while traversing only states satisfying a
@@ -329,6 +338,52 @@ public class SimulationEnvironment implements Serializable {
 		simulationManager.shutdown();
 		return reachabilityChecker.numberOfSuccessful() / n;
 	}
+
+	/**
+	 * Estimates the probability to reach a state satisfying the given goal
+	 * predicate within the given deadline while traversing only states satisfying a
+	 * given condition. The estimated probability differs from the exact one by
+	 * <code>delta</code> with a probability less or equal than
+	 * <code>errorProbability</code>.
+	 *
+	 * @param monitor          monitor used to control simulation.
+	 * @param random           random generator used in the simulation.
+	 * @param errorProbability error probability.
+	 * @param delta            error gap.
+	 * @param deadline         reachability deadline.
+	 * @param cursorSupplier   cursor used to generate the simulated trajectory.
+	 * @param state            initial state
+	 * @param condition        condition predicate.
+	 * @param goal             goal predicate.
+	 * @return the probability to reach a state satisfying the given condition
+	 *         within the given deadline.
+	 * @throws InterruptedException is thrown when simulation is interrupted.
+	 */
+	public <S extends State> double[] reachability(
+			SimulationMonitor monitor,
+			RandomGenerator random,
+			double errorProbability,
+			double delta,
+			double dt,
+			double deadline,
+			BiFunction<RandomGenerator, Function<RandomGenerator, S>, SimulatorCursor<S>> cursorSupplier,
+			Function<RandomGenerator,S> state,
+			StatePredicate<? super S> condition,
+			StatePredicate<? super S> goal) throws InterruptedException {
+		CumulativeReachabilityChecker<S> reachabilityChecker = new CumulativeReachabilityChecker<S>(condition, goal, dt, deadline);
+		double n = Math.ceil(Math.log(2 / delta) / (2 * Math.pow(errorProbability,2)));
+		LOGGER.info("Computing reachability with "+(int) n+" iterations.");
+		SimulationUnit<S> unit = new SimulationUnit<>(cursorSupplier, state, reachabilityChecker,
+				(t, s) -> (t > deadline) || goal.check(s) || !condition.check(s), goal);
+		SimulationManager<S> simulationManager = simulationManagerFactory.getSimulationManager(random, monitor);
+
+		for (int i = 0; i < n; i++) {
+			simulationManager.simulate(unit);
+		}
+		simulationManager.shutdown();
+		return reachabilityChecker.normalise(n);
+	}
+
 
 	public void setSimulationManagerFactory(SimulationManagerFactory simulationManagerFactory) {
 		this.simulationManagerFactory = simulationManagerFactory;
@@ -381,6 +436,71 @@ public class SimulationEnvironment implements Serializable {
 			};
 		}
 	}
+
+	private static class CumulativeReachabilityChecker<S extends State> implements Supplier<SamplingHandler<S>> {
+
+		private final StatePredicate<? super S> goal;
+		private final StatePredicate<? super S> condition;
+		private final int[] counters;
+		private final double dt;
+
+		public CumulativeReachabilityChecker(StatePredicate<? super S> condition, StatePredicate<? super S> goal, double dt, double deadline) {
+			this.condition = condition;
+			this.goal = goal;
+			this.dt = dt;
+			this.counters = new int[(int) Math.floor(deadline/dt)];
+		}
+
+		private synchronized void record(int idx) {
+			for(int i=idx; i<counters.length; i++) {
+				counters[i]++;
+			}
+		}
+
+		public synchronized int[] numberOfSuccessful() {
+			return counters;
+		}
+
+		public synchronized double[] normalise(double n) {
+			return IntStream.of(counters).asDoubleStream().map(d -> d / n).toArray();
+		}
+
+		@Override
+		public SamplingHandler<S> get() {
+			return new SamplingHandler<S>() {
+
+				private int idx = Integer.MAX_VALUE;
+				private boolean reached = false;
+				private boolean failed = false;
+
+				@Override
+				public void start() {
+
+				}
+
+				@Override
+				public void sample(double time, S state) {
+					if (!failed&&!reached) {
+						reached = reached || goal.check(state);
+						if (reached) {
+							idx = (int) Math.ceil(time/dt);
+						}
+					}
+					if (!reached) {
+						failed = failed || (!condition.check(state)&&!goal.check(state));
+					}
+
+				}
+
+				@Override
+				public void end(double time) {
+					record(idx);
+				}
+			};
+		}
+	}
+
+
 
 	public <S extends State> Trajectory<S> sampleTrajectory(RandomGenerator random, Model<S> model, S state,
 			double deadline) {
