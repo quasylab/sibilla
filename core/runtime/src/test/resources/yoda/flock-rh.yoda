@@ -5,6 +5,7 @@ param speed = 1; param threshold = 2;
 agent Bird =
   state :
     real angle = 0.0;
+    bool beacon = false;
   features:
     real x = 0.0;
     real y = 0.0;
@@ -25,8 +26,8 @@ end
 environment :
   sensing:
     Bird [
-      let meanX = mean Bird[distance(it.x, it.y, x, y)<threshold]. x
-      and meanY = mean Bird[distance(it.x, it.y, x, y)<threshold]. y
+      let meanX = mean Bird. x
+      and meanY = mean Bird. y
       in
         isTooFar <- distance(it.x, it.y, meanX, meanY) > maxDist;
         isTooClose <- distance(it.x, it.y, meanX, meanY) < minDist;
@@ -41,7 +42,14 @@ environment :
 end
 
 configuration Main :
-    for o sampled distinct nbirds time from U[0, nbirds] do
-        Bird [ x = o; y = o; ]
+    for o sampled distinct nbirds-1 time from U[0, nbirds-1] do
+        Bird [ x = o; y = U[0, nbirds]; ]
     endfor
+    Bird [ x = nbirds/3; y = nbirds/2; beacon = true;]
 end
+
+measure totalCenterOfMassX = mean Bird . x;
+measure totalCenterOfMassY = mean Bird . y;
+
+measure distanceBeacon = distance(min Bird[beacon].x, min Bird[beacon].y, mean Bird . x, mean Bird . y);
+predicate aggregatedBeacon = distance(min Bird[beacon].x, min Bird[beacon].y, mean Bird . x, mean Bird . y) < 2;

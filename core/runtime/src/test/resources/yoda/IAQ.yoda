@@ -1,0 +1,164 @@
+const idle = 0;                        /*power consumption low*/
+const reading = 1;                     /*power consumption medium*/
+const sending = 2;                     /*power consumption high*/
+const battSave = 3;                    /*battery low*/
+const exhausted = 4;                   /*device exhauste*/
+
+const CO2min = 600.0;                   /*Min CO2 (good IAQ)*/
+const CO2max = 3000.0;                  /*Max CO2 (bad IAQ)*/
+param CO2out = 415.0;                   /*Outside CO2 level*/
+param CO2ph = 150.0;                    /*Average CO2 produced by a human*/
+param ventilation = 0.25;               /*Ventilation level of a room (now it is scarce)*/
+
+const nepero = 2.718;
+
+param idleCons = 20.0;                  /*mA consume in idle state*/
+param readCons = 100.0;                 /*mA consume in reading state*/
+param sendCons = 200.0;                 /*mA consume in sending state*/
+
+param sendTimer = 15;                   /*timer sending*/
+param readTimer = 5;                    /*timer reading*/
+
+param initMaxBatteryCapacity = 108000.00;   /*mAm capacity of battery*/
+
+param maxST = 10;                           /* Maximum sojourn time of human in a room*/
+param minST = 2;                            /* Minimum sojourn time of human in a room*/
+param nHuman = 10;                          /*Number of humans in the system*/
+param threshold = 2;                        /*Maximum humans in the same room acceptable by a human*/
+param minH = 0;                             /*Minimum of humans acceptable for reading in a room*/
+
+param nSatellitesMainHall = 5;           /* Satellites rooms of the Main Hall */
+param nSatellitesSmallHall = 3;          /* Satellites rooms of the Small Hall */
+
+agent Device =
+    state:
+        int status = 0;
+        real batteryPerc = 100.0;
+        real batteryCapacity = 10000.00;
+        int saving = 1;
+        real registeredIAQ = 100.0;
+        real savedCO2 = 600.0;
+        int minutes = 0;
+    features:
+        bool lowChargeLed = false;
+        real numOfRoom = 0.0;                /*Index number of the room where the sensor is located*/
+        real roomCO2 = 600.0;
+    observations:
+        real numOfHuman = 0;               /*Amount of human agents observed in the room*/
+        real registeredCO2 = 600.0;       /*CO2 level observed*/
+    actions:
+        goIdle [
+            status <- idle;
+            batteryCapacity <- batteryCapacity - idleCons;
+            batteryPerc <- 100 * (batteryCapacity - idleCons) / initMaxBatteryCapacity;
+            registeredIAQ <- 100 * (CO2max - registeredCO2) / (CO2max - CO2min);
+            savedCO2 <- registeredCO2;
+            minutes <- minutes + 1;
+        ]
+        read [
+            status <- reading;
+            batteryCapacity <- batteryCapacity - (readCons + idleCons);
+            batteryPerc <- 100 * (batteryCapacity - (readCons + idleCons)) / initMaxBatteryCapacity;
+            registeredIAQ <- 100 * (CO2max - registeredCO2) / (CO2max - CO2min);
+            savedCO2 <- registeredCO2;
+            minutes <- minutes + 1;
+        ]
+        send [
+            status <- sending;
+            batteryCapacity <- batteryCapacity - (sendCons + idleCons);
+            batteryPerc <- 100 * (batteryCapacity - (sendCons + idleCons)) / initMaxBatteryCapacity;
+            registeredIAQ <- 100 * (CO2max - registeredCO2) / (CO2max - CO2min);
+            savedCO2 <- registeredCO2;
+            minutes <- minutes + 1;
+        ]
+        save [
+            status <- battSave;
+            saving <- 2;
+            batteryCapacity <- batteryCapacity - idleCons;
+            batteryPerc <- 100 * (batteryCapacity - idleCons) / initMaxBatteryCapacity;
+            registeredIAQ <- 100 * (CO2max - registeredCO2) / (CO2max - CO2min);
+            savedCO2 <- registeredCO2;
+            minutes <- minutes + 1;
+        ]
+        turnOff [
+            status <- exhausted;
+            batteryCapacity <- 0;
+            batteryPerc <- 0;
+        ]
+    behaviour:
+        when batteryPerc <= 0 -> [turnOff:1;]
+        orwhen (batteryPerc <= 30) && (saving == 1) -> [save:1;]
+        orwhen (minutes%(sendTimer*saving)) == 0 -> [send:1;]
+        orwhen ((minutes%(readTimer*saving)) == 0) || (numOfHuman>minH) || (registeredIAQ<85) -> [read:1;]
+        otherwise [goIdle:1;]
+
+end
+
+
+
+agent Human =
+    state :
+        real movingTowards = 0;
+        int sojournTime = 10;
+    features :
+        real roomPos = 0.0;
+    observations :
+        bool isCrowded = false;
+        real currentRoom = 0.0;
+    actions :
+        moveFromHall [movingTowards <- floor(U[0,(nSatellitesMainHall+1)]); sojournTime <- U[minST, maxST];]
+        moveToHall [movingTowards <- (nSatellitesMainHall+nSatellitesSmallHall+1); sojournTime <- U[minST, maxST];]
+        moveFromCorridor [movingTowards <- ceil(U[nSatellitesMainHall,(nSatellitesMainHall+nSatellitesSmallHall+1)]); sojournTime <- U[minST, maxST];]
+        moveToCorridor [movingTowards <- nSatellitesMainHall; sojournTime <- U[minST, maxST];]
+        stop [movingTowards <- currentRoom; sojournTime <- sojournTime - 1;]
+    behaviour :
+        when (isCrowded || (sojournTime<=0)) && (currentRoom == (nSatellitesMainHall+nSatellitesSmallHall+1)) -> [moveFromHall:0.90; stop:0.10;]
+        orwhen (isCrowded || (sojournTime<=0))  && (currentRoom < nSatellitesMainHall) -> [moveToHall:0.90; stop:0.10;]
+        orwhen (isCrowded || (sojournTime<=0)) && (currentRoom == nSatellitesMainHall) -> [moveFromCorridor:0.90; stop:0.10;]
+        orwhen (isCrowded || (sojournTime<=0)) && ((currentRoom > nSatellitesMainHall) && (currentRoom<=8)) -> [moveToCorridor:0.90; stop:0.10;]
+        otherwise [stop:1;]
+end
+
+environment:
+  sensing:
+    Device [
+        let nh = #Human[roomPos == it.numOfRoom]
+        and neperoK = nepero ^ ((-ventilation)/60)
+        in
+            numOfHuman <- nh;
+            let newCO2  = CO2out + (((CO2ph * nh)/ventilation)*(1-neperoK)) + ((roomCO2 - CO2out)*neperoK)
+            in
+                if (newCO2 >= CO2min) then
+                    registeredCO2 <- newCO2;
+                else
+                    registeredCO2 <- CO2min;
+                endif
+            endlet
+        endlet
+    ]
+    Human [
+        isCrowded <- ((# Human [roomPos == it.roomPos]/# Human) * 100 > threshold );
+        currentRoom <- it.roomPos;
+    ]
+  dynamic:
+    Device [
+        lowChargeLed <- batteryPerc <= 30;
+        roomCO2 <- savedCO2;
+    ]
+    Human [
+        roomPos <- movingTowards;
+    ]
+end
+
+configuration Main:
+    for i from 0 to (nSatellitesMainHall+nSatellitesSmallHall+2) do
+        Device[numOfRoom = i; batteryCapacity = initMaxBatteryCapacity; ]
+    endfor
+    for j sampled distinct nHuman time from U[0, (nSatellitesMainHall+nSatellitesSmallHall+1)] do
+        Human[roomPos = floor(j); currentRoom = floor(j); movingTowards = floor(j);]
+    endfor
+end
+
+measure coverage = (#Device[(batteryPerc >= 30)]/#Device)*100;
+measure averageBattery = mean Device.batteryPerc;
+measure averageIAQ = mean Device.registeredIAQ;

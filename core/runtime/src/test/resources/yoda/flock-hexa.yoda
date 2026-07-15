@@ -1,0 +1,68 @@
+param size = 1;
+param nbirds = 5;
+param maxDist = 1;
+param minDist = 1;
+
+agent Bird =
+  state :
+    int dirQ = 1;
+    int dirR = 0;
+    int dirS = 0;
+  features:
+    int q = 0;
+    int r = 0;
+    int s = 0;
+  observations:
+    int dist = 0;
+    int meanQ = 0;
+    int meanR = 0;
+    int meanS = 0;
+  actions:
+    skip [dirQ <- dirQ; dirR <- dirR; dirS <- dirS;]
+    getCloser [dirQ <- round(meanQ/dist);  dirR <- round(meanR/dist); dirS <- round(meanS/dist);]
+    escape [dirQ <- round(meanQ/-dist);  dirR <- round(meanR/-dist); dirS <- round(meanS/-dist);]
+  behaviour:
+    when dist > maxDist -> [getCloser:1;]
+    orwhen dist < minDist  -> [escape:1;]
+    otherwise [ skip : 1;]
+end
+
+environment :
+  sensing:
+    Bird [
+        let comQ = round (mean Bird . q)
+        and comR = round (mean Bird . r)
+        in
+            let comS = -(comQ+comR)
+            in
+                dist <- (abs(it.q - comQ) + abs(it.r - comR) + abs(it.s - comS))/2;
+                if ((comQ+comR != -comS)||(comR+comS != -comQ)||(comS+comQ != -comR)) then
+                    meanQ <- comQ; meanR <- comR; meanS <- comS;
+                endif
+                if ((comQ + comR) == (comQ + comS)) then
+                    meanQ <- comQ; meanR <- comR+1; meanS <- comS-1;
+                endif
+                if ((comR + comS) == (comR + comQ)) then
+                    meanQ <- comQ-1; meanR <- comR; meanS <- comS+1;
+                endif
+                if ((comS + comQ) == (comS + comR)) then
+                    meanQ <- comQ+1; meanR <- comR-1; meanS <- comS;
+                endif
+            endlet
+        endlet
+    ]
+  dynamic:
+    Bird [
+      q <- q + dirQ;
+      r <- r + dirR;
+      s <- s + dirS;
+    ]
+end
+
+configuration Main :
+    for i sampled distinct nbirds time from U[-nbirds, nbirds] do
+        for j sampled distinct nbirds time from U[-nbirds, nbirds] do
+            Bird [ q = round(i);  r = round(j); s = -(round(i)+round(j));]
+        endfor
+    endfor
+end

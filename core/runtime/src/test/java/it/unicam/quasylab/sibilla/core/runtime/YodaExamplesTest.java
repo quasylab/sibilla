@@ -319,25 +319,20 @@ class YodaExamplesTest {
     }
 
     @Test
+    @Disabled
     public void testReach() throws URISyntaxException, IOException, CommandExecutionException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/robotAgent.yoda"));
         sr.setParameter("height", 100);
-        sr.setParameter("width", 50);
+        sr.setParameter("width", 90);
         sr.setParameter("no", 100);
-        sr.setParameter("na", 30);
+        sr.setParameter("na", 10);
         sr.setConfiguration("MainFunnel");
-        sr.setDeadline(500);
-        //sr.setDeadline(500);
+        sr.setDeadline(600);
         sr.setDt(1);
         sr.setReplica(100);
-        int imax = 45;
-        int step = 10;
         double[] probs = sr.computeProbReach(null,"good", 0.1,0.001, 1.0);
         System.out.println(Arrays.toString(probs));
-
-
-        //        assertEquals(true, sr.computeProbReach(null, "success", 0.1,0.1)>0.5);
     }
 
 
@@ -483,6 +478,48 @@ class YodaExamplesTest {
         assertEquals("stop", actions.getAll().get(0).getElement().getName());
     }
 
+    @Test
+    @Disabled
+    public void testMeasureSuccessFinderBot() throws URISyntaxException, IOException, CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/finderBot2.yoda"));
+        double na = 30;
+        sr.setParameter("tolerance", 0.5);
+        sr.setParameter("na", na);
+        sr.setDeadline(500);
+        sr.setDt(1);
+        sr.setReplica(1000);
+        sr.addAllMeasures();
+        sr.setConfiguration("Main");
+        sr.simulate(null, "sim");
+        sr.save( "results","__","nag_"+na+"__");
+    }
+
+    @Test
+    @Disabled
+    public void testFPTFinderBot() throws URISyntaxException, IOException, CommandExecutionException {
+        int imax = 30;
+        double[] times = new double[imax];
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/finderBot2.yoda"));
+        sr.setParameter("tolerance", 0.5);
+        sr.setDeadline(500);
+        sr.setDt(1);
+        sr.setReplica(1000);
+        for (int i = 0; i < imax; i++) {
+            sr.setParameter("na", i+1);
+            sr.setConfiguration("Main");
+            FirstPassageTime fptRes = sr.firstPassageTime(null, "success");
+            double fptMean = fptRes.getMean();
+            System.out.println(fptMean);
+            times[i] = fptMean;
+        }
+        System.out.println(Arrays.toString(times));
+
+        //assertEquals(true, fptRes.getMean()<100);
+    }
+
+
     /* END TESTS ON FINDERBOT */
 
     /* BEGIN TESTS ON FLOCK */
@@ -505,13 +542,58 @@ class YodaExamplesTest {
 
     @Test
     @Disabled
-    public void shouldSimulateFlock() throws CommandExecutionException, IOException, URISyntaxException {
+    public void shouldTraceFlock() throws CommandExecutionException, IOException, URISyntaxException {
         SibillaRuntime sr = getRuntimeWithYodaModule();
         sr.load(getResource("yoda/flock-rh.yoda"));
-        sr.setParameter("nbirds", 500);
+        sr.setParameter("nbirds", 20);
         sr.setConfiguration("Main");
         sr.setDeadline(100);
         sr.trace(getResource("yoda/flock.trc"), "./results/", false);
+    }
+
+    @Test
+    @Disabled
+    public void shouldTraceFlockHexa() throws CommandExecutionException, IOException, URISyntaxException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/flock-hexa.yoda"));
+        sr.setParameter("nbirds", 5);
+        sr.setConfiguration("Main");
+        sr.setDeadline(100);
+        sr.trace(getResource("yoda/flock-hexa.trc"), "./results/", true);
+    }
+
+    @Test
+    @Disabled
+    public void shouldSimulateFlock() throws CommandExecutionException, IOException, URISyntaxException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/flock-rh.yoda"));
+        //sr.setParameter("speed", 1);
+        int maxDist = 10;
+        sr.setParameter("maxDist", maxDist);
+        sr.setParameter("nbirds", 100);
+        sr.setDeadline(500);
+        sr.setDt(1);
+        sr.setReplica(100);
+        sr.addAllMeasures();
+        sr.setConfiguration("Main");
+        sr.simulate(null, "sim");
+        sr.save( "results","__", "maxD"+maxDist+"__");
+    }
+
+    @Test
+    @Disabled
+    public void testReachFlock() throws URISyntaxException, IOException, CommandExecutionException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/flock-rh.yoda"));
+        int maxDist = 10;
+        sr.setParameter("maxDist", maxDist);
+        sr.setParameter("nbirds", 100);
+        sr.setConfiguration("Main");
+        sr.setDeadline(25);
+        sr.setDt(1);
+        sr.setReplica(1000);
+        double[] probs = sr.computeProbReach(null,"aggregatedBeacon", 0.1,0.001, 1.0);
+        System.out.println(Arrays.toString(probs));
     }
 
     @Test
@@ -741,7 +823,7 @@ class YodaExamplesTest {
     }
 
     @Test
-    @Disabled
+    //@Disabled
     public void testSEIRMonitor() throws IOException, URISyntaxException, YodaModelGenerationException {
         YodaModelGenerator generator = loadModelGenerator("yoda/seir2.yoda");
         YodaModelDefinition definition = generator.getYodaModelDefinition();
@@ -967,6 +1049,35 @@ class YodaExamplesTest {
         //sr.simulate("FinderBot");
     }
 
+    @Test
+    @Disabled
+    public void shouldTraceRBHexa() throws CommandExecutionException, IOException, URISyntaxException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/redblue-hexa.yoda"));
+        sr.setConfiguration("Main");
+        sr.setParameter("nRed", 70);
+        sr.setParameter("nBlue", 30);
+        sr.setDeadline(100);
+        sr.trace(getResource("yoda/redblue-hexa.trc"),"./results/", false);
+    }
+
+    @Test
+    @Disabled
+    public void shouldSimulateRBHexa() throws CommandExecutionException, IOException, URISyntaxException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/redblue-hexa.yoda"));
+        sr.setParameter("nRed", 70);
+        sr.setParameter("nBlue", 30);
+        sr.setConfiguration("Main");
+        sr.addAllMeasures();
+        sr.setDeadline(100);
+        sr.setDt(1);
+        sr.setReplica(100);
+        sr.simulate("RedBlue-Hexa");
+        sr.save("./results/", "#", "rbhexa");
+    }
+
+
     private static Predicate<YodaAgent> getRedPredicate(YodaVariable red){
         return a -> {
             boolean isRed = a.get(red).booleanOf();
@@ -1039,4 +1150,41 @@ class YodaExamplesTest {
 
     }
     /* END TESTS ON RB */
+
+
+    /* BEGIN TESTS ON IAQ*/
+    @Test
+    @Disabled
+    public void shouldSimulateIAQ() throws CommandExecutionException, IOException, URISyntaxException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/IAQ.yoda"));
+        sr.setConfiguration("Main");
+        sr.setParameter("threshold", 2);
+        sr.setParameter("nHuman",30);
+        sr.setParameter("nSatellitesMainHall", 7);
+        sr.setParameter("nSatellitesSmallHall", 5);
+        //sr.addMeasure("coverage");
+        sr.addAllMeasures();
+        sr.setDeadline(240);
+        sr.setDt(1);
+        sr.setReplica(100);
+        sr.simulate("IAQ");
+        sr.save("./results/", "", "IAQ");
+    }
+
+    @Test
+    @Disabled
+    public void shouldTraceIAQ() throws CommandExecutionException, IOException, URISyntaxException {
+        SibillaRuntime sr = getRuntimeWithYodaModule();
+        sr.load(getResource("yoda/IAQ.yoda"));
+        sr.setConfiguration("Main");
+        sr.setParameter("threshold", 3);
+        sr.setParameter("nHuman",20);
+        sr.setDeadline(240);
+        sr.trace(getResource("yoda/IAQ.trc"),"./results/", false);
+    }
+
+    /* END TESTS ON IAQ*/
 }
+
+

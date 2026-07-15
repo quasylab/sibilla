@@ -1,0 +1,88 @@
+param nRed = 70;
+param nBlue = 30;
+param tolerance = 20;
+param cr = 1;
+
+agent Supporter =
+    state :
+        real dirQ = 0.0;
+        real dirR = 0.0;
+        real dirS = 0.0;
+        bool switchParty = false;
+    features :
+        bool redParty = false;
+        bool blueParty = false;
+        real q = 0.0;
+        real r = 0.0;
+        real s = 0.0;
+    observations :
+        bool challenged = false;
+        real delta = 0.0;
+        real axis = 0.0;
+        real lookQ = 0.0;
+        real lookR = 0.0;
+        real lookS = 0.0;
+    actions :
+        changeParty [dirQ <- (lookQ*axis) ; dirR <- (lookR*axis) ; dirS <- (lookS*axis) ; switchParty <- true;]
+        move [dirQ <- (lookQ*axis) ; dirR <- (lookR*axis) ; dirS <- (lookS*axis) ; switchParty <- false;]
+    behaviour :
+        when challenged -> [changeParty : delta*cr ; move : (1-delta*cr);]
+        otherwise [move:1;]
+end
+
+environment :
+    sensing :
+        Supporter[
+            let actualBlue = # Supporter[blueParty && (((abs(q-it.q)+abs(r-it.r)+abs(s-it.s))/2)<=tolerance)]
+            and actualRed = # Supporter[redParty && (((abs(q-it.q)+abs(r-it.r)+abs(s-it.s))/2)<=tolerance)]
+            in
+                if (((actualRed+actualBlue)>0)&&((it.redParty && (actualBlue<actualRed))||(it.blueParty && (actualBlue>actualRed)))) then
+                    challenged <- true;
+                    delta <- abs(actualBlue-actualRed)/(actualRed+actualBlue);
+                else
+                    challenged <- false;
+                    delta <- 0.0;
+                endif
+            endlet
+            let randAxis = U[-1,1]
+            in
+                if (randAxis>0) then
+                    axis <- 1.0;
+                else
+                    axis <- -1.0;
+                endif
+            endlet
+            let randDir = ceil(U[0,3])
+            in
+                if (randDir == 1.0) then
+                    lookQ <- 1.0; lookR <- 0.0; lookS <- -1.0;
+                endif
+                if (randDir == 2.0) then
+                    lookQ <- -1.0; lookR <- 1.0; lookS <- 0.0;
+                endif
+                if (randDir == 3.0) then
+                    lookQ <- 0.0; lookR <- -1.0; lookS <- 1.0;
+                endif
+            endlet
+        ]
+    dynamic :
+        Supporter[
+            redParty <-(redParty && !switchParty)||(!redParty && switchParty);
+            blueParty <-(blueParty && !switchParty)||(!blueParty && switchParty);
+            q <- q + dirQ;
+            s <- s + dirS;
+            r <- r + dirR;
+        ]
+end
+
+configuration Main :
+    for i sampled distinct nRed time from U[0, (nRed+nBlue)] do
+        Supporter[redParty = true; blueParty = false; q = ceil(i); r = floor(-i);]
+    endfor
+    for j sampled distinct nBlue time from U[0,(nRed+nBlue)] do
+        Supporter[redParty = false; blueParty = true; r = ceil(j); s = floor(-j);]
+    endfor
+end
+
+measure red = #Supporter[(redParty)];
+measure blue = #Supporter[(blueParty)];

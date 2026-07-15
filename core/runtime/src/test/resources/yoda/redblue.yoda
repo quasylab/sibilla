@@ -56,3 +56,6 @@ configuration Main :
         Supporter[redParty = false; blueParty = true; x = j; z = U[0,100];]
     endfor
 end
+
+measure red = #Supporter[(redParty)];
+measure blue = #Supporter[(blueParty)];

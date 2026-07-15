@@ -2,12 +2,14 @@ param na = 3;
 param tolerance = 2.0;
 param tposX = 5.0;
 param tposZ = 5.0;
+param colRecRate = 0.1;
 
 agent Finder =
     state:
         real dirx = 0.0;
         real dirz = 0.0;
         bool found = false;
+        bool damaged = false;
     features:
         real x = 0.0;
         real z = 0.0;
@@ -16,12 +18,15 @@ agent Finder =
         bool target_sensor = false;
         real angle = 0.0;
         bool toTarget = false;
+        bool collision = false;
     actions:
         stop [ dirx <- 0.0; dirz <- 0.0; found <- true; ]
-        roam [ dirx <- U[-1.0 , 1.0]; dirz <- U[-1.0 , 1.0]; found <- false; ]
-        moveto [ dirx <- cos(angle); dirz <- sin(angle); found <- false; ]
+        collide [dirx <- 0.0; dirz <- 0.0; damaged <- true; ]
+        roam [ dirx <- U[-1.0 , 1.0]; dirz <- U[-1.0 , 1.0]; damaged <- false;]
+        moveto [ dirx <- cos(angle); dirz <- sin(angle); damaged <- false;]
     behaviour:
         when target_sensor -> [ stop:1; ]
+        orwhen collision || damaged -> [collide: 1-colRecRate; roam: colRecRate;]
         orwhen toTarget -> [ moveto:1; ]
         otherwise [ roam:1; ]
 end
@@ -35,6 +40,7 @@ environment :
     sensing:
         Finder [
             target_sensor <- (any Target : distance(posx, posz, it.x, it.z) < tolerance);
+            collision <- any Finder : (x==it.x)&&(z==it.z);
             if (any Finder: light) then
                 let meanX = mean Finder [light] .x
                 and meanZ = mean Finder [light] .z

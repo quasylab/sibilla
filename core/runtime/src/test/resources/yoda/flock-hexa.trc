@@ -1,0 +1,10 @@
+x = q;
+y = r;
+z = s;
+direction = dist;
+shape = bird;
+colour = {
+    when dist > 4 : blue;
+    when dist < 1 : red;
+    otherwise yellow;
+}
