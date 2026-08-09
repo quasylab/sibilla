@@ -36,6 +36,8 @@ dependencies {
     implementation(project(":core:simulator"))
     implementation(project(":langs:pm"))
     implementation(project(":langs:lio"))
+    implementation(project(":langs:dopm"))
+    implementation(project(":langs:enba"))
     implementation(project(":langs:markov"))
     implementation(project(":langs:slam"))
     implementation(project(":langs:yoda"))
